@@ -138,7 +138,7 @@ class DuosHeader extends Component {
                                 li({}, [
                                     GoogleLoginButton({}),
                                     GoogleLogoutButton({}),
-                                    a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
+                                    a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
                             ]),
