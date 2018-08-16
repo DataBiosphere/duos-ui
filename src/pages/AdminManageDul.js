@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, button, hr, h2, span, img, i, a, input, br } from 'react-hyperscript-helpers';
+import { div, button, hr, span, i, a, input, } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class AdminManageDul extends Component {
 
@@ -17,21 +18,15 @@ class AdminManageDul extends Component {
     }
 
     render() {
-
         return (
 
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     // TBD PageHeading goes here ...
-                    div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding title-wrapper" }, [
-                        img({ src: "/images/icon_manage_dul.png", alt: "Manage DUL icon", className: "cm-icons main-icon-title" }),
-                        h2({ className: "main-title margin-sm dul-color" }, [
-                            "Manage Data Use Limitations",
-                            br(),
-                            div({ className: "main-title-description" }, ["Select and manage Data Use Limitations for DAC review"]),
-                        ]),
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "../images/icon_manage_dul.png", iconSize: "medium", color: "dul-color", title: "Manage Data Use Limitations", description: "Select and manage Data Use Limitations for DAC review" }),
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+                    div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
                         div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
                             div({ className: "search-text" }, [
                                 i({ className: "glyphicon glyphicon-search dul-color" }),

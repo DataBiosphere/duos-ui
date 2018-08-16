@@ -1,5 +1,7 @@
 import { Component } from 'react';
-import { div } from 'react-hyperscript-helpers';
+import { div, hr } from 'react-hyperscript-helpers';
+import { AddDulModal } from '../components/AddDulModal';
+import { PageHeading } from '../components/PageHeading';
 
 class DataOwnerConsole extends Component {
     
@@ -22,14 +24,22 @@ class DataOwnerConsole extends Component {
 
 
     render() {
+        let currentUser = {
+            displayName: 'Nadya Lopez Zalba'
+        }
 
         return (
+            div({ className: "container" }, [
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "", iconSize: "none", color: "common-color", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
+                    ]),
 
-            div({}, [
-
-                div({ className: "container" }, [
-                    "DataOwner Console goes here ..."
-                ])
+                    div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 no-padding" }, [
+                        AddDulModal({})
+                    ]),
+                ]),
+                hr({ className: "section-separator" }),
             ])
         );
     }

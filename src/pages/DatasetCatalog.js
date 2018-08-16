@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, button, table, thead, tbody, th, tr, td, form, input, label, i, img, h2, br, span, a, p } from 'react-hyperscript-helpers';
+import { div, button, table, thead, tbody, th, tr, td, form, hr, input, label, i, span, a, p } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class DatasetCatalog extends Component {
 
@@ -17,35 +18,35 @@ class DatasetCatalog extends Component {
     }
 
     render() {
-
         return (
 
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
-                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding title-wrapper" }, [
-                        img({ src: "/images/icon_dataset_.png", alt: "Dataset Catalog icon", className: "cm-icons main-icon-title" }),
-                        h2({ className: "main-title margin-lg dataset-color" }, ["Dataset Catalog", br(),
-                            div({ className: "main-title-description" }, ["Datasets with an associated DUL to apply for secondary use."]),
+
+                    div({ className: "row no-margin" }, [
+                        div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                            PageHeading({ imgSrc: "../images/icon_dataset_.png", iconSize: "large", color: "dataset-color", title: "Dataset Catalog", description: "Datasets with an associated DUL to apply for secondary use" }),
+                        ]),
+                        div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+                            div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
+                                div({ className: "search-text" }, [
+                                    i({ className: "glyphicon glyphicon-search dataset-color" }),
+                                    input({
+                                        type: "search", className: "form-control users-search", placeholder: "Enter search term..."
+                                        , "value": "searchDataset"
+                                    })
+                                ]),
+                            ]),
+                            button({
+                                download: "", "ng-disabled": "objectIdList.length === 0", onClick: "DatasetCatalog.download(objectIdList)",
+                                className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 download-button dataset-background"
+                            }, [
+                                    span({}, ["Download selection"]),
+                                    span({ className: "cm-icon-button glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }, []),
+                                ]),
                         ]),
                     ]),
-                    div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
-                        div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-                            div({ className: "search-text" }, [
-                                i({ className: "glyphicon glyphicon-search dataset-color" }),
-                                input({
-                                    type: "search", className: "form-control users-search", placeholder: "Enter search term..."
-                                    , "value": "searchDataset"
-                                })
-                            ]),
-                        ]),
-                        button({
-                            download: "", "ng-disabled": "objectIdList.length === 0", onClick: "DatasetCatalog.download(objectIdList)",
-                            className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 download-button dataset-background"
-                        }, [
-                                span({}, ["Download selection"]),
-                                span({ className: "cm-icon-button glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }, []),
-                            ]),
-                    ]),
+                    hr({ className: "section-separator" }),
                 ]),
                 div({ className: "table-wrap" }, [
                     form({ className: "pos-relative" }, [

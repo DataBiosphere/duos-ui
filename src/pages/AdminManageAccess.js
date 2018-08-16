@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, button, hr, span, input, img, h2, br, i, a, } from 'react-hyperscript-helpers';
+import { div, hr, span, a, } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class AdminManageAccess extends Component {
 
@@ -21,25 +22,13 @@ class AdminManageAccess extends Component {
     }
 
     render() {
-
         return (
 
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     // TBD PageHeading goes here ...
-                    div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 no-padding title-wrapper" }, [
-                        img({ src: "/images/icon_manage_access.png", alt: "Manage DAR icon", className: "cm-icons main-icon-title" }),
-                        h2({ className: "main-title margin-sm access-color" }, [
-                            "Manage Data Access Request",
-                            br(),
-                            div({ className: "main-title-description" }, ["Select and manage Data Access Request for DAC review"]),
-                        ]),
-                    ]),
-                    div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
-                        div({ className: "search-text" }, [
-                            i({ className: "glyphicon glyphicon-search access-color" }),
-                            input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "value": "searchAccess" }),
-                        ]),
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "../images/icon_manage_access.png", iconSize: "medium", color: "access-color", title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review" }),
                     ]),
                 ]),
                 div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [

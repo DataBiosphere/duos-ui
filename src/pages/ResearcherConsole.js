@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div } from 'react-hyperscript-helpers';
+import { div, button, hr } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class ResearcherConsole extends Component {
 
@@ -22,14 +23,20 @@ class ResearcherConsole extends Component {
 
 
     render() {
+        let currentUser = {
+            displayName: 'Nadya Lopez Zalba'
+        }
 
         return (
+            div({ className: "container " }, [
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "", iconSize: "none", color: "common-color", title: "Welcome " + currentUser.displayName + "!", description: "These are your Data Access Request cases" }),
+                    ]),
+                ]),
+                hr({ className: "section-separator" }),
 
-            div({}, [
-
-                div({ className: "container" }, [
-                    "Researcher Console goes here ..."
-                ])
+                button({}, ["Click Me!"])
             ])
         );
     }
