@@ -44,57 +44,10 @@ class DuosHeader extends Component {
             });
         }
 
-        // const options = [];
-
-        // if (isChairPerson) {
-        //     console.log("es ChairPerson");
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/chair_console" }, ["DAC Console"]),
-        //         ]));
-        // }
-
-        // if (isMember) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/user_console" }, ["DAC Console"]),
-        //         ]));
-        // }
-
-        // if (isAdmin) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/admin_console" }, ["Admin Console"]),
-        //         ]));
-        // }
-
-        // if (isResearcher) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/researcher_console" }, ["Researcher Console"]),
-        //         ]));
-        // }
-
-        // if (isDataOwner) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/data_owner_console" }, ["Data Owner Console"]),
-        //         ]));
-        // }
-
-        // if (isResearcher) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "", onClick: this.goToRP }, ["Request Application"]),
-        //         ]));
-        // }
-
         let currentUser = {
             displayName: 'Diego Gil',
             email: 'diegogil@broadinstitute.org'
         };
-
-
 
         return (
 
