@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, button } from 'react-hyperscript-helpers';
+import { div } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class AdminManageAccess extends Component {
 
@@ -17,11 +18,13 @@ class AdminManageAccess extends Component {
     }
 
     render() {
-
         return (
-            div({ className: "container " }, [
-                "AdminManageAccess Page",
-                button({}, ["Click Me!"])
+            div({ className: "container" }, [
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "../images/icon_manage_access.png", iconSize: "medium", color: "access-color", title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review" }),
+                    ]),
+                ])
             ])
         );
     }

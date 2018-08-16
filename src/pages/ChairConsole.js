@@ -1,7 +1,8 @@
 import { Component } from 'react';
-import { div, hh } from 'react-hyperscript-helpers';
+import { div, hh, hr } from 'react-hyperscript-helpers';
 import { BaseModal } from '../components/BaseModal';
 import { AddDulModal } from '../components/AddDulModal';
+import { PageHeading } from '../components/PageHeading';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -24,15 +25,22 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
 
     render() {
+        let currentUser = {
+            displayName: 'Nadya Lopez Zalba'
+        }
 
         return (
+            div({ className: "container" }, [
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "", iconSize: "none", color: "common-color", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
+                    ]),
 
-            div({}, [
-
-                div({ className: "container" }, [
-                    "Chair Console goes here ...",
-                    AddDulModal({})
-                ])
+                    div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 no-padding" }, [
+                        AddDulModal({})
+                    ]),
+                ]),
+                hr({ className: "section-separator" }),
             ])
         );
     }
