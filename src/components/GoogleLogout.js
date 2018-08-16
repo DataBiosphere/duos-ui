@@ -5,16 +5,18 @@ import GoogleLogout from 'react-google-login';
 export const GoogleLogoutButton = hh(class GoogleLogoutButton extends Component {
     constructor(props) {
         super(props);
+        this.state = props.loginState;
 
     }
 
     responseGoogle = (response) => {
         console.log(response);
-    }
+    };
 
     logout = () => {
         console.log('logout');
-    }
+        this.state(false);
+    };
 
     render() {
         let logoutButton = h(GoogleLogout, {
@@ -24,4 +26,4 @@ export const GoogleLogoutButton = hh(class GoogleLogoutButton extends Component 
 
         return (logoutButton);
     }
-})
+});

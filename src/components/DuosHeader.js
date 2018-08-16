@@ -17,6 +17,10 @@ class DuosHeader extends Component {
         this.signOut = this.signOut.bind(this);
 
         this.toggleNavBar = this.toggleNavBar.bind(this);
+
+        this.loginState = props.loginState;
+        this.isLogged = props.isLogged;
+
     }
 
     render() {
@@ -136,8 +140,8 @@ class DuosHeader extends Component {
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }, []), "About"]),]),
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                                 li({}, [
-                                    GoogleLoginButton({}),
-                                    GoogleLogoutButton({}),
+                                    GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState}),
+                                    GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
                                     a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
