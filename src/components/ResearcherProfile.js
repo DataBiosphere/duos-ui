@@ -71,6 +71,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
     render() {
 
+        const showValidationMessages = true;
         return (
 
             div({ className: "container" }, [
@@ -90,15 +91,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                                     label({ className: "control-label" }, ["Academic / Business Email Address*"]),
                                     input({
-                                        type: "email", className: "form-control", name: "profileAcademicEmail", id: "profileAcademicEmail", onChange: this.handleChange, value: this.state.profileAcademicEmail,
+                                        type: "email", className: "form-control", name: "profileAcademicEmail", id: "profileAcademicEmail",
+                                        onChange: this.handleChange, value: this.state.profileAcademicEmail,
                                         "ng-class": "researcherForm.profileAcademicEmail.$invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control'",
                                         "required": "true"
                                     }),
                                 ]),
 
-                                span({ className: "cancel-color required-field-error-span", isRendered: "researcherForm.profileAcademicEmail.$invalid && showValidationMessages" }, [
-                                    span({}, ["Email Address is empty or has invalid format"]),
-                                ]),
+                                span({
+                                    className: "cancel-color required-field-error-span",
+                                    isRendered: this.state.profileAcademicEmail === undefined || this.state.profileAcademicEmail.indexOf('@') === -1 && showValidationMessages
+                                }, [
+                                        span({}, ["Email Address is empty or has invalid format"]),
+                                    ]),
 
                                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                                     label({ className: "control-label" }, ["Institution Name*"]),
