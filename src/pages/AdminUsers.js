@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 
+
 class AdminUsers extends Component {
 
     constructor(props) {
@@ -29,22 +30,13 @@ class AdminUsers extends Component {
     }
 
 
-    render() {
-
-        // this.state.userList.map(user => {
-        //     console.log(user.displayName);
-        // })
-
-        // user.researcher && user.completed && user.status === 'pending' || user.status === null ? 'enabled'
-        // : user.researcher && user.completed && user.status !== 'pending' ? 'editable'
-        // : user.researcher === false || !user.completed ? 'disabled': '';
-        
+    render() {        
 
         return (
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "../images/icon_manage_users.png", iconSize: "medium",  color: "common-color", title: "Manage Users", description: "Select and manage users and their roles" }),
+                        PageHeading({ imgSrc: "../images/icon_manage_users.png", iconSize: "medium",  color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
                     ]),
                     div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
                         div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
@@ -53,6 +45,7 @@ class AdminUsers extends Component {
                                 input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchUsers" }),
                             ]),
                         ]),
+
                         a({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background", onClick: this.addUser }, [
                             div({ className: "all-icons add-user_white" }, []),
                             span({}, ["Add User"]),
@@ -102,7 +95,7 @@ class AdminUsers extends Component {
                                                             : user.researcher === false || !user.completed ? 'disabled': '' }, ["Review"]),
                                                     ]),
                                                     a({ isRendered: user.researcher === false || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                                                        div({ className: user.researcher === false || !user.completed ? 'disabled' : '' }, ["Review"]),
+                                                        div({ className: "disabled" }, ["Review"]),
                                                     ]),
                                                     div({ isRendered: user.researcher === true, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
                                                         span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, tooltip: "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
