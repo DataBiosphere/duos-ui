@@ -1,6 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
 import { User } from '../libs/ajax'
+import { PageHeading } from '../components/PageHeading';
 
 class AdminUsers extends Component {
     
@@ -51,15 +52,9 @@ class AdminUsers extends Component {
         return (
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
-                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding title-wrapper" }, [
-                        img({ src: "/images/icon_manage_users.png", alt: "Manage Users icon", className: "cm-icons main-icon-title" }),
-                        h2({ className: "main-title margin-sm common-color" }, [
-                            "Manage Users",
-                            br({}),
-                            div({ className: "main-title-description" }, ["Select and manage users and their roles"]),
-                        ]),
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "../images/icon_manage_users.png", iconSize: "medium",  color: "common-color", title: "Manage Users", description: "Select and manage users and their roles" }),
                     ]),
-                    // TitleBox({ iconName: "cm-icons main-icon-title", color: "common-color", title: "Manage Users", description: "Select and manage users and their roles" }),
                     div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
                         div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
                             div({ className: "search-text" }, [

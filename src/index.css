@@ -105,7 +105,7 @@ small {
 }
 
 .f-left {
-  float: left;
+  float: left !important;
   text-align: left !important;
 }
 
@@ -576,7 +576,7 @@ small {
 
 /***************************************************Titles & Subtitles*/
 
-.title-wrapper {
+/* .title-wrapper {
   margin: 20px 0 10px 0;
   position: relative;
 }
@@ -607,7 +607,7 @@ small {
   font-size: 19px;
   line-height: 25px;
   padding: 5px 0 0 3px;
-}
+} */
 
 .main-title-case {
   font-size: 22px;
@@ -1205,7 +1205,7 @@ input[type=checkbox]:checked+label:before {
 
 .vote-button {
   background: #00609f;
-  float: right !important;
+  float: right;
   box-shadow: 2px 2px rgb(204, 204, 204) !important;
 }
 
@@ -1781,7 +1781,7 @@ a .editable:hover, a .enabled:hover {
 
 /*///////////////////////////////////////////////////////ADMIN*/
 
-.admin-icon-subtitles {
+/* .admin-icon-subtitles {
   font-size: 22px;
   font-weight: 500;
   display: inline-block;
@@ -1816,7 +1816,7 @@ a .editable:hover, a .enabled:hover {
 
 .admin-icons:hover {
   background: #2FA4E7 !important;
-}
+}*/
 
 .all-icons {
   display: inline-block;
@@ -1827,7 +1827,7 @@ a .editable:hover, a .enabled:hover {
   text-indent: -15000px;
   margin: 7px 3px 0 0;
 }
-
+/*
 .manage-dul {
   background-position: 0 0;
   width: 34px !important;
@@ -1953,13 +1953,13 @@ a .editable:hover, a .enabled:hover {
 
 .admin-icons:hover .add-ontologies {
   background-position: -484px -40px !important;
-}
+}*/
 
 .add-ontologies-white {
   background-position: -530px 0 !important;
   width: 42px;
   margin: -8px 0 0 -5px;
-}
+} 
 
 .admin-manage-buttons .enabled, .admin-manage-buttons .disabled, .admin-manage-buttons .create, .admin-manage-buttons .cancel {
   text-align: center;
