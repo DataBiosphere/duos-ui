@@ -1,5 +1,7 @@
 import { Component } from 'react';
-import { div, hr, h2, br, small, img, i, input } from 'react-hyperscript-helpers';
+import { div, hr, h2, br, i, img, input } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
+
 
 class UserConsole extends Component {
 
@@ -22,25 +24,20 @@ class UserConsole extends Component {
 
 
     render() {
-
         let currentUser = {
-            displayName: 'Diego Gil'
+            displayName: 'Nadya Lopez Zalba'
         }
 
         return (
 
-            div({}, [
-
                 div({ className: "container" }, [
-
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                        h2({ className: "common-color cm-title" }, ["Welcome ", currentUser.displayName, "!",
-                            br({}, []),
-                            small({}, ["These are your pending cases for review"]),
+                    div({ className: "row no-margin" }, [
+                        div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                            PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
                         ]),
-                        hr({ className: "section-separator" })
+    
                     ]),
-
+                    hr({ className: "section-separator" }),
 
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                         div({ className: "row no-margin" }, [
@@ -61,8 +58,7 @@ class UserConsole extends Component {
                             ]),
                         ]),
                     ]),
-                ]),
-            ])
+                ])
         );
     }
 }
