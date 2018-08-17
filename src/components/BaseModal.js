@@ -5,7 +5,6 @@ import { button, div, h2, h4, h, form, input, label, fieldset, textarea, img, sp
 import Modal from 'react-modal';
 import styles from './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
-import { AddDulModal } from '../components/AddDulModal';
 
 const customStyles = {
     overlay: {
