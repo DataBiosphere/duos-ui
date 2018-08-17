@@ -88,8 +88,6 @@ class App extends React.Component {
 
   constructor(props) {
     super(props);
-    console.log('------------------- App Constructor -----------------------------');
-    console.log(this.state);
 
     this.state = {
       isLogged: false
