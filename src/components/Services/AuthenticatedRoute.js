@@ -5,9 +5,10 @@ export default ({ component: C, props: cProps, ...rest }) =>
     <Route
         {...rest}
         render={props =>
-            cProps
+            sessionStorage.getItem("isLogged") === 'true'
                 ? <C {...props} {...cProps} />
                 : <Redirect
-                    to={`${props.location.pathname}`}
+                    to={'/login'}
+                    // to={props.location.pathname}
                 />}
     />;

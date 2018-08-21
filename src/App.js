@@ -17,12 +17,13 @@ class App extends React.Component {
             isLogged: false
         };
 
-        // this.loginState = this.loginStateF.bind(this);
+        this.loginState = this.loginState.bind(this);
 
     }
 
     loginState(isLogged) {
         this.setState({isLogged: isLogged}, function () {
+            sessionStorage.setItem('isLogged', isLogged);
             console.log('-------------- loggedIn ------------------', this.state);
         });
     }
@@ -34,7 +35,7 @@ class App extends React.Component {
                 // h(GoogleLoginButton, {isLogged: this.state.isLogged,
                 //                       loginState: this.loginState}),
 
-                h(Routes, {isLogged: this.state.isLogged})
+                h(Routes, {isLogged: sessionStorage.getItem('isLogged') === 'true', loginState: this.loginState})
 
 
                 // h(MainRoute, {childProps: childProps}),

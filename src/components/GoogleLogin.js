@@ -6,13 +6,16 @@ import GoogleLogout from 'react-google-login';
 export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     constructor(props) {
         super(props);
-        this.state = props.loginState;
+        this.state = {googleButton:null};
+        // this.getgoogleConfig();
+        this.loggin = props.loginState;
+        // this.getgoogleConfig = this.getgoogleConfig.bind(this);
     }
 
     responseGoogle = (response) => {
         console.log(response);
         console.log("PROPS DE GOOGLE LOGIN ", this.props);
-        this.state(true);
+        this.loggin(true);
     };
 
     forbidden = (response) => {
@@ -23,15 +26,22 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
         console.log('logout');
     };
 
-    render() {
-        let loginButton = h(GoogleLogin, {
+    async getgoogleConfig(){
+        const googleButton = h(GoogleLogin, {
             className: "navbar-duos-button",
-            clientId: "<change me>",
+            clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
             buttonText: "Sign In",
             onSuccess: this.responseGoogle,
             onFailure: this.forbidden,
         });
-
-        return (loginButton);
+        this.setState({googleButton: googleButton})
     }
-})
+    componentWillMount() {
+        this.getgoogleConfig();
+    }
+
+        render() {
+            return(this.state.googleButton);
+
+    }
+});

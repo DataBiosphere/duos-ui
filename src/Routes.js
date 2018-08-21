@@ -42,7 +42,7 @@ export default ({ childProps }) => (
     <Switch>
         <UnauthenticatedRoute exact path='/' component={Home} props={{childProps}}/>
         <UnauthenticatedRoute exact path='/home' component={Home} props={{childProps}}/>
-        <Route path='/admin_console' component={AdminConsole}/>
+        <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={childProps}/>
         <AuthenticatedRoute path='/admin_users' component={AdminUsers}/>
         <AuthenticatedRoute path='/summary_votes' component={SummaryVotes}/>
         <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole}/>

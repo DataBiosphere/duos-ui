@@ -11,8 +11,8 @@ class DuosHeader extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { isLogged: props.isLogged }
-
+        this.state = { isLogged: props.isLogged };
+        // this.GoogleLoginButton = GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState});
         this.signIn = this.signIn.bind(this);
         this.signOut = this.signOut.bind(this);
 
@@ -141,7 +141,7 @@ class DuosHeader extends Component {
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                                 li({}, [
                                     GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState}),
-                                    GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
+                                    // GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
                                     a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
