@@ -998,6 +998,7 @@ small {
 /*Eventually refactor code in every table of the site with these classes and remove unused code*/
 
 .cell-header {
+  min-height: 43px;
   font-style: italic;
   font-size: 16px;
   padding: 5px 10px;
@@ -1020,6 +1021,7 @@ small {
 }
 
 .cell-body {
+  min-height: 43px;
   color: #777777;
   white-space: nowrap;
   overflow: hidden;
@@ -1028,7 +1030,7 @@ small {
 }
 
 .cell-body.text {
-  padding-top: 12px
+  padding-top: 12px;
 }
 
 .cell-body.flagged {

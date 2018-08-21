@@ -1,7 +1,7 @@
 
 
 import { Component } from 'react';
-import { button, div, h2, h4, h, form, input, label, fieldset, textarea, img, span, hh, p, a } from 'react-hyperscript-helpers';
+import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import styles from './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
@@ -84,12 +84,12 @@ export const BaseModal = hh(class BaseModal extends Component {
 
                 a({ isRendered: this.props.linkType === "a-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.title]),
+                    span({ },[this.props.modalBtnText]),
                 ]),
 
                 button({ isRendered: this.props.linkType === "button-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.title]),
+                    span({ },[this.props.modalBtnText]),
                 ]),
 
                 h(Modal, {

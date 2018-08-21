@@ -21,7 +21,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         
         return (
 
-        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "", modalBtnIcon: "",
+        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "", modalBtnIcon: "", modalBtnText: "Add Datasets",
         id: "title_addDataset", modalSize: "large", imgSrc: "/images/icon_dataset_add.png", color: "dataset", title: "Add Datasets", 
         description: "Store Datasets associated with Data Use Limitations", action: { label: "Add", handler: this.OKHandler } },
         [
@@ -42,7 +42,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
                 div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
                     div({ className: "checkbox dataset-label" }, [
                         input({ "ng-model": "overwrite", id: "txt_overwrite", type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
-                        label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", for: "txt_overwrite"}, ["Overwrite existing Datasets"]),
+                        label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "txt_overwrite"}, ["Overwrite existing Datasets"]),
                     ]),
                 ]),
             ]),
