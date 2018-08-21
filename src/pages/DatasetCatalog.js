@@ -1,7 +1,9 @@
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, hr, input, label, i, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import { DataSet } from '../libs/ajax'
 
+const USER_ID = 5;
 class DatasetCatalog extends Component {
 
     constructor(props) {
@@ -9,71 +11,29 @@ class DatasetCatalog extends Component {
         this.state = {
             isLogged: false
         }
-
+        this.state = {
+            dataSetList: {
+                catalog: [],
+                dictionary: []
+            }
+        };
         this.myHandler = this.myHandler.bind(this);
-        this.mockData = this.mockData.bind(this);
+        this.getDatasets = this.getDatasets.bind(this);
     }
 
-    mockData() {
-        let data = {};
-        let catalog = [];
-
-        for (var i = 0; i < 10; i++) {
-            let dataSet = {
-                dataSetId: 'DS00' + i,
-                dataSetName: 'DS Name 00' + i,
-                darCode: 'DAR00' + i,
-                alreadyVoted: i % 2 === 0,
-                hasConcerns: i % 2 !== 0,
-                deletable: i % 2 === 0,
-                active: i % 2 !== 0
-            };
-            let properties = [];
-            properties.push({ propertyName: "Dataset Name", propertyValue: i % 2 === 0 ? 'CMG_00' + i : 'RPG_00' + i });
-            properties.push({ propertyName: "Dataset ID", propertyValue: i % 2 === 0 ? 'SC-2340' + i : 'SC-1200' + i });
-            properties.push({ propertyName: "Data Type", propertyValue: i % 2 === 0 ? 'DNA, whole exome' : 'Whole Genome' });
-            properties.push({ propertyName: "Species", propertyValue: 'human' });
-            properties.push({ propertyName: "Phenotype/Indication", propertyValue: i % 2 === 0 ? 'orphan disease' : 'primary brain disease' });
-            properties.push({ propertyName: "# of participants", propertyValue: i * 20 });
-            properties.push({
-                propertyName: "Description", propertyValue: i % 2 === 0
-                    ? 'Families with orphan diseases recruited by The Manton Center for Orphan Disease Research and sequenced through The Broad Center for Mendelian Genomics'
-                    : 'Families with neurological diseases recruited by Joseph Gleeson\'s team and sequenced through The Broad Center for Mendelian Genomics'
-            });
-            properties.push({ propertyName: "dbGAP", propertyValue: 'NA' });
-            properties.push({ propertyName: "Data Depositor", propertyValue: i % 2 === 0 ? 'Nadya Lopez Zalba' : 'Veronica Vicario' });
-            properties.push({ propertyName: "Principal Investigator(PI)", propertyValue: i % 2 === 0 ? 'Leonardo Forconesi' : 'Tadeo Riveros' });
-            dataSet['properties'] = properties;
-            catalog.push(dataSet);
-        }
-
-        data = {
+    async getDatasets() {
+        const dictionary = await DataSet.getDictionary();
+        const catalog = await DataSet.list(USER_ID);
+        const data = {
             catalog: catalog,
-            dictionary: [
-                { key: "Dataset Name", value: 'DS00' },
-                { key: "Dataset ID", value: 'DS00' },
-                { key: "Data Type", value: 'DS00' },
-                { key: "Species", value: 'DS00' },
-                { key: "Phenotype/Indication", value: 'DS00' },
-                { key: "# of participants", value: 'DS00' },
-                { key: "Description", value: 'DS00' },
-                { key: "dbGAP", propertyVvaluealue: 'DS00' },
-                { key: "Data Depositor", value: 'DS00' },
-                { key: "Principal Investigator(PI)", value: 'DS00' },
-            ]
+            dictionary: dictionary
         }
-
-        console.log('data', data);
-
-        let dataSetList = this.state.dataSetList;
-        dataSetList = data;
-        this.setState({ dataSetList: dataSetList }, () => { console.log(this.state) });
-
-
+        this.setState({ dataSetList: data }, () => { console.log(this.state) });
     }
+
+
     componentWillMount() {
-        console.log('----------------------------componentWillMount----------------------------------');
-        this.mockData();
+        this.getDatasets();
     }
 
     componentDidMount() {
@@ -117,11 +77,9 @@ class DatasetCatalog extends Component {
     }
 
     render() {
-        console.log('----------------------------render----------------------------------');
         const isAdmin = true;
         const isResearcher = false;
         const objectIdList = ['a', 'b', 'c'];
-        console.log('---------------dictionary----------------', this.state);
 
         return (
             h(Fragment, {}, [

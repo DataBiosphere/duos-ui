@@ -86,7 +86,7 @@ export const DataSet = {
         return res.json();
     },
 
-    getDictionary: async dataSetId => {
+    getDictionary: async() => {
         const url = `${await Config.getApiUrl()}/dataset/dictionary`;
         const res = await fetchOk(url, authOpts());
         return res.json();
