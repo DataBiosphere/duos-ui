@@ -112,7 +112,7 @@ class AdminManageDul extends Component {
                             ]),
                         ]),
 
-                        AddDulModal({}),
+                        AddDulModal({linkType: "a-tag"}),
                     ]),
                 ]),
 

@@ -21,7 +21,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         
         return (
 
-        BaseModal({ modalBtnStyle: "", modalBtnIcon: "",
+        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "", modalBtnIcon: "",
         id: "title_addDataset", modalSize: "large", imgSrc: "/images/icon_dataset_add.png", color: "dataset", title: "Add Datasets", 
         description: "Store Datasets associated with Data Use Limitations", action: { label: "Add", handler: this.OKHandler } },
         [

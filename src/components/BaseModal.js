@@ -82,7 +82,12 @@ export const BaseModal = hh(class BaseModal extends Component {
         return (
             div({}, [
 
-                a({ className: this.props.modalBtnStyle , onClick: this.openModal },[
+                a({ isRendered: this.props.linkType === "a-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
+                    div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
+                    span({ },[this.props.title]),
+                ]),
+
+                button({ isRendered: this.props.linkType === "button-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
                     span({ },[this.props.title]),
                 ]),
@@ -108,8 +113,8 @@ export const BaseModal = hh(class BaseModal extends Component {
 
                         div({ className: "modal-footer" }, [                        
                             // disabled: "consentForm.$invalid || disableButton",
-                            button({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background", onClick: this.props.action.handler }, [this.props.action.label]),
-                            button({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.closeModal }, ["Cancel"]),
+                            button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background", onClick: this.props.action.handler }, [this.props.action.label]),
+                            button({ id: "btn_cancel", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.closeModal }, ["Cancel"]),
 
                         ]),
 

@@ -3,9 +3,9 @@ import { button, div, h2, h4, h, form, input, label, fieldset, textarea, img, sp
 import { BaseModal } from '../BaseModal';
 
 
-export const AddUserModal = hh(class AddUserModal extends Component {
+export const EditUserModal = hh(class EditUserModal extends Component {
 
-    OKHandler() {
+    editUser() {
         console.log("algo");
     }
 
@@ -22,9 +22,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         return (
 
             BaseModal({
-                linkType: this.props.linkType, modalBtnStyle: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin", modalBtnIcon: "add-user_white",
-                id: "title_addUser", modalSize: "large", imgSrc: "/images/icon_add_user.png", color: "common", title: "Add User",
-                description: "Catalog a new User in the system", action: { label: "Add", handler: this.OKHandler }
+                linkType: this.props.linkType, modalBtnStyle: "admin-manage-buttons col-lg-1 col-md-1 col-sm-2 col-xs-2 no-padding", modalBtnIcon: "",
+                id: "title_editUser", modalSize: "large", imgSrc: "/images/icon_edit_user.png", color: "common", title: "Edit User",
+                description: "Edit a User in the system", action: { label: "Save", handler: this.editUser() }
             },
                 [
                     form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [

@@ -2,25 +2,38 @@ import { Component, Fragment } from 'react';
 import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
-
+import { User } from '../libs/ajax'
 
 class AdminManageUsers extends Component {
-
+  
     constructor(props) {
         super(props);
-        this.state = {
-            userList: [
-                { status: 'approved', completed: true, researcher: true, displayName: 'Diego Gil', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'pending', completed: true, researcher: false, displayName: 'Walter', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'rejected', completed: true, researcher: true, displayName: 'Leo', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'approved', completed: false, researcher: false, displayName: 'Vero', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'pending', completed: false, researcher: true, displayName: 'Tadeo', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'rejected', completed: false, researcher: false, displayName: 'Nadya', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-            ]
-        };
+        this.state = {userList:[]};
+        this.getUsers();
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
+        this.getUsers = this.getUsers.bind(this);
     }
+
+    async getUsers(){
+        const users = await User.list();
+        let userList = [];
+        users.map(user => {
+          user.researcher = false;
+          user.roles.map(role => {
+              if(role.name === 'Researcher') {
+                  user.status = role.status;
+                  user.completed = role.profileCompleted;
+                  user.researcher = true;
+              }
+              return user;
+          });
+          user.key = user.id;
+          userList.push(user);
+          return userList;
+        });
+        this.setState({ userList: userList });
+      } 
 
     handleOpenModal() {
         this.setState({ showModal: true });

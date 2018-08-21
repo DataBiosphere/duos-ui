@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { nav, button, ul, li, img, small, hr, div, span, a } from 'react-hyperscript-helpers';
 import { GoogleLoginButton } from '../components/GoogleLogin';
 import { GoogleLogoutButton } from '../components/GoogleLogout';
+import { HelpModal } from '../components/modals/HelpModal';
 
 class DuosHeader extends Component {
 
@@ -140,7 +141,9 @@ class DuosHeader extends Component {
                                         div({}, ["Request Help", span({ className: "caret caret-margin" }, []),])
                                     ]),
                                     ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                                        li({}, [a({ className: "f-left", onClick: this.helpMeModal }, ["Create a Report"])]),
+                                        li({}, [
+                                            HelpModal({linkType: "a-tag"}),
+                                        ]),
                                         hr({}),
                                         li({}, [a({ href: "/help_me", className: "f-left" }, ["List of Reports"])]),
                                     ]),

@@ -21,7 +21,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         
         return (
 
-        BaseModal({ modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", modalBtnIcon: "add-dul_white",
+        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", modalBtnIcon: "add-dul_white",
         id: "title_addDUL", modalSize: "large", imgSrc: "/images/icon_add_dul.png", color: "dul", title: "Add Data Use Limitations", 
         description: "Catalog a Data Use Limitations Record", action: { label: "Add", handler: this.OKHandler } },
         [
