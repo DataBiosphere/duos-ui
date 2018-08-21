@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, hr, hh, h2, img, span, a, h3 } from 'react-hyperscript-helpers';
 import { StatsBox }  from '../components/StatsBox';
+import { Summary } from '../libs/ajax'
 
 export const SummaryVotes = hh(class SummaryVotes extends Component {
 
@@ -102,11 +103,13 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
                                             ]),
                                     ]),
                                 a({
-                                    onClick: this.getFile("TranslateDUL"), ngshow: "roles.showStatistics($root.currentUser.roles, $root.userRoles)",
+                                    onClick: () => this.getFile("TranslateDUL"),
+                                    ngshow: "roles.showStatistics($root.currentUser.roles, $root.userRoles)",
                                     className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button dul-background"
                                 },
                                     [
-                                        span({}, ["Download stats"]),
+                                        span({
+                                        }, ["Download stats"]),
                                         span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
                                     ])
                             ]),
@@ -134,7 +137,8 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
                                             ]),
                                     ]),
                                 a({
-                                    onClick: this.getFile("DataAccess"), ngshow: "roles.showStatistics($root.currentUser.roles, $root.userRoles)",
+                                    onClick: () => this.getFile("DataAccess"),
+                                    ngshow: "roles.showStatistics($root.currentUser.roles, $root.userRoles)",
                                     name: "Download", className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 download-button search-reviewed access-background"
                                 },
                                     [
@@ -152,11 +156,11 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
                         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
                             StatsBox({
                                 subtitle: "All Cases", data: this.chartData.accessTotal, options: 'accessTotal',
-                                className: "result_chart", clickHandler: this.addDul, buttonLabel: 'Download all cases'
+                                className: "result_chart", clickHandler: () => this.getDarReport('reviewed', 'ReviewedDataAccessRequests.tsv'), buttonLabel: 'Download all cases'
                             }),
                             StatsBox({
                                 subtitle: "Reviewed cases results", data: this.chartData.accessReviewed, options: 'accessReviewed',
-                                className: "result_chart", clickHandler: this.addDul, buttonLabel: 'Download approved cases'
+                                className: "result_chart", clickHandler: () => this.getDarReport('approved', 'ApprovedDataAccessRequests.tsv'), buttonLabel: 'Download approved cases'
                             })
                         ]),
 
@@ -203,7 +207,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
     }
 
     addDul() {
-        console.log('addDul');
+        console.log('SummaryVotes -> addDul');
     }
 
     addUser() {
@@ -222,8 +226,34 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         console.log('addOntology');
     }
 
-    getFile(filename) {
+    getFile(fileName) {
+      const URI = `/consent/cases/summary/file?fileType=${fileName}`;
+      Summary.getFile(URI).then(
+        blob => {
+          if (blob.size !== 0) {
+            this.createBlobFile('summary.txt', blob);
+          }
+        }
+      );
+    }
 
+    getDarReport(fileType, fileName) {
+      const URI = `/dataRequest/${fileType}`;
+      Summary.getFile(URI).then(
+        blob => {
+          if (blob.size !== 0) {
+            this.createBlobFile(fileName, blob)
+          }
+        }
+      );
+    }
+
+    createBlobFile(fileName, blob) {
+      const url = window.URL.createObjectURL(blob);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
     }
 
 });

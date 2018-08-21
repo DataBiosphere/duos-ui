@@ -1,7 +1,8 @@
 import _ from 'lodash/fp'
 import * as Config from './config'
 
-const auth_token = "tokennnnnnnnn";
+const auth_token = "ya29.GlwABmRn494e8GPMtGnQ4gDBbzPPIScpEnSXDtfUSPx6Uv4tGX70tVH3D89yHlCrCSLZ0JurtC2gkuX2RH4ztgplx6OZjoEqrIjMBGzeaKYSJpsGjziMFjECrcQQCw";
+
 
 const authOpts = (token = auth_token) => ({ headers: { Authorization: `Bearer ${token}` } });
 const jsonBody = body => ({ body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })
@@ -53,7 +54,7 @@ export const User = {
     registerStatus: async(userRoleStatus, userId) => {
         const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
         const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(userRoleStatus), { method: 'PUT' }]));
-        return res.json(); 
+        return res.json();
     },
 
     findUserStatus:  async userId => {
@@ -62,10 +63,18 @@ export const User = {
         return res.json();
     }
 
-}
+};
+
+export const Summary = {
+    getFile: async (URI) => {
+      const url = `${await Config.getApiUrl()}${URI}`;
+      const res = await fetchOk(url, authOpts());
+      return res.blob();
+    }
+};
 
 const fetchOk = async (...args) => {
     const res = await fetch(...args);
     return res.ok ? res : Promise.reject(res);
-}
+};
 
