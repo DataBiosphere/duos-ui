@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, button } from 'react-hyperscript-helpers';
+import { div, button, hr } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class HomeRegister extends Component {
 
@@ -17,10 +18,15 @@ class HomeRegister extends Component {
     }
 
     render() {
-
         return (
-            div({ className: "container " }, [
-                "HomeRegister Page",
+            div({ className: "container" }, [
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Join DUOS", description: "Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests" }),
+                    ]),
+                ]),
+                hr({ className: "section-separator" }),
+
                 button({}, ["Click Me!"])
             ])
         );

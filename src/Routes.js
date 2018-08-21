@@ -35,13 +35,12 @@ import DulReviewResults from "./pages/DulReviewResults";
 import ResearcherReview from "./pages/ResearcherReview";
 import ManageOntologies from "./pages/ManageOntologies";
 import AuthenticatedRoute from "./components/Services/AuthenticatedRoute";
-import UnauthenticatedRoute from "./components/Services/UnauthenticatedRoute";
 
 export default ({ childProps }) => (
 
     <Switch>
-        <UnauthenticatedRoute exact path='/' component={Home} props={{childProps}} />
-        <UnauthenticatedRoute exact path='/home' component={Home} props={{childProps}} />
+        <Route exact path='/' component={Home} props={{childProps}}/>
+        <Route exact path='/home' component={Home} props={{childProps}}/>
         <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={childProps} />
         <AuthenticatedRoute path='/admin_users' component={AdminUsers} props={childProps} />
         <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={childProps}/>
@@ -50,17 +49,17 @@ export default ({ childProps }) => (
         <AuthenticatedRoute path='/user_console' component={UserConsole} props={childProps}/>
         <AuthenticatedRoute path='/data_owner_console' component={DataOwnerConsole} props={childProps}/>
         <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={childProps}/>
-        <UnauthenticatedRoute path='/home_help' component={HomeHelp}/>
-        <UnauthenticatedRoute path='/home_about' component={HomeAbout}/>
+        <Route path='/home_help' component={HomeHelp}/>
+        <Route path='/home_about' component={HomeAbout}/>
         <AuthenticatedRoute path='/researcher_profile' component={ResearcherProfile} props={childProps}/>
         <AuthenticatedRoute path='/admin_manage_access' component={AdminManageAccess} props={childProps}/>
         <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={childProps}/>
         <AuthenticatedRoute path='/data_owner_review' component={DataOwnerReview} props={childProps}/>
         <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={childProps}/>
-        <UnauthenticatedRoute path='/help_me' component={HelpMe} props={childProps}/>
+        <Route path='/help_me' component={HelpMe} props={childProps}/>
         <AuthenticatedRoute path='/home_register' component={HomeRegister} props={childProps}/>
         <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={childProps}/>
-        <UnauthenticatedRoute path='/login' component={Login} props={{childProps}}/>
+        <Route path='/login' component={Login} props={{childProps}}/>
         <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={childProps}/>
         <AuthenticatedRoute path='/researcher_review' component={ResearcherReview} props={childProps}/>
         <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords} props={childProps}/>
@@ -74,6 +73,6 @@ export default ({ childProps }) => (
         <AuthenticatedRoute path='/final_access_review_results' component={FinalAccessReviewResults} props={childProps}/>
         <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={childProps}/>
         <AuthenticatedRoute path='/rp_application' component={RpApplication} props={childProps}/>
-        <UnauthenticatedRoute path='*' component={NotFound}/>
+        <Route path='*' component={NotFound}/>
     </Switch>
 );

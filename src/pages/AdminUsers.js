@@ -1,24 +1,38 @@
 import { Component, Fragment } from 'react';
 import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
-import { TitleBox } from '../components/TitleBox';
+import { PageHeading } from '../components/PageHeading';
+import { User } from '../libs/ajax'
 
 class AdminUsers extends Component {
-
+    
     constructor(props) {
         super(props);
-        this.state = {
-            userList: [
-                { status: 'approved', completed: true, researcher: true, displayName: 'Diego Gil', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'pending', completed: true, researcher: false, displayName: 'Walter', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'rejected', completed: true, researcher: true, displayName: 'Leo', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'approved', completed: false, researcher: false, displayName: 'Vero', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'pending', completed: false, researcher: true, displayName: 'Tadeo', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-                { status: 'rejected', completed: false, researcher: false, displayName: 'Nadya', email: 'dgilbroad', roles: [{ name: 'Admin' }, { name: 'Researcher' }] },
-            ]
-        };
+        this.state = {userList:[]};
+        this.getUsers();
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
+        this.getUsers = this.getUsers.bind(this);
     }
+
+    async getUsers(){
+        const users = await User.list();
+        let userList = [];
+        users.map(user => {
+          user.researcher = false;
+          user.roles.map(role => {
+              if(role.name === 'Researcher') {
+                  user.status = role.status;
+                  user.completed = role.profileCompleted;
+                  user.researcher = true;
+              }
+              return user;
+          });
+          user.key = user.id;
+          userList.push(user);
+          return userList;
+        });
+        this.setState({ userList: userList });
+      } 
 
     handleOpenModal() {
         this.setState({ showModal: true });
@@ -29,29 +43,14 @@ class AdminUsers extends Component {
     }
 
 
-    render() {
-
-        // this.state.userList.map(user => {
-        //     console.log(user.displayName);
-        // })
-
-        // user.researcher && user.completed && user.status === 'pending' || user.status === null ? 'enabled'
-        // : user.researcher && user.completed && user.status !== 'pending' ? 'editable'
-        // : user.researcher === false || !user.completed ? 'disabled': '';
-        
+    render() {        
 
         return (
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
-                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding title-wrapper" }, [
-                        img({ src: "/images/icon_manage_users.png", alt: "Manage Users icon", className: "cm-icons main-icon-title" }),
-                        h2({ className: "main-title margin-sm common-color" }, [
-                            "Manage Users",
-                            br({}),
-                            div({ className: "main-title-description" }, ["Select and manage users and their roles"]),
-                        ]),
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "../images/icon_manage_users.png", iconSize: "medium",  color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
                     ]),
-                    // TitleBox({ iconName: "cm-icons main-icon-title", color: "common-color", title: "Manage Users", description: "Select and manage users and their roles" }),
                     div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
                         div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
                             div({ className: "search-text" }, [
@@ -59,6 +58,7 @@ class AdminUsers extends Component {
                                 input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchUsers" }),
                             ]),
                         ]),
+
                         a({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background", onClick: this.addUser }, [
                             div({ className: "all-icons add-user_white" }, []),
                             span({}, ["Add User"]),
@@ -108,7 +108,7 @@ class AdminUsers extends Component {
                                                             : user.researcher === false || !user.completed ? 'disabled': '' }, ["Review"]),
                                                     ]),
                                                     a({ isRendered: user.researcher === false || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                                                        div({ className: user.researcher === false || !user.completed ? 'disabled' : '' }, ["Review"]),
+                                                        div({ className: "disabled" }, ["Review"]),
                                                     ]),
                                                     div({ isRendered: user.researcher === true, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
                                                         span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, tooltip: "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
