@@ -40,40 +40,40 @@ import UnauthenticatedRoute from "./components/Services/UnauthenticatedRoute";
 export default ({ childProps }) => (
 
     <Switch>
-        <UnauthenticatedRoute exact path='/' component={Home} props={{childProps}}/>
-        <UnauthenticatedRoute exact path='/home' component={Home} props={{childProps}}/>
-        <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={childProps}/>
-        <AuthenticatedRoute path='/admin_users' component={AdminUsers}/>
-        <AuthenticatedRoute path='/summary_votes' component={SummaryVotes}/>
-        <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole}/>
-        <AuthenticatedRoute path='/chair_console' component={ChairConsole}/>
-        <AuthenticatedRoute path='/user_console' component={UserConsole}/>
-        <AuthenticatedRoute path='/data_owner_console' component={DataOwnerConsole}/>
-        <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication}/>
+        <UnauthenticatedRoute exact path='/' component={Home} props={{childProps}} />
+        <UnauthenticatedRoute exact path='/home' component={Home} props={{childProps}} />
+        <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={childProps} />
+        <AuthenticatedRoute path='/admin_users' component={AdminUsers} props={childProps} />
+        <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={childProps}/>
+        <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={childProps}/>
+        <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={childProps}/>
+        <AuthenticatedRoute path='/user_console' component={UserConsole} props={childProps}/>
+        <AuthenticatedRoute path='/data_owner_console' component={DataOwnerConsole} props={childProps}/>
+        <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={childProps}/>
         <UnauthenticatedRoute path='/home_help' component={HomeHelp}/>
         <UnauthenticatedRoute path='/home_about' component={HomeAbout}/>
-        <AuthenticatedRoute path='/researcher_profile' component={ResearcherProfile}/>
-        <AuthenticatedRoute path='/admin_manage_access' component={AdminManageAccess}/>
-        <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul}/>
-        <AuthenticatedRoute path='/data_owner_review' component={DataOwnerReview}/>
-        <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog}/>
-        <UnauthenticatedRoute path='/help_me' component={HelpMe}/>
-        <AuthenticatedRoute path='/home_register' component={HomeRegister}/>
-        <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions}/>
+        <AuthenticatedRoute path='/researcher_profile' component={ResearcherProfile} props={childProps}/>
+        <AuthenticatedRoute path='/admin_manage_access' component={AdminManageAccess} props={childProps}/>
+        <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={childProps}/>
+        <AuthenticatedRoute path='/data_owner_review' component={DataOwnerReview} props={childProps}/>
+        <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={childProps}/>
+        <UnauthenticatedRoute path='/help_me' component={HelpMe} props={childProps}/>
+        <AuthenticatedRoute path='/home_register' component={HomeRegister} props={childProps}/>
+        <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={childProps}/>
         <UnauthenticatedRoute path='/login' component={Login} props={{childProps}}/>
-        <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies}/>
-        <AuthenticatedRoute path='/researcher_review' component={ResearcherReview}/>
-        <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords}/>
-        <AuthenticatedRoute path='/dul_result_records' component={DulResultRecords}/>
-        <AuthenticatedRoute path='/access_review' component={AccessReview}/>
-        <AuthenticatedRoute path='/dul_review' component={DulReview}/>
-        <AuthenticatedRoute path='/access_preview_results' component={AccessPreviewResults}/>
-        <AuthenticatedRoute path='/access_review_results' component={AccessReviewResults}/>
-        <AuthenticatedRoute path='/dul_preview_results' component={DulPreviewResults}/>
-        <AuthenticatedRoute path='/dul_review_results' component={DulReviewResults}/>
-        <AuthenticatedRoute path='/final_access_review_results' component={FinalAccessReviewResults}/>
-        <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases}/>
-        <AuthenticatedRoute path='/rp_application' component={RpApplication}/>
+        <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={childProps}/>
+        <AuthenticatedRoute path='/researcher_review' component={ResearcherReview} props={childProps}/>
+        <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords} props={childProps}/>
+        <AuthenticatedRoute path='/dul_result_records' component={DulResultRecords} props={childProps}/>
+        <AuthenticatedRoute path='/access_review' component={AccessReview} props={childProps}/>
+        <AuthenticatedRoute path='/dul_review' component={DulReview} props={childProps}/>
+        <AuthenticatedRoute path='/access_preview_results' component={AccessPreviewResults} props={childProps}/>
+        <AuthenticatedRoute path='/access_review_results' component={AccessReviewResults} props={childProps}/>
+        <AuthenticatedRoute path='/dul_preview_results' component={DulPreviewResults} props={childProps}/>
+        <AuthenticatedRoute path='/dul_review_results' component={DulReviewResults} props={childProps}/>
+        <AuthenticatedRoute path='/final_access_review_results' component={FinalAccessReviewResults} props={childProps}/>
+        <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={childProps}/>
+        <AuthenticatedRoute path='/rp_application' component={RpApplication} props={childProps}/>
         <UnauthenticatedRoute path='*' component={NotFound}/>
     </Switch>
 );

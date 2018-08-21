@@ -5,25 +5,28 @@ import GoogleLogout from 'react-google-login';
 export const GoogleLogoutButton = hh(class GoogleLogoutButton extends Component {
     constructor(props) {
         super(props);
-        this.state = props.loginState;
-
+        this.login = props.loginState;
+        this.state = {logoutButton: null};
     }
-
-    responseGoogle = (response) => {
-        console.log(response);
-    };
 
     logout = () => {
         console.log('logout');
-        this.state(false);
+        this.login(false);
     };
 
-    render() {
-        let logoutButton = h(GoogleLogout, {
+    async getGoogleConfig() {
+        const logoutButton = h(GoogleLogout, {
             buttonText: "Sign Out",
             onSuccess: this.logout,
         });
+        this.setState({logoutButton: logoutButton})
+    }
 
-        return (logoutButton);
+    componentWillMount() {
+        this.getGoogleConfig();
+    }
+
+    render() {
+        return (this.state.logoutButton);
     }
 });
