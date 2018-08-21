@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="532f1357-c7e1-495b-90e6-21b6dfba0c3d" name="Default Changelist" comment="" />
+    <list default="true" id="532f1357-c7e1-495b-90e6-21b6dfba0c3d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
     <ignored path="$PROJECT_DIR$/tmp/" />
@@ -28,7 +30,7 @@
           <entry key="eslintrc" value="1" />
           <entry key="gitignore" value="1" />
           <entry key="html" value="1" />
-          <entry key="js" value="36" />
+          <entry key="js" value="37" />
           <entry key="json" value="2" />
         </counts>
       </usages-collector>
@@ -36,7 +38,7 @@
         <counts>
           <entry key="HTML" value="1" />
           <entry key="JSON" value="3" />
-          <entry key="JavaScript" value="36" />
+          <entry key="JavaScript" value="37" />
           <entry key="PLAIN_TEXT" value="1" />
         </counts>
       </usages-collector>
@@ -47,12 +49,12 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="js" value="9472" />
+          <entry key="js" value="9484" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="JavaScript" value="9472" />
+          <entry key="JavaScript" value="9484" />
         </counts>
       </usages-collector>
     </session>
@@ -94,11 +96,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/pages/SummaryVotes.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3565">
-              <caret line="250" column="4" selection-start-line="250" selection-start-column="4" selection-end-line="250" selection-end-column="4" />
+            <state relative-caret-position="713">
+              <caret line="251" column="50" selection-start-line="251" selection-start-column="50" selection-end-line="251" selection-end-column="50" />
               <folding>
                 <element signature="e#0#34#0" expanded="true" />
               </folding>
@@ -106,9 +108,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor" />
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/pages/DatasetCatalog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="368">
+              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            </state>
+          </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
@@ -253,7 +259,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="SearchEverywhereHistoryKey" value="Access&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/src/pages/AccessResultRecords.js&#10;servi&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/src/registerServiceWorker.js&#10;index&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/public/index.html" />
+    <property name="SearchEverywhereHistoryKey" value="Data&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/src/pages/DatasetCatalog.js&#10;Access&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/src/pages/AccessResultRecords.js&#10;servi&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/src/registerServiceWorker.js&#10;index&#9;FILE&#9;file:///home/triveros/workspace/Estudio/duos-ui/public/index.html" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
@@ -288,12 +294,12 @@
       <workItem from="1534437070408" duration="26880000" />
       <workItem from="1534797328617" duration="14784000" />
       <workItem from="1534855229477" duration="2883000" />
-      <workItem from="1534860089540" duration="4753000" />
+      <workItem from="1534860089540" duration="5789000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="53263000" />
+    <option name="totallyTimeSpent" value="54299000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="49" y="-4" width="1871" height="1084" extended-state="6" />
@@ -425,13 +431,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/pages/DatasetCatalog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/AccessPreviewResults.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="437">
@@ -518,18 +517,25 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/pages/DatasetCatalog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="368">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/SummaryVotes.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3565">
-          <caret line="250" column="4" selection-start-line="250" selection-start-column="4" selection-end-line="250" selection-end-column="4" />
+        <state relative-caret-position="713">
+          <caret line="251" column="50" selection-start-line="251" selection-start-column="50" selection-end-line="251" selection-end-column="50" />
           <folding>
             <element signature="e#0#34#0" expanded="true" />
           </folding>
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
