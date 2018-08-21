@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
+import { div, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { User } from '../libs/ajax'
@@ -59,7 +59,7 @@ class AdminManageUsers extends Component {
                                 input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchUsers" }),
                             ]),
                         ]),
-                        AddUserModal({}),
+                        AddUserModal({linkType: "a-tag"}),
                     ])
                 ]),
                 div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
