@@ -1,9 +1,10 @@
 import { Component, Fragment } from 'react';
 import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import { AddUserModal } from '../components/modals/AddUserModal';
 
 
-class AdminUsers extends Component {
+class AdminManageUsers extends Component {
 
     constructor(props) {
         super(props);
@@ -45,11 +46,7 @@ class AdminUsers extends Component {
                                 input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchUsers" }),
                             ]),
                         ]),
-
-                        a({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background", onClick: this.addUser }, [
-                            div({ className: "all-icons add-user_white" }, []),
-                            span({}, ["Add User"]),
-                        ]),
+                        AddUserModal({}),
                     ])
                 ]),
                 div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
@@ -63,7 +60,7 @@ class AdminUsers extends Component {
                         ]),
                         div({ className: "admin-box-body" }, [
                             hr({ className: "pvotes-main-separator" }),
-                            div({ "dir-paginate": "user in AdminUsers.usersList.dul | filter: searchUsers | itemsPerPage:8" }, [
+                            div({ "dir-paginate": "user in AdminManageUsers.usersList.dul | filter: searchUsers | itemsPerPage:8" }, [
                                 this.state.userList.map(user => {
                                     return h(Fragment, {}, [
                                         div({ className: "row pvotes-main-list" }, [
@@ -149,4 +146,4 @@ class AdminUsers extends Component {
 
 }
 
-export default AdminUsers;
+export default AdminManageUsers;

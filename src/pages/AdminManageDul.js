@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, button, hr, h, span, i, a, input, } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { AddDulModal } from '../components/AddDulModal';
+import { AddDulModal } from '../components/modals/AddDulModal';
 
 class AdminManageDul extends Component {
 

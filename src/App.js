@@ -1,7 +1,7 @@
 import React from 'react';
 import Home from './pages/Home';
 import AdminConsole from './pages/AdminConsole';
-import AdminUsers from './pages/AdminUsers';
+import AdminManageUsers from './pages/AdminManageUsers';
 import { ChairConsole } from './pages/ChairConsole';
 import ResearcherConsole from './pages/ResearcherConsole';
 import UserConsole from './pages/UserConsole';
@@ -48,7 +48,7 @@ const Main = () => (
       <Route exact path='/' component={Home} />
       <Route exact path='/home' component={Home} />
       <Route path='/admin_console' component={AdminConsole} />
-      <Route path='/admin_users' component={AdminUsers} />
+      <Route path='/admin_manage_users' component={AdminManageUsers} />
       <Route path='/summary_votes' component={SummaryVotes} />
       <Route path='/researcher_console' component={ResearcherConsole} />
       <Route path='/chair_console' component={ChairConsole} />

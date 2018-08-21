@@ -22,7 +22,7 @@ const customStyles = {
         right: '0',
         bottom: '0',
         left: '0',
-        width: '600px',
+        width: '750px',
         margin: '12vh auto auto auto',
         border: '1px solid rgb(204, 204, 204)',
         background: 'rgb(255, 255, 255)',
