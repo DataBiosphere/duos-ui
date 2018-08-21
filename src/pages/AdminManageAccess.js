@@ -26,9 +26,8 @@ class AdminManageAccess extends Component {
 
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
-                    // TBD PageHeading goes here ...
                     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "../images/icon_manage_access.png", iconSize: "medium", color: "access-color", title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review" }),
+                        PageHeading({ imgSrc: "/images/icon_manage_access.png", iconSize: "medium", color: "access", title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review" }),
                     ]),
                 ]),
                 div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [

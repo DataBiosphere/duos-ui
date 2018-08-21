@@ -22,7 +22,7 @@ class DataOwnerReview extends Component {
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "../images/icon_dataset_review.png", iconSize: "large", color: "dataset-color", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
+                        PageHeading({ imgSrc: "../images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
                     ]),
                 ]),
                 hr({ className: "section-separator" }),

@@ -2094,11 +2094,11 @@ a .editable:hover, a .enabled:hover {
   border: 0!important;
 }
 
-.modal-close-btn {
+/* .modal-close-btn {
   position: absolute;
   top: 15px;
   right: 20px;
-}
+} */
 
 .modal-alerts {
   width: 600px !important;
@@ -2150,9 +2150,9 @@ a .editable:hover, a .enabled:hover {
   padding-left: 7px !important;
 }
 
-.admin-modal-footer button:focus {
+/* .admin-modal-footer button:focus {
   color: #ffffff !important;
-}
+} */
 
 .admin-modals {
   width: 500px !important;
@@ -2185,7 +2185,7 @@ a .editable:hover, a .enabled:hover {
   border-top: 1px solid #e5e5e5;
 }
 
-.admin-modal-footer {
+/* .admin-modal-footer {
   padding: 0 0 20px 0 !important;
   margin: 0 auto !important;
   text-align: center
@@ -2212,7 +2212,7 @@ a .editable:hover, a .enabled:hover {
 .admin-modal-footer button:hover {
   background: #2FA4E7 !important;
   color: #ffffff !important;
-}
+} */
 
 input:-webkit-autofill {
   background-color: #eeeeee !important;

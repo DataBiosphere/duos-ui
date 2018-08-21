@@ -3,6 +3,7 @@ import { div, button, table, thead, tbody, th, tr, td, form, h, hr, input, label
 import { PageHeading } from '../components/PageHeading';
 import { DataSet } from '../libs/ajax'
 
+
 const USER_ID = 5;
 class DatasetCatalog extends Component {
 
@@ -80,13 +81,12 @@ class DatasetCatalog extends Component {
         const isAdmin = true;
         const isResearcher = false;
         const objectIdList = ['a', 'b', 'c'];
-
         return (
             h(Fragment, {}, [
                 div({ className: "container" }, [
                     div({ className: "row no-margin" }, [
                         div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                            PageHeading({ imgSrc: "/images/icon_dataset_.png", iconSize: "large", color: "dataset-color", title: "Dataset Catalog", description: "Datasets with an associated DUL to apply for secondary use" }),
+                            PageHeading({ imgSrc: "/images/icon_dataset_.png", iconSize: "large", color: "dataset", title: "Dataset Catalog", description: "Datasets with an associated DUL to apply for secondary use" }),
                         ]),
 
                         div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [

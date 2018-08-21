@@ -89,8 +89,8 @@ class DuosHeader extends Component {
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }, []), "About"]),]),
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                                 li({}, [
-                                    GoogleLoginButton({}),
-                                    GoogleLogoutButton({}),
+                                    // GoogleLoginButton({}),
+                                    // GoogleLogoutButton({}),
                                     a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
