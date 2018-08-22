@@ -12,6 +12,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     responseGoogle = (response) => {
         console.log(response);
         console.log("GOOGLE PROPS ", this.props);
+        sessionStorage.setItem("GAPI", JSON.stringify(response));
         this.login(true);
     };
 

@@ -4,26 +4,23 @@ import {div, h} from 'react-hyperscript-helpers';
 import './App.css';
 import Routes from "./Routes"
 
-
 class App extends React.Component {
 
     constructor(props) {
         super(props);
-        console.log('------------------- App Constructor -----------------------------');
-        console.log(this.state);
-
         this.state = {
             isLogged: false
         };
-
         this.loginState = this.loginState.bind(this);
-
     }
 
     loginState(isLogged) {
         this.setState({isLogged: isLogged}, function () {
-            sessionStorage.setItem('isLogged', isLogged);
-            console.log('-------------- loggedIn ------------------', this.state);
+            if (isLogged) {
+                sessionStorage.setItem('isLogged', isLogged);
+            } else {
+                sessionStorage.clear();
+            }
         });
     }
 

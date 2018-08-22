@@ -46,12 +46,13 @@ class DuosHeader extends Component {
                 if (role === 'alumni') { isAlumni = true; }
             });
         }
-
-        let currentUser = {
-            displayName: 'Diego Gil',
-            email: 'diegogil@broadinstitute.org'
-        };
-
+        let currentUser = {};
+        if (isLogged && sessionStorage.getItem("GAPI") !== null) {
+            currentUser = {
+                displayName: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.name,
+                email: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.email
+            };
+        }
         return (
 
             nav({ className: "navbar top-navigator-bar", role: "navigation", "ng-controller": "Header as Header" }, [
