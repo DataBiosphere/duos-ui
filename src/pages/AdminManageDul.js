@@ -1,7 +1,8 @@
 import { Component, Fragment } from 'react';
 import { div, button, hr, h, span, i, a, input, } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { AddDulModal } from '../components/AddDulModal';
+import { AddDulModal } from '../components/modals/AddDulModal';
+import { EditDulModal } from '../components/modals/EditDulModal';
 import { Consent } from '../libs/ajax';
 
 class AdminManageDul extends Component {
@@ -92,7 +93,14 @@ class AdminManageDul extends Component {
                             ]),
                         ]),
 
-                        AddDulModal({}),
+                        AddDulModal({
+                            linkType: "a-tag",
+                            modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
+                            modalBtnIcon: "add-dul_white",
+                            modalBtnText: "Add Data Use Limitations",
+                            id: 'title_addDUL',
+                            description: 'Catalog a Data Use Limitations Record',
+                        }),
                     ]),
                 ]),
 
@@ -124,7 +132,9 @@ class AdminManageDul extends Component {
                                         div({ className: "col-1 cell-body text", "ng-class": "{empty : !election.version}" }, [election.version]),
                                         div({ className: "col-1 cell-body text" }, [election.createDate]),
                                         div({ className: "col-1 cell-body f-center" }, [
-                                            button({ className: "cell-button hover-color", disabled: election.electionStatus !== 'un-reviewed' || !election.editable, onClick: this.editDul(election.consentId) }, ["Edit"]),
+                                            EditDulModal({ linkType: "button-tag" }),
+
+                                            // button({ className: "cell-button hover-color", disabled: election.electionStatus !== 'un-reviewed' || !election.editable, onClick: this.editDul(election.consentId) }, ["Edit"]),
                                         ]),
                                         div({ className: "col-1 cell-body text f-center bold" }, [
                                             span({ isRendered: election.electionStatus === 'un-reviewed' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Un-reviewed"])]),
