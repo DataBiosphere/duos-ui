@@ -20,10 +20,20 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         // ];
         
         return (
-
-        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "", modalBtnIcon: "", modalBtnText: "Add Datasets",
-        id: "title_addDataset", modalSize: "large", imgSrc: "/images/icon_dataset_add.png", color: "dataset", title: "Add Datasets", 
-        description: "Store Datasets associated with Data Use Limitations", action: { label: "Add", handler: this.OKHandler } },
+            
+        BaseModal({
+            linkType: this.props.linkType,
+            id: this.props.id,
+            modalBtnStyle: this.props.modalBtnStyle,
+            modalSize: "large",
+            imgSrc: "/images/icon_dataset_add.png",
+            color: "dataset",
+            icon_name: this.props.icon_name,
+            icon_size: this.props.icon_size,
+            title: this.props.title,
+            description: this.props.description,
+            action: { label: "Add", handler: this.OKHandler }
+        },
         [
         form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group admin-form-group first-form-group" }, [

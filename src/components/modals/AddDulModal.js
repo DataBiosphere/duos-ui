@@ -21,9 +21,20 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         
         return (
 
-        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", modalBtnIcon: "add-dul_white",
-        modalBtnText: "Add Data Use Limitations", id: "title_addDUL", modalSize: "large", imgSrc: "/images/icon_add_dul.png", color: "dul", title: "Add Data Use Limitations", 
-        description: "Catalog a Data Use Limitations Record", action: { label: "Add", handler: this.OKHandler } },
+        BaseModal({
+            linkType: this.props.linkType,
+            modalBtnStyle: this.props.modalBtnStyle,
+            modalBtnIcon: this.props.modalBtnIcon,
+            modalBtnText: this.props.modalBtnText,
+            id: this.props.id,
+            modalSize: "large",
+            imgSrc: "/images/icon_add_dul.png",
+            color: "dul",
+            title: "Add Data Use Limitations", 
+            description: this.props.description,
+            icon_name: this.props.icon_name,
+            icon_size: this.props.icon_size,
+            action: { label: "Add", handler: this.OKHandler } },
         [
 
         form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
