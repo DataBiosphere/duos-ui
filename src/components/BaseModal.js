@@ -1,7 +1,7 @@
 
 
 import { Component } from 'react';
-import { button, div, h2, h4, h, form, input, label, fieldset, textarea, img, span, hh, p, a } from 'react-hyperscript-helpers';
+import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import styles from './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
@@ -22,7 +22,7 @@ const customStyles = {
         right: '0',
         bottom: '0',
         left: '0',
-        width: '600px',
+        width: '750px',
         margin: '12vh auto auto auto',
         border: '1px solid rgb(204, 204, 204)',
         background: 'rgb(255, 255, 255)',
@@ -82,9 +82,14 @@ export const BaseModal = hh(class BaseModal extends Component {
         return (
             div({}, [
 
-                a({ className: this.props.modalBtnStyle , onClick: this.openModal },[
+                a({ isRendered: this.props.linkType === "a-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.title]),
+                    span({ },[this.props.modalBtnText]),
+                ]),
+
+                button({ isRendered: this.props.linkType === "button-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
+                    div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
+                    span({ },[this.props.modalBtnText]),
                 ]),
 
                 h(Modal, {
@@ -108,8 +113,8 @@ export const BaseModal = hh(class BaseModal extends Component {
 
                         div({ className: "modal-footer" }, [                        
                             // disabled: "consentForm.$invalid || disableButton",
-                            button({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background", onClick: this.props.action.handler }, [this.props.action.label]),
-                            button({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.closeModal }, ["Cancel"]),
+                            button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background", onClick: this.props.action.handler }, [this.props.action.label]),
+                            button({ id: "btn_cancel", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.closeModal }, ["Cancel"]),
 
                         ]),
 

@@ -29,7 +29,7 @@ import HomeAbout from "./pages/HomeAbout";
 import HelpMe from "./pages/HelpMe";
 import HomeRegister from "./pages/HomeRegister";
 import DataOwnerReview from "./pages/DataOwnerReview";
-import AdminUsers from "./pages/AdminUsers";
+import AdminManageUsers from './pages/AdminManageUsers';
 import DatasetCatalog from "./pages/DatasetCatalog";
 import DulReviewResults from "./pages/DulReviewResults";
 import ResearcherReview from "./pages/ResearcherReview";
@@ -42,7 +42,7 @@ export default ({ props }) => (
         <Route exact path='/' component={Home} props={{props}}/>
         <Route exact path='/home' component={Home} props={{props}}/>
         <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={props} />
-        <AuthenticatedRoute path='/admin_users' component={AdminUsers} props={props} />
+        <AuthenticatedRoute path='/admin_manage_users' component={AdminManageUsers} props={props} />
         <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={props}/>
         <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props}/>
         <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props}/>
