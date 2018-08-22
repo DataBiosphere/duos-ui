@@ -28,8 +28,8 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
             modalSize: "large",
             imgSrc: "/images/icon_dataset_add.png",
             color: "dataset",
-            icon_name: this.props.icon_name,
-            icon_size: this.props.icon_size,
+            iconName: this.props.iconName,
+            iconSize: this.props.iconSize,
             title: this.props.title,
             description: this.props.description,
             action: { label: "Add", handler: this.OKHandler }
@@ -56,8 +56,6 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
                     ]),
                 ]),
             ]),
-
-          
         ])
 
         // div({ isRendered: alerts.lenght > 0, className: "form-group dataset-form-group" }, [

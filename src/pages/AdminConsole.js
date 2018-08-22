@@ -5,6 +5,8 @@ import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
+import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
+import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 
 class AdminConsole extends Component {
 
@@ -13,16 +15,7 @@ class AdminConsole extends Component {
         this.state = {
             showModal: false
         };
-        this.handleOpenModal = this.handleOpenModal.bind(this);
-        this.handleCloseModal = this.handleCloseModal.bind(this);
-    }
 
-    handleOpenModal() {
-        this.setState({ showModal: true });
-    }
-
-    handleCloseModal() {
-        this.setState({ showModal: false });
     }
 
 
@@ -51,9 +44,9 @@ class AdminConsole extends Component {
                                     color: 'dul',
                                     title: 'Manage Data Use Limitations',
                                     description: 'Select and manage Data Use Limitations Record for review',
-                                    icon_name: 'manage-dul',
-                                    icon_size: 'default',
-                                    unreviewed_cases: 9
+                                    iconName: 'manage-dul',
+                                    iconSize: 'default',
+                                    unreviewedCases: 9
                                 }),
                             ]),
 
@@ -63,8 +56,8 @@ class AdminConsole extends Component {
                                     id: 'btn_addDUL',
                                     modalBtnStyle: "admin-box-wrapper",
                                     description: 'Catalog a Data Use Limitation Record in the system',
-                                    icon_name: 'add-dul',
-                                    icon_size: 'default'
+                                    iconName: 'add-dul',
+                                    iconSize: 'default'
                                 }),
                             ]),
                         ]),
@@ -77,9 +70,9 @@ class AdminConsole extends Component {
                                     color: 'common',
                                     title: 'Manage Users',
                                     description: 'Select and manage Users and their roles',
-                                    icon_name: 'manage-user',
-                                    icon_size: 'default',
-                                    unreviewed_cases: 8
+                                    iconName: 'manage-user',
+                                    iconSize: 'default',
+                                    unreviewedCases: 8
                                  }),
                             ]),
 
@@ -89,8 +82,8 @@ class AdminConsole extends Component {
                                     id: 'btn_addUser',
                                     modalBtnStyle: "admin-box-wrapper",
                                     description: 'Catalog a new User in the system',
-                                    icon_name: 'add-user',
-                                    icon_size: 'default'
+                                    iconName: 'add-user',
+                                    iconSize: 'default'
                                 }),
                             ]),
                         ]),
@@ -103,9 +96,9 @@ class AdminConsole extends Component {
                                     color: 'access',
                                     title: 'Manage Data Access Request',
                                     description: 'Select and manage Data Access Request for review',
-                                    icon_name: 'manage-access',
-                                    icon_size: 'default',
-                                    unreviewed_cases: 0
+                                    iconName: 'manage-access',
+                                    iconSize: 'default',
+                                    unreviewedCases: 0
                                  }),
                             ]),
 
@@ -114,8 +107,8 @@ class AdminConsole extends Component {
                                     linkType: "console-tag",
                                     id: 'btn_addDataset',
                                     modalBtnStyle: "admin-box-wrapper",
-                                    icon_name: 'add-dataset',
-                                    icon_size: 'large', 
+                                    iconName: 'add-dataset',
+                                    iconSize: 'large', 
                                     title: "Add Datasets",
                                     description: 'Store Datasets associated with Data Use Limitations',
                                 }),
@@ -124,14 +117,14 @@ class AdminConsole extends Component {
 
                         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                             div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                                AddDulModal({
+                                ElectionTimeoutModal({
                                     linkType: "console-tag",
                                     id: 'btn_setDataOwnerElectionTimeout',
                                     modalBtnStyle: "admin-box-wrapper",
                                     title: 'Set Data Owner election Timeout',
                                     description: 'Manage Data Owner election expiration time',
-                                    icon_name: 'manage-timeout',
-                                    icon_size: 'default'
+                                    iconName: 'manage-timeout',
+                                    iconSize: 'default'
                                 }),
                             ]),
 
@@ -142,9 +135,9 @@ class AdminConsole extends Component {
                                     color: 'common',
                                     title: 'Invalid Request Restrictions',
                                     description: 'Show Invalid Restrictions for Data Use Limitations and Data Access Requests',
-                                    icon_name: 'invalid-restrictions',
-                                    icon_size: 'large',
-                                    unreviewed_cases: 0
+                                    iconName: 'invalid-restrictions',
+                                    iconSize: 'large',
+                                    unreviewedCases: 0
                                  }),
                             ]),
                         ]),
@@ -157,21 +150,21 @@ class AdminConsole extends Component {
                                     color: 'common',
                                     title: 'Manage Ontologies',
                                     description: 'Select and manage Ontologies for index',
-                                    icon_name: 'manage-ontologies',
-                                    icon_size: 'large',
-                                    unreviewed_cases: 0
+                                    iconName: 'manage-ontologies',
+                                    iconSize: 'large',
+                                    unreviewedCases: 0
                                  }),
                             ]),
 
                             div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                                AddDulModal({
+                                AddOntologiesModal({
                                     linkType: "console-tag",
                                     id: 'btn_addOntologies',
                                     modalBtnStyle: "admin-box-wrapper",
                                     title: 'Add Ontologies',
                                     description: 'Store Ontologies for index',
-                                    icon_name: 'add-ontologies',
-                                    icon_size: 'large'
+                                    iconName: 'add-ontologies',
+                                    iconSize: 'large'
                                 }),
                             ]),
                         ]),
@@ -180,27 +173,6 @@ class AdminConsole extends Component {
             ])
         );
     }
-
-    addDul() {
-        console.log('addDul');
-    }
-
-    addUser() {
-        console.log('addUser');
-    }
-
-    addDataSets() {
-        console.log('addDataSets');
-    }
-
-    setTimeout() {
-        console.log('setTimeout');
-    }
-
-    addOntology() {
-        console.log('addOntology');
-    }
-
 }
 
 export default AdminConsole;

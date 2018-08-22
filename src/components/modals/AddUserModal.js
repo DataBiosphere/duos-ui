@@ -32,8 +32,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                 color: "common",
                 title: "Add User", 
                 description: this.props.description,
-                icon_name: this.props.icon_name,
-                icon_size: this.props.icon_size,
+                iconName: this.props.iconName,
+                iconSize: this.props.iconSize,
                 action: { label: "Add", handler: this.OKHandler }
             },
                 [

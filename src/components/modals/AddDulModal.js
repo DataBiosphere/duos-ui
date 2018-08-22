@@ -32,8 +32,8 @@ export const AddDulModal = hh(class AddDulModal extends Component {
             color: "dul",
             title: "Add Data Use Limitations", 
             description: this.props.description,
-            icon_name: this.props.icon_name,
-            icon_size: this.props.icon_size,
+            iconName: this.props.iconName,
+            iconSize: this.props.iconSize,
             action: { label: "Add", handler: this.OKHandler } },
         [
 
