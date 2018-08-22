@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { nav, button, ul, li, img, small, hr, div, span, a } from 'react-hyperscript-helpers';
 import { GoogleLoginButton } from '../components/GoogleLogin';
 import { GoogleLogoutButton } from '../components/GoogleLogout';
+import { HelpModal } from '../components/modals/HelpModal';
 
 class DuosHeader extends Component {
 
@@ -11,12 +12,15 @@ class DuosHeader extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { isLogged: props.isLogged }
-
+        this.state = { isLogged: props.isLogged };
         this.signIn = this.signIn.bind(this);
         this.signOut = this.signOut.bind(this);
 
         this.toggleNavBar = this.toggleNavBar.bind(this);
+
+        this.loginState = props.loginState;
+        this.isLogged = props.isLogged;
+
     }
 
     render() {
@@ -43,59 +47,13 @@ class DuosHeader extends Component {
                 if (role === 'alumni') { isAlumni = true; }
             });
         }
-
-        // const options = [];
-
-        // if (isChairPerson) {
-        //     console.log("es ChairPerson");
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/chair_console" }, ["DAC Console"]),
-        //         ]));
-        // }
-
-        // if (isMember) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/user_console" }, ["DAC Console"]),
-        //         ]));
-        // }
-
-        // if (isAdmin) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/admin_console" }, ["Admin Console"]),
-        //         ]));
-        // }
-
-        // if (isResearcher) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/researcher_console" }, ["Researcher Console"]),
-        //         ]));
-        // }
-
-        // if (isDataOwner) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "/data_owner_console" }, ["Data Owner Console"]),
-        //         ]));
-        // }
-
-        // if (isResearcher) {
-        //     options.push(
-        //         li({}, [
-        //             a({ href: "", onClick: this.goToRP }, ["Request Application"]),
-        //         ]));
-        // }
-
-        let currentUser = {
-            displayName: 'Diego Gil',
-            email: 'diegogil@broadinstitute.org'
-        };
-
-
-
+        let currentUser = {};
+        if (isLogged && sessionStorage.getItem("GAPI") !== null) {
+            currentUser = {
+                displayName: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.name,
+                email: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.email
+            };
+        }
         return (
 
             nav({ className: "navbar top-navigator-bar", role: "navigation", "ng-controller": "Header as Header" }, [
@@ -136,9 +94,11 @@ class DuosHeader extends Component {
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }, []), "About"]),]),
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                                 li({}, [
-                                    GoogleLoginButton({}),
-                                    GoogleLogoutButton({}),
-                                    a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
+
+                                    a({onClick: this.signIn}, [GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState})]),
+                                    GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
+                                    // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
+                                    // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
                             ]),
@@ -187,7 +147,9 @@ class DuosHeader extends Component {
                                         div({}, ["Request Help", span({ className: "caret caret-margin" }, []),])
                                     ]),
                                     ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                                        li({}, [a({ className: "f-left", onClick: this.helpMeModal }, ["Create a Report"])]),
+                                        li({}, [
+                                            HelpModal({linkType: "a-tag"}),
+                                        ]),
                                         hr({}),
                                         li({}, [a({ href: "/help_me", className: "f-left" }, ["List of Reports"])]),
                                     ]),

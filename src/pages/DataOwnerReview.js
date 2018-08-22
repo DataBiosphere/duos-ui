@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, button } from 'react-hyperscript-helpers';
+import { div, button, hr } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class DataOwnerReview extends Component {
 
@@ -17,10 +18,15 @@ class DataOwnerReview extends Component {
     }
 
     render() {
-
         return (
-            div({ className: "container " }, [
-                "DataOwnerReview Page",
+            div({ className: "container" }, [
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "../images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
+                    ]),
+                ]),
+                hr({ className: "section-separator" }),
+
                 button({}, ["Click Me!"])
             ])
         );

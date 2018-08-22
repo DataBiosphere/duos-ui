@@ -1,5 +1,7 @@
 import { Component } from 'react';
-import { div, button } from 'react-hyperscript-helpers';
+import { div, button, hr } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
+
 
 class ResearcherReview extends Component {
 
@@ -20,7 +22,13 @@ class ResearcherReview extends Component {
 
         return (
             div({ className: "container " }, [
-                "ResearcherReview Page",
+                div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                        PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
+                    ]),
+                ]),
+                hr({ className: "section-separator" }),
+
                 button({}, ["Click Me!"])
             ])
         );

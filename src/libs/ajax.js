@@ -1,8 +1,7 @@
 import _ from 'lodash/fp'
 import * as Config from './config'
 
-const auth_token = "ya29.GlwABmRn494e8GPMtGnQ4gDBbzPPIScpEnSXDtfUSPx6Uv4tGX70tVH3D89yHlCrCSLZ0JurtC2gkuX2RH4ztgplx6OZjoEqrIjMBGzeaKYSJpsGjziMFjECrcQQCw";
-
+const auth_token = "tokennnnnnnnn";
 
 const authOpts = (token = auth_token) => ({ headers: { Authorization: `Bearer ${token}` } });
 const jsonBody = body => ({ body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })
@@ -54,7 +53,7 @@ export const User = {
     registerStatus: async(userRoleStatus, userId) => {
         const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
         const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(userRoleStatus), { method: 'PUT' }]));
-        return res.json();
+        return res.json(); 
     },
 
     findUserStatus:  async userId => {
@@ -73,8 +72,62 @@ export const Summary = {
     }
 };
 
+export const DataSet = {
+
+    create: async (file, overwrite, userId) => {
+        const url = `${await Config.getApiUrl()}/dataset/${userId}?overwrite=${overwrite}`;
+        let formData = new FormData();
+        formData.append("data", new Blob([file], { type: 'text/plain' }));
+        const res = await fetchOk(url, _.mergeAll([authOpts(), formData, { method: 'POST' }]));
+        return res.json();
+    },
+
+    list: async dacUserId => {
+        const url = `${await Config.getApiUrl()}/dataset?dacUserId=${dacUserId}`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getByDataSetId: async dataSetId => {
+        const url = `${await Config.getApiUrl()}/dataset/${dataSetId}`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getDictionary: async() => {
+        const url = `${await Config.getApiUrl()}/dataset/dictionary`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+   
+    download: async(objectIdList) => {
+        const url = `${await Config.getApiUrl()}/dataset/download`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(objectIdList), { method: 'POST' }]));
+        return res.json();
+    },
+
+    delete: async(datasetObjectId, dacUserId) => {
+        const url = `${await Config.getApiUrl()}/dataset/${datasetObjectId}/${dacUserId}`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), { method: 'DELETE' }]));
+        return res.json();
+    },
+    
+    disableDataset: async(datasetObjectId, active) => {
+        const url = `${await Config.getApiUrl()}/dataset/disable/${datasetObjectId}/${active}`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), { method: 'DELETE' }]));
+        return res.json();
+    },
+
+    reviewDataSet: async(dataSetId, needsApproval) => {
+        const url = `${await Config.getApiUrl()}/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), { method: 'PUT' }]));
+        return res.json();
+    }
+}
+
+
 const fetchOk = async (...args) => {
     const res = await fetch(...args);
     return res.ok ? res : Promise.reject(res);
-};
+}
 
