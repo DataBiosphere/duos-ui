@@ -33,6 +33,8 @@ const customStyles = {
     }
 };
 
+Modal.setAppElement('#root');
+
 export const BaseModal = hh(class BaseModal extends Component {
 
     constructor() {

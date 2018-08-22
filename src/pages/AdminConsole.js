@@ -46,7 +46,7 @@ class AdminConsole extends Component {
                         ]),
 
                         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                            AdminConsoleBox({ id: '0012', url: '/admin_users', color: 'common-color', title: 'Manage Users', description: 'Select and manage Users and their roles', icon_name: 'manage-user', icon_size: 'default', unreviewed_cases: 8 }),
+                            AdminConsoleBox({ id: '0012', url: '/admin_manage_users', color: 'common-color', title: 'Manage Users', description: 'Select and manage Users and their roles', icon_name: 'manage-user', icon_size: 'default', unreviewed_cases: 8 }),
                             AdminConsoleBox({ id: '0013', clickHandler: this.addUser, color: 'common-color', title: 'Add User', description: 'Catalog a new User in the system', icon_name: 'add-user', icon_size: 'default' }),
                         ]),
 
