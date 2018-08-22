@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { div, button, hr, h, span, i, a, input, } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/AddDulModal';
+import { Consent } from '../libs/ajax';
 
 class AdminManageDul extends Component {
 
@@ -9,53 +10,36 @@ class AdminManageDul extends Component {
         super(props);
         this.state = {
             showModal: false,
-            value: ''
-        }
-
+            value: '',
+            electionsList: {
+                dul: []
+            }
+        };
         this.myHandler = this.myHandler.bind(this);
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
     }
 
-    electionStatusText(n) {
-        const x = n % 4;
-        console.log(x);
-        if (x === 0) return 'un-reviewed';
-        if (x === 1) return 'Open';
-        if (x === 2) return 'Canceled';
-        if (x === 3) return 'Closed';
+    async getConsentManage() {
+        Consent.getConsentManage().then(data =>{
+            const regex = new RegExp('-', 'g');
+            data.map(election => {
+                let str = election.consentName;
+                str = str.replace(regex, ' ');
+                election.ct = election.consentName + ' ' + election.version;
+                election.cts = str + ' ' + election.version;
+                return election;
+            });
+            this.setState({
+                electionsList: {
+                    dul: data
+                }
+            });
+        });        
     }
 
     componentWillMount() {
-        let data = {};
-        let dul = [];
-
-        for (var i = 0; i < 10; i++) {
-            let election = {
-                archived: 'archived',
-                consentId: 'consentId',
-                consentName: 'consentName',
-                createDate: 'createDate',
-                editable: i % 2 !== 0 ? true : false,
-                electionId: 'electionId',
-                electionStatus: this.electionStatusText(i),
-                groupName: 'groupName',
-                updateStatus: i % 2 === 0 ? true : false,
-                version: i % 3
-            };
-            dul.push(election);
-        }
-
-        data = {
-            dul: dul
-        }
-        console.log('data', data);
-
-        let electionsList = this.state.electionsList;
-        electionsList = data;
-        this.setState({ electionsList: electionsList }, () => {
-            console.log('----------------componentWillMount----------------', this.state);
-        });
+        this.getConsentManage();
     }
 
     handleOpenModal() {
@@ -94,11 +78,7 @@ class AdminManageDul extends Component {
     }
 
     render() {
-
-        console.log('----------------render----------------', this.state);
-
         return (
-
             div({ className: "container container-wide" }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
@@ -173,7 +153,7 @@ class AdminManageDul extends Component {
                                         , "boundary-links": "true"
                                         , className: "pvotes-pagination"
                                     }, []),
-                                ]) // <---
+                                ]) 
                             ])
                         )
                     })
