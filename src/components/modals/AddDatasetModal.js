@@ -5,7 +5,11 @@ import { BaseModal } from '../BaseModal';
 
 export const AddDatasetModal = hh(class AddDatasetModal extends Component {
 
-    OKHandler (){
+    OKHandler (event){
+        if(event.target.files != undefined && event.target.files[0]) {
+            
+        }
+       
         console.log ("algo");
     }
 
@@ -42,7 +46,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
                     div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 dataset-color upload-button" }, [
                         span({}, ["Upload file"]),
                         span({ className: "cm-icon-button glyphicon glyphicon-upload caret-margin", "aria-hidden": "true" }, []),
-                        input({ type: "file", "ng-model": "file.name", "file-upload": "true", id:"txt_file", className: "upload", required: "true" }),
+                        input({ type: "file",  onChange: this.OKHandler, "ng-model": "file.name", "file-upload": "true", id:"txt_file", className: "upload", required: "true" }),
                     ]),
                     p({ className: "fileName" }, [file.name]),
                 ]),

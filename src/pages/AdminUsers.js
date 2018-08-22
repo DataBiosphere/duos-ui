@@ -8,7 +8,6 @@ class AdminUsers extends Component {
     constructor(props) {
         super(props);
         this.state = {userList:[]};
-        this.getUsers();
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
         this.getUsers = this.getUsers.bind(this);
@@ -42,7 +41,10 @@ class AdminUsers extends Component {
         this.setState({ showModal: false });
     }
 
-
+    componentWillMount() {
+        this.getUsers();
+    }
+    
     render() {        
 
         return (
