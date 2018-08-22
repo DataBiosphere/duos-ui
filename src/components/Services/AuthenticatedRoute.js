@@ -9,6 +9,6 @@ export default ({ component: Component, props: componentProps, ...rest }) =>
             sessionStorage.getItem("isLogged") === 'true'
                 ? <Component {...props} {...componentProps} />
                 : <Redirect
-                    to={'/login'}
+                    to={'/'}
                 />}
     />;

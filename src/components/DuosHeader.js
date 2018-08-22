@@ -12,14 +12,14 @@ class DuosHeader extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { isLogged: props.isLogged };
+        this.state = { isLogged: props.isLogged, button: props.button };
         this.signIn = this.signIn.bind(this);
         this.signOut = this.signOut.bind(this);
 
         this.toggleNavBar = this.toggleNavBar.bind(this);
 
         this.loginState = props.loginState;
-        this.isLogged = props.isLogged;
+        this.isLogged = sessionStorage.getItem("isLogged") === 'true';
 
     }
 
@@ -35,7 +35,7 @@ class DuosHeader extends Component {
         let isAlumni = false;
 
         // let isLogged = false;
-        const { isLogged } = this.state;
+        let isLogged = sessionStorage.getItem("isLogged") === 'true';
 
         if (isLogged) {
             roles.forEach(role => {
@@ -95,8 +95,9 @@ class DuosHeader extends Component {
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                                 li({}, [
 
-                                    a({onClick: this.signIn}, [GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState})]),
-                                    GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
+                                    // a({onClick: this.signIn}, [GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState})]),
+                                    a({onClick: this.signIn}, [this.state.button])
+                                    // GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
                                     // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                                     // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                                 ]),
