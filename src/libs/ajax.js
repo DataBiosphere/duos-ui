@@ -1,7 +1,8 @@
 import _ from 'lodash/fp'
 import * as Config from './config'
 
-const auth_token = "tokennnnnnnnn";
+const auth_token = JSON.parse(sessionStorage.getItem("GAPI")).accessToken;
+
 
 const authOpts = (token = auth_token) => ({ headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
 const jsonBody = body => ({ body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })
