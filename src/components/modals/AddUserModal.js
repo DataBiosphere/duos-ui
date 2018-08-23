@@ -18,56 +18,56 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-    OKHandler(event) {
-        let roles = this.state.roles.slice();
-        const rolesName = roles.map(
-          role => {return {name:role}}
-        );
-        const userData = {
-          displayName: this.state.displayName,
-          email: this.state.email,
-          roles: rolesName
-        };
-        User.create(userData);
-        event.preventDefault();
+  OKHandler(event) {
+    let roles = this.state.roles.slice();
+    const rolesName = roles.map(
+      role => {return {name:role}}
+    );
+    const userData = {
+      displayName: this.state.displayName,
+      email: this.state.email,
+      roles: rolesName
+    };
+    User.create(userData);
+    event.preventDefault();
 
-    }
+  }
 
-    toggleState(role) {
-      const existingRole = this.state.roles.find(stRole => stRole === role);
-      let roleList = this.state.roles;
-      if (!existingRole) {
-        roleList.push(role);
-        this.setState({roles: roleList});
-      } else {
-        roleList.splice(this.state.roles.indexOf(role), 1);
-        this.setState({roles: roleList});
-      }
+  toggleState(role) {
+    const existingRole = this.state.roles.find(stRole => stRole === role);
+    let roleList = this.state.roles;
+    if (!existingRole) {
+      roleList.push(role);
+      this.setState({roles: roleList});
+    } else {
+      roleList.splice(this.state.roles.indexOf(role), 1);
+      this.setState({roles: roleList});
     }
+  }
 
-    handleChange(event) {
-      const value = event.target.name;
-      this.setState({[value]: event.target.value});
-    }
+  handleChange(event) {
+    const value = event.target.name;
+    this.setState({[value]: event.target.value});
+  }
 
 
   render() {
     return (
       BaseModal({
-        linkType: this.props.linkType,
-        modalBtnStyle: this.props.modalBtnStyle,
-        modalBtnIcon: this.props.modalBtnIcon,
-        modalBtnText: this.props.modalBtnText,
-        id: this.props.id,
-        modalSize: "large",
-        imgSrc: "/images/icon_add_user.png",
-        color: "common",
-        title: "Add User", 
-        description: this.props.description,
-        iconName: this.props.iconName,
-        iconSize: this.props.iconSize,
-        action: { label: "Add", handler: this.OKHandler }
-    },
+          linkType: this.props.linkType,
+          modalBtnStyle: this.props.modalBtnStyle,
+          modalBtnIcon: this.props.modalBtnIcon,
+          modalBtnText: this.props.modalBtnText,
+          id: this.props.id,
+          modalSize: "large",
+          imgSrc: "/images/icon_add_user.png",
+          color: "common",
+          title: "Add User",
+          description: this.props.description,
+          iconName: this.props.iconName,
+          iconSize: this.props.iconSize,
+          action: { label: "Add", handler: this.OKHandler }
+        },
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group admin-form-group first-form-group" }, [
@@ -173,15 +173,25 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                 ]),
               ]),
             ]),
+            div({ className: "form-group admin-form-group" }, [
+              div({
+                isRendered: this.state.roles.includes('Admin'),
+                className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4",
+                style:{'paddingLeft': '26px'}
+              }, [
+                div({  className: "checkbox" }, [
+                  input({
+                    id: "emailPreference",
+                    type:"checkbox",
+                    className: "checkbox-inline user-checkbox",
+                  }),
+                  label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "emailPreference"}, ["Disable Admin email notifications"]),
+                ])
+              ]),
+            ]),
           ]),
 
           // div({ isRendered: alerts.lenght > 0, className: "form-group alert-form-group" }, [
-          //     div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4", style:"paddingLeft: 26px" }, [
-          //         div({ isRendered: checkModel.ADMIN, className: "checkbox" }, [
-          //              input({ id: "emailPreference", type:"checkbox", className: "checkbox-inline user-checkbox", "set-mail-preference": true, "ng-model":"emailPreference" }),
-          //              label({ className: "regular-checkbox rp-choice-questions bold", for: "emailPreference"}, ["Disable Admin email notifications"]),
-          //          ])
-          //      ]),
 
           //      div({ className: "admin-alerts" }, [
           //          alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color" }, [
