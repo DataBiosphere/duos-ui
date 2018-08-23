@@ -34,6 +34,7 @@ class AdminManageUsers extends Component {
             return userList;
         });
         this.setState({ userList: userList });
+      console.log(userList);
     }
 
     handleOpenModal() {

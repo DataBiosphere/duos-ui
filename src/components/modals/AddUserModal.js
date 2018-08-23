@@ -1,42 +1,53 @@
 import { Component } from 'react';
 import { div, form, input, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
+import { User } from "../../libs/ajax";
 
 
 export const AddUserModal = hh(class AddUserModal extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {rolesList: [], inputName: '', inputGoogleId: ''};
+    this.state = {
+      roles: [],
+      displayName: '',
+      email: ''
+    };
     this.toggleState = this.toggleState.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.OKHandler = this.OKHandler.bind(this);
   }
 
     OKHandler(event) {
-        console.log("CERRAR MODAL");
+        let roles = this.state.roles.slice();
+        const rolesName = roles.map(
+          role => {return {name:role}}
+        );
+        const userData = {
+          displayName: this.state.displayName,
+          email: this.state.email,
+          roles: rolesName
+        };
+        User.create(userData);
         event.preventDefault();
+
     }
 
     toggleState(role) {
-      const existingRole = this.state.rolesList.find(stRole => stRole === role);
-      let roleList = this.state.rolesList;
+      const existingRole = this.state.roles.find(stRole => stRole === role);
+      let roleList = this.state.roles;
       if (!existingRole) {
         roleList.push(role);
-        this.setState({rolesList: roleList});
+        this.setState({roles: roleList});
       } else {
-        roleList.splice(this.state.rolesList.indexOf(role), 1);
-        this.setState({rolesList: roleList});
+        roleList.splice(this.state.roles.indexOf(role), 1);
+        this.setState({roles: roleList});
       }
-      console.log(this.state)
     }
 
     handleChange(event) {
       const value = event.target.name;
       this.setState({[value]: event.target.value});
-    }
-
-    availableRole() {
-      
     }
 
 
@@ -63,8 +74,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
                 input({
-                  type: "text", "ng-model": "user.displayName",
-                  name: "inputName", id: "txt_name",
+                  type: "text",
+                  name: "displayName",
+                  id: "txt_name",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "User name",
                   required: "true",
@@ -77,8 +89,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Google account id"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
                 input({
-                  type: "email", "ng-model": "user.email",
-                  name: "inputGoogleId", id: "txt_email",
+                  type: "email",
+                  name: "email",
+                  id: "txt_email",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "e.g. username@broadinstitute.org",
                   required: "true",
@@ -96,12 +109,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id:"chk_member",
                       className: "checkbox-inline user-checkbox",
-                      defaultChecked: this.state.rolesList.find(role => role === 'MEMBER'),
-                      // checked: ,
-                      onChange: () => this.toggleState('MEMBER'),
-                      // "ng-model": "checkModel.MEMBER",
-                      // "add-role": true,
-                      // disabled: (this.state.CHAIRPERSON || this.state.ALUMNI || this.state.RESEARCHER)
+                      defaultChecked: this.state.roles.find(role => role === 'Member'),
+                      onChange: () => this.toggleState('Member'),
+                      disabled: this.state.roles.includes('Chairperson') || this.state.roles.includes('Alumni') || this.state.roles.includes('Researcher')
                     }),
                     label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"]),
                   ]),
@@ -110,19 +120,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id:"chk_chairperson",
                       className: "checkbox-inline user-checkbox",
-                      "ng-model": "checkModel.CHAIRPERSON",
-                      // "add-role": true,
-                      disabled: "checkModel.MEMBER || checkModel.ALUMNI || checkModel.RESEARCHER" }),
+                      defaultChecked: this.state.roles.find(role => role === 'Chairperson'),
+                      onChange: () => this.toggleState('Chairperson'),
+                      disabled: this.state.roles.includes('Member') || this.state.roles.includes('Alumni') || this.state.roles.includes('Researcher')
+                    }),
                     label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"]),
                   ]),
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
                       id:"chk_alumni",
+                      defaultChecked: this.state.roles.find(role => role === 'Alumni'),
                       className: "checkbox-inline user-checkbox",
-                      "ng-model": "checkModel.ALUMNI",
-                      // "add-role": true,
-                      disabled: "checkModel.MEMBER || checkModel.CHAIRPERSON"
+                      onChange: () => this.toggleState('Alumni'),
+                      disabled: this.state.roles.includes('Member') || this.state.roles.includes('Chairperson'),
                     }),
                     label({ id: "lbl_alumni", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_alumni" }, ["Alumni"]),
                   ]),
@@ -132,9 +143,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     input({
                       type: "checkbox",
                       id:"chk_admin",
+                      defaultChecked: this.state.roles.find(role => role === 'Admin'),
                       className: "checkbox-inline user-checkbox",
-                      "ng-model": "checkModel.ADMIN",
-                      // "add-role": true
+                      onChange: () => this.toggleState('Admin'),
                     }),
                     label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"]),
                   ]),
@@ -142,10 +153,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     input({
                       type: "checkbox",
                       id:"chk_researcher",
+                      defaultChecked: this.state.roles.find(role => role === 'Researcher'),
                       className: "checkbox-inline user-checkbox",
-                      "ng-model": "checkModel.RESEARCHER",
-                      // "add-role": true,
-                      disabled: "checkModel.MEMBER || checkModel.ALUMNI || checkModel.RESEARCHER"
+                      onChange: () => this.toggleState('Researcher'),
+                      disabled: this.state.roles.includes('Member') || this.state.roles.includes('Chairperson')
                     }),
                     label({ id: "lbl_researcher", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_researcher" }, ["Researcher"]),
                   ]),
@@ -153,9 +164,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     input({
                       type: "checkbox",
                       id:"chk_dataOwner",
+                      defaultChecked: this.state.roles.find(role => role === 'Dataowner'),
                       className: "checkbox-inline user-checkbox",
-                      "ng-model": "checkModel.DATAOWNER",
-                      // "add-role": true
+                      onChange: () => this.toggleState('Dataowner'),
                     }),
                     label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"]),
                   ]),
