@@ -1,18 +1,48 @@
 import { Component } from 'react';
 import { div, hh, form, h2, label, input, span, hr, small, ul, li, a } from 'react-hyperscript-helpers';
-
+import {Researcher, User} from '../libs/ajax';
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            // User.g
+            // userId: JSON.parse(sessionStorage.getItem("CurrentUser")).dacUserId,
+            // userProfile: Researcher.getResearcherProfile(JSON.parse(sessionStorage.getItem("CurrentUser")).dacUserId).then((data) => {
+            //     return data;
+            // }),
+            researcherProfile: null,
             profileName: 'Diego Gil'
-        }
+        };
+        this.getResearcherProfile = this.getResearcherProfile.bind(this);
+
         this.handleChange = this.handleChange.bind(this);
         this.handlePIChange = this.handlePIChange.bind(this);
         this.handlePI2Change = this.handlePI2Change.bind(this);
     }
+    componentWillMount() {
+        this.getResearcherProfile();
+    }
 
+    componentDidUpdate() {
+        console.log("RESEARCHER PROFILE =", this.state.researcherProfile);
+    }
+
+    async getResearcherProfile() {
+
+        const profile = await Researcher.getResearcherProfile(JSON.parse(sessionStorage.getItem("CurrentUser")).dacUserId);
+        // let profileList = [];
+        this.setState({researcherProfile: profile});
+
+        // profile.then((result) => {
+        //     result.map(profileProperty => {
+        //         profileProperty.key = profileProperty.id;
+        //         profileList.push(profileProperty);
+        //         return profileList;
+        //     });
+        //     this.setState({ researcherProfile: profileList });
+        // });
+    }
     handleChange(event) {
         let field = {};
         field[event.target.name] = event.target.value;
@@ -168,11 +198,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                                     div({ className: "radio-inline" }, [
                                         input({ onChange: this.handlePIChange, value: this.state.isThePI, type: "radio", className: "regular-radio", id: "isThePI", name: "isThePI", onClick: this.clearNotRelatedPIFields, "required": "true" }),
                                         // label({ for: "isThePI" }, []),
-                                        label({ for: "isThePI", className: "radio-button-text" }, ["Yes"]),
+                                        // label({ for: "isThePI", className: "radio-button-text" }, ["Yes"]),
 
                                         input({ onChange: this.handlePIChange, value: this.state.isThePI, type: "radio", className: "regular-radio", id: "isNotThePI", name: "isThePI", onClick: this.clearNotRelatedPIFields, "required": "true" }),
                                         // label({ for: "isNotThePI" }, []),
-                                        label({ for: "isNotThePI", className: "radio-button-text" }, ["No"]),
+                                        // label({ for: "isNotThePI", className: "radio-button-text" }, ["No"]),
                                     ]),
                                 ]),
                             ]),
@@ -188,11 +218,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                                     div({ className: "radio-inline", "ng-disabled": this.state.isThePI !== false }, [
                                         input({ onChange: this.handlePI2Change, value: this.state.havePI, "ng-value": "true", type: "radio", className: "regular-radio", id: "doHavePI", name: "havePI", onClick: this.clearCommonsFields, "ng-disabled": this.state.isThePI !== "false", "ng-required": this.state.isThePI === "false" }),
                                         // label({ for: "doHavePI" }, []),
-                                        label({ for: "doHavePI", className: "radio-button-text" }, ["Yes"]),
+                                        // label({ for: "doHavePI", className: "radio-button-text" }, ["Yes"]),
 
                                         input({ onChange: this.handlePI2Change, value: this.state.havePI, "ng-value": "false", type: "radio", className: "regular-radio", id: "doNotHavePI", name: "havePI", onClick: this.clearNoHasPIFields, "ng-disabled": this.state.isThePI !== "false", "ng-required": this.state.isThePI === "false" }),
                                         // label({ for: "doNotHavePI" }, []),
-                                        label({ for: "doNotHavePI", className: "radio-button-text" }, ["No"]),
+                                        // label({ for: "doNotHavePI", className: "radio-button-text" }, ["No"]),
                                     ]),
                                 ]),
                             ]),

@@ -1,15 +1,26 @@
 import _ from 'lodash/fp'
 import * as Config from './config'
 
-// const auth_token = JSON.parse(sessionStorage.getItem("GAPI")).accessToken;
-const auth_token = "token";
+// var auth_token = sessionStorage.getItem("GAPI") !== null ? JSON.parse(sessionStorage.getItem("GAPI")).accessToken : 'token';
 
-const authOpts = (token = auth_token) => ({ headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-const jsonBody = body => ({ body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })
+const authOpts = (token = Token.getToken()) => ({ headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
+const jsonBody = body => ({ body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
+
+export const Token = {
+
+    setToken: async token => {
+        console.log("received Token ", token);
+    },
+    getToken: () => {
+        return sessionStorage.getItem("GAPI") !== null ? JSON.parse(sessionStorage.getItem("GAPI")).accessToken : 'token';
+    }
+
+};
 
 export const User = {
 
     getByEmail: async email => {
+        console.log("token? ", Token.getToken());
         const url = `${await Config.getApiUrl()}/dacuser/${email}`;
         const res = await fetchOk(url, authOpts());
         return res.json();
@@ -63,7 +74,18 @@ export const User = {
         return res.json();
     }
 
-}
+};
+
+export const Researcher = {
+
+    getResearcherProfile : async userId => {
+
+        const url = `${await Config.getApiUrl()}/researcher/${userId}`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    }
+
+};
 
 export const DataSet = {
 

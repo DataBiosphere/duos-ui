@@ -1,22 +1,35 @@
 import {Component} from 'react';
 import {h, hh} from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
+import {User, Token} from "../libs/ajax";
 
 export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     constructor(props) {
         super(props);
         this.state = {googleButton: null};
         this.login = props.loginState;
+        this.getUser = this.getUser.bind(this);
+
     }
 
     responseGoogle = (response) => {
         console.log(response);
-        console.log("GOOGLE PROPS ", this.props);
+        Token.setToken(response.accessToken);
         sessionStorage.setItem("GAPI", JSON.stringify(response));
+        this.getUser().then((data) => {
+            sessionStorage.setItem("CurrentUser", JSON.stringify(data));
+            console.log("USER = ", data);
+            // window.location.href = "/";
+        },
+            (data) => {
+                sessionStorage.clear();
+                console.log("Error: ", data)
+            });
         this.login(true);
     };
 
     forbidden = (response) => {
+        sessionStorage.clear();
         console.log(response);
     };
 
@@ -33,6 +46,11 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
             onFailure: this.forbidden,
         });
         this.setState({googleButton: googleButton})
+    }
+
+    async getUser(){
+        return await User.getByEmail(JSON.parse(sessionStorage.getItem("GAPI")).profileObj.email);
+        // console.log (user)
     }
 
     componentWillMount() {

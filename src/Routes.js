@@ -34,7 +34,7 @@ import DatasetCatalog from "./pages/DatasetCatalog";
 import DulReviewResults from "./pages/DulReviewResults";
 import ResearcherReview from "./pages/ResearcherReview";
 import ManageOntologies from "./pages/ManageOntologies";
-import AuthenticatedRoute from "./components/Services/AuthenticatedRoute";
+import AuthenticatedRoute from "./components/services/AuthenticatedRoute";
 
 export default ({ props }) => (
 

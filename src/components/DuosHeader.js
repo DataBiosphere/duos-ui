@@ -3,12 +3,10 @@ import { nav, button, ul, li, img, small, hr, div, span, a } from 'react-hypersc
 import { GoogleLoginButton } from '../components/GoogleLogin';
 import { GoogleLogoutButton } from '../components/GoogleLogout';
 import { HelpModal } from '../components/modals/HelpModal';
-
+import { Token } from '../libs/ajax';
 class DuosHeader extends Component {
 
     navBarCollapsed = true;
-
-    loggedState = false;
 
     constructor(props) {
         super(props);
@@ -69,6 +67,7 @@ class DuosHeader extends Component {
                         a({ href: "/home", className: "navbar-duos-brand" }, [
                             img({ src: "/images/duos_logo.svg", alt: "DUOS Logo" }),
                         ]),
+                        li({}, [a({ className: "navbar-duos-link", onClick: this.prueba }, ["Prueba"]),])
                     ]),
 
                     div({ className: "collapse navbar-collapse no-padding", collapse: "navbarCollapsed" }, [
@@ -102,6 +101,8 @@ class DuosHeader extends Component {
                                     // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
+
+
                             ]),
 
                             ul({ isRendered: isLogged, className: "navbar-left no-margin" }, [
@@ -163,6 +164,10 @@ class DuosHeader extends Component {
         );
     }
 
+    prueba() {
+        Token.getToken();
+    }
+
     isUserLogged() {
         console.log('------------------- isLogged ------------------------- ', this.state);
         return this.state.isLogged;
@@ -189,7 +194,8 @@ class DuosHeader extends Component {
         console.log('-----A---------- signOut --------------', this.state);
         this.setState({ isLogged: false }, function() {
             console.log('-----C---------- signOut --------------', this.state);
-            this.props.loginState(this.state.isLogged)
+            this.props.loginState(this.state.isLogged);
+            window.location.href = "/";
         });
         console.log('-----B---------- signOut --------------', this.state);
     }

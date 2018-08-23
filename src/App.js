@@ -28,6 +28,7 @@ class App extends React.Component {
     render() {
          return (
             div({}, [
+
                 h(DuosHeader, {isLogged: this.state.isLogged, loginState: this.loginState, button: GoogleLoginButton({isLogged:sessionStorage.getItem('isLogged') === 'true', loginState:this.loginState})}),
                 h(Routes, {isLogged: sessionStorage.getItem('isLogged') === 'true', loginState: this.loginState})
             ])
