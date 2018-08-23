@@ -1,10 +1,11 @@
 
 
 import { Component } from 'react';
-import { button, div, h2, h4, h, form, input, label, fieldset, textarea, img, span, hh, p, a } from 'react-hyperscript-helpers';
+import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import styles from './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
+import { AdminConsoleBox } from '../components/AdminConsoleBox';
 
 const customStyles = {
     overlay: {
@@ -84,14 +85,39 @@ export const BaseModal = hh(class BaseModal extends Component {
         return (
             div({}, [
 
-                a({ isRendered: this.props.linkType === "a-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
+                a({ 
+                    isRendered: this.props.linkType === "a-tag",
+                    className: this.props.modalBtnStyle,
+                    onClick: this.openModal
+                },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.title]),
+                    span({ },[this.props.modalBtnText]),
                 ]),
 
-                button({ isRendered: this.props.linkType === "button-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
+                button({
+                    isRendered: this.props.linkType === "button-tag",
+                    className: this.props.modalBtnStyle,
+                    onClick: this.openModal
+                },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.title]),
+                    span({ },[this.props.modalBtnText]),
+                ]),
+
+                a({ 
+                    isRendered: this.props.linkType === "console-tag",
+                    modalBtnStyle: this.props.modalBtnStyle,
+                    onClick: this.openModal
+                },[
+                    AdminConsoleBox({
+                        linkType: this.props.linkType,  
+                        id: this.props.id,
+                        color: this.props.color,
+                        title: this.props.title,
+                        description: this.props.description,
+                        iconName: this.props.iconName,
+                        iconSize: this.props.iconSize
+                      },[
+                    ]),
                 ]),
 
                 h(Modal, {
@@ -106,7 +132,7 @@ export const BaseModal = hh(class BaseModal extends Component {
                             button({ type: "button", className: "modal-close-btn close", onClick: this.closeModal }, [
                                 span({ className: "glyphicon glyphicon-remove default-color" }),
                             ]),
-                            PageSubHeading({ imgSrc: this.props.imgSrc, color: this.props.color, title: this.props.title, description: this.props.description }),
+                            PageSubHeading({ imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
                         ]),
 
                         div({ className: "modal-content" }, [

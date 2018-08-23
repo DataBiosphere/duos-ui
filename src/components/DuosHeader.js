@@ -12,12 +12,15 @@ class DuosHeader extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { isLogged: props.isLogged }
-
+        this.state = { isLogged: props.isLogged };
         this.signIn = this.signIn.bind(this);
         this.signOut = this.signOut.bind(this);
 
         this.toggleNavBar = this.toggleNavBar.bind(this);
+
+        this.loginState = props.loginState;
+        this.isLogged = props.isLogged;
+
     }
 
     render() {
@@ -44,12 +47,13 @@ class DuosHeader extends Component {
                 if (role === 'alumni') { isAlumni = true; }
             });
         }
-
-        let currentUser = {
-            displayName: 'Diego Gil',
-            email: 'diegogil@broadinstitute.org'
-        };
-
+        let currentUser = {};
+        if (isLogged && sessionStorage.getItem("GAPI") !== null) {
+            currentUser = {
+                displayName: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.name,
+                email: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.email
+            };
+        }
         return (
 
             nav({ className: "navbar top-navigator-bar", role: "navigation", "ng-controller": "Header as Header" }, [
@@ -90,9 +94,11 @@ class DuosHeader extends Component {
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }, []), "About"]),]),
                                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                                 li({}, [
-                                    // GoogleLoginButton({}),
-                                    // GoogleLogoutButton({}),
-                                    a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
+
+                                    a({onClick: this.signIn}, [GoogleLoginButton({isLogged:this.isLogged, loginState:this.loginState})]),
+                                    GoogleLogoutButton({isLogged:this.isLogged, loginState:this.loginState}),
+                                    // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
+                                    // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                                 ]),
                                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
                             ]),

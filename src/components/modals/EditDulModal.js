@@ -3,7 +3,7 @@ import { div, form, input, label, textarea, span, hh, p } from 'react-hyperscrip
 import { BaseModal } from '../BaseModal';
 
 
-export const AddDulModal = hh(class AddDulModal extends Component {
+export const EditDulModal = hh(class EditDulModal extends Component {
 
     OKHandler (){
         console.log ("algo");
@@ -21,20 +21,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         
         return (
 
-        BaseModal({
-            linkType: this.props.linkType,
-            modalBtnStyle: this.props.modalBtnStyle,
-            modalBtnIcon: this.props.modalBtnIcon,
-            modalBtnText: this.props.modalBtnText,
-            id: this.props.id,
-            modalSize: "large",
-            imgSrc: "/images/icon_add_dul.png",
-            color: "dul",
-            title: "Add Data Use Limitations", 
-            description: this.props.description,
-            iconName: this.props.iconName,
-            iconSize: this.props.iconSize,
-            action: { label: "Add", handler: this.OKHandler } },
+        BaseModal({ linkType: this.props.linkType, modalBtnStyle: "cell-button hover-color", modalBtnIcon: "",
+        modalBtnText: "Edit", id: "title_editDUL", modalSize: "large", imgSrc: "/images/icon_edit_dul.png", color: "dul", title: "Edit Data Use Limitations", 
+        description: "Edit a Data Use Limitations Record", action: { label: "Save", handler: this.OKHandler } },
         [
 
         form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
@@ -45,12 +34,12 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                         type: "text", "ng-model": "consent.consentId",
                         id:"txt_consentId", name: "inputConsentId",
                         className: "form-control col-lg-12 vote-input",
-                        placeholder: "Unique id from Compliance", required: "true"
+                        placeholder: "Unique id from Compliance", disabled: true
                     }),
                 ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
+            div({ className: "form-group admin-form-group" }, [
                 label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
                     input({
@@ -62,7 +51,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
+            div({ className: "form-group admin-form-group" }, [
                 label({ id:"lbl_file", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use Limitations File"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                     div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
