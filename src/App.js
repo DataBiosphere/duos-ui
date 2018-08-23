@@ -3,6 +3,7 @@ import DuosHeader from './components/DuosHeader';
 import {div, h} from 'react-hyperscript-helpers';
 import './App.css';
 import Routes from "./Routes"
+import { GoogleLoginButton } from './components/GoogleLogin';
 
 class App extends React.Component {
 
@@ -27,7 +28,7 @@ class App extends React.Component {
     render() {
          return (
             div({}, [
-                h(DuosHeader, {isLogged: this.state.isLogged, loginState: this.loginState}),
+                h(DuosHeader, {isLogged: this.state.isLogged, loginState: this.loginState, button: GoogleLoginButton({isLogged:sessionStorage.getItem('isLogged') === 'true', loginState:this.loginState})}),
                 h(Routes, {isLogged: sessionStorage.getItem('isLogged') === 'true', loginState: this.loginState})
             ])
         );
