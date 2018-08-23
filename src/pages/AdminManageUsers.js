@@ -60,7 +60,15 @@ class AdminManageUsers extends Component {
                                 input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchUsers" }),
                             ]),
                         ]),
-                        AddUserModal({ linkType: "a-tag" }),
+
+                        AddUserModal({
+                            linkType: "a-tag",
+                            modalBtnStyle: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+                            modalBtnIcon: "add-user_white",
+                            modalBtnText: "Add User",
+                            id: 'title_addUser',
+                            description: 'Catalog a new User in the system',
+                        }),
                     ])
                 ]),
                 div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [

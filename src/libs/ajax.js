@@ -1,9 +1,10 @@
 import _ from 'lodash/fp'
 import * as Config from './config'
 
-const auth_token = "tokennnnnnnnn";
+const auth_token = JSON.parse(sessionStorage.getItem("GAPI")).accessToken;
 
-const authOpts = (token = auth_token) => ({ headers: { Authorization: `Bearer ${token}` } });
+
+const authOpts = (token = auth_token) => ({ headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
 const jsonBody = body => ({ body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } })
 
 export const User = {
@@ -56,7 +57,7 @@ export const User = {
         return res.json(); 
     },
 
-    findUserStatus:  async userId => {
+    getUserStatus:  async userId => {
         const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
         const res = await fetchOk(url, authOpts());
         return res.json();
@@ -113,6 +114,51 @@ export const DataSet = {
     reviewDataSet: async(dataSetId, needsApproval) => {
         const url = `${await Config.getApiUrl()}/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
         const res = await fetchOk(url, _.mergeAll([authOpts(), { method: 'PUT' }]));
+        return res.json();
+    }
+}
+
+export const Consent = {
+
+    getById: async consentId => {
+        const url = `${await Config.getApiUrl()}/consent/${consentId}`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getDUL: async consentId => {
+        const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getConsentManage: async (file, overwrite, userId) => {
+        const url = `${await Config.getApiUrl()}/consent/manage`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getInvalidConsentRestriction: async dacUserId => {
+        const url = `${await Config.getApiUrl()}/consent/invalid`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    create: async consent => {
+        consent.requiresManualReview = false;
+        consent.useRestriction = JSON.parse(consent.useRestriction);
+        consent.dataUse = JSON.parse(consent.dataUse);
+        const url = `${await Config.getApiUrl()}/consent`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(consent), { method: 'POST' }]));
+        return res.json();
+    },
+
+    update: async consent => {
+        consent.requiresManualReview = false;
+        consent.useRestriction = JSON.parse(consent.useRestriction);
+        consent.dataUse = JSON.parse(consent.dataUse);
+        const url = `${await Config.getApiUrl()}/consent`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(consent), { method: 'PUT' }]));
         return res.json();
     }
 }

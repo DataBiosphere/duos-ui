@@ -22,9 +22,19 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         return (
 
             BaseModal({
-                linkType: this.props.linkType, modalBtnStyle: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin", modalBtnIcon: "add-user_white",
-                modalBtnText: "Add User", id: "title_addUser", modalSize: "large", imgSrc: "/images/icon_add_user.png", color: "common", title: "Add User",
-                description: "Catalog a new User in the system", action: { label: "Add", handler: this.OKHandler }
+                linkType: this.props.linkType,
+                modalBtnStyle: this.props.modalBtnStyle,
+                modalBtnIcon: this.props.modalBtnIcon,
+                modalBtnText: this.props.modalBtnText,
+                id: this.props.id,
+                modalSize: "large",
+                imgSrc: "/images/icon_add_user.png",
+                color: "common",
+                title: "Add User", 
+                description: this.props.description,
+                icon_name: this.props.icon_name,
+                icon_size: this.props.icon_size,
+                action: { label: "Add", handler: this.OKHandler }
             },
                 [
                     form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [

@@ -5,6 +5,7 @@ import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import styles from './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
+import { AdminConsoleBox } from '../components/AdminConsoleBox';
 
 const customStyles = {
     overlay: {
@@ -82,14 +83,39 @@ export const BaseModal = hh(class BaseModal extends Component {
         return (
             div({}, [
 
-                a({ isRendered: this.props.linkType === "a-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
+                a({ 
+                    isRendered: this.props.linkType === "a-tag",
+                    className: this.props.modalBtnStyle,
+                    onClick: this.openModal
+                },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
                     span({ },[this.props.modalBtnText]),
                 ]),
 
-                button({ isRendered: this.props.linkType === "button-tag", className: this.props.modalBtnStyle , onClick: this.openModal },[
+                button({
+                    isRendered: this.props.linkType === "button-tag",
+                    className: this.props.modalBtnStyle,
+                    onClick: this.openModal
+                },[
                     div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
                     span({ },[this.props.modalBtnText]),
+                ]),
+
+                a({ 
+                    isRendered: this.props.linkType === "console-tag",
+                    modalBtnStyle: this.props.modalBtnStyle,
+                    onClick: this.openModal
+                },[
+                    AdminConsoleBox({
+                        linkType: this.props.linkType,  
+                        id: this.props.id,
+                        color: this.props.color,
+                        title: this.props.title,
+                        description: this.props.description,
+                        icon_name: this.props.icon_name,
+                        icon_size: this.props.icon_size
+                      },[
+                    ]),
                 ]),
 
                 h(Modal, {
