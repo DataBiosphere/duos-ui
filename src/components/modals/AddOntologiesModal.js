@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { button, div, h2, h4, h, form, input, label, fieldset, textarea, img, span, hh, p } from 'react-hyperscript-helpers';
+import { div, form, input, label, span, hh, p } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 
 

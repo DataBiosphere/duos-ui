@@ -13,9 +13,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
     render() {
         const file = {
             name: "MyFile.txt"
-        }
-
-        // const alerts = [
+        }        // const alerts = [
 
         // ];
         

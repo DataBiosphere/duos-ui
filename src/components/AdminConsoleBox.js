@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { div, a, hh, h2, span } from 'react-hyperscript-helpers';
-import styles from './AdminConsoleBox.css';
+import './AdminConsoleBox.css';
 
 export const AdminConsoleBox = hh(class AdminConsoleBox extends Component {
 

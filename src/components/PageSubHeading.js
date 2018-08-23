@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { div, hh, img, h2, span } from 'react-hyperscript-helpers';
-import styles from './PageSubHeading.css';
+import './PageSubHeading.css';
 
 export const PageSubHeading = hh(class PageSubHeading extends Component {
 

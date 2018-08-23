@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { div, hh, img, h2, span } from 'react-hyperscript-helpers';
-import styles from './PageHeading.css';
+import './PageHeading.css';
 
 export const PageHeading = hh(class PageHeading extends Component {
 

@@ -3,7 +3,7 @@
 import { Component } from 'react';
 import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import styles from './BaseModal.css';
+import './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 
@@ -72,13 +72,6 @@ export const BaseModal = hh(class BaseModal extends Component {
     }
 
     render() {
-        const file = {
-            name: "MyFile.txt"
-        }    
-
-        const alerts = [
-
-        ];
 
         return (
             div({}, [

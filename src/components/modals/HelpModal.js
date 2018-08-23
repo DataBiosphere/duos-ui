@@ -11,10 +11,6 @@ export const HelpModal = hh(class HelpModal extends Component {
 
 
     render() {
-        const file = {
-            name: "MyFile.txt"
-        }
-
         // const alerts = [
 
         // ];

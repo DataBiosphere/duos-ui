@@ -11,10 +11,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
 
     render() {
-        const file = {
-            name: "MyFile.txt"
-        }
-
         // const alerts = [
 
         // ];
