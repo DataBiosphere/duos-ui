@@ -56,7 +56,7 @@ export const User = {
         return res.json(); 
     },
 
-    findUserStatus:  async userId => {
+    getUserStatus:  async userId => {
         const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
         const res = await fetchOk(url, authOpts());
         return res.json();
@@ -117,9 +117,53 @@ export const DataSet = {
     }
 }
 
+export const Consent = {
+
+    getById: async consentId => {
+        const url = `${await Config.getApiUrl()}/consent/${consentId}`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getDUL: async consentId => {
+        const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getConsentManage: async (file, overwrite, userId) => {
+        const url = `${await Config.getApiUrl()}/consent/manage`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    getInvalidConsentRestriction: async dacUserId => {
+        const url = `${await Config.getApiUrl()}/consent/invalid`;
+        const res = await fetchOk(url, authOpts());
+        return res.json();
+    },
+
+    create: async consent => {
+        consent.requiresManualReview = false;
+        consent.useRestriction = JSON.parse(consent.useRestriction);
+        consent.dataUse = JSON.parse(consent.dataUse);
+        const url = `${await Config.getApiUrl()}/consent`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(consent), { method: 'POST' }]));
+        return res.json();
+    },
+
+    update: async consent => {
+        consent.requiresManualReview = false;
+        consent.useRestriction = JSON.parse(consent.useRestriction);
+        consent.dataUse = JSON.parse(consent.dataUse);
+        const url = `${await Config.getApiUrl()}/consent`;
+        const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(consent), { method: 'PUT' }]));
+        return res.json();
+    }
+}
+
 
 const fetchOk = async (...args) => {
     const res = await fetch(...args);
     return res.ok ? res : Promise.reject(res);
 }
-

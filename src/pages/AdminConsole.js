@@ -10,14 +10,52 @@ import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 
 class AdminConsole extends Component {
 
+
     constructor(props) {
         super(props);
         this.state = {
-            showModal: false
+            showModal: false,
         };
 
+        this.addDul = this.addDul.bind(this);
+        this.handleOpenModal = this.handleOpenModal.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
     }
 
+    handleOpenModal() {
+        this.setState({ showModal: true });
+    }
+
+    handleCloseModal() {
+        this.setState({ showModal: false });
+    }
+
+    addDul() {
+        this.setState(prev => {
+            prev.showModal = true;
+            return prev;
+        });
+    }
+
+    componentWillMount() {
+        console.log('componentWillMount', this.state, this.props);
+    }
+
+    componentWillUpdate() {
+        console.log('componentWillUpdate', this.state, this.props);
+    }
+
+    componentDidMount() {
+        console.log('componentDidMount', this.state, this.props);
+    }
+
+    componentDidUpdate() {
+        console.log('componentDidUpdate', this.state, this.props);
+    }
+
+    // shouldComponentUpdate() {
+    //     return false;
+    // }
 
     render() {
 
@@ -28,6 +66,7 @@ class AdminConsole extends Component {
         return (
 
             div({}, [
+
                 div({ className: "container" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                         PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "What would you like to do today?" }),
@@ -51,14 +90,37 @@ class AdminConsole extends Component {
                             ]),
 
                             div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                                AddDulModal({
-                                    linkType: "console-tag",
+
+                                AdminConsoleBox({
                                     id: 'btn_addDUL',
-                                    modalBtnStyle: "admin-box-wrapper",
+                                    clickHandler: this.addDul,
+                                    color: 'dul-color',
+                                    title: 'Add Data Use Limitations',
                                     description: 'Catalog a Data Use Limitation Record in the system',
                                     iconName: 'add-dul',
                                     iconSize: 'default'
                                 }),
+
+                                AddDulModal({ showModal: false }),
+                                // AdminConsoleBox({
+                                //     id: 'btn_addDUL',
+                                //     color: 'dul',
+                                //     title: 'Add Data Use Limitations',
+                                //     description: 'Select and manage Data Use Limitations Record for review',
+                                //     iconName: 'add-dul',
+                                //     iconSize: 'default',
+                                //     clickHandler: this.addDul,
+                                //     unreviewedCases: 33
+                                // }, [AddDulModal({isRendered: this.state.showAddDulModal, showModal: this.state.showAddDulModal})])
+
+                                // AddDulModal({
+                                //     linkType: "console-tag",
+                                //     id: 'btn_addDUL',
+                                //     modalBtnStyle: "admin-box-wrapper",
+                                //     description: 'Select and manage Data Use Limitations Record for review',
+                                //     iconName: 'add-dul',
+                                //     iconSize: 'default'
+                                // }),
                             ]),
                         ]),
 
@@ -73,7 +135,7 @@ class AdminConsole extends Component {
                                     iconName: 'manage-user',
                                     iconSize: 'default',
                                     unreviewedCases: 8
-                                 }),
+                                }),
                             ]),
 
                             div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
@@ -99,7 +161,7 @@ class AdminConsole extends Component {
                                     iconName: 'manage-access',
                                     iconSize: 'default',
                                     unreviewedCases: 0
-                                 }),
+                                }),
                             ]),
 
                             div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
@@ -108,7 +170,7 @@ class AdminConsole extends Component {
                                     id: 'btn_addDataset',
                                     modalBtnStyle: "admin-box-wrapper",
                                     iconName: 'add-dataset',
-                                    iconSize: 'large', 
+                                    iconSize: 'large',
                                     title: "Add Datasets",
                                     description: 'Store Datasets associated with Data Use Limitations',
                                 }),
@@ -138,7 +200,7 @@ class AdminConsole extends Component {
                                     iconName: 'invalid-restrictions',
                                     iconSize: 'large',
                                     unreviewedCases: 0
-                                 }),
+                                }),
                             ]),
                         ]),
 
@@ -153,7 +215,7 @@ class AdminConsole extends Component {
                                     iconName: 'manage-ontologies',
                                     iconSize: 'large',
                                     unreviewedCases: 0
-                                 }),
+                                }),
                             ]),
 
                             div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [

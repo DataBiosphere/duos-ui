@@ -1,4 +1,5 @@
 import React from 'react';
+import Modal from 'react-modal';
 import DuosHeader from './components/DuosHeader';
 import {div, h} from 'react-hyperscript-helpers';
 import './App.css';
@@ -14,6 +15,10 @@ class App extends React.Component {
         this.loginState = this.loginState.bind(this);
     }
 
+    componentWillMount() {
+        Modal.setAppElement('body');
+    }
+    
     loginState(isLogged) {
         this.setState({isLogged: isLogged}, function () {
             if (isLogged) {
