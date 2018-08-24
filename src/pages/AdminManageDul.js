@@ -19,6 +19,12 @@ class AdminManageDul extends Component {
         this.myHandler = this.myHandler.bind(this);
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
+
+        this.addDul = this.addDul.bind(this);
+        this.closeAddDulModal = this.closeAddDulModal.bind(this);
+        this.okAddDulModal = this.okAddDulModal.bind(this);
+        this.afterAddDulModalOpen = this.afterAddDulModalOpen.bind(this);
+    
     }
 
     async getConsentManage() {
@@ -78,6 +84,34 @@ class AdminManageDul extends Component {
 
     }
 
+    addDul() {
+      this.setState(prev => {
+        prev.showModal = true;
+        return prev;
+      });
+    }
+   
+    closeAddDulModal() {
+      // this state change close AddDul modal
+      this.setState(prev => {
+        prev.showModal = false;
+        return prev;
+      });
+    }
+  
+    okAddDulModal() {
+      // this state change close AddDul modal
+      this.setState(prev => {
+        prev.showModal = false;
+        return prev;
+      });
+    }
+  
+    afterAddDulModalOpen() {
+      // not sure when to use this
+      console.log('afterAddDulModalOpen', this.state, this.props);
+    }
+
     render() {
         return (
             div({ className: "container container-wide" }, [
@@ -93,14 +127,22 @@ class AdminManageDul extends Component {
                             ]),
                         ]),
 
+                        // AddDulModal({
+                        //     linkType: "a-tag",
+                        //     modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
+                        //     modalBtnIcon: "add-dul_white",
+                        //     modalBtnText: "Add Data Use Limitations",
+                        //     id: 'title_addDUL',
+                        //     description: 'Catalog a Data Use Limitations Record',
+                        // }),
+                        button({className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", onClick: this.addDul}, ["Add Data Use Limitations"]),
                         AddDulModal({
-                            linkType: "a-tag",
-                            modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
-                            modalBtnIcon: "add-dul_white",
-                            modalBtnText: "Add Data Use Limitations",
-                            id: 'title_addDUL',
-                            description: 'Catalog a Data Use Limitations Record',
+                          showModal: this.state.showModal,
+                          onOKRequest: this.okAddDulModal,
+                          onCloseRequest: this.closeAddDulModal,
+                          onAfterOpen: this.afterAddDulModalOpen
                         }),
+
                     ]),
                 ]),
 
