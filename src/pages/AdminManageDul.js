@@ -127,6 +127,7 @@ class AdminManageDul extends Component {
               ]),
             ]),
 
+            // this is the button-alike a to open the modal 
             a({
               id: 'title_addDUL',
               className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
@@ -136,6 +137,7 @@ class AdminManageDul extends Component {
                 span({}, ["Add Data Use Limitations"]),
               ]),
 
+            // this is the modal, not shown by default ...
             AddDulModal({
               showModal: this.state.showModal,
               onOKRequest: this.okAddDulModal,
