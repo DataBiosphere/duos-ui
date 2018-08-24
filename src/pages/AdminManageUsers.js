@@ -3,7 +3,7 @@ import { div, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { EditUserModal } from '../components/modals/EditUserModal';
-import { User } from '../libs/ajax'
+import { User } from "../libs/user.ajax";
 
 class AdminManageUsers extends Component {
 
