@@ -18,6 +18,7 @@ class AdminConsole extends Component {
       showAddUserModal: false
     };
 
+    this.closeModal = this.closeModal.bind(this);
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -54,6 +55,21 @@ class AdminConsole extends Component {
       prev.showAddUserModal = true;
       return prev;
     });
+  }
+
+  closeModal(name) {
+    console.log('closeModel ------------------> ' + name);
+    // this state change close modal
+    switch (name) {
+      case 'addDul':
+        this.setState(prev => { prev.showAddDulModal = false; return prev; });
+        break;
+      case 'addUser':
+        this.setState(prev => { prev.showAddUserModal = false; return prev; });
+        break;
+      default:
+        break;
+    }
   }
 
   closeAddDulModal() {
@@ -144,7 +160,7 @@ class AdminConsole extends Component {
                 AddDulModal({
                   showModal: this.state.showAddDulModal,
                   onOKRequest: this.okAddDulModal,
-                  onCloseRequest: this.closeAddDulModal,
+                  onCloseRequest: this.closeModal,
                   onAfterOpen: this.afterAddDulModalOpen
                 }),
 
@@ -178,7 +194,7 @@ class AdminConsole extends Component {
                 AddUserModal({
                   showModal: this.state.showAddUserModal,
                   onOKRequest: this.okAddUserModal,
-                  onCloseRequest: this.closeAddUserModal,
+                  onCloseRequest: this.closeModal,
                   onAfterOpen: this.afterAddUserModalOpen
                 }),
               ]),

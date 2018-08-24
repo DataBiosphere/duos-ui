@@ -20,7 +20,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     // DO SOMETHING HERE ...
 
     // and call parent's OK Handler
-    this.props.onOKRequest();
+    this.props.onOKRequest('addDul');
   }
 
   closeHandler() {
@@ -31,14 +31,14 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     // DO SOMETHING HERE ...
 
     // and call parent's close handler
-    this.props.onCloseRequest();
+    this.props.onCloseRequest('addDul');
   }
 
   afterOpenHandler() {
     // DO SOMETHING HERE ...
 
     // and call parent's after open handler
-    this.props.onAfterOpen();
+    this.props.onAfterOpen('addDul');
 
   }
 

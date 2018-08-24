@@ -20,7 +20,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     // DO SOMETHING HERE ...
 
     // and call parent's OK Handler
-    this.props.onOKRequest();
+    this.props.onOKRequest('adduser');
   }
 
   closeHandler() {
@@ -31,14 +31,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     // DO SOMETHING HERE ...
 
     // and call parent's close handler
-    this.props.onCloseRequest();
+    this.props.onCloseRequest('addUser');
   }
 
   afterOpenHandler() {
     // DO SOMETHING HERE ...
 
     // and call parent's after open handler
-    this.props.onAfterOpen();
+    this.props.onAfterOpen('addUser');
 
   }
 
