@@ -1,8 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, h, span, i, a, input, } from 'react-hyperscript-helpers';
+import { div, button, hr, h, span, i, a, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { EditDulModal } from '../components/modals/EditDulModal';
+import { CreateElectionModal } from '../components/modals/CreateElectionModal';
+import { CancelElectionModal } from '../components/modals/CancelElectionModal';
+import { ArchiveElectionModal } from '../components/modals/ArchiveElectionModal';
+import { DeleteElectionModal } from '../components/modals/DeleteElectionModal';
 import { Consent } from '../libs/ajax';
 
 class AdminManageDul extends Component {
@@ -119,22 +123,20 @@ class AdminManageDul extends Component {
                     this.state.electionsList.dul.map((election, eIndex) => {
                         return (
                             h(Fragment, {}, [
-                                div({ "dir-paginate": "election in AdminManage.electionsList.dul | filter: searchDUL | itemsPerPage:10", "current-page": this.currentDULPage }, [
-                                    div({ className: "grid-9-row pushed-2", "ng-class": "{'list-highlighted': election.updateStatus}" }, [
-                                        div({ className: "col-2 cell-body text", "ng-class": "{flagged : election.archived}", title: election.consentName }, [
-                                            span({
-                                                isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
-                                                "tooltip": "Consent has been updated", "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                            }, []),
+                                // div({ "dir-paginate": "election in AdminManage.electionsList.dul | filter: searchDUL | itemsPerPage:10", "current-page": this.currentDULPage }, [
+                                    div({ key: election.electionId, id: eIndex, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted": "") }, [
+                                        div({ className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
+                                                span({
+                                                    isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
+                                                    // "tooltip": "Consent has been updated", "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                                                }, []),
                                             a({ onClick: this.open(election.consentId, 'dul_preview_results', null, true) }, [election.consentName]),
                                         ]),
-                                        div({ className: "col-2 cell-body text", "ng-class": "{empty : !election.groupName}", title: election.groupName }, [election.groupName]),
-                                        div({ className: "col-1 cell-body text", "ng-class": "{empty : !election.version}" }, [election.version]),
+                                        div({ className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : "" ), title: election.groupName }, [election.groupName]),
+                                        div({ className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "" ) }, [election.version]),
                                         div({ className: "col-1 cell-body text" }, [election.createDate]),
-                                        div({ className: "col-1 cell-body f-center" }, [
+                                        div({ className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
                                             EditDulModal({ linkType: "button-tag" }),
-
-                                            // button({ className: "cell-button hover-color", disabled: election.electionStatus !== 'un-reviewed' || !election.editable, onClick: this.editDul(election.consentId) }, ["Edit"]),
                                         ]),
                                         div({ className: "col-1 cell-body text f-center bold" }, [
                                             span({ isRendered: election.electionStatus === 'un-reviewed' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Un-reviewed"])]),
@@ -142,28 +144,32 @@ class AdminManageDul extends Component {
                                             span({ isRendered: election.electionStatus === 'Canceled' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Canceled"]),]),
                                             span({ isRendered: election.electionStatus === 'Closed' }, [a({ onClick: this.open(null, 'dul_results_record', election.electionId, false) }, ["Reviewed"]),]),
                                         ]),
-                                        div({ className: "col-1 cell-body f-center" }, [
-                                            button({ isRendered: election.electionStatus !== 'Open', disabled: !election.editable, className: "cell-button hover-color", onClick: this.openCreate(election) }, ["Create"]),
-                                            button({ isRendered: election.electionStatus === 'Open', className: "cell-button cancel-color", onClick: this.openCancel(election) }, ["Cancel"]),
+                                        div({ isRendered: election.electionStatus !== 'Open', className: "col-1 cell-body f-center", disabled: !election.editable }, [
+                                            CreateElectionModal({ color: "dul", electionStatus: election.electionStatus, electionArchived: election.archived }),
+                                        ]),
+                                        div({ isRendered: election.electionStatus === 'Open', className: "col-1 cell-body f-center" }, [
+                                            CancelElectionModal({ electionType: 'dul' }),
                                         ]),
                                         div({ className: "icon-actions" }, [
-                                            button({ disabled: election.electionStatus === 'un-reviewed' || election.archived, onClick: this.openArchive(election) }, [
-                                                span({ className: "glyphicon glyphicon-inbox caret-margin", "ng-class": "{activated : election.archived}", "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Archive election" }, []),
+                                            // "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Archive election"
+                                            div({ className: "display-inline-block", disabled: (election.electionStatus === 'un-reviewed' || election.archived === true) }, [
+                                                ArchiveElectionModal({ electionArchived: election.archived, electionStatus: election.electionStatus }),
                                             ]),
-                                            button({ disabled: election.electionStatus !== 'un-reviewed', onClick: this.openDelete(election.consentId) }, [
-                                                span({ className: "glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Delete record" }, []),
+                                            // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Delete record" 
+                                            div({ className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
+                                                DeleteElectionModal({ }),
                                             ]),
                                         ]),
                                     ]),
                                     hr({ className: "pvotes-separator" }),
-                                    div({
-                                        "dir-pagination-controls": "true"
-                                        , "max-size": "10"
-                                        , "direction-links": "true"
-                                        , "boundary-links": "true"
-                                        , className: "pvotes-pagination"
-                                    }, []),
-                                ]) 
+                                    // div({
+                                    //     "dir-pagination-controls": "true"
+                                    //     , "max-size": "10"
+                                    //     , "direction-links": "true"
+                                    //     , "boundary-links": "true"
+                                    //     , className: "pvotes-pagination"
+                                    // }, []),
+                                // ]) 
                             ])
                         )
                     })

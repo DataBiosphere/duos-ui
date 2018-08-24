@@ -105,12 +105,11 @@ class AdminManageUsers extends Component {
                                     div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                                         div({ className: "row no-margin" }, [
                                             a({ isRendered: user.researcher !== false && user.completed, "ui-sref": "researcher_review({dacUserId: '{{user.dacUserId}}'})", className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                                                // div({ className: "{'enabled': user.researcher && user.completed && user.status ::: 'pending' || user.status ::: null, 'editable': user.researcher && user.completed && user.status !:: 'pending', 'disabled': user.researcher :: false || !(user.completed)}" }, ["Review"]),
                                                 div({
-                                                    className:
-                                                        user.researcher && user.completed && user.status === 'pending' || user.status === null ? 'enabled'
-                                                            : user.researcher && user.completed && user.status !== 'pending' ? 'editable'
-                                                                : user.researcher === false || !user.completed ? 'disabled' : ''
+                                                    className: 
+                                                        ((user.researcher && user.completed && user.status === 'pending') || user.status === null) ? 'enabled'
+                                                        : (user.researcher && user.completed && user.status !== 'pending') ? 'editable'
+                                                        : (user.researcher === false || !user.completed) ? 'disabled' : ''
                                                 }, ["Review"]),
                                             ]),
                                             a({ isRendered: user.researcher === false || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [

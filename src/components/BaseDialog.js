@@ -1,11 +1,11 @@
 
 
 import { Component } from 'react';
-import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
+import { button, div, h, h2, span, hh, a } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import './BaseModal.css';
-import { PageSubHeading } from '../components/PageSubHeading';
-import { AdminConsoleBox } from '../components/AdminConsoleBox';
+import './BaseDialog.css';
+
+
 
 const customStyles = {
     overlay: {
@@ -23,7 +23,7 @@ const customStyles = {
         right: '0',
         bottom: '0',
         left: '0',
-        width: '750px',
+        width: '600px',
         margin: '12vh auto auto auto',
         border: '1px solid rgb(204, 204, 204)',
         background: 'rgb(255, 255, 255)',
@@ -34,7 +34,7 @@ const customStyles = {
     }
 };
 
-export const BaseModal = hh(class BaseModal extends Component {
+export const BaseDialog = hh(class BaseDialog extends Component {
 
     constructor() {
         super();
@@ -76,69 +76,56 @@ export const BaseModal = hh(class BaseModal extends Component {
         return (
             div({}, [
 
-                a({ 
+                a({
                     isRendered: this.props.linkType === "a-tag",
                     className: this.props.modalBtnStyle,
                     onClick: this.openModal
-                },[
-                    div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.modalBtnText]),
-                ]),
+                }, [
+                        div({ isRendered: this.props.modalBtnIcon !== undefined, className: "all-icons " + this.props.modalBtnIcon }),
+                        span({}, [this.props.modalBtnText]),
+                    ]),
 
                 button({
                     isRendered: this.props.linkType === "button-tag",
                     className: this.props.modalBtnStyle,
                     onClick: this.openModal
-                },[
-                    div({ isRendered: this.props.modalBtnIcon, className: "all-icons " + this.props.modalBtnIcon }),
-                    span({ },[this.props.modalBtnText]),
-                ]),
-
-                a({ 
-                    isRendered: this.props.linkType === "console-tag",
-                    modalBtnStyle: this.props.modalBtnStyle,
-                    onClick: this.openModal
-                },[
-                    AdminConsoleBox({
-                        linkType: this.props.linkType,  
-                        id: this.props.id,
-                        color: this.props.color,
-                        title: this.props.title,
-                        description: this.props.description,
-                        iconName: this.props.iconName,
-                        iconSize: this.props.iconSize
-                      },[
+                }, [
+                        div({ isRendered: this.props.modalBtnIcon !== undefined, className: "all-icons " + this.props.modalBtnIcon }),
+                        span({}, [this.props.modalBtnText]),
                     ]),
-                ]),
+
+                button({
+                    isRendered: this.props.linkType === "icon-tag",
+                    onClick: this.openModal
+                }, [
+                        span({ className: "glyphicon caret-margin " + this.props.modalBtnIcon }),
+                    ]),
 
                 h(Modal, {
                     isOpen: this.state.modalIsOpen,
                     onAfterOpen: this.afterOpenModal,
                     onRequestClose: this.closeModal,
                     style: customStyles,
-                    contentLabel: "Modal"
+                    contentLabel: "Dialog"
                 }, [
 
-                        div({ className: "modal-header" }, [
-                            button({ type: "button", className: "modal-close-btn close", onClick: this.closeModal }, [
+                        div({ className: "dialog-header" }, [
+                            button({ type: "button", className: "dialog-close-btn close", onClick: this.closeModal }, [
                                 span({ className: "glyphicon glyphicon-remove default-color" }),
                             ]),
-                            PageSubHeading({ imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
+                            h2({ id: this.props.id, className: "dialog-title " + this.props.color + "-color" }, [this.props.title]),
                         ]),
 
-                        div({ className: "modal-content" }, [
+                        div({ className: "dialog-content" }, [
                             this.props.children
                         ]),
 
-                        div({ className: "modal-footer" }, [                        
-                            // disabled: "consentForm.$invalid || disableButton",
+                        div({ className: "dialog-footer" }, [
+                            button({ id: "btn_cancel", className: "col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background", onClick: this.closeModal }, ["No"]),
                             button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background", onClick: this.props.action.handler }, [this.props.action.label]),
-                            button({ id: "btn_cancel", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.closeModal }, ["Cancel"]),
-
                         ]),
 
                     ])
-                
             ])
         );
     }
