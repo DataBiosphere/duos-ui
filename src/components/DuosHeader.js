@@ -3,6 +3,7 @@ import { nav, button, ul, li, img, small, hr, div, span, a } from 'react-hypersc
 import { GoogleLoginButton } from '../components/GoogleLogin';
 import { GoogleLogoutButton } from '../components/GoogleLogout';
 import { HelpModal } from '../components/modals/HelpModal';
+import { DuosModal } from '../components/DuosModal';
 
 class DuosHeader extends Component {
 

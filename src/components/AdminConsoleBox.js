@@ -1,30 +1,11 @@
 import { Component } from 'react';
 import { div, a, hh, h2, span } from 'react-hyperscript-helpers';
-import styles from './AdminConsoleBox.css';
+import './AdminConsoleBox.css';
 
 export const AdminConsoleBox = hh(class AdminConsoleBox extends Component {
 
-    componentWillMount() {
-        console.log('componentWillMount', this.state, this.props);
-    }
-
-    componentWillUpdate() {
-        console.log('componentWillUpdate', this.state, this.props);
-    }
-
-    componentDidMount() {
-        console.log('componentDidMount', this.state, this.props);
-    }
-
-    componentDidUpdate() {
-        console.log('componentDidUpdate', this.state, this.props);
-    }
-
-    
     render() {
 
-        console.log('-----------AdminConsoleBox-------------', this.state, this.props);
-        
         let tag = a({}, []);
 
         const badge = this.props.unreviewedCases && this.props.unreviewedCases > 0 ?
