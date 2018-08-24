@@ -13,7 +13,14 @@ class AdminManageUsers extends Component {
         this.getUsers();
         this.handleOpenModal = this.handleOpenModal.bind(this);
         this.handleCloseModal = this.handleCloseModal.bind(this);
+
+        this.openModal = this.openModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
+        this.okModal = this.okModal.bind(this);
+        this.afterModalOpen = this.afterModalOpen.bind(this);
+
         this.getUsers = this.getUsers.bind(this);
+
     }
 
     async getUsers() {
@@ -44,6 +51,34 @@ class AdminManageUsers extends Component {
         this.setState({ showModal: false });
     }
 
+    openModal() {
+      this.setState(prev => {
+        prev.showModal = true;
+        return prev;
+      });
+    }
+  
+    closeModal() {
+      // this state change close modal
+      this.setState(prev => {
+        prev.showModal = false;
+        return prev;
+      });
+    }
+  
+    okModal() {
+      // this state change close modal
+      this.setState(prev => {
+        prev.showModal = false;
+        return prev;
+      });
+    }
+  
+    afterModalOpen() {
+      // not sure when to use this
+      console.log('afterModalOpen', this.state, this.props);
+    }
+
 
     render() {
 
@@ -61,14 +96,31 @@ class AdminManageUsers extends Component {
                             ]),
                         ]),
 
-                        AddUserModal({
-                            linkType: "a-tag",
-                            modalBtnStyle: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
-                            modalBtnIcon: "add-user_white",
-                            modalBtnText: "Add User",
-                            id: 'title_addUser',
-                            description: 'Catalog a new User in the system',
+                        // AddUserModal({
+                        //     linkType: "a-tag",
+                        //     modalBtnStyle: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+                        //     modalBtnIcon: "add-user_white",
+                        //     modalBtnText: "Add User",
+                        //     id: 'title_addUser',
+                        //     description: 'Catalog a new User in the system',
+                        // }),
+
+                        a({
+                          id: 'title_addUser',
+                          className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+                          onClick: this.openModal
+                        }, [
+                            div({ className: "all-icons add-user_white" }),
+                            span({}, ["Add User"]),
+                          ]),
+            
+                          AddUserModal({
+                          showModal: this.state.showModal,
+                          onOKRequest: this.okModal,
+                          onCloseRequest: this.closeModal,
+                          onAfterOpen: this.afterModalOpen
                         }),
+
                     ])
                 ]),
                 div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
