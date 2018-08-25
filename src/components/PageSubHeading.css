@@ -11,8 +11,13 @@
     height: 40px;
   }
 
-  .page-sub-heading-text {
+  .page-sub-heading-text,
+  .page-sub-heading-text.default {
     margin-left: 45px;
+  }
+
+  .page-sub-heading-text.large {
+    margin-left: 55px;
   }
   
   .page-sub-heading-title {

@@ -113,7 +113,14 @@ class AdminManageDul extends Component {
                             ]),
                         ]),
 
-                        AddDulModal({linkType: "a-tag"}),
+                        AddDulModal({
+                            linkType: "a-tag",
+                            modalBtnStyle: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
+                            modalBtnIcon: "add-dul_white",
+                            modalBtnText: "Add Data Use Limitations",
+                            id: 'title_addDUL',
+                            description: 'Catalog a Data Use Limitations Record',
+                        }),
                     ]),
                 ]),
 
