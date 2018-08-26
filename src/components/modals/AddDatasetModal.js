@@ -58,7 +58,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     }
 
     // and call parent's OK Handler
-    this.props.onOKRequest('AddDataset');
+    this.props.onOKRequest('addDataset');
   }
 
   closeHandler() {
@@ -69,14 +69,14 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     // DO SOMETHING HERE ...
 
     // and call parent's close handler
-    this.props.onCloseRequest('AddDataset');
+    this.props.onCloseRequest('addDataset');
   }
 
   afterOpenHandler() {
     // DO SOMETHING HERE ...
 
     // and call parent's after open handler
-    this.props.onAfterOpen('AddDataset');
+    this.props.onAfterOpen('addDataset');
 
   }
 

@@ -13,7 +13,7 @@ const customStyles = {
     left: '0',
     right: '0',
     bottom: '0',
-    backgroundColor: 'rgba(255, 255, 255, 0.75)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
 
   content: {

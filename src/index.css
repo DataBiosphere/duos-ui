@@ -1080,7 +1080,10 @@ small {
   background: #D13B07 !important;
 }
 
-.cell-button[disabled] {
+.cell-button[disabled],
+[disabled] .cell-button,
+[disabled] button,
+[disabled] .glyphicon {
   color: #cccccc !important;
   cursor: default !important;
   pointer-events: none;

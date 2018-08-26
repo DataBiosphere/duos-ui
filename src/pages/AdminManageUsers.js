@@ -152,7 +152,24 @@ class AdminManageUsers extends Component {
                     )
                   ]),
                   div({ className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    EditUserModal({ linkType: "button-tag" }),
+                    // EditUserModal({ linkType: "button-tag" }),
+
+                    a({
+                      id: 'title_editUser',
+                      className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+                      onClick: this.openModal
+                    }, [
+                        div({ className: "all-icons edit-user_white" }),
+                        span({}, ["Edit"]),
+                      ]),
+
+                    EditUserModal({
+                      showModal: this.state.showModal,
+                      onOKRequest: this.okModal,
+                      onCloseRequest: this.closeModal,
+                      onAfterOpen: this.afterModalOpen
+                    }),
+
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     div({ className: "row no-margin" }, [

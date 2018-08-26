@@ -54,7 +54,7 @@ class AdminConsole extends Component {
 
   addDataset() {
     this.setState(prev => {
-      prev.showAddDataseModal = true;
+      prev.showAddDatasetModal = true;
       return prev;
     });
   }
@@ -279,13 +279,13 @@ class AdminConsole extends Component {
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
-                  id: 'btn_manageDAR',
+                  id: 'btn_addDataset',
                   clickHandler: this.addDataset,
                   color: 'access',
-                  title: 'Manage Data Access Request',
-                  description: 'Select and manage Data Access Request for review',
-                  iconName: 'manage-access',
-                  iconSize: 'default',
+                  title: 'Add Datasets',
+                  description: 'Store Datasets associated with Data Use Limitations',
+                  iconName: 'add-dataset',
+                  iconSize: 'large',
                   unreviewedCases: 0
                 }),
                 AddDatasetModal({
