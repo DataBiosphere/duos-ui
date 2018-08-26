@@ -1,7 +1,7 @@
 
 
 import { Component } from 'react';
-import { button, div, h, span, hh, a } from 'react-hyperscript-helpers';
+import { button, div, h, span, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';

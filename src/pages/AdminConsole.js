@@ -15,32 +15,27 @@ class AdminConsole extends Component {
     this.state = {
       showModal: false,
       showAddDulModal: false,
-      showAddUserModal: false
+      showAddUserModal: false,
+      showAddDatasetModal: false,
+      showAddOntologiesModal: false,
+      showEditDulModal: false,
+      showEditUserModal: false,
+      showElectionTimeoutModal: false
     };
 
+    this.okModal = this.okModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
-
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.afterModalOpen = this.afterModalOpen.bind(this);
 
     this.addDul = this.addDul.bind(this);
-    this.closeAddDulModal = this.closeAddDulModal.bind(this);
-    this.okAddDulModal = this.okAddDulModal.bind(this);
-    this.afterAddDulModalOpen = this.afterAddDulModalOpen.bind(this);
-
     this.addUser = this.addUser.bind(this);
-    this.closeAddUserModal = this.closeAddUserModal.bind(this);
-    this.okAddUserModal = this.okAddUserModal.bind(this);
-    this.afterAddUserModalOpen = this.afterAddUserModalOpen.bind(this);
+    this.addDataset = this.addDataset.bind(this);
+    this.addOntologies = this.addOntologies.bind(this);
 
-  }
+    this.editDul = this.editDul.bind(this);
+    this.editUser = this.editUser.bind(this);
+    this.electionTimeout = this.electionTimeout.bind(this);
 
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
   }
 
   addDul() {
@@ -57,9 +52,44 @@ class AdminConsole extends Component {
     });
   }
 
-  closeModal(name) {
-    console.log('closeModel ------------------> ' + name);
-    // this state change close modal
+  addDataset() {
+    this.setState(prev => {
+      prev.showAddDataseModal = true;
+      return prev;
+    });
+  }
+
+  addOntologies() {
+    this.setState(prev => {
+      prev.showAddOntologiesModal = true;
+      return prev;
+    });
+  }
+
+  editDul() {
+    this.setState(prev => {
+      prev.showEditDulModal = true;
+      return prev;
+    });
+  }
+
+  editUser() {
+    this.setState(prev => {
+      prev.showEditUserModal = true;
+      return prev;
+    });
+  }
+
+  electionTimeout() {
+    this.setState(prev => {
+      prev.showElectionTimeoutModal = true;
+      return prev;
+    });
+  }
+
+  okModal(name) {
+    console.log('okModal ------------------> ' + name);
+
     switch (name) {
       case 'addDul':
         this.setState(prev => { prev.showAddDulModal = false; return prev; });
@@ -67,51 +97,84 @@ class AdminConsole extends Component {
       case 'addUser':
         this.setState(prev => { prev.showAddUserModal = false; return prev; });
         break;
+      case 'addDataset':
+        this.setState(prev => { prev.showAddDatasetModal = false; return prev; });
+        break;
+      case 'addOntologies':
+        this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
+        break;
+      case 'editDul':
+        this.setState(prev => { prev.showEditDulModal = false; return prev; });
+        break;
+      case 'editUser':
+        this.setState(prev => { prev.showEditUserModal = false; return prev; });
+        break;
+      case 'electionTimeout':
+        this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
+        break;
       default:
         break;
     }
   }
 
-  closeAddDulModal() {
-    // this state change close AddDul modal
-    this.setState(prev => {
-      prev.showAddDulModal = false;
-      return prev;
-    });
+  closeModal(name) {
+    console.log('closeModel ------------------> ' + name);
+
+    switch (name) {
+      case 'addDul':
+        this.setState(prev => { prev.showAddDulModal = false; return prev; });
+        break;
+      case 'addUser':
+        this.setState(prev => { prev.showAddUserModal = false; return prev; });
+        break;
+      case 'addDataset':
+        this.setState(prev => { prev.showAddDatasetModal = false; return prev; });
+        break;
+      case 'addOntologies':
+        this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
+        break;
+      case 'editDul':
+        this.setState(prev => { prev.showEditDulModal = false; return prev; });
+        break;
+      case 'editUser':
+        this.setState(prev => { prev.showEditUserModal = false; return prev; });
+        break;
+      case 'electionTimeout':
+        this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
+        break;
+      default:
+        break;
+    }
   }
 
-  okAddDulModal() {
-    // this state change close AddDul modal
-    this.setState(prev => {
-      prev.showAddDulModal = false;
-      return prev;
-    });
-  }
+  afterModalOpen(name) {
+    console.log('afterModalOpen ------------------> ' + name);
 
-  afterAddDulModalOpen() {
-    // not sure when to use this
-    console.log('afterAddDulModalOpen', this.state, this.props);
-  }
-
-  closeAddUserModal() {
-    // this state change close AddDul modal
-    this.setState(prev => {
-      prev.showAddUserModal = false;
-      return prev;
-    });
-  }
-
-  okAddUserModal() {
-    // this state change close AddDul modal
-    this.setState(prev => {
-      prev.showAddUserModal = false;
-      return prev;
-    });
-  }
-
-  afterAddUserModalOpen() {
-    // not sure when to use this
-    console.log('afterAddUserModalOpen', this.state, this.props);
+    switch (name) {
+      case 'addDul':
+        this.setState(prev => { prev.showAddDulModal = false; return prev; });
+        break;
+      case 'addUser':
+        this.setState(prev => { prev.showAddUserModal = false; return prev; });
+        break;
+      case 'addDataset':
+        this.setState(prev => { prev.showAddDatasetModal = false; return prev; });
+        break;
+      case 'addOntologies':
+        this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
+        break;
+      case 'editDul':
+        this.setState(prev => { prev.showEditDulModal = false; return prev; });
+        break;
+      case 'editUser':
+        this.setState(prev => { prev.showEditUserModal = false; return prev; });
+        break;
+      case 'electionTimeout':
+        this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
+        break;
+      default:
+        break;
+    }
   }
 
   render() {
@@ -159,9 +222,9 @@ class AdminConsole extends Component {
                 }),
                 AddDulModal({
                   showModal: this.state.showAddDulModal,
-                  onOKRequest: this.okAddDulModal,
+                  onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterAddDulModalOpen
+                  onAfterOpen: this.afterModalOpen
                 }),
 
               ]),
@@ -193,9 +256,9 @@ class AdminConsole extends Component {
                 }),
                 AddUserModal({
                   showModal: this.state.showAddUserModal,
-                  onOKRequest: this.okAddUserModal,
+                  onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterAddUserModalOpen
+                  onAfterOpen: this.afterModalOpen
                 }),
               ]),
             ]),
@@ -215,29 +278,43 @@ class AdminConsole extends Component {
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                // AddDatasetModal({
-                //   linkType: "console-tag",
-                //   id: 'btn_addDataset',
-                //   modalBtnStyle: "admin-box-wrapper",
-                //   iconName: 'add-dataset',
-                //   iconSize: 'large',
-                //   title: "Add Datasets",
-                //   description: 'Store Datasets associated with Data Use Limitations',
-                // }),
+                AdminConsoleBox({
+                  id: 'btn_manageDAR',
+                  clickHandler: this.addDataset,
+                  color: 'access',
+                  title: 'Manage Data Access Request',
+                  description: 'Select and manage Data Access Request for review',
+                  iconName: 'manage-access',
+                  iconSize: 'default',
+                  unreviewedCases: 0
+                }),
+                AddDatasetModal({
+                  showModal: this.state.showAddDatasetModal,
+                  onOKRequest: this.okModal,
+                  onCloseRequest: this.closeModal,
+                  onAfterOpen: this.afterModalOpen
+                }),
               ]),
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                // ElectionTimeoutModal({
-                //   linkType: "console-tag",
-                //   id: 'btn_setDataOwnerElectionTimeout',
-                //   modalBtnStyle: "admin-box-wrapper",
-                //   title: 'Set Data Owner election Timeout',
-                //   description: 'Manage Data Owner election expiration time',
-                //   iconName: 'manage-timeout',
-                //   iconSize: 'default'
-                // }),
+                AdminConsoleBox({
+                  id: 'btn_invalidRequest',
+                  clickHandler: this.electionTimeout,
+                  color: 'common',
+                  title: 'Set Data Owner election Timeout',
+                  description: 'Manage Data Owner election expiration time',
+                  iconName: 'manage-timeout',
+                  iconSize: 'large',
+                  unreviewedCases: 0
+                }),
+                ElectionTimeoutModal({
+                  showModal: this.state.showElectionTimeoutModal,
+                  onOKRequest: this.okModal,
+                  onCloseRequest: this.closeModal,
+                  onAfterOpen: this.afterModalOpen
+                }),
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
@@ -269,15 +346,22 @@ class AdminConsole extends Component {
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                // AddOntologiesModal({
-                //   linkType: "console-tag",
-                //   id: 'btn_addOntologies',
-                //   modalBtnStyle: "admin-box-wrapper",
-                //   title: 'Add Ontologies',
-                //   description: 'Store Ontologies for index',
-                //   iconName: 'add-ontologies',
-                //   iconSize: 'large'
-                // }),
+                AdminConsoleBox({
+                  id: 'btn_manageOntologies',
+                  clickHandler: this.addOntologies,
+                  color: 'common',
+                  title: 'Add Ontologies',
+                  description: 'Select and manage Ontologies for index',
+                  iconName: 'add-ontologies',
+                  iconSize: 'large',
+                  unreviewedCases: 0
+                }),
+                AddOntologiesModal({
+                  showModal: this.state.showAddOntologiesModal,
+                  onOKRequest: this.okModal,
+                  onCloseRequest: this.closeModal,
+                  onAfterOpen: this.afterModalOpen
+                }),
               ]),
             ]),
           ]),
@@ -288,3 +372,5 @@ class AdminConsole extends Component {
 }
 
 export default AdminConsole;
+
+

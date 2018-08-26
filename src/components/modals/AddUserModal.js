@@ -95,29 +95,29 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
                   div({ className: "checkbox" }, [
-                    input({ type: "checkbox", id: "chk_member", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.MEMBER", "add-role": true, disabled: "checkModel.CHAIRPERSON || checkModel.ALUMNI || checkModel.RESEARCHER" }),
+                    input({ type: "checkbox", id: "chk_member", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.MEMBER", "add-role": "true", disabled: "checkModel.CHAIRPERSON || checkModel.ALUMNI || checkModel.RESEARCHER" }),
                     label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"]),
                   ]),
                   div({ className: "checkbox" }, [
-                    input({ type: "checkbox", id: "chk_chairperson", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.CHAIRPERSON", "add-role": true, disabled: "checkModel.MEMBER || checkModel.ALUMNI || checkModel.RESEARCHER" }),
+                    input({ type: "checkbox", id: "chk_chairperson", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.CHAIRPERSON", "add-role": "true", disabled: "checkModel.MEMBER || checkModel.ALUMNI || checkModel.RESEARCHER" }),
                     label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"]),
                   ]),
                   div({ className: "checkbox" }, [
-                    input({ type: "checkbox", id: "chk_alumni", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.ALUMNI", "add-role": true, disabled: "checkModel.MEMBER || checkModel.CHAIRPERSON" }),
+                    input({ type: "checkbox", id: "chk_alumni", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.ALUMNI", "add-role": "true", disabled: "checkModel.MEMBER || checkModel.CHAIRPERSON" }),
                     label({ id: "lbl_alumni", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_alumni" }, ["Alumni"]),
                   ]),
                 ]),
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
                   div({ className: "checkbox" }, [
-                    input({ type: "checkbox", id: "chk_admin", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.ADMIN", "add-role": true }),
+                    input({ type: "checkbox", id: "chk_admin", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.ADMIN", "add-role": "true" }),
                     label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"]),
                   ]),
                   div({ className: "checkbox" }, [
-                    input({ type: "checkbox", id: "chk_researcher", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.RESEARCHER", "add-role": true, disabled: "checkModel.MEMBER || checkModel.ALUMNI || checkModel.RESEARCHER" }),
+                    input({ type: "checkbox", id: "chk_researcher", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.RESEARCHER", "add-role": "true", disabled: "checkModel.MEMBER || checkModel.ALUMNI || checkModel.RESEARCHER" }),
                     label({ id: "lbl_researcher", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_researcher" }, ["Researcher"]),
                   ]),
                   div({ className: "checkbox" }, [
-                    input({ type: "checkbox", id: "chk_dataOwner", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.DATAOWNER", "add-role": true }),
+                    input({ type: "checkbox", id: "chk_dataOwner", className: "checkbox-inline user-checkbox", "ng-model": "checkModel.DATAOWNER", "add-role": "true" }),
                     label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"]),
                   ]),
                 ]),
