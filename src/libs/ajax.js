@@ -107,7 +107,6 @@ export const Votes = {
     return res.json();
   },
 
-  // @Path("{api : (api/)?}dataRequest/{requestId}/vote")
   findDar: async(requestId, voteId) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -122,6 +121,12 @@ export const Votes = {
 
   finalAccessDarVote: async(requestId, voteId, vote) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}/final/`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
+    return res.json();
+  },
+
+  createDarVote: async(requestId, voteId, vote) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
     return res.json();
   },
@@ -148,6 +153,25 @@ export const Votes = {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
+  },
+  // @Path("{api : (api/)?}dataRequest/{requestId}/vote")
+  deleteVote: async (requestId, id) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${id}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
+    return res.json();
+  },
+
+  deleteVotes: async (requestId) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
+    return res.json();
+  },
+};
+
+// TODO keep going from this
+export const Cases = {
+  darPendingCases: async(dacUserId) => {
+    const url = ``
   },
 };
 
