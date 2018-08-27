@@ -100,6 +100,7 @@ class DuosHeader extends Component {
                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                 li({}, [
 
+<<<<<<< HEAD
     render() {
 
         // let roles = ['chairperson', 'member', 'admin', 'researcher', 'dataOwner', 'alumni'];
@@ -153,6 +154,14 @@ class DuosHeader extends Component {
                             img({ src: "/images/duos_logo.svg", alt: "DUOS Logo" }),
                         ]),
                     ]),
+=======
+                  a({onClick: this.signIn}, [this.state.googleButton])
+                  // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
+                  // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
+                ]),
+                li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
+              ]),
+>>>>>>> more-modal-fixes
 
                     div({ className: "collapse navbar-collapse no-padding", collapse: "navbarCollapsed" }, [
 

@@ -214,7 +214,7 @@ class AdminConsole extends Component {
                 AdminConsoleBox({
                   id: 'btn_addDUL',
                   clickHandler: this.addDul,
-                  color: 'dul-color',
+                  color: 'dul',
                   title: 'Add Data Use Limitations',
                   description: 'Catalog a Data Use Limitation Record in the system',
                   iconName: 'add-dul',
@@ -248,7 +248,7 @@ class AdminConsole extends Component {
                 AdminConsoleBox({
                   id: 'btn_addUser',
                   clickHandler: this.addUser,
-                  color: 'dul-color',
+                  color: 'common',
                   title: 'Add User',
                   description: 'Catalog a new User in the system',
                   iconName: 'add-user',
@@ -281,7 +281,7 @@ class AdminConsole extends Component {
                 AdminConsoleBox({
                   id: 'btn_addDataset',
                   clickHandler: this.addDataset,
-                  color: 'access',
+                  color: 'dataset',
                   title: 'Add Datasets',
                   description: 'Store Datasets associated with Data Use Limitations',
                   iconName: 'add-dataset',

@@ -1,6 +1,15 @@
-import _ from 'lodash/fp';
-import { Storage } from './storage';
+import _ from 'lodash/fp'
+import { Storage } from './storage'
 import { Config } from './config';
+
+const authOpts = (token = Token.getToken()) => ({
+  headers: {
+    Authorization: `Bearer ${token}`,
+    Accept: 'application/json'
+  }
+});
+
+const jsonBody = body => ({body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}});
 
 // Storage Variables
 // const CurrentUser = "CurrentUser"; // System user
@@ -457,6 +466,36 @@ export const Consent = {
     return res.json();
   }
 };
+
+// export const Storage = {
+//   clearStorage: () => {
+//     sessionStorage.clear();
+//   },
+//
+//   setCurrentUser: data => {
+//     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
+//   },
+//
+//   getCurrentUser: () => {
+//     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
+//   },
+//
+//   setGoogleData: data => {
+//     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
+//   },
+//
+//   getGoogleData: () => {
+//     return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
+//   },
+//
+//   userIsLogged: () => {
+//     return sessionStorage.getItem(UserIsLogged) === 'true';
+//   },
+//
+//   setUserIsLogged: value => {
+//     sessionStorage.setItem(UserIsLogged, value);
+//   }
+// };
 
 // export const Storage = {
 //   clearStorage: () => {
