@@ -81,6 +81,7 @@ export const User = {
     return res.json();
   }
 };
+
 export const Votes = {
   find: async(consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
@@ -106,22 +107,46 @@ export const Votes = {
     return res.json();
   },
 
-
-  findDar: async(consentId, voteId) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${consentId}/vote/${voteId}`;
+  // @Path("{api : (api/)?}dataRequest/{requestId}/vote")
+  findDar: async(requestId, voteId) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  postDarVote: async(requestId, voteId) => {
-    const url = `${await Config.getApiUrl()}/consent/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'POST'}]));
+  postDarVote: async(requestId, voteId, vote) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
     return res.json();
   },
 
-  updateDarVote: async(requestId, voteId) => {
+  finalAccessDarVote: async(requestId, voteId, vote) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}/final/`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
+    return res.json();
+  },
+
+  updateDarVote: async(requestId, voteId, vote) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'PUT'}]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'PUT'}]));
+    return res.json();
+  },
+
+  finalDarVote: async requestId => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/final`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  findDarFinal: async(requestId) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/final`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  allDarVotes: async(requestId) => {
+    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote`;
+    const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 };
@@ -221,9 +246,15 @@ export const Researcher = {
     return res.json();
   },
 
-  update: async (userId, validate) => {
+  update: async (userId, validate, researcherProperties) => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
-    const res = await fetchOk(url, Config.authOpts());
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'PUT' }]));
+    return res.json();
+  },
+
+  register: async (userId, validate, researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
     return res.json();
   },
 };
