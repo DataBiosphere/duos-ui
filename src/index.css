@@ -705,29 +705,14 @@ small {
 }
 
 .stats-box-title {
-  padding: 15px 10px 10px 10px;
-}
-
-.stats-box-title .cm-inside-box-title {
-  font-size: 20px !important;
-}
-
-.cm-inside-box-title {
-  font-size: 17px;
+  margin: 25px 0 5px 0;
+  padding: 0 5px;
+  font-size: 22px;
   font-style: italic;
-  padding: 5px 0 5px 0;
-  display: inline;
+  display: block;
   color: #777777;
 }
 
-.cm-inside-box-title span {
-  font-weight: 700 !important;
-  font-style: italic;
-}
-
-.cm-inside-box-title-margin {
-  margin-top: 45px;
-}
 
 .cm-box-title {
   font-weight: normal !important;
