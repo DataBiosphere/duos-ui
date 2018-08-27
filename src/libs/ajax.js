@@ -21,6 +21,7 @@ export const User = {
 
     getByEmail: async email => {
         console.log("token? ", Token.getToken());
+
         const url = `${await Config.getApiUrl()}/dacuser/${email}`;
         const res = await fetchOk(url, authOpts());
         return res.json();
