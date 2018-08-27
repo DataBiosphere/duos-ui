@@ -168,11 +168,61 @@ export const Votes = {
   },
 };
 
-// TODO keep going from this
-export const Cases = {
+export const DarCases = {
   darPendingCases: async(dacUserId) => {
-    const url = ``
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/${dacUserId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
   },
+
+  darPendingCasesDataOwner: async(dataOwnerId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  darSummaryCases: async type => {
+    const url = `${await Config.getApiUrl()}/datarequest/cases/summary/${type}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  darMatchSummary: async () => {
+    const url = `${await Config.getApiUrl()}/datarequest/cases/matchsummary/`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  describeClosedElections: async () => {
+    const url = `${await Config.getApiUrl()}/datarequest/cases/closed/`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+};
+
+export const ConsentCases = {
+  pending: async dacUserId => {
+    const url = `${await Config.getApiUrl()}/consent/cases/pending/${dacUserId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  summary: async() => {
+    const url = `${await Config.getApiUrl()}/consent/cases/summary`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  summaryDetailFile: async(fileType) => {
+    const url = `${await Config.getApiUrl()}/consent/cases/summary/file?fileType=${fileType}`;
+    return getFile(url);
+  },
+
+  describeClosedElections: async dacUserId => {
+    const url = `${await Config.getApiUrl()}/consent/cases/closed`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  }
 };
 
 export const Files = {
