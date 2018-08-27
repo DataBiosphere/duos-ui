@@ -7,36 +7,36 @@ import Routes from "./Routes"
 
 class App extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            isLogged: false
-        };
-        this.loginState = this.loginState.bind(this);
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      isLogged: false
+    };
+    this.loginState = this.loginState.bind(this);
+  }
 
-    componentWillMount() {
-        Modal.setAppElement(document.getElementById('modal-root'));
-    }
+  componentWillMount() {
+    Modal.setAppElement(document.getElementById('modal-root'));
+  }
 
-    loginState(isLogged) {
-        this.setState({ isLogged: isLogged }, function () {
-            if (isLogged) {
-                sessionStorage.setItem('isLogged', isLogged);
-            } else {
-                sessionStorage.clear();
-            }
-        });
-    }
+  loginState(isLogged) {
+    this.setState({ isLogged: isLogged }, function () {
+      if (isLogged) {
+        sessionStorage.setItem('isLogged', isLogged);
+      } else {
+        sessionStorage.clear();
+      }
+    });
+  }
 
-    render() {
-        return (
-            div({}, [
-                h(DuosHeader, { isLogged: this.state.isLogged, loginState: this.loginState }),
-                h(Routes, { isLogged: sessionStorage.getItem('isLogged') === 'true', loginState: this.loginState })
-            ])
-        );
-    }
+  render() {
+    return (
+      div({}, [
+        h(DuosHeader, { isLogged: this.state.isLogged, loginState: this.loginState }),
+        h(Routes, { isLogged: sessionStorage.getItem('isLogged') === 'true', loginState: this.loginState })
+      ])
+    );
+  }
 
 }
 
