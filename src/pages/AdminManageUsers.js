@@ -52,7 +52,7 @@ class AdminManageUsers extends Component {
     console.log('editUser: ', user);
     this.setState(prev => {
       prev.showEditUserModal = true;
-      // prev.editableUser = user;
+      prev.user = user;
       return prev;
     });
   }
@@ -141,6 +141,7 @@ class AdminManageUsers extends Component {
               onOKRequest: this.okModal,
               onCloseRequest: this.closeModal,
               onAfterOpen: this.afterModalOpen,
+              user: this.state.user
             }),
 
           ])
