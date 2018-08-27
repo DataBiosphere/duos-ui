@@ -36,7 +36,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handleChange(event) {
-    let field = {};
+    // let field = {};
     let fieldName = event.target.name;
     let fieldValue = event.target.value;
     console.log('handleChange: ', fieldName, fieldValue);
@@ -63,7 +63,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handlePIChange(event) {
-    let field = {};
+    // let field = {};
     console.log(event.target.id, event.target.name);
     if (event.target.id === 'isThePI') {
       this.setState({'isThePI': "true"}, () => {
@@ -77,7 +77,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handlePI2Change(event) {
-    let field = {};
+    // let field = {};
     console.log(event.target.id, event.target.name);
     if (event.target.id === 'doHavePI') {
       this.setState({'havePI': "true"}, () => {
@@ -133,7 +133,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: "lbl_profileName", className: "control-label"
                   }, ["Full Name*"]),
                   input({
-                    id: "profileName",
                     id: "profileName",
                     type: "text",
                     onChange: this.handleChange,
@@ -473,7 +472,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: ((this.state.piEmail === undefined) || (this.state.piEmail.indexOf('@') === -1) && (showValidationMessages))
+                    isRendered: ((this.state.piEmail === undefined || this.state.piEmail.indexOf('@') === -1) && showValidationMessages)
                     // (researcherForm.profilePIEmail.$invalid && showValidationMessages)
                   }, ["Email Address is empty or has invalid format"]),
                 ]),
