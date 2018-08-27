@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, hh, h2, img, span, a, h3 } from 'react-hyperscript-helpers';
+import { div, hr, hh, span, a, h3 } from 'react-hyperscript-helpers';
 import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
@@ -84,12 +84,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             PageSubHeading({ imgSrc: "../images/icon_dul.png", color: "dul", title: "Data Use Limitations Statistics", description: "Summary of votes on whether the consent limitations were accurately converted into a structured format" }),
           ]),
 
-          a({ className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button dul-background",
+          a({
+            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button dul-background",
             onClick: () => this.getFile("TranslateDUL"),
-            isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)" }, [
-            span({}, ["Download stats"]),
-            span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
-          ]),
+            isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
+          }, [
+              span({}, ["Download stats"]),
+              span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
+            ]),
         ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
@@ -103,12 +105,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             PageSubHeading({ imgSrc: "../images/icon_access.png", color: "access", title: "Data Access Statistics", description: "Summary of votes on whether the researcher should be allowed to access a research study" }),
           ]),
 
-          a({ className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button access-background",
+          a({
+            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button access-background",
             onClick: () => this.getFile("DataAccess"),
-            isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)" }, [
-            span({}, ["Download stats"]),
-            span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
-          ]),
+            isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
+          }, [
+              span({}, ["Download stats"]),
+              span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
+            ]),
         ]),
 
         h3({ className: "stats-box-title no-margin" }, [
@@ -116,18 +120,21 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
-          StatsBox({ subtitle: "All Cases",
+          StatsBox({
+            subtitle: "All Cases",
             data: this.chartData.accessTotal,
             options: 'accessTotal', className: "result_chart",
             clickHandler: () => this.getDarReport('reviewed', 'ReviewedDataAccessRequests.tsv'),
-            buttonLabel: 'Download all cases' }),
+            buttonLabel: 'Download all cases'
+          }),
           StatsBox({
             subtitle: "Reviewed cases results",
             data: this.chartData.accessReviewed,
             options: 'accessReviewed',
             className: "result_chart",
             clickHandler: () => this.getDarReport('approved', 'ApprovedDataAccessRequests.tsv'),
-            buttonLabel: 'Download approved cases' })
+            buttonLabel: 'Download approved cases'
+          })
         ]),
 
         hr({ className: "box-separator" }),
@@ -144,7 +151,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         hr({ className: "box-separator" }),
 
         h3({ className: "stats-box-title no-margin" }, [
-          div({ className: "cm-inside-box-ttle access-color" }, ["Evaluation of automated matching in comparison with the Data Access Committee decision"]),
+          div({ className: "cm-inside-box-title access-color" }, ["Evaluation of automated matching in comparison with the Data Access Committee decision"]),
         ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
