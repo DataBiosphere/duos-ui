@@ -135,7 +135,7 @@ class AdminManageDul extends Component {
               ]),
             ]),
 
-            // this is the button-alike a to open the modal 
+            // this is the button-alike a to open the modal
             a({
               id: 'title_addDUL',
               className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
@@ -214,7 +214,7 @@ class AdminManageDul extends Component {
                     div({ className: "display-inline-block", disabled: (election.electionStatus === 'un-reviewed' || election.archived === true) }, [
                       ArchiveElectionModal({ electionArchived: election.archived, electionStatus: election.electionStatus }),
                     ]),
-                    // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Delete record" 
+                    // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Delete record"
                     div({ className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
                       DeleteElectionModal({ electionType: 'dul' }),
                     ]),
@@ -228,7 +228,7 @@ class AdminManageDul extends Component {
                 //     , "boundary-links": "true"
                 //     , className: "pvotes-pagination"
                 // }, []),
-                // ]) 
+                // ])
               ])
             )
           })
