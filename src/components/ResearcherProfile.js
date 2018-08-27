@@ -36,7 +36,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handleChange(event) {
+<<<<<<< HEAD
     let field = {};
+=======
+    // let field = {};
+>>>>>>> more-modal-fixes
     let fieldName = event.target.name;
     let fieldValue = event.target.value;
     console.log('handleChange: ', fieldName, fieldValue);
@@ -134,7 +138,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Full Name*"]),
                   input({
                     id: "profileName",
+<<<<<<< HEAD
                     id: "profileName",
+=======
+>>>>>>> more-modal-fixes
                     type: "text",
                     onChange: this.handleChange,
                     className: "form-control ",
@@ -473,7 +480,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
+<<<<<<< HEAD
                     isRendered: ((this.state.piEmail === undefined) || (this.state.piEmail.indexOf('@') === -1) && (showValidationMessages))
+=======
+                    isRendered: ((this.state.piEmail === undefined || this.state.piEmail.indexOf('@') === -1) && showValidationMessages)
+>>>>>>> more-modal-fixes
                     // (researcherForm.profilePIEmail.$invalid && showValidationMessages)
                   }, ["Email Address is empty or has invalid format"]),
                 ]),

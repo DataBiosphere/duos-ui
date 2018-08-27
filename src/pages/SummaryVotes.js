@@ -68,8 +68,8 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
     this.setState({ showModal: false });
   }
 
-  render() {
-
+  render() {    
+    
     return (
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
@@ -95,9 +95,19 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
-          StatsBox({ subtitle: "All Cases", data: this.chartData.dulTotal, options: 'dulTotal', className: "result_chart" }),
+          StatsBox({
+            subtitle: "All Cases",
+            data: this.chartData.dulTotal,
+            options: 'dul',
+            className: "result_chart"
+          }),
 
-          StatsBox({ subtitle: "Reviewed cases results", data: this.chartData.dulReviewed, options: 'dulReviewed', className: "result_chart" })
+          StatsBox({
+            subtitle: "Reviewed cases results",
+            data: this.chartData.dulReviewed,
+            options: 'dul',
+            className: "result_chart"
+          })
         ]),
 
         div({ className: "row no-margin" }, [
@@ -115,22 +125,21 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             ]),
         ]),
 
-        h3({ className: "stats-box-title no-margin" }, [
-          div({ className: "cm-inside-box-title access-color" }, ["1. Should data access be granted to this applicant ?"]),
-        ]),
+        h3({ className: "statsSubtitle access-color" }, ["1. Should data access be granted to this applicant ?"]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
           StatsBox({
             subtitle: "All Cases",
             data: this.chartData.accessTotal,
-            options: 'accessTotal', className: "result_chart",
+            options: 'access',
+            className: "result_chart",
             clickHandler: () => this.getDarReport('reviewed', 'ReviewedDataAccessRequests.tsv'),
             buttonLabel: 'Download all cases'
           }),
           StatsBox({
             subtitle: "Reviewed cases results",
             data: this.chartData.accessReviewed,
-            options: 'accessReviewed',
+            options: 'access',
             className: "result_chart",
             clickHandler: () => this.getDarReport('approved', 'ApprovedDataAccessRequests.tsv'),
             buttonLabel: 'Download approved cases'
@@ -139,24 +148,40 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         hr({ className: "box-separator" }),
 
-        h3({ className: "stats-box-title no-margin" }, [
-          div({ className: "cm-inside-box-title access-color" }, ["2. Was the research purpose accurately converted to a structured format ?"]),
-        ]),
+        h3({ className: "stats-box-title access-color" }, ["2. Was the research purpose accurately converted to a structured format ?"]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
-          StatsBox({ subtitle: "All Cases", data: this.chartData.RPTotal, options: 'RPTotal', className: "result_chart" }),
-          StatsBox({ subtitle: "Reviewed cases results", data: this.chartData.RPReviewed, options: 'RPReviewed', className: "result_chart" }),
+          StatsBox({
+            subtitle: "All Cases",
+            data: this.chartData.RPTotal,
+            options: 'access',
+            className: "result_chart"
+          }),
+          StatsBox({
+            subtitle: "Reviewed cases results",
+            data: this.chartData.RPReviewed,
+            options: 'access',
+            className: "result_chart"
+          }),
         ]),
 
         hr({ className: "box-separator" }),
 
-        h3({ className: "stats-box-title no-margin" }, [
-          div({ className: "cm-inside-box-title access-color" }, ["Evaluation of automated matching in comparison with the Data Access Committee decision"]),
-        ]),
+        h3({ className: "stats-box-title access-color" }, ["Evaluation of automated matching in comparison with the Data Access Committee decision"]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
-          StatsBox({ subtitle: "All Cases", data: this.chartData.VaultReviewed, options: 'VaultReviewed', className: "result_chart" }),
-          StatsBox({ subtitle: "Reviewed cases results", data: this.chartData.Agreement, options: 'Agreement', className: "result_chart" }),
+          StatsBox({
+            subtitle: "Cases reviewed by automated matching",
+            data: this.chartData.VaultReviewed,
+            options: 'access',
+            className: "result_chart"
+          }),
+          StatsBox({
+            subtitle: "Agreement between automated matching and Data Access Committee",
+            data: this.chartData.Agreement,
+            options: 'access',
+            className: "result_chart"
+          }),
         ]),
       ])
     )

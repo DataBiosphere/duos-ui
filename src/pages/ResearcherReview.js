@@ -5,19 +5,13 @@ import { PageHeading } from '../components/PageHeading';
 
 class ResearcherReview extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            value: ''
-        }
-
-        this.myHandler = this.myHandler.bind(this);
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: ''
     }
 
-    myHandler(event) {
-        // TBD
-    }
-
+<<<<<<< HEAD
     render() {
 
         return (
@@ -33,6 +27,28 @@ class ResearcherReview extends Component {
             ])
         );
     }
+=======
+    this.myHandler = this.myHandler.bind(this);
+  }
+
+  myHandler(event) {
+    // TBD
+  }
+
+  render() {
+    return (
+      div({ className: "container " }, [
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+            PageHeading({ color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
+          ]),
+        ]),
+        hr({ className: "section-separator" }),
+        button({}, ["Click Me!"])
+      ])
+    );
+  }
+>>>>>>> more-modal-fixes
 }
 
 export default ResearcherReview;
