@@ -31,7 +31,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
+                        PageHeading({ color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
                     ]),
 
                     div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 no-padding" }, [
