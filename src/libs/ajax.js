@@ -1,5 +1,17 @@
-import _ from 'lodash/fp'
-import { Config } from './config'
+import _ from 'lodash/fp';
+import { Storage } from './storage';
+import { Config } from './config';
+
+// Storage Variables
+// const CurrentUser = "CurrentUser"; // System user
+// const GoogleUser = "Gapi"; // Google user info, including token
+// const UserIsLogged = "isLogged"; // User log status flag
+
+export const Token = {
+  getToken: () => {
+    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
+  }
+};
 
 export const User = {
 
@@ -8,7 +20,6 @@ export const User = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
-
   list: async () => {
     const url = `${await Config.getApiUrl()}/dacuser`;
     const res = await fetchOk(url, Config.authOpts());
@@ -258,6 +269,95 @@ export const Files = {
     return getFile(url);
   },
 
+  getByEmail: async email => {
+    const url = `${await Config.getApiUrl()}/dacuser/${email}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  list: async () => {
+    const url = `${await Config.getApiUrl()}/dacuser`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  create: async user => {
+    const url = `${await Config.getApiUrl()}/dacuser`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), {method: 'POST'}]));
+    return res.json();
+  },
+
+  update: async (user, userId) => {
+    const url = `${await Config.getApiUrl()}/dacuser/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), {method: 'PUT'}]));
+    return res.json();
+  },
+
+  updateName: async (body, userId) => {
+    const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), {method: 'PUT'}]));
+    return res.json();
+  },
+
+  validateDelegation: async (role, dacUser) => {
+    const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dacUser), {method: 'POST'}]));
+    return res.json();
+  },
+
+  registerUser: async user => {
+    const url = `${await Config.getApiUrl()}/user`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), {method: 'POST'}]));
+    return res.json();
+  },
+
+  registerStatus: async (userRoleStatus, userId) => {
+    const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), {method: 'PUT'}]));
+    return res.json();
+  },
+
+  getUserStatus: async userId => {
+    const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  }
+
+};
+
+export const Summary = {
+  getFile: async (URI) => {
+    const url = `${await Config.getApiUrl()}${URI}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.blob();
+  }
+};
+
+export const Researcher = {
+  getResearcherProfile: async userId => {
+    const url = `${await Config.getApiUrl()}/researcher/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+
+  list: async (userId) => {
+    const url = `${await Config.getApiUrl()}/researcher/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  update: async (userId, validate, researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'PUT' }]));
+    return res.json();
+  },
+
+  register: async (userId, validate, researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
+    return res.json();
+  },
 };
 
 export const DataSet = {
@@ -313,31 +413,87 @@ export const DataSet = {
   }
 };
 
-export const Researcher = {
-  list: async (userId) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}`;
+export const Consent = {
+
+  getById: async consentId => {
+    const url = `${await Config.getApiUrl()}/consent/${consentId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  update: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
-    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'PUT' }]));
+  getDUL: async consentId => {
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
+    const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  register: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
-    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
+  getConsentManage: async (file, overwrite, userId) => {
+    const url = `${await Config.getApiUrl()}/consent/manage`;
+    const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
+
+  getInvalidConsentRestriction: async dacUserId => {
+    const url = `${await Config.getApiUrl()}/consent/invalid`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  create: async consent => {
+    consent.requiresManualReview = false;
+    consent.useRestriction = JSON.parse(consent.useRestriction);
+    consent.dataUse = JSON.parse(consent.dataUse);
+    const url = `${await Config.getApiUrl()}/consent`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'POST'}]));
+    return res.json();
+  },
+
+  update: async consent => {
+    consent.requiresManualReview = false;
+    consent.useRestriction = JSON.parse(consent.useRestriction);
+    consent.dataUse = JSON.parse(consent.dataUse);
+    const url = `${await Config.getApiUrl()}/consent`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'PUT'}]));
+    return res.json();
+  }
+};
+
+// export const Storage = {
+//   clearStorage: () => {
+//     sessionStorage.clear();
+//   },
+//
+//   setCurrentUser: data => {
+//     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
+//   },
+//
+//   getCurrentUser: () => {
+//     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
+//   },
+//
+//   setGoogleData: data => {
+//     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
+//   },
+//
+//   getGoogleData: () => {
+//     return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
+//   },
+//
+//   userIsLogged: () => {
+//     return sessionStorage.getItem(UserIsLogged) === 'true';
+//   },
+//
+//   setUserIsLogged: value => {
+//     sessionStorage.setItem(UserIsLogged, value);
+//   }
+// };
+
+const fetchOk = async (...args) => {
+  const res = await fetch(...args);
+  return res.ok ? res : Promise.reject(res);
 };
 
 const getFile = async (URI) => {
   const res = await fetchOk(URI, Config.authOpts());
   return res.blob();
-};
-export const fetchOk = async (...args) => {
-  const res = await fetch(...args);
-  return res.ok ? res : Promise.reject(res);
 };

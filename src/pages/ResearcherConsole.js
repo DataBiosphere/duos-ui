@@ -31,7 +31,7 @@ class ResearcherConsole extends Component {
             div({ className: "container " }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your Data Access Request cases" }),
+                        PageHeading({ color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your Data Access Request cases" }),
                     ]),
                 ]),
                 hr({ className: "section-separator" }),

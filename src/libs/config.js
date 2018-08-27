@@ -28,3 +28,11 @@ const loadConfig = _.memoize(async () => {
 const getConfig = async () => {
   return await loadConfig()
 };
+
+const getConfig = async () => {
+    return await loadConfig()
+};
+
+export const getGoogleClientId = async () => (await getConfig()).clientId;
+
+export const getApiUrl = async () => (await getConfig()).apiUrl;

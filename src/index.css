@@ -1080,7 +1080,10 @@ small {
   background: #D13B07 !important;
 }
 
-.cell-button[disabled] {
+.cell-button[disabled],
+[disabled] .cell-button,
+[disabled] button,
+[disabled] .glyphicon {
   color: #cccccc !important;
   cursor: default !important;
   pointer-events: none;
@@ -1286,6 +1289,17 @@ input[type=checkbox]:checked+label:before {
 }
 
 /*///////////////////////////////////////////////////////DAC CONSOLES*/
+
+/*keep the following class*/
+.admin-box {
+  background: #eeeeee;
+  margin: 10px;
+  box-shadow: 3px 3px 3px #cccccc;
+  border-radius: 6px;
+  padding: 0;
+  display: inline-block;
+  transition: background 0.3s ease !important;
+}
 
 .pvotes-main-list {
   margin: 0!important;
@@ -1571,15 +1585,16 @@ a .editable:hover, a .enabled:hover {
 
 .required-field-error {
   outline: none;
-  border: solid 1px rgba(209, 59, 7, 0.5);
-  -webkit-box-shadow: inset 0 0 1px rgba(209, 59, 7, 0.5), 0 0 8px rgba(209, 59, 7, 0.5);
-  box-shadow: inset 0 0 1px rgba(209, 59, 7, 0.5), 0 0 8px rgba(209, 59, 7, 0.5);
+  border: solid 1px rgba(208, 62, 39, 0.75);
+  -webkit-box-shadow: inset 0 0 1px rgba(208, 62, 39, 0.5), 0 0 8px rgba(208, 62, 39, 0.5);
+  box-shadow: inset 0 0 1px rgba(208, 62, 39, 0.5), 0 0 8px rgba(208, 62, 39, 0.5);
 }
 
 .required-field-error-span {
-  font-weight: normal !important;
-  font-size: 14px !important;
-  padding: 0 0 5px 10px;
+  font-weight: normal;
+  line-height: 25px;
+  font-size: 13px;
+  vertical-align: middle;
 }
 
 /***************************************************Paginator*/
