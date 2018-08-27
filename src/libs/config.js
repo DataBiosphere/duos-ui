@@ -6,7 +6,6 @@ export const Config = {
   loadConfig: _.memoize(async () => {
     const res = await fetch('config.json');
     return res.json()
-<<<<<<< HEAD
   }),
 
   getApiUrl: async () => (await getConfig()).apiUrl,
@@ -29,20 +28,11 @@ const loadConfig = _.memoize(async () => {
 const getConfig = async () => {
   return await loadConfig()
 };
-=======
-});
->>>>>>> more-modal-fixes
 
 const getConfig = async () => {
     return await loadConfig()
 };
-<<<<<<< HEAD
 
 export const getGoogleClientId = async () => (await getConfig()).clientId;
 
-=======
-
-export const getGoogleClientId = async () => (await getConfig()).clientId;
-
->>>>>>> more-modal-fixes
 export const getApiUrl = async () => (await getConfig()).apiUrl;
