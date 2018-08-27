@@ -44,15 +44,6 @@ class DataOwnerConsole extends Component {
     return (
       div({ className: "container" }, [
 
-<<<<<<< HEAD
-                div({ className: "row no-margin" }, [
-                    div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({
-                            color: "common",
-                            title: "Welcome " + currentUser.displayName + "!",
-                            description: "These are your pending cases for review"
-                        }),
-=======
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({
@@ -60,7 +51,6 @@ class DataOwnerConsole extends Component {
               title: "Welcome " + currentUser.displayName + "!",
               description: "These are your pending cases for review"
             }),
->>>>>>> more-modal-fixes
 
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [

@@ -9,19 +9,11 @@ export const GoogleLogoutButton = hh(class GoogleLogoutButton extends Component 
     this.state = { logoutButton: null };
   }
 
-<<<<<<< HEAD
-    logout = () => {
-        console.log('logout');
-        this.login(false);
-        window.location.href = "/";
-    };
-=======
   logout = () => {
     console.log('logout');
     this.login(false);
     window.location.href = "/";
   };
->>>>>>> more-modal-fixes
 
   async getGoogleConfig() {
     const logoutButton = h(GoogleLogout, {

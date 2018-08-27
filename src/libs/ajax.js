@@ -1,11 +1,6 @@
 import _ from 'lodash/fp'
-<<<<<<< HEAD
-import * as Config from './config'
-import { Storage } from './storage'
-=======
 import { Storage } from './storage'
 import { Config } from './config';
->>>>>>> more-modal-fixes
 
 const authOpts = (token = Token.getToken()) => ({
   headers: {
@@ -17,10 +12,6 @@ const authOpts = (token = Token.getToken()) => ({
 const jsonBody = body => ({body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}});
 
 // Storage Variables
-<<<<<<< HEAD
-
-=======
->>>>>>> more-modal-fixes
 // const CurrentUser = "CurrentUser"; // System user
 // const GoogleUser = "Gapi"; // Google user info, including token
 // const UserIsLogged = "isLogged"; // User log status flag
@@ -35,9 +26,6 @@ export const User = {
 
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-=======
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -293,87 +281,54 @@ export const Files = {
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
     const res = await fetchOk(url, Config.authOpts());
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   list: async () => {
     const url = `${await Config.getApiUrl()}/dacuser`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-=======
     const res = await fetchOk(url, Config.authOpts());
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   create: async user => {
     const url = `${await Config.getApiUrl()}/dacuser`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(user), {method: 'POST'}]));
-=======
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), {method: 'POST'}]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/${userId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(user), {method: 'PUT'}]));
-=======
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), {method: 'PUT'}]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   updateName: async (body, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(body), {method: 'PUT'}]));
-=======
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), {method: 'PUT'}]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   validateDelegation: async (role, dacUser) => {
     const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
-<<<<<<< HEAD
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(dacUser), {method: 'POST'}]));
-=======
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dacUser), {method: 'POST'}]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   registerUser: async user => {
     const url = `${await Config.getApiUrl()}/user`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(user), {method: 'POST'}]));
-=======
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), {method: 'POST'}]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   registerStatus: async (userRoleStatus, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(userRoleStatus), {method: 'PUT'}]));
-=======
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), {method: 'PUT'}]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   getUserStatus: async userId => {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-=======
     const res = await fetchOk(url, Config.authOpts());
->>>>>>> more-modal-fixes
     return res.json();
   }
 
@@ -382,11 +337,7 @@ export const Files = {
 export const Summary = {
   getFile: async (URI) => {
     const url = `${await Config.getApiUrl()}${URI}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-=======
     const res = await fetchOk(url, Config.authOpts());
->>>>>>> more-modal-fixes
     return res.blob();
   }
 };
@@ -394,11 +345,6 @@ export const Summary = {
 export const Researcher = {
   getResearcherProfile: async userId => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-    return res.json();
-  }
-=======
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -421,7 +367,6 @@ export const Researcher = {
     const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
     return res.json();
   },
->>>>>>> more-modal-fixes
 };
 
 export const DataSet = {
@@ -429,61 +374,19 @@ export const DataSet = {
   create: async (file, overwrite, userId) => {
     const url = `${await Config.getApiUrl()}/dataset/${userId}?overwrite=${overwrite}`;
     let formData = new FormData();
-<<<<<<< HEAD
-    formData.append("data", new Blob([file], {type: 'text/plain'}));
-    const res = await fetchOk(url, _.mergeAll([authOpts(), formData, {method: 'POST'}]));
-=======
     formData.append("data", new Blob([file], { type: 'text/plain' }));
     const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), formData, { method: 'POST' }]));
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   list: async dacUserId => {
     const url = `${await Config.getApiUrl()}/dataset?dacUserId=${dacUserId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-=======
     const res = await fetchOk(url, Config.authOpts());
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   getByDataSetId: async dataSetId => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-    return res.json();
-  },
-
-  getDictionary: async () => {
-    const url = `${await Config.getApiUrl()}/dataset/dictionary`;
-    const res = await fetchOk(url, authOpts());
-    return res.json();
-  },
-
-  download: async (objectIdList) => {
-    const url = `${await Config.getApiUrl()}/dataset/download`;
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(objectIdList), {method: 'POST'}]));
-    return res.json();
-  },
-
-  delete: async (datasetObjectId, dacUserId) => {
-    const url = `${await Config.getApiUrl()}/dataset/${datasetObjectId}/${dacUserId}`;
-    const res = await fetchOk(url, _.mergeAll([authOpts(), {method: 'DELETE'}]));
-    return res.json();
-  },
-
-  disableDataset: async (datasetObjectId, active) => {
-    const url = `${await Config.getApiUrl()}/dataset/disable/${datasetObjectId}/${active}`;
-    const res = await fetchOk(url, _.mergeAll([authOpts(), {method: 'DELETE'}]));
-    return res.json();
-  },
-
-  reviewDataSet: async (dataSetId, needsApproval) => {
-    const url = `${await Config.getApiUrl()}/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
-    const res = await fetchOk(url, _.mergeAll([authOpts(), {method: 'PUT'}]));
-=======
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -515,7 +418,6 @@ export const DataSet = {
   reviewDataSet: async(dataSetId, needsApproval) => {
     const url = `${await Config.getApiUrl()}/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'PUT' }]));
->>>>>>> more-modal-fixes
     return res.json();
   }
 };
@@ -524,56 +426,15 @@ export const Consent = {
 
   getById: async consentId => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-=======
     const res = await fetchOk(url, Config.authOpts());
->>>>>>> more-modal-fixes
     return res.json();
   },
 
   getDUL: async consentId => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-<<<<<<< HEAD
-    const res = await fetchOk(url, authOpts());
-    return res.json();
-  },
-
-  getConsentManage: async (file, overwrite, userId) => {
-    const url = `${await Config.getApiUrl()}/consent/manage`;
-    const res = await fetchOk(url, authOpts());
-    return res.json();
-  },
-
-  getInvalidConsentRestriction: async dacUserId => {
-    const url = `${await Config.getApiUrl()}/consent/invalid`;
-    const res = await fetchOk(url, authOpts());
-    return res.json();
-  },
-
-  create: async consent => {
-    consent.requiresManualReview = false;
-    consent.useRestriction = JSON.parse(consent.useRestriction);
-    consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent`;
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(consent), {method: 'POST'}]));
-    return res.json();
-  },
-
-  update: async consent => {
-    consent.requiresManualReview = false;
-    consent.useRestriction = JSON.parse(consent.useRestriction);
-    consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent`;
-    const res = await fetchOk(url, _.mergeAll([authOpts(), jsonBody(consent), {method: 'PUT'}]));
-    return res.json();
-  }
-};
-=======
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
->>>>>>> more-modal-fixes
 
   getConsentManage: async (file, overwrite, userId) => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
@@ -700,11 +561,8 @@ const fetchOk = async (...args) => {
   const res = await fetch(...args);
   return res.ok ? res : Promise.reject(res);
 };
-<<<<<<< HEAD
-=======
 
 const getFile = async (URI) => {
   const res = await fetchOk(URI, Config.authOpts());
   return res.blob();
 };
->>>>>>> more-modal-fixes
