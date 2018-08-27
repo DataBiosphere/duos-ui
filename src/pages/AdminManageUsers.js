@@ -20,7 +20,6 @@ class AdminManageUsers extends Component {
     this.afterModalOpen = this.afterModalOpen.bind(this);
 
     this.getUsers = this.getUsers.bind(this);
-
   }
 
   async getUsers() {
@@ -41,6 +40,7 @@ class AdminManageUsers extends Component {
       return userList;
     });
     this.setState({ userList: userList });
+    console.log(userList);
   }
 
   handleOpenModal() {

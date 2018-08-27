@@ -1,11 +1,11 @@
 import { Component } from 'react';
-import { div, form, input, label, span, hh, h4, p, alert } from 'react-hyperscript-helpers';
+import { div, span, hh } from 'react-hyperscript-helpers';
 import { BaseDialog } from '../BaseDialog';
 
 export const DeleteElectionModal = hh(class DeleteElectionModal extends Component {
 
   render() {
-    
+
     return (
       BaseDialog({
         linkType: "icon-tag",

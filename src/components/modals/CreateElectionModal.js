@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, form, input, label, span, hh, h4, p, alert } from 'react-hyperscript-helpers';
+import { div, span, hh } from 'react-hyperscript-helpers';
 import { BaseDialog } from '../BaseDialog';
 
 export const CreateElectionModal = hh(class CreateElectionModal extends Component {
