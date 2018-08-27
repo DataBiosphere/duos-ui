@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
+import { div, button, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { EditUserModal } from '../components/modals/EditUserModal';
@@ -9,16 +9,13 @@ class AdminManageUsers extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { userList: [] };
+    this.state = {
+      userList: [],
+      showAddUserModal: false,
+      showEditUserModal: false
+    };
+
     this.getUsers();
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
-
-    this.openModal = this.openModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-    this.okModal = this.okModal.bind(this);
-    this.afterModalOpen = this.afterModalOpen.bind(this);
-
     this.getUsers = this.getUsers.bind(this);
   }
 
@@ -43,42 +40,67 @@ class AdminManageUsers extends Component {
     console.log(userList);
   }
 
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  }
-
-  openModal() {
+  addUser = (e) => {
     this.setState(prev => {
-      prev.showModal = true;
+      prev.showAddUserModal = true;
       return prev;
     });
   }
 
-  closeModal() {
-    // this state change close modal
+  editUser = (user) => (e) => {
+    // "this", "e", "id"
+    console.log('editUser: ', user);
     this.setState(prev => {
-      prev.showModal = false;
+      prev.showEditUserModal = true;
+      // prev.editableUser = user;
       return prev;
     });
   }
 
-  okModal() {
-    // this state change close modal
-    this.setState(prev => {
-      prev.showModal = false;
-      return prev;
-    });
+  okModal = (name) => {
+    console.log('okModal ------------------> ' + name);
+
+    switch (name) {
+      case 'addUser':
+        this.setState(prev => { prev.showAddUserModal = false; return prev; });
+        break;
+      case 'editUser':
+        this.setState(prev => { prev.showEditUserModal = false; return prev; });
+        break;
+      default:
+        break;
+    }
   }
 
-  afterModalOpen() {
-    // not sure when to use this
-    console.log('afterModalOpen', this.state, this.props);
+  closeModal = (name) => {
+    console.log('closeModel ------------------> ' + name);
+
+    switch (name) {
+      case 'addUser':
+        this.setState(prev => { prev.showAddUserModal = false; return prev; });
+        break;
+      case 'editUser':
+        this.setState(prev => { prev.showEditUserModal = false; return prev; });
+        break;
+      default:
+        break;
+    }
   }
 
+  afterModalOpen = (name) => {
+    console.log('afterModalOpen ------------------> ' + name);
+
+    switch (name) {
+      case 'addUser':
+        this.setState(prev => { prev.showAddUserModal = false; return prev; });
+        break;
+      case 'editUser':
+        this.setState(prev => { prev.showEditUserModal = false; return prev; });
+        break;
+      default:
+        break;
+    }
+  }
 
   render() {
 
@@ -96,29 +118,29 @@ class AdminManageUsers extends Component {
               ]),
             ]),
 
-            // AddUserModal({
-            //     linkType: "a-tag",
-            //     modalBtnStyle: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
-            //     modalBtnIcon: "add-user_white",
-            //     modalBtnText: "Add User",
-            //     id: 'title_addUser',
-            //     description: 'Catalog a new User in the system',
-            // }),
-
             a({
               id: 'title_addUser',
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
-              onClick: this.openModal
+              onClick: this.addUser
             }, [
                 div({ className: "all-icons add-user_white" }),
                 span({}, ["Add User"]),
               ]),
 
             AddUserModal({
-              showModal: this.state.showModal,
+              isRendered: this.state.showAddUserModal,
+              showModal: this.state.showAddUserModal,
               onOKRequest: this.okModal,
               onCloseRequest: this.closeModal,
               onAfterOpen: this.afterModalOpen
+            }),
+
+            EditUserModal({
+              isRendered: this.state.showEditUserModal,
+              showModal: this.state.showEditUserModal,
+              onOKRequest: this.okModal,
+              onCloseRequest: this.closeModal,
+              onAfterOpen: this.afterModalOpen,
             }),
 
           ])
@@ -152,23 +174,12 @@ class AdminManageUsers extends Component {
                     )
                   ]),
                   div({ className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    // EditUserModal({ linkType: "button-tag" }),
 
-                    a({
+                    button({
                       id: 'title_editUser',
-                      className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
-                      onClick: this.openModal
-                    }, [
-                        div({ className: "all-icons edit-user_white" }),
-                        span({}, ["Edit"]),
-                      ]),
-
-                    EditUserModal({
-                      showModal: this.state.showModal,
-                      onOKRequest: this.okModal,
-                      onCloseRequest: this.closeModal,
-                      onAfterOpen: this.afterModalOpen
-                    }),
+                      className: "cell-button hover-color",
+                      onClick: this.editUser(user)
+                    }, ["Edit"]),
 
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
@@ -208,31 +219,6 @@ class AdminManageUsers extends Component {
       ])
     );
   }
-
-  editUser() {
-
-  }
-
-  addDul() {
-    console.log('addDul');
-  }
-
-  addUser() {
-    console.log('addUser');
-  }
-
-  addDataSets() {
-    console.log('addDataSets');
-  }
-
-  setTimeout() {
-    console.log('setTimeout');
-  }
-
-  addOntology() {
-    console.log('addOntology');
-  }
-
 }
 
 export default AdminManageUsers;

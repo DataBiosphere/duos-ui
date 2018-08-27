@@ -5,15 +5,7 @@ import { BaseModal } from '../BaseModal';
 
 export const EditUserModal = hh(class EditUserModal extends Component {
 
-    constructor(props) {
-        super(props);
-
-        this.closeHandler = this.closeHandler.bind(this);
-        this.afterOpenHandler = this.afterOpenHandler.bind(this);
-        this.OKHandler = this.OKHandler.bind(this);
-    }
-
-    OKHandler() {
+    OKHandler = (e) => {
         // this is the method for handling OK click
         // we might do something here, adding a user for instance
         // or delegate it to the parent....
@@ -23,7 +15,7 @@ export const EditUserModal = hh(class EditUserModal extends Component {
         this.props.onOKRequest('editUser');
     }
 
-    closeHandler() {
+    closeHandler = (e) => {
         // this is the method to handle Cancel click
         // could do some cleaning here 
         // or delegate it to the parent
@@ -34,7 +26,7 @@ export const EditUserModal = hh(class EditUserModal extends Component {
         this.props.onCloseRequest('editUser');
     }
 
-    afterOpenHandler() {
+    afterOpenHandler = (e)  => {
         // DO SOMETHING HERE ...
 
         // and call parent's after open handler

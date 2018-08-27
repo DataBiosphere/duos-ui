@@ -27,7 +27,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     async getGoogleConfig() {
         const googleButton = h(GoogleLogin, {
             className: "navbar-duos-button",
-            clientId: "complete-clientId",
+            clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
             buttonText: "Sign In",
             onSuccess: this.responseGoogle,
             onFailure: this.forbidden,
