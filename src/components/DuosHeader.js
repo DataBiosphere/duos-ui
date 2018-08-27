@@ -10,7 +10,7 @@ class DuosHeader extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {isLogged: props.isLogged, googleButton: props.button};
+    this.state = { isLogged: props.isLogged, googleButton: props.button };
     this.signIn = this.signIn.bind(this);
     this.signOut = this.signOut.bind(this);
     this.toggleNavBar = this.toggleNavBar.bind(this);
@@ -100,7 +100,7 @@ class DuosHeader extends Component {
                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                 li({}, [
 
-                  a({onClick: this.signIn}, [this.state.googleButton])
+                  a({ onClick: this.signIn }, [this.state.googleButton])
                   // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                   // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
@@ -181,7 +181,7 @@ class DuosHeader extends Component {
 
   signIn() {
     console.log('----A----------- signIn ----------------', this.state);
-    this.setState({isLogged: true}, function () {
+    this.setState({ isLogged: true }, function () {
       console.log('-----C---------- signIn --------------', this.state);
       this.props.loginState(this.state.isLogged);
     });
@@ -190,7 +190,7 @@ class DuosHeader extends Component {
 
   signOut() {
     console.log('-----A---------- signOut --------------', this.state);
-    this.setState({isLogged: false}, function () {
+    this.setState({ isLogged: false }, function () {
       console.log('-----C---------- signOut --------------', this.state);
       this.props.loginState(this.state.isLogged);
       window.location.href = "/";

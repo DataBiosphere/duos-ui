@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, hr, input, label, i, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet } from '../libs/ajax'
+import { DataSet } from "../libs/ajax";
 
 
 const USER_ID = 5;

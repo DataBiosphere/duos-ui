@@ -36,7 +36,7 @@ import ResearcherReview from "./pages/ResearcherReview";
 import ManageOntologies from "./pages/ManageOntologies";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 
-export default ({ props }) => (
+export default ({props}) => (
 
   <Switch>
     <Route exact path='/' component={Home} props={{ props }} />
