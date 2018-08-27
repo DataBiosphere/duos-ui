@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, hh, form, label, input, span, hr, ul, li, a } from 'react-hyperscript-helpers';
-import { Researcher, Storage } from '../libs/ajax';
+import { Researcher } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {

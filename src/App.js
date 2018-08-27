@@ -1,10 +1,11 @@
 import React from 'react';
+import Modal from 'react-modal';
 import DuosHeader from './components/DuosHeader';
 import { div, h } from 'react-hyperscript-helpers';
 import './App.css';
 import Routes from "./Routes"
 import { GoogleLoginButton } from './components/GoogleLogin';
-import { Storage } from './libs/ajax';
+import { Storage } from './libs/storage';
 
 class App extends React.Component {
 
@@ -46,7 +47,6 @@ class App extends React.Component {
       ])
     );
   }
-
 }
 
 export default App;

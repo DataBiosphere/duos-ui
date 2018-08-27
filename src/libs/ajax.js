@@ -1,7 +1,6 @@
 import _ from 'lodash/fp'
 import * as Config from './config'
-
-// var auth_token = sessionStorage.getItem("GAPI") !== null ? JSON.parse(sessionStorage.getItem("GAPI")).accessToken : 'token';
+import { Storage } from './storage'
 
 const authOpts = (token = Token.getToken()) => ({
   headers: {
@@ -9,24 +8,24 @@ const authOpts = (token = Token.getToken()) => ({
     Accept: 'application/json'
   }
 });
+
 const jsonBody = body => ({body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}});
 
+// Storage Variables
+
+// const CurrentUser = "CurrentUser"; // System user
+// const GoogleUser = "Gapi"; // Google user info, including token
+// const UserIsLogged = "isLogged"; // User log status flag
+
 export const Token = {
-
-  setToken: async token => {
-    console.log("received Token ", token);
-  },
   getToken: () => {
-    return sessionStorage.getItem("GAPI") !== null ? JSON.parse(sessionStorage.getItem("GAPI")).accessToken : 'token';
+    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
   }
-
 };
 
 export const User = {
 
   getByEmail: async email => {
-    console.log("token? ", Token.getToken());
-
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
     const res = await fetchOk(url, authOpts());
     return res.json();
@@ -82,15 +81,20 @@ export const User = {
 
 };
 
+export const Summary = {
+  getFile: async (URI) => {
+    const url = `${await Config.getApiUrl()}${URI}`;
+    const res = await fetchOk(url, authOpts());
+    return res.blob();
+  }
+};
+
 export const Researcher = {
-
   getResearcherProfile: async userId => {
-
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
     const res = await fetchOk(url, authOpts());
     return res.json();
   }
-
 };
 
 export const DataSet = {
@@ -144,7 +148,7 @@ export const DataSet = {
     const res = await fetchOk(url, _.mergeAll([authOpts(), {method: 'PUT'}]));
     return res.json();
   }
-}
+};
 
 export const Consent = {
 
@@ -191,38 +195,38 @@ export const Consent = {
   }
 };
 
-export const Storage = {
-  clearStorage: () => {
-    sessionStorage.clear();
-  },
 
-  setCurrentUser: data => {
-    sessionStorage.setItem("CurrentUser", JSON.stringify(data));
-  },
-
-  getCurrentUser: () => {
-    return sessionStorage.getItem("CurrentUser") ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
-  },
-
-  setGoogleData: data => {
-    sessionStorage.setItem("GAPI", JSON.stringify(data));
-  },
-
-  getGoogleData: () => {
-    return sessionStorage.getItem("GAPI") ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
-  },
-
-  userIsLogged: () => {
-    return sessionStorage.getItem('isLogged') === 'true';
-  },
-
-  setUserIsLogged: value => {
-    sessionStorage.setItem('isLogged', value);
-  }
-};
+// export const Storage = {
+//   clearStorage: () => {
+//     sessionStorage.clear();
+//   },
+//
+//   setCurrentUser: data => {
+//     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
+//   },
+//
+//   getCurrentUser: () => {
+//     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
+//   },
+//
+//   setGoogleData: data => {
+//     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
+//   },
+//
+//   getGoogleData: () => {
+//     return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
+//   },
+//
+//   userIsLogged: () => {
+//     return sessionStorage.getItem(UserIsLogged) === 'true';
+//   },
+//
+//   setUserIsLogged: value => {
+//     sessionStorage.setItem(UserIsLogged, value);
+//   }
+// };
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
   return res.ok ? res : Promise.reject(res);
 };
-

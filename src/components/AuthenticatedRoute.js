@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { Storage } from "../libs/ajax";
+import { Storage } from "../libs/storage";
 
 export default ({component: Component, props: componentProps, ...rest}) =>
   <Route

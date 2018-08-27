@@ -5,8 +5,41 @@ import { BaseModal } from '../BaseModal';
 
 export const EditUserModal = hh(class EditUserModal extends Component {
 
-    editUser() {
-        console.log("algo");
+    constructor(props) {
+        super(props);
+
+        this.closeHandler = this.closeHandler.bind(this);
+        this.afterOpenHandler = this.afterOpenHandler.bind(this);
+        this.OKHandler = this.OKHandler.bind(this);
+    }
+
+    OKHandler() {
+        // this is the method for handling OK click
+        // we might do something here, adding a user for instance
+        // or delegate it to the parent....
+        // DO SOMETHING HERE ...
+
+        // and call parent's OK Handler
+        this.props.onOKRequest('editUser');
+    }
+
+    closeHandler() {
+        // this is the method to handle Cancel click
+        // could do some cleaning here 
+        // or delegate it to the parent
+        // we need to use it to close the
+        // DO SOMETHING HERE ...
+
+        // and call parent's close handler
+        this.props.onCloseRequest('editUser');
+    }
+
+    afterOpenHandler() {
+        // DO SOMETHING HERE ...
+
+        // and call parent's after open handler
+        this.props.onAfterOpen('editUser');
+
     }
 
     replaceRoleAlert() {
@@ -17,25 +50,25 @@ export const EditUserModal = hh(class EditUserModal extends Component {
 
     }
 
-
     render() {
-        const file = {
-            name: "MyFile.txt"
-        }
-
-        
-
-
-        // const alerts = [
-
-        // ];
 
         return (
 
             BaseModal({
-                linkType: this.props.linkType, modalBtnStyle: "cell-button hover-color", modalBtnIcon: "", modalBtnText: "Edit",
-                id: "title_editUser", modalSize: "large", imgSrc: "/images/icon_edit_user.png", color: "common", title: "Edit User",
-                description: "Edit a User in the system", action: { label: "Save", handler: this.editUser() }
+                showModal: this.props.showModal,
+                onRequestClose: this.closeHandler,
+                onAfterOpen: this.afterOpenHandler,
+                linkType: this.props.linkType,
+                modalBtnStyle: "cell-button hover-color",
+                modalBtnIcon: "",
+                modalBtnText: "Edit",
+                id: "title_editUser",
+                modalSize: "large",
+                imgSrc: "/images/icon_edit_user.png",
+                color: "common",
+                title: "Edit User",
+                description: "Edit a User in the system",
+                action: { label: "Save", handler: this.OKHandler }
             },
                 [
                     form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [

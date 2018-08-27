@@ -1,7 +1,8 @@
 import { Component } from 'react';
 import { h, hh } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
-import { User, Token, Storage } from "../libs/ajax";
+import { User } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 
 export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
   constructor(props) {
@@ -14,9 +15,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
 
   responseGoogle = (response) => {
     console.log(response);
-    Token.setToken(response.accessToken);
     Storage.setGoogleData(response);
-
     this.getUser().then((data) => {
         Storage.setCurrentUser(data);
         // console.log("USER = ", data);

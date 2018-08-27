@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, hr, h2, br, small, a, span, i, h, img, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { User } from '../libs/ajax';
+import { User } from '../libs/ajax'
 
 class AdminUsers extends Component {
     
