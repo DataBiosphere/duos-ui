@@ -1,27 +1,19 @@
 import { Component } from 'react';
 import { nav, button, ul, li, img, small, hr, div, span, a } from 'react-hyperscript-helpers';
-import { GoogleLoginButton } from '../components/GoogleLogin';
-import { GoogleLogoutButton } from '../components/GoogleLogout';
 import { HelpModal } from '../components/modals/HelpModal';
+import { Storage } from '../libs/storage';
 // import { DuosModal } from '../components/DuosModal';
 
 class DuosHeader extends Component {
 
   navBarCollapsed = true;
 
-  loggedState = false;
-
   constructor(props) {
     super(props);
-    this.state = { isLogged: props.isLogged };
+    this.state = {isLogged: props.isLogged, googleButton: props.button};
     this.signIn = this.signIn.bind(this);
     this.signOut = this.signOut.bind(this);
-
     this.toggleNavBar = this.toggleNavBar.bind(this);
-
-    this.loginState = props.loginState;
-    this.isLogged = props.isLogged;
-
   }
 
   render() {
@@ -35,24 +27,36 @@ class DuosHeader extends Component {
     let isDataOwner = false;
     let isAlumni = false;
 
-    // let isLogged = false;
-    const { isLogged } = this.state;
+    let isLogged = Storage.userIsLogged();
 
     if (isLogged) {
       roles.forEach(role => {
-        if (role === 'chairperson') { isChairPerson = true; }
-        if (role === 'member') { isMember = true; }
-        if (role === 'admin') { isAdmin = true; }
-        if (role === 'researcher') { isResearcher = true; }
-        if (role === 'dataOwner') { isDataOwner = true; }
-        if (role === 'alumni') { isAlumni = true; }
+        if (role === 'chairperson') {
+          isChairPerson = true;
+        }
+        if (role === 'member') {
+          isMember = true;
+        }
+        if (role === 'admin') {
+          isAdmin = true;
+        }
+        if (role === 'researcher') {
+          isResearcher = true;
+        }
+        if (role === 'dataOwner') {
+          isDataOwner = true;
+        }
+        if (role === 'alumni') {
+          isAlumni = true;
+        }
       });
     }
     let currentUser = {};
-    if (isLogged && sessionStorage.getItem("GAPI") !== null) {
+    let profile = Storage.getGoogleData();
+    if (isLogged && profile !== null) {
       currentUser = {
-        displayName: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.name,
-        email: JSON.parse(sessionStorage.getItem("GAPI")).profileObj.email
+        displayName: profile.profileObj.name,
+        email: profile.profileObj.email
       };
     }
     return (
@@ -96,10 +100,9 @@ class DuosHeader extends Component {
                 li({}, [a({ className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
                 li({}, [
 
-                  a({ onClick: this.signIn }, [GoogleLoginButton({ isLogged: this.isLogged, loginState: this.loginState })]),
-                  GoogleLogoutButton({ isLogged: this.isLogged, loginState: this.loginState }),
+                  a({onClick: this.signIn}, [this.state.googleButton])
                   // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
-                  a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
+                  // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
                 li({}, [a({ className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
               ]),
@@ -178,7 +181,7 @@ class DuosHeader extends Component {
 
   signIn() {
     console.log('----A----------- signIn ----------------', this.state);
-    this.setState({ isLogged: true }, function () {
+    this.setState({isLogged: true}, function () {
       console.log('-----C---------- signIn --------------', this.state);
       this.props.loginState(this.state.isLogged);
     });
@@ -187,9 +190,10 @@ class DuosHeader extends Component {
 
   signOut() {
     console.log('-----A---------- signOut --------------', this.state);
-    this.setState({ isLogged: false }, function () {
+    this.setState({isLogged: false}, function () {
       console.log('-----C---------- signOut --------------', this.state);
-      this.props.loginState(this.state.isLogged)
+      this.props.loginState(this.state.isLogged);
+      window.location.href = "/";
     });
     console.log('-----B---------- signOut --------------', this.state);
   }

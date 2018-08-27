@@ -44,7 +44,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   closeHandler() {
     // this is the method to handle Cancel click
-    // could do some cleaning here 
+    // could do some cleaning here
     // or delegate it to the parent
     // we need to use it to close the
     // DO SOMETHING HERE ...

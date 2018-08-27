@@ -19,16 +19,14 @@ class ResearcherReview extends Component {
   }
 
   render() {
-
     return (
       div({ className: "container " }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "", iconSize: "none", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
+            PageHeading({ color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
           ]),
         ]),
         hr({ className: "section-separator" }),
-
         button({}, ["Click Me!"])
       ])
     );
