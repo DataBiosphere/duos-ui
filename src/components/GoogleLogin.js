@@ -1,45 +1,61 @@
-import {Component} from 'react';
-import {h, hh} from 'react-hyperscript-helpers';
+import { Component } from 'react';
+import { h, hh } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
+import { User } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 
 export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {googleButton: null};
-        this.login = props.loginState;
-    }
+  constructor(props) {
+    super(props);
+    this.state = {googleButton: null};
+    this.login = props.loginState;
+    this.getUser = this.getUser.bind(this);
 
-    responseGoogle = (response) => {
-        console.log(response);
-        console.log("GOOGLE PROPS ", this.props);
-        sessionStorage.setItem("GAPI", JSON.stringify(response));
+  }
+
+  responseGoogle = (response) => {
+    console.log(response);
+    Storage.setGoogleData(response);
+    this.getUser().then((data) => {
+        Storage.setCurrentUser(data);
+        // console.log("USER = ", data);
         this.login(true);
-    };
+      },
+      (data) => {
+        Storage.clearStorage();
+        console.log("Error: ", data)
+      });
+  };
 
-    forbidden = (response) => {
-        console.log(response);
-    };
+  forbidden = (response) => {
+    Storage.clearStorage();
+    console.log(response);
+  };
 
-    logout = () => {
-        console.log('logout');
-    };
+  logout = () => {
+    console.log('logout');
+  };
 
-    async getGoogleConfig() {
-        const googleButton = h(GoogleLogin, {
-            className: "navbar-duos-button",
-            clientId: "complete-clientId",
-            buttonText: "Sign In",
-            onSuccess: this.responseGoogle,
-            onFailure: this.forbidden,
-        });
-        this.setState({googleButton: googleButton})
-    }
+  async getGoogleConfig() {
+    const googleButton = h(GoogleLogin, {
+      className: "navbar-duos-button",
+      clientId: "complete-clientId",
+      buttonText: "Sign In",
+      onSuccess: this.responseGoogle,
+      onFailure: this.forbidden,
+    });
+    this.setState({googleButton: googleButton})
+  }
 
-    componentWillMount() {
-        this.getGoogleConfig();
-    }
+  async getUser() {
+    return await User.getByEmail(Storage.getGoogleData().profileObj.email);
+  }
 
-    render() {
-        return (this.state.googleButton);
-    }
+  componentWillMount() {
+    this.getGoogleConfig();
+  }
+
+  render() {
+    return (this.state.googleButton);
+  }
 });
