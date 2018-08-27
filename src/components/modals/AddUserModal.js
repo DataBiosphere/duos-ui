@@ -16,12 +16,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     this.toggleState = this.toggleState.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
+
+    this.closeHandler = this.closeHandler.bind(this);
+    this.afterOpenHandler = this.afterOpenHandler.bind(this);
+    this.OKHandler = this.OKHandler.bind(this);
   }
 
   OKHandler(event) {
+    // this is the method for handling OK click
+    // we might do something here, adding a user for instance
+    // or delegate it to the parent....
+    // DO SOMETHING HERE ...
     let roles = this.state.roles.slice();
     const rolesName = roles.map(
-      role => {return {name:role}}
+      role => { return { name: role } }
     );
     const userData = {
       displayName: this.state.displayName,
@@ -30,6 +38,26 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     };
     User.create(userData);
     event.preventDefault();
+    // and call parent's OK Handler
+    this.props.onOKRequest('adduser');
+  }
+
+  closeHandler() {
+    // this is the method to handle Cancel click
+    // could do some cleaning here 
+    // or delegate it to the parent
+    // we need to use it to close the
+    // DO SOMETHING HERE ...
+
+    // and call parent's close handler
+    this.props.onCloseRequest('addUser');
+  }
+
+  afterOpenHandler() {
+    // DO SOMETHING HERE ...
+
+    // and call parent's after open handler
+    this.props.onAfterOpen('addUser');
 
   }
 
@@ -38,36 +66,38 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     let roleList = this.state.roles;
     if (!existingRole) {
       roleList.push(role);
-      this.setState({roles: roleList});
+      this.setState({ roles: roleList });
     } else {
       roleList.splice(this.state.roles.indexOf(role), 1);
-      this.setState({roles: roleList});
+      this.setState({ roles: roleList });
     }
   }
 
   handleChange(event) {
     const value = event.target.name;
-    this.setState({[value]: event.target.value});
+    this.setState({ [value]: event.target.value });
   }
-
 
   render() {
     return (
       BaseModal({
-          linkType: this.props.linkType,
-          modalBtnStyle: this.props.modalBtnStyle,
-          modalBtnIcon: this.props.modalBtnIcon,
-          modalBtnText: this.props.modalBtnText,
-          id: this.props.id,
-          modalSize: "large",
-          imgSrc: "/images/icon_add_user.png",
-          color: "common",
-          title: "Add User",
-          description: this.props.description,
-          iconName: this.props.iconName,
-          iconSize: this.props.iconSize,
-          action: { label: "Add", handler: this.OKHandler }
-        },
+        showModal: this.props.showModal,
+        onRequestClose: this.closeHandler,
+        onAfterOpen: this.afterOpenHandler,
+        linkType: this.props.linkType,
+        modalBtnStyle: this.props.modalBtnStyle,
+        modalBtnIcon: this.props.modalBtnIcon,
+        modalBtnText: this.props.modalBtnText,
+        id: this.props.id,
+        modalSize: "large",
+        imgSrc: "/images/icon_add_user.png",
+        color: "common",
+        title: "Add User",
+        description: "Catalog a new User in the system",
+        iconName: this.props.iconName,
+        iconSize: this.props.iconSize,
+        action: { label: "Add", handler: this.OKHandler }
+      },
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group admin-form-group first-form-group" }, [
@@ -107,7 +137,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
-                      id:"chk_member",
+                      id: "chk_member",
                       className: "checkbox-inline user-checkbox",
                       defaultChecked: this.state.roles.find(role => role === 'Member'),
                       onChange: () => this.toggleState('Member'),
@@ -118,7 +148,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
-                      id:"chk_chairperson",
+                      id: "chk_chairperson",
                       className: "checkbox-inline user-checkbox",
                       defaultChecked: this.state.roles.find(role => role === 'Chairperson'),
                       onChange: () => this.toggleState('Chairperson'),
@@ -129,7 +159,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
-                      id:"chk_alumni",
+                      id: "chk_alumni",
                       defaultChecked: this.state.roles.find(role => role === 'Alumni'),
                       className: "checkbox-inline user-checkbox",
                       onChange: () => this.toggleState('Alumni'),
@@ -142,7 +172,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
-                      id:"chk_admin",
+                      id: "chk_admin",
                       defaultChecked: this.state.roles.find(role => role === 'Admin'),
                       className: "checkbox-inline user-checkbox",
                       onChange: () => this.toggleState('Admin'),
@@ -152,7 +182,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
-                      id:"chk_researcher",
+                      id: "chk_researcher",
                       defaultChecked: this.state.roles.find(role => role === 'Researcher'),
                       className: "checkbox-inline user-checkbox",
                       onChange: () => this.toggleState('Researcher'),
@@ -163,7 +193,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
-                      id:"chk_dataOwner",
+                      id: "chk_dataOwner",
                       defaultChecked: this.state.roles.find(role => role === 'Dataowner'),
                       className: "checkbox-inline user-checkbox",
                       onChange: () => this.toggleState('Dataowner'),
@@ -177,17 +207,17 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               div({
                 isRendered: this.state.roles.includes('Admin'),
                 className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4",
-                style:{'paddingLeft': '26px'}
+                style: { 'paddingLeft': '26px' }
               }, [
-                div({  className: "checkbox" }, [
-                  input({
-                    id: "emailPreference",
-                    type:"checkbox",
-                    className: "checkbox-inline user-checkbox",
-                  }),
-                  label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "emailPreference"}, ["Disable Admin email notifications"]),
-                ])
-              ]),
+                  div({ className: "checkbox" }, [
+                    input({
+                      id: "emailPreference",
+                      type: "checkbox",
+                      className: "checkbox-inline user-checkbox",
+                    }),
+                    label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "emailPreference" }, ["Disable Admin email notifications"]),
+                  ])
+                ]),
             ]),
           ]),
 
