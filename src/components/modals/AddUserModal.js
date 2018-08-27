@@ -39,7 +39,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     User.create(userData);
     event.preventDefault();
     // and call parent's OK Handler
-    this.props.onOKRequest('adduser');
+    this.props.onOKRequest('addUser');
   }
 
   closeHandler() {
