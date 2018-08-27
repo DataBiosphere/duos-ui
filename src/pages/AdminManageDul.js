@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hr, h, span, i, a, input } from 'react-hyperscript-helpers';
+import { div, hr, h, span, i, a, input, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { EditDulModal } from '../components/modals/EditDulModal';
@@ -25,6 +25,7 @@ class AdminManageDul extends Component {
     this.handleCloseModal = this.handleCloseModal.bind(this);
 
     this.addDul = this.addDul.bind(this);
+    this.editDul = this.editDul.bind(this);
     this.closeAddDulModal = this.closeAddDulModal.bind(this);
     this.okAddDulModal = this.okAddDulModal.bind(this);
     this.afterAddDulModalOpen = this.afterAddDulModalOpen.bind(this);
@@ -85,7 +86,10 @@ class AdminManageDul extends Component {
 
   }
   editDul() {
-
+    this.setState(prev => {
+      prev.showModal = true;
+      return prev;
+    });
   }
 
   addDul() {
@@ -149,6 +153,13 @@ class AdminManageDul extends Component {
               onAfterOpen: this.afterAddDulModalOpen
             }),
 
+            EditDulModal({
+              showModal: this.state.showModal,
+              onOKRequest: this.okAddDulModal,
+              onCloseRequest: this.closeAddDulModal,
+              onAfterOpen: this.afterAddDulModalOpen
+            }),
+
           ]),
         ]),
 
@@ -180,7 +191,11 @@ class AdminManageDul extends Component {
                   div({ className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
                   div({ className: "col-1 cell-body text" }, [election.createDate]),
                   div({ className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
-                    EditDulModal({ linkType: "button-tag" }),
+                    button({
+                      id: 'btn_editDUL',
+                      className: "cell-button hover-color",
+                      onClick: this.editDul
+                    }, ["Edit"]),
                   ]),
                   div({ className: "col-1 cell-body text f-center bold" }, [
                     span({ isRendered: election.electionStatus === 'un-reviewed' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Un-reviewed"])]),
