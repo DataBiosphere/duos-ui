@@ -62,7 +62,15 @@ export const User = {
         return res.json();
     }
 
-}
+};
+
+export const Summary = {
+    getFile: async (URI) => {
+      const url = `${await Config.getApiUrl()}${URI}`;
+      const res = await fetchOk(url, authOpts());
+      return res.blob();
+    }
+};
 
 export const DataSet = {
 
