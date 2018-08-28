@@ -226,7 +226,7 @@ small {
   }
 }
 
-.home-title h1 {
+.home-title {
   font-size: 30px;
   font-weight: 700;
   color: #333333;
@@ -283,13 +283,13 @@ small {
 
 .home-content {
   margin-top: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   font-size: 15px;
   color: #333333;
 }
 
-.home-content br {
-  line-height: 30px;
+.home-content p {
+  margin-bottom: 10px;
 }
 
 .home-content-graphic {
