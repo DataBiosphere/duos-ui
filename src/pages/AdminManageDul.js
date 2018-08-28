@@ -179,43 +179,43 @@ class AdminManageDul extends Component {
             return (
               h(Fragment, {}, [
                 // div({ "dir-paginate": "election in AdminManage.electionsList.dul | filter: searchDUL | itemsPerPage:10", "current-page": this.currentDULPage }, [
-                div({ key: election.electionId, id: eIndex, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
-                  div({ className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
+                div({ key: election.electionId, id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
+                  div({ id: election.consentId + "_consentName", className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
                     span({
-                      isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
+                      id: election.consentId + "_flag_consentName", isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
                       // "tooltip": "Consent has been updated", "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
                     }, []),
-                    a({ onClick: this.open(election.consentId, 'dul_preview_results', null, true) }, [election.consentName]),
+                    a({ id: election.consentId + "_link_consentName", onClick: this.open(election.consentId, 'dul_preview_results', null, true) }, [election.consentName]),
                   ]),
-                  div({ className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : ""), title: election.groupName }, [election.groupName]),
-                  div({ className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
-                  div({ className: "col-1 cell-body text" }, [election.createDate]),
-                  div({ className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
+                  div({ id: election.consentId + "_groupName", className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : ""), title: election.groupName }, [election.groupName]),
+                  div({ id: election.consentId + "_version", className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
+                  div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [election.createDate]),
+                  div({ id: election.consentId + "_editDUL", className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
                     button({
-                      id: 'btn_editDUL',
+                      id: election.consentId + "_btn_editDUL",
                       className: "cell-button hover-color",
                       onClick: this.editDul
                     }, ["Edit"]),
                   ]),
-                  div({ className: "col-1 cell-body text f-center bold" }, [
+                  div({ id: election.consentId + "_electionStatus", className: "col-1 cell-body text f-center bold" }, [
                     span({ isRendered: election.electionStatus === 'un-reviewed' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Un-reviewed"])]),
                     span({ isRendered: election.electionStatus === 'Open' }, [a({ onClick: this.open(election.consentId, 'dul_review_results', null, false) }, ["Open"]),]),
                     span({ isRendered: election.electionStatus === 'Canceled' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Canceled"]),]),
                     span({ isRendered: election.electionStatus === 'Closed' }, [a({ onClick: this.open(null, 'dul_results_record', election.electionId, false) }, ["Reviewed"]),]),
                   ]),
-                  div({ isRendered: election.electionStatus !== 'Open', className: "col-1 cell-body f-center", disabled: !election.editable }, [
+                  div({ id: election.consentId + "_createElection", isRendered: election.electionStatus !== 'Open', className: "col-1 cell-body f-center", disabled: !election.editable }, [
                     CreateElectionModal({ electionType: 'dul', electionStatus: election.electionStatus, electionArchived: election.archived }),
                   ]),
-                  div({ isRendered: election.electionStatus === 'Open', className: "col-1 cell-body f-center" }, [
+                  div({ id: election.consentId + "_cancelElection", isRendered: election.electionStatus === 'Open', className: "col-1 cell-body f-center" }, [
                     CancelElectionModal({ electionType: 'dul' }),
                   ]),
-                  div({ className: "icon-actions" }, [
+                  div({ id: election.consentId + "_actions", className: "icon-actions" }, [
                     // "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Archive election"
-                    div({ className: "display-inline-block", disabled: (election.electionStatus === 'un-reviewed' || election.archived === true) }, [
+                    div({ id: election.consentId + "_btn_archiveElection", className: "display-inline-block", disabled: (election.electionStatus === 'un-reviewed' || election.archived === true) }, [
                       ArchiveElectionModal({ electionArchived: election.archived, electionStatus: election.electionStatus }),
                     ]),
                     // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", "tooltip": "Delete record"
-                    div({ className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
+                    div({ id: election.consentId + "_btn_deleteDul", className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
                       DeleteElectionModal({ electionType: 'dul' }),
                     ]),
                   ]),
