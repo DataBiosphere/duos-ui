@@ -7,12 +7,6 @@ import { Config } from './config';
 // const GoogleUser = "Gapi"; // Google user info, including token
 // const UserIsLogged = "isLogged"; // User log status flag
 
-export const Token = {
-  getToken: () => {
-    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-  }
-};
-
 export const User = {
 
   getByEmail: async email => {
@@ -390,19 +384,19 @@ export const DataSet = {
 
 export const Consent = {
 
-  getById: async consentId => {
+  ConsentResource: async consentId => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  getDUL: async consentId => {
+  ConsentDulResource: async consentId => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  getConsentManage: async (file, overwrite, userId) => {
+  getConsentManage: async () => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
@@ -606,96 +600,6 @@ export const DAR = {
     return res.json();
   },
 };
-
-// export const Storage = {
-//   clearStorage: () => {
-//     sessionStorage.clear();
-//   },
-//
-//   setCurrentUser: data => {
-//     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
-//   },
-//
-//   getCurrentUser: () => {
-//     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
-//   },
-//
-//   setGoogleData: data => {
-//     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
-//   },
-//
-//   getGoogleData: () => {
-//     return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
-//   },
-//
-//   userIsLogged: () => {
-//     return sessionStorage.getItem(UserIsLogged) === 'true';
-//   },
-//
-//   setUserIsLogged: value => {
-//     sessionStorage.setItem(UserIsLogged, value);
-//   }
-// };
-
-// export const Storage = {
-//   clearStorage: () => {
-//     sessionStorage.clear();
-//   },
-//
-//   setCurrentUser: data => {
-//     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
-//   },
-//
-//   getCurrentUser: () => {
-//     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
-//   },
-//
-//   setGoogleData: data => {
-//     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
-//   },
-//
-//   getGoogleData: () => {
-//     return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
-//   },
-//
-//   userIsLogged: () => {
-//     return sessionStorage.getItem(UserIsLogged) === 'true';
-//   },
-//
-//   setUserIsLogged: value => {
-//     sessionStorage.setItem(UserIsLogged, value);
-//   }
-// };
-
-// export const Storage = {
-//   clearStorage: () => {
-//     sessionStorage.clear();
-//   },
-//
-//   setCurrentUser: data => {
-//     sessionStorage.setItem(CurrentUser, JSON.stringify(data));
-//   },
-//
-//   getCurrentUser: () => {
-//     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem("CurrentUser")) : null;
-//   },
-//
-//   setGoogleData: data => {
-//     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
-//   },
-//
-//   getGoogleData: () => {
-//     return sessionStorage.getItem(GoogleUser) ? JSON.parse(sessionStorage.getItem("GAPI")) : null;
-//   },
-//
-//   userIsLogged: () => {
-//     return sessionStorage.getItem(UserIsLogged) === 'true';
-//   },
-//
-//   setUserIsLogged: value => {
-//     sessionStorage.setItem(UserIsLogged, value);
-//   }
-// };
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
