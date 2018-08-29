@@ -28,61 +28,37 @@ export const User = {
 
   create: async user => {
     const url = `${await Config.getApiUrl()}/dacuser`;
-    const res = await fetchOk(url, _.mergeAll([
-      Config.authOpts(),
-      Config.jsonBody(user),
-      { method: 'POST' }
-    ]));
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
     return res.json();
   },
 
   update: async(user, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([
-      Config.authOpts(),
-      Config.jsonBody(user),
-      { method: 'PUT' }
-    ]));
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
     return res.json();
   },
 
   updateName: async(body, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([
-      Config.authOpts(),
-      Config.jsonBody(body),
-      { method: 'PUT' }
-    ]));
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(body), { method: 'PUT' }]));
     return res.json();
   },
 
   validateDelegation: async(role, dacUser) => {
     const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
-    const res = await fetchOk(url, _.mergeAll([
-      Config.authOpts(),
-      Config.jsonBody(dacUser),
-      { method: 'POST' }
-    ]));
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(dacUser), { method: 'POST' }]));
     return res.json();
   },
 
   registerUser: async user => {
     const url = `${await Config.getApiUrl()}/user`;
-    const res = await fetchOk(url, _.mergeAll([
-      Config.authOpts(),
-      Config.jsonBody(user),
-      { method: 'POST' }
-    ]));
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
     return res.json();
   },
 
   registerStatus: async(userRoleStatus, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([
-      Config.authOpts(),
-      Config.jsonBody(userRoleStatus),
-      { method: 'PUT' }
-    ]));
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -211,13 +187,6 @@ export const DarCases = {
   },
 };
 
-export const Election = {
-  downloadDatasetVotesForDARElection: async requestId => {
-    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
-    return getFile(url);
-  },
-};
-
 export const ConsentCases = {
   pending: async dacUserId => {
     const url = `${await Config.getApiUrl()}/consent/cases/pending/${dacUserId}`;
@@ -330,7 +299,6 @@ export const Files = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   }
-
 };
 
 export const Summary = {
@@ -465,8 +433,8 @@ export const Consent = {
   }
 };
 
-export const ConsentElection = {
-  // ConsentElectionResource
+export const Election = {
+
   create: async (consentId, election) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), {method: 'POST'}]));
@@ -484,6 +452,78 @@ export const ConsentElection = {
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
     return res.json();
   },
+
+  downloadDatasetVotesForDARElection: async requestId => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
+    return getFile(url);
+  },
+
+  electionUpdateResource: async electionId => {
+    const url = `${await Config.getApiUrl()}/election/${electionId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  electionUpdateResourceUpdate: async (electionId, document)  => {
+    const url = `${await Config.getApiUrl()}/election/${electionId}`;
+    const res = await fetchOk(url, _.mergeAll(Config.authOpts(), document, {method: 'PUT'}));
+    return res.json();
+  },
+
+  electionConsentResource: async requestElectionId => {
+    const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  lastElectionReview: async electionId => {
+    const url = `${await Config.getApiUrl()}/electionReview/last/${electionId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  electionReviewConsent: async consentId => {
+    const url = `${await Config.getApiUrl()}/electionReview/consent/${consentId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  electionReview: async electionId => {
+    const url = `${await Config.getApiUrl()}/electionReview/${electionId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  electionReviewResource: async (referenceId, type) => {
+    const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  dataAccessElectionReviewResource: async (electionId, isFinalAccess) => {
+    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}?isFinalAccess=${isFinalAccess}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  RPElectionReviewResource: async (electionId, isFinalAccess) => {
+    const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  ElectionReviewedConsents: async () => {
+    const url = `${await Config.getApiUrl()}/consent/cases/closed`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  // .factory('ElectionReviewedDRs', function($resource, apiUrl){
+  //   return $resource(apiUrl+"dataRequest/cases/closed", {},
+  //     {
+  //       List: {method:'GET', isArray:true}
+  //     });
+  // })
 };
 
 export const DUL = {
