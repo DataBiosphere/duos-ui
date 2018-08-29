@@ -9,6 +9,8 @@ class DataOwnerConsole extends Component {
     this.state = {
       dataOwnerUnreviewedCases: []
     };
+    this.handleOpenModal = this.handleOpenModal.bind(this);
+    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
   mockData() {
@@ -21,19 +23,18 @@ class DataOwnerConsole extends Component {
       ]
     })
   }
-  
+
   componentDidMount() {
     this.mockData();
   }
 
-  editReview() {
+  handleOpenModal() {
+    this.setState({ showModal: true });
+  }
 
-  };
-
-  voteReview() {
-
-  };
-
+  handleCloseModal() {
+    this.setState({ showModal: false });
+  }
 
   render() {
     let currentUser = {
@@ -63,7 +64,6 @@ class DataOwnerConsole extends Component {
             ]),
           ]),
         ]),
-
 
         div({ className: "jumbotron table-box" }, [
           div({ className: "row no-margin" }, [

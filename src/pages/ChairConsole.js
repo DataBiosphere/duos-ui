@@ -4,27 +4,27 @@ import { PageHeading } from '../components/PageHeading';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            showModal: false
-        };
-        this.handleOpenModal = this.handleOpenModal.bind(this);
-        this.handleCloseModal = this.handleCloseModal.bind(this);
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      showModal: false
+    };
+    this.handleOpenModal = this.handleOpenModal.bind(this);
+    this.handleCloseModal = this.handleCloseModal.bind(this);
+  }
 
-    handleOpenModal() {
-        this.setState({ showModal: true });
-    }
+  handleOpenModal() {
+    this.setState({ showModal: true });
+  }
 
-    handleCloseModal() {
-        this.setState({ showModal: false });
-    }
+  handleCloseModal() {
+    this.setState({ showModal: false });
+  }
 
-    render() {
-        let currentUser = {
-            displayName: 'Nadya Lopez Zalba'
-        }
+  render() {
+    let currentUser = {
+      displayName: 'Nadya Lopez Zalba'
+    }
 
         return (
             div({ className: "container" }, [

@@ -9,7 +9,6 @@ class HomeRegister extends Component {
     this.state = {
       value: ''
     }
-
     this.myHandler = this.myHandler.bind(this);
   }
 

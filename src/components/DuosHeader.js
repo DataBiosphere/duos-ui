@@ -197,35 +197,26 @@ class DuosHeader extends Component {
   }
 
   isUserLogged() {
-    console.log('------------------- isLogged ------------------------- ', this.state);
     return this.state.isLogged;
   }
 
   notYet() {
-    console.log('Not Yet Implemented');
   }
 
   toggled() {
-    console.log('--------------- toggled ---------------');
   }
 
   signIn() {
-    console.log('----A----------- signIn ----------------', this.state);
-    this.setState({ isLogged: true }, function () {
-      console.log('-----C---------- signIn --------------', this.state);
+    this.setState({isLogged: true}, function () {
       this.props.loginState(this.state.isLogged);
     });
-    console.log('----B----------- signIn ----------------', this.state);
   }
 
   signOut() {
-    console.log('-----A---------- signOut --------------', this.state);
-    this.setState({ isLogged: false }, function () {
-      console.log('-----C---------- signOut --------------', this.state);
+    this.setState({isLogged: false}, function () {
       this.props.loginState(this.state.isLogged);
       window.location.href = "/";
     });
-    console.log('-----B---------- signOut --------------', this.state);
   }
 
   toggleNavBar() {
@@ -233,7 +224,6 @@ class DuosHeader extends Component {
   }
 
   goToRP() {
-    console.log('--------------- goToRP ---------------');
   }
 
 }

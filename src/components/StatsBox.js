@@ -4,7 +4,6 @@ import { Chart } from "react-google-charts";
 
 export const StatsBox = hh(class StatsBox extends Component {
 
-
   chartOptions = {
     'dul': {
       pieHole: 0.4,
@@ -105,8 +104,6 @@ export const StatsBox = hh(class StatsBox extends Component {
 
     let options = this.props.options;
     let data = this.props.data;
-    // let subtitle = this.props.subtitle;
-    // let clickHandler = this.clickConsumer();
 
     let total = 0;
     data.forEach((element, index) => {

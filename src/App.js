@@ -16,8 +16,12 @@ class App extends React.Component {
     this.loginState = this.loginState.bind(this);
   }
 
+  componentWillMount() {
+    Modal.setAppElement(document.getElementById('modal-root'));
+  }
+
   loginState(isLogged) {
-    this.setState({isLogged: isLogged}, function () {
+    this.setState({ isLogged: isLogged }, function () {
       if (isLogged) {
         Storage.setUserIsLogged(isLogged);
       } else {
