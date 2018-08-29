@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, h1, h3, br, p, img } from 'react-hyperscript-helpers';
+import { div, hr, h1, h3, p, img } from 'react-hyperscript-helpers';
 
 // export const HomeAbout = hh(
 class HomeAbout extends Component {

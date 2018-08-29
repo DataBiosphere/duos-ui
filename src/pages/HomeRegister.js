@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { div, h1, form, label, input, hr } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
 
 class HomeRegister extends Component {
 

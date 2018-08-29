@@ -1,4 +1,5 @@
 import React from 'react';
+import Modal from 'react-modal';
 import DuosHeader from './components/DuosHeader';
 import { div, h } from 'react-hyperscript-helpers';
 import './App.css';
