@@ -8,7 +8,6 @@ class Home extends Component {
     return (
 
       div({ className: "row home" }, [
-
         div({ className: "col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           h1({ className: "home-title" }, ["Data Use Oversight System"]),
           div({ className: "home-title-description" }, ["A semi-automated management service for compliant secondary use of human genomics data"]),
