@@ -1,6 +1,6 @@
 import _ from 'lodash/fp'
+import { Storage } from "./storage";
 
-const auth_token = "tokennnnnnnnn";
 
 export const Config = {
   loadConfig: _.memoize(async () => {
@@ -10,14 +10,26 @@ export const Config = {
 
   getApiUrl: async () => (await getConfig()).apiUrl,
 
-  authOpts: (token = auth_token) => ({
-    headers: { Authorization: `Bearer ${token}` }
+   authOpts : (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json'
+    }
   }),
 
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' }
   }),
+
+  getGoogleClientId : async () => (await getConfig()).clientId
+
+};
+
+const Token = {
+  getToken: () => {
+    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
+  }
 };
 
 const loadConfig = _.memoize(async () => {
