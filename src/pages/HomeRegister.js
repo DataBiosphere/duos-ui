@@ -22,7 +22,7 @@ class HomeRegister extends Component {
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ color: "common", title: "Join DUOS", description: "Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests" }),
+                        PageHeading({ id: "joinDUOS", color: "common", title: "Join DUOS", description: "Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests" }),
                     ]),
                 ]),
                 hr({ className: "section-separator" }),

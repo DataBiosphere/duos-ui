@@ -24,7 +24,7 @@ class RpApplication extends Component {
             div({ className: "container " }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "../images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application", description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control." }),
+                        PageHeading({ id: "rpApplication", imgSrc: "../images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application", description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control." }),
                     ]),
                 ]),
                 hr({ className: "section-separator" }),

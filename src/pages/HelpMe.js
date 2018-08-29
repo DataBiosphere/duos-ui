@@ -22,7 +22,7 @@ class HelpMe extends Component {
             div({ className: "container" }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ imgSrc: "../images/icon_manage_help.png", iconSize: "large", color: "common", title: "Request Help Reports", description: "List of comments, suggestions and bug reports" }),
+                        PageHeading({ id: "helpMe", imgSrc: "../images/icon_manage_help.png", iconSize: "large", color: "common", title: "Request Help Reports", description: "List of comments, suggestions and bug reports" }),
                     ]),
                 ]),
                 hr({ className: "section-separator" }),

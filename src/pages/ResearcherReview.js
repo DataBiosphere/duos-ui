@@ -24,7 +24,7 @@ class ResearcherReview extends Component {
             div({ className: "container " }, [
                 div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                        PageHeading({ color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
+                        PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
                     ]),
                 ]),
                 hr({ className: "section-separator" }),

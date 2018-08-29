@@ -74,7 +74,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "/images/icon_statistics.png", iconSize: "large", color: "common", title: "Votes Statistics", description: "Summary statistics on the Data Access Committee and votes system" }),
+            PageHeading({ id: "summaryVotes", imgSrc: "/images/icon_statistics.png", iconSize: "large", color: "common", title: "Votes Statistics", description: "Summary statistics on the Data Access Committee and votes system" }),
           ]),
         ]),
         hr({ className: "section-separator" }),

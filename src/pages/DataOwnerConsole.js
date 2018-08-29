@@ -46,6 +46,7 @@ class DataOwnerConsole extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
             PageHeading({
+              id: "dataOwnerConsole",
               color: "dataset",
               title: "Welcome " + currentUser.displayName + "!",
               description: "These are your pending cases for review"

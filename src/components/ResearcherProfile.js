@@ -119,6 +119,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         div({className: "row no-margin"}, [
           div({className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12"}, [
             PageHeading({
+              id: "researcherProfile",
               color: "common",
               title: "Your Profile",
               description: "Please complete the following information to be able to request access to dataset(s)"

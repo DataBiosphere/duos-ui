@@ -30,6 +30,7 @@ class DataAccessRequestApplication extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({
+              id: "requestApplication",
               imgSrc: "/images/icon_add_access.png",
               iconSize: "medium",
               color: "access",

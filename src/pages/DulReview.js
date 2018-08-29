@@ -73,7 +73,7 @@ class DulReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "/images/icon_dul.png", iconSize: "medium", color: "dul", title: "Data Use Limitations Congruence Review", description: consentData }),
+            PageHeading({ id: "dulReview", imgSrc: "/images/icon_dul.png", iconSize: "medium", color: "dul", title: "Data Use Limitations Congruence Review", description: consentData }),
           ]),
 
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
@@ -117,7 +117,7 @@ class DulReview extends Component {
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           SubmitVoteBox({
-            id: "dulReview",
+            id: "dulReviewVoteBox",
             color: "dul",
             title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
             isDisabled: "isFormDisabled",
