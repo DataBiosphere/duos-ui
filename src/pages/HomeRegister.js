@@ -1,6 +1,5 @@
 import { Component } from 'react';
-import { div, button, hr } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
+import { div, h1, form, label, input, hr } from 'react-hyperscript-helpers';
 
 class HomeRegister extends Component {
 
@@ -15,18 +14,27 @@ class HomeRegister extends Component {
   myHandler(event) {
     // TBD
   }
-  
+
   render() {
     return (
-      div({ className: "container" }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ color: "common", title: "Join DUOS", description: "Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests" }),
-          ]),
-        ]),
-        hr({ className: "section-separator" }),
-
-        button({}, ["Click Me!"])
+      div({ className: "row home" }, [
+        div({ className: "col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+          h1({ className: "home-title" }, ["Join DUOS"]),
+          div({ className: "home-title-description" }, ["Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests."]),
+          hr({ className: "home-line" }),
+          div({ className: "row" }, [
+            div({ className: "col-lg-6 col-md-8 col-sm-12 col-xs-12" }, [
+              label({ className: "home-control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" }, ["Full Name"]),
+              input({ className: "form-control col-lg-12 col-md-12 col-sm-12 col-xs-12", type: "text", "ng-model": "form.name" }),
+            ]),
+            div({ className: "col-lg-6 col-md-8 col-sm-12 col-xs-12" }, [
+              div({ className: "pos-relative" }, [
+                div({ className: "custom-g-signin2 g-signin2 signInRegister", "data-onsuccess": "onSignIn", "data-theme": "dark"  }),
+                div({ isRendered: !form.name, className: "signInDisabledButton" })
+              ]),
+            ]),
+          ])
+        ])
       ])
     );
   }

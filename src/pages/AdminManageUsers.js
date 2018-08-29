@@ -108,7 +108,7 @@ class AdminManageUsers extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "../images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
+            PageHeading({ id: "manageUsers", imgSrc: "../images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
@@ -119,7 +119,7 @@ class AdminManageUsers extends Component {
             ]),
 
             a({
-              id: 'title_addUser',
+              id: 'btn_addUser',
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
               onClick: this.addUser
             }, [
@@ -146,7 +146,7 @@ class AdminManageUsers extends Component {
 
           ])
         ]),
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+        div({ className: "jumbotron table-box" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header common-color" }, ["User Name"]),
             div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header common-color" }, ["Google account id"]),
@@ -159,12 +159,12 @@ class AdminManageUsers extends Component {
           div({ "dir-paginate": "user in AdminManageUsers.usersList.dul | filter: searchUsers | itemsPerPage:8" }, [
             this.state.userList.map(user => {
               return h(Fragment, {}, [
-                div({ className: "row no-margin" }, [
-                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
-                  div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text" }, [user.email]),
-                  div({ className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold" }, [
-                    user.roles.map(role =>
-                      span({ className: "admin-users-list" }, [
+                div({ key: user.dacUserId, id: user.dacUserId, className: "row no-margin" }, [
+                  div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
+                  div({ id: user.dacUserId + "_email", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text" }, [user.email]),
+                  div({ id: user.dacUserId + "_roles", className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold" }, [
+                    user.roles.map((role, eIndex) =>
+                      span({ key: user.dacUserId + "_roles_" + eIndex, id: user.dacUserId + "_roles_" + eIndex, className: "admin-users-list" }, [
                         span({ className: "enabled default-color", isRendered: role.name === 'Admin' }, ["Admin"]),
                         span({ className: "enabled default-color", isRendered: role.name === 'Member' }, ["Member"]),
                         span({ className: "enabled default-color", isRendered: role.name === 'Chairperson' }, ["Chairperson"]),
@@ -174,17 +174,15 @@ class AdminManageUsers extends Component {
                       ])
                     )
                   ]),
-                  div({ className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
-
+                  div({ id: user.dacUserId + "_btn_edit", className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({
                       id: 'title_editUser',
                       className: "cell-button hover-color",
                       onClick: this.editUser(user)
                     }, ["Edit"]),
-
                   ]),
-                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    div({ className: "row no-margin" }, [
+                  div({ id: user.dacUserId + "_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
+                    div({ id: user.dacUserId + "_btn_researcherReview", className: "row no-margin" }, [
                       a({ isRendered: user.researcher !== false && user.completed, "ui-sref": "researcher_review({dacUserId: '{{user.dacUserId}}'})", className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                         // div({ className: "{'enabled': user.researcher && user.completed && user.status ::: 'pending' || user.status ::: null, 'editable': user.researcher && user.completed && user.status !:: 'pending', 'disabled': user.researcher :: false || !(user.completed)}" }, ["Review"]),
                         div({
@@ -197,15 +195,14 @@ class AdminManageUsers extends Component {
                       a({ isRendered: user.researcher === false || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                         div({ className: "disabled" }, ["Review"]),
                       ]),
-                      div({ isRendered: user.researcher === true, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
+
+                      div({ id: user.dacUserId + "_bonafide_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
                         span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, tooltip: "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
                         span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, tooltip: "Non-Bonafide researcher", "tooltip-className": "tooltip-class", "tooltip- trigger": "true", "tooltip-placement": "left" }, []),
                         span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, tooltip: "Researcher review pending", "tooltip-className": "tooltip-class", "tooltip -trigger": "true", "tooltip-placement": "left" }, []),
-                        span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) }, []),
+                        span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                       ]),
-                      div({ isRendered: user.researcher === false, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
-                        span({ className: "glyphicon glyphicon-hand-right dismiss-color" }, []),
-                      ]),
+          
                     ]),
 
                   ]),
