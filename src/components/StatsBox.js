@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, button, span, hh, h, hr, h4, i } from 'react-hyperscript-helpers';
+import { div, button, span, hh, h, hr, h4 } from 'react-hyperscript-helpers';
 import { Chart } from "react-google-charts";
 
 export const StatsBox = hh(class StatsBox extends Component {
@@ -105,8 +105,8 @@ export const StatsBox = hh(class StatsBox extends Component {
 
     let options = this.props.options;
     let data = this.props.data;
-    let subtitle = this.props.subtitle;
-    let clickHandler = this.clickConsumer();
+    // let subtitle = this.props.subtitle;
+    // let clickHandler = this.clickConsumer();
 
     let total = 0;
     data.forEach((element, index) => {

@@ -74,14 +74,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "../images/icon_statistics.png", iconSize: "large", color: "common", title: "Votes Statistics", description: "Summary statistics on the Data Access Committee and votes system" }),
+            PageHeading({ imgSrc: "/images/icon_statistics.png", iconSize: "large", color: "common", title: "Votes Statistics", description: "Summary statistics on the Data Access Committee and votes system" }),
           ]),
         ]),
         hr({ className: "section-separator" }),
 
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
-            PageSubHeading({ imgSrc: "../images/icon_dul.png", color: "dul", title: "Data Use Limitations Statistics", description: "Summary of votes on whether the consent limitations were accurately converted into a structured format" }),
+            PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Statistics", description: "Summary of votes on whether the consent limitations were accurately converted into a structured format" }),
           ]),
 
           a({
@@ -112,7 +112,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
-            PageSubHeading({ imgSrc: "../images/icon_access.png", color: "access", title: "Data Access Statistics", description: "Summary of votes on whether the researcher should be allowed to access a research study" }),
+            PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Statistics", description: "Summary of votes on whether the researcher should be allowed to access a research study" }),
           ]),
 
           a({

@@ -613,13 +613,13 @@ small {
   padding: 5px 0 0 3px;
 }*/
 
-.main-title-case {
+/* .main-title-case {
   font-size: 22px;
   margin: 12px 0 0 2px;
   display: block;
   color: #333333;
   font-weight: 300;
-}
+} */
 
 .hint {
   margin: 20px 15px 15px 15px;
@@ -808,6 +808,14 @@ small {
   margin-left: 5px;
   font-size: 15px;
   color: #777777;
+}
+
+.table-box {
+  padding: 15px 25px !important;
+  box-shadow: 3px 3px 0 #cccccc;
+  height: auto;
+  background: #eeeeee;
+  margin: 15px 0 20px 0;
 }
 
 .box-vote, .box-vote-results, .box-vote-singleresults, .box-vote-lightresults, .box-vote-stats {

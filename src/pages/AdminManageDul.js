@@ -163,7 +163,7 @@ class AdminManageDul extends Component {
           ]),
         ]),
 
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+        div({ className: "jumbotron table-box" }, [
           div({ className: "grid-9-row pushed-2" }, [
             div({ className: "col-2 cell-header dul-color" }, ["Consent id"]),
             div({ className: "col-2 cell-header dul-color" }, ["Consent Group Name"]),

@@ -146,7 +146,7 @@ class AdminManageUsers extends Component {
 
           ])
         ]),
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+        div({ className: "jumbotron table-box" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header common-color" }, ["User Name"]),
             div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header common-color" }, ["Google account id"]),

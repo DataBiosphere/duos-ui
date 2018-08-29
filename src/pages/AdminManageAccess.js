@@ -31,7 +31,7 @@ class AdminManageAccess extends Component {
           ]),
         ]),
 
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+        div({ className: "jumbotron table-box" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Data Request id"]),
             div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header access-color" }, ["Project title"]),
@@ -43,7 +43,7 @@ class AdminManageAccess extends Component {
 
           hr({ className: "pvotes-main-separator" }),
 
-          div({ "dir-paginate": "dar in AdminManageAccess.dars | filter: searchAccess | itemsPerPage:10", "current-page": "AdminManageAccess.currentDARPage" }, [
+          // div({ "dir-paginate": "dar in AdminManageAccess.dars | filter: searchAccess | itemsPerPage:10", "current-page": "AdminManageAccess.currentDARPage" }, [
             // this.state.userList.map(dar => {
               // return h(Fragment, {}, [
                 // div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin " + (dar.needsApproval ? "list-highlighted" : ""), }, [
@@ -105,7 +105,6 @@ class AdminManageAccess extends Component {
                 // ]),
               // ])
             // })
-          ]),
         ])
       ])
     );

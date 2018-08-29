@@ -67,7 +67,7 @@ class AdminUsers extends Component {
                         ]),
                     ])
                 ]),
-                div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+                div({ className: "jumbotron table-box" }, [
                     div({ className: "row" }, [
                         div({ className: "pvotes-box-head" }, [
                             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-box-subtitle common-color" }, ["User Name"]),
