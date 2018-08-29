@@ -408,13 +408,13 @@ export const Consent = {
     return res.json();
   },
 
-  getInvalidConsentRestriction: async dacUserId => {
+  getInvalidConsentRestriction: async () => {
     const url = `${await Config.getApiUrl()}/consent/invalid`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  create: async consent => {
+  create: async (consent) => {
     consent.requiresManualReview = false;
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
@@ -423,7 +423,7 @@ export const Consent = {
     return res.json();
   },
 
-  update: async consent => {
+  update: async (consent) => {
     consent.requiresManualReview = false;
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
@@ -441,7 +441,7 @@ export const Election = {
     return res.json();
   },
 
-  describe: async consentId => {
+  describe: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
@@ -453,12 +453,12 @@ export const Election = {
     return res.json();
   },
 
-  downloadDatasetVotesForDARElection: async requestId => {
+  downloadDatasetVotesForDARElection: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
     return getFile(url);
   },
 
-  electionUpdateResource: async electionId => {
+  electionUpdateResource: async (electionId) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
@@ -470,25 +470,25 @@ export const Election = {
     return res.json();
   },
 
-  electionConsentResource: async requestElectionId => {
+  electionConsentResource: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  lastElectionReview: async electionId => {
+  lastElectionReview: async (electionId) => {
     const url = `${await Config.getApiUrl()}/electionReview/last/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  electionReviewConsent: async consentId => {
+  electionReviewConsent: async (consentId) => {
     const url = `${await Config.getApiUrl()}/electionReview/consent/${consentId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  electionReview: async electionId => {
+  electionReview: async (electionId) => {
     const url = `${await Config.getApiUrl()}/electionReview/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
@@ -518,12 +518,39 @@ export const Election = {
     return res.json();
   },
 
-  // .factory('ElectionReviewedDRs', function($resource, apiUrl){
-  //   return $resource(apiUrl+"dataRequest/cases/closed", {},
-  //     {
-  //       List: {method:'GET', isArray:true}
-  //     });
-  // })
+  DataSetElection: async () => {
+    const url = `${await Config.getApiUrl()}/election/checkdataset`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  DarElectionResourceGet: async (requestId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  DarElectionResourcePost: async (requestId) => {
+    let postElection = {};
+    postElection.status = 'Open';
+    postElection.finalAccessVote = false;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(postElection), Config.authOpts(), {method: 'POST'}]));
+    return res.json();
+  },
+
+  DarElectionDatasetVotes: async (requestId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  ElectionVote: async (voteId) => {
+    const url = `${await Config.getApiUrl()}/election/vote/${voteId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
 };
 
 export const DUL = {
