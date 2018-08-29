@@ -1,21 +1,5 @@
 import _ from 'lodash/fp'
-import { Storage } from './storage'
 import { Config } from './config';
-
-// const Config.authOpts = (token = Token.getToken()) => ({
-//   headers: {
-//     Authorization: `Bearer ${token}`,
-//     Accept: 'application/json'
-//   }
-// });
-
-// const jsonBody = body => ({body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}});
-
-// export const Token = {
-//   getToken: () => {
-//     return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-//   }
-// };
 
 export const User = {
 
