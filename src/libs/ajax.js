@@ -1,5 +1,4 @@
 import _ from 'lodash/fp'
-import { Storage } from './storage'
 import { Config } from './config';
 
 // Storage Variables
@@ -610,10 +609,10 @@ export const DAR = {
   },
 };
 
-const Purpose = {
+export const Purpose = {
 
   darModalSummary: async (darId) => {
-    const url = `${await Config.getApiUrl()}dar/modalSummary/${darId}`;
+    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -635,7 +634,10 @@ const Purpose = {
   },
 
   dataAccessRequestManageResource: async (userId) => {
-    const url = `${await Config.getApiUrl()}dar/manage?userId=${userId}`;
+    if (userId === undefined) {
+      userId = '';
+    }
+    const url = `${await Config.getApiUrl()}/dar/manage?userId=${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
