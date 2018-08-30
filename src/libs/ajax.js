@@ -390,6 +390,12 @@ export const Consent = {
     return res.json();
   },
 
+  getInvalidConsentRestriction: async () => {
+    const url = `${await Config.getApiUrl()}/consent/invalid`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
   ConsentDulResource: async consentId => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
     const res = await fetchOk(url, Config.authOpts());
@@ -402,18 +408,20 @@ export const Consent = {
     return res.json();
   },
 
-  getInvalidConsentRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/consent/invalid`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  create: async (consent) => {
+  CreateConsentResource: async (consent) => {
     consent.requiresManualReview = false;
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
     const url = `${await Config.getApiUrl()}/consent`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'POST'}]));
+    return res.json();
+  },
+
+  CreateDulResource: async (consentId, fileName, file) => {
+    let formData = new FormData();
+    formData.append("data", new Blob([file], { type: 'text/plain' }));
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${file}`;
+    const res = await fetchOk(url, _.mergeAll([ Config.authOpts(), formData, { method: 'POST' }]));
     return res.json();
   },
 
@@ -424,7 +432,14 @@ export const Consent = {
     const url = `${await Config.getApiUrl()}/consent`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'PUT'}]));
     return res.json();
-  }
+  },
+
+  DeleteConsentResource: async (consentId) => {
+    const url = `${await Config.getApiUrl()}/consent/${consentId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
+    return res.json();
+  },
+
 };
 
 export const Election = {
@@ -593,12 +608,60 @@ export const DAR = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
+};
 
-  modalSummary: async id => {
-    const url = `${await Config.getApiUrl()}/dar/modalSummary/${id}`;
+const Purpose = {
+
+  darModalSummary: async (darId) => {
+    const url = `${await Config.getApiUrl()}dar/modalSummary/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
+
+  describeDar: async (darId) => {
+    let darInfo = {};
+    this.darModalSummary(darId).then((data) => {
+      darInfo.researcherId = data.userId;
+      darInfo.status = data.status;
+      darInfo.hasAdminComment = data.rationale !== null;
+      darInfo.adminComment = data.rationale;
+      darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
+      if (darInfo.hasPurposeStatements) {
+        darInfo.purposeStatements = data.purposeStatements;
+        darInfo.purposeManualReview = this.requiresManualReview(darInfo.purposeStatements);
+      }
+
+    });
+  },
+
+  dataAccessRequestManageResource: async (userId) => {
+    const url = `${await Config.getApiUrl()}dar/manage?userId=${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  postDataAccessRequest: async (dataAccessRequest) => {
+    const url = `${await Config.getApiUrl()}/dar`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dataAccessRequest), {method: 'POST'}]));
+    return res.json();
+  },
+
+  cancelDar: async (referenceId) => {
+    const url = `${await Config.getApiUrl()}/dar/cancel/${referenceId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'PUT'}]));
+    return res.json();
+  },
+
+  requiresManualReview: (object) => {
+    var manualReview = false;
+    object.forEach(function (element) {
+      if (element.manualReview === true) {
+        manualReview = true;
+      }
+    });
+  return manualReview;
+}
+
 };
 
 const fetchOk = async (...args) => {
