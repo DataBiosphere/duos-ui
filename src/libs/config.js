@@ -41,11 +41,11 @@ const getConfig = async () => {
   return await loadConfig()
 };
 
-const Token = {
-  getToken: () => {
-    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-  }
-};
+// const Token = {
+//   getToken: () => {
+//     return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
+//   }
+// };
 
 export const getGoogleClientId = async () => (await getConfig()).clientId;
 
