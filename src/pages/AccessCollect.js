@@ -30,14 +30,11 @@ class AccessCollect extends Component {
   mockState() {
     this.setState(prev => {
       prev.createDate = '2018-08-30';
-      prev.enableFinalButton = true;
-      prev.enableAgreementButton = true;
       prev.hasUseRestriction = true;
       prev.projectTitle = 'My Project 01';
       prev.consentName = 'ORSP-124';
       prev.isQ1Expanded = true;
       prev.isQ2Expanded = false;
-      prev.match = '-1';
       prev.election = {
         finalVote: '0',
         finalRationale: '',
@@ -53,14 +50,9 @@ class AccessCollect extends Component {
         finalRationale: '',
         finalVoteDate: '2018-08-30'
       };
-      prev.voteAgreement = {
-        vote: '0',
-        rationale: '',
-      };
       prev.darInfo = {
         havePI: true,
         pi: 'PI name goes here....',
-
         profileName: 'My Profile name',
         status: 'OK',
         hasAdminComment: true,
@@ -308,7 +300,7 @@ class AccessCollect extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review", description: consentData }),
+            PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             a({ id: "btn_back", onClick: "back()", className: "btn vote-button vote-button-back vote-button-bigger" }, [
@@ -566,7 +558,7 @@ class AccessCollect extends Component {
 
               h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
 
-              this.state.voteAccessList.map((row, rIndex) => {
+              this.state.rpVoteAccessList.map((row, rIndex) => {
                 return h(Fragment, {}, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
