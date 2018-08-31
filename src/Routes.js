@@ -35,7 +35,6 @@ import DulReviewResults from "./pages/DulReviewResults";
 import ResearcherReview from "./pages/ResearcherReview";
 import ManageOntologies from "./pages/ManageOntologies";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
-import Paginator from "./components/Paginator";
 
 export default ({props}) => (
 
@@ -74,7 +73,6 @@ export default ({props}) => (
     <AuthenticatedRoute path='/final_access_review_results' component={FinalAccessReviewResults} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
     <AuthenticatedRoute path='/rp_application' component={RpApplication} props={props} />
-    <AuthenticatedRoute path='/paginator' component={Paginator} props={props}/>
     <Route path='*' component={NotFound} />
   </Switch>
 );
