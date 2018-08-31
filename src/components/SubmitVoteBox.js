@@ -34,73 +34,89 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
-    return div({ id: this.props.id, className: "jumbotron box-vote " + this.props.color + "-background-lighter" }, [
-      h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
-      hr({ className: "box-separator" }),
-      form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
-        fieldset({ disable: this.props.isDisabled }, [
-          div({ className: "form-group first-form-group" }, [
-            label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
-            div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-              div({ className: "radio-inline" }, [
-                input({
-                  id: "rad_positiveVote",
-                  name: "inputVote",
-                  type: "radio",
-                  className: "regular-radio",
-                  value: this.state.voteStatus,
-                  onClick: this.positiveVote
-                }),
-                label({ htmlFor: "rad_positiveVote" }, []),
-                label({ id: "lbl_positiveVote", htmlFor: "rad_positiveVote", className: "radio-button-text" }, ["Yes"]),
+    return (
+      div({ id: "box_" + this.props.id }, [
+        h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
+        hr({ className: "box-separator" }),
 
-                input({
-                  id: "rad_negativeVote",
-                  name: "inputVote",
-                  type: "radio",
-                  className: "regular-radio",
-                  value: this.state.voteStatus,
-                  onClick: this.setEnableVoteButton
-                }),
-                label({ htmlFor: "rad_negativeVote" }, []),
-                label({ id: "lbl_negativeVote", htmlFor: "rad_negativeVote", className: "radio-button-text" }, ["No"]),
+        div({ isRendered: this.props.agreementData !== undefined }, [this.props.agreementData]),
+
+        form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
+          fieldset({ disable: this.props.isDisabled }, [
+            div({ className: "form-group first-form-group" }, [
+              label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
+              div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+                div({ className: "radio-inline" }, [
+                  input({
+                    id: "rad_positive_" + this.props.id,
+                    name: "input_" + this.props.id,
+                    type: "radio",
+                    className: "regular-radio",
+                    value: this.state.voteStatus,
+                    onClick: this.positiveVote
+                  }),
+                  label({ htmlFor: "rad_positive_" + this.props.id }, []),
+                  label({ id: "lbl_positive_" + this.props.id, htmlFor: "rad_positive_" + this.props.id, className: "radio-button-text" }, ["Yes"]),
+
+                  input({
+                    id: "rad_negative_" + this.props.id,
+                    name: "input_" + this.props.id,
+                    type: "radio",
+                    className: "regular-radio",
+                    value: this.state.voteStatus,
+                    onClick: this.setEnableVoteButton
+                  }),
+                  label({ htmlFor: "rad_negative_" + this.props.id }, []),
+                  label({ id: "lbl_negative_" + this.props.id, htmlFor: "rad_negative_" + this.props.id, className: "radio-button-text" }, ["No"]),
+                ]),
               ]),
             ]),
-          ]),
 
-          div({ className: "form-group" }, [
-            span({ isRendered: this.state.voteStatus === '1' }, [
-              label({ id: "lbl_comments", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
+            div({ className: "form-group" }, [
+              span({ isRendered: this.state.voteStatus === '1' }, [
+                label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
+              ]),
+              span({ isRendered: this.state.voteStatus !== '1' }, [
+                label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
+              ]),
+              div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+                input({
+                  id: "txt_rationale" + this.props.id,
+                  name: "inputRationale" + this.props.id,
+                  type: "text",
+                  className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
+                  title: "Optional: describe your rationale or add comments here (please be as specific as possible)",
+                  placeholder: "Optional: describe your rationale or add comments here (please be as specific as possible)",
+                  value: this.state.rationale,
+                  onChange: this.setEnableVoteButton
+                }),
+              ]),
             ]),
-            span({ isRendered: this.state.voteStatus !== '1' }, [
-              label({ id: "lbl_rationale", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
-            ]),
-            div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-              input({
-                id: "txt_rationale",
-                name: "inputRationale",
-                type: "text",
-                className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
-                title: "Optional: describe your rationale or add comments here (please be as specific as possible)",
-                placeholder: "Optional: describe your rationale or add comments here (please be as specific as possible)",
-                value: this.state.rationale,
-                onChange: this.setEnableVoteButton                
-              }),
-            ]),
-          ]),
 
-          div({ className: "form-group form-group-bottom" }, [
-            div({ className: "col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-6 col-sm-offset-6 col-xs-6 col-xs-offset-6" }, [
-              button({
-                id: "btn_submitVote",
-                disabled: this.state.voteStatus === null || !this.state.enableVoteButton,
-                onClick: this.logVote,
-                className: "btn btn-primary col-lg-12 col-md-12 col-sm-12 col-xs-12 vote-button " + this.props.color + "-background"
-              }, [this.props.action.label]),
+            div({ className: "form-group form-group-bottom" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-6 col-xs-12" }, [
+                // div({ className: "votes-alerts final-alert no-margin no-padding" }, [
+                //   alertsDAR.map((alert, rIndex) => {
+                //     return h(Fragment, {}, [
+                //       div({ type: "danger", className: "alert-title cancel-color" }, [
+                //         h4({}, [alert.title]),
+                //       ]),
+                //     ]);
+                //   })
+                // ]),
+              ]),
+              div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
+                button({
+                  id: "btn_submit_" + this.props.id,
+                  disabled: this.state.voteStatus === null || !this.state.enableVoteButton,
+                  onClick: this.logVote,
+                  className: "btn btn-primary col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
+                }, [this.props.action.label]),
+              ]),
             ]),
-          ]),
+          ])
         ])
       ])
-    ])
+    );
   }
 });

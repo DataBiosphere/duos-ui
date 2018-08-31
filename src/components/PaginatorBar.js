@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Pagination from 'react-paginating';
 import { div, hh, li, ul, h, i, a, input, button, hr, option, span, select } from 'react-hyperscript-helpers';
+import Select from 'react-select';
 import _ from 'lodash/fp'
 import './PaginatorBar.css';
 
@@ -16,7 +17,34 @@ const paginatorButton = (props, label) => button(_.merge({
   // }
 }, props), label);
 
+const options = [
+  { label: '  5', value: 5, clearableValue: false },
+  { label: ' 10', value: 10, clearableValue: false },
+  { label: ' 20', value: 20, clearableValue: false },
+  { label: ' 50', value: 50, clearableValue: false },
+  { label: '100', value: 100, clearableValue: false },
+];
+
 export const PaginatorBar = hh(class PaginatorBar extends Component {
+
+  limit = 0;
+
+
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      limit: this.props.limit
+    }
+  }
+
+  changeLimit = (data) => {
+    this.setState(prev => {
+      prev.limit = data.value;
+      return prev;
+    });
+    this.props.changeHandler(data.value);
+  }
 
   render() {
 
@@ -78,8 +106,20 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                   span({ className: "glyphicon glyphicon-fast-forward", "aria-hidden": "true" })
                 ]
               ),
+
+              h(Select, {
+                clearable: false,
+                multi: false,
+                placeholder: '',
+                value: this.state.limit,
+                defaultValue: options[0],
+                onChange: data => this.changeLimit(data),
+                options: options,
+
+              })
             ])
         ])
     );
   }
 });
+

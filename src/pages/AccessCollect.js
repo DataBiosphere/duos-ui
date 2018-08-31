@@ -1,10 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { SingleResultBox } from '../components/SingleResultBox';
+import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 
-class AccessReview extends Component {
+class AccessCollect extends Component {
 
 
   constructor(props) {
@@ -89,11 +91,111 @@ class AccessReview extends Component {
 
   initialState() {
     return {
+      voteStatus: '1',
+      createDate: '2018-08-30',
       hasUseRestriction: true,
       projectTitle: 'My Project 01',
       consentName: 'ORSP-124',
-      isQ1Expanded: true,
+      isQ1Expanded: false,
       isQ2Expanded: false,
+      
+      electionAccess: {
+        finalVote: '0',
+        finalRationale: 'lalala',
+        finalVoteDate: '2018-08-31'
+      },
+      electionRP: {
+        finalVote: '0',
+        finalRationale: '',
+        finalVoteDate: '2018-08-30'
+      },
+
+      voteAccessList: [
+        [
+          {
+            displayName: "Diego Gil", vote: {
+              vote: '0',
+              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
+              createDate: '',
+              updateDate: '',
+            }
+          },
+          {
+            displayName: "Nadya Lopez Zalba", vote: {
+              vote: '0',
+              rationale: '',
+              createDate: '',
+              updateDate: '',
+            }
+          },
+        ],
+        [
+          {
+            displayName: "Walter Lo Forte", vote: {
+              vote: '0',
+              rationale: 'lala',
+              createDate: '',
+              updateDate: ''
+            }
+          },
+          {
+            displayName: "Leo Forconesi", vote: {
+              vote: '1',
+              rationale: '',
+              createDate: '',
+              updateDate: ''
+            }
+          },
+        ]
+      ],
+      rpVoteAccessList: [
+        [
+          {
+            displayName: "Diego Gil", vote: {
+              vote: '0',
+              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
+              createDate: '',
+              updateDate: '',
+            }
+          },
+          {
+            displayName: "Nadya Lopez Zalba", vote: {
+              vote: '0',
+              rationale: '',
+              createDate: '',
+              updateDate: '',
+            }
+          },
+        ],
+        [
+          {
+            displayName: "Walter Lo Forte", vote: {
+              vote: '0',
+              rationale: 'lala',
+              createDate: '',
+              updateDate: ''
+            }
+          },
+          {
+            displayName: "Leo Forconesi", vote: {
+              vote: '1',
+              rationale: '',
+              createDate: '',
+              updateDate: ''
+            }
+          },
+        ],
+        [
+          {
+            displayName: "Tadeo Riveros", vote: {
+              vote: '0',
+              rationale: 'lalala',
+              createDate: '',
+              updateDate: ''
+            }
+          }
+        ]
+      ],
 
       darInfo: {
         havePI: true,
@@ -193,39 +295,23 @@ class AccessReview extends Component {
       this.state.consentName
     ]);
 
-    let userRoles = {
-      member: 'MEMBER',
-      chairperson: "CHAIRPERSON"
-    }
-
     return (
 
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
+            PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map(rol => {
-              return (
-                a({ id: "btn_back", href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
-            this.state.currentUser.roles.map(rol => {
-              return (
-                a({ id: "btn_back", href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
+            a({ id: "btn_back", onClick: "back()", className: "btn vote-button vote-button-back vote-button-bigger" }, [
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 
         div({ className: "row no-margin" }, [
           CollapsiblePanel({
-            id: "accessReview",
+            id: "accessCollectVotes",
             onClick: this.toggleQ1,
             color: 'access',
             title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
@@ -234,7 +320,7 @@ class AccessReview extends Component {
           }, [
 
               hr({ className: "section-separator", style: { 'marginTop': '0' } }),
-              h4({ className: "hint" }, ["Please review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data"]),
+              h4({ className: "hint" }, ["Please review the Application Summary, Data Use Limitations, and DAC Votes to determine if the researcher should be granted access to the data"]),
               //-----
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
@@ -362,30 +448,58 @@ class AccessReview extends Component {
               ]),
 
               //-----
-              div({ className: "row no-margin" }, [
 
-                div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-                  div({ className: "jumbotron box-vote access-background-lighter" }, [
-                    SubmitVoteBox({
-                      id: "reviewAccess",
-                      color: "access",
-                      title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
-                        : "Should data access be granted to this applicant?",
-                      isDisabled: "isFormDisabled",
-                      voteStatus: this.state.voteStatus,
-                      action: { label: "Vote", handler: this.submit }
+              div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                CollectResultBox({
+                  id: "accessCollectResult",
+                  title: "Vote Results",
+                  color: "access",
+                  type: "stats",
+                  class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
+                  chartData: [
+                    ['Results', 'Votes'],
+                    ['Yes', 90],
+                    ['No', 110]
+                  ]
+                }),
+
+                div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
+                  SubmitVoteBox({
+                    id: "collectAccess",
+                    color: "access",
+                    title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
+                      : "Should data access be granted to this applicant?",
+                    isDisabled: "isFormDisabled",
+                    voteStatus: this.state.voteStatus,
+                    action: { label: "Vote", handler: this.submit }
+                  }),
+                ]),
+              ]),
+
+              h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
+
+              this.state.voteAccessList.map((row, rIndex) => {
+                return h(Fragment, {}, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    row.map((vm, vIndex) => {
+                      return h(Fragment, {}, [
+                        SingleResultBox({
+                          id: "accessSingleResult" + vIndex,
+                          color: "access",
+                          data: vm
+                        })
+                      ]);
                     })
-                  ])
-                ])
-              ])
+                  ]),
+                ]);
+              })
             ])
         ]),
-
 
         div({ className: "row no-margin" }, [
           CollapsiblePanel({
             isRendered: this.state.hasUseRestriction,
-            id: "rpReviewVotes",
+            id: "rpCollectVotes",
             onClick: this.toggleQ1,
             color: 'access',
             title: "Q2. Was the research purpose accurately converted to a structured format?",
@@ -393,7 +507,7 @@ class AccessReview extends Component {
           }, [
 
               hr({ className: "section-separator", style: { 'marginTop': '0' } }),
-              h4({ className: "hint" }, ["Please review the Research Purpose and determine if it was appropriately converted to a Structured Research Purpose"]),
+              h4({ className: "hint" }, ["Please review the Research Purpose, Structured Research Purpose, and DAC votes to determine if the Research Purpose was appropriately converted to a Structured Research Purpose"]),
 
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
@@ -415,20 +529,50 @@ class AccessReview extends Component {
               ]),
 
               //-----
-              div({ className: "row no-margin" }, [
-                div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-                  div({ className: "jumbotron box-vote access-background-lighter" }, [
-                    SubmitVoteBox({
-                      id: "reviewRP",
-                      color: "access",
-                      title: "Q2. Was the research purpose accurately converted to a structured format?",
-                      isDisabled: "isFormDisabled",
-                      voteStatus: this.state.voteStatus,
-                      action: { label: "Vote", handler: this.submit }
-                    }),
-                  ])
-                ])
-              ])
+
+              div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                CollectResultBox({
+                  id: "rpCollectResult",
+                  title: "Vote Results",
+                  color: "access",
+                  type: "stats",
+                  class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
+                  chartData: [
+                    ['Results', 'Votes'],
+                    ['Yes', 90],
+                    ['No', 110]
+                  ]
+                }),
+
+                div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
+                  SubmitVoteBox({
+                    id: "collectRP",
+                    color: "access",
+                    title: "Q2. Was the research purpose accurately converted to a structured format?",
+                    isDisabled: "isFormDisabled",
+                    voteStatus: this.state.voteStatus,
+                    action: { label: "Vote", handler: this.submit }
+                  }),
+                ]),
+              ]),
+
+              h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
+
+              this.state.rpVoteAccessList.map((row, rIndex) => {
+                return h(Fragment, {}, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    row.map((vm, vIndex) => {
+                      return h(Fragment, {}, [
+                        SingleResultBox({
+                          id: "rpSingleResult" + vIndex,
+                          color: "access",
+                          data: vm
+                        })
+                      ]);
+                    })
+                  ]),
+                ]);
+              })
             ])
         ])
       ])
@@ -436,5 +580,5 @@ class AccessReview extends Component {
   }
 }
 
-export default AccessReview;
+export default AccessCollect;
 

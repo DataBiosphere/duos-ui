@@ -8,10 +8,12 @@ import Pagination from "react-paginating";
 import _ from "lodash/fp";
 import { PaginatorBar } from '../components/PaginatorBar';
 
-const limit = 3;
-const pageCount = 5;
+
 
 class AdminManageUsers extends Component {
+
+  limit = 5;
+  pageCount = 5;
 
   constructor(props) {
     super(props);
@@ -19,6 +21,7 @@ class AdminManageUsers extends Component {
       userList: [],
       showAddUserModal: false,
       showEditUserModal: false,
+      limit: this.limit,
       currentPage: 1,
     };
 
@@ -50,6 +53,13 @@ class AdminManageUsers extends Component {
   handlePageChange = page => {
     this.setState(prev => {
       prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
       return prev;
     });
   };
@@ -172,7 +182,7 @@ class AdminManageUsers extends Component {
 
           hr({ className: "pvotes-main-separator" }),
           div({ "dir-paginate": "user in AdminManageUsers.usersList.dul | filter: searchUsers | itemsPerPage:8" }, [
-            this.state.userList.slice((currentPage - 1) * limit, currentPage * limit).map((user, index) => {
+            this.state.userList.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
               return h(Fragment, {}, [
                 div({ key: user.dacUserId, id: user.dacUserId, className: "row no-margin" }, [
                   div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
@@ -228,10 +238,11 @@ class AdminManageUsers extends Component {
             }),
             PaginatorBar({
               total: this.state.userList.length,
-              limit: limit,
-              pageCount: pageCount,
+              limit: this.state.limit,
+              pageCount: this.pageCount,
               currentPage: this.state.currentPage,
-              onPageChange: this.handlePageChange
+              onPageChange: this.handlePageChange,
+              changeHandler: this.handleSizeChange,
             }),
           ])
         ])
