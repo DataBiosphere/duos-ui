@@ -1,7 +1,6 @@
 import { Component, Fragment } from 'react';
 import { div, button, span, b, a, i, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
@@ -373,19 +372,6 @@ class AccessResultRecords extends Component {
       b({ className: "pipe" }, [this.state.projectTitle]),
       this.state.darCode
     ]);
-
-    const agreementData = div({ className: "agreement-data" }, [
-      label({}, ["DAC Decision: "]),
-      span({ className: "access-color", isRendered: this.state.electionAccess.finalVote === '1', style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
-      span({ className: "access-color", isRendered: this.state.electionAccess.finalVote === '0', style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
-      span({ className: "access-color", isRendered: this.state.electionAccess.finalVote === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
-      label({}, ["DUOS Matching Algorithm Decision: "]),
-      span({ className: "access-color", isRendered: this.state.match === '1', style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
-      span({ className: "access-color", isRendered: this.state.match === '0', style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
-      span({ className: "access-color", isRendered: this.state.match === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
-      span({ className: "cancel-color", isRendered: this.state.match === '-1', style: { 'marginLeft': '5px' } }, [
-        "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"]),
-    ])
 
     return (
 
