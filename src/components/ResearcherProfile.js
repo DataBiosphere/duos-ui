@@ -125,7 +125,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   submit(event) {
     console.log(this.state.researcherProfile);
-    Researcher.update()
+    Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     event.preventDefault();
   }
 
