@@ -75,29 +75,31 @@ class DataAccessRequestApplication extends Component {
   }
 
   handleChange = (e) => {
-    const field = e.target.id;
+    console.log(e);
+    const field = e.target.name;
     const value = e.target.value;
-
-    if (field === "inputInvestigator") { this.setState(prev => { prev.formData.investigator = value; return prev; }) }
-    if (field === "inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; }) }
-    if (field === "inputDepartment") { this.setState(prev => { prev.formData.department = value; return prev; }) }
-    if (field === "inputDivision") { this.setState(prev => { prev.formData.division = value; return prev; }) }
-    if (field === "inputAddress1") { this.setState(prev => { prev.formData.address1 = value; return prev; }) }
-    if (field === "inputAddress2") { this.setState(prev => { prev.formData.address2 = value; return prev; }) }
-    if (field === "inputCity") { this.setState(prev => { prev.formData.city = value; return prev; }) }
-    if (field === "inputState") { this.setState(prev => { prev.formData.state = value; return prev; }) }
-    if (field === "inputZipcode") { this.setState(prev => { prev.formData.zipcode = value; return prev; }) }
-    if (field === "inputCountry") { this.setState(prev => { prev.formData.country = value; return prev; }) }
-    if (field === "inputTitle") { this.setState(prev => { prev.formData.projectTile = value; return prev; }) }
-
-    //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-    //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-    //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-    //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-    //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-
+    this.setState(prev => { prev.formData[field] = value; return prev; });
     console.log(JSON.stringify(this.state.formData, null, 2));
   }
+
+  // if (field === "inputInvestigator") { this.setState(prev => { prev.formData.investigator = value; return prev; }) }
+  // if (field === "inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; }) }
+  // if (field === "inputDepartment") { this.setState(prev => { prev.formData.department = value; return prev; }) }
+  // if (field === "inputDivision") { this.setState(prev => { prev.formData.division = value; return prev; }) }
+  // if (field === "inputAddress1") { this.setState(prev => { prev.formData.address1 = value; return prev; }) }
+  // if (field === "inputAddress2") { this.setState(prev => { prev.formData.address2 = value; return prev; }) }
+  // if (field === "inputCity") { this.setState(prev => { prev.formData.city = value; return prev; }) }
+  // if (field === "inputState") { this.setState(prev => { prev.formData.state = value; return prev; }) }
+  // if (field === "inputZipcode") { this.setState(prev => { prev.formData.zipcode = value; return prev; }) }
+  // if (field === "inputCountry") { this.setState(prev => { prev.formData.country = value; return prev; }) }
+  // if (field === "inputTitle") { this.setState(prev => { prev.formData.projectTile = value; return prev; }) }
+  // if (field === "inputRUS") { this.setState(prev => { prev.formData.rus = value; return prev; }) }
+  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
+  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
+  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
+  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
+  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
+
 
   step1 = (e) => {
     this.setState(prev => {
@@ -308,7 +310,7 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     input({
                       ref: this.focus1,
-                      value: this.state.formData.investigator, onChange: this.handleChange, type: "text", name: "inputInvestigator", id: "inputInvestigator", disabled: false,
+                      value: this.state.formData.investigator, onChange: this.handleChange, type: "text", name: "investigator", id: "inputInvestigator", disabled: false,
                       className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control', required: true
                     }),
                   ]),
@@ -327,7 +329,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.institution, onChange: this.handleChange, type: "text", name: "inputInstitution", id: "inputInstitution", disabled: false,
+                      value: this.state.formData.institution, onChange: this.handleChange, type: "text", name: "institution", id: "inputInstitution", disabled: false,
                       className: step1.inputInstitution.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required"
                     }),
@@ -341,7 +343,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.department, onChange: this.handleChange, type: "text", name: "inputDepartment", id: "inputDepartment", disabled: false,
+                      value: this.state.formData.department, onChange: this.handleChange, type: "text", name: "department", id: "inputDepartment", disabled: false,
                       className: step1.inputDepartment.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required"
                     }),
@@ -349,7 +351,7 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
                     label({ className: "control-label" }, ["Division"]),
-                    input({ value: this.state.formData.division, onChange: this.handleChange, type: "text", name: "inputDivision", id: "inputDivision", className: "form-control", disabled: false }),
+                    input({ value: this.state.formData.division, onChange: this.handleChange, type: "text", name: "division", id: "inputDivision", className: "form-control", disabled: false }),
                   ]),
 
                   div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
@@ -360,7 +362,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.address1, onChange: this.handleChange, type: "text", name: "inputAddress1", id: "inputAddress1",
+                      value: this.state.formData.address1, onChange: this.handleChange, type: "text", name: "address1", id: "inputAddress1",
                       className: step1.inputAddress1.$invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required", disabled: false
                     }),
@@ -368,7 +370,7 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                     label({ className: "control-label" }, ["Street Address 2"]),
-                    input({ value: this.state.formData.address2, onChange: this.handleChange, type: "text", name: "inputAddress2", id: "inputAddress2", className: "form-control", disabled: false }),
+                    input({ value: this.state.formData.address2, onChange: this.handleChange, type: "text", name: "address2", id: "inputAddress2", className: "form-control", disabled: false }),
                   ]),
 
                   div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -378,7 +380,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.city, onChange: this.handleChange, type: "text", name: "inputCity", id: "inputCity",
+                      value: this.state.formData.city, onChange: this.handleChange, type: "text", name: "city", id: "inputCity",
                       className: step1.inputCity.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required", disabled: false
                     }),
@@ -386,7 +388,7 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                     label({ className: "control-label" }, ["State"]),
-                    input({ value: this.state.formData.state, onChange: this.handleChange, type: "text", name: "inputState", id: "inputState", className: "form-control", disabled: false }, [
+                    input({ value: this.state.formData.state, onChange: this.handleChange, type: "text", name: "state", id: "inputState", className: "form-control", disabled: false }, [
                     ]),
                   ]),
 
@@ -397,7 +399,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.zipcode, onChange: this.handleChange, type: "text", name: "inputZipCode", id: "inputZipCode",
+                      value: this.state.formData.zipcode, onChange: this.handleChange, type: "text", name: "zipCode", id: "inputZipCode",
                       className: step1.inputZipCode.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required", disabled: false
                     }),
@@ -410,7 +412,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.country, onChange: this.handleChange, type: "text", name: "inputCountry", id: "inputCountry",
+                      value: this.state.formData.country, onChange: this.handleChange, type: "text", name: "country", id: "inputCountry",
                       className: step1.inputCountry.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required", disabled: false
                     }),
@@ -430,7 +432,7 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group" }, [
                     input({
-                      value: this.state.formData.projectTitle, onChange: this.handleChange, type: "text", name: "inputTitle", id: "inputTitle",
+                      value: this.state.formData.projectTitle, onChange: this.handleChange, type: "text", name: "projectTitle", id: "inputTitle",
                       className: step1.inputTitle.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required", disabled: this.state.formData.dar_code !== null
                     }),
@@ -443,7 +445,7 @@ class DataAccessRequestApplication extends Component {
                       a({ onClick: this.step2, className: "access-background" }, ["Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, []),
                       ]),
                     ]),
-                    li({ isRendered: "this.state.formData.dar_code === null", className: "next f-right multi-step-save" }, [
+                    li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save" }, [
                       a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
                     ]),
                   ]),
@@ -493,7 +495,7 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     textarea({
                       ref: this.focus2,
-                      value: this.state.formData.rus, name: "inputRUS", id: "inputRUS",
+                      value: this.state.formData.rus, onChange: this.handleChange, name: "rus", id: "inputRUS",
                       className: step2.inputRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                       maxLength: "2200", rows: "6",
                       required: "required", placeholder: "Please limit your RUS to 2200 characters.", disabled: this.state.formData.dar_code !== null
@@ -510,7 +512,7 @@ class DataAccessRequestApplication extends Component {
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     textarea({
-                      value: this.state.formData.non_tech_rus, name: "inputNonTechRUS", id: "inputNonTechRUS",
+                      value: this.state.formData.non_tech_rus, onChange: this.handleChange, name: "non_tech_rus", id: "inputNonTechRUS",
                       className: step2.inputNonTechRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                       maxLength: "1100", rows: "3", required: "required", placeholder: "Please limit your non-technical summary to 1100 characters.",
                       disabled: this.state.formData.dar_code !== null
@@ -530,7 +532,7 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: "this.state.formData.diseases", id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                        value: this.state.formData.diseases, onChange: this.handleChange, name:'diseases', id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
                         name: "checkDiseases", disabled: (this.state.formData.dar_code !== null)
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkDiseases" }, [
