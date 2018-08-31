@@ -90,9 +90,9 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
   render() {
 
     return (
-      div({ className: "jumbotron box-vote-results no-padding " + this.props.class }, [
+      div({ className: "jumbotron box-vote-results " + this.props.class }, [
 
-        div({ isRendered: this.props.type !== "stats" || this.props.type === undefined, className: "row" }, [
+        div({ isRendered: this.props.type === undefined, className: "row" }, [
           div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
             h4({ className: "box-vote-title " + this.props.color + "-color" }, [this.props.title]),
             hr({ className: "box-separator" }),
@@ -143,7 +143,34 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
             className: "result-chart",
             style: { 'marginTop': '10px' }
           })
-        ])
+        ]),
+
+        div({ isRendered: this.props.type === "records" }, [
+          h4({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
+          hr({ className: "box-separator" }),
+          div({ className: "results-box" }, [
+            div({ className: "row" }, [
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Vote: "]),
+              div({ id: "lbl_result" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 vote-label bold" }, [
+                span({ isRendered: this.props.vote === '1' }, ["YES"]),
+                span({ isRendered: this.props.vote === '0' }, ["NO"]),
+                span({ isRendered: this.props.vote === null }, []),
+              ]),
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Date: "]),
+
+              div({ id: "lbl_date" + this.props.id, className: "col-lg-4 col-md-4 col-sm-8 col-xs-8 vote-label" }, [
+                this.props.voteDate /*| date: dateFormat */
+              ]),
+            ]),
+            div({ className: "row" }, [
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-9 vote-label" }, [
+                span({ isRendered: this.props.vote !== null }, [this.props.rationale]),
+                span({ isRendered: this.props.vote === null }, ["---"]),
+              ]),
+            ]),
+          ]),
+        ]),
       ])
     );
   }

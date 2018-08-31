@@ -197,7 +197,7 @@ class DulCollect extends Component {
             ]
           }),
 
-          div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
+          div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results dul-background-lighter" }, [
             SubmitVoteBox({
               id: "collectDul",
               color: "dul",

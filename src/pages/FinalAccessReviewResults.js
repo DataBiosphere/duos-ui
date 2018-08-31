@@ -655,7 +655,7 @@ class FinalAccessReviewResults extends Component {
 
               div({ className: "row no-margin" }, [
                 CollectResultBox({
-                  id: "RPCollectResult",
+                  id: "rpCollectResult",
                   title: "DAC Decision",
                   color: "access",
                   class: "col-lg-8 col-md-8 col-sm-12 col-xs-12",
