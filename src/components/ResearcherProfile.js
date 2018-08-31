@@ -12,13 +12,18 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.state = {
       researcherProfile: {},
       fieldStatus: {},
-      profileName: 'Diego Gil'
     };
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
 
     this.handleChange = this.handleChange.bind(this);
     this.handlePIChange = this.handlePIChange.bind(this);
     this.handlePI2Change = this.handlePI2Change.bind(this);
+    this.componentDidUpdate = this.componentDidUpdate.bind(this);
+    this.clearNotRelatedPIFields = this.clearNotRelatedPIFields.bind(this);
+    this.clearCommonsFields = this.clearCommonsFields.bind(this);
+    this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
+    this.saveProfile = this.saveProfile.bind(this);
+    this.submit = this.submit.bind(this);
   }
 
   componentWillMount() {
@@ -26,25 +31,30 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   componentDidUpdate() {
-    console.log("RESEARCHER PROFILE =", this.state.researcherProfile);
+    // console.log("RESEARCHER PROFILE =", this.state);
   }
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
+    profile.isThePI = JSON.parse(profile.isThePI);
+    profile.havePI = JSON.parse(profile.havePI);
+    profile.completed = JSON.parse(profile.completed);
     this.setState({researcherProfile: profile});
   }
 
   handleChange(event) {
-    // let field = {};
-    let fieldName = event.target.name;
-    let fieldValue = event.target.value;
-    console.log('handleChange: ', fieldName, fieldValue);
+    let field = event.target.name;
+    let value = event.target.value;
+    let researcherProfile = this.state.researcherProfile;
+    researcherProfile[field] = value;
+    this.setState({ researcherProfile: researcherProfile});
 
-    if (fieldName === 'profileAcademicEmail') {
-      if (fieldValue !== 'nlopez@broadinstitute.org') {
+    if (field === 'profileAcademicEmail') {
+      if (value !== '') {
         console.log('error ....');
         this.setState(prev => {
           prev.fieldStatus.email = 'error';
+          console.log(prev);
           return prev;
         });
       } else {
@@ -62,28 +72,32 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handlePIChange(event) {
-    let field = {};
+    let researcherProfile = this.state.researcherProfile;
     console.log(event.target.id, event.target.name);
     if (event.target.id === 'isThePI') {
-      this.setState({'isThePI': "true"}, () => {
+      researcherProfile.isThePI = true;
+      this.setState({researcherProfile: researcherProfile}, () => {
         console.log(JSON.stringify(this.state, null, 2));
       });
     } else {
-      this.setState({'isThePI': "false"}, () => {
+      researcherProfile.isThePI = false;
+      this.setState({researcherProfile: researcherProfile}, () => {
         console.log(JSON.stringify(this.state, null, 2));
       });
     }
   }
 
   handlePI2Change(event) {
-    let field = {};
+    let researcherProfile = this.state.researcherProfile;
     console.log(event.target.id, event.target.name);
     if (event.target.id === 'doHavePI') {
-      this.setState({'havePI': "true"}, () => {
+      researcherProfile.havePI = true;
+      this.setState({researcherProfile: researcherProfile}, () => {
         console.log(JSON.stringify(this.state, null, 2));
       });
     } else {
-      this.setState({'havePI': "false"}, () => {
+      researcherProfile.havePI = false;
+      this.setState({researcherProfile: researcherProfile}, () => {
         console.log(JSON.stringify(this.state, null, 2));
       });
     }
@@ -105,8 +119,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   }
 
-  submit() {
+  saveProfile() {
+    console.log(this.state.researcherProfile);
+  }
 
+  submit(event) {
+    console.log(this.state.researcherProfile);
+    Researcher.update()
+    event.preventDefault();
   }
 
   render() {
@@ -134,6 +154,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Full Name*"]),
                   input({
                     id: "profileName",
+                    name: "profileName",
                     type: "text",
                     onChange: this.handleChange,
                     className: "form-control ",
@@ -154,7 +175,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Academic/Business Email Address*"]),
                   input({
                     id: "profileAcademicEmail",
-                    name: "profileAcademicEmail",
+                    name: "academicEmail",
                     type: "email",
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.academicEmail,
@@ -172,7 +193,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   label({id: "lbl_profileInstitution", className: "control-label"}, ["Institution Name*"]),
                   input({
                     id: "profileInstitution",
-                    name: "profileInstitution",
+                    name: "institution",
                     type: "text",
                     className: "form-control ",
                     //  + (researcherForm.profileInstitution.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -191,7 +212,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({id: "lbl_profileDepartment", className: "control-label"}, ["Department*"]),
                       input({
                         id: "profileDepartment",
-                        name: "profileDepartment",
+                        name: "department",
                         type: "text",
                         className: "form-control ",
                         //  + (researcherForm.profileDepartment.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -211,7 +232,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }, ["Division ", span({className: "italic"}, ["(optional)"]),]),
                       input({
                         id: "profileDivision",
-                        name: "profileDivision",
+                        name: "division",
                         type: "text",
                         className: "form-control",
                         onChange: this.handleChange,
@@ -226,7 +247,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({id: "lbl_profileAddress1", className: "control-label"}, ["Street Address 1*"]),
                       input({
                         id: "profileAddress1",
-                        name: "profileAddress1",
+                        name: "address1",
                         type: "text",
                         className: "form-control ",
                         //  + (researcherForm.profileAddress1.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -245,8 +266,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         className: "control-label"
                       }, ["Street Address 2 ", span({className: "italic"}, ["(optional)"])]),
                       input({
-                        id: "profileAddress2",
-                        name: "profileAddress2",
+                        id: "address2",
+                        name: "address2",
                         type: "text",
                         className: "form-control",
                         onChange: this.handleChange,
@@ -262,7 +283,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({id: "lbl_profileCity", className: "control-label"}, ["City*"]),
                       input({
                         id: "profileCity",
-                        name: "profileCity",
+                        name: "city",
                         type: "text",
                         className: "form-control ",
                         //  + (researcherForm.profileCity.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -279,7 +300,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({id: "lbl_profileState", className: "control-label"}, ["State*"]),
                       input({
                         id: "profileState",
-                        name: "profileState",
+                        name: "state",
                         type: "text",
                         className: "form-control ",
                         //  + (researcherForm.profileState.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -301,7 +322,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({id: "lbl_profileZip", className: "control-label"}, ["Zip/Postal Code*"]),
                       input({
                         id: "profileZip",
-                        name: "profileZip",
+                        name: "zipcode",
                         type: "text",
                         className: "form-control ",
                         //  + (researcherForm.profileZip.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -318,7 +339,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({id: "lbl_profileCountry", className: "control-label"}, ["Country*"]),
                       input({
                         id: "profileCountry",
-                        name: "profileCountry",
+                        name: "country",
                         type: "text",
                         className: "form-control ",
                         //  + (researcherForm.profileCountry.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",
@@ -328,7 +349,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.profileCountry === undefined && showValidationMessages)
+                        isRendered: (this.state.researcherProfile.country === undefined && showValidationMessages)
                       }, ["Country is required"]),
                     ]),
                   ]),
@@ -383,13 +404,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ]),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.isThePI === undefined && showValidationMessages)
+                    isRendered: (this.state.researcherProfile.isThePI === undefined && showValidationMessages)
                     // researcherForm.havePI.$invalid && showValidationMessages
                   }, ["Required field"]),
                 ]),
               ]),
 
-              div({isRendered: this.state.isThePI === "false", className: "form-group"}, [
+              div({isRendered: this.state.researcherProfile.isThePI === false, className: "form-group"}, [
                 div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group"}, [
                   label({
                     className: "control-label ",
@@ -398,17 +419,17 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group"}, [
-                  div({className: "radio-inline", disabled: this.state.isThePI !== "false"}, [
+                  div({className: "radio-inline", disabled: this.state.researcherProfile.isThePI !== false}, [
                     input({
                       id: "doHavePI",
                       name: "havePI",
                       type: "radio",
                       onChange: this.handlePI2Change,
-                      value: this.state.havePI,
+                      value: this.state.researcherProfile.havePI,
                       className: "regular-radio",
                       onClick: this.clearCommonsFields,
-                      disabled: this.state.isThePI !== "false",
-                      required: this.state.isThePI === "false"
+                      disabled: this.state.researcherProfile.isThePI !== false,
+                      required: this.state.researcherProfile.isThePI === false
                     }),
                     label({htmlFor: "doHavePI"}, []),
                     label({id: "lbl_doHavePI", htmlFor: "doHavePI", className: "radio-button-text"}, ["Yes"]),
@@ -421,8 +442,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       value: this.state.researcherProfile.havePI,
                       className: "regular-radio",
                       onClick: this.clearNoHasPIFields,
-                      disabled: this.state.researcherProfile.isThePI !== "false",
-                      required: this.state.researcherProfile.isThePI === "false"
+                      disabled: this.state.researcherProfile.isThePI !== false,
+                      required: this.state.researcherProfile.isThePI === false
                     }),
                     label({htmlFor: "doNotHavePI"}, []),
                     label({id: "lbl_doNotHavePI", htmlFor: "doNotHavePI", className: "radio-button-text"}, ["No"]),
@@ -434,18 +455,18 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
               ]),
 
-              div({isRendered: this.state.researcherProfile.havePI === "true", className: "form-group"}, [
+              div({isRendered: this.state.researcherProfile.havePI === true, className: "form-group"}, [
                 div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12"}, [
                   label({id: "lbl_profilePIName", className: "control-label"}, ["Principal Investigator Name*"]),
                   input({
                     id: "profilePIName",
-                    name: "profilePIName",
+                    name: "pIName",
                     type: "text",
                     className: "form-control ",
                     //  + (researcherForm.profilePIName.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.piName,
-                    required: this.state.researcherProfile.havePI === "true",
+                    required: this.state.researcherProfile.havePI === true,
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
@@ -460,13 +481,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Principal Investigator Email Address*"]),
                   input({
                     id: "profilePIEmail",
-                    name: "profilePIEmail",
+                    name: "pIEmail",
                     type: "email",
                     className: "form-control ",
                     //  + (researcherForm.profilePIEmail.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.piEmail,
-                    required: this.state.havePI === "true",
+                    required: this.state.researcherProfile.havePI === true,
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
@@ -482,7 +503,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["eRA Commons ID ", span({className: "italic"}, ["(optional)"])]),
                   input({
                     id: "profileEraCommons",
-                    name: "profileEraCommons",
+                    name: "eRACommonsID",
                     type: "text",
                     className: "form-control",
                     onChange: this.handleChange,
@@ -512,7 +533,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["URL of a scientific publication ", span({className: "italic"}, ["(optional)"])]),
                   input({
                     id: "profileScientificURL",
-                    name: "profileScientificURL",
+                    name: "scientificURL",
                     type: "text",
                     className: "form-control",
                     onChange: this.handleChange,
@@ -522,7 +543,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               ]),
 
               div({
-                isRendered: (this.state.researcherProfile.isThePI === "true" || this.state.researcherProfile.havePI === "false"),
+                isRendered: (this.state.researcherProfile.isThePI === true || this.state.researcherProfile.havePI === false),
                 className: "form-group",
                 style: {"border": "5px solid red"}
               }, [
@@ -533,7 +554,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["eRA Commons ID ", span({className: "italic"}, ["(optional)"]),]),
                   input({
                     id: "profileEraCommons",
-                    name: "profileEraCommons",
+                    name: "eRACommonsID",
                     type: "text",
                     className: "form-control",
                     onChange: this.handleChange,
@@ -548,7 +569,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Pubmed ID of a publication ", span({className: "italic"}, ["(optional)"])]),
                   input({
                     id: "profilePubmedID",
-                    name: "profilePubmedID",
+                    name: "pubmedID",
                     type: "text",
                     className: "form-control",
                     onChange: this.handleChange,
@@ -563,7 +584,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["URL of a scientific publication ", span({className: "italic"}, ["(optional)"])]),
                   input({
                     id: "profileScientificURL",
-                    name: "profileScientificURL",
+                    name: "scientificURL",
                     type: "text",
                     className: "form-control",
                     onChange: this.handleChange,
@@ -577,9 +598,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   li({className: "italic default-color"}, ["*Required field"]),
                   li({className: "f-right multi-step-next"}, [
                     a({
-                      isRendered: true,
+                      isRendered: this.state.researcherProfile.completed,
                       // isRendered: "!this.state.completed",
-                      disabled: "researcherForm.$invalid",
+                      disabled: false,
                       href: "",
                       onClick: this.submit,
                       className: "common-background"
@@ -592,7 +613,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       className: "common-background"
                     }, ["Update"]),
                   ]),
-                  li({isRendered: "!this.state.completed", className: "f-right multi-step-save"}, [
+                  li({isRendered: !this.state.researcherProfile.completed, className: "f-right multi-step-save"}, [
                     a({href: "", onClick: this.saveProfile, className: "common-color"}, ["Continue later"]),
                   ]),
                 ]),
