@@ -53,7 +53,6 @@ class DulReview extends Component {
 
   render() {
 
-    let consentDulName = 'consentDulName <strong>Hola</strong> </br> zarasa';
     let consentSDul = 'consentSDul';
     let consentName = 'ORSP-124';
     let consentGroupName = 'OD-256: Jackson / HS-08-000245';
@@ -97,7 +96,7 @@ class DulReview extends Component {
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
         h4({ className: "hint" }, ["Please review the Data Use Letter and determine if the Data Use Limitations were accurately converted to Structured Limitations"]),
-        
+
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
           ElectionPanel({
             id: "dulPanel",
@@ -116,14 +115,16 @@ class DulReview extends Component {
         ]),
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-          SubmitVoteBox({
-            id: "dulReviewVoteBox",
-            color: "dul",
-            title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-            isDisabled: "isFormDisabled",
-            voteStatus: this.state.voteStatus,
-            action: { label: "Vote", handler: this.submit }
-          }),
+          div({ className: "jumbotron box-vote dul-background-lighter" }, [
+            SubmitVoteBox({
+              id: "dulReview",
+              color: "dul",
+              title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
+              isDisabled: "isFormDisabled",
+              voteStatus: this.state.voteStatus,
+              action: { label: "Vote", handler: this.submit }
+            }),
+          ]),
         ]),
       ])
     );

@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, button } from 'react-hyperscript-helpers';
 
-class AccessReviewResults extends Component {
+class DulPreview extends Component {
 
   constructor(props) {
     super(props);
@@ -20,12 +20,12 @@ class AccessReviewResults extends Component {
 
     return (
       div({ className: "container " }, [
-        "AccessReviewResults Page",
+        "DulPreviewResults Page",
         button({}, ["Click Me!"])
       ])
     );
   }
 }
 
-export default AccessReviewResults;
+export default DulPreview;
 
