@@ -23,7 +23,7 @@ class ManageOntologies extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "../images/icon-manage-ontology.png", iconSize: "large", color: "common", title: "Manage Ontologies", description: "Select and manage Ontologies for index" }),
+            PageHeading({ id: "manageOntologies", imgSrc: "../images/icon-manage-ontology.png", iconSize: "large", color: "common", title: "Manage Ontologies", description: "Select and manage Ontologies for index" }),
           ]),
         ]),
         hr({ className: "section-separator" }),

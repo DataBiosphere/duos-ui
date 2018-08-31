@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, table, thead, tbody, th, tr, td, form, h, hr, input, label, i, span, a, p } from 'react-hyperscript-helpers';
+import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, i, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { DataSet } from "../libs/ajax";
 
@@ -83,32 +83,41 @@ class DatasetCatalog extends Component {
     const objectIdList = ['a', 'b', 'c'];
     return (
       h(Fragment, {}, [
-        div({ className: "container" }, [
+        div({ className: "container container-wide" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-              PageHeading({ imgSrc: "/images/icon_dataset_.png", iconSize: "large", color: "dataset", title: "Dataset Catalog", description: "Datasets with an associated DUL to apply for secondary use" }),
+              PageHeading({
+                id: "datasetCatalog",
+                imgSrc: "/images/icon_dataset_.png",
+                iconSize: "large",
+                color: "dataset",
+                title: "Dataset Catalog",
+                description: "Datasets with an associated DUL to apply for secondary use"
+              }),
             ]),
 
             div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
+              div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
                 div({ className: "search-text" }, [
                   i({ className: "glyphicon glyphicon-search dataset-color" }),
                   input({
-                    type: "search", className: "form-control users-search", placeholder: "Enter search term..."
-                    , "value": "searchDataset"
+                    id: "txt_search",
+                    type: "search",
+                    className: "form-control users-search",
+                    placeholder: "Enter search term...",
+                    value: "searchDataset"
                   })
                 ]),
               ]),
               button({
-                download: "", "ng-disabled": "objectIdList.length === 0", onClick: this.download(objectIdList),
-                className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 download-button dataset-background"
+                download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),
+                className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
-                  span({}, ["Download selection"]),
                   span({ className: "cm-icon-button glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }, []),
+                  span({}, ["Download selection"]),
                 ]),
             ]),
           ]),
-          hr({ className: "section-separator" }),
 
 
           div({ className: "table-wrap" }, [
@@ -116,7 +125,7 @@ class DatasetCatalog extends Component {
             form({ className: "pos-relative" }, [
               div({ className: "checkbox check-all" }, [
                 input({ type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "all" }),
-                label({ className: "regular-checkbox", for: "all" }, []),
+                label({ className: "regular-checkbox", htmlFor: "all" }, []),
               ]),
             ]),
 
@@ -235,38 +244,34 @@ class DatasetCatalog extends Component {
                             return h(Fragment, {}, [
 
                               td({
-                                className: "table-items cell-size", "ng-class": "{'dataset-disabled': !dataSet.active}"
+                                className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '')
                               }, [
-
                                   p({ isRendered: property.propertyName !== 'dbGAP' }, [property.propertyValue]),
 
                                   a({
-                                    href: property.propertyValue, target: "_blank", className: "enabled",
-                                    isRendered: property.propertyName === 'dbGAP' && property.propertyValue.length > 0
-                                  }, ["Link"]),
-
-                                  a({
-                                    href: property.propertyValue, className: "disabled",
-                                    isRendered: property.propertyName === 'dbGAP' && property.propertyValue.length === 0
+                                    isRendered: property.propertyName === 'dbGAP',
+                                    href: property.propertyValue,
+                                    target: "_blank",
+                                    className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
                                   }, ["Link"]),
                                 ])
                             ])
                           }),
 
-
-                          td({ className: "table-items cell-size", "ng-class": "{'dataset-disabled': !dataSet.active}" }, [dataSet.consentId]),
+                          td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
                           td({
-                            className: "table-items cell-size translated-restriction hover-color",
-                            "ng-class": "{'dataset-disabled': !dataSet.active}",
+                            className: "table-items cell-size translated-restriction hover-color bold " + (!dataSet.active ? 'dataset-disabled' : ''),
                             onClick: this.showSdul(dataSet.translatedUseRestriction)
-                          }, [span({ style: { "cursor": "pointer" } }, ["Translated Use Restriction"]),
+                          }, [
+                              span({ style: { "cursor": "pointer" } }, ["Translated Use Restriction"]),
                             ]),
 
                           td({
-                            isRendered: isAdmin, className: "table-items cell-size translated-restriction hover-color",
+                            isRendered: isAdmin, className: "table-items cell-size translated-restriction hover-color bold",
                             onClick: this.downloadList(dataSet)
-                          }, [span({ style: { "cursor": "pointer" } }, ["Download List"]),
+                          }, [
+                              span({ style: { "cursor": "pointer" } }, ["Download List"]),
                             ]),
                         ])
                     ]);
@@ -276,19 +281,18 @@ class DatasetCatalog extends Component {
               ]),
 
               div({
-                className: "pvotes-pagination dataset-pagination", "dir-pagination-controls": "true"
-                , "max-size": "10"
-                , "direction-links": "true"
-                , "boundary-links": "true"
+                className: "pvotes-pagination dataset-pagination", "dir-pagination-controls": "true",
+                "max-size": "10",
+                "direction-links": "true",
+                "boundary-links": "true"
               }),
             ]),
             div({ className: "f-right" }, [
               button({
-                "ng-show": "isResearcher",
-                "ng-disabled": "objectIdList.length === 0",
+                isRendered: this.isResearcher,
+                disabled: objectIdList.length === 0,
                 onClick: this.exportToRequest(objectIdList),
-                className: "download-button dataset-background apply-dataset",
-                "ng-class": "{'disabled': objectIdList.length === 0}",
+                className: "download-button dataset-background apply-dataset " + (objectIdList.length === 0 ? 'disabled' : ''),
                 tooltip: "Request Access for selected Datasets", "tooltip-class": "tooltip-class", "tooltip-trigger": "true",
                 "tooltip-placement": "top", "tooltip-animation": "false"
               }, ["Apply for Access"]),

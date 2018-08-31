@@ -23,7 +23,7 @@ class InvalidRestrictions extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "../images/icon_invalid_restrictions.png", iconSize: "large", color: "common", title: "Invalid Request Restriction", description: "List of Invalid Restrictions for Data Use Limitations and Data Access Requests" }),
+            PageHeading({ id: "invalidRestrictions", imgSrc: "../images/icon_invalid_restrictions.png", iconSize: "large", color: "common", title: "Invalid Request Restriction", description: "List of Invalid Restrictions for Data Use Limitations and Data Access Requests" }),
           ]),
         ]),
         hr({ className: "section-separator" }),

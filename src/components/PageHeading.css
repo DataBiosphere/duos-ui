@@ -31,3 +31,12 @@
     font-size: 19px;
     line-height: 25px;
   }
+
+  .page-heading-description .consent-data {
+    font-size: 22px;
+    font-style: normal;
+    margin: 10px 0 0 2px;
+    display: block;
+    color: #333333;
+    font-weight: 300;
+  }
