@@ -1,0 +1,28 @@
+.absolute-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-btn:hover {
+  border: 0!important;
+  background: #2FA4E7 !important;
+  color: #ffffff !important;
+}
+
+.pagination-btn {
+  /* width: 80%; */
+  height: auto;
+  text-align: center;
+  border: 0!important;
+  background: rgba(204, 204, 204, 0.5) !important;
+  transition: background 0.3s ease, color 0.3s ease;
+  font-weight: 500;
+  border-radius: 3px;
+  -moz-border-radius: 5px;
+  box-shadow: 2px 2px rgb(204, 204, 204) !important;
+  cursor: pointer;
+  padding: 7px 20px 5px 20px !important;
+  margin: 0px 5px 0px 5px !important;
+  font-size: 14px;
+}

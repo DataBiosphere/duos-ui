@@ -10,7 +10,6 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     this.state = { googleButton: null };
     this.login = props.loginState;
     this.getUser = this.getUser.bind(this);
-
   }
 
   responseGoogle = (response) => {

@@ -1,18 +1,28 @@
-import { Component, Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import { div, button, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { EditUserModal } from '../components/modals/EditUserModal';
 import { User } from "../libs/ajax";
+import Pagination from "react-paginating";
+import _ from "lodash/fp";
+import { PaginatorBar } from '../components/PaginatorBar';
+
+
 
 class AdminManageUsers extends Component {
+
+  limit = 5;
+  pageCount = 5;
 
   constructor(props) {
     super(props);
     this.state = {
       userList: [],
       showAddUserModal: false,
-      showEditUserModal: false
+      showEditUserModal: false,
+      limit: this.limit,
+      currentPage: 1,
     };
 
     this.getUsers();
@@ -39,6 +49,20 @@ class AdminManageUsers extends Component {
     this.setState({ userList: userList });
     console.log(userList);
   }
+
+  handlePageChange = page => {
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      return prev;
+    });
+  };
 
   addUser = (e) => {
     this.setState(prev => {
@@ -103,12 +127,13 @@ class AdminManageUsers extends Component {
   }
 
   render() {
+    const { currentPage } = this.state;
 
     return (
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "manageUsers", imgSrc: "../images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
+            PageHeading({ id: "manageUsers", imgSrc: "/images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
@@ -157,7 +182,7 @@ class AdminManageUsers extends Component {
 
           hr({ className: "pvotes-main-separator" }),
           div({ "dir-paginate": "user in AdminManageUsers.usersList.dul | filter: searchUsers | itemsPerPage:8" }, [
-            this.state.userList.map(user => {
+            this.state.userList.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
               return h(Fragment, {}, [
                 div({ key: user.dacUserId, id: user.dacUserId, className: "row no-margin" }, [
                   div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
@@ -208,10 +233,17 @@ class AdminManageUsers extends Component {
                   ]),
 
                 ]),
-                hr({ className: "pvotes-separator" })
+                hr({ className: "pvotes-separator", key: user.dacUserId + '-hr' })
               ])
             }),
-            div({ "dir-pagination-controls": "true", "max-size": "8", "direction-links": "true", "boundary-links": "true", className: "pvotes-pagination" }, []),
+            PaginatorBar({
+              total: this.state.userList.length,
+              limit: this.state.limit,
+              pageCount: this.pageCount,
+              currentPage: this.state.currentPage,
+              onPageChange: this.handlePageChange,
+              changeHandler: this.handleSizeChange,
+            }),
           ])
         ])
       ])
