@@ -6,7 +6,7 @@ export const PageHeading = hh(class PageHeading extends Component {
 
   render() {
 
-    return div({ id: this.props.id, className: "page-heading"}, [
+    return div({ id: this.props.id + "_heading", className: "page-heading"}, [
       img({
         id: this.props.id + "_icon",
         isRendered: this.props.imgSrc !== undefined,

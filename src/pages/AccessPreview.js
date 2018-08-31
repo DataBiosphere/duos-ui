@@ -183,7 +183,7 @@ class AccessPreview extends Component {
                     h4({}, ["Application Summary"]),
                   ]),
 
-                  div({ id: "rp", className: "panel-body row" }, [
+                  div({ id: "panel_applicationSummary", className: "panel-body row" }, [
                     div({ className: "col-lg-4 col-md-5 col-sm-5 col-xs-12" }, [
 
                       div({ isRendered: this.state.darInfo.havePI, className: "row no-margin" }, [
@@ -294,7 +294,7 @@ class AccessPreview extends Component {
                   div({ className: "panel-heading cm-boxhead dul-color" }, [
                     h4({}, ["Data Use Limitations"]),
                   ]),
-                  div({ id: "dul", className: "panel-body cm-boxbody" }, [
+                  div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
                       button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
                     ])
