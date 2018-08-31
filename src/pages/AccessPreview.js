@@ -1,10 +1,9 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, h4, ul, li, label, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 
-class AccessReview extends Component {
+class AccessPreview extends Component {
 
 
   constructor(props) {
@@ -33,21 +32,6 @@ class AccessReview extends Component {
       prev.consentName = 'ORSP-124';
       prev.isQ1Expanded = true;
       prev.isQ2Expanded = false;
-      prev.election = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionAccess = {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionRP = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
       prev.darInfo = {
         havePI: true,
         pi: 'PI name goes here....',
@@ -92,7 +76,7 @@ class AccessReview extends Component {
       hasUseRestriction: true,
       projectTitle: 'My Project 01',
       consentName: 'ORSP-124',
-      isQ1Expanded: true,
+      isQ1Expanded: false,
       isQ2Expanded: false,
 
       darInfo: {
@@ -145,14 +129,6 @@ class AccessReview extends Component {
     console.log('------------downloadDUL-------------', e);
   }
 
-  positiveVote = (e) => {
-    console.log('------------positiveVote--------------');
-  }
-
-  logVote = (e) => {
-    console.log('------------logVote--------------');
-  }
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
@@ -170,62 +146,29 @@ class AccessReview extends Component {
   }
 
   render() {
-
-    // let vote = {
-    //   vote: null,
-    //   rationale: ''
-    // }
-
-    // let alertsDAR = [
-    //   { title: "Alert 01" },
-    //   { title: "Alert 02" },
-    // ];
-
-    // let alertsAgree = [
-    //   { title: "Alert Agree 01" },
-    //   { title: "Alert Agree 02" },
-    // ];
-
-    // let alertOn = null;
-
+    
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
       this.state.consentName
     ]);
-
-    let userRoles = {
-      member: 'MEMBER',
-      chairperson: "CHAIRPERSON"
-    }
 
     return (
 
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
+            PageHeading({ id: "previewAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Preview", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map(rol => {
-              return (
-                a({ id: "btn_back", href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
-            this.state.currentUser.roles.map(rol => {
-              return (
-                a({ id: "btn_back", href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
+            a({ id: "btn_back", onClick: "back()", className: "btn vote-button vote-button-back vote-button-bigger" }, [
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 
         div({ className: "row no-margin" }, [
           CollapsiblePanel({
-            id: "accessReview",
+            id: "accessCollectVotes",
             onClick: this.toggleQ1,
             color: 'access',
             title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
@@ -233,8 +176,6 @@ class AccessReview extends Component {
             expanded: this.state.isQ1Expanded
           }, [
 
-              hr({ className: "section-separator", style: { 'marginTop': '0' } }),
-              h4({ className: "hint" }, ["Please review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data"]),
               //-----
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
@@ -356,44 +297,22 @@ class AccessReview extends Component {
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
                       button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-                    ]),
-                  ]),
-                ]),
-              ]),
-
-              //-----
-              div({ className: "row no-margin" }, [
-
-                div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-                  div({ className: "jumbotron box-vote access-background-lighter" }, [
-                    SubmitVoteBox({
-                      id: "reviewAccess",
-                      color: "access",
-                      title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
-                        : "Should data access be granted to this applicant?",
-                      isDisabled: "isFormDisabled",
-                      voteStatus: this.state.voteStatus,
-                      action: { label: "Vote", handler: this.submit }
-                    })
+                    ])
                   ])
                 ])
               ])
             ])
         ]),
 
-
         div({ className: "row no-margin" }, [
           CollapsiblePanel({
             isRendered: this.state.hasUseRestriction,
-            id: "rpReviewVotes",
+            id: "rpCollectVotes",
             onClick: this.toggleQ1,
             color: 'access',
             title: "Q2. Was the research purpose accurately converted to a structured format?",
             expanded: this.state.isQ2Expanded
           }, [
-
-              hr({ className: "section-separator", style: { 'marginTop': '0' } }),
-              h4({ className: "hint" }, ["Please review the Research Purpose and determine if it was appropriately converted to a Structured Research Purpose"]),
 
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
@@ -413,22 +332,6 @@ class AccessReview extends Component {
                   div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction" }, [this.state.darInfo.sDar])
                 ]),
               ]),
-
-              //-----
-              div({ className: "row no-margin" }, [
-                div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-                  div({ className: "jumbotron box-vote access-background-lighter" }, [
-                    SubmitVoteBox({
-                      id: "reviewRP",
-                      color: "access",
-                      title: "Q2. Was the research purpose accurately converted to a structured format?",
-                      isDisabled: "isFormDisabled",
-                      voteStatus: this.state.voteStatus,
-                      action: { label: "Vote", handler: this.submit }
-                    }),
-                  ])
-                ])
-              ])
             ])
         ])
       ])
@@ -436,5 +339,5 @@ class AccessReview extends Component {
   }
 }
 
-export default AccessReview;
+export default AccessPreview;
 
