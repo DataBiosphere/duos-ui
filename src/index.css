@@ -293,7 +293,13 @@ small {
 }
 
 .home-content-graphic {
-  padding: 40px 50px !important;
+  padding: 40px 100px 40px 0;
+}
+
+@media screen and (min-width: 1500px) {
+  .home-content-graphic {
+    padding: 40px 250px 40px 0;
+  }
 }
 
 .home-content-references {
@@ -932,7 +938,7 @@ small {
 }
 
 .response-label {
-  padding: 7px 0 0 15px;
+  padding: 5px 0 0 15px;
   text-align: left;
   color: #777777;
 }
