@@ -332,7 +332,7 @@ class AccessCollect extends Component {
                     div({ className: "col-lg-4 col-md-5 col-sm-5 col-xs-12" }, [
 
                       div({ isRendered: this.state.darInfo.havePI, className: "row no-margin" }, [
-                        label({ className: "control-label access-color" }, ["Principal Investigator: "]),
+                        label({ className: "control-label access-color" }, ["PI: "]),
                         span({ id: "lbl_principalInvestigator", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.pi]),
                       ]),
                       div({ className: "row no-margin" }, [
