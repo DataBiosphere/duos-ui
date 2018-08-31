@@ -10,7 +10,6 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     this.state = { googleButton: null };
     this.login = props.loginState;
     this.getUser = this.getUser.bind(this);
-
   }
 
   responseGoogle = (response) => {
@@ -39,7 +38,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
   async getGoogleConfig() {
     const googleButton = h(GoogleLogin, {
       className: "navbar-duos-button",
-      clientId: "complete-clientId",
+      clientId: "complete clientId",
       buttonText: "Sign In",
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden,
