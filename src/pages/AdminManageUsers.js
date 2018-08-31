@@ -1,10 +1,9 @@
-import React, { Component, Fragment } from 'react';
+import { Component, Fragment } from 'react';
 import { div, button, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { EditUserModal } from '../components/modals/EditUserModal';
 import { User } from "../libs/ajax";
-import Pagination from "react-paginating";
 import _ from "lodash/fp";
 import { PaginatorBar } from '../components/PaginatorBar';
 
