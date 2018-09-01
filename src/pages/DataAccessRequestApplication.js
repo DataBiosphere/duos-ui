@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { div, hr, h2, br, h, b, small, h3, h4, a, span, form, ol, ul, li, label, button, input, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
+import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import Select, { createFilter } from 'react-select';
 
 import './DataAccessRequestApplication.css';
@@ -14,12 +15,6 @@ const filterConfig = {
 }
 
 class DataAccessRequestApplication extends Component {
-
-  focus1;
-  focus2;
-  focus3;
-  focus4;
-  selectedOntologies;
 
   datasetOptions = [
     { label: 'ORSP-12245| Dataset XYZ aaa', value: "10000", clearableValue: true },
@@ -44,8 +39,6 @@ class DataAccessRequestApplication extends Component {
     { label: 'Pancreatic cancer', value: 'OID-100700', clearableValue: true },
   ];
 
-
-
   constructor(props) {
     super(props);
     this.state = {
@@ -53,13 +46,71 @@ class DataAccessRequestApplication extends Component {
       step: 1,
       formData: {
         dar_code: null,
-        rus: 'this is RUS',
-        non_tech_rus: 'non tech rus...',
-        other: false,
-        othertext: '',
-        datasets: [],
-        ontologies: [],
+        rus: 'this is RUS aaa',
+        non_tech_rus: 'non tech rus...aaa',
+        other: true,
+        othertext: 'este es otro texto  ...',
+        datasets: [
+          {
+            label: 'ORSP-12245| Dataset XYZ aaa',
+            value: '10000',
+            clearableValue: true
+          },
+          {
+            label: 'ORSP-62245| Dataset XYZ bba',
+            value: '10500',
+            clearableValue: true
+          }
+        ],
+        ontologies: [
+          {
+            label: 'Blefaritis',
+            value: 'OID-100200',
+            clearableValue: true
+          },
+          {
+            label: 'Adenocarcinoma',
+            value: 'OID-100500',
+            clearableValue: true
+          },
+          {
+            label: 'Pancreatic cancer',
+            value: 'OID-100700',
+            clearableValue: true
+          }
+        ],
+        onegender: true,
+        diseases: true,
+        methods: true,
+        controls: true,
+        population: true,
+        hmb: true,
+        poa: true,
+        forProfit: true,
+        gender: 'M',
+        pediatric: true,
+        illegalbehave: false,
+        addiction: true,
+        sexualdiseases: false,
+        stigmatizediseases: true,
+        vulnerablepop: false,
+        popmigration: true,
+        psychtraits: false,
+        nothealth: true,
+        investigator: 'Diego A. Gil',
+        institution: 'Broad Institution',
+        department: 'Technologies',
+        division: 'Software',
+        address1: '1 Rodeo Drive',
+        address2: '....',
+        city: 'Beverly Hills',
+        state: 'California',
+        zipcode: '90210',
+        country: 'USA',
+        projectTitle: 'Sample Data Access Review'
       }
+
+
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -75,43 +126,26 @@ class DataAccessRequestApplication extends Component {
   }
 
   handleChange = (e) => {
-    console.log(e);
     const field = e.target.name;
     const value = e.target.value;
     this.setState(prev => { prev.formData[field] = value; return prev; });
-    console.log(JSON.stringify(this.state.formData, null, 2));
   }
 
-  // if (field === "inputInvestigator") { this.setState(prev => { prev.formData.investigator = value; return prev; }) }
-  // if (field === "inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; }) }
-  // if (field === "inputDepartment") { this.setState(prev => { prev.formData.department = value; return prev; }) }
-  // if (field === "inputDivision") { this.setState(prev => { prev.formData.division = value; return prev; }) }
-  // if (field === "inputAddress1") { this.setState(prev => { prev.formData.address1 = value; return prev; }) }
-  // if (field === "inputAddress2") { this.setState(prev => { prev.formData.address2 = value; return prev; }) }
-  // if (field === "inputCity") { this.setState(prev => { prev.formData.city = value; return prev; }) }
-  // if (field === "inputState") { this.setState(prev => { prev.formData.state = value; return prev; }) }
-  // if (field === "inputZipcode") { this.setState(prev => { prev.formData.zipcode = value; return prev; }) }
-  // if (field === "inputCountry") { this.setState(prev => { prev.formData.country = value; return prev; }) }
-  // if (field === "inputTitle") { this.setState(prev => { prev.formData.projectTile = value; return prev; }) }
-  // if (field === "inputRUS") { this.setState(prev => { prev.formData.rus = value; return prev; }) }
-  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
-  //    if (field==="inputInstitution") { this.setState(prev => { prev.formData.institution = value; return prev; })}
+  handleCheckboxChange = (e) => {
+    const field = e.target.name;
+    const value = e.target.checked;
+    this.setState(prev => { prev.formData[field] = value; return prev; });
+  }
 
+  handleRadioChange = (e, field, value) => {
+    this.setState(prev => { prev.formData[field] = value; return prev; });
+  }
 
   step1 = (e) => {
     this.setState(prev => {
       prev.step = 1;
       return prev;
     });
-    setTimeout(
-      () => {
-        this.focus1.current.focus();
-      },
-      300
-    );
   }
 
   step2 = (e) => {
@@ -119,7 +153,6 @@ class DataAccessRequestApplication extends Component {
       prev.step = 2;
       return prev;
     });
-
   }
 
   step3 = (e) => {
@@ -139,18 +172,13 @@ class DataAccessRequestApplication extends Component {
   }
 
   attestAndSave = (e) => {
-
+    // implement full save on mongodb here ... after validations 
+    console.log(JSON.stringify(this.state.formData, null, 2));
   }
 
   partialSave = (e) => {
-
-  }
-
-  componentDidMount() {
-    this.focus1 = React.createRef();
-    this.focus2 = React.createRef();
-    this.focus3 = React.createRef();
-    this.focus4 = React.createRef();
+    // implement partial save on mongodb here ... no validations
+    console.log(JSON.stringify(this.state.formData, null, 2));
   }
 
   onOntologiesChange = (data, action) => {
@@ -309,7 +337,6 @@ class DataAccessRequestApplication extends Component {
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     input({
-                      ref: this.focus1,
                       value: this.state.formData.investigator, onChange: this.handleChange, type: "text", name: "investigator", id: "inputInvestigator", disabled: false,
                       className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control', required: true
                     }),
@@ -399,7 +426,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     input({
-                      value: this.state.formData.zipcode, onChange: this.handleChange, type: "text", name: "zipCode", id: "inputZipCode",
+                      value: this.state.formData.zipcode, onChange: this.handleChange, type: "text", name: "zipcode", id: "inputZipCode",
                       className: step1.inputZipCode.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: "required", disabled: false
                     }),
@@ -494,7 +521,6 @@ class DataAccessRequestApplication extends Component {
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     textarea({
-                      ref: this.focus2,
                       value: this.state.formData.rus, onChange: this.handleChange, name: "rus", id: "inputRUS",
                       className: step2.inputRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                       maxLength: "2200", rows: "6",
@@ -532,8 +558,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: this.state.formData.diseases, onChange: this.handleChange, name:'diseases', id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                        name: "checkDiseases", disabled: (this.state.formData.dar_code !== null)
+                        checked: this.state.formData.diseases, onClick: this.handleCheckboxChange, name: 'diseases', id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                        disabled: (this.state.formData.dar_code !== null)
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkDiseases" }, [
                         span({}, ["2.4.1 Disease-related studies: "]),
@@ -544,8 +570,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: "this.state.formData.methods", id: "checkMethods", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                        className: "checkbox-inline rp-checkbox", name: "checkMethods"
+                        checked: this.state.formData.methods, onClick: this.handleCheckboxChange, id: "checkMethods", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                        className: "checkbox-inline rp-checkbox", name: "methods"
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkMethods" }, [
                         span({}, ["2.4.2 Methods development and validation studies: "]),
@@ -556,8 +582,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: "this.state.formData.controls", id: "checkControls", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                        className: "checkbox-inline rp-checkbox", name: "checkControls"
+                        checked: this.state.formData.controls, onClick: this.handleCheckboxChange, id: "checkControls", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                        className: "checkbox-inline rp-checkbox", name: "controls"
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkControls" }, [
                         span({}, ["2.4.3 Controls: "]),
@@ -568,8 +594,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: "this.state.formData.population", id: "checkPopulation", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                        className: "checkbox-inline rp-checkbox", name: "checkPopulation"
+                        checked: this.state.formData.population, onClick: this.handleCheckboxChange, id: "checkPopulation", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                        className: "checkbox-inline rp-checkbox", name: "population"
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkPopulation" }, [
                         span({}, ["2.4.4 Population structure or normal variation studies: "]),
@@ -581,8 +607,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: "this.state.formData.hmb", id: "checkHmb", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                        name: "checkHmb", disabled: (this.state.formData.dar_code !== null)
+                        checked: this.state.formData.hmb, onClick: this.handleCheckboxChange, id: "checkHmb", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                        name: "hmb", disabled: (this.state.formData.dar_code !== null)
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkHmb" }, [
                         span({}, ["2.4.5 Health/medical/biomedical research: "]),
@@ -594,8 +620,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: "this.state.formData.poa", id: "checkPoa", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                        name: "checkPoa", disabled: (this.state.formData.dar_code !== null)
+                        checked: this.state.formData.poa, onClick: this.handleCheckboxChange, id: "checkPoa", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                        name: "poa", disabled: (this.state.formData.dar_code !== null)
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkPoa" }, [
                         span({}, ["2.4.6 Population origins or ancestry research: "]),
@@ -607,8 +633,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
-                        value: this.state.formData.other, id: "checkOther", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                        name: "checkOther", disabled: (this.state.formData.dar_code !== null)
+                        checked: this.state.formData.other, onClick: this.handleCheckboxChange, id: "checkOther", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                        name: "other", disabled: (this.state.formData.dar_code !== null)
                       }),
                       label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkOther" }, [span({}, ["2.4.7 Other:"]),]),
                     ]),
@@ -616,7 +642,7 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     input({
-                      value: this.state.formData.othertext, type: "text", name: "inputOther", id: "inputOther",
+                      value: this.state.formData.othertext, onChange: this.handleChange, type: "text", name: "othertext", id: "inputOtherText",
                       required: this.state.formData.other, className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                       disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true, placeholder: "Please specify if selected"
                     }),
@@ -678,6 +704,8 @@ class DataAccessRequestApplication extends Component {
                   span({ className: "cancel-color required-field-error-span", isRendered: "!step3isValidated && showValidationMessages" }, [
                     span({}, ["* All fields are required"]),
                   ]),
+
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({
                       className: "control-label rp-choice-questions", "tooltip-class": "tooltip-class", "tooltip-trigger": "true"
@@ -685,155 +713,68 @@ class DataAccessRequestApplication extends Component {
                     }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                    YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, name: 'forProfit', disabled: (this.state.formData.dar_code !== null), required: true }),
+                  ]),
 
-                    YesNoRadioGroup({ value: this.state.formData.forProfit, name: 'exclusive' }),
-
-                    // div({ className: "radio-inline" }, [
-                    //   input({
-                    //     ref: this.focus3,
-                    //     value: this.state.formData.forProfit, "ng-value": true, type: "radio", className: "regular-radio", id: "exclusiveYes",
-                    //     name: "exclusive", required: true, disabled: (this.state.formData.dar_code !== null)
-                    //   }),
-                    //   label({ htmlFor: "exclusiveYes" }, []),
-                    //   label({ htmlFor: "exclusiveYes", className: "radio-button-text" }, ["Yes"]),
-                    //   input({
-                    //     value: this.state.formData.forProfit, "ng-value": false, type: "radio", className: "regular-radio", id: "exclusiveNo",
-                    //     name: "exclusive", required: true, disabled: (this.state.formData.dar_code !== null)
-                    //   }),
-                    //   label({ htmlFor: "exclusiveNo" }, []),
-                    //   label({ htmlFor: "exclusiveNo", className: "radio-button-text" }, ["No"]),
-                    // ]),
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                    label({
+                      className: "control-label rp-choice-questions"
+                    }, ["3.1.2 Please indicate if this study is limited to one gender?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({ className: "control-label rp-choice-questions" }, ["3.1.2 Please indicate if this study is limited to one gender?"]),
-                  ]),
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        value: this.state.formData.onegender, "ng-value": true, type: "radio", className: "regular-radio", id: "oneGenderYes",
-                        name: "onegender", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "oneGenderYes" }, []),
-                      label({ htmlFor: "oneGenderYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        value: this.state.formData.onegender, "ng-value": false, type: "radio", className: "regular-radio", id: "oneGenderNo",
-                        name: "onegender", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "oneGenderNo" }, []),
-                      label({ htmlFor: "oneGenderNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, name: 'onegender', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                     div({ isRendered: this.state.formData.onegender === true, className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
-                      span({}, ["Please specify"]),
-                      div({ className: "radio-inline" }, [
-                        input({
-                          value: this.state.formData.gender, value: "F", type: "radio", className: "regular-radio", id: "genderFemale",
-                          required: this.state.formData.onegender, disabled: (this.state.formData.dar_code !== null)
-                        }),
-                        label({ htmlFor: "genderFemale" }, []),
-                        label({ htmlFor: "genderFemale", className: "radio-button-text" }, ["Female"]),
-                        input({
-                          value: this.state.formData.gender, value: "M", type: "radio", className: "regular-radio", id: "genderMale",
-                          required: this.state.formData.onegender, disabled: (this.state.formData.dar_code !== null)
-                        }),
-                        label({ htmlFor: "genderMale" }, []),
-                        label({ htmlFor: "genderMale", className: "radio-button-text" }, ["Male"]),
-                      ]),
+                      span({}, [
+                        "Please specify"]),
+
+                      OptionsRadioGroup({
+                        value: this.state.formData.gender,
+                        optionLabels: ['Female', "Male"],
+                        optionValues: ['F', 'M'],
+                        name: 'gender',
+                        onChange: this.handleRadioChange
+                      }),
+
                     ]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({ className: "control-label rp-choice-questions" }, ["3.1.3 Please indicate if this study is restricted to a  pediatric population (under the age of 18)?"]),
+                    label({ className: "control-label rp-choice-questions" }, [
+                      "3.1.3 Please indicate if this study is restricted to a  pediatric population (under the age of 18)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        value: this.state.formData.pediatric, "ng-value": true, type: "radio", className: "regular-radio", id: "pediatricYes",
-                        name: "pediatric", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "pediatricYes" }, []),
-                      label({ htmlFor: "pediatricYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        value: this.state.formData.pediatric, "ng-value": false, type: "radio", className: "regular-radio", id: "pediatricNo",
-                        name: "pediatric", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "pediatricNo" }, []),
-                      label({ htmlFor: "pediatricNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+
+                    YesNoRadioGroup({ value: this.state.formData.pediatric, onChange: this.handleRadioChange, name: 'pediatric', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.4 Does the research aim involve the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        value: this.state.formData.illegalbehave, "ng-value": true, type: "radio", className: "regular-radio", id: "illegalBehaveYes",
-                        name: "illegalBehave", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "illegalBehaveYes" }, []),
-                      label({ htmlFor: "illegalBehaveYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        value: this.state.formData.illegalbehave, "ng-value": false, type: "radio", className: "regular-radio", id: "illegalBehaveNo",
-                        name: "illegalBehave", required: true
-                      }),
-                      label({ htmlFor: "illegalBehaveNo" }, []),
-                      label({ htmlFor: "illegalBehaveNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.illegalbehave, onChange: this.handleRadioChange, name: 'illegalbehave', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.5 Does the research aim involve the study of alcohol or drug abuse, or abuse of other addictive products?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        value: this.state.formData.addiction, disabled: (this.state.formData.dar_code !== null), "ng-value": true, type: "radio", className: "regular-radio", id: "addictionYes",
-                        name: "addiction", required: true
-                      }),
-                      label({ htmlFor: "addictionYes" }, []),
-                      label({ htmlFor: "addictionYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        value: this.state.formData.addiction, disabled: (this.state.formData.dar_code !== null), "ng-value": false, type: "radio", className: "regular-radio", id: "addictionNo",
-                        name: "addiction", required: true
-                      }),
-                      label({ htmlFor: "addictionNo" }, []),
-                      label({ htmlFor: "addictionNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+
+                    YesNoRadioGroup({ value: this.state.formData.addiction, onChange: this.handleRadioChange, name: 'addiction', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.6 Does the research aim involve the study of sexual preferences or sexually transmitted diseases?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        "value": "this.state.formData.sexualdiseases", "ng-value": true, type: "radio", className: "regular-radio", id: "sexualDiseasesYes",
-                        name: "sexualdiseases", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "sexualDiseasesYes" }, []),
-                      label({ htmlFor: "sexualDiseasesYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        "value": "this.state.formData.sexualdiseases", "ng-value": false, type: "radio", className: "regular-radio", id: "sexualDiseasesNo",
-                        name: "sexualdiseases", required: true
-                      }),
-                      label({ htmlFor: "sexualDiseasesNo" }, []),
-                      label({ htmlFor: "sexualDiseasesNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.sexualdiseases, onChange: this.handleRadioChange, name: 'sexualdiseases', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.7 Does the research aim involve the study of any stigmatizing illnesses?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        "value": "this.state.formData.stigmatizediseases", disabled: (this.state.formData.dar_code !== null), "ng-value": true, type: "radio", className: "regular-radio", id: "stigmatizeDiseasesYes",
-                        name: "stigmatizediseases", required: true
-                      }),
-                      label({ htmlFor: "stigmatizeDiseasesYes" }, []),
-                      label({ htmlFor: "stigmatizeDiseasesYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        "value": "this.state.formData.stigmatizediseases", disabled: (this.state.formData.dar_code !== null), "ng-value": false, type: "radio", className: "regular-radio", id: "stigmatizeDiseasesNo",
-                        name: "stigmatizediseases", required: true
-                      }),
-                      label({ htmlFor: "stigmatizeDiseasesNo" }, []),
-                      label({ htmlFor: "stigmatizeDiseasesNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.stigmatizediseases, onChange: this.handleRadioChange, name: 'stigmatizediseases', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({
@@ -842,77 +783,28 @@ class DataAccessRequestApplication extends Component {
                     }, ["3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or \[\"SIGNIFICANTLY\"\] economically or educationally disadvantaged persons)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        "value": "this.state.formData.vulnerablepop", disabled: (this.state.formData.dar_code !== null), "ng-value": true, type: "radio", className: "regular-radio", id: "vulnerablePopYes",
-                        name: "vulnerablepop", required: true
-                      }),
-                      label({ htmlFor: "vulnerablePopYes" }, []),
-                      label({ htmlFor: "vulnerablePopYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        "value": "this.state.formData.vulnerablepop", disabled: (this.state.formData.dar_code !== null), "ng-value": false, type: "radio", className: "regular-radio", id: "vulnerablePopNo",
-                        name: "vulnerablepop", required: true
-                      }),
-                      label({ htmlFor: "vulnerablePopNo" }, []),
-                      label({ htmlFor: "vulnerablePopNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.vulnerablepop, onChange: this.handleRadioChange, name: 'vulnerablepop', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.9 Does the research aim involve the study of Population Origins/Migration patterns?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        "value": "this.state.formData.popmigration", disabled: (this.state.formData.dar_code !== null), "ng-value": true, type: "radio", className: "regular-radio", id: "popMigrationYes",
-                        name: "popmigration", required: true
-                      }),
-                      label({ htmlFor: "popMigrationYes" }, []),
-                      label({ htmlFor: "popMigrationYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        "value": "this.state.formData.popmigration", disabled: (this.state.formData.dar_code !== null), "ng-value": false, type: "radio", className: "regular-radio", id: "popMigrationNo",
-                        name: "popmigration", required: true
-                      }),
-                      label({ htmlFor: "popMigrationNo" }, []),
-                      label({ htmlFor: "popMigrationNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.popmigration, onChange: this.handleRadioChange, name: 'popmigration', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.10 Does the research aim involve the study of psychological traits, including intelligence, attention, emotion?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        "value": "this.state.formData.psychtraits", "ng-value": true, type: "radio", className: "regular-radio", id: "psychTraitsYes",
-                        name: "psychtraits", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "psychTraitsYes" }, []),
-                      label({ htmlFor: "psychTraitsYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        "value": "this.state.formData.psychtraits", "ng-value": false, type: "radio", className: "regular-radio", id: "psychTraitsNo",
-                        name: "psychtraits", required: true, disabled: (this.state.formData.dar_code !== null)
-                      }),
-                      label({ htmlFor: "psychTraitsNo" }, []),
-                      label({ htmlFor: "psychTraitsNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.psychtraits, onChange: this.handleRadioChange, name: 'psychtraits', disabled: (this.state.formData.dar_code !== null), required: true }),
+
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.11 Does the research correlate ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways that are not easily related to Health?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group" }, [
-                    div({ className: "radio-inline" }, [
-                      input({
-                        "value": "this.state.formData.nothealth", disabled: (this.state.formData.dar_code !== null), "ng-value": true, type: "radio", className: "regular-radio", id: "notHealthYes",
-                        name: "nothealth", required: true
-                      }),
-                      label({ htmlFor: "notHealthYes" }, []),
-                      label({ htmlFor: "notHealthYes", className: "radio-button-text" }, ["Yes"]),
-                      input({
-                        "value": "this.state.formData.nothealth", disabled: (this.state.formData.dar_code !== null), "ng-value": false, type: "radio", className: "regular-radio", id: "notHealthNo",
-                        name: "nothealth", required: true
-                      }),
-                      label({ htmlFor: "notHealthNo" }, []),
-                      label({ htmlFor: "notHealthNo", className: "radio-button-text" }, ["No"]),
-                    ]),
+                    YesNoRadioGroup({ value: this.state.formData.nothealth, onChange: this.handleRadioChange, name: 'nothealth', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
                 ]),
                 ul({ className: "pager wizard" }, [
@@ -982,7 +874,7 @@ class DataAccessRequestApplication extends Component {
                     ]),
 
                     li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
-                      a({ ref: this.focus4, onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
+                      a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
                     ]),
                   ]),
                 ]),
