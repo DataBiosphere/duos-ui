@@ -37,7 +37,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
 
   async getGoogleConfig() {
     const googleButton = h(GoogleLogin, {
-      className: "btn navbar-duos-button",
+      className: "navbar-duos-button",
       clientId: "complete-clientId",
       buttonText: "Sign In",
       onSuccess: this.responseGoogle,

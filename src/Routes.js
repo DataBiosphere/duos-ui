@@ -24,7 +24,7 @@ import FinalAccessReviewResults from "./pages/FinalAccessReviewResults";
 import { SummaryVotes } from "./pages/SummaryVotes";
 import ReviewedCases from "./pages/ReviewedCases";
 import DataAccessRequestApplication from "./pages/DataAccessRequestApplication";
-import UserConsole from "./pages/UserConsole";
+import MemberConsole from "./pages/MemberConsole";
 import HomeAbout from "./pages/HomeAbout";
 import HelpMe from "./pages/HelpMe";
 import HomeRegister from "./pages/HomeRegister";
@@ -46,7 +46,7 @@ export default ({props}) => (
     <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={props} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} />
     <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props} />
-    <AuthenticatedRoute path='/user_console' component={UserConsole} props={props} />
+    <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} />
     <AuthenticatedRoute path='/data_owner_console' component={DataOwnerConsole} props={props} />
     <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} />
     <Route path='/home_help' component={HomeHelp} />
