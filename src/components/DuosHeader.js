@@ -150,7 +150,7 @@ class DuosHeader extends Component {
                 ]),
 
                 li({ isRendered: isResearcher }, [
-                  a({ id: "link_requestApplication", onClick: this.goToRP }, ["Request Application"]),
+                  a({ id: "link_requestApplication", href: "/dar_application" }, ["Request Application"]),
                 ]),
 
                 li({ className: "dropdown", onToggle: this.toggled, isRendered: isLogged }, [
@@ -224,6 +224,7 @@ class DuosHeader extends Component {
   }
 
   goToRP() {
+
   }
 
 }
