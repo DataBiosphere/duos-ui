@@ -1,17 +1,36 @@
 import { Component, Fragment } from 'react';
 import { div, hr, input, i, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import { PaginatorBar } from '../components/PaginatorBar';
+
 
 class DataOwnerConsole extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      dataOwnerUnreviewedCases: []
+      dataOwnerUnreviewedCases: [],
+      limit: 5,
+      currentPage: 1
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
+
+  handlePageChange = page => {
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
 
   mockData() {
     this.setState({
@@ -47,9 +66,12 @@ class DataOwnerConsole extends Component {
   }
 
   render() {
+
     let currentUser = {
       displayName: 'Nadya Lopez Zalba'
     }
+
+    const { currentPage } = this.state;
 
     return (
       div({ className: "container" }, [
@@ -87,7 +109,7 @@ class DataOwnerConsole extends Component {
 
           hr({ className: "pvotes-main-separator" }),
 
-          this.state.dataOwnerUnreviewedCases.map(pendingCase => {
+          this.state.dataOwnerUnreviewedCases.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map(pendingCase => {
             return h(Fragment, { key: pendingCase.darCode }, [
               div({ id: pendingCase.darCode, className: "row pvotes-main-list" }, [
 
@@ -117,6 +139,14 @@ class DataOwnerConsole extends Component {
               ]),
               hr({ className: "pvotes-separator" }),
             ])
+          }),
+          PaginatorBar({
+            total: this.state.dataOwnerUnreviewedCases.length,
+            limit: this.state.limit,
+            pageCount: this.pageCount,
+            currentPage: this.state.currentPage,
+            onPageChange: this.handlePageChange,
+            changeHandler: this.handleSizeChange,
           }),
         ]),
       ])
