@@ -1,5 +1,4 @@
 import { Component, Fragment } from 'react';
-import React from 'react';
 import { div, hr, h, span, i, a, input, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
@@ -13,7 +12,6 @@ import _ from "lodash/fp";
 import { PaginatorBar } from "../components/PaginatorBar";
 
 const limit = 10;
-const pageCount = 5;
 
 class AdminManageDul extends Component {
 
@@ -53,7 +51,7 @@ class AdminManageDul extends Component {
         return election;
       });
       this.setState(prev => {
-        prev.currentPage = 1,
+        prev.currentPage = 1;
         prev.electionsList.dul = data;
         return prev;
       });
@@ -205,7 +203,6 @@ class AdminManageDul extends Component {
           this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
             return (
               h(Fragment, {key: election.consentId }, [
-                // div({ "dir-paginate": "election in AdminManage.electionsList.dul | filter: searchDUL | itemsPerPage:10", "current-page": this.currentDULPage }, [
                 div({  id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
                   div({ id: election.consentId + "_consentName", className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
                     span({
