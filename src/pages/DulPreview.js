@@ -1,17 +1,19 @@
 import { Component } from 'react';
 import { div, button, i, span, b, a, h4 } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { Election } from '../libs/ajax';
+import { Election, Files } from '../libs/ajax';
 
 class DulPreview extends Component {
 
   constructor(props) {
     super(props);
-    this.state = this.initialState();
-    this.back = this.back.bind(this);
+    this.state = {
+      consentPreview: {}
+    };
     this.backCall();
+    this.back = this.back.bind(this);
     this.backCall = this.backCall.bind(this);
-
+    this.downloadDUL = this.downloadDUL.bind(this);
   }
 
   back() {
@@ -20,11 +22,9 @@ class DulPreview extends Component {
 
   async backCall() {
     const consentId = this.props.match.params.consentId;
-    console.log(consentId);
     const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
-    console.log(consent);
+    this.setState({consentPreview: consent.consent});
   }
-
 
   componentWillMount() {
     this.mockState();
@@ -47,31 +47,28 @@ class DulPreview extends Component {
     });
   }
 
-  initialState() {
-    return {
-      consentGroupName: 'ConsentGroup 01',
-      consentName: 'ORSP-124',
-      sDul: "something",
-    };
-  }
-  
-  
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
     console.log('------------download-------------', filename, value);
  };
 
-  downloadDUL = (e) => {
-    console.log('------------downloadDUL-------------', e);
+  downloadDUL = () => {
+    Files.getDulFile(this.props.match.params.consentId).then(
+      blob => {
+        if (blob.size !== 0) {
+          this.createBlobFile(this.state.consentPreview.name, blob);
+        }
+      }
+    );
   };
 
 
   render() {
 
     const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [this.state.consentGroupName]),
-      this.state.consentName
+      b({ className: "pipe" }, [this.state.consentPreview.groupName]),
+      this.state.consentPreview.name
     ]);
 
     return (
@@ -111,7 +108,8 @@ class DulPreview extends Component {
               className: "panel-body cm-boxbody" }, [
               button({
                 className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color",
-                onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                onClick: () => this.downloadDUL()
+              }, ["Download Data Use Letter"]),
             ])
           ]),
 
@@ -119,7 +117,7 @@ class DulPreview extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.sDul])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.consentPreview.translatedUseRestriction])
           ]),
         ]),
       ])
