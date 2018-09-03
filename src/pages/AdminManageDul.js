@@ -13,7 +13,7 @@ import _ from "lodash/fp";
 import { PaginatorBar } from "../components/PaginatorBar";
 
 const limit = 10;
-const pageCount = 10;
+const pageCount = 5;
 
 class AdminManageDul extends Component {
 
@@ -23,7 +23,7 @@ class AdminManageDul extends Component {
       currentPage: 1,
       showModal: false,
       value: '',
-      limit: this.linit,
+      limit: limit,
       electionsList: {
         dul: []
       }
@@ -52,10 +52,10 @@ class AdminManageDul extends Component {
         election.cts = str + ' ' + election.version;
         return election;
       });
-      this.setState({
-        electionsList: {
-          dul: data
-        }
+      this.setState(prev => {
+        prev.currentPage = 1,
+        prev.electionsList.dul = data;
+        return prev;
       });
     });
   }
@@ -74,6 +74,7 @@ class AdminManageDul extends Component {
   handleSizeChange = size => {
     this.setState(prev => {
       prev.limit = size;
+      prev.currentPage = 1;
       return prev;
     });
   };
@@ -203,9 +204,9 @@ class AdminManageDul extends Component {
           hr({ className: "pvotes-main-separator" }),
           this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
             return (
-              h(Fragment, {}, [
+              h(Fragment, {key: election.consentId }, [
                 // div({ "dir-paginate": "election in AdminManage.electionsList.dul | filter: searchDUL | itemsPerPage:10", "current-page": this.currentDULPage }, [
-                div({ key: election.electionId, id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
+                div({  id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
                   div({ id: election.consentId + "_consentName", className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
                     span({
                       id: election.consentId + "_flag_consentName", isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
