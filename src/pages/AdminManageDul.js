@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import  React from 'react';
+import React from 'react';
 import { div, hr, h, span, i, a, input, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
@@ -10,19 +10,10 @@ import { ArchiveElectionModal } from '../components/modals/ArchiveElectionModal'
 import { DeleteElectionModal } from '../components/modals/DeleteElectionModal';
 import { Consent } from '../libs/ajax';
 import _ from "lodash/fp";
-import Pagination from "react-paginating";
+import { PaginatorBar } from "../components/PaginatorBar";
 
 const limit = 10;
 const pageCount = 10;
-
-const paginatorButton = (props, label) => button(_.merge({
-  style: {
-    margin: '0 2px', padding: '0.25rem 0.5rem',
-    border: '1px solid #ccc', borderRadius: 3,
-    color: props.disabled ? '#fdce09' : '#00f', backgroundColor: 'white',
-    cursor: props.disabled ? 'not-allowed' : 'pointer'
-  }
-}, props), label);
 
 class AdminManageDul extends Component {
 
@@ -32,6 +23,7 @@ class AdminManageDul extends Component {
       currentPage: 1,
       showModal: false,
       value: '',
+      limit: this.linit,
       electionsList: {
         dul: []
       }
@@ -40,7 +32,7 @@ class AdminManageDul extends Component {
     this.myHandler = this.myHandler.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.handlePageChange= this.handlePageChange.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this);
 
     this.addDul = this.addDul.bind(this);
     this.editDul = this.editDul.bind(this);
@@ -73,8 +65,16 @@ class AdminManageDul extends Component {
   }
 
   handlePageChange = page => {
-    this.setState({
-      currentPage: page
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      return prev;
     });
   };
 
@@ -145,7 +145,7 @@ class AdminManageDul extends Component {
   }
 
   render() {
-    const {currentPage} = this.state;
+    const { currentPage } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
@@ -201,7 +201,7 @@ class AdminManageDul extends Component {
           ]),
 
           hr({ className: "pvotes-main-separator" }),
-          this.state.electionsList.dul.slice((currentPage -1) * 10, currentPage * 10).map((election, eIndex) => {
+          this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
             return (
               h(Fragment, {}, [
                 // div({ "dir-paginate": "election in AdminManage.electionsList.dul | filter: searchDUL | itemsPerPage:10", "current-page": this.currentDULPage }, [
@@ -247,62 +247,18 @@ class AdminManageDul extends Component {
                   ]),
                 ]),
                 hr({ className: "pvotes-separator" }),
-                // div({
-                //     "dir-pagination-controls": "true"
-                //     , "max-size": "10"
-                //     , "direction-links": "true"
-                //     , "boundary-links": "true"
-                //     , className: "pvotes-pagination"
-                // }, []),
-                // ])
+
               ])
             )
           }),
-          h(Pagination, {
-            total: this.state.electionsList.dul.length,  // Total results
-            limit: limit, // Number of results per page
-            pageCount: pageCount, // How many pages number you want to display in pagination zone.
-            currentPage: currentPage // Current page number
-          }, [
-            ({pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, totalPages, getPageItemProps}) => h(React.Fragment, [
-              div({}, [
-              ]),
-              // button({onClick: this.handlePageChange({pageValue: 1})}, [a("HEY")]),
-              paginatorButton(_.merge({ disabled: currentPage === 1},
-                getPageItemProps({ pageValue: 1, onPageChange: this.handlePageChange})),
-                ['first']),
-
-              paginatorButton(
-                _.merge({ disabled: !hasPreviousPage, style: { marginRight: '1rem' } },
-                  getPageItemProps({ pageValue: previousPage, onPageChange: this.handlePageChange})),
-                ['<']
-              ),
-
-              _.map(num => paginatorButton(
-                _.merge({
-                    key: num,
-                    style: {
-                      minWidth: '2rem',
-                      backgroundColor: currentPage === num ? '#0000ff' : undefined,
-                      color: currentPage === num ? '#ffffff' : '#0000ff',
-                      border: currentPage === num ? '#0000ff' : undefined
-                    }
-                  },
-                  getPageItemProps({ pageValue: num, onPageChange: this.handlePageChange})),
-                num), pages
-              ),
-              paginatorButton(
-                _.merge({ disabled: !hasNextPage, style: { marginLeft: '1rem' } },
-                  getPageItemProps({ pageValue: nextPage, onPageChange: this.handlePageChange})),
-                ['>']
-              ),
-              paginatorButton(
-                _.merge({ disabled: currentPage === totalPages, style: { marginLeft: '0.5rem' } },
-                  getPageItemProps({ pageValue: totalPages, onPageChange: this.handlePageChange})),
-                ['Last']
-              ),
-            ])
-          ])
+          PaginatorBar({
+            total: this.state.electionsList.dul.length,
+            limit: this.state.limit,
+            pageCount: this.pageCount,
+            currentPage: this.state.currentPage,
+            onPageChange: this.handlePageChange,
+            changeHandler: this.handleSizeChange,
+          }),
         ])
       ])
     );

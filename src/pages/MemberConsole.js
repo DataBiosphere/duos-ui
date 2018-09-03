@@ -1,9 +1,10 @@
 import { Component, Fragment } from 'react';
-import { div, hh, h2, h, hr, small, br, img, i, input, a, span, } from 'react-hyperscript-helpers';
+import { div, hr, h2, br, i, img, input, span, small, a, h, } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import _ from "lodash/fp";
 import { PaginatorBar } from '../components/PaginatorBar';
 
-export const ChairConsole = hh(class ChairConsole extends Component {
+class MemberConsole extends Component {
 
   dulPageCount = 10;
   accessPageCount = 10;
@@ -15,7 +16,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     super(props);
     this.state = {
       showModal: false,
-      currentUser: {},
       dulLimit: 5,
       accessLimit: 5,
       currentDulPage: 1,
@@ -24,7 +24,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
-
 
   handleDulPageChange = page => {
     this.setState(prev => {
@@ -54,17 +53,22 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     });
   };
 
+  handleOpenModal() {
+    this.setState({ showModal: true });
+  }
+
+  handleCloseModal() {
+    this.setState({ showModal: false });
+  }
+
   componentWillMount() {
 
     let dul = [];
     let access = [];
-    for (var i = 0; i < 77; i++) {
+    for (var i = 0; i < 27; i++) {
       dul.push(this.createPendingCase(i));
       access.push(this.createPendingCase(i));
     }
-
-    console.log('dul', dul);
-    console.log('access', access);
 
     this.setState(prev => {
       prev.totalAccessPendingVotes = 5;
@@ -96,7 +100,10 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             ix % 6 === 3 ? 'un-reviewed' :
               ix % 6 === 4 ? 'PendingApproval' :
                 ix % 6 === 5 ? 'Final' : '',
+      // status: ix % 2 === 0 ? 'pending' :   ix % 6 === 1 ? 'editable' : '',
+      status: 'editable',
       isFinalVote: ix % 2 === 0 ? true : false,
+      isReminderSent: ix % 2 === 0 ? false : true,
     }
   }
 
@@ -123,34 +130,51 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     console.log('---------openAccessReviewResult----------', pendingCase);
     //  (pendingCase.referenceId, pendingCase.electionId)"
   }
-
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  }
-
   render() {
 
     const { currentDulPage, currentAccessPage } = this.state;
+    console.log(JSON.stringify(this.state.electionsList.dul, null, 2));
+    console.log(this.state.electionsList.dul.length);
+
+
+    let currentUser = {
+      displayName: 'Nadya Lopez Zalba'
+    }
 
     return (
+
       // div({ className: "container" }, [
       //   div({ className: "row no-margin" }, [
       //     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
       //       PageHeading({ color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
       //     ]),
 
-      //     div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 no-padding" }, [
-      //       BaseModal({ modalName: "AddDulModal", modalSize: "medium", imgSrc: "/images/icon_add_dul.png", color: "dul", title: "Add Data Use Limitations", description: "Catalog a Data Use Limitations Record", action: "Add" })
-      //     ]),
       //   ]),
       //   hr({ className: "section-separator" }),
-      // ])
-      //-----------------------------------------
 
+      //   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+      //     div({ className: "row no-margin" }, [
+      //       h2({ className: "col-lg-7 col-md-7 col-sm-8 col-xs-12 pvotes-box-title dul-color" }, [
+      //         img({ src: "/images/icon_dul.png", alt: "Data Use Limitations Review icon", className: "pvotes-icons" }),
+      //         "Data Use Limitations Review",
+      //         br({}),
+      //         div({ className: "pvotes-box-title-description" }, [
+      //           "Were data use limitations accurately converted to a structured format?"
+      //         ])
+      //       ]),
+
+      //       div({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
+      //         div({ className: "search-text" }, [
+      //           i({ className: "glyphicon glyphicon-search dul-color" }),
+      //           input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchDULCases" })
+      //         ]),
+      //       ]),
+      //     ]),
+      //   ]),
+      // ])
+
+
+      //-------------------------------------
       div({ className: "container" }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           h2({ className: "cm-title common-color" }, [
@@ -176,58 +200,41 @@ export const ChairConsole = hh(class ChairConsole extends Component {
           ]),
           div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
             div({ className: "row" }, [
-              div({ className: "pvotes-box-head  fsi-row-lg-level fsi-row-md-level" }, [
+              div({ className: "pvotes-box-head fsi-row-lg-level fsi-row-md-level" }, [
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-box-subtitle dul-color" }, ["Consent id"]),
                 div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-box-subtitle dul-color" }, ["Consent Group Name"]),
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, ["Status"]),
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, ["Logged"]),
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, [
                   "Review/Vote",
-                  div({ isRendered: this.state.totalDulPendingVotes > 0, id: "dulPendingVoteCases", className: "pcases-small-tag" }, [
-                    this.state.totalDulPendingVotes
-                  ]),
+                  div({ isRendered: this.state.totalDulPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalDulPendingVotes]),
                 ]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, [
-                  "Logged"
-                ]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, ["Actions"]),
               ]),
               hr({ className: "pvotes-main-separator" }),
               div({ className: "pvotes-box-body" }, [
-
                 this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
                   return h(Fragment, { key: rIndex }, [
+
                     hr({ className: "pvotes-separator" }),
                     div({ className: "row pvotes-main-list" }, [
-
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-list-id", title: pendingCase.frontEndId }, [
-                        pendingCase.frontEndId
-                      ]),
-
+                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-list-id", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
                       div({
-                        className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-list-id " /*+ !pendingCase.consentGroupName ? 'empty' : ''*/,
+                        className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-list-id", "ng-class": "{empty : !pendingCase.consentGroupName}",
                         title: pendingCase.consentGroupName
-                      }, [
-                          pendingCase.consentGroupName
-                        ]),
-
-                      a({ onClick: this.openDULReview, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [
+                      }, [pendingCase.consentGroupName]),
+                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list bold" }, [
+                        span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
+                        span({ isRendered: pendingCase.status === 'pending' && pendingCase.isReminderSent !== true }, ["Pending"]),
+                        span({ isRendered: pendingCase.status === 'editable' }, ["Editable"]),
+                      ]),
+                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list" }, [pendingCase.logged]),
+                      a({ onClick: this.openDULReview, /*pendingCase.referenceId, pendingCase.voteId)"*/ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [
                         div({ className: pendingCase.alreadyVoted ? 'editable' : 'enabled' }, [
-                          span({ isRendered: pendingCase.alreadyVoted === false, value: JSON.stringify(pendingCase) }, ["Vote"]),
-                          span({ isRendered: pendingCase.alreadyVoted === true, value: JSON.stringify(pendingCase) }, ["Edit"]),
+                          span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
+                          span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
                         ]),
                       ]),
-
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list" }, [pendingCase.logged]),
-                      a({
-                        onClick: this.openDULReviewResult, value: pendingCase.referenceId,
-                        className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding"
-                      }, [
-                          div({ className: "collectButton " + pendingCase.alreadyVoted ? 'enabled' : 'disabled' }, [
-                            span({ isRendered: pendingCase.alreadyVoted === false }, ["---"]),
-                            span({ isRendered: pendingCase.alreadyVoted === true }, ["Collect Votes"]),
-                          ]),
-                        ]),
                     ]),
-
                   ]);
                 }),
                 hr({ className: "pvotes-separator" }),
@@ -244,6 +251,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             ]),
           ]),
         ]),
+
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           div({ className: "row no-margin" }, [
             h2({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 pvotes-box-title access-color" }, [
@@ -261,22 +269,14 @@ export const ChairConsole = hh(class ChairConsole extends Component {
           ]),
           div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
             div({ className: "row" }, [
-              div({ className: "pvotes-box-head  fsi-row-lg-level fsi-row-md-level" }, [
+              div({ className: "pvotes-box-head fsi-row-lg-level fsi-row-md-level" }, [
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-box-subtitle access-color" }, ["Data Request Id"]),
                 div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-box-subtitle access-color" }, ["Project Title"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, [
-                  "Review/Vote",
-
-                  div({ isRendered: this.state.totalAccessPendingVotes > 0, id: "accessPendingVoteCases", className: "pcases-small-tag" }, [
-                    this.state.totalAccessPendingVotes
-                  ]),
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, ["Status"]),
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, ["Logged"]),
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, ["Review/Vote",
+                  div({ isRendered: this.state.totalAccessPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalAccessPendingVotes]),
                 ]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, [
-                  "Logged"
-                ]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, [
-                  "Actions"
-                ])
               ]),
               hr({ className: "pvotes-main-separator" }),
               div({ className: "pvotes-box-body" }, [
@@ -285,48 +285,24 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   return h(Fragment, { key: rIndex }, [
 
                     hr({ className: "pvotes-separator" }),
-
                     div({ className: "row pvotes-main-list" }, [
                       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-list-id", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
-
                       div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-list-id", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
-
-                      a({ onClick: this.openAccessReview, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [
-                        div({ className: pendingCase.alreadyVoted === true ? 'editable' : 'enabled', isRendered: pendingCase.electionStatus !== 'Final' }, [
-                          span({ isRendered: pendingCase.alreadyVoted === false && pendingCase.electionStatus !== 'Final', value: JSON.stringify(pendingCase) }, ["Vote"]),
-                          span({ isRendered: pendingCase.alreadyVoted === true, value: JSON.stringify(pendingCase) }, ["Edit"])
-                        ])
+                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list this.pendingCase.status " }, [
+                        span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
+                        span({ isRendered: pendingCase.status === 'pending' && pendingCase.isReminderSent !== true }, ["Pending"]),
+                        span({ isRendered: pendingCase.status === 'editable' }, ["Editable"]),
                       ]),
-
                       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list" }, [pendingCase.logged]),
-
-                      div({ isRendered: !pendingCase.alreadyVoted === true && pendingCase.electionStatus !== 'Final' }, [
-                        div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 no-padding collectButton " + pendingCase.alreadyVoted ? 'enabled' : 'disabled' }, [
-                          span({}, ["---"]),
+                      a({
+                        onClick: this.openAccessReview, /*(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"*/
+                        className: "col-lg-2 col-md-2 col-sm-2 col-xs-2"
+                      }, [
+                          div({ className: pendingCase.status }, [
+                            span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
+                            span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
+                          ]),
                         ]),
-                      ]),
-
-                      div({ isRendered: pendingCase.alreadyVoted === true && !pendingCase.isFinalVote && pendingCase.electionStatus !== 'Final' }, [
-                        a({
-                          onClick: this.openAccessReviewResult, value: pendingCase,
-                          className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding"
-                        }, [
-                            div({ className: "collectButton " + pendingCase.alreadyVoted === true ? 'enabled' : 'disabled' }, [
-                              span({}, ["Collect Votes"]),
-                            ]),
-                          ]),
-                      ]),
-
-                      div({ isRendered: pendingCase.electionStatus === 'Final' }, [
-                        a({
-                          onClick: this.openFinalAccessReviewResults, value: pendingCase,
-                          className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 no-padding"
-                        }, [
-                            div({ className: "collectButton " + pendingCase.alreadyVoted === true ? 'enabled' : 'disabled' }, [
-                              span({}, ["FINAL VOTE"]),
-                            ]),
-                          ]),
-                      ]),
                     ]),
                   ]);
                 }),
@@ -347,4 +323,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       ])
     );
   }
-});
+}
+
+export default MemberConsole;
