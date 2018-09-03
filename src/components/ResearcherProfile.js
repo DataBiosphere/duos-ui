@@ -262,7 +262,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         className: "control-label"
                       }, ["Street Address 2 ", span({className: "italic"}, ["(optional)"])]),
                       input({
-                        id: "address2",
+                        id: "profileAddress2",
                         name: "address2",
                         type: "text",
                         className: "form-control",
