@@ -1,21 +1,11 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import Pagination from 'react-paginating';
-import { div, hh, li, ul, h, i, a, input, button, hr, option, span, select } from 'react-hyperscript-helpers';
+import { div, hh, h, button, span } from 'react-hyperscript-helpers';
 import Select from 'react-select';
 import _ from 'lodash/fp'
 import './PaginatorBar.css';
 
-const paginatorButton = (props, label) => button(_.merge({
-  className: "pagination-btn"
-  // style: {
-  //   margin: '0 2px', padding: '0.25rem 0.5rem',
-  //   border: '1px solid #ccc', 
-  //   borderRadius: 3,
-  //   color: props.disabled ? '#fdce09' : '#00f', 
-  //   backgroundColor: 'white',
-  //   cursor: props.disabled ? 'not-allowed' : 'pointer'
-  // }
-}, props), label);
+const paginatorButton = (props, label) => button(_.merge({ className: "pagination-btn" }, props), label);
 
 const options = [
   { label: '  5', value: 5, clearableValue: false },
@@ -28,8 +18,6 @@ const options = [
 export const PaginatorBar = hh(class PaginatorBar extends Component {
 
   limit = 0;
-
-
 
   constructor(props) {
     super(props);
@@ -63,7 +51,8 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                 getPageItemProps({ pageValue: 1, onPageChange: this.props.onPageChange })),
                 // ['First']
                 [
-                  span({ className: "glyphicon glyphicon-fast-backward", "aria-hidden": "true" })
+                  span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" }),
+                  span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" })
                 ]
               ),
 
@@ -71,20 +60,14 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                 _.merge({ disabled: !hasPreviousPage, style: { marginRight: '1rem' } },
                   getPageItemProps({ pageValue: previousPage, onPageChange: this.props.onPageChange })),
                 [
-                  span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" })
+                  span({ className: "glyphicon glyphicon-menu-left arrow", "aria-hidden": "true" })
                 ]
               ),
 
               _.map(num => paginatorButton(
                 _.merge({
                   key: num,
-                  style: {
-                    minWidth: '2rem',
-                    backgroundColor: currentPage === num ? '#0000ff' : undefined,
-                    color: currentPage === num ? '#000000' : '#0000ff',
-                    fontWeight: currentPage === num ? '900' : 'normal',
-                    border: currentPage === num ? '#0000ff' : undefined
-                  }
+                  className: "pagination-btn " + (currentPage === num ? "active" : "")
                 },
                   getPageItemProps({ pageValue: num, onPageChange: this.props.onPageChange })),
                 num), pages
@@ -94,7 +77,7 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                 _.merge({ disabled: !hasNextPage, style: { marginLeft: '1rem' } },
                   getPageItemProps({ pageValue: nextPage, onPageChange: this.props.onPageChange })),
                 [
-                  span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
+                  span({ className: "glyphicon glyphicon-menu-right arrow", "aria-hidden": "true" })
                 ]
               ),
 
@@ -103,7 +86,8 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                   getPageItemProps({ pageValue: totalPages, onPageChange: this.props.onPageChange })),
                 // ['Last']
                 [
-                  span({ className: "glyphicon glyphicon-fast-forward", "aria-hidden": "true" })
+                  span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" }),
+                  span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" })
                 ]
               ),
 
