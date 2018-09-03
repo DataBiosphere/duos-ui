@@ -31,7 +31,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   componentDidUpdate() {
-    // console.log("RESEARCHER PROFILE =", this.state);
+    // TODO review from here to control form validation
   }
 
   async getResearcherProfile() {
@@ -65,10 +65,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         });
       }
     }
-    // this.setState(field, () => {
-    //   console.log(JSON.stringify(this.state, null, 2));
-    // });
-    // console.log(JSON.stringify(this.state, null, 2));
   }
 
   handlePIChange(event) {
@@ -599,7 +595,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   li({className: "f-right multi-step-next"}, [
                     a({
                       isRendered: this.state.researcherProfile.completed,
-                      // isRendered: "!this.state.completed",
                       disabled: false,
                       href: "",
                       onClick: this.submit,
@@ -607,7 +602,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }, ["Submit"]),
                     a({
                       isRendered: false,
-                      // isRendered: "this.state.completed",
                       href: "",
                       onClick: this.submit,
                       className: "common-background"
