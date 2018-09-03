@@ -12,7 +12,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 class AdminManageUsers extends Component {
 
   limit = 5;
-  pageCount = 5;
+  // pageCount = 5;
 
   constructor(props) {
     super(props);
@@ -21,32 +21,38 @@ class AdminManageUsers extends Component {
       showAddUserModal: false,
       showEditUserModal: false,
       limit: this.limit,
-      currentPage: 1,
+      currentPage: null,
     };
 
-    this.getUsers();
-    this.getUsers = this.getUsers.bind(this);
+    // this.getUsers = this.getUsers.bind(this);
   }
 
   async getUsers() {
-    const users = await User.list();
-    let userList = [];
-    users.map(user => {
-      user.researcher = false;
-      user.roles.map(role => {
-        if (role.name === 'Researcher') {
-          user.status = role.status;
-          user.completed = role.profileCompleted;
-          user.researcher = true;
-        }
+    User.list().then(users => {
+
+      let userList = users.map(user => {
+        user.researcher = false;
+        user.roles.map(role => {
+          if (role.name === 'Researcher') {
+            user.status = role.status;
+            user.completed = role.profileCompleted;
+            user.researcher = true;
+          }
+        });
+        user.key = user.id;
         return user;
       });
-      user.key = user.id;
-      userList.push(user);
-      return userList;
+
+      this.setState(prev => {
+        prev.currentPage = 1;
+        prev.userList = userList;
+        return prev;
+      });
     });
-    this.setState({ userList: userList });
-    console.log(userList);
+  }
+
+  componentWillMount() {
+    this.getUsers();
   }
 
   handlePageChange = page => {
@@ -59,6 +65,7 @@ class AdminManageUsers extends Component {
   handleSizeChange = size => {
     this.setState(prev => {
       prev.limit = size;
+      prev.currentPage = 1;
       return prev;
     });
   };
@@ -81,7 +88,6 @@ class AdminManageUsers extends Component {
   }
 
   okModal = (name) => {
-    console.log('okModal ------------------> ' + name);
 
     switch (name) {
       case 'addUser':
@@ -96,7 +102,6 @@ class AdminManageUsers extends Component {
   }
 
   closeModal = (name) => {
-    console.log('closeModel ------------------> ' + name);
 
     switch (name) {
       case 'addUser':
@@ -111,7 +116,6 @@ class AdminManageUsers extends Component {
   }
 
   afterModalOpen = (name) => {
-    console.log('afterModalOpen ------------------> ' + name);
 
     switch (name) {
       case 'addUser':
@@ -226,7 +230,7 @@ class AdminManageUsers extends Component {
                         span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, tooltip: "Researcher review pending", "tooltip-className": "tooltip-class", "tooltip -trigger": "true", "tooltip-placement": "left" }, []),
                         span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                       ]),
-          
+
                     ]),
 
                   ]),
@@ -238,7 +242,7 @@ class AdminManageUsers extends Component {
             PaginatorBar({
               total: this.state.userList.length,
               limit: this.state.limit,
-              pageCount: this.pageCount,
+              // pageCount: this.pageCount,
               currentPage: this.state.currentPage,
               onPageChange: this.handlePageChange,
               changeHandler: this.handleSizeChange,

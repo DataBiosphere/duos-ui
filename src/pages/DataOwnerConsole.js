@@ -36,6 +36,16 @@ class DataOwnerConsole extends Component {
     this.setState({ showModal: false });
   }
 
+  editReview = (e) => {
+    const data = e.target.getAttribute('data');
+    console.log('------------editReview---------------', data);
+  }
+
+  voteReview = (e) => {
+    const data = e.target.getAttribute('data');
+    console.log('------------voteReview---------------', data);
+  }
+
   render() {
     let currentUser = {
       displayName: 'Nadya Lopez Zalba'
@@ -45,6 +55,7 @@ class DataOwnerConsole extends Component {
       div({ className: "container" }, [
 
         div({ className: "row no-margin" }, [
+
           div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
             PageHeading({
               id: "dataOwnerConsole",
@@ -52,8 +63,8 @@ class DataOwnerConsole extends Component {
               title: "Welcome " + currentUser.displayName + "!",
               description: "These are your pending cases for review"
             }),
-
           ]),
+
           div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "search-text" }, [
               i({ className: "glyphicon glyphicon-search dataset-color" }),
@@ -63,6 +74,7 @@ class DataOwnerConsole extends Component {
               }),
             ]),
           ]),
+
         ]),
 
         div({ className: "jumbotron table-box" }, [
@@ -74,26 +86,33 @@ class DataOwnerConsole extends Component {
           ]),
 
           hr({ className: "pvotes-main-separator" }),
+
           this.state.dataOwnerUnreviewedCases.map(pendingCase => {
-            return h(Fragment, {}, [
-              div({ key: pendingCase.darCode, id: pendingCase.darCode, className: "row pvotes-main-list" }, [
+            return h(Fragment, { key: pendingCase.darCode }, [
+              div({ id: pendingCase.darCode, className: "row pvotes-main-list" }, [
+
                 div({ id: pendingCase.darCode + "_dataSetId", className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 cell-body text" }, [pendingCase.dataSetId]),
                 div({ id: pendingCase.darCode + "_dataSetName", className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 cell-body text" }, [pendingCase.dataSetName]),
                 div({ id: pendingCase.darCode + "_darCode", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pendingCase.darCode]),
 
                 div({ id: pendingCase.darCode + "_actions", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
+
                   button({
                     id: pendingCase.darCode + "_btn_vote",
                     className: "cell-button cancel-color",
                     isRendered: !pendingCase.alreadyVoted && (pendingCase.hasConcerns === null || !pendingCase.hasConcerns),
-                    onClick: this.voteReview()
+                    data: pendingCase.darCode,
+                    onClick: this.voteReview
                   }, ["Vote"]),
+
                   button({
                     id: pendingCase.darCode + "_btn_edit",
                     className: "cell-button default-color",
                     isRendered: pendingCase.alreadyVoted || pendingCase.hasConcerns,
-                    onClick: this.editReview()
+                    data: pendingCase.darCode,
+                    onClick: this.editReview
                   }, ["Edit"]),
+
                 ]),
               ]),
               hr({ className: "pvotes-separator" }),
