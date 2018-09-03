@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, button, i, span, b, a, h4 } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { Election, User } from '../libs/ajax';
+import { Election } from '../libs/ajax';
 
 class DulPreview extends Component {
 
@@ -9,10 +9,8 @@ class DulPreview extends Component {
     super(props);
     this.state = this.initialState();
     this.back = this.back.bind(this);
-    // this.backCall();
-    // this.backCall = this.backCall.bind(this);
-    this.getUsers();
-    this.getUsers = this.getUsers.bind(this);
+    this.backCall();
+    this.backCall = this.backCall.bind(this);
 
   }
 
@@ -20,33 +18,13 @@ class DulPreview extends Component {
     console.log('back');
   }
 
-  // async backCall() {
-  //   const consentId = this.props.match.params.consentId;
-  //   console.log(consentId);
-  //   // Election.electionReviewResource(consentId, 'TranslateDUL');
-  //   const consent = await Election.describe(consentId);
-  // }
-
-  async getUsers() {
-    const users = await User.list();
-    let userList = [];
-    users.map(user => {
-      user.researcher = false;
-      user.roles.map(role => {
-        if (role.name === 'Researcher') {
-          user.status = role.status;
-          user.completed = role.profileCompleted;
-          user.researcher = true;
-        }
-        return user;
-      });
-      user.key = user.id;
-      userList.push(user);
-      return userList;
-    });
-    this.setState({ userList: userList });
-    console.log(userList);
+  async backCall() {
+    const consentId = this.props.match.params.consentId;
+    console.log(consentId);
+    const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
+    console.log(consent);
   }
+
 
   componentWillMount() {
     this.mockState();

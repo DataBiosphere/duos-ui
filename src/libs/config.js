@@ -29,7 +29,7 @@ const Token = {
 };
 
 const loadConfig = _.memoize(async () => {
-  const res = await fetch('config.json');
+  const res = await fetch('/config.json');
   return res.json()
 });
 
