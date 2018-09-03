@@ -566,6 +566,8 @@ export const DUL = {
 
   create: async (id) => {
     const url = `${await Config.getApiUrl()}/consent/${id}/dul`;
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(), Config.authOpts(), { method: 'POST' }]));
+    return res.json();
   },
 };
 

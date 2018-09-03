@@ -68,7 +68,7 @@ export default ({props}) => (
     <AuthenticatedRoute path='/dul_review' component={DulReview} props={props} />
     <AuthenticatedRoute path='/access_preview' component={AccessPreview} props={props} />
     <AuthenticatedRoute path='/access_collect' component={AccessCollect} props={props} />
-    <AuthenticatedRoute path='/dul_preview' component={DulPreview} props={props} />
+    <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} />
     <AuthenticatedRoute path='/dul_collect' component={DulCollect} props={props} />
     <AuthenticatedRoute path='/final_access_review_results' component={FinalAccessReviewResults} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />

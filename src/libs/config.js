@@ -3,10 +3,6 @@ import { Storage } from './storage';
 
 
 export const Config = {
-  loadConfig: _.memoize(async () => {
-    const res = await fetch('config.json');
-    return res.json()
-  }),
 
   getApiUrl: async () => (await getConfig()).apiUrl,
 
@@ -22,7 +18,7 @@ export const Config = {
     headers: { 'Content-Type': 'application/json' }
   }),
 
-  getGoogleClientId : async () => (await getConfig()).clientId
+  // getGoogleClientId : async () => (await getConfig()).clientId
 
 };
 
@@ -47,6 +43,6 @@ const getConfig = async () => {
 //   }
 // };
 
-export const getGoogleClientId = async () => (await getConfig()).clientId;
+// export const getGoogleClientId = async () => (await getConfig()).clientId;
 
-export const getApiUrl = async () => (await getConfig()).apiUrl;
+// export const getApiUrl = async () => (await getConfig()).apiUrl;
