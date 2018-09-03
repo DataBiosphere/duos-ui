@@ -5,8 +5,8 @@ import { PaginatorBar } from '../components/PaginatorBar';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
-  dulPageCount = 10;
-  accessPageCount = 10;
+  dulPageCount = 5;
+  accessPageCount = 5;
 
   searchDulCases = '';
   searchAccessCases = '';
@@ -333,7 +333,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                 hr({ className: "pvotes-separator" }),
                 PaginatorBar({
                   name: 'access',
-                  total: this.state.electionsList.dul.length,
+                  total: this.state.electionsList.access.length,
                   limit: this.state.accessLimit,
                   pageCount: this.accessPageCount,
                   currentPage: this.state.currentAccessPage,

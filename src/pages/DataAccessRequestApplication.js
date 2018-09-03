@@ -730,8 +730,8 @@ class DataAccessRequestApplication extends Component {
 
                       OptionsRadioGroup({
                         value: this.state.formData.gender,
-                        optionLabels: ['Female', "Male"],
-                        optionValues: ['F', 'M'],
+                        optionLabels: ['Female', "Male", "Prefer Not to answer"],
+                        optionValues: ['F', 'M', "N"],
                         name: 'gender',
                         onChange: this.handleRadioChange
                       }),
