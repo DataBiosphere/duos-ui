@@ -12,7 +12,6 @@ import { PaginatorBar } from '../components/PaginatorBar';
 class AdminManageUsers extends Component {
 
   limit = 5;
-  // pageCount = 5;
 
   constructor(props) {
     super(props);
@@ -23,8 +22,6 @@ class AdminManageUsers extends Component {
       limit: this.limit,
       currentPage: null,
     };
-
-    // this.getUsers = this.getUsers.bind(this);
   }
 
   async getUsers() {
@@ -78,7 +75,6 @@ class AdminManageUsers extends Component {
   }
 
   editUser = (user) => (e) => {
-    // "this", "e", "id"
     console.log('editUser: ', user);
     this.setState(prev => {
       prev.showEditUserModal = true;
@@ -211,7 +207,6 @@ class AdminManageUsers extends Component {
                   div({ id: user.dacUserId + "_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     div({ id: user.dacUserId + "_btn_researcherReview", className: "row no-margin" }, [
                       a({ isRendered: user.researcher !== false && user.completed, "ui-sref": "researcher_review({dacUserId: '{{user.dacUserId}}'})", className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                        // div({ className: "{'enabled': user.researcher && user.completed && user.status ::: 'pending' || user.status ::: null, 'editable': user.researcher && user.completed && user.status !:: 'pending', 'disabled': user.researcher :: false || !(user.completed)}" }, ["Review"]),
                         div({
                           className:
                             ((user.researcher && user.completed && user.status === 'pending') || user.status === null) ? 'enabled'
@@ -241,7 +236,6 @@ class AdminManageUsers extends Component {
             PaginatorBar({
               total: this.state.userList.length,
               limit: this.state.limit,
-              // pageCount: this.pageCount,
               currentPage: this.state.currentPage,
               onPageChange: this.handlePageChange,
               changeHandler: this.handleSizeChange,
