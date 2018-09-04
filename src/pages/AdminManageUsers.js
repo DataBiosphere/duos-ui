@@ -180,10 +180,9 @@ class AdminManageUsers extends Component {
           ]),
 
           hr({ className: "pvotes-main-separator" }),
-          div({ "dir-paginate": "user in AdminManageUsers.usersList.dul | filter: searchUsers | itemsPerPage:8" }, [
             this.state.userList.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
-              return h(Fragment, {}, [
-                div({ key: user.dacUserId, id: user.dacUserId, className: "row no-margin" }, [
+              return h(Fragment, { key: user.dacUserId }, [
+                div({ id: user.dacUserId, className: "row no-margin" }, [
                   div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
                   div({ id: user.dacUserId + "_email", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text" }, [user.email]),
                   div({ id: user.dacUserId + "_roles", className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold" }, [
@@ -242,8 +241,7 @@ class AdminManageUsers extends Component {
               currentPage: this.state.currentPage,
               onPageChange: this.handlePageChange,
               changeHandler: this.handleSizeChange,
-            }),
-          ])
+            })
         ])
       ])
     );
