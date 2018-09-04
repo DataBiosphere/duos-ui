@@ -1,7 +1,11 @@
 import { Component, Fragment } from 'react';
-import { div, hr, span, a, h } from 'react-hyperscript-helpers';
+import { div, hr, span, a, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Purpose } from '../libs/ajax';
+import { PaginatorBar } from "../components/PaginatorBar";
+
+const limit = 10;
+
 
 class AdminManageAccess extends Component {
 
@@ -9,8 +13,10 @@ class AdminManageAccess extends Component {
     super(props);
     this.state = {
       value: '',
-      darElectionList: []
-    };
+      darElectionList: [],
+      currentPage: 1,
+      limit: limit,
+    }
 
     this.getElectionDarList = this.getElectionDarList.bind(this);
     this.myHandler = this.myHandler.bind(this);
@@ -28,22 +34,44 @@ class AdminManageAccess extends Component {
       darElection.push(dar);
       return dar;
     });
-      this.setState({
-        darElectionList: darElection
-      });
+
+    this.setState(prev => {
+      prev.currentPage = 1;
+      prev.darElectionList = darElection;
+      return prev;
+    });
   }
 
   componentWillMount() {
-    this.getElectionDarList().then(data => {return data});
+    this.getElectionDarList().then(data => { return data });
   }
+
+
+  handlePageChange = page => {
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
 
   open(data) {
 
   }
 
   render() {
+
+    const { currentPage } = this.state;
+
     return (
-      
+
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
@@ -63,71 +91,78 @@ class AdminManageAccess extends Component {
 
           hr({ className: "pvotes-main-separator" }),
 
-          // div({ "dir-paginate": "dar in AdminManageAccess.dars | filter: searchAccess | itemsPerPage:10", "current-page": "AdminManageAccess.currentDARPage" }, [
-            this.state.darElectionList.map(dar => {
-              return h(Fragment, {}, [
-                div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin " + (dar.needsApproval ? "list-highlighted" : ""), }, [
-                //   div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: "this.dar.frontEndId" }, [
-                    div({
-                //       id: dar.frontEndId + "_flag_darId", className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.needsApproval ? "access-color" : dar.needsApproval ? "access-color" : ""),
-                //       // "ng-class": "{'access-color': dar.needsApproval, 'cancel-color': dar.dataSetElectionResult :: 'Denied','dataset-color': dar.dataSetElectionResult :: 'Approved'}",
-                //       //  "tooltip": "this.dar.dataSetElectionResult ", "tooltip-class": "tooltip-class"
-                //       // , "tooltip-trigger": "true", "tooltip-placement": "right", "ng-show": "dar.needsApproval"
-                    }, []),
-                    span({ id: dar.frontEndId + "_name_darId", className: "list-highlighted-item" }, ["this.dar.frontEndId "])
+          this.state.darElectionList.map(dar => {
+            return h(Fragment, { key: dar.frontEndId }, [
+              div({ id: dar.frontEndId, className: "row no-margin " + (dar.needsApproval ? "list-highlighted" : "") }, [
+                div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
+                  div({ id: dar.frontEndId + "_flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : "") }, []),
+                  //  "tooltip": "this.dar.dataSetElectionResult ", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                  span({ id: dar.frontEndId + "_name_darId", className: "list-highlighted-item" }, [dar.frontEndId])
                 ]),
 
-                  div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: "this.dar.projectTitle" }, [dar.projectTitle]),
+                div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
 
-                  div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.createDate | "date:'yyyy-MM-dd'"]),
+                div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.createDate | "date:'yyyy-MM-dd'"]),
 
-                  a({ id: dar.frontEndId + "_btn_summary", href: "", className: "admin-manage-buttons col-lg-1 col-md-1 col-sm-1 col-xs-1 no-padding" }, [
-                    div({ className: "enabled hover-color", onClick: "AdminManageAccess.openApplication(dar.dataRequestId, dar.electionStatus)" }, ["Summary"]),
+                div({ id: dar.frontEndId + "_btn_summary", href: "", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
+                  button({ className: "cell-button hover-color", onClick: "this.openApplication(dar.dataRequestId, dar.electionStatus)" }, ["Summary"]),
+                ]),
+
+                div({ id: dar.frontEndId + "_link_electionStatus", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
+                  span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
+                    a({ onClick: this.open('access_preview_results', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
                   ]),
-
-                  div({ id: dar.frontEndId + "_link_electionStatus", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold" }, [
-                    span({ isRendered: "dar.electionStatus :: 'un-reviewed'" }, [
-                      a({ onClick: this.open("access_preview_results, dar.electionId, dar.dataRequestId") }, ["Un-reviewed"]),
-                    ]),
-                    span({ isRendered: "dar.electionStatus :: 'Open' || dar.electionStatus :: 'Final'" }, [
-                      a({ onClick: "AdminManageAccess.open('access_review_results', dar.electionId, dar.dataRequestId)" }, ["Open"]),
-                    ]),
-                    span({ isRendered: "dar.electionStatus :: 'Canceled'" }, [
-                      a({ onClick: "AdminManageAccess.open('access_preview_results', dar.electionId, dar.dataRequestId)" }, ["Canceled"]),
-                    ]),
-                    span({ isRendered: "dar.electionStatus :: 'Closed' || dar.electionStatus :: 'PendingApproval'" }, [
-                      a({ onClick: "AdminManageAccess.open('access_results_record', dar.electionId, dar.dataRequestId)" }, ["Reviewed"]),
-                    ]),
+                  span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
+                    a({ onClick: this.open('access_review_results', dar.electionId, dar.dataRequestId) }, ["Open"]),
                   ]),
+                  span({ isRendered: dar.electionStatus === 'Canceled' }, [
+                    a({ onClick: this.open('access_preview_results', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
+                  ]),
+                  span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
+                    a({ onClick: this.open('access_results_record', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
+                  ]),
+                ]),
 
-                //   div({ id: dar.frontEndId + "_actions", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
-                //     div({ className: "row no-margin" }, [
-                //       a({ id: dar.frontEndId + "_btn_action", href: "", className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                //         div({ isRendered: "dar.electionStatus !: 'Open' &&  dar.electionStatus !: 'Final' && dar.electionStatus !: 'PendingApproval'", className: "create hover-color", onClick: "AdminManageAccess.openCreate(dar.dataRequestId)" }, ["Create"]),
-                //         div({ isRendered: "dar.electionStatus :: 'PendingApproval'", className: "disabled" }, ["Create"]),
-                //         div({ isRendered: "dar.electionStatus :: 'Open'||  dar.electionStatus :: 'Final'", className: "cancel hover-color", onClick: "AdminManageAccess.openCancel(dar)" }, ["Cancel"]),
-                //       ]),
-                //       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
-                //         a({ id: dar.frontEndId + "_flag_bonafide", isRendered: "dar.status !:: null", onClick: "AdminManageAccess.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)" }, [
-                //           span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: "dar.status ::: 'approved'", "tooltip": "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
-                //           span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: "dar.status ::: 'rejected'", "tooltip": "Non-Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
-                //           span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: "dar.status ::: 'pending'", "tooltip": "Researcher review pending", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
-                //           span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: "dar.status ::: null" }, []),
-                //         ]),
-                //       ]),
-                //     ]),
-                //   ]),
-
-                //   hr({ className: "pvotes-separator" }),
-                  // ]),
-                  // div({ "dir-pagination-controls": "true", "max-size": "10", "direction-links": "true", "boundary-links": "true", className: "pvotes-pagination" }, [
-                  // ]),
-                // ]),
-              ])
-            })
-          ])
+                div({ id: dar.frontEndId + "_actions", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
+                  div({ className: "row no-margin" }, [
+                    div({ id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
+                      button({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), className: "cell-button hover-color", onClick: "this.openCreate(dar.dataRequestId)" }, ["Create"]),
+                      button({ isRendered: dar.electionStatus === 'PendingApproval', className: "cell-button disabled" }, ["Create"]),
+                      button({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), className: "cell-button cancel-color", onClick: "this.openCancel(dar)" }, ["Cancel"]),
+                    ]),
+                    div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
+                      a({ id: dar.frontEndId + "_flag_bonafide", onClick: "this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)" }, [
+                        span({
+                          className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved'
+                          // , "tooltip": "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left"
+                        }, []),
+                        span({
+                          className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected'
+                          // , "tooltip": "Non-Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" 
+                        }, []),
+                        span({
+                          className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending'
+                          // , "tooltip": "Researcher review pending", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" 
+                        }, []),
+                        span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }, []),
+                      ])
+                    ])
+                  ])
+                ])
+              ]),
+              hr({ className: "pvotes-separator" })
+            ]);
+          }),
+          PaginatorBar({
+            total: this.state.darElectionList.length,
+            limit: this.state.limit,
+            pageCount: this.pageCount,
+            currentPage: this.state.currentPage,
+            onPageChange: this.handlePageChange,
+            changeHandler: this.handleSizeChange,
+          }),
         ])
-      // ])
+      ])
     );
   }
 }

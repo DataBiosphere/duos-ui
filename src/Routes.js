@@ -20,7 +20,7 @@ import RpApplication from "./pages/RpApplication";
 import NotFound from "./pages/NotFound";
 import AccessResultRecords from "./pages/AccessResultRecords";
 import DulResultRecords from "./pages/DulResultRecords";
-import FinalAccessReviewResults from "./pages/FinalAccessReviewResults";
+import FinalAccessReview from "./pages/FinalAccessReview";
 import { SummaryVotes } from "./pages/SummaryVotes";
 import ReviewedCases from "./pages/ReviewedCases";
 import DataAccessRequestApplication from "./pages/DataAccessRequestApplication";
@@ -70,7 +70,7 @@ export default ({props}) => (
     <AuthenticatedRoute path='/access_collect' component={AccessCollect} props={props} />
     <AuthenticatedRoute path='/dul_preview' component={DulPreview} props={props} />
     <AuthenticatedRoute path='/dul_collect' component={DulCollect} props={props} />
-    <AuthenticatedRoute path='/final_access_review_results' component={FinalAccessReviewResults} props={props} />
+    <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
     <AuthenticatedRoute path='/rp_application' component={RpApplication} props={props} />
     <Route path='*' component={NotFound} />

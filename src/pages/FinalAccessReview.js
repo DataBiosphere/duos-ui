@@ -6,7 +6,7 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 
-class FinalAccessReviewResults extends Component {
+class FinalAccessReview extends Component {
 
   constructor(props) {
     super(props);
@@ -737,4 +737,4 @@ class FinalAccessReviewResults extends Component {
   }
 }
 
-export default FinalAccessReviewResults;
+export default FinalAccessReview;
