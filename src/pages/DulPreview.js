@@ -10,17 +10,17 @@ class DulPreview extends Component {
     this.state = {
       consentPreview: {}
     };
-    this.backCall();
+    this.electionReview();
     this.back = this.back.bind(this);
-    this.backCall = this.backCall.bind(this);
+    this.electionReview = this.electionReview.bind(this);
     this.downloadDUL = this.downloadDUL.bind(this);
   }
 
   back() {
-    console.log('back');
+    this.props.history.goBack();
   }
 
-  async backCall() {
+  async electionReview() {
     const consentId = this.props.match.params.consentId;
     const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
     this.setState({consentPreview: consent.consent});

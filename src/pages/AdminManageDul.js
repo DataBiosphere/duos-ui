@@ -226,7 +226,7 @@ class AdminManageDul extends Component {
                     span({ isRendered: election.electionStatus === 'un-reviewed' }, [
                       a({ onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Un-reviewed"])]),
                     span({ isRendered: election.electionStatus === 'Open' }, [
-                      a({ onClick: () => this.open(election.consentId, 'dul_review', null, false) }, ["Open"]),]),
+                      a({ onClick: () => this.open(election.consentId, 'dul_collect', null, false) }, ["Open"]),]),
                     span({ isRendered: election.electionStatus === 'Canceled' }, [
                       a({ onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Canceled"]),]),
                     span({ isRendered: election.electionStatus === 'Closed' }, [

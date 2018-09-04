@@ -4,12 +4,31 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
+import { Election, Files } from '../libs/ajax';
 
 class DulCollect extends Component {
 
   constructor(props) {
     super(props);
+
+    this.back = this.back.bind(this);
+    this.electionReview();
+    this.electionReview = this.electionReview.bind(this);
+    const consentId = this.props.match.params.consentId;
+    console.log(consentId);
     this.state = this.initialState();
+  }
+
+  back() {
+    this.props.history.goBack();
+  }
+
+  async electionReview() {
+    const consentId = this.props.match.params.consentId;
+    const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
+    this.setState({consentPreview: consent});
+    console.log(this.state.consentPreview);
+    this.setState({})
   }
 
   componentWillMount() {
@@ -106,38 +125,21 @@ class DulCollect extends Component {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
     console.log('------------download-------------', filename, value);
-  }
+  };
 
   downloadDUL = (e) => {
     console.log('------------downloadDUL-------------', e);
-  }
+  };
 
   positiveVote = (e) => {
     console.log('------------positiveVote--------------');
-  }
+  };
 
   logVote = (e) => {
     console.log('------------logVote--------------');
-  }
+  };
 
   render() {
-
-    // let vote = {
-    //   vote: null,
-    //   rationale: ''
-    // }
-
-    // let alertsDAR = [
-    //   { title: "Alert 01" },
-    //   { title: "Alert 02" },
-    // ];
-
-    // let alertsAgree = [
-    //   { title: "Alert Agree 01" },
-    //   { title: "Alert Agree 02" },
-    // ];
-
-    // let alertOn = null;
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.consentGroupName]),
@@ -152,7 +154,7 @@ class DulCollect extends Component {
             PageHeading({ id: "collectDul", imgSrc: "/images/icon_dul.png", iconSize: "medium", color: "dul", title: "Collect votes for Data Use Limitations Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", onClick: "back()", className: "btn vote-button vote-button-back vote-button-bigger" }, [
+            a({ id: "btn_back", onClick: () => this.back(), className: "btn vote-button vote-button-back vote-button-bigger" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),
@@ -226,10 +228,6 @@ class DulCollect extends Component {
             ]),
           ]);
         })
-        // ])
-        // ])
-
-
 
       ])
     );
