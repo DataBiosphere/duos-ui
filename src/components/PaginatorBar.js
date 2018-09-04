@@ -6,31 +6,21 @@ import './PaginatorBar.css';
 
 const paginatorButton = (props, label) => button(_.merge({ className: "pagination-btn" }, props), label);
 
-const options = [
-  { label: '  5', value: 5, clearableValue: false },
-  { label: ' 10', value: 10, clearableValue: false },
-  { label: ' 20', value: 20, clearableValue: false },
-  { label: ' 50', value: 50, clearableValue: false },
-  { label: '100', value: 100, clearableValue: false },
-];
-
 export const PaginatorBar = hh(class PaginatorBar extends Component {
-
-  limit = 0;
 
   constructor(props) {
     super(props);
 
     this.changeLimit = this.changeLimit.bind(this);
     this.state = {
-      limit: this.props.limit
+      limit: this.props.limit ? this.props.limit : 5,
+      pageCount: this.props.pageCount ? this.props.pageCount : 5
     }
   }
 
   changeLimit(e) {
     const target = e.target;
     const value = target.value;
-    console.log('-----------changeLimit-------------', value);
     this.setState(prev => {
       prev.limit = value;
       return prev;
@@ -39,25 +29,26 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
 
   render() {
 
+    const nPages = Math.ceil(this.props.total / this.state.limit);
+
     return (
 
       h(Pagination, {
         total: this.props.total,  // Total results
-        limit: parseInt(this.state.limit), // Number of results per page
-        pageCount: this.props.pageCount, // How many pages number you want to display in pagination zone.
+        limit: parseInt(this.state.limit, 10), // Number of results per page
+        pageCount: this.state.pageCount, // How many pages number you want to display in pagination zone.
         currentPage: this.props.currentPage // Current page number
       }, [
           ({ pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, totalPages, getPageItemProps }) =>
             div({ className: 'controls-wrapper' }, [
               div({ className: "amount-wrapper" }, [
-                span({ className: "amount-label pipe" }, ['Page: ' + this.props.currentPage + ' of ' + Math.ceil(this.props.total / this.state.limit ),]),
-                span({ className: "amount-label" }, ['Results:  ' + this.props.total ]),
+                span({ className: "amount-label pipe" }, ['Page: ' + this.props.currentPage + ' of ' + nPages]),
+                span({ className: "amount-label" }, ['Results:  ' + this.props.total]),
               ]),
 
               div({ className: 'pagination-wrapper' }, [
                 paginatorButton(_.merge({ disabled: currentPage === 1 },
                   getPageItemProps({ pageValue: 1, onPageChange: this.props.onPageChange })),
-                  // ['First']
                   [
                     span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" }),
                     span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" })
@@ -92,7 +83,6 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                 paginatorButton(
                   _.merge({ disabled: currentPage === totalPages, style: { marginLeft: '0.5rem' } },
                     getPageItemProps({ pageValue: totalPages, onPageChange: this.props.onPageChange })),
-                  // ['Last']
                   [
                     span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" }),
                     span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" })
@@ -109,7 +99,6 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                 ]),
                 div({ className: "select-label" }, ["items per page"]),
               ]),
-             
             ])
         ])
     );

@@ -42,16 +42,18 @@ class AdminManageDul extends Component {
   async getConsentManage() {
     Consent.getConsentManage().then(data => {
       const regex = new RegExp('-', 'g');
-      data.map(election => {
+
+      let dul = data.map(election => {
         let str = election.consentName;
         str = str.replace(regex, ' ');
         election.ct = election.consentName + ' ' + election.version;
         election.cts = str + ' ' + election.version;
         return election;
       });
+
       this.setState(prev => {
         prev.currentPage = 1;
-        prev.electionsList.dul = data;
+        prev.electionsList.dul = dul;
         return prev;
       });
     });

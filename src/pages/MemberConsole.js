@@ -1,13 +1,15 @@
 import { Component, Fragment } from 'react';
-import { div, hr, h2, br, i, img, input, span, small, a, h, } from 'react-hyperscript-helpers';
+import { div, hr, i, input, span, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import { PageSubHeading } from '../components/PageSubHeading';
 import _ from "lodash/fp";
 import { PaginatorBar } from '../components/PaginatorBar';
 
+
 class MemberConsole extends Component {
 
-  dulPageCount = 10;
-  accessPageCount = 10;
+  dulPageCount = 5;
+  accessPageCount = 5;
 
   searchDulCases = '';
   searchAccessCases = '';
@@ -143,53 +145,15 @@ class MemberConsole extends Component {
 
     return (
 
-      // div({ className: "container" }, [
-      //   div({ className: "row no-margin" }, [
-      //     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-      //       PageHeading({ color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
-      //     ]),
 
-      //   ]),
-      //   hr({ className: "section-separator" }),
-
-      //   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-      //     div({ className: "row no-margin" }, [
-      //       h2({ className: "col-lg-7 col-md-7 col-sm-8 col-xs-12 pvotes-box-title dul-color" }, [
-      //         img({ src: "/images/icon_dul.png", alt: "Data Use Limitations Review icon", className: "pvotes-icons" }),
-      //         "Data Use Limitations Review",
-      //         br({}),
-      //         div({ className: "pvotes-box-title-description" }, [
-      //           "Were data use limitations accurately converted to a structured format?"
-      //         ])
-      //       ]),
-
-      //       div({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
-      //         div({ className: "search-text" }, [
-      //           i({ className: "glyphicon glyphicon-search dul-color" }),
-      //           input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", "ng-model": "searchDULCases" })
-      //         ]),
-      //       ]),
-      //     ]),
-      //   ]),
-      // ])
-
-
-      //-------------------------------------
       div({ className: "container" }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          h2({ className: "cm-title common-color" }, [
-            div({ id: "dacUser" }, ["Welcome ", this.state.currentUser.displayName, " !"]),
-            small({}, ["These are your pending cases for review"]),
-          ]),
+          PageHeading({ color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
           hr({ className: "section-separator" }),
-        ]),
-        div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+
           div({ className: "row no-margin" }, [
-            h2({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 pvotes-box-title dul-color" }, [
-              img({ src: "/images/icon_dul.png", alt: "Data Use Limitations Review icon", className: "pvotes-icons" }),
-              "Data Use Limitations Review",
-              br(),
-              div({ className: "pvotes-box-title-description" }, ["Were data use limitations accurately converted to a structured format?"]),
+            div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
+              PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Review", description: "Were data use limitations accurately converted to a structured format?" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
               div({ className: "search-text" }, [
@@ -198,68 +162,60 @@ class MemberConsole extends Component {
               ]),
             ]),
           ]),
-          div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
-            div({ className: "row" }, [
-              div({ className: "pvotes-box-head fsi-row-lg-level fsi-row-md-level" }, [
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-box-subtitle dul-color" }, ["Consent id"]),
-                div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-box-subtitle dul-color" }, ["Consent Group Name"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, ["Status"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, ["Logged"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle dul-color" }, [
-                  "Review/Vote",
-                  div({ isRendered: this.state.totalDulPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalDulPendingVotes]),
-                ]),
-              ]),
-              hr({ className: "pvotes-main-separator" }),
-              div({ className: "pvotes-box-body" }, [
-                this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
-                  return h(Fragment, { key: rIndex }, [
 
-                    hr({ className: "pvotes-separator" }),
-                    div({ className: "row pvotes-main-list" }, [
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-list-id", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
-                      div({
-                        className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-list-id", "ng-class": "{empty : !pendingCase.consentGroupName}",
-                        title: pendingCase.consentGroupName
-                      }, [pendingCase.consentGroupName]),
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list bold" }, [
-                        span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
-                        span({ isRendered: pendingCase.status === 'pending' && pendingCase.isReminderSent !== true }, ["Pending"]),
-                        span({ isRendered: pendingCase.status === 'editable' }, ["Editable"]),
-                      ]),
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list" }, [pendingCase.logged]),
-                      a({ onClick: this.openDULReview, /*pendingCase.referenceId, pendingCase.voteId)"*/ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [
-                        div({ className: pendingCase.alreadyVoted ? 'editable' : 'enabled' }, [
-                          span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
-                          span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
-                        ]),
-                      ]),
+          div({ className: "jumbotron table-box" }, [
+            div({ className: "row no-margin" }, [
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header dul-color" }, ["Consent id"]),
+              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-header dul-color" }, ["Consent Group Name"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, ["Status"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, ["Logged"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, [
+                "Review/Vote",
+                div({ isRendered: this.state.totalDulPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalDulPendingVotes]),
+              ])
+            ]),
+            hr({ className: "pvotes-main-separator" }),
+
+            this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
+              return h(Fragment, { key: rIndex }, [
+                div({ className: "row no-margin" }, [
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
+                  div({
+                    className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ""),
+                    title: pendingCase.consentGroupName
+                  }, [pendingCase.consentGroupName]),
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
+                    span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
+                    span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ["Pending"]),
+                    span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ["Editable"]),
+                  ]),
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
+                  div({ onClick: this.openDULReview, /*pendingCase.referenceId, pendingCase.voteId)"*/ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
+                    button({ className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
+                      span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
+                      span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
                     ]),
-                  ]);
-                }),
-                hr({ className: "pvotes-separator" }),
-                PaginatorBar({
-                  name: 'dul',
-                  total: this.state.electionsList.dul.length,
-                  limit: this.state.dulLimit,
-                  pageCount: this.dulPageCount,
-                  currentPage: this.state.currentDulPage,
-                  onPageChange: this.handleDulPageChange,
-                  changeHandler: this.handleDulSizeChange,
-                }),
-              ]),
-            ]),
+                  ]),
+                ]),
+                hr({ className: "pvotes-separator" })
+              ])
+            }),
+            PaginatorBar({
+              name: 'dul',
+              total: this.state.electionsList.dul.length,
+              limit: this.state.dulLimit,
+              pageCount: this.dulPageCount,
+              currentPage: this.state.currentDulPage,
+              onPageChange: this.handleDulPageChange,
+              changeHandler: this.handleDulSizeChange,
+            })
           ]),
-        ]),
 
-        div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           div({ className: "row no-margin" }, [
-            h2({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 pvotes-box-title access-color" }, [
-              img({ src: "/images/icon_access.png", alt: "Data Access Review icon", className: "pvotes-icons" }),
-              "Data Access Request Review",
-              br(),
-              div({ className: "pvotes-box-title-description" }, ["Should data access be granted to this applicant?"]),
+            div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
+              PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Request Review", description: "Should data access be granted to this applicant?" }),
             ]),
+
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
               div({ className: "search-text" }, [
                 i({ className: "glyphicon glyphicon-search access-color" }),
@@ -267,57 +223,52 @@ class MemberConsole extends Component {
               ]),
             ]),
           ]),
-          div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
-            div({ className: "row" }, [
-              div({ className: "pvotes-box-head fsi-row-lg-level fsi-row-md-level" }, [
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-box-subtitle access-color" }, ["Data Request Id"]),
-                div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-box-subtitle access-color" }, ["Project Title"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, ["Status"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, ["Logged"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 center-text pvotes-box-subtitle access-color" }, ["Review/Vote",
-                  div({ isRendered: this.state.totalAccessPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalAccessPendingVotes]),
-                ]),
-              ]),
-              hr({ className: "pvotes-main-separator" }),
-              div({ className: "pvotes-box-body" }, [
-
-                this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
-                  return h(Fragment, { key: rIndex }, [
-
-                    hr({ className: "pvotes-separator" }),
-                    div({ className: "row pvotes-main-list" }, [
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 pvotes-list-id", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
-                      div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 pvotes-list-id", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list this.pendingCase.status " }, [
-                        span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
-                        span({ isRendered: pendingCase.status === 'pending' && pendingCase.isReminderSent !== true }, ["Pending"]),
-                        span({ isRendered: pendingCase.status === 'editable' }, ["Editable"]),
-                      ]),
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 pvotes-list" }, [pendingCase.logged]),
-                      a({
-                        onClick: this.openAccessReview, /*(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"*/
-                        className: "col-lg-2 col-md-2 col-sm-2 col-xs-2"
-                      }, [
-                          div({ className: pendingCase.status }, [
-                            span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
-                            span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
-                          ]),
-                        ]),
-                    ]),
-                  ]);
-                }),
-                hr({ className: "pvotes-separator" }),
-                PaginatorBar({
-                  name: 'access',
-                  total: this.state.electionsList.dul.length,
-                  limit: this.state.accessLimit,
-                  pageCount: this.accessPageCount,
-                  currentPage: this.state.currentAccessPage,
-                  onPageChange: this.handleAccessPageChange,
-                  changeHandler: this.handleAccessSizeChange,
-                }),
+          div({ className: "jumbotron table-box" }, [
+            div({ className: "row no-margin" }, [
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header access-color" }, ["Data Request Id"]),
+              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-header access-color" }, ["Project Title"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center" }, ["Status"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center" }, ["Logged"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center" }, ["Review/Vote",
+                div({ isRendered: this.state.totalAccessPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalAccessPendingVotes]),
               ]),
             ]),
+
+            hr({ className: "pvotes-main-separator" }),
+
+            this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
+              return h(Fragment, { key: rIndex }, [
+                div({ className: "row no-margin" }, [
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
+                  div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center bold" }, [
+                    span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
+                    span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ["Pending"]),
+                    span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ["Editable"]),
+                  ]),
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
+                  div({
+                    onClick: this.openAccessReview, /*(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"*/
+                    className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center"
+                  }, [
+                      button({ className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
+                        span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
+                      ]),
+                    ]),
+                ]),
+                hr({ className: "pvotes-separator" })
+              ])
+            }),
+            PaginatorBar({
+              name: 'access',
+              total: this.state.electionsList.dul.length,
+              limit: this.state.accessLimit,
+              pageCount: this.accessPageCount,
+              currentPage: this.state.currentAccessPage,
+              onPageChange: this.handleAccessPageChange,
+              changeHandler: this.handleAccessSizeChange,
+            }),
           ]),
         ]),
       ])
