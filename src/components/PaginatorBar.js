@@ -8,8 +8,6 @@ const paginatorButton = (props, label) => button(_.merge({ className: "paginatio
 
 export const PaginatorBar = hh(class PaginatorBar extends Component {
 
-  // limit = 5;
-
   constructor(props) {
     super(props);
 
@@ -51,7 +49,6 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
               div({ className: 'pagination-wrapper' }, [
                 paginatorButton(_.merge({ disabled: currentPage === 1 },
                   getPageItemProps({ pageValue: 1, onPageChange: this.props.onPageChange })),
-                  // ['First']
                   [
                     span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" }),
                     span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" })
@@ -86,7 +83,6 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                 paginatorButton(
                   _.merge({ disabled: currentPage === totalPages, style: { marginLeft: '0.5rem' } },
                     getPageItemProps({ pageValue: totalPages, onPageChange: this.props.onPageChange })),
-                  // ['Last']
                   [
                     span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" }),
                     span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" })

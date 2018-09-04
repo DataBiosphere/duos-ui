@@ -109,7 +109,6 @@ class ManageOntologies extends Component {
               hr({ className: "pvotes-main-separator" }),
               this.state.indexedFiles.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
                 return h(Fragment, { key: ix }, [
-                  // div({ "dir-paginate": "indexFile in indexedFiles | itemsPerPage:8", "pagination-id": "indexedFiles" }, [
                   div({ className: "row pvotes-main-list" }, [
                     a({
                       className: "col-lg-5 col-md-5 col-sm-5 col-xs-4 pvotes-list-id",
@@ -128,14 +127,6 @@ class ManageOntologies extends Component {
                   hr({ className: "pvotes-separator" }),
                 ]);
               }),
-              // div({ dir-pagination-controls
-              //      ", "max-size":"10"
-              //      ", "direction-links":"true"
-              //      ", "boundary-links":"true"
-              //      className:"pvotes-pagination"
-              //      pagination-id:"indexedFiles"},[
-              // ]),
-              // ]),-----
               PaginatorBar({
                 total: this.state.indexedFiles.length,
                 limit: this.state.limit,
