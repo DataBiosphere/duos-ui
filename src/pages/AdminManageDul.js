@@ -10,6 +10,7 @@ import { DeleteElectionModal } from '../components/modals/DeleteElectionModal';
 import { Consent } from '../libs/ajax';
 import _ from "lodash/fp";
 import { PaginatorBar } from "../components/PaginatorBar";
+import * as Utils from '../libs/utils';
 
 const limit = 10;
 
@@ -215,7 +216,7 @@ class AdminManageDul extends Component {
                   ]),
                   div({ id: election.consentId + "_groupName", className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : ""), title: election.groupName }, [election.groupName]),
                   div({ id: election.consentId + "_version", className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
-                  div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [election.createDate]),
+                  div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [Utils.formatDate(election.createDate)]),
                   div({ id: election.consentId + "_editDUL", className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
                     button({
                       id: election.consentId + "_btn_editDUL",

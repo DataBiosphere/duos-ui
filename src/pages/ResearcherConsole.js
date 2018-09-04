@@ -3,6 +3,7 @@ import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
+import * as Utils from '../libs/utils';
 
 class ResearcherConsole extends Component {
 
@@ -43,7 +44,7 @@ class ResearcherConsole extends Component {
 
   handleDarSizeChange = size => {
     this.setState(prev => {
-      prev.partialDarLimit = size;
+      prev.darLimit = size;
       return prev;
     });
   };
@@ -89,32 +90,32 @@ class ResearcherConsole extends Component {
         displayName: 'Nadya Lopez Zalba',
       };
       prev.dars = [
-        { dataRequestId: '1000', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date().toISOString(), isCanceled: false, electionVote: false, electionStatus: 'Open' },
-        { dataRequestId: '1001', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date().toISOString(), isCanceled: false, electionVote: true, electionStatus: 'Closed' },
-        { dataRequestId: '1002', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date().toISOString(), isCanceled: true, electionVote: false, electionStatus: 'Canceled' },
-        { dataRequestId: '1003', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date().toISOString(), isCanceled: true, electionVote: true, electionStatus: 'un-reviewed' },
-        { dataRequestId: '1004', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date().toISOString(), isCanceled: false, electionVote: true, electionStatus: 'PendingApproval' },
-        { dataRequestId: '1005', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date().toISOString(), isCanceled: true, electionVote: false, electionStatus: 'Final' },
-        { dataRequestId: '10010', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date().toISOString(), isCanceled: false, electionVote: false, electionStatus: 'Open' },
-        { dataRequestId: '10011', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date().toISOString(), isCanceled: false, electionVote: true, electionStatus: 'Closed' },
-        { dataRequestId: '10012', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date().toISOString(), isCanceled: true, electionVote: false, electionStatus: 'Canceled' },
-        { dataRequestId: '10013', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date().toISOString(), isCanceled: true, electionVote: true, electionStatus: 'un-reviewed' },
-        { dataRequestId: '10014', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date().toISOString(), isCanceled: false, electionVote: true, electionStatus: 'PendingApproval' },
-        { dataRequestId: '10015', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date().toISOString(), isCanceled: true, electionVote: false, electionStatus: 'Final' },
+        { dataRequestId: '1000', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date(), isCanceled: false, electionVote: false, electionStatus: 'Open' },
+        { dataRequestId: '1001', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date(), isCanceled: false, electionVote: true, electionStatus: 'Closed' },
+        { dataRequestId: '1002', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date(), isCanceled: true, electionVote: false, electionStatus: 'Canceled' },
+        { dataRequestId: '1003', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date(), isCanceled: true, electionVote: true, electionStatus: 'un-reviewed' },
+        { dataRequestId: '1004', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date(), isCanceled: false, electionVote: true, electionStatus: 'PendingApproval' },
+        { dataRequestId: '1005', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date(), isCanceled: true, electionVote: false, electionStatus: 'Final' },
+        { dataRequestId: '10010', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date(), isCanceled: false, electionVote: false, electionStatus: 'Open' },
+        { dataRequestId: '10011', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date(), isCanceled: false, electionVote: true, electionStatus: 'Closed' },
+        { dataRequestId: '10012', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date(), isCanceled: true, electionVote: false, electionStatus: 'Canceled' },
+        { dataRequestId: '10013', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date(), isCanceled: true, electionVote: true, electionStatus: 'un-reviewed' },
+        { dataRequestId: '10014', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date(), isCanceled: false, electionVote: true, electionStatus: 'PendingApproval' },
+        { dataRequestId: '10015', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date(), isCanceled: true, electionVote: false, electionStatus: 'Final' },
       ];
       prev.partialDars = [
-        { dataRequestId: '1000', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date().toISOString(), partial_dar_code: 'X0001', electionStatus: 'Open' },
-        { dataRequestId: '1001', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date().toISOString(), partial_dar_code: 'X0002', electionStatus: 'Closed' },
-        { dataRequestId: '1002', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date().toISOString(), partial_dar_code: 'X0003', electionStatus: 'Canceled' },
-        { dataRequestId: '1003', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date().toISOString(), partial_dar_code: 'X0004', electionStatus: 'un-reviewed' },
-        { dataRequestId: '1004', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date().toISOString(), partial_dar_code: 'X0005', electionStatus: 'Open' },
-        { dataRequestId: '1005', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date().toISOString(), partial_dar_code: 'X0006', electionStatus: 'Closed' },
-        { dataRequestId: '10010', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date().toISOString(), partial_dar_code: 'X0001', electionStatus: 'Open' },
-        { dataRequestId: '10011', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date().toISOString(), partial_dar_code: 'X0002', electionStatus: 'Closed' },
-        { dataRequestId: '10012', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date().toISOString(), partial_dar_code: 'X0003', electionStatus: 'Canceled' },
-        { dataRequestId: '10013', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date().toISOString(), partial_dar_code: 'X0004', electionStatus: 'un-reviewed' },
-        { dataRequestId: '10014', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date().toISOString(), partial_dar_code: 'X0005', electionStatus: 'Open' },
-        { dataRequestId: '10015', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date().toISOString(), partial_dar_code: 'X0006', electionStatus: 'Closed' },
+        { dataRequestId: '1000', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date(), partial_dar_code: 'X0001', electionStatus: 'Open' },
+        { dataRequestId: '1001', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date(), partial_dar_code: 'X0002', electionStatus: 'Closed' },
+        { dataRequestId: '1002', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date(), partial_dar_code: 'X0003', electionStatus: 'Canceled' },
+        { dataRequestId: '1003', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date(), partial_dar_code: 'X0004', electionStatus: 'un-reviewed' },
+        { dataRequestId: '1004', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date(), partial_dar_code: 'X0005', electionStatus: 'Open' },
+        { dataRequestId: '1005', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date(), partial_dar_code: 'X0006', electionStatus: 'Closed' },
+        { dataRequestId: '10010', frontEndId: ' 100', projectTitle: 'Titlte 100', createDate: new Date(), partial_dar_code: 'X0001', electionStatus: 'Open' },
+        { dataRequestId: '10011', frontEndId: ' 101', projectTitle: 'Titlte 101', createDate: new Date(), partial_dar_code: 'X0002', electionStatus: 'Closed' },
+        { dataRequestId: '10012', frontEndId: ' 102', projectTitle: 'Titlte 102', createDate: new Date(), partial_dar_code: 'X0003', electionStatus: 'Canceled' },
+        { dataRequestId: '10013', frontEndId: ' 103', projectTitle: 'Titlte 103', createDate: new Date(), partial_dar_code: 'X0004', electionStatus: 'un-reviewed' },
+        { dataRequestId: '10014', frontEndId: ' 104', projectTitle: 'Titlte 104', createDate: new Date(), partial_dar_code: 'X0005', electionStatus: 'Open' },
+        { dataRequestId: '10015', frontEndId: ' 105', projectTitle: 'Titlte 105', createDate: new Date(), partial_dar_code: 'X0006', electionStatus: 'Closed' },
       ];
       return prev;
     });
@@ -175,7 +176,7 @@ class ResearcherConsole extends Component {
                   div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin" }, [
                     div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.frontEndId]),
                     div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.projectTitle]),
-                    div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.createDate]),
+                    div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(dar.createDate)]),
                     div({ id: dar.frontEndId + "_electionStatus", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, ["Submitted"]),
                       span({ isRendered: dar.electionStatus === 'Open' || dar.electionStatus === 'Final' || dar.electionStatus === 'PendingApproval' }, ["In review"]),
@@ -230,7 +231,7 @@ class ResearcherConsole extends Component {
                       ]),
                       div({ id: pdar.partial_dar_code + "_partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partial_dar_code]),
                       div({ id: pdar.partial_dar_code + "_partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),
-                      div({ id: pdar.partial_dar_code + "_partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.createDate]),
+                      div({ id: pdar.partial_dar_code + "_partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),
                       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                         button({ id: pdar.partial_dar_code + "_btn_resume", className: "cell-button hover-color", onClick: this.resume, value: pdar.dataRequestId }, ["Resume"]),
                       ]),
