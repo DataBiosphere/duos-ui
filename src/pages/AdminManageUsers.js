@@ -12,7 +12,6 @@ import { PaginatorBar } from '../components/PaginatorBar';
 class AdminManageUsers extends Component {
 
   limit = 5;
-  pageCount = 5;
 
   constructor(props) {
     super(props);
@@ -21,32 +20,36 @@ class AdminManageUsers extends Component {
       showAddUserModal: false,
       showEditUserModal: false,
       limit: this.limit,
-      currentPage: 1,
+      currentPage: null,
     };
-
-    this.getUsers();
-    this.getUsers = this.getUsers.bind(this);
   }
 
   async getUsers() {
-    const users = await User.list();
-    let userList = [];
-    users.map(user => {
-      user.researcher = false;
-      user.roles.map(role => {
-        if (role.name === 'Researcher') {
-          user.status = role.status;
-          user.completed = role.profileCompleted;
-          user.researcher = true;
-        }
+    User.list().then(users => {
+
+      let userList = users.map(user => {
+        user.researcher = false;
+        user.roles.map(role => {
+          if (role.name === 'Researcher') {
+            user.status = role.status;
+            user.completed = role.profileCompleted;
+            user.researcher = true;
+          }
+        });
+        user.key = user.id;
         return user;
       });
-      user.key = user.id;
-      userList.push(user);
-      return userList;
+
+      this.setState(prev => {
+        prev.currentPage = 1;
+        prev.userList = userList;
+        return prev;
+      });
     });
-    this.setState({ userList: userList });
-    console.log(userList);
+  }
+
+  componentWillMount() {
+    this.getUsers();
   }
 
   handlePageChange = page => {
@@ -59,6 +62,7 @@ class AdminManageUsers extends Component {
   handleSizeChange = size => {
     this.setState(prev => {
       prev.limit = size;
+      prev.currentPage = 1;
       return prev;
     });
   };
@@ -71,7 +75,6 @@ class AdminManageUsers extends Component {
   }
 
   editUser = (user) => (e) => {
-    // "this", "e", "id"
     console.log('editUser: ', user);
     this.setState(prev => {
       prev.showEditUserModal = true;
@@ -81,7 +84,6 @@ class AdminManageUsers extends Component {
   }
 
   okModal = (name) => {
-    console.log('okModal ------------------> ' + name);
 
     switch (name) {
       case 'addUser':
@@ -96,7 +98,6 @@ class AdminManageUsers extends Component {
   }
 
   closeModal = (name) => {
-    console.log('closeModel ------------------> ' + name);
 
     switch (name) {
       case 'addUser':
@@ -111,7 +112,6 @@ class AdminManageUsers extends Component {
   }
 
   afterModalOpen = (name) => {
-    console.log('afterModalOpen ------------------> ' + name);
 
     switch (name) {
       case 'addUser':
@@ -207,7 +207,6 @@ class AdminManageUsers extends Component {
                   div({ id: user.dacUserId + "_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     div({ id: user.dacUserId + "_btn_researcherReview", className: "row no-margin" }, [
                       a({ isRendered: user.researcher !== false && user.completed, "ui-sref": "researcher_review({dacUserId: '{{user.dacUserId}}'})", className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                        // div({ className: "{'enabled': user.researcher && user.completed && user.status ::: 'pending' || user.status ::: null, 'editable': user.researcher && user.completed && user.status !:: 'pending', 'disabled': user.researcher :: false || !(user.completed)}" }, ["Review"]),
                         div({
                           className:
                             ((user.researcher && user.completed && user.status === 'pending') || user.status === null) ? 'enabled'
@@ -225,7 +224,7 @@ class AdminManageUsers extends Component {
                         span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, tooltip: "Researcher review pending", "tooltip-className": "tooltip-class", "tooltip -trigger": "true", "tooltip-placement": "left" }, []),
                         span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                       ]),
-          
+
                     ]),
 
                   ]),
@@ -237,7 +236,6 @@ class AdminManageUsers extends Component {
             PaginatorBar({
               total: this.state.userList.length,
               limit: this.state.limit,
-              pageCount: this.pageCount,
               currentPage: this.state.currentPage,
               onPageChange: this.handlePageChange,
               changeHandler: this.handleSizeChange,
