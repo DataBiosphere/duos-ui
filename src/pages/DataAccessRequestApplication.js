@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { div, hr, h2, br, h, b, small, h3, h4, a, span, form, ol, ul, li, label, button, input, textarea } from 'react-hyperscript-helpers';
+import { div, hr, h2, br, h, b, small, h3, h4, a, span, form, ol, ul, li, label, button, input, textarea, img } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
+import { Alert } from '../components/Alert';
 import Select, { createFilter } from 'react-select';
 
 import './DataAccessRequestApplication.css';
@@ -50,6 +51,11 @@ class DataAccessRequestApplication extends Component {
         non_tech_rus: 'non tech rus...aaa',
         other: true,
         othertext: 'este es otro texto  ...',
+        eraAuthorized: false,
+        nihUsername: "username",
+        eraExpirationCount: 15,
+        isLinkedinAuthorized: false,
+        linkedinProfile: "profile",
         datasets: [
           {
             label: 'ORSP-12245| Dataset XYZ aaa',
@@ -98,17 +104,10 @@ class DataAccessRequestApplication extends Component {
         psychtraits: false,
         nothealth: true,
         investigator: 'Diego A. Gil',
-        institution: 'Broad Institution',
-        department: 'Technologies',
-        division: 'Software',
-        address1: '1 Rodeo Drive',
-        address2: '....',
-        city: 'Beverly Hills',
-        state: 'California',
-        zipcode: '90210',
-        country: 'USA',
+        researcher: 'Diego A. Gil',
         projectTitle: 'Sample Data Access Review'
-      }
+      },
+      completed: true,
 
 
     };
@@ -172,7 +171,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   attestAndSave = (e) => {
-    // implement full save on mongodb here ... after validations 
+    // implement full save on mongodb here ... after validations
     console.log(JSON.stringify(this.state.formData, null, 2));
   }
 
@@ -201,29 +200,15 @@ class DataAccessRequestApplication extends Component {
 
   render() {
 
-    let atLeastOneCheckboxChecked = true;
-    let showValidationMessages = false;
+    let atLeastOneCheckboxChecked = false;
+    let showValidationMessages = true;
+    let problemSavingRequest = false;
 
     let step1 = {
-      inputInstitution: {
+      inputResearcher: {
         invalid: false
       },
       inputInvestigator: {
-        invalid: false
-      },
-      inputDepartment: {
-        invalid: false
-      },
-      inputAddress1: {
-        invalid: false
-      },
-      inputCity: {
-        invalid: false
-      },
-      inputZipCode: {
-        invalid: false
-      },
-      inputCountry: {
         invalid: false
       },
       inputTitle: {
@@ -232,6 +217,9 @@ class DataAccessRequestApplication extends Component {
     }
 
     let step2 = {
+      inputDatasets: {
+        invalid: false
+      },
       inputRUS: {
         invalid: false
       },
@@ -243,6 +231,23 @@ class DataAccessRequestApplication extends Component {
       }
     }
 
+    let step3 = {
+      inputPurposes: {
+        invalid: false
+      }
+    }
+
+    const profileUnsubmitted = span({}, [
+      "Please submit ",
+      a({ href: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      " to be able to create a Data Access Request"
+    ]);
+
+    const profileSubmitted = span({}, [
+      "Please make sure ",
+      a({ href: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      " is updated, as it will be submited with your DAR Application"
+    ]);
 
 
     return (
@@ -262,7 +267,6 @@ class DataAccessRequestApplication extends Component {
             div({ className: "row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin" }, [
 
               a({
-                "ui-sref": ".step1",
                 onClick: this.step1,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 1 ? 'active' : '')
@@ -273,7 +277,6 @@ class DataAccessRequestApplication extends Component {
                 ]),
 
               a({
-                "ui-sref": ".step2",
                 onClick: this.step2,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 2 ? 'active' : '')
@@ -284,7 +287,6 @@ class DataAccessRequestApplication extends Component {
                 ]),
 
               a({
-                "ui-sref": ".step3",
                 onClick: this.step3,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 3 ? 'active' : '')
@@ -295,7 +297,6 @@ class DataAccessRequestApplication extends Component {
                 ]),
 
               a({
-                "ui-sref": ".step4",
                 onClick: this.step4,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 4 ? 'active' : '')
@@ -309,164 +310,152 @@ class DataAccessRequestApplication extends Component {
           ]),
         ]),
         form({ name: "form", "noValidate": true }, [
-          div({ id: "form-views", "ui-view": "true" }, [
+          div({ id: "form-views" }, [
 
             //------------------ Step 1--------------------------------------
             div({ isRendered: this.state.step === 1 }, [
 
               div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-                div({ className: "admin-alerts rp-alerts", isRendered: "!completed" }, [
-                          /*alert*/ div({ type: "danger", className: "alert-title cancel-color" }, [
-                    h4({}, [
-                      "Please submit ",
-                      a({ href: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
-                      " to be able to create a Data Access Request"]),
-                  ]),
+
+                div({ isRendered: this.state.completed === false, className: "rp-alert" }, [
+                  Alert({ id: "profileUnsubmitted", type: "danger", title: profileUnsubmitted })
+                ]),
+                div({ isRendered: this.state.completed === true, className: "rp-alert" }, [
+                  Alert({ id: "profileSubmitted", type: "info", title: profileSubmitted })
                 ]),
 
-                div({ className: "cm-subtitle access-color no-padding" }, [h3({}, ["1. Researcher Information"]),]),
+                h3({ className: "rp-form-title access-color" }, ["1. Researcher Information"]),
+
+                div({ className: "form-group" }, [
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                    label({ className: "control-label rp-title-question" }, ["1.1 Researcher*"]),
+                  ]),
+
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                    input({
+                      type: "text",
+                      name: "researcher",
+                      id: "inputResearcher",
+                      value: this.state.formData.investigator,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                      required: true
+                    }),
+                    span({ isRendered: (step1.inputResearcher.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                  ]),
+
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox" }, [
+                    input({
+                      type: "checkbox",
+                      id: "checkCollaborator",
+                      name: "checkCollaborator",
+                      className: "checkbox-inline rp-checkbox",
+                      disable: this.state.formData.dar_code !== null
+                    }),
+                    label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkCollaborator" }, ["I am a collaborator of the PI/Data Custodian for the selected dataset(s)"]),
+                  ]),
+
+                  div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
+                    label({ className: "control-label" }, [
+                      "NIH eRA Commons ID*",
+                    ]),
+
+                    div({ isRendered: this.state.formData.eraAuthorized !== true }, [
+                      a({ onClick: "RPApplication.redirectToNihLogin()", target: "_blank", className: "auth-button eRACommons" }, [
+                        div({ className: "logo" }, []),
+                        span({}, ["Authenticate your account"])
+                      ])
+                    ]),
+
+                    div({ isRendered: (this.state.formData.eraAuthorized === true) && (this.state.formData.dar_code === null) }, [
+                      div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
+                        div({ className: "auth-id" }, [this.state.formData.nihUsername]),
+                        button({
+                          onClick: "deleteNihAccount()", className: "close auth-clear",
+                          // tooltip-class: "tooltip-class-dark", tooltip-trigger tooltip-placement: "right" tooltip:"Clear account"
+                        }, [
+                            span({ className: "glyphicon glyphicon-remove-circle" })
+                          ])
+                      ]),
+
+                      div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                        div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
+                        div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                      ]),
+                      div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                        div({ className: "auth-id" }, [this.state.formData.nihUsername])
+                      ]),
+                    ]),
+                    span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
+                  ]),
+
+                  div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
+                    label({ className: "control-label rp-title-question default-color" }, [
+                      "Researcher Identification*",
+                      span({}, ["Please authenticate either your LinkedIn or your ORCID iD"]),
+                    ])
+                  ]),
+
+                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
+                    div({ isRendered: this.state.formData.isLinkedinAuthorized !== true }, [
+                      a({ onClick: "linkedinAuth()", target: "_blank" }, [
+                        img({ className: "auth-button linkedin" }),
+                      ])
+                    ]),
+                    div({ isRendered: (this.state.formData.isLinkedinAuthorized) && (this.state.formData.linkedinProfile) }, [
+                      a({ onClick: "openProfile()", target: "_blank", className: "hover-color auth-link" }, ["LinkedIn Profile Link"]),
+                      button({ isRendered: this.state.formData.dar_code === undefined, onClick: "removeLinkedinProfile()", className: "close auth-clear", }, ["LinkedIn Profile Link"]),
+                      // tooltip-class:"tooltip-class-dark", tooltip-trigger tooltip-placement:"right", tooltip:"Clear account"
+                    ]),
+                    span({ isRendered: (this.state.formData.isLinkedinAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span no-padding" }, ["Required field"]),
+                  ]),
+                ]),
 
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "1.1 Principal Investigator",
+                      "1.2 Principal Investigator* ",
                       span({}, ["By typing in the name of the principal investigator, I certify that he or she is aware of this research study."]),]),
                   ]),
-                  span({ className: "cancel-color required-field-error-span", isRendered: step1.inputInvestigator.invalid && showValidationMessages }, [
-                    span({}, ["* Required field"]),
-                  ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     input({
-                      value: this.state.formData.investigator, onChange: this.handleChange, type: "text", name: "investigator", id: "inputInvestigator", disabled: false,
-                      className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control', required: true
+                      type: "text",
+                      name: "investigator",
+                      id: "inputInvestigator",
+                      value: this.state.formData.investigator,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                      required: true
                     }),
-                  ]),
-                ]),
-
-                div({ className: "form-group" }, [
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({ className: "control-label rp-title-question" }, ["1.2 Organization Information"]),
-                  ]),
-
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({ className: "control-label" }, [
-                      "Institution Name ",
-                      span({ className: "cancel-color required-field-error-span", isRendered: step1.inputInstitution.invalid && showValidationMessages }, [
-                        span({}, ["* Required field"]),
-                      ]),
-                    ]),
-                    input({
-                      value: this.state.formData.institution, onChange: this.handleChange, type: "text", name: "institution", id: "inputInstitution", disabled: false,
-                      className: step1.inputInstitution.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required"
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                    label({ className: "control-label" }, [
-                      "Department ",
-                      span({ className: "cancel-color required-field-error-span", isRendered: step1.inputDepartment.invalid && showValidationMessages }, [
-                        span({}, ["* Required field"]),
-                      ]),
-                    ]),
-                    input({
-                      value: this.state.formData.department, onChange: this.handleChange, type: "text", name: "department", id: "inputDepartment", disabled: false,
-                      className: step1.inputDepartment.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required"
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                    label({ className: "control-label" }, ["Division"]),
-                    input({ value: this.state.formData.division, onChange: this.handleChange, type: "text", name: "division", id: "inputDivision", className: "form-control", disabled: false }),
-                  ]),
-
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                    label({ className: "control-label" }, [
-                      "Street Address 1",
-                      span({ className: "cancel-color required-field-error-span", isRendered: step1.inputAddress1.invalid && showValidationMessages }, [
-                        span({}, ["* Required field"]),
-                      ]),
-                    ]),
-                    input({
-                      value: this.state.formData.address1, onChange: this.handleChange, type: "text", name: "address1", id: "inputAddress1",
-                      className: step1.inputAddress1.$invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required", disabled: false
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                    label({ className: "control-label" }, ["Street Address 2"]),
-                    input({ value: this.state.formData.address2, onChange: this.handleChange, type: "text", name: "address2", id: "inputAddress2", className: "form-control", disabled: false }),
-                  ]),
-
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                    label({ className: "control-label" }, ["City",
-                      span({ className: "cancel-color required-field-error-span", isRendered: step1.inputCity.invalid && showValidationMessages }, [
-                        span({}, ["* Required field"]),
-                      ]),
-                    ]),
-                    input({
-                      value: this.state.formData.city, onChange: this.handleChange, type: "text", name: "city", id: "inputCity",
-                      className: step1.inputCity.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required", disabled: false
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                    label({ className: "control-label" }, ["State"]),
-                    input({ value: this.state.formData.state, onChange: this.handleChange, type: "text", name: "state", id: "inputState", className: "form-control", disabled: false }, [
-                    ]),
-                  ]),
-
-                  div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4" }, [
-                    label({ className: "control-label" }, ["Zip/Postal Code",
-                      span({ className: "cancel-color required-field-error-span", isRendered: step1.inputZipCode.invalid && showValidationMessages }, [
-                        span({}, ["* Required field"]),
-                      ]),
-                    ]),
-                    input({
-                      value: this.state.formData.zipcode, onChange: this.handleChange, type: "text", name: "zipcode", id: "inputZipCode",
-                      className: step1.inputZipCode.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required", disabled: false
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 rp-group" }, [
-                    label({ className: "control-label" }, ["Country",
-                      span({ className: "cancel-color required-field-error-span", isRendered: step1.inputCountry.invalid && showValidationMessages }, [
-                        span({}, ["* Required field"]),
-                      ]),
-                    ]),
-                    input({
-                      value: this.state.formData.country, onChange: this.handleChange, type: "text", name: "country", id: "inputCountry",
-                      className: step1.inputCountry.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required", disabled: false
-                    }),
+                    span({ className: "cancel-color required-field-error-span", isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages) }, ["Required field"]),
                   ]),
                 ]),
 
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "1.3 Descriptive Title of Project",
+                      "1.3 Descriptive Title of Project* ",
                       span({}, ["Please note that coordinated requests by collaborating institutions should each use the same title."]),
                     ]),
                   ]),
-                  span({ className: "cancel-color required-field-error-span", isRendered: step1.inputTitle.invalid && showValidationMessages }, [
-                    span({}, ["* Required field"]),
-                  ]),
-
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group" }, [
                     input({
-                      value: this.state.formData.projectTitle, onChange: this.handleChange, type: "text", name: "projectTitle", id: "inputTitle",
+                      type: "text",
+                      name: "projectTitle",
+                      id: "inputTitle",
+                      value: this.state.formData.projectTitle,
+                      onChange: this.handleChange,
                       className: step1.inputTitle.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                      required: "required", disabled: this.state.formData.dar_code !== null
+                      required: true,
+                      disabled: this.state.formData.dar_code !== null
                     }),
+                    span({ className: "cancel-color required-field-error-span", isRendered: step1.inputTitle.invalid && showValidationMessages }, ["Required field"]),
                   ]),
                 ]),
 
-                ul({ className: "pager wizard" }, [
+                ul({ className: "pager" }, [
                   div({ className: "row multi-step-pager" }, [
                     li({ className: "next f-right multi-step-next" }, [
                       a({ onClick: this.step2, className: "access-background" }, ["Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, []),
@@ -484,76 +473,96 @@ class DataAccessRequestApplication extends Component {
             //------------------ Step 2--------------------------------------
             div({ isRendered: this.state.step === 2 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-                div({ className: "cm-subtitle access-color no-padding" }, [h3({}, ["2. Data Access Request"])]),
+
+                h3({ className: "rp-form-title access-color" }, ["2. Data Access Request"]),
+
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "2.1 Dataset ID",
-                      span({}, ["Please type the ID of the datasets you would like to request access to for this study."]),
+                      "2.1 Select Dataset(s)*",
+                      span({}, ["Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:"]),
                     ]),
                   ]),
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group " }, [
-
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     h(Select, {
+                      id: "inputDatasets",
                       isMulti: true,
                       autoFocus: true,
                       value: this.state.formData.datasets,
                       onChange: this.onDatasetsChange,
                       options: this.datasetOptions, // search_datasets($query)"
-                      placeholder: "Please select datasets ...",
+                      placeholder: "Dataset Name, Sample Collection ID, or PI",
                       className: "basic-multi-select",
                       classNamePrefix: "select",
+                      required: true
                       // filterOption: createFilter(filterConfig),
                     }),
-
+                    span({ className: "cancel-color required-field-error-span", isRendered: step2.inputDatasets.invalid && showValidationMessages }, ["Required field"]),
                   ]),
+
                 ]),
+
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "2.2 Research use statement (RUS)",
+                      "2.2 Research use statement (RUS)* ",
                       span({}, ["A RUS is a brief description of the applicant’s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.",
                         br(),
                         "Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ",
-                        a({ target: "_blank", "ng-href": "this.url", "ng-mousedown": "openGWAS()" }, ["here"], ".")
+                        a({ target: "_blank", href: "http://epi.grants.cancer.gov/dac/examples.html" }, ["here"], ".")
                       ]),
                     ]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     textarea({
-                      value: this.state.formData.rus, onChange: this.handleChange, name: "rus", id: "inputRUS",
+                      value: this.state.formData.rus, onChange: this.handleChange,
+                      name: "rus",
+                      id: "inputRUS",
                       className: step2.inputRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
-                      maxLength: "2200", rows: "6",
-                      required: "required", placeholder: "Please limit your RUS to 2200 characters.", disabled: this.state.formData.dar_code !== null
+                      maxLength: "2200",
+                      rows: "6",
+                      required: true,
+                      placeholder: "Please limit your RUS to 2200 characters.",
+                      disabled: this.state.formData.dar_code !== null
                     }),
+                    span({ className: "cancel-color required-field-error-span", isRendered: step2.inputRUS.invalid && showValidationMessages }, ["Required field"]),
                   ]),
                 ]),
+
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "2.3 Non-Technical summary",
+                      "2.3 Non-Technical summary* ",
                       span({}, ["Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below)."
                       ]),
                     ]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     textarea({
-                      value: this.state.formData.non_tech_rus, onChange: this.handleChange, name: "non_tech_rus", id: "inputNonTechRUS",
-                      className: step2.inputNonTechRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
-                      maxLength: "1100", rows: "3", required: "required", placeholder: "Please limit your non-technical summary to 1100 characters.",
+                      value: this.state.formData.non_tech_rus,
+                      onChange: this.handleChange,
+                      name: "non_tech_rus",
+                      id: "inputNonTechRUS",
+                      className: step2.inputNonTechRUS.invalid && showValidationMessages ? 'required-field-error form-control' : 'form-control',
+                      maxLength: "1100",
+                      rows: "3",
+                      required: true,
+                      placeholder: "Please limit your non-technical summary to 1100 characters.",
                       disabled: this.state.formData.dar_code !== null
                     }),
+                    span({ className: "cancel-color required-field-error-span", isRendered: step2.inputNonTechRUS.invalid && showValidationMessages }, ["Required field"]),
                   ]),
                 ]),
+
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "2.4 Type of Research",
+                      "2.4 Type of Research* ",
                       span({}, ["Select all applicable options."]),
                     ]),
                   ]),
-                  span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages }, [
-                    span({}, ["* At least one of the fields is required"]),
+                  div({ className: "row no-margin"}, [
+                    span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: {'marginLeft': '15px'} }, ["At least one of the fields is required"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
@@ -567,6 +576,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
@@ -579,6 +589,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
@@ -591,6 +602,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
                       input({
@@ -642,21 +654,27 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     input({
-                      value: this.state.formData.othertext, onChange: this.handleChange, type: "text", name: "othertext", id: "inputOtherText",
+                      type: "text",
+                      name: "othertext",
+                      id: "inputOtherText",
+                      value: this.state.formData.othertext,
+                      onChange: this.handleChange,
                       required: this.state.formData.other, className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
-                      disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true, placeholder: "Please specify if selected"
+                      disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
+                      placeholder: "Please specify if selected"
                     }),
+                    span({ className: "cancel-color required-field-error-span", isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages }, ["Required field"]),
                   ]),
                 ]),
+
                 div({ className: "form-group" }, [
-                  div({ className: " col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group " }, [
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
                       "2.5 Please state the disease area(s) this study focus on ",
                       span({}, ["Choose any number of Disease Ontology ; or none."]),
                     ]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group " }, [
-
                     h(Select, {
                       // defaultValue:{[colourOptions[2], colourOptions[3]]},
                       isMulti: true,
@@ -668,12 +686,11 @@ class DataAccessRequestApplication extends Component {
                       classNamePrefix: "select",
                       filterOption: createFilter(filterConfig)
                     }),
-
                   ]),
                 ]),
-                ul({ className: "pager wizard" }, [
-                  div({ className: "row multi-step-pager" }, [
 
+                ul({ className: "pager" }, [
+                  div({ className: "row multi-step-pager" }, [
                     li({ className: "previous f-left multi-step-prev" }, [
                       a({ onClick: this.step1, className: "access-background" }, [
                         span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }, []), "Previous Step"]),
@@ -696,20 +713,20 @@ class DataAccessRequestApplication extends Component {
             //------------------ Step 3--------------------------------------
             div({ isRendered: this.state.step === 3 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-                div({ className: "cm-subtitle access-color no-padding" }, [h3({}, ["3. Research Purpose Statement"]),]),
+
+                h3({ className: "rp-form-title access-color" }, ["3. Research Purpose Statement"]),
+
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, ["3.1 In order to ensure appropriate review, please answer the questions below:"]),
                   ]),
-                  span({ className: "cancel-color required-field-error-span", isRendered: "!step3isValidated && showValidationMessages" }, [
-                    span({}, ["* All fields are required"]),
+                  div({ className: "row no-margin"}, [
+                    span({ className: "cancel-color required-field-error-span", isRendered: step3.inputPurposes.invalid && showValidationMessages, style: {'marginLeft': '15px'} }, ["All fields are required"]),
                   ]),
-
-
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({
-                      className: "control-label rp-choice-questions", "tooltip-class": "tooltip-class", "tooltip-trigger": "true"
-                      , "tooltip-placement": "right", tooltip: "*"
+                      className: "control-label rp-choice-questions"
+                      // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", tooltip: "*"
                     }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -717,17 +734,13 @@ class DataAccessRequestApplication extends Component {
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({
-                      className: "control-label rp-choice-questions"
-                    }, ["3.1.2 Please indicate if this study is limited to one gender?"]),
+                    label({ className: "control-label rp-choice-questions" }, ["3.1.2 Please indicate if this study is limited to one gender?"]),
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, name: 'onegender', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                     div({ isRendered: this.state.formData.onegender === true, className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
-                      span({}, [
-                        "Please specify"]),
-
+                      span({}, ["Please specify"]),
                       OptionsRadioGroup({
                         value: this.state.formData.gender,
                         optionLabels: ['Female', "Male"],
@@ -735,71 +748,69 @@ class DataAccessRequestApplication extends Component {
                         name: 'gender',
                         onChange: this.handleRadioChange
                       }),
-
                     ]),
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({ className: "control-label rp-choice-questions" }, [
-                      "3.1.3 Please indicate if this study is restricted to a  pediatric population (under the age of 18)?"]),
+                    label({ className: "control-label rp-choice-questions" }, ["3.1.3 Please indicate if this study is restricted to a  pediatric population (under the age of 18)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-
                     YesNoRadioGroup({ value: this.state.formData.pediatric, onChange: this.handleRadioChange, name: 'pediatric', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.4 Does the research aim involve the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.illegalbehave, onChange: this.handleRadioChange, name: 'illegalbehave', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.5 Does the research aim involve the study of alcohol or drug abuse, or abuse of other addictive products?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-
                     YesNoRadioGroup({ value: this.state.formData.addiction, onChange: this.handleRadioChange, name: 'addiction', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.6 Does the research aim involve the study of sexual preferences or sexually transmitted diseases?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.sexualdiseases, onChange: this.handleRadioChange, name: 'sexualdiseases', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.7 Does the research aim involve the study of any stigmatizing illnesses?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.stigmatizediseases, onChange: this.handleRadioChange, name: 'stigmatizediseases', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({
-                      className: "control-label rp-choice-questions", "tooltip-class": "tooltip-class", "tooltip-trigger": "true"
-                      , "tooltip-placement": "right", tooltip: "*", "tooltip-container": "body", "tooltip-animation": "false"
+                      className: "control-label rp-choice-questions",
+                      // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", tooltip: "*", "tooltip-container": "body", "tooltip-animation": "false"
                     }, ["3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or \[\"SIGNIFICANTLY\"\] economically or educationally disadvantaged persons)?"]),
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.vulnerablepop, onChange: this.handleRadioChange, name: 'vulnerablepop', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.9 Does the research aim involve the study of Population Origins/Migration patterns?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.popmigration, onChange: this.handleRadioChange, name: 'popmigration', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.10 Does the research aim involve the study of psychological traits, including intelligence, attention, emotion?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.psychtraits, onChange: this.handleRadioChange, name: 'psychtraits', disabled: (this.state.formData.dar_code !== null), required: true }),
-
                   ]),
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.11 Does the research correlate ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways that are not easily related to Health?"]),
                   ]),
@@ -807,9 +818,9 @@ class DataAccessRequestApplication extends Component {
                     YesNoRadioGroup({ value: this.state.formData.nothealth, onChange: this.handleRadioChange, name: 'nothealth', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
                 ]),
-                ul({ className: "pager wizard" }, [
-                  div({ className: "row multi-step-pager" }, [
 
+                ul({ className: "pager" }, [
+                  div({ className: "row multi-step-pager" }, [
                     li({ className: "previous f-left multi-step-prev" }, [
                       a({ onClick: this.step2, className: "access-background" }, [span({
                         className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true"
@@ -832,11 +843,14 @@ class DataAccessRequestApplication extends Component {
             //------------------ Step 4--------------------------------------
             div({ isRendered: this.state.step === 4 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-                div({ className: "cm-subtitle access-color no-padding" }, [h3({}, ["4. Attestation Statement"])]),
-                div({ className: "form-group" }, [
+
+                h3({ className: "rp-form-title access-color" }, ["4. Attestation Statement"]),
+
+                div({ className: "row no-margin form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, ["I attest to the following:"]),
                   ]),
+
                   ol({ className: "rp-accept-statement rp-last-group" }, [
                     li({}, ["Data will only be used for approved research"]),
                     li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
@@ -847,21 +861,18 @@ class DataAccessRequestApplication extends Component {
                   ]),
                 ]),
 
-                // span({ className:"admin-alerts rp-alerts", isRendered:"showValidationMessages"},[
-                //     alert({ type:"danger", className:"alert-title cancel-color"},[
-                //         h4({},["Please, complete all required fields."]),
-                //         ]),
-                // ]),
+                div({ className: "row no-margin" }, [
+                  div({ isRendered: showValidationMessages, className: "rp-alert" }, [
+                    Alert({ id: "formErrors", type: "danger", title: "Please, complete all required fields." })
+                  ]),
 
-                // span({ className:"admin-alerts rp-alerts" isRendered:"problemSavingRequest"},[
-                //     a({lert type:"danger", className:"alert-title cancel-color"},[
-                //         h4({},["Some errors occurred, Data Access Request Application couldn't be created.]),
-                //     </alert}),
-                // ]),
+                  div({ isRendered: problemSavingRequest, className: "rp-alert" }, [
+                    Alert({ id: "problemSavingRequest", type: "danger", title: "Some errors occurred, Data Access Request Application couldn't be created." })
+                  ]),
+                ]),
 
-                ul({ className: "pager wizard", style: { "marginTop": "0!important" } }, [
+                ul({ className: "pager", style: { "marginTop": "0 !important" } }, [
                   div({ className: "row multi-step-pager" }, [
-
                     li({ className: "previous f-left multi-step-prev" }, [
                       a({ onClick: this.step3, className: "access-background" }, [
                         span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"]),

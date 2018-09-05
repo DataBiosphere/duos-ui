@@ -1,21 +1,150 @@
-.sample-page1 {
-  background-color: aquamarine;
-  color: black;
-  border: 1px solid gray;
-  border-radius: 0.4em;
+.rp-form-title {
+  margin: 25px 10px 5px 10px
 }
 
-.sample-page2 {
-  border: 1px solid gray;
-  border-radius: 0.4em;
+.rp-alert {
+  margin: 15px 10px;
 }
 
-.sample-page3 {
-  border: 1px solid gray;
-  border-radius: 0.4em;
+.rp-group {
+  margin-bottom: 10px !important;
+  position: relative;
 }
 
-.sample-page4 {
-  border: 1px solid gray;
-  border-radius: 0.4em;
+.rp-last-group {
+  margin-bottom: 20px !important;
+}
+
+.rp-title-question,
+.rp-choice-questions,
+.rp-accept-statement {
+  float: left !important;
+  text-align: left !important;
+  display: block;
+}
+
+.rp-title-question {
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 500 !important;
+  color: #603B9B;
+}
+
+.rp-choice-questions,
+.rp-accept-statement {
+  font-weight: normal !important;
+  font-size: 15px;
+  color: #777777;
+}
+
+.rp-accept-statement {
+  line-height: 25px;
+  margin-left: 33px;
+}
+
+.rp-title-question span, .rp-choice-questions span {
+  font-weight: normal;
+  font-size: 15px;
+}
+
+.rp-choice-questions span {
+  display: inline;
+  color: #603B9B;
+}
+
+.rp-title-question span {
+  display: block;
+  color: #777777;
+}
+
+.rp-title-question span a,
+.rp-choice-questions span a {
+  color: #2FA4E7;
+  cursor: pointer !important;
+}
+
+.auth-button.eRACommons {
+  height: 34px;
+  width: 210px;
+  border: none;
+  border-radius: 3px;
+  display: block;
+  border: 1px solid #d3d3d3;
+  padding: 3px;
+  text-align: center;
+  margin-top: 3px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 1px 1px 3px #999;
+  cursor: pointer;
+  color: #999;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.auth-button.eRACommons:hover {
+  box-shadow: 1px 1px 5px #00609f;
+}
+
+.auth-button.eRACommons .logo {
+  height: 27px;
+  width: 38px;
+  background-size: cover !important;
+  background-image: url('../images/era-commons-logo.png');
+  display: inline-block;
+}
+
+.auth-button.eRACommons span {
+  vertical-align: 50%;
+}
+
+.auth-button.linkedin,
+.auth-button.linkedin:hover {
+    height: 34px;
+    width: 178px;
+    display: block;
+    background-size: cover !important;
+    border: none;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+}
+
+.auth-button.linkedin {
+    background: url(../images/linkedin-sign-in.png) no-repeat;
+}
+
+.auth-button.linkedin:hover {
+    background: url(../images/linkedin-sign-in-hover.png) no-repeat;
+}
+
+.auth-button {
+  margin-top: 3px;
+}
+
+.auth-link,
+.auth-id {
+  float: left;
+  font-weight: 500;
+  display: inline;
+  padding-top: 5px;
+}
+
+.auth-link {
+  transition: all 0.2s ease;
+}
+
+.auth-link:hover {
+  color: #00609f !important;
+}
+
+.auth-clear {
+  float: left;
+  margin: 2px 0 0 15px;
+}
+
+.auth-message {
+  padding-top: 8px;
+  font-style: italic;
+  display: block;
 }

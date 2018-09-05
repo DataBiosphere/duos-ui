@@ -5,7 +5,7 @@ import InvalidRestrictions from "./pages/InvalidRestrictions";
 import HomeHelp from "./pages/HomeHelp";
 import Login from './pages/Login';
 import AccessReview from "./pages/AccessReview";
-import { ResearcherProfile } from "./components/ResearcherProfile";
+import { ResearcherProfile } from "./pages/ResearcherProfile";
 import DataOwnerConsole from "./pages/DataOwnerConsole";
 import AdminManageAccess from "./pages/AdminManageAccess";
 import AccessPreview from "./pages/AccessPreview";
