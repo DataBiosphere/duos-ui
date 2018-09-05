@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { div, button, hr, label, h2, small, h3, input, form, span } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 
 class ResearcherReview extends Component {

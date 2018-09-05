@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { div, button, hr, img, h2, br, h4, a, h3, form, fieldset, label, input, span } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 
 class DataOwnerReview extends Component {

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { div, hr, h2, br, h, b, small, h3, h4, a, span, form, ol, ul, li, label, button, input, textarea, img } from 'react-hyperscript-helpers';
+import { Component } from 'react';
+import { div, hr, br, h, small, h3, a, span, form, ol, ul, li, label, button, input, textarea, img } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
@@ -13,7 +13,7 @@ const filterConfig = {
   ignoreAccents: false,
   trim: false,
   matchFromStart: false,
-}
+};
 
 class DataAccessRequestApplication extends Component {
 
@@ -790,7 +790,7 @@ class DataAccessRequestApplication extends Component {
                     label({
                       className: "control-label rp-choice-questions",
                       // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", tooltip: "*", "tooltip-container": "body", "tooltip-animation": "false"
-                    }, ["3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or \[\"SIGNIFICANTLY\"\] economically or educationally disadvantaged persons)?"]),
+                    }, ["3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [\"SIGNIFICANTLY\"] economically or educationally disadvantaged persons)?"]),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [

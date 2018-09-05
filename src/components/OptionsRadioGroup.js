@@ -1,5 +1,5 @@
-import { Component, Fragment } from 'react';
-import { div, input, hh, h, label } from 'react-hyperscript-helpers';
+import { Component } from 'react';
+import { div, input, hh, label } from 'react-hyperscript-helpers';
 import PropTypes from 'prop-types';
 
 export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {

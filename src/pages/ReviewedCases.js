@@ -1,6 +1,5 @@
 import { Component, Fragment } from 'react';
 import { div, button, hr, img, h2, br, i, input, span, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 
 class ReviewedCases extends Component {
@@ -8,7 +7,6 @@ class ReviewedCases extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
-  searchDulCases = '';
   searchAccessCases = '';
 
   constructor(props) {
