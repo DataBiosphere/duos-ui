@@ -10,12 +10,7 @@ class DulCollect extends Component {
 
   constructor(props) {
     super(props);
-
     this.back = this.back.bind(this);
-    this.electionReview();
-    this.electionReview = this.electionReview.bind(this);
-    const consentId = this.props.match.params.consentId;
-    console.log(consentId);
     this.state = this.initialState();
   }
 
@@ -23,16 +18,20 @@ class DulCollect extends Component {
     this.props.history.goBack();
   }
 
-  async electionReview() {
+  async componentWillMount() {
     const consentId = this.props.match.params.consentId;
-    const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
-    this.setState({consentPreview: consent});
-    console.log(this.state.consentPreview);
-    this.setState({})
-  }
+    Election.electionReviewResource(consentId, 'TranslateDUL').then(data => {
+      this.setState({ dulVoteList: this.chunk(data.reviewVote, 2) });
+      this.setState({ consentGroupName: data.consent.groupName });
+      this.setState({ consentName: data.consent.name });
+      this.setState({ translatedUseRestriction: data.election.translatedUseRestriction });
+      this.setState({ projectTitle: data.election.projectTitle });
+      this.setState({ finalVote: data.election.finalVote });
+      this.setState({ finalRationale: data.election.finalRationale });
+      this.setState({ finalVoteDate: data.election.finalVoteDate });
+      console.log(data);
+    });
 
-  componentWillMount() {
-    this.mockState();
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -41,82 +40,30 @@ class DulCollect extends Component {
         ]
       };
       return prev;
-    });
+   });
   }
 
-  mockState() {
-    this.setState(prev => {
-      prev.createDate = '2018-08-30';
-      prev.consentGroupName = 'GroupName 01';
-      prev.consentName = 'ORSP-124';
-      prev.election = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.election = {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-30'
-      };
-
-      return prev;
-    });
+  chunk(arr, size) {
+    let newArr = [];
+    for (let i = 0; i < arr.length; i += size) {
+      newArr.push(arr.slice(i, i + size));
+    }
+    return newArr;
   }
 
   initialState() {
     return {
-      voteStatus: '1',
-      createDate: '2018-08-30',
-      hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      consentName: 'ORSP-124',
-      sDul: "something",
-
-      dulElection: {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-31'
-      },
-
-      dulVoteList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ]
-      ],
+      voteStatus: '',
+      createDate: '',
+      hasUseRestriction: Boolean,
+      projectTitle: '',
+      consentName: '',
+      translatedUseRestriction: '',
+      consentGroupName: '',
+      finalVote: '',
+      finalRationale: '',
+      finalVoteDate: '',
+      dulVoteList: []
     };
   }
   
@@ -129,6 +76,13 @@ class DulCollect extends Component {
 
   downloadDUL = (e) => {
     console.log('------------downloadDUL-------------', e);
+    Files.getDulFile(this.props.match.params.consentId).then(
+      blob => {
+        if (blob.size !== 0) {
+          this.createBlobFile(this.state.consentName, blob);
+        }
+      }
+    );
   };
 
   positiveVote = (e) => {
@@ -179,7 +133,7 @@ class DulCollect extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.sDul])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.translatedUseRestriction])
           ]),
         ]),
 
@@ -214,10 +168,10 @@ class DulCollect extends Component {
         h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
 
         this.state.dulVoteList.map((row, rIndex) => {
-          return h(Fragment, {}, [
+          return h(Fragment, { key: rIndex }, [
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
               row.map((vm, vIndex) => {
-                return h(Fragment, {}, [
+                return h(Fragment, { key: vIndex }, [
                   SingleResultBox({
                     id: "dulSingleResult" + vIndex,
                     color: "dul",
