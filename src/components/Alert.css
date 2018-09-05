@@ -1,0 +1,28 @@
+.alert-wrapper {
+  position: relative;
+  width: 100%;
+  padding: 15px 20px;
+}
+
+.alert-wrapper.danger {
+  background-color: #FCEDEB;
+  color: #D13B07;
+}
+
+.alert-wrapper.info {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.alert-wrapper h4{
+  display: block;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 25px;
+  margin: 0;
+}
+
+.alert-wrapper hr {
+  border-color: #cccccc !important;
+}
+
