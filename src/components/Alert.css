@@ -14,7 +14,7 @@
   color: #004085;
 }
 
-.alert-wrapper h4{
+.alert-title {
   display: block;
   font-weight: 500;
   font-size: 16px;
@@ -22,7 +22,29 @@
   margin: 0;
 }
 
+.alert-description {
+  display: block;
+  padding-top: 3px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+}
+
 .alert-wrapper hr {
   border-color: #cccccc !important;
+}
+
+.rp-alert {
+  margin: 15px 10px;
+}
+
+.dialog-alert {
+  margin-top: 10px;
+}
+
+.vote-box-alert .alert-title,
+.dialog-alert .alert-title {
+  font-size: 15px;
+  line-height: 20px;
 }
 

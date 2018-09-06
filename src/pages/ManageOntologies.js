@@ -1,7 +1,8 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, img, h, h2, i, input, span, a, br } from 'react-hyperscript-helpers';
+import { div, button, hr, h, i, input, span, a } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
+import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 
 
 class ManageOntologies extends Component {
@@ -14,9 +15,9 @@ class ManageOntologies extends Component {
       currentPage: 1,
       indexedFiles: [
         {
-          fileUrl: 'fileUrl',
-          fileName: 'fileName',
-          ontologyType: 'OID',
+          fileurl: 'fileUrl',
+          filename: 'fileName',
+          ontologytype: 'OID',
           prefix: 'orsp-'
         }
 
@@ -24,6 +25,11 @@ class ManageOntologies extends Component {
     }
 
     this.myHandler = this.myHandler.bind(this);
+    this.addOntologiesModal = this.addOntologiesModal.bind(this);
+    this.closeAddOntologiesModal = this.closeAddOntologiesModal.bind(this);
+    this.okAddOntologiesModal = this.okAddOntologiesModal.bind(this);
+    this.afterAddOntologiesModalOpen = this.afterAddOntologiesModalOpen.bind(this);
+
   }
 
   handlePageChange = page => {
@@ -40,6 +46,35 @@ class ManageOntologies extends Component {
       return prev;
     });
   };
+
+  addOntologiesModal() {
+    this.setState(prev => {
+      prev.showModal = true;
+      return prev;
+    });
+  }
+
+  closeAddOntologiesModal() {
+    // this state change close AddDul modal
+    this.setState(prev => {
+      prev.showModal = false;
+      return prev;
+    });
+  }
+
+  okAddOntologiesModal() {
+    // this state change close AddDul modal
+    this.setState(prev => {
+      prev.showModal = false;
+      return prev;
+    });
+  }
+
+  afterAddOntologiesModalOpen() {
+    // not sure when to use this
+    console.log('afterAddOntologyModalOpen', this.state, this.props);
+  }
+
 
   myHandler(event) {
     // TBD
@@ -60,83 +95,83 @@ class ManageOntologies extends Component {
 
     return (
 
-      // div({ className: "container" }, [
-      //   div({ className: "row no-margin" }, [
-      //     div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-      //       PageHeading({ id: "manageOntologies", imgSrc: "../images/icon-manage-ontology.png", iconSize: "large", color: "common", title: "Manage Ontologies", description: "Select and manage Ontologies for index" }),
-      //     ]),
-      //   ]),
-      //   hr({ className: "section-separator" }),
-
-      //   button({}, ["Click Me!"])
-      // ])
-
-
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding title-wrapper" }, [
-            img({ src: "/images/icon-manage-ontology.png", alt: "Manage Ontology icon", className: "cm-icons main-icon-title" }),
-            h2({ className: "main-title margin-sm common-color" }, ["Manage Ontologies", br(),
-              div({ className: "main-title-description" }, ["Select and manage Ontologies for index"]),
-            ]),
+          div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+            PageHeading({ id: "manageOntologies", imgSrc: "../images/icon-manage-ontology.png", iconSize: "large", color: "common", title: "Manage Ontologies", description: "Select and manage Ontologies for index" }),
           ]),
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+
+          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
               div({ className: "search-text" }, [
                 i({ className: "glyphicon glyphicon-search common-color" }),
                 input({
                   type: "search", className: "form-control users-search", placeholder: "Enter search term..."
-                  , "value": "searchOntologies"
+                  // , "value": "searchOntologies"
                 }),
               ]),
             ]),
-            a({ href: "", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin", onClick: "addOntology()" }, [
-              div({ className: "all-icons add-ontologies-white" }, []),
-              span({}, ["Add Ontologies"]),
-            ]),
-          ]),
-        ]),
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
-          div({ className: "row manage-wrapper" }, [
-            div({ className: "pvotes-box-head fsi-row-lg-level fsi-row-md-level" }, [
-              div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-4 pvotes-box-subtitle common-color" }, ["File name"]),
-              div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 pvotes-box-subtitle common-color" }, ["Type"]),
-              div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 pvotes-box-subtitle common-color" }, ["Prefix"]),
-              div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 pvotes-box-subtitle f-center common-color" }, []),
-            ]),
 
-            div({ className: "admin-box-body" }, [
-              hr({ className: "pvotes-main-separator" }),
-              this.state.indexedFiles.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
-                return h(Fragment, { key: ix }, [
-                  div({ className: "row pvotes-main-list" }, [
-                    a({
-                      className: "col-lg-5 col-md-5 col-sm-5 col-xs-4 pvotes-list-id",
-                      style: { "cursor": "pointer" }, onClick: this.downloadOntology, fileName: indexFile.fileName, fileUrl: indexFile.fileUrl
-                    }, [indexFile.fileName]),
-                    div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 pvotes-list-id" }, [indexFile.ontologyType]),
-                    div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 pvotes-list-id" }, [indexFile.prefix]),
-                    div({ className: "remove-dul-col" }, [
-                      a({ onClick: this.openDelete, fileUrl: indexFile.fileUrl }, [
-                        span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true" }, []),
-                      ]),
-                      hr({ className: "pvotes-separator-longer" }, [
-                      ]),
+            a({
+              id: 'title_addOntologies',
+              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+              onClick: this.addOntologiesModal
+            }, [
+                div({ className: "all-icons add-ontologies-white" }),
+                span({}, ["Add Ontologies"]),
+              ]),
+            AddOntologiesModal({
+              showModal: this.state.showModal,
+              onOKRequest: this.okAddOntologiesModal,
+              onCloseRequest: this.closeAddOntologiesModal,
+              onAfterOpen: this.afterAddOntologiesModalOpen
+            }),
+
+            hr({ className: "section-separator" })
+          ])
+        ]),
+
+        div({ className: "jumbotron table-box" }, [
+          div({ className: "grid-row pushed-1" }, [
+
+            div({ className: "col-5 cell-header common-color" }, ["File name"]),
+            div({ className: "col-2 cell-header common-color" }, ["Type"]),
+            div({ className: "col-2 cell-header common-color" }, ["Prefix"]),
+          ]),
+          hr({ className: "pvotes-main-separator" }),
+
+          this.state.indexedFiles.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
+            return h(Fragment, { key: ix }, [
+              div({ className: "grid-row pushed-1" }, [
+                a({
+                  className: "col-5 cell-body text",
+                  style: { "cursor": "pointer" },
+                  // onClick: this.downloadOntology(),
+                  filename: indexFile.filename,
+                  fileurl: indexFile.fileurl
+                }, [indexFile.filename]),
+                div({ className: "col-2 cell-body text" }, [indexFile.ontologytype]),
+                div({ className: "col-2 cell-body text" }, [indexFile.prefix]),
+
+                div({ className: "icon-actions" }, [
+                  div({ className: "display-inline-block", disabled: false }, [
+                    button({}, [span({ className: "glyphicon glyphicon-trash caret-margin" }),
                     ]),
                   ]),
-                  hr({ className: "pvotes-separator" }),
-                ]);
-              }),
-              PaginatorBar({
-                total: this.state.indexedFiles.length,
-                limit: this.state.limit,
-                pageCount: this.pageCount,
-                currentPage: this.state.currentPage,
-                onPageChange: this.handlePageChange,
-                changeHandler: this.handleSizeChange,
-              }),
-            ]),
-          ]),
+                ]),
+              ]),
+              hr({ className: "pvotes-separator" }),
+            ]);
+          }),
+
+          PaginatorBar({
+            total: this.state.indexedFiles.length,
+            limit: this.state.limit,
+            pageCount: this.pageCount,
+            currentPage: this.state.currentPage,
+            onPageChange: this.handlePageChange,
+            changeHandler: this.handleSizeChange,
+          })
         ]),
       ])
     );

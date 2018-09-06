@@ -92,7 +92,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group form-group-bottom" }, [
               div({ className: "col-lg-9 col-md-9 col-sm-6 col-xs-12" }, [
-                div({ isRendered: this.props.showAlert === true, className: "rp-alert" }, [
+                div({ isRendered: this.props.showAlert === true, className: "vote-box-alert" }, [
                   Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
                 ]),
               ]),

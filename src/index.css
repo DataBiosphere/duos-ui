@@ -105,7 +105,7 @@ small {
 }
 
 .f-left {
-  float: left;
+  float: left !important;
   text-align: left !important;
 }
 
@@ -1212,7 +1212,7 @@ input[type=checkbox]:checked+label:before {
 
 .vote-button {
   background: #00609f;
-  float: right !important;
+  float: right;
   box-shadow: 2px 2px rgb(204, 204, 204) !important;
 }
 
@@ -3179,6 +3179,11 @@ tags-input .tags .tag-item {
   width: 100%;
   margin: 0;
   padding: 0;
+}
+
+.grid-row.pushed-1, .grid-9-row.pushed-1 {
+  padding-right: 35px;
+  position: relative;
 }
 
 .grid-row.pushed-2, .grid-9-row.pushed-2 {

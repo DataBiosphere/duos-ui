@@ -3,6 +3,7 @@ import { div, hr, span, a, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Purpose } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 const limit = 10;
 
@@ -16,6 +17,8 @@ class AdminManageAccess extends Component {
       darElectionList: [],
       currentPage: 1,
       limit: limit,
+      showDialogCancel: false,
+      showDialogCreate: false,
     }
 
     this.getElectionDarList = this.getElectionDarList.bind(this);
@@ -60,6 +63,22 @@ class AdminManageAccess extends Component {
       prev.currentPage = 1;
       return prev;
     });
+  };
+
+  openDialogCancel = (e) => {
+    this.setState({ showDialogCancel: true });
+  };
+
+  openDialogCreate = (e) => {
+    this.setState({ showDialogCreate: true });
+  };
+
+  dialogHandlerCancel = (answer) => (e) => {
+    this.setState({ showDialogCancel: false });
+  };
+
+  dialogHandlerCreate = (answer) => (e) => {
+    this.setState({ showDialogCreate: false });
   };
 
   open(data) {
@@ -125,11 +144,13 @@ class AdminManageAccess extends Component {
 
                 div({ id: dar.frontEndId + "_actions", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
                   div({ className: "row no-margin" }, [
-                    div({ id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
-                      button({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), className: "cell-button hover-color", onClick: "this.openCreate(dar.dataRequestId)" }, ["Create"]),
-                      button({ isRendered: dar.electionStatus === 'PendingApproval', className: "cell-button disabled" }, ["Create"]),
-                      button({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), className: "cell-button cancel-color", onClick: "this.openCancel(dar)" }, ["Cancel"]),
+                    div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
+                      button({ onClick: this.openDialogCreate, className: "cell-button hover-color" }, ["Create"]),
                     ]),
+                    div({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
+                      button({ onClick: this.openDialogCancel, className: "cell-button cancel-color" }, ["Cancel"]),
+                    ]),
+
                     div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
                       a({ id: dar.frontEndId + "_flag_bonafide", onClick: "this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)" }, [
                         span({
@@ -150,7 +171,23 @@ class AdminManageAccess extends Component {
                   ])
                 ])
               ]),
-              hr({ className: "pvotes-separator" })
+              hr({ className: "pvotes-separator" }),
+
+              ConfirmationDialog({
+                title: 'Cancel election?', color: 'cancel', showModal: this.state.showDialogCancel, action: { label: "Yes", handler: this.dialogHandlerCancel }
+              }, [
+                  div({ className: "dialog-description" }, [
+                    span({}, ["Are you sure you want to cancel the current election process? "]),
+                  ]),
+                ]),
+
+              ConfirmationDialog({
+                title: 'Create election?', color: 'access', showModal: this.state.showDialogCreate, action: { label: "Yes", handler: this.dialogHandlerCreate }
+              }, [
+                  div({ className: "dialog-description" }, [
+                    span({}, ["Are you sure you want the DAC to vote on this case? "]),
+                  ])
+                ]),
             ]);
           }),
           PaginatorBar({

@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, form, input, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
+import { Alert } from '../Alert';
 
 export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Component {
 
@@ -90,27 +91,13 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
               label({ id: "lbl_setTimeout", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Set new timeout:"]),
               div({ className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 admin-input" }, [
                 input({ id: "txt_setTimeout", type: "number", min: "1", "ng-model": "timeout.newTimeout", name: "days", required: true, "ng-change": "setTimeout()", style: { 'width': '55px', 'padding': '5px 2px 2px 5px', 'color': '#777777' } }),
-              ]),
-            ]),
+              ])
+            ])
+          ]),
 
-
+          div({ isRendered: false }, [
+            Alert({ id: "electionTimeout", type: "danger", title: "alert.title", description: "alert.msg" })
           ])
-
-          // div({ isRendered: alerts.lenght > 0, className: "form-group dataset-form-group" }, [
-          //     div({ className: "admin-alerts dataset-admin-alerts" }, [
-          //         alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color no-margin" }, [
-          //             h4({}, [alert.title]),
-          //             span({}, [alert.msg]),
-          // span({ style: "lineHeight: 22px" }, [
-          //     "Please, ",
-          //     a({ download: "errorsFile.txt", className: "hover-color bold", href: "{{url}}", onClick: DataSetModal.releaseUrl }, ["download this file"]),
-          //     "with the mistakes found."
-          // ]),
-
-          //         ])
-          //     ]),
-          // ]),
-
         ])
 
     );
