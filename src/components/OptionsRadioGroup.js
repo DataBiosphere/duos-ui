@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, input, hh, label } from 'react-hyperscript-helpers';
+import { div, input, hh, label, span } from 'react-hyperscript-helpers';
 import PropTypes from 'prop-types';
 
 export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
@@ -28,22 +28,19 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
     return (
 
       div({ className: 'radio-inline' }, [
-
         this.state.optionLabels.map((option, ix) => {
-
           return (
-            div({ key: this.state.name + ix, style: { "display": "inline-block" }, onClick: (e) => this.selectOption(e, this.state.optionValues[ix]) }, [
+            span({ key: this.state.name + ix, onClick: (e) => this.selectOption(e, this.state.optionValues[ix]) }, [
               input({
                 className: "regular-radio",
                 value: this.state.optionValues[ix],
                 type: "radio",
-                id: this.state.name + ix,
+                id: "rad_" + this.props.id + ix,
                 name: this.state.name,
                 checked: this.state.value === this.state.optionValues[ix]
               }),
-
-              label({ htmlFor: "option" + ix }, []),
-              label({ htmlFor: "option" + ix, className: "radio-button-text" }, [this.state.optionLabels[ix]]),
+              label({ htmlFor: "rad_" + this.props.id + ix }, []),
+              label({ id: "lbl_" + this.props.id + ix, htmlFor: "rad_" + this.props.id + ix, className: "radio-button-text" }, [this.state.optionLabels[ix]]),
             ])
           )
         })
