@@ -1,9 +1,9 @@
 import { Component, Fragment } from 'react';
 import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
-import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
+import * as Utils from '../libs/utils';
 
 class ResearcherConsole extends Component {
 
@@ -44,7 +44,7 @@ class ResearcherConsole extends Component {
 
   handleDarSizeChange = size => {
     this.setState(prev => {
-      prev.partialDarLimit = size;
+      prev.darLimit = size;
       return prev;
     });
   };
