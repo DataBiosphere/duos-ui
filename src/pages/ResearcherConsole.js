@@ -4,7 +4,6 @@ import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-import * as Utils from '../libs/utils';
 
 class ResearcherConsole extends Component {
 
