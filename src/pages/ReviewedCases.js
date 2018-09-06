@@ -9,7 +9,6 @@ class ReviewedCases extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
-  searchDulCases = '';
   searchAccessCases = '';
 
   constructor(props) {

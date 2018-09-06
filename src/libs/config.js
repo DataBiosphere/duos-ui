@@ -3,10 +3,6 @@ import { Storage } from './storage';
 
 
 export const Config = {
-  loadConfig: _.memoize(async () => {
-    const res = await fetch('config.json');
-    return res.json()
-  }),
 
   getApiUrl: async () => (await getConfig()).apiUrl,
 
@@ -21,9 +17,6 @@ export const Config = {
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' }
   }),
-
-  getGoogleClientId : async () => (await getConfig()).clientId
-
 };
 
 const Token = {
@@ -33,20 +26,10 @@ const Token = {
 };
 
 const loadConfig = _.memoize(async () => {
-  const res = await fetch('config.json');
+  const res = await fetch('/config.json');
   return res.json()
 });
 
 const getConfig = async () => {
   return await loadConfig()
 };
-
-// const Token = {
-//   getToken: () => {
-//     return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-//   }
-// };
-
-export const getGoogleClientId = async () => (await getConfig()).clientId;
-
-export const getApiUrl = async () => (await getConfig()).apiUrl;

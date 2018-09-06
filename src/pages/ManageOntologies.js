@@ -1,6 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, img, h, h2, i, input, span, a, br } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
+import { div, hr, img, h, h2, i, input, span, a, br } from 'react-hyperscript-helpers';
 import { PaginatorBar } from '../components/PaginatorBar';
 
 

@@ -210,7 +210,7 @@ export const Files = {
   // Get DUL File requires another field for fileName to be downloaded
   // this field is required in the component
   getDulFile: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}`;
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
     return getFile(url);
   },
 
@@ -566,6 +566,8 @@ export const DUL = {
 
   create: async (id) => {
     const url = `${await Config.getApiUrl()}/consent/${id}/dul`;
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(), Config.authOpts(), { method: 'POST' }]));
+    return res.json();
   },
 };
 
