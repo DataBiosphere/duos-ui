@@ -7,6 +7,7 @@ import { Consent } from '../libs/ajax';
 import _ from "lodash/fp";
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import * as Utils from '../libs/utils';
 
 const limit = 10;
 
@@ -91,8 +92,10 @@ class AdminManageDul extends Component {
   myHandler(event) {
     // TBD
   }
-
-  open() {}
+  
+  open(electionId, page, action, status) {
+    this.props.history.push(`${page}/${electionId}`)
+  }
 
   editDul() {
     this.setState(prev => {
@@ -204,11 +207,11 @@ class AdminManageDul extends Component {
                       id: election.consentId + "_flag_consentName", isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
                       // "tooltip": "Consent has been updated", "aria-hidden": "true", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
                     }, []),
-                    a({ id: election.consentId + "_link_consentName", onClick: this.open(election.consentId, 'dul_preview_results', null, true) }, [election.consentName]),
+                    a({ id: election.consentId + "_link_consentName", onClick: () => this.open(election.consentId, 'dul_preview', null, true) }, [election.consentName]),
                   ]),
                   div({ id: election.consentId + "_groupName", className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : ""), title: election.groupName }, [election.groupName]),
                   div({ id: election.consentId + "_version", className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
-                  div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [election.createDate]),
+                  div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [Utils.formatDate(election.createDate)]),
                   div({ id: election.consentId + "_editDUL", className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
                     button({ id: election.consentId + "_btn_editDUL", className: "cell-button hover-color", onClick: this.editDul }, ["Edit"]),
                     EditDulModal({
@@ -216,10 +219,14 @@ class AdminManageDul extends Component {
                     }),
                   ]),
                   div({ id: election.consentId + "_electionStatus", className: "col-1 cell-body text f-center bold" }, [
-                    span({ isRendered: election.electionStatus === 'un-reviewed' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Un-reviewed"])]),
-                    span({ isRendered: election.electionStatus === 'Open' }, [a({ onClick: this.open(election.consentId, 'dul_review_results', null, false) }, ["Open"]),]),
-                    span({ isRendered: election.electionStatus === 'Canceled' }, [a({ onClick: this.open(election.consentId, 'dul_preview_results', null, false) }, ["Canceled"]),]),
-                    span({ isRendered: election.electionStatus === 'Closed' }, [a({ onClick: this.open(null, 'dul_results_record', election.electionId, false) }, ["Reviewed"]),]),
+                    span({ isRendered: election.electionStatus === 'un-reviewed' }, [
+                      a({ onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Un-reviewed"])]),
+                    span({ isRendered: election.electionStatus === 'Open' }, [
+                      a({ onClick: () => this.open(election.consentId, 'dul_collect', null, false) }, ["Open"]),]),
+                    span({ isRendered: election.electionStatus === 'Canceled' }, [
+                      a({ onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Canceled"]),]),
+                    span({ isRendered: election.electionStatus === 'Closed' }, [
+                      a({ onClick: () => this.open(null, 'dul_results_record', election.electionId, false) }, ["Reviewed"]),]),
                   ]),
                   div({ id: election.consentId + "_createElection", isRendered: election.electionStatus !== 'Open', className: "col-1 cell-body f-center", disabled: !election.editable }, [
                     button({ onClick: this.openDialogCreate, className: "cell-button hover-color" }, ["Create"]),

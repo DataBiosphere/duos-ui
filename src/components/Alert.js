@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, a, hh, h4, span } from 'react-hyperscript-helpers';
+import { div, hh, h4, span } from 'react-hyperscript-helpers';
 import './Alert.css';
 
 export const Alert = hh(class Alert extends Component {

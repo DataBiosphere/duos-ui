@@ -87,8 +87,6 @@ class AdminManageAccess extends Component {
 
   render() {
 
-    const { currentPage } = this.state;
-
     return (
 
       div({ className: "container" }, [

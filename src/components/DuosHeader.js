@@ -24,19 +24,19 @@ class DuosHeader extends Component {
       prev.showHelpModal = true;
       return prev;
     });
-  }
+  };
 
   okModal = () => {
     this.setState(prev => { prev.showHelpModal = false; return prev; });
-  }
+  };
 
   closeModal = () => {
     this.setState(prev => { prev.showHelpModal = false; return prev; });
-  }
+  };
 
   afterModalOpen = () => {
     this.setState(prev => { prev.showHelpModal = false; return prev; });
-  }
+  };
 
   render() {
 

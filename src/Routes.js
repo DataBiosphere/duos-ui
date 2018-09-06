@@ -33,9 +33,10 @@ import DatasetCatalog from "./pages/DatasetCatalog";
 import DulCollect from "./pages/DulCollect";
 import ResearcherReview from "./pages/ResearcherReview";
 import ManageOntologies from "./pages/ManageOntologies";
+import Election404 from "./pages/Election404";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 
-export default ({props}) => (
+export default ({ props }) => (
 
   <Switch>
     <Route exact path='/' component={Home} props={{ props }} />
@@ -64,13 +65,14 @@ export default ({props}) => (
     <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords} props={props} />
     <AuthenticatedRoute path='/dul_result_records' component={DulResultRecords} props={props} />
     <AuthenticatedRoute path='/access_review' component={AccessReview} props={props} />
-    <AuthenticatedRoute path='/dul_review' component={DulReview} props={props} />
     <AuthenticatedRoute path='/access_preview' component={AccessPreview} props={props} />
     <AuthenticatedRoute path='/access_collect' component={AccessCollect} props={props} />
-    <AuthenticatedRoute path='/dul_preview' component={DulPreview} props={props} />
-    <AuthenticatedRoute path='/dul_collect' component={DulCollect} props={props} />
+    <AuthenticatedRoute path='/dul_review/:consentId' component={DulReview} props={props} />
+    <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} />
+    <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} />
     <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
+    <Route path='/election404' component={Election404} />
     <Route path='*' component={NotFound} />
   </Switch>
 );

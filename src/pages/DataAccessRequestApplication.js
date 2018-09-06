@@ -15,7 +15,7 @@ const filterConfig = {
   ignoreAccents: false,
   trim: false,
   matchFromStart: false,
-}
+};
 
 class DataAccessRequestApplication extends Component {
 
