@@ -34,6 +34,7 @@ import DatasetCatalog from "./pages/DatasetCatalog";
 import DulCollect from "./pages/DulCollect";
 import ResearcherReview from "./pages/ResearcherReview";
 import ManageOntologies from "./pages/ManageOntologies";
+import Election404 from "./pages/Election404";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 
 export default ({props}) => (
@@ -73,6 +74,7 @@ export default ({props}) => (
     <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
     <AuthenticatedRoute path='/rp_application' component={RpApplication} props={props} />
+    <Route path='/election404' component={Election404} />
     <Route path='*' component={NotFound} />
   </Switch>
 );
