@@ -2,7 +2,6 @@ import { Component, Fragment } from 'react';
 import { div, hr, i, input, span, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
-import _ from "lodash/fp";
 import { PaginatorBar } from '../components/PaginatorBar';
 
 

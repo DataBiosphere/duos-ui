@@ -153,7 +153,7 @@ class ResearcherConsole extends Component {
               ]),
 
               a({
-                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 admin-add-button access-background search-reviewed", href: "/rp_application/step1"
+                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 admin-add-button access-background search-reviewed", href: "/dar_application"
               }, [
                   div({ className: "all-icons add-access_white" }, []),
                   span({}, ["Create Data Access Request"]),
@@ -222,7 +222,6 @@ class ResearcherConsole extends Component {
                 ]),
                 hr({ className: "pvotes-main-separator" }),
 
-                //   div({ "dir-paginate": "pdar in ResearcherConsole.partialDars | filter: searchAccess | itemsPerPage:10", "pagination-id": "researcherPartialConsole" }, [
                 this.state.partialDars.slice((currentPartialDarPage - 1) * this.state.partialDarLimit, currentPartialDarPage * this.state.partialDarLimit).map((pdar, rIndex) => {
                   return h(Fragment, {}, [
                     div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin" }, [

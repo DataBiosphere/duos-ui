@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hh, h2, h, hr, small, br, img, i, input, a, span, button } from 'react-hyperscript-helpers';
+import { div, hh, h, hr, i, input, span, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 

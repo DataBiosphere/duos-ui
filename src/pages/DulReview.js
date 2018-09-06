@@ -12,7 +12,9 @@ class DulReview extends Component {
       currentUser: {},
       enableVoteButton: false,
       voteStatus: '1'
-    }
+    };
+    const consentId = this.props.match.params.consentId;
+    console.log(consentId);
 
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }

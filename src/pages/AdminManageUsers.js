@@ -4,9 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { EditUserModal } from '../components/modals/EditUserModal';
 import { User } from "../libs/ajax";
-import _ from "lodash/fp";
 import { PaginatorBar } from '../components/PaginatorBar';
-
 
 
 class AdminManageUsers extends Component {
@@ -29,7 +27,7 @@ class AdminManageUsers extends Component {
 
       let userList = users.map(user => {
         user.researcher = false;
-        user.roles.map(role => {
+        user.roles.forEach(role => {
           if (role.name === 'Researcher') {
             user.status = role.status;
             user.completed = role.profileCompleted;

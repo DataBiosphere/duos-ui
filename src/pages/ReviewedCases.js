@@ -1,6 +1,7 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, img, h2, br, i, input, span, h } from 'react-hyperscript-helpers';
+import { div, button, hr, i, input, span, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 
 class ReviewedCases extends Component {
@@ -8,7 +9,6 @@ class ReviewedCases extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
-  searchDulCases = '';
   searchAccessCases = '';
 
   constructor(props) {
@@ -75,72 +75,55 @@ class ReviewedCases extends Component {
     }
   }
 
-render() {
+  render() {
 
 
-  const { currentDulPage, currentAccessPage } = this.state;
+    const { currentDulPage, currentAccessPage } = this.state;
 
-  return (
+    return (
 
 
-    // div({ className: "container " }, [
-    //   div({ className: "row no-margin" }, [
-    //     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-    //       PageHeading({ id: "reviewedCases", imgSrc: "../images/icon_reviewed.png", iconSize: "medium", color: "common", title: "Reviewed Cases Record", description: "List of Reviewed cases and their results" }),
-    //     ]),
-    //   ]),
-    //   hr({ className: "section-separator" }),
-
-    //   button({}, ["Click Me!"])
-    // ])
-
-    div({ className: "container" }, [
-      div({ className: "row fsi-row-lg-level fsi-row-md-level title-wrapper" }, [
-        img({ src: "/images/icon_reviewed.png", alt: "Reviewed cases icon", className: "cm-icons main-icon-title" }),
-        h2({ className: "main-title margin-sm common-color" }, [
-          "Reviewed Cases Record",
-          br(),
-          div({ className: "main-title-description" }, ["List of Reviewed cases and their results"]),
+      div({ className: "container " }, [
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+            PageHeading({ id: "reviewedCases", imgSrc: "../images/icon_reviewed.png", iconSize: "medium", color: "common", title: "Reviewed Cases Record", description: "List of Reviewed cases and their results" }),
+          ]),
         ]),
-      ]),
-      hr({ className: "section-separator" }),
-      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-        div({ className: "row" }, [
-          h2({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 pvotes-box-title dul-color" }, [
-            img({ src: "/images/icon_dul.png", alt: "DUL icon", className: "pvotes-icons" }),
-            "Data Use Limitations Reviewed Cases",
-            div({ className: "pvotes-box-title-description" }, ["List of Data Use Limitations Reviewed Cases and their results"]),
+        hr({ className: "section-separator" }),
+
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
+            PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Reviewed Cases", description: "List of Data Use Limitations Reviewed Cases and their results" }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed" }, [
             div({ className: "search-text" }, [
               i({ className: "glyphicon glyphicon-search dul-color" }),
               input({ type: "search", className: "form-control", placeholder: "Enter search term...", value: this.searchDULcases }),
             ]),
-          ]),
+          ])
         ]),
 
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+        div({ className: "jumbotron table-box" }, [
           div({ className: "grid-row" }, [
             div({ className: "col-2 cell-header cell-sort dul-color", onClick: "sort('displayId')" }, [
               "Consent id",
-              span({ className: "glyphicon sort-icon glyphicon-sort" }, []),
+              span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
             div({ className: "col-2 cell-header cell-sort dul-color", onClick: "sort('election.consentGroupName')" }, [
               "Consent Group Name",
-              span({ className: "glyphicon sort-icon glyphicon-sort" }, []),
+              span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
             div({ className: "col-1 cell-header cell-sort dul-color", onClick: "sort('version')" }, [
               "Election N°",
-              span({ className: "glyphicon sort-icon glyphicon-sort" }, []),
+              span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
             div({ className: "col-1 cell-header dul-color" }, ["Result Date"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Final Result"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Record"]),
           ]),
           hr({ className: "pvotes-separator" }),
-          // //-----
-          this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
 
+          this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
               div({ className: "grid-row" }, [
                 div({ className: "col-2 cell-body text " + (election.archived ? 'flagged' : ''), title: election.displayId }, [election.displayId]),
@@ -156,7 +139,7 @@ render() {
                 ]),
               ]),
               hr({ className: "pvotes-separator" }),
-            ])
+            ]);
           }),
           // //----
           PaginatorBar({
@@ -171,33 +154,30 @@ render() {
                 return prev;
               });
             },
-            changeHandler:  (size) => {
+            changeHandler: (size) => {
               this.setState(prev => {
                 prev.dulLimit = size;
                 prev.currentDulPage = 1;
                 return prev;
               },
-            )
-             },
+              )
+            },
           }),
         ]),
-      ]),
 
-      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-        div({ className: "row" }, [
-          h2({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 pvotes-box-title access-color" }, [
-            img({ src: "/images/icon_access.png", alt: "Access icon", className: "pvotes-icons" }),
-            "Data Access Reviewed Cases",
-            div({ className: "pvotes-box-title-description" }, ["List of Data Access Request Reviewed Cases and their results"]),
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
+            PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Reviewed Cases", description: "List of Data Access Request Reviewed Cases and their results" }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed" }, [
             div({ className: "search-text" }, [
               i({ className: "glyphicon glyphicon-search access-color" }),
               input({ type: "search", className: "form-control", placeholder: "Enter search term...", "value": "searchAccessCases" }),
             ]),
-          ]),
+          ])
         ]),
-        div({ className: "jumbotron box-vote-singleresults box-vote-no-margin" }, [
+
+        div({ className: "jumbotron table-box" }, [
           div({ className: "grid-row" }, [
             div({ className: "col-2 cell-header access-color" }, ["Data Request id"]),
             div({ className: "col-3 cell-header access-color" }, ["Project Title"]),
@@ -206,6 +186,7 @@ render() {
             div({ className: "col-1 cell-header f-center access-color" }, ["Record"]),
           ]),
           hr({ className: "pvotes-separator" }),
+
           this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
               div({ className: "grid-row" }, [
@@ -244,12 +225,10 @@ render() {
               });
             },
           }),
-
         ]),
-      ]),
-    ])
-  );
-}
+      ])
+    );
+  }
 }
 
 export default ReviewedCases;
