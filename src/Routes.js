@@ -72,7 +72,6 @@ export default ({ props }) => (
     <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} />
     <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
-    {/* <AuthenticatedRoute path='/rp_application' component={RpApplication} props={props} /> */}
     <Route path='/election404' component={Election404} />
     <Route path='*' component={NotFound} />
   </Switch>
