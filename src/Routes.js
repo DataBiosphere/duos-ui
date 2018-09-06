@@ -16,7 +16,6 @@ import DulPreview from "./pages/DulPreview";
 import AdminConsole from "./pages/AdminConsole";
 import ResearcherConsole from "./pages/ResearcherConsole";
 import { ChairConsole } from "./pages/ChairConsole";
-import RpApplication from "./pages/RpApplication";
 import NotFound from "./pages/NotFound";
 import AccessResultRecords from "./pages/AccessResultRecords";
 import DulResultRecords from "./pages/DulResultRecords";
@@ -72,7 +71,6 @@ export default ({props}) => (
     <AuthenticatedRoute path='/dul_collect' component={DulCollect} props={props} />
     <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
-    <AuthenticatedRoute path='/rp_application' component={RpApplication} props={props} />
     <Route path='*' component={NotFound} />
   </Switch>
 );

@@ -1,5 +1,5 @@
 import { Component, } from 'react';
-import { div, input, hh, label } from 'react-hyperscript-helpers';
+import { div, input, hh, label, span } from 'react-hyperscript-helpers';
 import PropTypes from 'prop-types';
 
 export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
@@ -30,33 +30,32 @@ export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
     return (
 
       div({ className: 'radio-inline' }, [
-
-        div({ style: { "display": "inline-block" }, onClick: (e) => this.selectOption(e, true) }, [
+        span({ onClick: (e) => this.selectOption(e, true) }, [
           input({
             className: "regular-radio",
             value: true,
             type: "radio",
-            id: this.state.name + 'Yes',
+            id: "rad_positive_" + this.props.id,
             name: this.state.name,
             checked: this.state.value === true,
             onChange: this.handleChange
           }),
-          label({ htmlFor: "RadioOptionYes" }, []),
-          label({ htmlFor: "RadioOptionYes", className: "radio-button-text" }, ["Yes"]),
+          label({ htmlFor: "rad_positive_" + this.props.id }, []),
+          label({ id: "lbl_positive_" + this.props.id, htmlFor: "rad_positive_" + this.props.id, className: "radio-button-text" }, ["Yes"]),
         ]),
 
-        div({ style: { "display": "inline-block" }, onClick: (e) => this.selectOption(e, false) }, [
+        span({ onClick: (e) => this.selectOption(e, false) }, [
           input({
             className: "regular-radio",
             value: false,
             type: "radio",
-            id: this.state.name + 'No',
+            id: "rad_negative_" + this.props.id,
             name: this.state.name,
             checked: this.state.value === false,
             onChange: this.handleChange
           }),
-          label({ htmlFor: "RadioOptionNo" }, []),
-          label({ htmlFor: "RadioOptionNo", className: "radio-button-text" }, ["No"]),
+          label({ htmlFor: "rad_negative_" + this.props.id }, []),
+          label({ id: "lbl_negative_" + this.props.id, htmlFor: "rad_negative_" + this.props.id, className: "radio-button-text" }, ["No"]),
         ])
       ])
     );

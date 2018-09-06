@@ -1,5 +1,8 @@
 import { Component } from 'react';
 import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'react-hyperscript-helpers';
+import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
+import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
+import { Alert } from '../components/Alert';
 
 export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
@@ -46,29 +49,23 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
             div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                div({ className: "radio-inline" }, [
-                  input({
-                    id: "rad_positive_" + this.props.id,
-                    name: "input_" + this.props.id,
-                    type: "radio",
-                    className: "regular-radio",
-                    value: this.state.voteStatus,
-                    onClick: this.positiveVote
-                  }),
-                  label({ htmlFor: "rad_positive_" + this.props.id }, []),
-                  label({ id: "lbl_positive_" + this.props.id, htmlFor: "rad_positive_" + this.props.id, className: "radio-button-text" }, ["Yes"]),
+                YesNoRadioGroup({
+                  id: this.props.id,
+                  isRendered: (this.props.radioType === "boolean") || (this.props.radioType === undefined),
+                  value: this.props.status,
+                  name: "rad_" + this.props.id,
+                  onChange: this.setEnableVoteButton
+                 }),
 
-                  input({
-                    id: "rad_negative_" + this.props.id,
-                    name: "input_" + this.props.id,
-                    type: "radio",
-                    className: "regular-radio",
-                    value: this.state.voteStatus,
-                    onClick: this.setEnableVoteButton
-                  }),
-                  label({ htmlFor: "rad_negative_" + this.props.id }, []),
-                  label({ id: "lbl_negative_" + this.props.id, htmlFor: "rad_negative_" + this.props.id, className: "radio-button-text" }, ["No"]),
-                ]),
+                OptionsRadioGroup({
+                  id: this.props.id,
+                  isRendered: this.props.radioType === "multiple",
+                  value: this.props.status,
+                  optionLabels: this.props.radioLabels,
+                  optionValues: this.props.radioValues,
+                  name: "rad_" + this.props.id,
+                  onChange: this.setEnableVoteButton
+                }),
               ]),
             ]),
 
@@ -95,15 +92,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group form-group-bottom" }, [
               div({ className: "col-lg-9 col-md-9 col-sm-6 col-xs-12" }, [
-                // div({ className: "votes-alerts final-alert no-margin no-padding" }, [
-                //   alertsDAR.map((alert, rIndex) => {
-                //     return h(Fragment, {}, [
-                //       div({ type: "danger", className: "alert-title cancel-color" }, [
-                //         h4({}, [alert.title]),
-                //       ]),
-                //     ]);
-                //   })
-                // ]),
+                div({ isRendered: this.props.showAlert === true, className: "rp-alert" }, [
+                  Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
+                ]),
               ]),
               div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
                 button({
