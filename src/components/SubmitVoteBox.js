@@ -3,6 +3,7 @@ import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'rea
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
@@ -13,7 +14,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       value: '',
       currentUser: {},
       enableVoteButton: false,
-      voteStatus: '1'
+      voteStatus: this.props.voteStatus,
+      showDialogSubmit: false,
     }
 
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
@@ -27,17 +29,66 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     });
   }
 
-  logVote = () => {
+  logVote = (e) => {
     console.log('----------logVote----------');
+    this.setState({ showDialogSubmit: true });
   }
 
   setEnableVoteButton = () => {
     console.log('----------setEnableVoteButton----------');
   }
 
+  dialogHandlerSubmit = (answer) => (e) => {
+    if (answer === true) {
+      console.log(answer);
+    } else {
+      console.log(answer);
+    }
+    this.setState({ showDialogSubmit: false });
+    this.props.action.handler(answer);
+  };
+
   render() {
+    let dialogTitle = "";
+    let dialogMessage = "";
+    let dialogType = "";
+    let dialogLabel = ""
+
+    //if agreement election
+    if (this.props.id === "agreement") {
+      dialogTitle = "Post Decision Agreement?";
+      dialogMessage = "Are you sure you want to post this Decision Agreement?";
+      dialogType = "";
+      dialogLabel = "Yes"
+    }
+
+    //if final election
+    if (this.props.id === "finalAccess") {
+      dialogTitle = "Post Final Access Decision?";
+      dialogMessage = "Are you sure you want to post this Final Access Decision?";
+      dialogType = "";
+      dialogLabel = "Yes"
+    }
+
+    //if collect election 
+    if (this.props.id === "accessCollect" || this.props.id === "rpCollect" || this.props.id === "dulCollect") {
+      dialogTitle = "Post Final Vote?";
+      dialogMessage = "If you post this vote the Election will be closed with current results.";
+      dialogType = "";
+      dialogLabel = "Yes"
+    }
+
+    //if review election
+    if (this.props.id === "accessReview" || this.props.id === "rpReview" || this.props.id === "dulReview" || this.props.id === "dataOwnerReview" || this.props.id === "researcherReview") {
+      dialogTitle = "Vote confirmation";
+      dialogMessage = "Your vote has been successfully logged!";
+      dialogType = "informative";
+      dialogLabel = "Ok"
+    }
+
 
     return (
+
       div({ id: "box_" + this.props.id }, [
         h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
         hr({ className: "box-separator" }),
@@ -55,7 +106,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   value: this.props.status,
                   name: "rad_" + this.props.id,
                   onChange: this.setEnableVoteButton
-                 }),
+                }),
 
                 OptionsRadioGroup({
                   id: this.props.id,
@@ -92,17 +143,24 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group form-group-bottom" }, [
               div({ className: "col-lg-9 col-md-9 col-sm-6 col-xs-12" }, [
-                div({ isRendered: this.props.showAlert === true, className: "rp-alert" }, [
+                div({ isRendered: this.props.showAlert === true, className: "vote-box-alert" }, [
                   Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
                 ]),
               ]),
               div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
                 button({
+                  type: 'button',
                   id: "btn_submit_" + this.props.id,
                   disabled: this.state.voteStatus === null || !this.state.enableVoteButton,
                   onClick: this.logVote,
                   className: "btn btn-primary col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
                 }, [this.props.action.label]),
+
+                ConfirmationDialog({
+                  title: dialogTitle, color: this.props.color, type: dialogType,
+                  showModal: this.state.showDialogSubmit,
+                  action: { label: dialogLabel, handler: this.dialogHandlerSubmit }
+                }, [div({ className: "dialog-description" }, [dialogMessage])])
               ]),
             ]),
           ])

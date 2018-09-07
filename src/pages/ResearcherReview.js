@@ -60,6 +60,8 @@ class ResearcherReview extends Component {
               title: "Your Vote",
               isDisabled: "isFormDisabled",
               voteStatus: this.state.voteStatus,
+              showAlert: false,
+              alertMessage: "something!",
               action: { label: "Vote", handler: this.submit }
             }),
           ]),
@@ -83,9 +85,7 @@ class ResearcherReview extends Component {
   //         span({ isRendered: "status !== 'approved'" }, [
   //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Rationale"]),
   //         ]),
-
-   
-
+  
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
             div({ className: "row no-margin form-group" }, [

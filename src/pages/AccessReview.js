@@ -367,7 +367,7 @@ class AccessReview extends Component {
                 div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
                   div({ className: "jumbotron box-vote access-background-lighter" }, [
                     SubmitVoteBox({
-                      id: "reviewAccess",
+                      id: "accessReview",
                       color: "access",
                       title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                         : "Should data access be granted to this applicant?",
@@ -419,7 +419,7 @@ class AccessReview extends Component {
                 div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
                   div({ className: "jumbotron box-vote access-background-lighter" }, [
                     SubmitVoteBox({
-                      id: "reviewRP",
+                      id: "rpReview",
                       color: "access",
                       title: "Q2. Was the research purpose accurately converted to a structured format?",
                       isDisabled: "isFormDisabled",
