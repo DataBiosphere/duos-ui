@@ -1,7 +1,8 @@
 import { Component } from 'react';
-import { div, form, input, label, span, hh, p } from 'react-hyperscript-helpers';
+import { div, form, input, label, span, hh, p, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataSet } from '../../libs/ajax'
+import { DataSet } from '../../libs/ajax';
+import { Alert } from '../Alert';
 
 let USER_ID = 5;
 
@@ -81,6 +82,21 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
   }
 
   render() {
+
+    const alertMessage = span({}, [
+      "Some errors occurred, Datasets weren't uploaded.",
+      div({}, [
+          "Please, ",
+          a({
+            download: "errorsFile.txt",
+            className: "hover-color bold",
+            // href: "{{url}}", 
+          // "onClick": "DataSetModal.releaseUrl"
+         }, ["download this file"]),
+          " with the mistakes found."
+      ]),
+    ]);
+
     return (
 
       BaseModal({
@@ -116,24 +132,11 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
                 ]),
               ]),
             ]),
+          ]),
 
-          ])
-
-          // div({ isRendered: alerts.lenght > 0, className: "form-group dataset-form-group" }, [
-          //     div({ className: "admin-alerts dataset-admin-alerts" }, [
-          //         alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color no-margin" }, [
-          //             h4({}, [alert.title]),
-          //             span({}, [alert.msg]),
-          // span({ style: "lineHeight: 22px" }, [
-          //     "Please, ",
-          //     a({ download: "errorsFile.txt", className: "hover-color bold", href: "{{url}}", onClick: DataSetModal.releaseUrl }, ["download this file"]),
-          //     "with the mistakes found."
-          // ]),
-
-          //         ])
-          //     ]),
-          // ]),
-
+          div({ isRendered: false }, [
+            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
+          ]),
         ])
     );
   }

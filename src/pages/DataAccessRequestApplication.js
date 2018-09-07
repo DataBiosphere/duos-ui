@@ -5,6 +5,8 @@ import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 import Select, { createFilter } from 'react-select';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+
 
 import './DataAccessRequestApplication.css';
 
@@ -108,8 +110,8 @@ class DataAccessRequestApplication extends Component {
         projectTitle: 'Sample Data Access Review'
       },
       completed: true,
-
-
+      showDialogSubmit: false,
+      showDialogSave: false,
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -173,12 +175,22 @@ class DataAccessRequestApplication extends Component {
   attestAndSave = (e) => {
     // implement full save on mongodb here ... after validations
     console.log(JSON.stringify(this.state.formData, null, 2));
+    this.setState({ showDialogSubmit: true });
   }
 
   partialSave = (e) => {
     // implement partial save on mongodb here ... no validations
     console.log(JSON.stringify(this.state.formData, null, 2));
+    this.setState({ showDialogSave: true });
   }
+
+  dialogHandlerSubmit = (answer) => (e) => {
+    this.setState({ showDialogSubmit: false });
+  };
+  
+  dialogHandlerSave = (answer) => (e) => {
+    this.setState({ showDialogSave: false });
+  };
 
   onOntologiesChange = (data, action) => {
     console.log('data', data);
@@ -201,7 +213,7 @@ class DataAccessRequestApplication extends Component {
   render() {
 
     let atLeastOneCheckboxChecked = false;
-    let showValidationMessages = true;
+    let showValidationMessages = false;
     let problemSavingRequest = false;
 
     let step1 = {
@@ -561,8 +573,8 @@ class DataAccessRequestApplication extends Component {
                       span({}, ["Select all applicable options."]),
                     ]),
                   ]),
-                  div({ className: "row no-margin"}, [
-                    span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: {'marginLeft': '15px'} }, ["At least one of the fields is required"]),
+                  div({ className: "row no-margin" }, [
+                    span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: { 'marginLeft': '15px' } }, ["At least one of the fields is required"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     div({ className: "checkbox" }, [
@@ -720,8 +732,8 @@ class DataAccessRequestApplication extends Component {
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, ["3.1 In order to ensure appropriate review, please answer the questions below:"]),
                   ]),
-                  div({ className: "row no-margin"}, [
-                    span({ className: "cancel-color required-field-error-span", isRendered: step3.inputPurposes.invalid && showValidationMessages, style: {'marginLeft': '15px'} }, ["All fields are required"]),
+                  div({ className: "row no-margin" }, [
+                    span({ className: "cancel-color required-field-error-span", isRendered: step3.inputPurposes.invalid && showValidationMessages, style: { 'marginLeft': '15px' } }, ["All fields are required"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({
@@ -878,19 +890,23 @@ class DataAccessRequestApplication extends Component {
                         span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"]),
                     ]),
 
-                    li({ className: "next f-right multi-step-next" }, [
-                      button({ isRendered: this.state.formData.dar_code === null, className: "access-background bold", onClick: this.attestAndSave }, [
-                        "Attest and Send"
-                      ]),
+                    li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-next" }, [
+                      a({ onClick: this.attestAndSave, className: "access-background bold" }, ["Attest and Send"]),
                     ]),
+                    ConfirmationDialog({
+                      title: 'Data Request Confirmation', color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
                     li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
                       a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
                     ]),
-                  ]),
-                ]),
-              ]),
-            ]),
+                    ConfirmationDialog({
+                      title: 'Save changes?', color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
+                  ])
+                ])
+              ])
+            ])
           ])
         ])
       ])

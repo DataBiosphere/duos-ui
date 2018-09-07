@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, i, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { DataSet } from "../libs/ajax";
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 
 const USER_ID = 5;
@@ -15,7 +16,10 @@ class DatasetCatalog extends Component {
     this.state = {
       dataSetList: {
         catalog: [],
-        dictionary: []
+        dictionary: [],
+        showDialogDelete: false,
+        showDialogEnable: false,
+        showDialogDisable: false,
       }
     };
     this.myHandler = this.myHandler.bind(this);
@@ -57,17 +61,29 @@ class DatasetCatalog extends Component {
 
   }
 
-  openDelete() {
-
+  openDelete = (answer) => (e) => {
+    this.setState({ showDialogDelete: true });
   }
 
-  openDisable() {
-
+  openEnable = (answer) => (e) => {
+    this.setState({ showDialogEnable: true });
   }
 
-  openEnable() {
-
+  openDisable = (answer) => (e) => {
+    this.setState({ showDialogDisable: true });
   }
+
+  dialogHandlerDelete = (answer) => (e) => {
+    this.setState({ showDialogDelete: false });
+  };
+
+  dialogHandlerEnable = (answer) => (e) => {
+    this.setState({ showDialogEnable: false });
+  };
+
+  dialogHandlerDisable = (answer) => (e) => {
+    this.setState({ showDialogDisable: false });
+  };
 
   download() {
 
@@ -183,58 +199,48 @@ class DatasetCatalog extends Component {
                             return h(Fragment, {}, [
 
                               td({
-                                className: "remove-datasets-col", id: 'td-' + property.propertyName,
+                                className: "fixed-col", id: 'td-' + property.propertyName,
                                 isRendered: property.propertyName === 'Dataset ID' && isAdmin && !isResearcher
                               }, [
 
-                                  a({
-                                    isRendered: dataSet.deletable && isAdmin && !isResearcher, onClick: this.openDelete(property.propertyValue),
-                                    tooltip: "Delete dataset", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                  }, [
-                                      span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin default-color", "aria-hidden": "true" }),
-                                    ]),
-
-                                  a({ isRendered: !dataSet.deletable && isAdmin && !isResearcher }, [
-                                    span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin dismiss-color", "aria-hidden": "true" }),
-                                  ]),
-
-                                  div({ className: "disable-datasets-col" }, [
-
+                                  div({ className: "dataset-actions" }, [
                                     a({
-                                      isRendered: dataSet.active && isAdmin && !isResearcher, onClick: this.openDisable(property.propertyValue),
-                                      "tooltip": "Disable dataset",
-                                      "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                    }, [
-                                        span({
-                                          className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true"
-                                        }, []),
+                                      onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable
+                                      // tooltip: "Delete dataset", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true" })
                                       ]),
 
                                     a({
-                                      isRendered: !dataSet.active && isAdmin && !isResearcher, onClick: this.openEnable(property.propertyValue),
-                                      "tooltip": "Enable dataset",
-                                      "tooltip-className": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                    }, [
-                                        span({
-                                          className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color",
-                                          "aria-hidden": "true"
-                                        }, []),
+                                      isRendered: dataSet.active, onClick: this.openDisable(property.propertyValue)
+                                      // "tooltip": "Disable dataset", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true" })
                                       ]),
 
-                                  ]),
-
-
-                                  div({ className: "approval-datasets-col" }, [
                                     a({
-                                      isRendered: isAdmin && !isResearcher, onClick: this.associate(property.propertyValue, dataSet.needsApproval),
-                                      "tooltip": "Connect with Data Owner", "tooltip-class": "tooltip-class", "tooltip-trigger": "true",
-                                      "tooltip-placement": "right"
-                                    }, [
-                                        span({
-                                          className: dataSet.isAssociatedToDataOwners ? 'cm-icon-button glyphicon glyphicon-link caret-margin dataset-color' : 'cm-icon-button glyphicon glyphicon-link caret-margin default-color',
-                                          "aria-hidden": "true"
-                                        }, []),
+                                      isRendered: !dataSet.active, onClick: this.openEnable(property.propertyValue)
+                                      // "tooltip": "Enable dataset", "tooltip-className": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color", "aria-hidden": "true" }),
                                       ]),
+
+
+                                    a({
+                                      onClick: this.associate(property.propertyValue, dataSet.needsApproval),
+                                      // "tooltip": "Connect with Data Owner", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true" }),
+                                      ]),
+
+                                    ConfirmationDialog({
+                                      title: 'Delete Dataset Confirmation?', color: 'cancel', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
+                                    }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
+
+                                    ConfirmationDialog({
+                                      title: 'Disable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogDisable, action: { label: "Yes", handler: this.dialogHandlerDisable }
+                                    }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
+
+                                    ConfirmationDialog({
+                                      title: 'Enable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogEnable, action: { label: "Yes", handler: this.dialogHandlerEnable }
+                                    }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
+
                                   ]),
                                 ])
                             ])

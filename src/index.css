@@ -105,13 +105,12 @@ small {
 }
 
 .f-left {
-  float: left;
+  float: left !important;
   text-align: left !important;
 }
 
 .f-right {
   float: right;
-  text-align: right;
 }
 
 .f-center {
@@ -1082,6 +1081,7 @@ small {
   background: #D13B07 !important;
 }
 
+a[disabled],
 .cell-button[disabled],
 [disabled] .cell-button,
 [disabled] button,
@@ -1212,7 +1212,7 @@ input[type=checkbox]:checked+label:before {
 
 .vote-button {
   background: #00609f;
-  float: right !important;
+  float: right;
   box-shadow: 2px 2px rgb(204, 204, 204) !important;
 }
 
@@ -2682,7 +2682,7 @@ input[type="checkbox"][disabled]+label {
 
 .table-scroll-admin {
   overflow-x: scroll;
-  margin: 0 25px 5px 144px !important;
+  margin: 0 25px 5px 140px !important;
   overflow-y: visible;
 }
 
@@ -2714,82 +2714,51 @@ input[type="checkbox"][disabled]+label {
   padding-top: 5px;
 }
 
-td:first-child {
+ td:first-child {
   position: absolute;
   margin-left: -40px;
 }
 
 .table-scroll-admin td:first-child {
   position: absolute;
-  left: 60px!important;
+  left: 60px !important;
 }
 
-.table-scroll-admin td:first-child+.remove-datasets-col {
+.table-scroll-admin td:first-child+.fixed-col {
   position: absolute;
   padding: 8px 8px 8px 10px !important;
-  left: 55px!important;
-}
-
-.table-scroll-admin td:first-child+.remove-datasets-col a:hover .disabled {
-  cursor: not-allowed !important;
-  color: #cccccc !important;
+  left: 50px !important;
 }
 
 td:first-child .checkbox {
-  margin-top: 0px !important;
+  margin-top: 0px;
   display: inline;
 }
 
 td:first-child .checkbox label {
-  padding-top: 1px !important;
+  padding-top: 1px;
 }
 
-.disable-datasets-col, .approval-datasets-col {
+.dataset-actions {
   display: inline !important;
+  margin: 0;
+  padding-right: 10px;
 }
 
-.remove-datasets-col {
+.dataset-actions a {
   display: inline !important;
+  margin: 0 5px 0 0;
 }
 
-.disable-datasets-col {
-  padding: 8px 10px 8px 10px !important;
-  margin: 0 3px !important;
-}
+.dataset-actions a:hover span {
+  color: #2FA4E7 !important;
+} 
 
-.approval-datasets-col {
-  padding: 8px 0!important;
-  margin: 0 3px 0 0!important;
-}
-
-.remove-datasets-col a span, .disable-datasets-col a span .approval-datasets-col a span {
+.dataset-actions a .glyphicon {
   text-shadow: 1px 1px 0 #ffffff !important;
-  padding-left: 0!important;
-  margin-left: 0!important;
-}
-
-.remove-datasets-col a span.glyphicon-trash, .disable-datasets-col a span.glyphicon-ban-circle, .disable-datasets-col a span.glyphicon-ok-sign, .approval-datasets-col a span.glyphicon-link, .approval-datasets-col a span.glyphicon-exclamation-sign {
+  padding: 0;
   vertical-align: bottom;
   font-size: 1.15em;
-  top: 0!important;
-  padding-top: 0!important;
-}
-
-.disable-datasets-col a span.glyphicon-ok-circle {
-  vertical-align: bottom;
-  font-size: 1.2em;
-  top: 0!important;
-  margin-top: 0!important;
-}
-
-.remove-datasets-col a .glyphicon-trash.disabled {
-  padding-top: 6px !important;
-  height: auto !important;
-}
-
-.remove-datasets-col a:hover span, .disable-datasets-col a:hover span, .approval-datasets-col a:hover span {
-  color: #2FA4E7 !important;
-  cursor: pointer;
 }
 
 .table-items {
@@ -3179,6 +3148,11 @@ tags-input .tags .tag-item {
   width: 100%;
   margin: 0;
   padding: 0;
+}
+
+.grid-row.pushed-1, .grid-9-row.pushed-1 {
+  padding-right: 35px;
+  position: relative;
 }
 
 .grid-row.pushed-2, .grid-9-row.pushed-2 {
