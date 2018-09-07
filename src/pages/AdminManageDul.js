@@ -8,7 +8,6 @@ import { CancelElectionModal } from '../components/modals/CancelElectionModal';
 import { ArchiveElectionModal } from '../components/modals/ArchiveElectionModal';
 import { DeleteElectionModal } from '../components/modals/DeleteElectionModal';
 import { Consent } from '../libs/ajax';
-import _ from "lodash/fp";
 import { PaginatorBar } from "../components/PaginatorBar";
 import * as Utils from '../libs/utils';
 
