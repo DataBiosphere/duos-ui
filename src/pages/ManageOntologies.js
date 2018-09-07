@@ -3,6 +3,7 @@ import { div, button, hr, h, i, input, span, a } from 'react-hyperscript-helpers
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 
 class ManageOntologies extends Component {
@@ -21,7 +22,8 @@ class ManageOntologies extends Component {
           prefix: 'orsp-'
         }
 
-      ]
+      ],
+      showDialogDelete: false,
     }
 
     this.myHandler = this.myHandler.bind(this);
@@ -85,8 +87,13 @@ class ManageOntologies extends Component {
   }
 
   openDelete = (e) => {
-
+    this.setState({ showDialogDelete: true });
   }
+
+  dialogHandlerDelete = (answer) => (e) => {
+    this.setState({ showDialogDelete: false });
+  };
+  
 
   render() {
 
@@ -155,10 +162,13 @@ class ManageOntologies extends Component {
 
                 div({ className: "icon-actions" }, [
                   div({ className: "display-inline-block", disabled: false }, [
-                    button({}, [span({ className: "glyphicon glyphicon-trash caret-margin" }),
+                    button({ onClick: this.openDelete }, [span({ className: "glyphicon glyphicon-trash caret-margin" }),
                     ]),
-                  ]),
-                ]),
+                    ConfirmationDialog({
+                      title: 'Delete Ontology file?', color: 'common', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this file? The ontologies contained will be deleted from the Ontology Model."]),]),
+                  ])
+                ])
               ]),
               hr({ className: "pvotes-separator" }),
             ]);

@@ -111,6 +111,7 @@ class DataAccessRequestApplication extends Component {
       },
       completed: true,
       showDialogSubmit: false,
+      showDialogSave: false,
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -140,14 +141,6 @@ class DataAccessRequestApplication extends Component {
   handleRadioChange = (e, field, value) => {
     this.setState(prev => { prev.formData[field] = value; return prev; });
   }
-
-  openDialogSubmit = (e) => {
-    this.setState({ showDialogSubmit: true });
-  };
-
-  dialogHandlerSubmit = (answer) => (e) => {
-    this.setState({ showDialogSubmit: false });
-  };
 
   step1 = (e) => {
     this.setState(prev => {
@@ -182,14 +175,22 @@ class DataAccessRequestApplication extends Component {
   attestAndSave = (e) => {
     // implement full save on mongodb here ... after validations
     console.log(JSON.stringify(this.state.formData, null, 2));
-    //after proper validation, if everything goes right...
-    // openDialogSubmit
+    this.setState({ showDialogSubmit: true });
   }
 
   partialSave = (e) => {
     // implement partial save on mongodb here ... no validations
     console.log(JSON.stringify(this.state.formData, null, 2));
+    this.setState({ showDialogSave: true });
   }
+
+  dialogHandlerSubmit = (answer) => (e) => {
+    this.setState({ showDialogSubmit: false });
+  };
+  
+  dialogHandlerSave = (answer) => (e) => {
+    this.setState({ showDialogSave: false });
+  };
 
   onOntologiesChange = (data, action) => {
     console.log('data', data);
@@ -889,23 +890,23 @@ class DataAccessRequestApplication extends Component {
                         span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"]),
                     ]),
 
-                    li({ className: "next f-right multi-step-next" }, [
-                      button({ isRendered: this.state.formData.dar_code === null, onClick: this.openDialogSubmit, className: "access-background bold"
-                      // onClick: this.attestAndSave 
-                    }, ["Attest and Send"]),      
-
-                      ConfirmationDialog({
-                        title: 'Data Request Confirmation', color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
-                      }, [ div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
+                    li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-next" }, [
+                      a({ onClick: this.attestAndSave, className: "access-background bold" }, ["Attest and Send"]),
                     ]),
+                    ConfirmationDialog({
+                      title: 'Data Request Confirmation', color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
                     li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
                       a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
                     ]),
-                  ]),
-                ]),
-              ]),
-            ]),
+                    ConfirmationDialog({
+                      title: 'Save changes?', color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
+                  ])
+                ])
+              ])
+            ])
           ])
         ])
       ])

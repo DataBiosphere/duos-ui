@@ -3,6 +3,7 @@ import { div, hh, form, label, input, span, hr, ul, li, a } from 'react-hyperscr
 import { Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -12,6 +13,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.state = {
       researcherProfile: {},
       fieldStatus: {},
+      showDialogSubmit: false,
+      showDialogSave: false,
     };
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
 
@@ -117,13 +120,23 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   saveProfile() {
     console.log(this.state.researcherProfile);
+    this.setState({ showDialogSave: true });
   }
 
   submit(event) {
     console.log(this.state.researcherProfile);
     Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     event.preventDefault();
+    this.setState({ showDialogSubmit: true });
   }
+
+  dialogHandlerSubmit = (answer) => (e) => {
+    this.setState({ showDialogSubmit: false });
+  };
+
+  dialogHandlerSave = (answer) => (e) => {
+    this.setState({ showDialogSave: false });
+  };
 
   render() {
 
@@ -593,28 +606,27 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 multi-step-pager"}, [
                   li({className: "italic default-color"}, ["*Required field"]),
                   li({className: "f-right multi-step-next"}, [
-                    a({
-                      isRendered: this.state.researcherProfile.completed,
-                      disabled: false,
-                      href: "",
-                      onClick: this.submit,
-                      className: "common-background"
-                    }, ["Submit"]),
-                    a({
-                      isRendered: false,
-                      href: "",
-                      onClick: this.submit,
-                      className: "common-background"
-                    }, ["Update"]),
+                    a({ onClick: this.submit, disabled: false, className: "common-background"
+                    }, [
+                      span({ isRendered: this.state.researcherProfile.completed }, ["Submit"]),
+                      span({ isRendered: !this.state.researcherProfile.completed }, ["Update"]),
+                      ]),
                   ]),
-                  li({isRendered: !this.state.researcherProfile.completed, className: "f-right multi-step-save"}, [
-                    a({href: "", onClick: this.saveProfile, className: "common-color"}, ["Continue later"]),
+                  ConfirmationDialog({
+                    title: 'Submit Profile', color: 'common', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                  }, [div({ className: "dialog-description" }, ["Are you sure you want to submit your Profile information?"]),]),
+
+                  li({ isRendered: !this.state.researcherProfile.completed, className: "f-right multi-step-save"}, [
+                    a({ onClick: this.saveProfile, className: "common-color"}, ["Continue later"]),
                   ]),
-                ]),
-              ]),
-            ]),
-          ]),
-        ]),
+                  ConfirmationDialog({
+                    title: 'Continue later', color: 'common', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                  }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."]),])
+                ])
+              ])
+            ])
+          ])
+        ])
       ])
     );
   }
