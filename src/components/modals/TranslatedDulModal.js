@@ -22,10 +22,6 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
     this.props.onCloseRequest(MODAL_ID);
   }
 
-  afterOpenHandler = (e) => {
-    this.props.onAfterOpen(MODAL_ID);
-  }
-  
   render() {
     return (
 
@@ -33,17 +29,14 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_dataset_add.png",
         color: "dataset",
-        iconSize: 'large',
+        iconSize: 'none',
         title: "More information",
         description: 'Translated Use Restriction',
-        action: { label: "OK", handler: this.OKHandler }
+        action: { label: "Close", handler: this.OKHandler }
       },
         [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-modal-content translated-restriction" }, [
-            this.props.dataset
-          ]),
+          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 translated-restriction" }, [this.props.dataset]),
         ])
     );
   }

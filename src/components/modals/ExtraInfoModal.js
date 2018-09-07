@@ -22,11 +22,6 @@ export const ExtraInfoModal = hh(class ExtraInfoModal extends Component {
     this.props.onCloseRequest(MODAL_ID);
   }
 
-  afterOpenHandler = (e) => {
-    this.props.onAfterOpen(MODAL_ID);
-  }
-  
-
   render() {
     const { rus } = this.state;
     return (
@@ -34,20 +29,15 @@ export const ExtraInfoModal = hh(class ExtraInfoModal extends Component {
       BaseModal({
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
-        onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_dataset_add.png",
         color: "access",
-        iconSize: 'large',
+        type: "informative",
+        iconSize: 'none',
         title: "More information",
         description: 'Research use statement (RUS)',
-        action: { label: "OK", handler: this.OKHandler }
+        action: { label: "Close", handler: this.OKHandler }
       },
         [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-modal-content" }, [
-            span({ className: "default-color" }, [
-              rus
-            ]),
-          ]),
+          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 default-color" }, [rus])
         ])
     );
   }
