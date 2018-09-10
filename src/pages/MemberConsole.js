@@ -112,25 +112,26 @@ class MemberConsole extends Component {
     const value = e.target.getAttribute('value');
     console.log('---------openAccessReview----------', value);
     //(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"
-  }
+  };
 
   openDULReview = (e) => {
     let pendingCase = e.target.getAttribute('value');
     console.log('---------openDulReview----------', pendingCase);
     //pendingCase.referenceId, pendingCase.voteId)",
-  }
+  };
 
   openFinalAccessReviewResults = (e) => {
     let pendingCase = e.target.getAttribute('value');
     console.log('---------openFinalAccessReviewResults----------', pendingCase);
     //  (pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId)",
-  }
+  };
 
   openAccessReviewResult = (e) => {
     let pendingCase = e.target.getAttribute('value');
     console.log('---------openAccessReviewResult----------', pendingCase);
     //  (pendingCase.referenceId, pendingCase.electionId)"
-  }
+  };
+
   render() {
 
     const { currentDulPage, currentAccessPage } = this.state;
@@ -140,7 +141,7 @@ class MemberConsole extends Component {
 
     let currentUser = {
       displayName: 'Nadya Lopez Zalba'
-    }
+    };
 
     return (
 

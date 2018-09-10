@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, hh, label, hr, span, input } from 'react-hyperscript-helpers';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import * as Utils from '../libs/utils';
 
 export const SingleResultBox = hh(class SingleResultBox extends Component {
 
@@ -77,8 +78,14 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
 
           div({ id: "lbl_date_" + this.props.id, className: "voteDate col-lg-4 col-md-4 col-sm-9 col-xs-9 vote-label" }, [
             span({ isRendered: this.props.data.vote.createDate === null }, ["---"]),
-            span({ isRendered: this.props.data.vote.createDate !== null && this.props.data.vote.updateDate === null }, [this.props.data.vote.createDate /* | date:dateFormat */]),
-            span({ isRendered: this.props.data.vote.createDate !== null && this.props.data.vote.updateDate !== null }, [this.props.data.vote.updateDate /* | date:dateFormat */]),
+            span(
+              { isRendered: this.props.data.vote.createDate !== null && this.props.data.vote.updateDate === null },
+              [Utils.formatDate(this.props.data.vote.createDate) /* | date:dateFormat */]
+            ),
+            span(
+              { isRendered: this.props.data.vote.createDate !== null && this.props.data.vote.updateDate !== null },
+              [Utils.formatDate(this.props.data.vote.updateDate) /* | date:dateFormat */]
+            ),
           ]),
         ]),
 

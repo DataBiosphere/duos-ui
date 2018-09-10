@@ -4,7 +4,6 @@ import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { EditDulModal } from '../components/modals/EditDulModal';
 import { Consent } from '../libs/ajax';
-import _ from "lodash/fp";
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';

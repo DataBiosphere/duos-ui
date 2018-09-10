@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { div, b, span, a, h4, hr, i, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { Votes, Election, Consent, Files } from '../libs/ajax';
 
 class DulReview extends Component {
 
@@ -11,10 +12,11 @@ class DulReview extends Component {
       value: '',
       currentUser: {},
       enableVoteButton: false,
-      voteStatus: '1'
+      voteStatus: '1',
+      consent: {},
+      election: {},
+      vote: {}
     };
-    const consentId = this.props.match.params.consentId;
-    console.log(consentId);
 
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
@@ -30,6 +32,25 @@ class DulReview extends Component {
       };
       return prev;
     });
+    this.voteInfo();
+  }
+
+  async voteInfo() {
+    Votes.find(this.props.match.params.consentId, this.props.match.params.voteId)
+      .then(data => {
+        console.log(data);
+        this.setState({vote: data});
+      });
+    Election.electionVote(this.props.match.params.voteId)
+      .then(data => {
+        console.log(data);
+        this.setState({election: data});
+      });
+    Consent.ConsentResource(this.props.match.params.consentId)
+      .then(data => {
+        console.log(data);
+        this.setState({consent: data});
+      });
   }
 
   mockState() {
@@ -41,14 +62,6 @@ class DulReview extends Component {
     });
   }
 
-  initialState() {
-    return {
-      consentGroupName: 'OD-256: Jackson / HS-08-000245',
-      consentName: 'ORSP-124',
-      sDul: 'something'
-    };
-  }
-
   setEnableVoteButton() {
     console.log('----------setEnableVoteButton----------');
     this.setState(prev => {
@@ -57,33 +70,36 @@ class DulReview extends Component {
     });
   }
 
-
   logVote = () => {
     console.log('----------logVote----------');
-  }
+  };
 
-  downloadDUL = () => {
-    console.log('----------downloadDUL----------');
-  }
+  downloadDUL = (e) => {
+    console.log('------------downloadDUL-------------', e);
+    Files.getDulFile(this.props.match.params.consentId).then(
+      blob => {
+        if (blob.size !== 0) {
+          this.createBlobFile(this.state.consentName, blob);
+        }
+      }
+    );
+  };
 
   setEnableVoteButton = () => {
     console.log('----------setEnableVoteButton----------');
-  }
+  };
 
   render() {
 
-    let consentName = 'ORSP-124';
-    let consentGroupName = 'OD-256: Jackson / HS-08-000245';
-
     const consentData = span({ className: "consent-data" }, [
-      b({ isRendered: consentGroupName, className: "pipe", "ng-bind-html": "consentGroupName" }, [consentGroupName]),
-      consentName
+      b({ isRendered: this.state.consent.groupName, className: "pipe", "ng-bind-html": "consentGroupName" }, [this.state.consent.groupName]),
+      this.state.consent.name
     ]);
 
     let userRoles = {
       member: 'MEMBER',
       chairperson: "CHAIRPERSON"
-    }
+    };
 
     return (
 
@@ -96,14 +112,14 @@ class DulReview extends Component {
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             this.state.currentUser.roles.map(rol => {
               return (
-                a({ id: "btn_back", href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", key: rol, href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
             }),
             this.state.currentUser.roles.map(rol => {
               return (
-                a({ id: "btn_back", href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", key: rol, href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
@@ -129,7 +145,7 @@ class DulReview extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.sDul])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.consent.translatedUseRestriction])
           ]),
         ]),
 
