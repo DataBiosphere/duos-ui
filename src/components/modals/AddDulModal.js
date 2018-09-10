@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, form, input, label, textarea, span, hh, p } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
+import { Alert } from '../Alert';
 
 
 export const AddDulModal = hh(class AddDulModal extends Component {
@@ -118,22 +119,15 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                   id: "txt_dataUse", name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})", required: "true"
-                }),
-              ]),
-            ]),
+                })
+              ])
+            ])
+          ]),
+
+          div({ isRendered: false }, [
+            Alert({ id: "addDul", type: "danger", title: "alert.title", description: "alert.msg" })
           ])
-
-          // div({ isRendered: alerts.lenght > 0, className: "alert-form-group" }, [
-          //     div({ className: "admin-alerts no-margin" }, [
-          //         alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color" }, [
-          //             h4({}, [alert.title]),
-          //             span({}, [alert.msg]),
-          //         ])
-          //     ]),
-          // ]),
-
         ])
-
     );
   }
 

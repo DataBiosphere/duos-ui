@@ -1,11 +1,13 @@
 import { Component, Fragment } from 'react';
 import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
+import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import * as Utils from '../libs/utils';
 import { DAR } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherConsole extends Component {
 
@@ -22,7 +24,9 @@ class ResearcherConsole extends Component {
       darLimit: 5,
       partialDarLimit: 5,
       currentDarPage: 1,
-      currentPartialDarPage: 1
+      currentPartialDarPage: 1,
+      showDialogCancelDAR: false,
+      showDialogDeletePDAR: false,
 
     };
 
@@ -74,6 +78,7 @@ class ResearcherConsole extends Component {
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     console.log('------------cancelDar------------', dataRequestId);
+    this.setState({ showDialogCancelDAR: true });
   }
 
   resume = (e) => {
@@ -81,10 +86,19 @@ class ResearcherConsole extends Component {
     console.log('------------resume------------', dataRequestId);
   }
 
-  cancelPartialDar = (e) => {
+  deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    console.log('------------cancelPartialDar------------', dataRequestId);
+    console.log('------------deletePartialDar------------', dataRequestId);
+    this.setState({ showDialogDeletePDAR: true });
   }
+
+  dialogHandlerCancelDAR = (answer) => (e) => {
+    this.setState({ showDialogCancelDAR: false });
+  };
+
+  dialogHandlerDeletePDAR = (answer) => (e) => {
+    this.setState({ showDialogDeletePDAR: false });
+  };
 
   componentWillMount() {
     let currentUser = Storage.getCurrentUser();
@@ -183,6 +197,10 @@ class ResearcherConsole extends Component {
                       onClick: this.cancelDar, value: dar.dataRequestId }, ["Cancel"]),
                       button({ id: dar.frontEndId + "_canceled", isRendered: dar.isCanceled, className: "disabled" }, ["Canceled"]),
                     ]),
+                    ConfirmationDialog({
+                      title: 'Cancel saved Request?', color: 'cancel', showModal: this.state.showDialogCancelDAR, action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
+                  
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
                       button({ id: dar.frontEndId + "_btn_review", className: "cell-button hover-color", onClick: this.review, 
                       value: dar.dataRequestId }, ["Review"]),
@@ -221,9 +239,13 @@ class ResearcherConsole extends Component {
                   return h(Fragment, { key: rIndex }, [
                     div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin" }, [
                       a({ id: pdar.partial_dar_code + "_btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color", 
-                      onClick: this.cancelPartialDar, value: pdar.dataRequestId }, [
+                      onClick: this.deletePartialDar, value: pdar.dataRequestId }, [
                         span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
                       ]),
+                      ConfirmationDialog({
+                        title: 'Delete saved Request?', color: 'cancel', showModal: this.state.showDialogDeletePDAR, action: { label: "Yes", handler: this.dialogHandlerDeletePDAR }
+                      }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Data Access Request?"]),]),
+                    
                       div({ id: pdar.partial_dar_code + "_partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partial_dar_code]),
                       div({ id: pdar.partial_dar_code + "_partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),
                       div({ id: pdar.partial_dar_code + "_partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),

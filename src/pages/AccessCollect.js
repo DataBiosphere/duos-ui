@@ -98,7 +98,7 @@ class AccessCollect extends Component {
       consentName: 'ORSP-124',
       isQ1Expanded: false,
       isQ2Expanded: false,
-      
+
       electionAccess: {
         finalVote: '0',
         finalRationale: 'lalala',
@@ -114,10 +114,10 @@ class AccessCollect extends Component {
         [
           {
             displayName: "Diego Gil", vote: {
-              vote: '0',
+              vote: null,
               rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
               createDate: '',
-              updateDate: '',
+              updateDate: null,
             }
           },
           {
@@ -132,10 +132,10 @@ class AccessCollect extends Component {
         [
           {
             displayName: "Walter Lo Forte", vote: {
-              vote: '0',
+              vote: null,
               rationale: 'lala',
               createDate: '',
-              updateDate: ''
+              updateDate: null
             }
           },
           {
@@ -233,6 +233,10 @@ class AccessCollect extends Component {
     };
   }
 
+  handleVote = (answer) => (e) => {
+    console.log('------------submit-------------', e, answer);
+  }
+
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
@@ -271,24 +275,12 @@ class AccessCollect extends Component {
     console.log('------------toggleQ1--------------');
   }
 
+  back = (e) => {
+    this.props.history.goBack();
+  }
+
   render() {
 
-    // let vote = {
-    //   vote: null,
-    //   rationale: ''
-    // }
-
-    // let alertsDAR = [
-    //   { title: "Alert 01" },
-    //   { title: "Alert 02" },
-    // ];
-
-    // let alertsAgree = [
-    //   { title: "Alert Agree 01" },
-    //   { title: "Alert Agree 02" },
-    // ];
-
-    // let alertOn = null;
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -303,7 +295,7 @@ class AccessCollect extends Component {
             PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", onClick: "back()", className: "btn vote-button vote-button-back vote-button-bigger" }, [
+            a({ id: "btn_back", onClick: this.back, className: "btn vote-button vote-button-back vote-button-bigger" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),
@@ -381,7 +373,7 @@ class AccessCollect extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_purposeStatement" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
@@ -401,7 +393,7 @@ class AccessCollect extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_researchType" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
@@ -421,7 +413,7 @@ class AccessCollect extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_disease" + rIndex }, [
                                   disease
                                 ]),
@@ -465,13 +457,13 @@ class AccessCollect extends Component {
 
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
                   SubmitVoteBox({
-                    id: "collectAccess",
+                    id: "accessCollect",
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
                     isDisabled: "isFormDisabled",
                     voteStatus: this.state.voteStatus,
-                    action: { label: "Vote", handler: this.submit }
+                    action: { label: "Vote", handler: this.handleVote }
                   }),
                 ]),
               ]),
@@ -479,10 +471,10 @@ class AccessCollect extends Component {
               h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
 
               this.state.voteAccessList.map((row, rIndex) => {
-                return h(Fragment, {}, [
+                return h(Fragment, { key: rIndex }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
-                      return h(Fragment, {}, [
+                      return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
                           id: "accessSingleResult" + vIndex,
                           color: "access",
@@ -546,12 +538,12 @@ class AccessCollect extends Component {
 
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
                   SubmitVoteBox({
-                    id: "collectRP",
+                    id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
                     isDisabled: "isFormDisabled",
                     voteStatus: this.state.voteStatus,
-                    action: { label: "Vote", handler: this.submit }
+                    action: { label: "Vote", handler: this.handleVote }
                   }),
                 ]),
               ]),
@@ -559,10 +551,10 @@ class AccessCollect extends Component {
               h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
 
               this.state.rpVoteAccessList.map((row, rIndex) => {
-                return h(Fragment, {}, [
+                return h(Fragment, { key: rIndex }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
-                      return h(Fragment, {}, [
+                      return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
                           id: "rpSingleResult" + vIndex,
                           color: "access",

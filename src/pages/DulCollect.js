@@ -155,7 +155,7 @@ class DulCollect extends Component {
 
           div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results dul-background-lighter" }, [
             SubmitVoteBox({
-              id: "collectDul",
+              id: "dulCollect",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
               isDisabled: "isFormDisabled",
