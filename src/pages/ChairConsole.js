@@ -2,8 +2,9 @@ import { Component, Fragment } from 'react';
 import { div, hh, h, hr, i, input, span, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
-
+import { Storage } from '../libs/storage';
 import { PaginatorBar } from '../components/PaginatorBar';
+import { PendingCases } from '../libs/ajax';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -19,9 +20,13 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       showModal: false,
       currentUser: {},
       dulLimit: 5,
-      accessLimit: 5,
+      darLimit: 5,
       currentDulPage: 1,
-      currentAccessPage: 1,
+      currentDarPage: 1,
+      electionsList: {
+        dul: [],
+        access: []
+      }
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -37,7 +42,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   handleAccessPageChange = page => {
     this.setState(prev => {
-      prev.currentAccessPage = page;
+      prev.currentDarPage = page;
       return prev;
     });
   };
@@ -51,36 +56,121 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   handleAccessSizeChange = size => {
     this.setState(prev => {
-      prev.accessLimit = size;
+      prev.darLimit = size;
       return prev;
     });
   };
 
   componentWillMount() {
-
     let dul = [];
-    let access = [];
-    for (var i = 0; i < 77; i++) {
-      dul.push(this.createPendingCase(i));
-      access.push(this.createPendingCase(i));
-    }
+    let dars = [];
+
+    let currentUser = Storage.getCurrentUser();
+    this.setState({ currentUser: currentUser }, () => {
+      dul = PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
+      dul.then(dul => {
+        if (dul !== undefined) {
+          console.log('---- INFO 1 ----', dul);
+          this.setState(prev => {
+            prev.electionsList.dul = dul;
+            return prev;
+          }, () => {
+            dars = PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
+            dars.then(dars => {
+              if (dars !== undefined) {
+                console.log('---- INFO 2 ----', dars);
+                this.setState(prev => {
+                  prev.electionsList.access = dars;
+                  return prev;
+                });
+              }
+            });
+          }
+          );
+        }
+      })
+    });
+
+
+    // for (var i = 0; i < 77; i++) {
+    //   dul.push(this.createPendingCase(i));
+    //   access.push(this.createPendingCase(i));
+    // }
+
+
+
+
 
     console.log('dul', dul);
-    console.log('access', access);
+    console.log('access', dars);
 
     this.setState(prev => {
       prev.totalAccessPendingVotes = 5;
       prev.totalDulPendingVotes = 6;
-      prev.currentUser = {
-        displayName: 'Nadya Lopez Zalba',
-      };
-      prev.electionsList = {
-        dul: dul,
-        access: access,
-      };
+      // prev.currentUser = {
+      //   displayName: 'Nadya Lopez Zalba',
+      // };
+      // prev.electionsList = {
+      //   dul: dul,
+      //   access: access,
+      // };
       return prev;
     });
   }
+
+  // var vm = this;
+  // vm.totalDulPendingVotes = 0;
+  // vm.totalAccessPendingVotes = 0;
+  // vm.totalResearchPurposePendingVotes = 0;
+  // vm.currentDULPage = 1;
+  // vm.currentAccessPage = 1;
+  // vm.openDULReview = openDULReview;
+  // vm.openDULReviewResult = openDULReviewResult;
+  // vm.openAccessReviewResult = openAccessReviewResult;
+  // vm.openAccessReview = openAccessReview;
+  // vm.openFinalAccessReviewResults = openFinalAccessReviewResults;
+  // vm.electionsList = { 'dul': [], 'access': [], 'rp': [] };
+  // $rootScope.pathFrom = 'chair_console';
+  // init();
+
+  // function init() {
+  //     if (($rootScope.path === 'dul-review' || $rootScope.path === 'dul-review-results') && $rootScope.currentDULPage !== undefined) {
+  //         vm.currentDULPage = $rootScope.currentDULPage;
+  //     } else if (($rootScope.path === 'access-review' || $rootScope.path === 'access-review-results' || $rootScope.path === 'final-access-review-results') && $rootScope.currentAccessPage !== undefined) {
+  //         vm.currentAccessPage = $rootScope.currentAccessPage;
+  //     }
+  //     $rootScope.currentAccessPage = undefined;
+  //     $rootScope.currentDULPage = undefined;
+  //     $rootScope.path = undefined;
+  //     cmPendingCaseService.findConsentPendingCasesByUser($rootScope.currentUser.dacUserId, vm);
+  //     cmPendingCaseService.findDataRequestPendingCasesByUser($rootScope.currentUser.dacUserId, vm);
+
+  // }
+
+  //   function openDULReview(consentId, voteId) {
+  //     $rootScope.currentDULPage = vm.currentDULPage;
+  //     $state.go('dul_review', { consentId: consentId, voteId: voteId });
+  // }
+
+  // function openDULReviewResult(consentId) {
+  //     $rootScope.currentDULPage = vm.currentDULPage;
+  //     $state.go('dul_review_results', { consentId: consentId});
+  // }
+
+  // function openAccessReviewResult(referenceId, electionId) {
+  //     $rootScope.currentAccessPage = vm.currentAccessPage;
+  //     $state.go('access_review_results', { referenceId: referenceId, electionId: electionId });
+  // }
+
+  // function openAccessReview(darId, voteId, rpVoteId) {
+  //     $rootScope.currentAccessPage = vm.currentAccessPage;
+  //     $state.go('access_review', { darId: darId, voteId: voteId, rpVoteId: rpVoteId });
+  // }
+
+  // function openFinalAccessReviewResults(referenceId, electionId, rpElectionId) {
+  //     $rootScope.currentAccessPage = vm.currentAccessPage;
+  //     $state.go('final_access_review_results', { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId });
+  // }
 
   createPendingCase(ix) {
     return {
@@ -136,11 +226,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   render() {
 
-    let currentUser = {
-      displayName: 'Nadya Lopez Zalba'
-    }
-
-    const { currentDulPage, currentAccessPage } = this.state;
+    const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit } = this.state;
 
     return (
 
@@ -178,7 +264,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
             hr({ className: "pvotes-main-separator" }),
 
-            this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
+            this.state.electionsList.dul.slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
@@ -205,9 +291,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             PaginatorBar({
               name: 'dul',
               total: this.state.electionsList.dul.length,
-              limit: this.state.dulLimit,
+              limit: dulLimit,
               pageCount: this.dulPageCount,
-              currentPage: this.state.currentDulPage,
+              currentPage: currentDulPage,
               onPageChange: this.handleDulPageChange,
               changeHandler: this.handleDulSizeChange,
             }),
@@ -243,7 +329,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
             hr({ className: "pvotes-main-separator" }),
 
-            this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
+            this.state.electionsList.access.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
@@ -261,10 +347,10 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
 
                   div({ isRendered: (pendingCase.alreadyVoted === true) && (!pendingCase.isFinalVote) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center" }, [
-                    button({ onClick: this.openAccessReviewResult, value: pendingCase, className: "cell-button cancel-color"}, ["Collect Votes"])
+                    button({ onClick: this.openAccessReviewResult, value: pendingCase, className: "cell-button cancel-color" }, ["Collect Votes"])
                   ]),
                   div({ isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center" }, [
-                    button({ onClick: this.openFinalAccessReviewResults, value: pendingCase, className: "cell-button cancel-color"}, ["FINAL VOTE"])
+                    button({ onClick: this.openFinalAccessReviewResults, value: pendingCase, className: "cell-button cancel-color" }, ["FINAL VOTE"])
                   ]),
                   div({ isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text f-center empty" }, [])
                 ]),
@@ -274,9 +360,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             PaginatorBar({
               name: 'access',
               total: this.state.electionsList.dul.length,
-              limit: this.state.accessLimit,
+              limit: darLimit,
               pageCount: this.accessPageCount,
-              currentPage: this.state.currentAccessPage,
+              currentPage: currentDarPage,
               onPageChange: this.handleAccessPageChange,
               changeHandler: this.handleAccessSizeChange,
             })

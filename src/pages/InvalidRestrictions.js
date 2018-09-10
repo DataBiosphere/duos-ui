@@ -80,7 +80,7 @@ class InvalidRestrictions extends Component {
   }
 
   searchDul = (row, query) => {
-    let values = Object.values(row);
+    // let values = Object.values(row);
     let texto = JSON.stringify(row);
     console.log(texto);
     // ''.concat(values);
@@ -91,7 +91,7 @@ class InvalidRestrictions extends Component {
   }
 
   searchDar = (row, query) => {
-    let values = Object.values(row);
+    // let values = Object.values(row);
     let texto = JSON.stringify(row);
     console.log(texto);
     // ''.concat(values);
@@ -102,7 +102,7 @@ class InvalidRestrictions extends Component {
   }
 
   filterTable = (row, query) => {
-    let values = Object.values(row);
+    // let values = Object.values(row);
     let texto = JSON.stringify(row);
     console.log(texto);
     // ''.concat(values);

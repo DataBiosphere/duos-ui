@@ -6,6 +6,49 @@ import { Config } from './config';
 // const GoogleUser = "Gapi"; // Google user info, including token
 // const UserIsLogged = "isLogged"; // User log status flag
 
+const dataTemplate = {
+  accessTotal: [
+    ['Results', 'Votes'],
+    ['Reviewed cases', 0],
+    ['Pending cases', 0]
+  ],
+  accessReviewed: [
+    ['Results', 'Votes'],
+    ['Yes', 0],
+    ['No', 0]
+  ],
+  dulTotal: [
+    ['Results', 'Votes'],
+    ['Reviewed cases', 0],
+    ['Pending cases', 0]
+  ],
+  dulReviewed: [
+    ['Results', 'Votes'],
+    ['Yes', 0],
+    ['No', 0]
+  ],
+  RPTotal: [
+    ['Results', 'Votes'],
+    ['Reviewed cases', 0],
+    ['Pending cases', 0]
+  ],
+  RPReviewed: [
+    ['Results', 'Votes'],
+    ['Yes', 0],
+    ['No', 0]
+  ],
+  VaultReviewed: [
+    ['Results', 'Votes'],
+    ['Yes', 0],
+    ['No', 0]
+  ],
+  Agreement: [
+    ['Results', 'Votes'],
+    ['Agreement', 0],
+    ['Disagreement', 0]
+  ]
+};
+
 export const User = {
 
   getByEmail: async email => {
@@ -149,6 +192,7 @@ export const Votes = {
 };
 
 export const DarCases = {
+
   darPendingCases: async (dacUserId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/${dacUserId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -609,6 +653,19 @@ export const DAR = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
+
+  getDataAccessManage: async userId => {
+    const url = `${await Config.getApiUrl()}/dar/manage?userId=${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  getPartialDarRequestList: async userId => {
+    const url = `${await Config.getApiUrl()}/dar/partials/manage?userId=${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
 };
 
 export const Purpose = {
@@ -668,8 +725,159 @@ export const Purpose = {
 
 };
 
+export const PendingCases = {
+
+  findDataRequestPendingCasesByUser: async (userId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+
+    // fetchOk(url, Config.authOpts()).then(
+    //   data => {
+    //     let resp = {};
+    //     let info = data.json();
+    //     console.log('------------------- data.json ------------------', info);
+    //     resp.electionsList.access = data;
+    //     resp.totalAccessPendingVotes = 0;
+    //     resp.electionsList.access.forEach(
+    //       access => {
+    //         if (access.alreadyVoted === false) {
+    //           resp.totalAccessPendingVotes += (access.alreadyVoted === false ? 1 : 0);
+    //         }
+    //       }
+    //     );
+    //     console.log('resp ----------------------->', resp);
+    //     return resp;
+    //   },
+    //   error => {
+    //     console.log('----------------------error--------------------', error);
+    //   });
+  },
+
+
+  findConsentPendingCasesByUser: async (userId) => {
+    const url = `${await Config.getApiUrl()}/consent/cases/pending/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+ 
+    // fetchOk(url, Config.authOpts()).then(
+    //   data => {
+    //     console.log('------------------------ data ------------------', data.json());
+    //     let resp = {};
+    //     resp.electionsList.dul = data;
+    //     resp.totalDulPendingVotes = 0;
+    //     resp.electionsList.dul.forEach(
+    //       // dul.consentGroupName = $sce.trustAsHtml(dul.consentGroupName);
+    //       dul => {
+    //         if (dul.alreadyVoted === false) {
+    //           resp.totalDulPendingVotes += (dul.alreadyVoted === false ? 1 : 0);
+    //         }
+    //       }
+    //     );
+    //     return resp;
+    //   },
+    //   error => {
+    //     console.log('----------------------error--------------------', error);
+    //   });
+  },
+
+
+  findConsentUnReviewed: async (vm) => {
+    const url = `${await Config.getApiUrl()}/consent/unreviewed`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  findDARUnReviewed: async (vm) => {
+    const url = `${await Config.getApiUrl()}/dar/cases/unreviewed`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  findDataOwnerUnReviewed: async (dataOwnerId, vm) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  findSummary: async (data, vm) => {
+    const consentUrl = `${await Config.getApiUrl()}/consent/cases/summary`;
+    const dataAccessUrl = `${await Config.getApiUrl()}/dataRequest/cases/summary/DataAccess`;
+    const rpUrl = `${await Config.getApiUrl()}/dataRequest/cases/summary/RP`;
+    const matchUrl = `${await Config.getApiUrl()}/dataRequest/cases/matchsummary`;
+    fetchOk(consentUrl, Config.authOpts()).then(
+      access => {
+        data = dataTemplate;
+
+        data.dulTotal[1][1] = access.reviewedPositiveCases + access.reviewedNegativeCases;
+        // pending cases
+        data.dulTotal[2][1] = access.pendingCases;
+        // positive cases
+        data.dulReviewed[1][1] = access.reviewedPositiveCases;
+        // negative cases
+        data.dulReviewed[2][1] = access.reviewedNegativeCases;
+
+        fetchOk(dataAccessUrl, Config.authOpts()).then(
+          dul => {
+            // reviewed cases
+            data.accessTotal[1][1] = dul.reviewedPositiveCases + dul.reviewedNegativeCases;
+            // pending cases
+            data.accessTotal[2][1] = dul.pendingCases;
+            // positive cases
+            data.accessReviewed[1][1] = dul.reviewedPositiveCases;
+            // negative cases
+            data.accessReviewed[2][1] = dul.reviewedNegativeCases;
+
+            fetchOk(rpUrl, Config.authOpts()).then(
+              rp => {
+                // reviewed cases
+                data.RPTotal[1][1] = rp.reviewedPositiveCases + rp.reviewedNegativeCases;
+                // pending cases
+                data.RPTotal[2][1] = rp.pendingCases;
+                // positive cases
+                data.RPReviewed[1][1] = rp.reviewedPositiveCases;
+                // negative cases
+                data.RPReviewed[2][1] = rp.reviewedNegativeCases;
+                fetchOk(matchUrl, Config.authOpts()).then(
+                  match => {
+                    if (match[0]) {
+                      // positive cases
+                      data.VaultReviewed[1][1] = match[0].reviewedPositiveCases;
+                      // negative cases
+                      data.VaultReviewed[2][1] = match[0].reviewedNegativeCases;
+                    }
+                    if (match[1]) {
+                      // positive cases
+                      data.Agreement[1][1] = match[1].reviewedPositiveCases;
+                      // negative cases
+                      data.Agreement[2][1] = match[1].reviewedNegativeCases;
+                    }
+                    return data;
+                  },
+                  err => {
+
+                  }
+                );
+              },
+              err => {
+
+              }
+            );
+          },
+          err => {
+
+          }
+        );
+      }, err => {
+
+      }
+    );
+  }
+};
+
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
+  // console.log('------------------------------ res ----------------------', res);
   return res.ok ? res : Promise.reject(res);
 };
 
