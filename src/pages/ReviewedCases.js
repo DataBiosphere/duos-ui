@@ -24,6 +24,10 @@ class ReviewedCases extends Component {
 
   }
 
+  sort = (val) => {
+    const filename = val.target;
+  };
+
   componentWillMount() {
 
     let dul = [];
@@ -105,15 +109,15 @@ class ReviewedCases extends Component {
 
         div({ className: "jumbotron table-box" }, [
           div({ className: "grid-row" }, [
-            div({ className: "col-2 cell-header cell-sort dul-color", onClick: "sort('displayId')" }, [
+            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('displayId') }, [
               "Consent id",
               span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
-            div({ className: "col-2 cell-header cell-sort dul-color", onClick: "sort('election.consentGroupName')" }, [
+            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('election.consentGroupName') }, [
               "Consent Group Name",
               span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
-            div({ className: "col-1 cell-header cell-sort dul-color", onClick: "sort('version')" }, [
+            div({ className: "col-1 cell-header cell-sort dul-color", onClick: this.sort('version') }, [
               "Election N°",
               span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
