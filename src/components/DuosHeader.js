@@ -83,7 +83,7 @@ class DuosHeader extends Component {
     }
     return (
 
-      nav({ className: "navbar top-navigator-bar", role: "navigation", "ng-controller": "Header as Header" }, [
+      nav({ className: "navbar top-navigator-bar", role: "navigation" }, [
         div({ className: "row top-navigator" }, [
           div({ className: "navbar-header" }, [
             button({ id: "btn_hamburger", type: "button", className: "navbar-toggle", onClick: this.toggleNavBar }, [
@@ -105,7 +105,8 @@ class DuosHeader extends Component {
                 a({ id: "sel_dacUser", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
                   div({ id: "dacUser" }, [
                     currentUser.displayName,
-                    span({ className: "caret caret-margin" }, []),]),
+                    span({ className: "caret caret-margin" })
+                  ]),
                   small({ id: "dacUserMail" }, [currentUser.email]),
                 ]),
                 ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
@@ -118,80 +119,76 @@ class DuosHeader extends Component {
             div({ className: "collapse navbar-collapse no-padding col-lg-10 col-md-10 col-sm-9 col-xs-12 navbar-right", collapse: "navbarCollapsed" }, [
 
               ul({ isRendered: !isLogged, className: "no-margin" }, [
-                li({}, [a({ id: "link_about", className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }, []), "About"]),]),
-                li({}, [a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }, []), "Help"]),]),
+                li({}, [a({ id: "link_about", className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }), "About"]),]),
+                li({}, [a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }), "Help"]),]),
                 li({}, [
                   a({ id: "link_signIn", onClick: this.signIn }, [this.state.googleButton])
                   // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                   // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
                 li({}, [a({ id: "link_join", className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
-              ]),
-
-              ul({ isRendered: isLogged, className: "navbar-left no-margin" }, [
-                li({ isRendered: isChairPerson }, [
-                  a({ id: "link_dacConsole", href: "/chair_console" }, ["DAC Console"]),
-                ]),
-
-                li({ isRendered: isMember }, [
-                  a({ id: "link_dacConsole", href: "/user_console" }, ["DAC Console"]),
-                ]),
-
-                li({ isRendered: isAdmin }, [
-                  a({ id: "link_adminConsole", href: "/admin_console" }, ["Admin Console"]),
-                ]),
-
-                li({ isRendered: isResearcher }, [
-                  a({ id: "link_researcherConsole", href: "/researcher_console" }, ["Researcher Console"]),
-                ]),
-
-                li({ isRendered: isDataOwner }, [
-                  a({ id: "link_dataOwnerConsole", href: "/data_owner_console" }, ["Data Owner Console"]),
-                ]),
-
-                li({ isRendered: isResearcher }, [
-                  a({ id: "link_requestApplication", href: "/dar_application" }, ["Request Application"]),
-                ]),
-
-                li({ className: "dropdown", onToggle: this.toggled, isRendered: isLogged }, [
-                  a({ id: "sel_statistics", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
-                    div({}, ["Statistics", span({ className: "caret caret-margin" }, []),]),
-                  ]),
-                  ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                    li({}, [a({ id: "link_statistics", href: "/summary_votes", className: "f-left" }, ["Votes Statistics"]),]),
-                    hr({}),
-                    li({}, [a({ id: "link_reviewedCases", href: "/reviewed_cases", className: "f-left" }, ["Reviewed Cases Record"]),]),
-                  ]),
-                ]),
-
-                li({}, [a({ isRendered: isLogged, href: "/dataset_catalog" }, ["Dataset Catalog"]),]),
-                li({ className: "dropdown", onToggle: this.toggled }, [
-                  a({ id: "sel_requestHelp", isRendered: isLogged, role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
-                    div({}, ["Request Help", span({ className: "caret caret-margin" }, []),])
-                  ]),
-                  ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                    li({}, [
-                      a({
-                        id: 'link_helpModal',
-                        className: "f-left",
-                        onClick: this.helpModal
-                      }, ["Create a Report"]),
-
-                      HelpModal({
-                        showModal: this.state.showHelpModal,
-                        onOKRequest: this.okModal,
-                        onCloseRequest: this.closeModal,
-                        onAfterOpen: this.afterModalOpen
-                      }),
-                    ]),
-                    hr({}),
-                    li({}, [a({ id: "link_reportList", href: "/help_me", className: "f-left" }, ["List of Reports"])]),
-                  ]),
-                ]),
-              ]),
+              ])
             ]),
-          ]),
-        ]),
+
+            ul({ isRendered: isLogged, className: "navbar-left no-margin" }, [
+              li({ isRendered: isChairPerson }, [
+                a({ id: "link_chairConsole", href: "/chair_console" }, ["DAC Console"]),
+              ]),
+
+              li({ isRendered: isMember }, [
+                a({ id: "link_memberConsole", href: "/member_console" }, ["DAC Console"]),
+              ]),
+
+              li({ isRendered: isAdmin }, [
+                a({ id: "link_adminConsole", href: "/admin_console" }, ["Admin Console"]),
+              ]),
+
+              li({ isRendered: isResearcher }, [
+                a({ id: "link_researcherConsole", href: "/researcher_console" }, ["Researcher Console"]),
+              ]),
+
+              li({ isRendered: isDataOwner }, [
+                a({ id: "link_dataOwnerConsole", href: "/data_owner_console" }, ["Data Owner Console"]),
+              ]),
+
+              li({ isRendered: isResearcher }, [
+                a({ id: "link_requestApplication", href: "/dar_application" }, ["Request Application"]),
+              ]),
+
+              li({ className: "dropdown", onToggle: this.toggled, isRendered: isLogged }, [
+                a({ id: "sel_statistics", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
+                  div({}, ["Statistics", span({ className: "caret caret-margin" }, []),]),
+                ]),
+                ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
+                  li({}, [a({ id: "link_statistics", href: "/summary_votes", className: "f-left" }, ["Votes Statistics"]),]),
+                  hr({}),
+                  li({}, [a({ id: "link_reviewedCases", href: "/reviewed_cases", className: "f-left" }, ["Reviewed Cases Record"]),]),
+                ]),
+              ]),
+
+              li({}, [a({ isRendered: isLogged, href: "/dataset_catalog" }, ["Dataset Catalog"]),]),
+
+              li({ className: "dropdown", onToggle: this.toggled }, [
+                a({ id: "sel_requestHelp", isRendered: isLogged, role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
+                  div({}, ["Request Help", span({ className: "caret caret-margin" })])
+                ]),
+                ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
+                  li({}, [a({ id: 'link_helpModal', className: "f-left", onClick: this.helpModal }, ["Create a Report"]),
+
+                  HelpModal({
+                    showModal: this.state.showHelpModal,
+                    onOKRequest: this.okModal,
+                    onCloseRequest: this.closeModal,
+                    onAfterOpen: this.afterModalOpen
+                  }),
+                  ]),
+                  hr({}),
+                  li({}, [a({ id: "link_reportList", href: "/help_reports", className: "f-left" }, ["List of Reports"])]),
+                ])
+              ])
+            ])
+          ])
+        ])
       ])
     );
   }
@@ -207,13 +204,13 @@ class DuosHeader extends Component {
   }
 
   signIn() {
-    this.setState({isLogged: true}, function () {
+    this.setState({ isLogged: true }, function () {
       this.props.loginState(this.state.isLogged);
     });
   }
 
   signOut() {
-    this.setState({isLogged: false}, function () {
+    this.setState({ isLogged: false }, function () {
       this.props.loginState(this.state.isLogged);
       window.location.href = "/";
     });
