@@ -4,7 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { Election } from '../libs/ajax';
+import { Election, Files } from '../libs/ajax';
 import * as Utils from '../libs/utils';
 
 class DulResultRecords extends Component {
@@ -78,6 +78,13 @@ class DulResultRecords extends Component {
 
   downloadDUL = (e) => {
     console.log('------------downloadDUL-------------', e);
+    Files.getDulFile(this.props.match.params.consentId).then(
+      blob => {
+        if (blob.size !== 0) {
+          this.createBlobFile(this.state.consentName, blob);
+        }
+      }
+    );
   };
 
   positiveVote = (e) => {
