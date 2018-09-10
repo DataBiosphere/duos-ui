@@ -554,7 +554,7 @@ export const Election = {
     return res.json();
   },
 
-  ElectionVote: async (voteId) => {
+  electionVote: async (voteId) => {
     const url = `${await Config.getApiUrl()}/election/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
