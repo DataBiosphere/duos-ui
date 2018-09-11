@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, b, ul, h, li, hr, button, label, span, hh, a } from 'react-hyperscript-helpers';
+import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DataSet } from '../../libs/ajax'
 

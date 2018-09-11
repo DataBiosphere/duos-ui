@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hr, img, h2, i, input, a, h } from 'react-hyperscript-helpers';
+import { div, hr, i, input, a, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
@@ -82,35 +82,35 @@ class InvalidRestrictions extends Component {
 
   searchDul = (row, query) => {
     let values = Object.values(row);
-    let texto = JSON.stringify(row);
-    console.log(texto);
+    let text = JSON.stringify(row);
+    console.log(text);
     // ''.concat(values);
     if (query === undefined || query === null || query === '') {
       return true;
     }
-    return texto.toLowerCase().includes(query.toLowerCase());
+    return text.toLowerCase().includes(query.toLowerCase());
   }
 
   searchDar = (row, query) => {
     let values = Object.values(row);
-    let texto = JSON.stringify(row);
-    console.log(texto);
+    let text = JSON.stringify(row);
+    console.log(text);
     // ''.concat(values);
     if (query === undefined || query === null || query === '') {
       return true;
     }
-    return texto.toLowerCase().includes(query.toLowerCase());
+    return text.toLowerCase().includes(query.toLowerCase());
   }
 
   filterTable = (row, query) => {
     let values = Object.values(row);
-    let texto = JSON.stringify(row);
-    console.log(texto);
+    let text = JSON.stringify(row);
+    console.log(text);
     // ''.concat(values);
     if (query === undefined || query === null || query === '') {
       return true;
     }
-    return texto.toLowerCase().includes(query.toLowerCase());
+    return text.toLowerCase().includes(query.toLowerCase());
   }
 
   render() {
@@ -202,7 +202,6 @@ class InvalidRestrictions extends Component {
 
             hr({ className: "pvotes-main-separator" }),
 
-            // div({ className: "pvotes-box-body", id: "searchTextResults" }, [
             this.state.InvalidRestrictions.darList
               // .filter(dar => this.filterTable(dar, this.state.searchDarCases))
               .slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((dar, index) => {
@@ -225,9 +224,7 @@ class InvalidRestrictions extends Component {
             })
           ]),
         ])
-
       ])
-
     );
   }
 }

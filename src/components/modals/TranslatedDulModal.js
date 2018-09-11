@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, form, input, label, span, hh, p } from 'react-hyperscript-helpers';
+import { div, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DataSet } from '../../libs/ajax'
 
@@ -30,6 +30,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
         color: "dataset",
+        type: "informative",
         iconSize: 'none',
         title: "More information",
         description: 'Translated Use Restriction',

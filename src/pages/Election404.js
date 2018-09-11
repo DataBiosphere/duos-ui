@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h2, br, a } from 'react-hyperscript-helpers';
+import { div, a } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 
 class Election404 extends Component {
@@ -8,8 +8,8 @@ class Election404 extends Component {
     super(props);
     this.state = {
       value: '',
-      isAccessElection : false,
-      isDataUseLimitations : true, 
+      isAccessElection: false,
+      isDataUseLimitations: true, 
     }
   }
 
@@ -19,8 +19,6 @@ class Election404 extends Component {
   }
 
   render() {
-
-    const { isAccessElection, isDataUseLimitations } = this.props;
 
     return (
       div({ className: "container container-wide" }, [

@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, i, input, span, a, h } from 'react-hyperscript-helpers';
+import { div, hr, i, input, span, a, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { HelpModal } from '../components/modals/HelpModal';
