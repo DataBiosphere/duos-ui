@@ -361,19 +361,20 @@ class DatasetCatalog extends Component {
                 ]),
               ]),
 
-              div({
-                className: "pvotes-pagination dataset-pagination", "dir-pagination-controls": "true",
-                "max-size": "10",
-                "direction-links": "true",
-                "boundary-links": "true"
-              }),
+              // div({
+              //   className: "pvotes-pagination dataset-pagination", "dir-pagination-controls": "true",
+              //   "max-size": "10",
+              //   "direction-links": "true",
+              //   "boundary-links": "true"
+              // }),
             ]),
             div({ className: "f-right" }, [
               button({
                 isRendered: this.isResearcher,
                 disabled: objectIdList.length === 0,
                 onClick: this.exportToRequest(objectIdList),
-                className: "download-button dataset-background apply-dataset " + (objectIdList.length === 0 ? 'disabled' : ''),
+                className: "download-button dataset-background apply-dataset",
+                disabled: objectIdList.length === 0 ,
                 tooltip: "Request Access for selected Datasets", "tooltip-class": "tooltip-class", "tooltip-trigger": "true",
                 "tooltip-placement": "top", "tooltip-animation": "false"
               }, ["Apply for Access"]),

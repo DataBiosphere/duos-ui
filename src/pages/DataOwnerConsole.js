@@ -111,7 +111,7 @@ class DataOwnerConsole extends Component {
 
           this.state.dataOwnerUnreviewedCases.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map(pendingCase => {
             return h(Fragment, { key: pendingCase.darCode }, [
-              div({ id: pendingCase.darCode, className: "row pvotes-main-list" }, [
+              div({ id: pendingCase.darCode, className: "row no-margin" }, [
 
                 div({ id: pendingCase.darCode + "_dataSetId", className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 cell-body text" }, [pendingCase.dataSetId]),
                 div({ id: pendingCase.darCode + "_dataSetName", className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 cell-body text" }, [pendingCase.dataSetName]),

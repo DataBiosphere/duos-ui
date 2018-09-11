@@ -59,9 +59,9 @@ export const EditUserModal = hh(class EditUserModal extends Component {
       },
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
+            div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text", "ng-model": "user.displayName",
                   name: "inputName", id: "txt_name",
@@ -71,9 +71,9 @@ export const EditUserModal = hh(class EditUserModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Google account id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "email", "ng-model": "user.email",
                   name: "inputGoogleId", id: "txt_email",
@@ -83,7 +83,7 @@ export const EditUserModal = hh(class EditUserModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Roles"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -135,13 +135,13 @@ export const EditUserModal = hh(class EditUserModal extends Component {
           //      ]),
           //  ]),
 
-          // div({ isRendered: "delegateDacUser.needsDelegation", className: "form-group admin-form-group" }, [
+          // div({ isRendered: "delegateDacUser.needsDelegation", className: "form-group" }, [
           //     div({ className: "row f-left" }, [
           //         div({ className: "default-color", style: {padding: '0 40px 15px 40px'} }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
           //     ]),
 
           //     label({ id:"lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
-          //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+          //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
 
           //         select({ id: "sel_alternativeUser", className: "form-control col-lg-12", "ng-model": "$parent.alternativeDACMemberUser", required: "delegateDacUser.needsDelegation" }, [
           //             option({ "ng-repeat": "user in delegateDacUser.delegateCandidates", value: "{{user}}" }, [this.user.displayName] )
@@ -150,13 +150,13 @@ export const EditUserModal = hh(class EditUserModal extends Component {
           //     ]),
           // ]),
 
-          // div({ isRendered: "delegateDataOwner.needsDelegation", className: "form-group admin-form-group" }, [
+          // div({ isRendered: "delegateDataOwner.needsDelegation", className: "form-group" }, [
           //     div({ className: "row f-left" }, [
           //         div({ className: "default-color", style: {padding: '0 40px 15px 40px'} }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
           //     ]),
 
           //     label({ id:"lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
-          //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+          //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
 
           //         select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", "ng-model": "$parent.alternativeDataOwnerUser", required: "delegateDataOwner.needsDelegation" }, [
           //             option({ "ng-repeat": "dataOwner in delegateDataOwner.delegateCandidates", value: "{{dataOwner}}" }, [this.dataOwner.displayName] )

@@ -86,14 +86,14 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     const alertMessage = span({}, [
       "Some errors occurred, Datasets weren't uploaded.",
       div({}, [
-          "Please, ",
-          a({
-            download: "errorsFile.txt",
-            className: "hover-color bold",
-            // href: "{{url}}", 
+        "Please, ",
+        a({
+          download: "errorsFile.txt",
+          className: "hover-color bold",
+          // href: "{{url}}", 
           // "onClick": "DataSetModal.releaseUrl"
-         }, ["download this file"]),
-          " with the mistakes found."
+        }, ["download this file"]),
+        " with the mistakes found."
       ]),
     ]);
 
@@ -112,7 +112,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
       },
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
+            div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 dataset-color upload-button" }, [
@@ -124,7 +124,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
                 div({ className: "checkbox dataset-label" }, [
                   input({ onChange: this.handleOverwriteChange, checked: this.state.overwrite, id: "txt_overwrite", type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
@@ -135,7 +135,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
           ]),
 
           div({ isRendered: false }, [
-            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
+            Alert({ id: "modal", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
           ]),
         ])
     );

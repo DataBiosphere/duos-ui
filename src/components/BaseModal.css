@@ -40,6 +40,11 @@
   line-height: 22px;
 }
 
+textarea {
+  resize: vertical;
+  max-height: 150px;
+}
+
 .modal-footer {
     width: 100%;
     padding: 15px 15px 0 15px;

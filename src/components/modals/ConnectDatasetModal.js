@@ -197,9 +197,9 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
               ]),
             ]),
           ]),
-          div({ isRendered: false, className: "dialog-alert" }, [
-            Alert({ id: "dialog", type: "danger", title: alert.title, description: alert.msg })
-          ])
+          div({ isRendered: false }, [
+            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
+          ]),
         ])
     );
   }
