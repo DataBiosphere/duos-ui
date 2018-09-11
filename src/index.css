@@ -2242,44 +2242,6 @@ input:-webkit-autofill {
   left: 0;
 }
 
-.app-summary-modal-content {
-  float: left;
-  text-align: left;
-  padding: 0 30px 10px 30px !important;
-}
-
-.app-summary-modal-first-content {
-  padding: 10px 30px !important;
-}
-
-.app-summary-modal-content hr {
-  margin: 10px 0 0 0!important;
-  border-top-color: #e5e5e5 !important;
-}
-
-.app-summary-modal-content ul {
-  margin: 0 15px 0 15px !important;
-}
-
-.app-summary-modal-content .alert-danger, .dar-summary .alert-danger {
-  padding: 15px 20px;
-  margin-top: 10px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.app-summary-modal-content .control-label {
-  padding: 7px 0 0 0!important;
-  line-height: 23px;
-}
-
-.app-summary-modal-content .response-label {
-  line-height: 23px;
-}
-
-.app-summary-modal-footer button {
-  margin-top: 5px !important;
-}
 
 /***************************************************Confirmation modals*/
 

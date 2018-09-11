@@ -25,7 +25,7 @@ import ReviewedCases from "./pages/ReviewedCases";
 import DataAccessRequestApplication from "./pages/DataAccessRequestApplication";
 import MemberConsole from "./pages/MemberConsole";
 import HomeAbout from "./pages/HomeAbout";
-import HelpMe from "./pages/HelpMe";
+import HelpReports from "./pages/HelpReports";
 import HomeRegister from "./pages/HomeRegister";
 import DataOwnerReview from "./pages/DataOwnerReview";
 import AdminManageUsers from './pages/AdminManageUsers';
@@ -56,7 +56,7 @@ export default ({ props }) => (
     <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={props} />
     <AuthenticatedRoute path='/data_owner_review' component={DataOwnerReview} props={props} />
     <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={props} />
-    <Route path='/help_me' component={HelpMe} props={props} />
+    <Route path='/help_reports' component={HelpReports} props={props} />
     <AuthenticatedRoute path='/home_register' component={HomeRegister} props={props} />
     <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={props} />
     <Route path='/login' component={Login} props={{ props }} />

@@ -1,12 +1,15 @@
 import { Component } from 'react';
-import { div, h2, br, a } from 'react-hyperscript-helpers';
+import { div, a } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
 
 class Election404 extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      value: ''
+      value: '',
+      isAccessElection: false,
+      isDataUseLimitations: true, 
     }
   }
 
@@ -17,21 +20,21 @@ class Election404 extends Component {
 
   render() {
 
-    const { isAccessElection, isDataUseLimitations } = this.props;
-
     return (
-      div({ className: "container " }, [
-        div({ className: "row " }, [
-          h2({ className: "main-title " + (isAccessElection ? 'access-color' : (isDataUseLimitations ? 'dul-color' : '')) }, [
-            "Sorry, something went wrong when trying to access the election page.",
-            br(),
-            div({ className: "main-title-description", style: { "paddingTop": "10px" } }, ["Please, return to your console and check if the election is still open. Thanks!"] ),
+      div({ className: "container container-wide" }, [
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+            PageHeading({ 
+              id: "notFound",
+              color: this.state.isAccessElection ? 'access' : this.state.isDataUseLimitations ? 'dul' : '',
+              title: "Sorry, something went wrong when trying to access the election page.",
+              description: "Please, return to your console and check if the election is still open. Thanks!",
+            }),
           ]),
-          a({
-            className: "btn btn-primary vote-button " + (isAccessElection ? 'access-background' : isDataUseLimitations ? 'dul-background' : ''),
-            style: { "float": "left !important", "marginTop": "15px" }, onClick: this.goToConsole
-          }, ["Your Console"]),
-        ]),
+          a({ className: "btn vote-button vote-button-back vote-button-bigger f-left " + (this.state.isAccessElection ? 'access-background' : this.state.isDataUseLimitations ? 'dul-background' : ''),
+            style: { 'marginTop': '15px' },
+            onClick: this.goToConsole }, ["Back to Your Console"]),
+        ])
       ])
     );
   }
