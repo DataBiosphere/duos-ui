@@ -80,16 +80,15 @@ class AdminManageUsers extends Component {
       prev.showAddUserModal = true;
       return prev;
     });
-  }
+  };
 
   editUser = (user) => (e) => {
-    console.log('editUser: ', user);
     this.setState(prev => {
       prev.showEditUserModal = true;
       prev.user = user;
       return prev;
     });
-  }
+  };
 
   okModal = (name) => {
 
@@ -131,18 +130,17 @@ class AdminManageUsers extends Component {
       default:
         break;
     }
-  }
+  };
 
   filterTable = (row, query) => {
     // let values = Object.values(row);
     let texto = JSON.stringify(row);
-    console.log(texto);
     // ''.concat(values);
     if (query === undefined || query === null || query === '') {
       return true;
     }
     return texto.toLowerCase().includes(query.toLowerCase());
-  }
+  };
 
   render() {
     const { currentPage } = this.state;

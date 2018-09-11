@@ -25,7 +25,7 @@ import ReviewedCases from "./pages/ReviewedCases";
 import DataAccessRequestApplication from "./pages/DataAccessRequestApplication";
 import MemberConsole from "./pages/MemberConsole";
 import HomeAbout from "./pages/HomeAbout";
-import HelpMe from "./pages/HelpMe";
+import HelpReports from "./pages/HelpReports";
 import HomeRegister from "./pages/HomeRegister";
 import DataOwnerReview from "./pages/DataOwnerReview";
 import AdminManageUsers from './pages/AdminManageUsers';
@@ -56,18 +56,18 @@ export default ({ props }) => (
     <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={props} />
     <AuthenticatedRoute path='/data_owner_review' component={DataOwnerReview} props={props} />
     <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={props} />
-    <Route path='/help_me' component={HelpMe} props={props} />
+    <Route path='/help_reports' component={HelpReports} props={props} />
     <AuthenticatedRoute path='/home_register' component={HomeRegister} props={props} />
     <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={props} />
     <Route path='/login' component={Login} props={{ props }} />
     <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={props} />
     <AuthenticatedRoute path='/researcher_review' component={ResearcherReview} props={props} />
     <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords} props={props} />
-    <AuthenticatedRoute path='/dul_result_records' component={DulResultRecords} props={props} />
+    <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} />
     <AuthenticatedRoute path='/access_review' component={AccessReview} props={props} />
     <AuthenticatedRoute path='/access_preview' component={AccessPreview} props={props} />
     <AuthenticatedRoute path='/access_collect' component={AccessCollect} props={props} />
-    <AuthenticatedRoute path='/dul_review/:consentId' component={DulReview} props={props} />
+    <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} />
     <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} />
     <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} />
     <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />

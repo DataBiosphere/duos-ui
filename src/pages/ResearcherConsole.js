@@ -178,8 +178,8 @@ class ResearcherConsole extends Component {
               ]),
               hr({ className: "pvotes-main-separator" }),
 
-              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((dar, darIndex) => {
-                return h(Fragment, { key: darIndex }, [
+              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(dar => {
+                return h(Fragment, {key: dar.frontEndId}, [
                   div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin" }, [
                     div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.frontEndId]),
                     div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.projectTitle]),
@@ -232,7 +232,7 @@ class ResearcherConsole extends Component {
                 hr({ className: "pvotes-main-separator" }),
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {
-                  return h(Fragment, { key: rIndex }, [
+                  return h(Fragment, {key: pdar.partial_dar_code}, [
                     div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin" }, [
                       a({ id: pdar.partial_dar_code + "_btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color", 
                       onClick: this.deletePartialDar, value: pdar.dataRequestId }, [

@@ -173,7 +173,7 @@ class MemberConsole extends Component {
   //     $rootScope.currentAccessPage = vm.currentAccessPage;
   //     $state.go('access_review', { darId: darId, voteId: voteId,  rpVoteId: rpVoteId});
   // }
-  }
+  };
 
   openDULReview = (e) => {
     let pendingCase = e.target.getAttribute('value');
@@ -186,26 +186,26 @@ class MemberConsole extends Component {
   // }
 
 
-  }
+  };
 
   openFinalAccessReviewResults = (e) => {
     let pendingCase = e.target.getAttribute('value');
     console.log('---------openFinalAccessReviewResults----------', pendingCase);
     //  (pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId)",
-  }
+  };
 
   openAccessReviewResult = (e) => {
     let pendingCase = e.target.getAttribute('value');
     console.log('---------openAccessReviewResult----------', pendingCase);
     //  (pendingCase.referenceId, pendingCase.electionId)"
-  }
+  };
+
   render() {
 
     const { currentUser, currentDulPage, currentAccessPage } = this.state;
 
     // console.log(this.state.electionsList.dul);
     // console.log(this.state.electionsList.access);
-
 
     return (
 
