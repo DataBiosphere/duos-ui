@@ -14,9 +14,8 @@ class DataOwnerReview extends Component {
       voteStatus: null,
       rationale: '',
       darFields: {
-        rus: ' rus rus rus rus rus ......' 
+        rus: ' rus rus rus rus rus ......'
       }
-      
     }
 
     this.myHandler = this.myHandler.bind(this);
@@ -58,14 +57,14 @@ class DataOwnerReview extends Component {
 
   }
 
-  openApplication() {
+  openApplication = (e) => {
     this.setState(prev => {
       prev.showApplicationSummaryModal = true;
       return prev;
     });
   }
 
-  openDataset() {
+  openDataset = (e) => {
     this.setState(prev => {
       prev.showDatasetSummaryModal = true;
       return prev;
@@ -73,7 +72,6 @@ class DataOwnerReview extends Component {
   }
 
   closeApplicationSummaryModal() {
-    // this state change close AddDul modal
     this.setState(prev => {
       prev.showApplicationSummaryModal = false;
       return prev;
@@ -81,7 +79,6 @@ class DataOwnerReview extends Component {
   }
 
   closeDatasetSummaryModal() {
-    // this state change close AddDul modal
     this.setState(prev => {
       prev.showDatasetSummaryModal = false;
       return prev;
@@ -89,7 +86,6 @@ class DataOwnerReview extends Component {
   }
 
   okApplicationSummaryModal() {
-    // this state change close AddDul modal
     this.setState(prev => {
       prev.showApplicationSummaryModal = false;
       return prev;
@@ -97,7 +93,6 @@ class DataOwnerReview extends Component {
   }
 
   okDatasetSummaryModal() {
-    // this state change close AddDul modal
     this.setState(prev => {
       prev.showDatasetSummaryModal = false;
       return prev;

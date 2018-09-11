@@ -50,6 +50,13 @@ class DatasetCatalog extends Component {
     this.setState({ dataSetList: data }, () => { console.log(this.state) });
   }
 
+  componentWillMount() {
+    this.getDatasets();
+  }
+
+  componentDidMount() {
+  }
+
   handleOpenConnectDatasetModal() {
     this.setState({ showConnectDatasetModal: true });
   }
