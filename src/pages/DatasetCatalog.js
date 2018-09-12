@@ -3,6 +3,8 @@ import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, i,
 import { PageHeading } from '../components/PageHeading';
 import { DataSet } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
+import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 
 
 const USER_ID = 5;
@@ -24,6 +26,18 @@ class DatasetCatalog extends Component {
     };
     this.myHandler = this.myHandler.bind(this);
     this.getDatasets = this.getDatasets.bind(this);
+
+    this.handleOpenConnectDatasetModal = this.handleOpenConnectDatasetModal.bind(this);
+    this.handleCloseConnectDatasetModal = this.handleCloseConnectDatasetModal.bind(this);
+    this.handleOpenTranslatedDULModal = this.handleOpenTranslatedDULModal.bind(this);
+    this.handleCloseTranslatedDULModal = this.handleCloseTranslatedDULModal.bind(this);
+
+    this.openConnectDataset = this.openConnectDataset.bind(this);
+    this.closeConnectDatasetModal = this.closeConnectDatasetModal.bind(this);
+    this.okConnectDatasetModal = this.okConnectDatasetModal.bind(this);
+    this.openTranslatedDUL = this.openTranslatedDUL.bind(this);
+    this.closeTranslatedDULModal = this.closeTranslatedDULModal.bind(this);
+    this.okTranslatedDULModal = this.okTranslatedDULModal.bind(this);
   }
 
   async getDatasets() {
@@ -36,16 +50,34 @@ class DatasetCatalog extends Component {
     this.setState({ dataSetList: data }, () => { console.log(this.state) });
   }
 
+  componentWillMount() {
+    this.getDatasets();
+  }
+
+  componentDidMount() {
+  }
+
+  handleOpenConnectDatasetModal() {
+    this.setState({ showConnectDatasetModal: true });
+  }
+
+  handleCloseConnectDatasetModal() {
+    this.setState({ showConnectDatasetModal: false });
+  }
+
+  handleOpenTranslatedDULModal() {
+    this.setState({ showTranslatedDULModal: true });
+  }
+
+  handleCloseTranslatedDULModal() {
+    this.setState({ showTranslatedDULModal: false });
+  }
 
   componentWillMount() {
     this.getDatasets();
   }
 
   componentDidMount() {
-
-  }
-
-  showSdul() {
 
   }
 
@@ -59,6 +91,48 @@ class DatasetCatalog extends Component {
 
   associate() {
 
+  }
+
+  openConnectDataset() {
+    this.setState(prev => {
+      prev.showConnectDatasetModal = true;
+      return prev;
+    });
+  }
+
+  closeConnectDatasetModal() {
+    this.setState(prev => {
+      prev.showConnectDatasetModal = false;
+      return prev;
+    });
+  }
+
+  okConnectDatasetModal() {
+    this.setState(prev => {
+      prev.showConnectDatasetModal = false;
+      return prev;
+    });
+  }
+
+  openTranslatedDUL() {
+    this.setState(prev => {
+      prev.showTranslatedDULModal = true;
+      return prev;
+    });
+  }
+
+  closeTranslatedDULModal() {
+    this.setState(prev => {
+      prev.showTranslatedDULModal = false;
+      return prev;
+    });
+  }
+
+  okTranslatedDULModal() {
+    this.setState(prev => {
+      prev.showTranslatedDULModal = false;
+      return prev;
+    });
   }
 
   openDelete = (answer) => (e) => {
@@ -121,7 +195,7 @@ class DatasetCatalog extends Component {
                     type: "search",
                     className: "form-control users-search",
                     placeholder: "Enter search term...",
-                    value: "searchDataset"
+                    // value: "searchDataset"
                   })
                 ]),
               ]),
@@ -151,8 +225,8 @@ class DatasetCatalog extends Component {
                 thead({}, [
                   tr({}, [
                     th({}),
-                    this.state.dataSetList.dictionary.map(dictionary => {
-                      return h(Fragment, {}, [
+                    this.state.dataSetList.dictionary.map((dictionary, dIndex) => {
+                      return h(Fragment, { key: dIndex }, [
                         th({ className: "table-titles dataset-color cell-size", id: dictionary.key }, [
                           dictionary.key
                         ])
@@ -168,7 +242,7 @@ class DatasetCatalog extends Component {
                 tbody({}, [
 
                   this.state.dataSetList.catalog.map((dataSet, trIndex) => {
-                    return h(Fragment, {}, [
+                    return h(Fragment, { key: trIndex }, [
 
                       tr({
                         id: 'tr-' + dataSet.dataSetId,
@@ -176,8 +250,8 @@ class DatasetCatalog extends Component {
                         , "current-page": "pagination.current"
                       }, [
 
-                          dataSet.properties.map(property => {
-                            return h(Fragment, {}, [
+                          dataSet.properties.map((property, dIndex) => {
+                            return h(Fragment, { key: dIndex }, [
 
                               td({
                                 isRendered: property.propertyName === 'Dataset ID',
@@ -189,14 +263,14 @@ class DatasetCatalog extends Component {
                                       // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
                                       , value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
                                     }),
-                                    label({ className: "regular-checkbox rp-choice-questions", for: property.propertyValue }),
+                                    label({ className: "regular-checkbox rp-choice-questions", htmlFor: property.propertyValue }),
                                   ])
                                 ])
                             ])
                           }),
 
-                          dataSet.properties.map(property => {
-                            return h(Fragment, {}, [
+                          dataSet.properties.map((property, dIndex) => {
+                            return h(Fragment, { key: dIndex }, [
 
                               td({
                                 className: "fixed-col", id: 'td-' + property.propertyName,
@@ -224,7 +298,8 @@ class DatasetCatalog extends Component {
 
 
                                     a({
-                                      onClick: this.associate(property.propertyValue, dataSet.needsApproval),
+                                      onClick: this.openConnectDataset
+                                      // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
                                       // "tooltip": "Connect with Data Owner", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
                                     }, [span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true" }),
                                       ]),
@@ -241,14 +316,17 @@ class DatasetCatalog extends Component {
                                       title: 'Enable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogEnable, action: { label: "Yes", handler: this.dialogHandlerEnable }
                                     }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
 
+                                    ConnectDatasetModal({
+                                      showModal: this.state.showConnectDatasetModal, onOKRequest: this.okConnectDatasetModal, onCloseRequest: this.closeConnectDatasetModal
+                                    }),
+
                                   ]),
                                 ])
                             ])
                           }),
 
-                          dataSet.properties.map(property => {
-                            return h(Fragment, {}, [
-
+                          dataSet.properties.map((property, dIndex) => {
+                            return h(Fragment, { key: dIndex }, [
                               td({
                                 className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '')
                               }, [
@@ -266,23 +344,20 @@ class DatasetCatalog extends Component {
 
                           td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
-                          td({
-                            className: "table-items cell-size translated-restriction hover-color bold " + (!dataSet.active ? 'dataset-disabled' : ''),
-                            onClick: this.showSdul(dataSet.translatedUseRestriction)
-                          }, [
-                              span({ style: { "cursor": "pointer" } }, ["Translated Use Restriction"]),
-                            ]),
+                          td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                            a({ onClick: this.openTranslatedDUL, className: "enabled" }, ["Translated Use Restriction"])
+                          ]),
 
-                          td({
-                            isRendered: isAdmin, className: "table-items cell-size translated-restriction hover-color bold",
-                            onClick: this.downloadList(dataSet)
-                          }, [
-                              span({ style: { "cursor": "pointer" } }, ["Download List"]),
-                            ]),
-                        ])
+                          td({ isRendered: isAdmin, className: "table-items cell-size" }, [
+                            a({ onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
+                          ]),
+                        ]),
+
+                      TranslatedDulModal({
+                        showModal: this.state.showTranslatedDULModal, onOKRequest: this.okTranslatedDULModal, onCloseRequest: this.closeTranslatedDULModal
+                      }),
                     ]);
                   })
-
                 ]),
               ]),
 

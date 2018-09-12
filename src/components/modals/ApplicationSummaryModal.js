@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, b, ul, h, li, hr, button, label, span, hh, a } from 'react-hyperscript-helpers';
+import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DataSet } from '../../libs/ajax'
 
@@ -12,15 +12,37 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     this.state = {
       summary: {
         darCode: 'XYZ-1000',
-        datasetDetail: [],
-        researchType: [],
-        purposeStatements: [],
-        diseases: ['disease1', 'disease2', 'disease3']
-      }
+        principalInvestigator: 'Nadya Lopez Zalba',
+        researcherName: 'Nadya Researcher',
+        status: 'bonafideResearcher',
+        rationale: 'just because',
+        electionStatus: '',
+        institutionName: 'Belatrix',
+        projectTitle: 'MyFirstProject',
+        needDOApproval: 'Approved by Data Owner(s).',
+        datasetDetail: [
+          { key: "SC-20156", data: "Dataset Name" }
+        ],
+        researchType: [
+          { title: "Type Title 1", description: "Description description description description description description" },
+          { title: "Type Title 2", description: "Description description description description" }
+        ],
+        thereDiseases: true,
+        diseases: ['disease1', 'disease2', 'disease3'],
+        therePurposeStatements: false,
+        purposeStatements: [
+          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
+          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
+          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
+          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
+        ],
+        sensitivePopulation: false,
+        requiresManualReview: false
+      },
+      calledFromAdmin: true,
     }
 
     this.closeHandler = this.closeHandler.bind(this);
-    this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
   };
 
@@ -28,29 +50,10 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     // this is the method for handling OK click
     // we might do something here, adding a user for instance
     // or delegate it to the parent....
-    // DO SOMETHING HERE ...
-
-    // and call parent's OK Handler
-    this.props.onOKRequest('addDataset');
   }
 
   closeHandler() {
     // this is the method to handle Cancel click
-    // could do some cleaning here 
-    // or delegate it to the parent
-    // we need to use it to close the
-    // DO SOMETHING HERE ...
-
-    // and call parent's close handler
-    this.props.onCloseRequest('addDataset');
-  }
-
-  afterOpenHandler() {
-    // DO SOMETHING HERE ...
-
-    // and call parent's after open handler
-    this.props.onAfterOpen('addDataset');
-
   }
 
   render() {
@@ -62,132 +65,126 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       BaseModal({
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
-        onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_dataset_add.png",
-        color: "dataset",
-        iconSize: 'large',
+        color: "access",
+        type: "informative",
+        iconSize: 'none',
         title: "Application Summary",
         description: 'Data Access Request Application Summary',
-        action: { label: "Add", handler: this.OKHandler }
+        action: { label: "Close", handler: this.OKHandler }
       },
         [
-
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 admin-modal-content app-summary-modal-content app-summary-modal-first-content" }, [
+          div({ className: "summary" }, [
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Data Access Request ID"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.darCode]),
             ]),
+
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Principal Investigator"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.principalInvestigator]),
             ]),
+
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Researcher"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.researcherName]),
-              div({ isRendered: "electionStatus !== 'Closed'" }, [
-                b({}, ["Status: "]),
-                summary.status,
-                div({ isRendered: "ApplicationModal.rationaleCheck() && summary.status === bonafideResearcher" }, [b({}, ["Comment:"]), summary.rationale]),
-                div({ isRendered: "ApplicationModal.rationaleCheck() && summary.status !== bonafideResearcher" }, [b({}, ["Rationale:"]), summary.rationale]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
+                div({}, [summary.researcherName]),
+                div({ isRendered: summary.electionStatus !== 'Closed', className: "bold" }, [
+                  "Status: ",
+                  summary.status
+                ]),
+                div({ isRendered: summary.status === "bonafideResearcher", className: "bold" }, [
+                  // "ApplicationModal.rationaleCheck() && summary.status === bonafideResearcher"
+                  "Comment: ",
+                  summary.rationale
+                ]),
+                div({ isRendered: summary.status !== "bonafideResearcher", className: "bold" }, [
+                  // "ApplicationModal.rationaleCheck() && summary.status !== bonafideResearcher"
+                  "Rationale: ",
+                  summary.rationale
+                ])
               ]),
-
             ]),
-          ]),
-          div({ className: "row" }, [
-            label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Institution Name"]),
-            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.institutionName]),
-          ]),
-          div({ className: "row" }, [
-            label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Project Title"]),
-            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.projectTitle]),
-          ]),
-          hr({}),
 
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 app-summary-modal-content" }, [
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Datasets"]),
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Institution Name"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.institutionName]),
+            ]),
+
+            div({ className: "row" }, [
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Project Title"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [summary.projectTitle]),
+            ]),
+
+            div({ className: "row" }, [
+              hr({}),
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Dataset(s)"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 ul({}, [
-                  summary.datasetDetail.map(row => {
-                    return h(Fragment, {}, [
-                      li({}, [
-                        b({}, [row.key]), "   ", row.data]),
-                      div({ isRendered: "calledFromAdmin && summary.needDOApproval !== 'Approval not needed.'" }, [summary.needDOApproval]),
-                      div({ isRendered: "calledFromAdmin && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).')" }, [
-                        span({ className: "glyphicon glyphicon-download-alt access-color", style: { "marginRight": "10px" } }, []),
-                        a({ onClick: "ApplicationModal.downloadDetail()", style: { "cursor": "pointer" } }, ["Download Datasets Vote Summary"]),
+                  summary.datasetDetail.map((row, Index) => {
+                    return h(Fragment, { key: Index }, [
+                      li({}, [b({}, [row.key]), " ", row.data]),
+                      div({ isRendered: this.calledFromAdmin && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
+                      div({ isRendered: this.calledFromAdmin && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
+                        span({ className: "glyphicon glyphicon-download-alt hover-color", style: { "marginRight": "10px" } }),
+                        a({ onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
                       ])
                     ])
-                  }),
-                ]),
-              ]),
+                  })
+                ])
+              ])
             ]),
-            hr({}),
-          ]),
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 app-summary-modal-content" }, [
+
             div({ className: "row" }, [
+              hr({}),
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Type of research"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 ul({}, [
-                  summary.researchType.map(rt => {
-                    return h(Fragment, {}, [
-                      li({}, [
-                        b({}, [rt.title]),
-                        rt.description
-                      ])
+                  summary.researchType.map((rt, Index) => {
+                    return h(Fragment, { key: Index }, [
+                      li({}, [b({}, [rt.title]), " ", rt.description]),
                     ])
                   })
                 ]),
               ]),
             ]),
-            hr({}),
-          ]),
-          div({ isRendered: "summary.thereDiseases === true", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 app-summary-modal-content" }, [
-            div({ className: "row" }, [
+
+            div({ isRendered: summary.thereDiseases === true, className: "row" }, [
+              hr({}),
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Disease area(s)"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 ul({}, [
-                  summary.diseases.map(disease => {
-                    return h(Fragment, {}, [
-                      li({}, [
-                        disease
-                      ])
+                  summary.diseases.map((disease, Index) => {
+                    return h(Fragment, { key: Index }, [
+                      li({}, [disease])
                     ])
                   })
                 ]),
               ]),
             ]),
-            hr({}),
-          ]),
-          div({ isRendered: "summary.therePurposeStatements === true", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 app-summary-modal-content" }, [
-            div({ className: "row" }, [
+
+            div({ isRendered: summary.therePurposeStatements === true, className: "row" }, [
+              hr({}),
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Purpose Statement"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 ul({}, [
-                  summary.purposeStatements.map(rt => {
-                    return h(Fragment, {}, [
+                  summary.purposeStatements.map((rt, Index) => {
+                    return h(Fragment, { key: Index }, [
                       li({ className: rt.manualReview ? 'cancel-color' : '' }, [
-                        b({}, [rt.title]),
-                        rt.description
+                        b({}, [rt.title]), " ", rt.description
                       ])
                     ])
                   })
                 ]),
               ]),
             ]),
-            div({ isRendered: "summary.sensitivePopulation === true", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
+
+            div({ isRendered: summary.sensitivePopulation === true, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
               "This research involves studying a sensitive population and requires manual review."
             ]),
-            hr({}),
-          ]),
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 app-summary-modal-content" }, [
-            div({ isRendered: "summary.requiresManualReview === true && summary.sensitivePopulation === false", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-              "This research requires manual review."
-            ]),
-          ]),
 
-          div({ className: "modal-footer admin-modal-footer app-summary-modal-footer" }, [
-            button({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn access-background", onClick: "ApplicationModal.cancel()" }, ["Close"]),
+            div({ isRendered: summary.requiresManualReview === true && summary.sensitivePopulation === false, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
+              "This research requires manual review."
+            ])
           ])
         ])
     );

@@ -1,9 +1,9 @@
 import { Component, Fragment } from 'react';
-import { div, h, h4, form, input, label, select, hh, option } from 'react-hyperscript-helpers';
+import { div, h, form, input, label, select, hh, option } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
 
-export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Component {
+export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Component {
 
   constructor() {
     super();
@@ -31,8 +31,11 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
         { id: '01800', name: 'client 18' },
         { id: '01900', name: 'client 19' },
       ],
-      selectedclients: []
+      selectedclients: [],
+      needsApproval: false
     }
+
+    this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
 
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
@@ -41,35 +44,25 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
 
   OKHandler() {
     // this is the method for handling OK click
-    // we might do something here, adding a user for instance
-    // or delegate it to the parent....
-    // DO SOMETHING HERE ...
-
-    // and call parent's OK Handler
-    this.props.onOKRequest('addDataset');
   }
 
   closeHandler() {
     // this is the method to handle Cancel click
-    // could do some cleaning here 
-    // or delegate it to the parent
-    // we need to use it to close the
-    // DO SOMETHING HERE ...
-
-    // and call parent's close handler
-    this.props.onCloseRequest('addDataset');
   }
 
   afterOpenHandler() {
     // DO SOMETHING HERE ...
-
     // and call parent's after open handler
-    this.props.onAfterOpen('addDataset');
+  }
 
+  handleNeedsApprovalChange(event) {
+    this.setState({
+      needsApproval: event.target.checked
+    });
   }
 
   moveLItem = (e) => {
- 
+
     let filteredTo = this.state.selectedclients;
     let filteredFrom = this.state.availableclients.filter(row => {
       if (this.state.available.includes(row.id)) {
@@ -89,7 +82,7 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
   }
 
   moveRItem = (e) => {
- 
+
     let filteredTo = this.state.availableclients;
     let filteredFrom = this.state.selectedclients.filter(row => {
       if (this.state.selected.includes(row.id)) {
@@ -115,11 +108,10 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
     const options = target.options;
     const selectedOptions = target.selectedOptions;
     console.log(options, selectedOptions);
-    selectedOptions.
-    this.setState(prev => {
-      prev.available.push(value);
-      return prev;
-    });
+    selectedOptions.this.setState(prev => {
+        prev.available.push(value);
+        return prev;
+      });
   }
 
   handleRSelection = (e) => {
@@ -138,12 +130,6 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
 
     const { available, selected, availableclients, selectedclients } = this.state;
 
-    console.log('-----------------showModal--------------------------------', this.props.showModal);
-    console.log('-----------------available--------------------------------', available);
-    console.log('-----------------selected---------------------------------', selected);
-    console.log('-----------------availableclients-------------------------', availableclients);
-    console.log('-----------------selectedclients--------------------------', selectedclients);
-
     return (
 
       BaseModal({
@@ -155,12 +141,12 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
         iconSize: 'large',
         title: "Connect Dataset with Data Owner",
         description: 'Associate Dataset with Data Owners and check for approval',
-        action: { label: "Add", handler: this.OKHandler }
+        action: { label: "Submit", handler: this.OKHandler }
       },
         [
 
           form({ className: "form-horizontal css-form", name: "datasetApprovalForm", noValidate: true, encType: "multipart/form-data" }, [
-            div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding", style: { "margin": "20px 0 0 0" } }, [
+            div({ className: "row", style: { 'margin': '10px 0 0 0' } }, [
 
               div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
                 div({ className: "select-table-title dataset-color" }, ["Data Owners"]),
@@ -176,7 +162,7 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
                   ]),
               ]),
 
-              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-12", style: { "margin": "30px 0" } }, [
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-12", style: { 'marginTop': '30px' } }, [
                 input({
                   type: "button", className: "select-table-btn select-table-btn-add default-color", value: "Add",
                   onClick: this.moveLItem
@@ -204,26 +190,16 @@ export const DatasetApprovalModal = hh(class DatasetApprovalModal extends Compon
 
             ]),
 
-            div({ className: "form-group admin-form-group no-margin" }, [
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                div({ className: "checkbox dataset-label no-padding" }, [
-                  input({ value: this.updatedNeedsApproval, id: "approval", type: "checkbox", className: "checkbox-inline", name: "updatedNeedsApproval" }),
-                  label({ className: "regular-checkbox dataset-label", htmlFor: "approval" }, ["Needs Data Owner's approval"]),
-                ]),
+            div({ className: "form-group row", style: { 'margin': '10px 0' } }, [
+              div({ className: "checkbox dataset-label" }, [
+                input({ onChange: this.handleNeedsApprovalChange, checked: this.state.needsApproval, id: "chk_needsApproval", type: "checkbox", className: "checkbox-inline", name: "needsApproval" }),
+                label({ id: "lbl_needsApproval", className: "regular-checkbox dataset-label", htmlFor: "chk_needsApproval" }, ["Needs Data Owner's approval"]),
               ]),
             ]),
           ]),
-
-          div({ className: "form-group alert-form-group" }, [
-            div({ className: "admin-alerts" }, [
-              Alert({ isRendered: "alert.show", type: "this.alert.type ", className: "alert-title cancel-color" }, [
-                h4({}, [alert.title]),
-                alert.msg,
-                div({ className: "warning" }, [alert.warning]),
-              ]),
-            ]),
-          ]),
-
+          div({ isRendered: false, className: "dialog-alert" }, [
+            Alert({ id: "dialog", type: "danger", title: alert.title, description: alert.msg })
+          ])
         ])
     );
   }
