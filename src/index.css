@@ -606,7 +606,6 @@ small {
 
 /***************************************************Hr*/
 
-/*REVIEW THESE*************************************************************************/
 .section-separator {
   border-color: #d5d5d5;
   margin: 10px 0;
@@ -622,16 +621,15 @@ small {
   margin: 5px 0 5px 0;
 }
 
-.pvotes-main-separator, .pvotes-separator {
+.table-head-separator, .table-body-separator {
   border-color: #d5d5d5;
   margin: 0;
   padding: 0 !important;
 }
 
-.pvotes-main-separator {
+.table-head-separator {
   border-width: 2px !important;
 }
-
 
 /***************************************************Boxes*/
 
@@ -782,6 +780,18 @@ small {
 .dar-summary a {
   display: block;
   padding-top: 5px;
+}
+
+.dar-summary .alert-danger {
+  padding: 15px 20px;
+  margin-top: 10px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.alert-danger {
+  background-color: rgba(209, 59, 7, 0.1);
+  border: none;
 }
 
 .vote-update {

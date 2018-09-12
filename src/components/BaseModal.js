@@ -11,7 +11,9 @@ const customStyles = {
     left: '0',
     right: '0',
     bottom: '0',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    overflowY: 'scroll',
+
   },
 
   content: {
@@ -21,10 +23,10 @@ const customStyles = {
     bottom: '0',
     left: '0',
     width: '750px',
-    margin: '12vh auto auto auto',
+    margin: '12vh auto 50px auto',
     border: '1px solid rgb(204, 204, 204)',
     background: 'rgb(255, 255, 255)',
-    overflow: 'auto',
+    overflow: 'hidden',
     borderRadius: '4px',
     outline: 'none',
     padding: '10px 20px 20px 20px',

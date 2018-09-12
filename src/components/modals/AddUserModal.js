@@ -94,7 +94,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group first-form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
+              label({ id: "lbl_name", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text",
@@ -109,7 +109,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
 
             div({ className: "form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Google account id"]),
+              label({ id: "lbl_email", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Google account id"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "email",
@@ -204,7 +204,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               }, [
                   div({ className: "checkbox" }, [
                     input({
-                      id: "emailPreference",
+                      id: "chk_emailPreference",
                       type: "checkbox",
                       className: "checkbox-inline user-checkbox",
                     }),

@@ -107,7 +107,7 @@ class DataOwnerConsole extends Component {
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dataset-color" }, ["Review/Vote"]),
           ]),
 
-          hr({ className: "pvotes-main-separator" }),
+          hr({ className: "table-head-separator" }),
 
           this.state.dataOwnerUnreviewedCases.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map(pendingCase => {
             return h(Fragment, { key: pendingCase.darCode }, [
@@ -137,7 +137,7 @@ class DataOwnerConsole extends Component {
 
                 ]),
               ]),
-              hr({ className: "pvotes-separator" }),
+              hr({ className: "table-body-separator" }),
             ])
           }),
           PaginatorBar({

@@ -196,7 +196,8 @@ class AdminManageUsers extends Component {
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header common-color f-center" }, ["Researcher Review"]),
           ]),
 
-          hr({ className: "pvotes-main-separator" }),
+          hr({ className: "table-head-separator" }),
+
           this.state.userList.filter(user => this.filterTable(user, this.state.searchUsers)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
             return h(Fragment, { key: user.dacUserId }, [
               div({ id: user.dacUserId, className: "row no-margin" }, [
@@ -247,7 +248,7 @@ class AdminManageUsers extends Component {
                 ]),
 
               ]),
-              hr({ className: "pvotes-separator", key: user.dacUserId + '-hr' })
+              hr({ className: "table-body-separator"})
             ])
           }),
           PaginatorBar({

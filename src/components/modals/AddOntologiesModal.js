@@ -7,7 +7,13 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
 
   constructor(props) {
     super(props);
+    this.state = {
+      file: {
+        name: "",
+      }
+    }
 
+    this.handleFileChange = this.handleFileChange.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
@@ -39,10 +45,22 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
 
     // and call parent's after open handler
     this.props.onAfterOpen('addOntologies');
+  }
 
+  handleFileChange(event) {
+    if (event.target.files !== undefined && event.target.files[0]) {
+      let file = event.target.files[0];
+      this.setState({
+        file: file,
+      });
+    }
   }
 
   render() {
+
+    const file = {
+      name: ""
+    }
 
     return (
 
@@ -61,19 +79,19 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group first-form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Ontology File"]),
+              label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Ontology File"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 common-color upload-button" }, [
                   span({}, ["Upload file"]),
                   span({ className: "cm-icon-button glyphicon glyphicon-upload caret-margin", "aria-hidden": "true" }, []),
-                  input({ id: "txt_file", type: "file", "ng-model": "file.name", "file-upload": "true", className: "upload", required: "true" }),
+                  input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
                 ]),
-                p({ className: "fileName" }, ["file.name"]),
+                p({ id: "txt_uploadFile", className: "fileName" }, [file.name]),
               ]),
             ]),
 
             div({ className: "form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Prefix"]),
+              label({ id: "lbl_prefix", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Prefix"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({ id: "txt_prefix", type: "text", "ng-model": "prefix", className: "form-control col-lg-12 vote-input", name: "ontology_prefix", placeholder: "Ontology Prefix", required: "true" }),
               ]),

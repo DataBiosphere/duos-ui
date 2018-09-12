@@ -61,14 +61,14 @@ export const HelpModal = hh(class HelpModal extends Component {
             div({ className: "form-group first-form-group" }, [
               label({ id: "lbl_subject", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Subject"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                input({ type: "text", "ng-model": "report.subject", id: "txt_subject", className: "form-control col-lg-12 vote-input", required: "true" }),
+                input({ type: "text", id: "txt_subject", className: "form-control col-lg-12 vote-input", required: "true" }),
               ]),
             ]),
 
             div({ className: "form-group" }, [
               label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Description"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                textarea({ name: "helpDescription", "ng-model": "report.description", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", required: "true" }),
+                textarea({ name: "helpDescription", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", required: "true" }),
               ]),
             ]),
           ]),
