@@ -130,7 +130,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
           action: { label: "Add", handler: this.OKHandler }
         },
         [
-          div({className: "row no-margin"}, [ "Click here to download a ", a({className: "hover-color", href: "/DataSetSample.tsv"}, ["Dataset Spreadsheet Modal"])]),
+          
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group admin-form-group first-form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
@@ -149,10 +149,11 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
                 div({ className: "checkbox dataset-label" }, [
                   input({ onChange: this.handleOverwriteChange, checked: this.state.overwrite, id: "txt_overwrite", type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
                   label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "txt_overwrite" }, ["Overwrite existing Datasets"]),
-                ]),
-              ]),
-            ]),
+                ])
+              ])
+            ])
           ]),
+          div({ className: "row download-link" }, ["Click here to download a ", a({ className: "hover-color", href: "/DataSetSample.tsv" }, ["Dataset Spreadsheet Modal"])]),
         ])
     );
   }
