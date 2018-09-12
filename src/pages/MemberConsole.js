@@ -3,7 +3,8 @@ import { div, hr, i, input, span, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-
+import { Storage } from '../libs/storage';
+import { PendingCases } from '../libs/ajax';
 
 class MemberConsole extends Component {
 
@@ -21,6 +22,15 @@ class MemberConsole extends Component {
       accessLimit: 5,
       currentDulPage: 1,
       currentAccessPage: 1,
+      electionsList: {
+        dul: [],
+        access: [],
+        rp: []
+      },
+      totalDulPendingVotes: 0,
+      totalAccessPendingVotes: 0,
+      totalResearchPurposePendingVotes: 0,
+
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -63,88 +73,43 @@ class MemberConsole extends Component {
   }
 
   componentWillMount() {
+    let currentUser = Storage.getCurrentUser();
 
-    let dul = [];
-    let access = [];
-    for (var i = 0; i < 27; i++) {
-      dul.push(this.createPendingCase(i));
-      access.push(this.createPendingCase(i));
-    }
+    this.setState({ currentUser: currentUser });
 
-    this.setState(prev => {
-      prev.totalAccessPendingVotes = 5;
-      prev.totalDulPendingVotes = 6;
-      prev.currentUser = {
-        displayName: 'Nadya Lopez Zalba',
-      };
-      prev.electionsList = {
-        dul: dul,
-        access: access,
-      };
-      return prev;
-    });
+    PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId).then(
+      resp => {
+        this.setState(prev => {
+          prev.totalDulPendingVotes = resp.totalDulPendingVotes;
+          prev.electionsList.dul = resp.dul;
+          return prev;
+        });
+      });
+
+    PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
+      resp => {
+        this.setState(prev => {
+          prev.totalAccessPendingVotes = resp.totalAccessPendingVotes;
+          prev.electionsList.access = resp.access;
+          return prev;
+        });
+      });
+
   }
 
-  createPendingCase(ix) {
-    return {
-      frontEndId: 'Front ID' + ix,
-      refrenceId: 'Ref ID' + ix,
-      alreadyVoted: ix % 2 === 0 ? true : false,
-      logged: ix % 2 === 0 ? 'Yes' : 'No',
-      consentGroupName: 'ORS-222',
-      voteId: 'XX' + ix,
-      projectTitle: 'Project Title ' + ix,
-      rpVoteId: 'rpVote ID' + ix,
-      electionStatus: ix % 6 === 0 ? 'Open' :
-        ix % 6 === 1 ? 'Closed' :
-          ix % 6 === 2 ? 'Canceled' :
-            ix % 6 === 3 ? 'un-reviewed' :
-              ix % 6 === 4 ? 'PendingApproval' :
-                ix % 6 === 5 ? 'Final' : '',
-      // status: ix % 2 === 0 ? 'pending' :   ix % 6 === 1 ? 'editable' : '',
-      status: 'editable',
-      isFinalVote: ix % 2 === 0 ? true : false,
-      isReminderSent: ix % 2 === 0 ? false : true,
-    }
-  }
-
-  openAccessReview = (e) => {
-    const value = e.target.getAttribute('value');
-    console.log('---------openAccessReview----------', value);
-    //(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"
+  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
+    this.props.history.push({ pathname: 'access_review', props: { darId: referenceId, voteId: voteId, rpVoteId: rpVoteId } })
   };
 
-  openDULReview = (e) => {
-    let pendingCase = e.target.getAttribute('value');
-    console.log('---------openDulReview----------', pendingCase);
-    //pendingCase.referenceId, pendingCase.voteId)",
-  };
-
-  openFinalAccessReviewResults = (e) => {
-    let pendingCase = e.target.getAttribute('value');
-    console.log('---------openFinalAccessReviewResults----------', pendingCase);
-    //  (pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId)",
-  };
-
-  openAccessReviewResult = (e) => {
-    let pendingCase = e.target.getAttribute('value');
-    console.log('---------openAccessReviewResult----------', pendingCase);
-    //  (pendingCase.referenceId, pendingCase.electionId)"
+  openDULReview = (consentId, voteId) => (e) => {
+    this.props.history.push(`dul_review/${voteId}/${consentId}`);
   };
 
   render() {
 
-    const { currentDulPage, currentAccessPage } = this.state;
-    console.log(JSON.stringify(this.state.electionsList.dul, null, 2));
-    console.log(this.state.electionsList.dul.length);
-
-
-    let currentUser = {
-      displayName: 'Nadya Lopez Zalba'
-    };
+    const { currentUser, currentDulPage, currentAccessPage } = this.state;
 
     return (
-
 
       div({ className: "container" }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
@@ -190,7 +155,7 @@ class MemberConsole extends Component {
                     span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ["Editable"]),
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
-                  div({ onClick: this.openDULReview, /*pendingCase.referenceId, pendingCase.voteId)"*/ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
+                  div({ onClick: this.openDULReview(pendingCase.referenceId, pendingCase.voteId), className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({ className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
                       span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
                       span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
@@ -248,7 +213,7 @@ class MemberConsole extends Component {
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
                   div({
-                    onClick: this.openAccessReview, /*(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"*/
+                    onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
                     className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center"
                   }, [
                       button({ className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
@@ -262,7 +227,7 @@ class MemberConsole extends Component {
             }),
             PaginatorBar({
               name: 'access',
-              total: this.state.electionsList.dul.length,
+              total: this.state.electionsList.access.length,
               limit: this.state.accessLimit,
               pageCount: this.accessPageCount,
               currentPage: this.state.currentAccessPage,

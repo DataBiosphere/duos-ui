@@ -47,7 +47,6 @@ class AdminManageUsers extends Component {
   }
 
   search = (e) => {
-    let target = e.target;
     let query = e.target.value;
     this.setState(prev => {
       prev.currentPage = 1;
@@ -134,6 +133,7 @@ class AdminManageUsers extends Component {
   };
 
   filterTable = (row, query) => {
+    // let values = Object.values(row);
     let texto = JSON.stringify(row);
     // ''.concat(values);
     if (query === undefined || query === null || query === '') {
