@@ -23,7 +23,6 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
       translatedUseRestriction: 'Translated DUL'
     }
 
-
     this.closeHandler = this.closeHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
   };
@@ -73,66 +72,64 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
         [
           div({ className: "summary" }, [
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset ID"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DatasetId]),
+              label({ id: "lbl_datasetId", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset ID"]),
+              div({ id: "txt_datasetId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DatasetId]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset Name"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DatasetName]),
+              label({ id: "lbl_datasetName", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset Name"]),
+              div({ id: "txt_datasetName", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DatasetName]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Description"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Description]),
+              label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Description"]),
+              div({ id: "txt_description", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Description]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Data Type"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DataType]),
+              label({ id: "lbl_dataType", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Data Type"]),
+              div({ id: "txt_dataType", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DataType]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Phenotype/Indication"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Indication]),
+              label({ id: "lbl_phenotype", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Phenotype/Indication"]),
+              div({ id: "txt_phenotype", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Indication]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Species"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Species]),
+              label({ id: "lbl_species", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Species"]),
+              div({ id: "txt_species", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Species]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["# of Participants"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.nrParticipants]),
+              label({ id: "lbl_participants", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["# of Participants"]),
+              div({ id: "txt_participants", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.nrParticipants]),
             ]),
 
             hr({}),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Data Depositor"]),
-              div({ className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.DataDepositor]),
+              label({ id: "lbl_depositor", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Data Depositor"]),
+              div({ id: "txt_depositor", className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.DataDepositor]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Principal Investigator"]),
-              div({ className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.PI]),
+              label({ id: "lbl_PI", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Principal Investigator"]),
+              div({ id: "txt_PI", className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.PI]),
             ]),
 
             hr({}),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Consent ID"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.consentName]),
+              label({ id: "lbl_consentId", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Consent ID"]),
+              div({ id: "txt_consentId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.consentName]),
             ]),
 
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Structured Limitations"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label translated-restriction" }, [this.state.translatedUseRestriction]),
-            ]),
-
-          ]),
-
+              label({ id: "lbl_structured", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Structured Limitations"]),
+              div({ id: "txt_structured", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label translated-restriction" }, [this.state.translatedUseRestriction]),
+            ])
+          ])
         ])
     );
   }

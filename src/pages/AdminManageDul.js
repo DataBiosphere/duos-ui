@@ -195,7 +195,8 @@ class AdminManageDul extends Component {
             div({ className: "col-1 cell-header f-center dul-color" }, ["Election actions"]),
           ]),
 
-          hr({ className: "pvotes-main-separator" }),
+          hr({ className: "table-head-separator" }),
+
           this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
             //---------------------
             return (
@@ -248,7 +249,7 @@ class AdminManageDul extends Component {
                     ]),
                   ]),
                 ]),
-                hr({ className: "pvotes-separator" }),
+                hr({ className: "table-body-separator" }),
 
             //------------------
             ConfirmationDialog({

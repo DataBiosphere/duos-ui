@@ -176,7 +176,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, ["Actions"]),
             ]),
 
-            hr({ className: "pvotes-main-separator" }),
+            hr({ className: "table-head-separator" }),
 
             this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
@@ -199,7 +199,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   ]),
                   div({ isRendered: pendingCase.alreadyVoted === false, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text empty f-center" }, []),
                 ]),
-                hr({ className: "pvotes-separator" })
+                hr({ className: "table-body-separator" })
               ]);
             }),
             PaginatorBar({
@@ -241,7 +241,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               ])
             ]),
 
-            hr({ className: "pvotes-main-separator" }),
+            hr({ className: "table-head-separator" }),
 
             this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
@@ -268,7 +268,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   ]),
                   div({ isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text f-center empty" }, [])
                 ]),
-                hr({ className: "pvotes-separator" })
+                hr({ className: "table-body-separator" })
               ]);
             }),
             PaginatorBar({

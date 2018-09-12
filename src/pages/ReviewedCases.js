@@ -125,7 +125,7 @@ class ReviewedCases extends Component {
             div({ className: "col-1 cell-header f-center dul-color" }, ["Final Result"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Record"]),
           ]),
-          hr({ className: "pvotes-separator" }),
+          hr({ className: "table-head-separator" }),
 
           this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
@@ -142,10 +142,9 @@ class ReviewedCases extends Component {
                   button({ className: "cell-button hover-color", "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})" }, ["Record"]),
                 ]),
               ]),
-              hr({ className: "pvotes-separator" }),
+              hr({ className: "table-body-separator" }),
             ]);
           }),
-          // //----
           PaginatorBar({
             name: 'dul',
             total: this.state.electionsList.dul.length,
@@ -189,7 +188,7 @@ class ReviewedCases extends Component {
             div({ className: "col-1 cell-header f-center access-color" }, ["Final Result"]),
             div({ className: "col-1 cell-header f-center access-color" }, ["Record"]),
           ]),
-          hr({ className: "pvotes-separator" }),
+          hr({ className: "table-head-separator" }),
 
           this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
@@ -205,10 +204,9 @@ class ReviewedCases extends Component {
                   button({ className: "cell-button hover-color", "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})" }, ["Record"]),
                 ]),
               ]),
-              hr({ className: "pvotes-separator" }),
+              hr({ className: "table-body-separator" }),
             ])
           }),
-
           PaginatorBar({
             name: 'access',
             total: this.state.electionsList.access.length,

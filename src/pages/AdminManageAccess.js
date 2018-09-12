@@ -106,7 +106,7 @@ class AdminManageAccess extends Component {
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election actions"]),
           ]),
 
-          hr({ className: "pvotes-main-separator" }),
+          hr({ className: "table-head-separator" }),
 
           this.state.darElectionList.map(dar => {
             return h(Fragment, { key: dar.frontEndId }, [
@@ -169,7 +169,7 @@ class AdminManageAccess extends Component {
                   ])
                 ])
               ]),
-              hr({ className: "pvotes-separator" }),
+              hr({ className: "table-body-separator" }),
 
               ConfirmationDialog({
                 title: 'Cancel election?', color: 'cancel', showModal: this.state.showDialogCancel, action: { label: "Yes", handler: this.dialogHandlerCancel }

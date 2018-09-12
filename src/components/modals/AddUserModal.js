@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { div, form, input, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { User } from "../../libs/ajax";
+import { Alert } from '../Alert';
 
 
 export const AddUserModal = hh(class AddUserModal extends Component {
@@ -92,9 +93,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       },
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+            div({ className: "form-group first-form-group" }, [
+              label({ id: "lbl_name", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text",
                   name: "displayName",
@@ -107,9 +108,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Google account id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+            div({ className: "form-group" }, [
+              label({ id: "lbl_email", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Google account id"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "email",
                   name: "email",
@@ -122,7 +123,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Roles"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -195,7 +196,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                 ]),
               ]),
             ]),
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               div({
                 isRendered: this.state.roles.includes('Admin'),
                 className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4",
@@ -203,7 +204,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               }, [
                   div({ className: "checkbox" }, [
                     input({
-                      id: "emailPreference",
+                      id: "chk_emailPreference",
                       type: "checkbox",
                       className: "checkbox-inline user-checkbox",
                     }),
@@ -213,20 +214,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
           ]),
 
-          // div({ isRendered: alerts.lenght > 0, className: "form-group alert-form-group" }, [
-
-          //      div({ className: "admin-alerts" }, [
-          //          alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color" }, [
-          //              h4({}, [alert.title]),
-          //              span({}, [alert.msg]),
-          //              div({ className: "warning" }, [alert.warning]),
-          //          ])
-          //      ]),
-          //  ]),
-
+          div({ isRendered: false }, [
+            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
+          ])
         ])
-
     );
   }
-
 });

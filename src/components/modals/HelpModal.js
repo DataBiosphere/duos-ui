@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, form, input, label, textarea, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
+import { Alert } from '../Alert';
 
 export const HelpModal = hh(class HelpModal extends Component {
 
@@ -57,25 +58,24 @@ export const HelpModal = hh(class HelpModal extends Component {
 
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
+            div({ className: "form-group first-form-group" }, [
               label({ id: "lbl_subject", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Subject"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
-                input({ type: "text", "ng-model": "report.subject", id: "txt_subject", className: "form-control col-lg-12 vote-input", required: "true" }),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+                input({ type: "text", id: "txt_subject", className: "form-control col-lg-12 vote-input", required: "true" }),
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Description"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
-                textarea({ name: "helpDescription", "ng-model": "report.description", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", required: "true" }),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+                textarea({ name: "helpDescription", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", required: "true" }),
               ]),
             ]),
-
+          ]),
+          div({ isRendered: false }, [
+            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
           ])
-
         ])
-
     );
   }
-
 });
