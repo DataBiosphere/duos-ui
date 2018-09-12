@@ -358,15 +358,8 @@ class DatasetCatalog extends Component {
                       }),
                     ]);
                   })
-                ]),
-              ]),
-
-              // div({
-              //   className: "pvotes-pagination dataset-pagination", "dir-pagination-controls": "true",
-              //   "max-size": "10",
-              //   "direction-links": "true",
-              //   "boundary-links": "true"
-              // }),
+                ])
+              ])
             ]),
             div({ className: "f-right" }, [
               button({

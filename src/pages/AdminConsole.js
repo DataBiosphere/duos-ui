@@ -18,8 +18,6 @@ class AdminConsole extends Component {
       showAddUserModal: false,
       showAddDatasetModal: false,
       showAddOntologiesModal: false,
-      showEditDulModal: false,
-      showEditUserModal: false,
       showElectionTimeoutModal: false
     };
 
@@ -31,9 +29,6 @@ class AdminConsole extends Component {
     this.addUser = this.addUser.bind(this);
     this.addDataset = this.addDataset.bind(this);
     this.addOntologies = this.addOntologies.bind(this);
-
-    this.editDul = this.editDul.bind(this);
-    this.editUser = this.editUser.bind(this);
     this.electionTimeout = this.electionTimeout.bind(this);
 
   }
@@ -66,20 +61,6 @@ class AdminConsole extends Component {
     });
   }
 
-  editDul() {
-    this.setState(prev => {
-      prev.showEditDulModal = true;
-      return prev;
-    });
-  }
-
-  editUser() {
-    this.setState(prev => {
-      prev.showEditUserModal = true;
-      return prev;
-    });
-  }
-
   electionTimeout() {
     this.setState(prev => {
       prev.showElectionTimeoutModal = true;
@@ -102,12 +83,6 @@ class AdminConsole extends Component {
         break;
       case 'addOntologies':
         this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
-        break;
-      case 'editDul':
-        this.setState(prev => { prev.showEditDulModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
         break;
       case 'electionTimeout':
         this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
@@ -133,12 +108,6 @@ class AdminConsole extends Component {
       case 'addOntologies':
         this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
         break;
-      case 'editDul':
-        this.setState(prev => { prev.showEditDulModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
       case 'electionTimeout':
         this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
         break;
@@ -163,13 +132,7 @@ class AdminConsole extends Component {
       case 'addOntologies':
         this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
         break;
-      case 'editDul':
-        this.setState(prev => { prev.showEditDulModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      case 'electionTimeout':
+       case 'electionTimeout':
         this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
         break;
       default:
