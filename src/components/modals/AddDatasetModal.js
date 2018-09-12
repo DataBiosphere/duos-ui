@@ -130,6 +130,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
           action: { label: "Add", handler: this.OKHandler }
         },
         [
+          div({className: "row no-margin"}, [ "Click here to download a ", a({className: "hover-color", href: "/DataSetSample.tsv"}, ["Dataset Spreadsheet Modal"])]),
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group admin-form-group first-form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
@@ -151,10 +152,6 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
                 ]),
               ]),
             ]),
-          ]),
-
-          div({ isRendered: this.state.errors }, [
-            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
           ]),
         ])
     );
