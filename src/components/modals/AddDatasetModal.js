@@ -3,19 +3,22 @@ import { div, form, input, label, span, hh, p, a } from 'react-hyperscript-helpe
 import { BaseModal } from '../BaseModal';
 import { DataSet } from '../../libs/ajax';
 import { Alert } from '../Alert';
+import { Storage } from "../../libs/storage";
 
-let USER_ID = 5;
 
 export const AddDatasetModal = hh(class AddDatasetModal extends Component {
+  USER_ID = Storage.getCurrentUser().dacUserId;
 
   constructor() {
     super();
     this.state = {
       file: {
-        name: "",
+        name: '',
       },
-      overwrite: false
-    }
+      overwrite: false,
+      errors: false,
+      url: {}
+    };
     this.handleFileChange = this.handleFileChange.bind(this);
     this.handleOverwriteChange = this.handleOverwriteChange.bind(this);
 
@@ -41,26 +44,36 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     }
   }
 
-  OKHandler() {
+  OKHandler = () => {
     // this is the method for handling OK click
     // we might do something here, adding a user for instance
     // or delegate it to the parent....
     // DO SOMETHING HERE ...
-
     if (this.state.file.name !== "") {
-      DataSet.create(this.state.file, this.state.overwrite, USER_ID).then(
-        function () {
+      DataSet.create(this.state.file, this.state.overwrite, this.USER_ID)
+        .then(() => {
           // cerrar modal
-          alert("todo bien");
-          this.props.onOKRequest('AddDataset');
-        }).catch(function (errorResponse) {
-          alert(JSON.stringify(errorResponse));
-        })
+          this.setState({errors: false});
+          this.props.onOKRequest('addDataset');
+        }).then(() => {
+        this.setState({errors: false});
+        this.props.onOKRequest('addDataset')
+      }).catch(errorResponse => {
+        this.setState({errors: true});
+        errorResponse.json().then(errors => this.generateFileAndUrl(errors));
+      });
     }
+  };
 
-    // and call parent's OK Handler
-    this.props.onOKRequest('addDataset');
-  }
+  generateFileAndUrl = (errors) => {
+    let content = '';
+    for (let i = 0; i < errors.length; i++) {
+      content += errors[i] + "\r\n";
+    }
+    let blob = new Blob([content], {type: 'text/plain'});
+    let url = (window.URL || window.webkitURL).createObjectURL(blob);
+    this.setState({url: url});
+  };
 
   closeHandler() {
     // this is the method to handle Cancel click
@@ -70,6 +83,12 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     // DO SOMETHING HERE ...
 
     // and call parent's close handler
+    this.setState({
+      url: '',
+      file: '',
+      overwrite: '',
+      errors: false
+    });
     this.props.onCloseRequest('addDataset');
   }
 
@@ -86,30 +105,30 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     const alertMessage = span({}, [
       "Some errors occurred, Datasets weren't uploaded.",
       div({}, [
-          "Please, ",
-          a({
-            download: "errorsFile.txt",
-            className: "hover-color bold",
-            // href: "{{url}}", 
-          // "onClick": "DataSetModal.releaseUrl"
-         }, ["download this file"]),
-          " with the mistakes found."
+        "Please, ",
+        a({
+          download: "errorsFile.txt",
+          className: "hover-color bold",
+          href: this.state.url,
+          // onClick: this.releaseUrl,
+        }, ["download this file"]),
+        " with the mistakes found."
       ]),
     ]);
 
     return (
 
       BaseModal({
-        showModal: this.props.showModal,
-        onRequestClose: this.closeHandler,
-        onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_dataset_add.png",
-        color: "dataset",
-        iconSize: 'large',
-        title: "Add Datasets",
-        description: 'Store Datasets associated with Data Use Limitations',
-        action: { label: "Add", handler: this.OKHandler }
-      },
+          showModal: this.props.showModal,
+          onRequestClose: this.closeHandler,
+          onAfterOpen: this.afterOpenHandler,
+          imgSrc: "/images/icon_dataset_add.png",
+          color: "dataset",
+          iconSize: 'large',
+          title: "Add Datasets",
+          description: 'Store Datasets associated with Data Use Limitations',
+          action: { label: "Add", handler: this.OKHandler }
+        },
         [
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group admin-form-group first-form-group" }, [
@@ -134,7 +153,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
             ]),
           ]),
 
-          div({ isRendered: false }, [
+          div({ isRendered: this.state.errors }, [
             Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
           ]),
         ])

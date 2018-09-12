@@ -334,7 +334,7 @@ export const DataSet = {
     const url = `${await Config.getApiUrl()}/dataset/${userId}?overwrite=${overwrite}`;
     let formData = new FormData();
     formData.append("data", new Blob([file], { type: 'text/plain' }));
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), formData, { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
     return res.json();
   },
 
