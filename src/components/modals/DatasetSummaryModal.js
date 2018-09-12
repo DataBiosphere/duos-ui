@@ -22,7 +22,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
       consentName: 'Consent Name',
       translatedUseRestriction: 'Translated DUL'
     }
-
+    
     
     this.closeHandler = this.closeHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
