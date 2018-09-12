@@ -155,7 +155,7 @@ class InvalidRestrictions extends Component {
               div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-header dul-color" }, ["Invalid Restrictions"]),
             ]),
 
-            hr({ className: "pvotes-main-separator" }),
+            hr({ className: "table-head-separator" }),
 
             this.state.InvalidRestrictions.dulList
               // .filter(consent => this.filterTable(consent, this.state.searchDULcases))
@@ -167,7 +167,7 @@ class InvalidRestrictions extends Component {
                       a({ href: "", onClick: this.download(dul.name, dul.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
                     ])
                   ]),
-                  hr({ className: "pvotes-separator" })
+                  hr({ className: "table-body-separator" })
                 ])
               }),
             PaginatorBar({
@@ -200,7 +200,7 @@ class InvalidRestrictions extends Component {
               div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-header access-color" }, ["Invalid Restrictions"]),
             ]),
 
-            hr({ className: "pvotes-main-separator" }),
+            hr({ className: "table-head-separator" }),
 
             this.state.InvalidRestrictions.darList
               // .filter(dar => this.filterTable(dar, this.state.searchDarCases))
@@ -212,7 +212,7 @@ class InvalidRestrictions extends Component {
                       a({ href: "", onClick: this.download(dar.name, dar.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
                     ]),
                   ]),
-                  hr({ className: "pvotes-separator" }),
+                  hr({ className: "table-body-separator" }),
                 ])
               }),
             PaginatorBar({

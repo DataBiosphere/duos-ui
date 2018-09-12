@@ -82,9 +82,9 @@ export const EditDulModal = hh(class EditDulModal extends Component {
         [
 
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
+            div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Unique id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text", value : this.state.consent.consentId, onChange: this.formHandler, 
                   id: "txt_consentId", name: "inputConsentId",
@@ -94,9 +94,9 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text", value: this.state.consent.name, onChange: this.formHandler,
                   id: "txt_consentName", name: "inputName",
@@ -106,7 +106,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ id: "lbl_file", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use Limitations File"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
@@ -118,9 +118,9 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
                   value: this.state.useRestriction, onChange: this.formHandler,
                   id: "txt_sdul", name: "inputSDUL",
@@ -130,9 +130,9 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
                   value: this.state.dataUse, onChange: this.formHandler,
                   id: "txt_dataUse", name: "inputDU",

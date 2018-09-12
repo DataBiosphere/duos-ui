@@ -180,7 +180,7 @@ class ResearcherConsole extends Component {
                 div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Cancel"]),
                 div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Review"]),
               ]),
-              hr({ className: "pvotes-main-separator" }),
+              hr({ className: "table-head-separator" }),
 
               this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(dar => {
                 return h(Fragment, { key: dar.frontEndId }, [
@@ -210,10 +210,9 @@ class ResearcherConsole extends Component {
                       }, ["Review"]),
                     ])
                   ]),
-                  hr({ className: "pvotes-separator" })
+                  hr({ className: "table-body-separator" })
                 ])
               }),
-              hr({ className: "pvotes-separator" }),
               PaginatorBar({
                 name: 'dar',
                 total: this.state.dars.length,
@@ -237,7 +236,7 @@ class ResearcherConsole extends Component {
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header default-color" }, ["Date"]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center default-color" }, ["Resume"]),
                 ]),
-                hr({ className: "pvotes-main-separator" }),
+                hr({ className: "table-head-separator" }),
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {
                   return h(Fragment, { key: pdar.partial_dar_code }, [
@@ -259,10 +258,9 @@ class ResearcherConsole extends Component {
                         }, ["Resume"]),
                       ]),
                     ]),
-                    hr({ className: "pvotes-separator" })
+                    hr({ className: "table-body-separator" })
                   ])
                 }),
-                hr({ className: "pvotes-separator" }),
                 PaginatorBar({
                   name: 'partialDar',
                   total: this.state.partialDars.length,

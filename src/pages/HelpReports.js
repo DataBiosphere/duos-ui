@@ -98,7 +98,7 @@ class HelpReports extends Component {
             div({ className: "cell-header common-color " + (this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-4 col-xs-4" : !this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-5 col-xs-5" : "") }, ["Description"]),
           ]),
 
-          hr({ className: "pvotes-main-separator" }),
+          hr({ className: "table-head-separator" }),
 
           this.state.reports.slice((this.state.currentPage - 1) * this.state.limit, this.state.currentPage * this.state.limit).map((report, ix) => {
             return h(Fragment, { key: ix }, [
@@ -109,10 +109,9 @@ class HelpReports extends Component {
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-3 col-xs-3" : "") }, [report.subject]),
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-4 col-xs-4" : !this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-5 col-xs-5" : "") }, [report.description]),
               ]),
-              hr({ className: "pvotes-separator" }),
+              hr({ className: "table-body-separator" }),
             ]);
           }),
-
           PaginatorBar({
             total: this.state.reports.length,
             limit: this.state.limit,

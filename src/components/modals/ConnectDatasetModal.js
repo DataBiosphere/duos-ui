@@ -149,10 +149,14 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
             div({ className: "row", style: { 'margin': '10px 0 0 0' } }, [
 
               div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
-                div({ className: "select-table-title dataset-color" }, ["Data Owners"]),
+                div({ id: "lbl_dataOwners", className: "select-table-title dataset-color" }, ["Data Owners"]),
                 select({
-                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list", size: "5",
-                  multiple: true, value: available, onChange: this.handleLSelection
+                  id: "sel_dataOwners",
+                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list",
+                  size: "5",
+                  multiple: true,
+                  value: available,
+                  onChange: this.handleLSelection
                 }, [
                     this.state.availableclients.map((client, index) => {
                       return h(Fragment, { key: index }, [
@@ -164,12 +168,18 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-12", style: { 'marginTop': '30px' } }, [
                 input({
-                  type: "button", className: "select-table-btn select-table-btn-add default-color", value: "Add",
+                  id: "btn_add",
+                  type: "button",
+                  className: "select-table-btn select-table-btn-add default-color",
+                  value: "Add",
                   onClick: this.moveLItem
                 }),
 
                 input({
-                  type: "button", className: "select-table-btn select-table-btn-remove default-color", value: "Remove",
+                  id: "btn_remove",
+                  type: "button",
+                  className: "select-table-btn select-table-btn-remove default-color",
+                  value: "Remove",
                   onClick: this.moveRItem
                 }),
               ]),
@@ -177,8 +187,12 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
               div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
                 div({ className: "select-table-title dataset-color" }, ["Selected Data Owners"]),
                 select({
-                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list", size: "5",
-                  multiple: true, value: selected, onChange: this.handleRSelection
+                  id: "sel_selectedDataOwners",
+                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list",
+                  size: "5",
+                  multiple: true,
+                  value: selected,
+                  onChange: this.handleRSelection
                 }, [
                     this.state.selectedclients.map((client, index) => {
                       return h(Fragment, { key: index }, [
@@ -192,14 +206,24 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
             div({ className: "form-group row", style: { 'margin': '10px 0' } }, [
               div({ className: "checkbox dataset-label" }, [
-                input({ onChange: this.handleNeedsApprovalChange, checked: this.state.needsApproval, id: "chk_needsApproval", type: "checkbox", className: "checkbox-inline", name: "needsApproval" }),
-                label({ id: "lbl_needsApproval", className: "regular-checkbox dataset-label", htmlFor: "chk_needsApproval" }, ["Needs Data Owner's approval"]),
+                input({ id: "chk_needsApproval",
+                onChange: this.handleNeedsApprovalChange,
+                checked: this.state.needsApproval,
+                type: "checkbox",
+                className: "checkbox-inline",
+                name: "needsApproval" 
+              }),
+                label({ 
+                  id: "lbl_needsApproval",
+                  className: "regular-checkbox dataset-label",
+                  htmlFor: "chk_needsApproval"
+                 }, ["Needs Data Owner's approval"]),
               ]),
             ]),
           ]),
-          div({ isRendered: false, className: "dialog-alert" }, [
-            Alert({ id: "dialog", type: "danger", title: alert.title, description: alert.msg })
-          ])
+          div({ isRendered: false }, [
+            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
+          ]),
         ])
     );
   }

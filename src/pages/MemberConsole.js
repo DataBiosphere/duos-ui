@@ -139,7 +139,7 @@ class MemberConsole extends Component {
                 div({ isRendered: this.state.totalDulPendingVotes > 0, className: "pcases-small-tag" }, [this.state.totalDulPendingVotes]),
               ])
             ]),
-            hr({ className: "pvotes-main-separator" }),
+            hr({ className: "table-head-separator" }),
 
             this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
@@ -162,7 +162,7 @@ class MemberConsole extends Component {
                     ]),
                   ]),
                 ]),
-                hr({ className: "pvotes-separator" })
+                hr({ className: "table-body-separator" })
               ])
             }),
             PaginatorBar({
@@ -199,7 +199,7 @@ class MemberConsole extends Component {
               ]),
             ]),
 
-            hr({ className: "pvotes-main-separator" }),
+            hr({ className: "table-head-separator" }),
 
             this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
@@ -222,7 +222,7 @@ class MemberConsole extends Component {
                       ]),
                     ]),
                 ]),
-                hr({ className: "pvotes-separator" })
+                hr({ className: "table-body-separator" })
               ])
             }),
             PaginatorBar({

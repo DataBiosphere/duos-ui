@@ -20,8 +20,6 @@ class AdminConsole extends Component {
       showAddUserModal: false,
       showAddDatasetModal: false,
       showAddOntologiesModal: false,
-      showEditDulModal: false,
-      showEditUserModal: false,
       showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
@@ -73,20 +71,6 @@ class AdminConsole extends Component {
     });
   }
 
-  editDul = (e) => {
-    this.setState(prev => {
-      prev.showEditDulModal = true;
-      return prev;
-    });
-  }
-
-  editUser = (e) => {
-    this.setState(prev => {
-      prev.showEditUserModal = true;
-      return prev;
-    });
-  }
-
   electionTimeout = (e) => {
     this.setState(prev => {
       prev.showElectionTimeoutModal = true;
@@ -101,8 +85,6 @@ class AdminConsole extends Component {
       case 'addUser': this.setState({ showAddUserModal: false }); break;
       case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
       case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
-      case 'editDul': this.setState({ showEditDulModal: false }); break;
-      case 'editUser': this.setState({ showEditUserModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -114,8 +96,6 @@ class AdminConsole extends Component {
       case 'addUser': this.setState({ showAddUserModal: false }); break;
       case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
       case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
-      case 'editDul': this.setState({ showEditDulModal: false }); break;
-      case 'editUser': this.setState({ showEditUserModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -127,8 +107,6 @@ class AdminConsole extends Component {
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
       case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
       case 'addOntologies': this.setState(prev => { prev.showAddOntologiesModal = false; return prev; }); break;
-      case 'editDul': this.setState(prev => { prev.showEditDulModal = false; return prev; }); break;
-      case 'editUser': this.setState(prev => { prev.showEditUserModal = false; return prev; }); break;
       case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
     }
