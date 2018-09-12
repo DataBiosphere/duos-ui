@@ -153,6 +153,9 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
               ])
             ])
           ]),
+          div({ isRendered: this.state.errors }, [
+            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
+          ]),
           div({ className: "row download-link" }, ["Click here to download a ", a({ className: "hover-color", href: "/DataSetSample.tsv" }, ["Dataset Spreadsheet Modal"])]),
         ])
     );
