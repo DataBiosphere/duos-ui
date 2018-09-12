@@ -8,6 +8,7 @@ import { Consent, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
+import { SearchBox } from '../components/SearchBox';
 
 const limit = 10;
 
@@ -23,6 +24,7 @@ class AdminManageDul extends Component {
       electionsList: {
         dul: []
       },
+      searchDUL: '',
       showDialogArchive: false,
       showDialogCancel: false,
       showDialogCreate: false,
@@ -150,7 +152,7 @@ class AdminManageDul extends Component {
     this.setState({
       createWarning: (status === 'Closed' && archived !== true),
       showDialogCreate: true,
-      createId : e.target.getAttribute('consentid')
+      createId: e.target.getAttribute('consentid')
     });
   };
 
@@ -172,7 +174,7 @@ class AdminManageDul extends Component {
     //
     this.setState({ showDialogCreate: false });
     let consentId = this.state.createId;
-    let election = { status: 'Open'};
+    let election = { status: 'Open' };
     Election.create(consentId, election);
   };
 
@@ -180,8 +182,17 @@ class AdminManageDul extends Component {
     this.setState({ showDialogDelete: false });
   };
 
+  handleSearch = (query) => {
+    this.setState({ searchDUL: query });
+  }
+
+  searchDUL = (row) => {
+    let text = JSON.stringify(row);
+    return text.includes(this.state.searchDUL);
+  }
+
   render() {
-    const { currentPage } = this.state;
+    const { currentPage, limit } = this.state;
 
 
     return (
@@ -192,10 +203,11 @@ class AdminManageDul extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search dul-color" }),
-                input({ type: "search", className: "form-control users-search", placeholder: "Enter search term..."/*, value: "searchDUL"*/ }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearch })
+              // div({ className: "search-text" }, [
+              //   i({ className: "glyphicon glyphicon-search dul-color" }),
+              //   input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", onChange: this.handleSearch  }),
+              // ]),
             ]),
 
             a({ id: 'title_addDUL', className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", onClick: this.addDul }, [
@@ -221,8 +233,7 @@ class AdminManageDul extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
-            //---------------------
+          this.state.electionsList.dul.filter(this.searchDUL).slice((currentPage - 1) * limit, currentPage * limit).map((election, eIndex) => {
             return (
               h(Fragment, { key: election.consentId }, [
                 div({ id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
