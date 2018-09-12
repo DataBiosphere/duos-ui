@@ -2,7 +2,8 @@ import { Component, Fragment } from 'react';
 import { div, hr, input, i, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-
+import { PendingCases } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 
 class DataOwnerConsole extends Component {
 
@@ -32,19 +33,15 @@ class DataOwnerConsole extends Component {
     });
   };
 
-  mockData() {
-    this.setState({
-      dataOwnerUnreviewedCases: [
-        { dataSetId: "DS001", dataSetName: 'DS Name 001', darCode: 'DAR001', alreadyVoted: true, hasConcerns: true },
-        { dataSetId: "DS002", dataSetName: 'DS Name 002', darCode: 'DAR002', alreadyVoted: true, hasConcerns: false },
-        { dataSetId: "DS003", dataSetName: 'DS Name 003', darCode: 'DAR003', alreadyVoted: false, hasConcerns: true },
-        { dataSetId: "DS004", dataSetName: 'DS Name 004', darCode: 'DAR004', alreadyVoted: false, hasConcerns: false },
-      ]
-    })
-  }
-
-  componentDidMount() {
-    this.mockData();
+  componentWillMount() {
+    let currentUser = Storage.getCurrentUser();
+    this.setState({ currentUser: currentUser }, () => {
+      PendingCases.findDataOwnerUnReviewed().then(
+        dars => {
+          this.setState({ dataOwnerUnreviewedCases: dars });
+        }
+      )
+    });
   }
 
   handleOpenModal() {
@@ -67,11 +64,7 @@ class DataOwnerConsole extends Component {
 
   render() {
 
-    let currentUser = {
-      displayName: 'Nadya Lopez Zalba'
-    }
-
-    const { currentPage } = this.state;
+    const { currentUser, currentPage, limit } = this.state;
 
     return (
       div({ className: "container" }, [
@@ -109,7 +102,7 @@ class DataOwnerConsole extends Component {
 
           hr({ className: "pvotes-main-separator" }),
 
-          this.state.dataOwnerUnreviewedCases.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map(pendingCase => {
+          this.state.dataOwnerUnreviewedCases.slice((currentPage - 1) * limit, currentPage * limit).map(pendingCase => {
             return h(Fragment, { key: pendingCase.darCode }, [
               div({ id: pendingCase.darCode, className: "row pvotes-main-list" }, [
 
@@ -142,9 +135,9 @@ class DataOwnerConsole extends Component {
           }),
           PaginatorBar({
             total: this.state.dataOwnerUnreviewedCases.length,
-            limit: this.state.limit,
+            limit: limit,
             pageCount: this.pageCount,
-            currentPage: this.state.currentPage,
+            currentPage: currentPage,
             onPageChange: this.handlePageChange,
             changeHandler: this.handleSizeChange,
           }),

@@ -26,11 +26,6 @@ class AdminConsole extends Component {
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
     };
-
-    this.okModal = this.okModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-    this.afterModalOpen = this.afterModalOpen.bind(this);
-
   }
 
   componentWillMount() {
@@ -46,7 +41,7 @@ class AdminConsole extends Component {
 
     PendingCases.findDARUnReviewed().then(
       resp => {
-        this.setState({ darUnreviewedCases: resp.darUnreviewedCases });
+        this.setState({ darUnreviewedCases: resp.darUnReviewedCases });
       });
   }
 

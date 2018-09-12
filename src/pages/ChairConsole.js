@@ -23,6 +23,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       darLimit: 5,
       currentDulPage: 1,
       currentDarPage: 1,
+      totalDulPendingVotes: 0,
+      totalAccessPendingVotes: 0,
       electionsList: {
         dul: [],
         access: []
@@ -62,158 +64,47 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   componentWillMount() {
-    let dul = [];
-    let dars = [];
-
     let currentUser = Storage.getCurrentUser();
     this.setState({ currentUser: currentUser }, () => {
-      dul = PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
-      dul.then(dul => {
-        if (dul !== undefined) {
-          console.log('---- INFO 1 ----', dul);
-          this.setState(prev => {
-            prev.electionsList.dul = dul;
-            return prev;
-          }, () => {
-            dars = PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
-            dars.then(dars => {
-              if (dars !== undefined) {
-                console.log('---- INFO 2 ----', dars);
-                this.setState(prev => {
-                  prev.electionsList.access = dars;
-                  return prev;
-                });
-              }
-            });
-          }
-          );
-        }
-      })
+      this.init(currentUser);
+    });
+  }
+
+  async init(currentUser) {
+
+    let duls = await PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
+    this.setState(prev => {
+      prev.electionsList.dul = duls.dul;
+      prev.totalDulPendingVotes = duls.totalDulPendingVotes
+      return prev;
     });
 
-
-    // for (var i = 0; i < 77; i++) {
-    //   dul.push(this.createPendingCase(i));
-    //   access.push(this.createPendingCase(i));
-    // }
-
-
-
-
-
-    console.log('dul', dul);
-    console.log('access', dars);
-
+    let dars = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
     this.setState(prev => {
-      prev.totalAccessPendingVotes = 5;
-      prev.totalDulPendingVotes = 6;
-      // prev.currentUser = {
-      //   displayName: 'Nadya Lopez Zalba',
-      // };
-      // prev.electionsList = {
-      //   dul: dul,
-      //   access: access,
-      // };
+      prev.electionsList.access = dars.access;
+      prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
       return prev;
     });
   }
 
-  // var vm = this;
-  // vm.totalDulPendingVotes = 0;
-  // vm.totalAccessPendingVotes = 0;
-  // vm.totalResearchPurposePendingVotes = 0;
-  // vm.currentDULPage = 1;
-  // vm.currentAccessPage = 1;
-  // vm.openDULReview = openDULReview;
-  // vm.openDULReviewResult = openDULReviewResult;
-  // vm.openAccessReviewResult = openAccessReviewResult;
-  // vm.openAccessReview = openAccessReview;
-  // vm.openFinalAccessReviewResults = openFinalAccessReviewResults;
-  // vm.electionsList = { 'dul': [], 'access': [], 'rp': [] };
-  // $rootScope.pathFrom = 'chair_console';
-  // init();
-
-  // function init() {
-  //     if (($rootScope.path === 'dul-review' || $rootScope.path === 'dul-review-results') && $rootScope.currentDULPage !== undefined) {
-  //         vm.currentDULPage = $rootScope.currentDULPage;
-  //     } else if (($rootScope.path === 'access-review' || $rootScope.path === 'access-review-results' || $rootScope.path === 'final-access-review-results') && $rootScope.currentAccessPage !== undefined) {
-  //         vm.currentAccessPage = $rootScope.currentAccessPage;
-  //     }
-  //     $rootScope.currentAccessPage = undefined;
-  //     $rootScope.currentDULPage = undefined;
-  //     $rootScope.path = undefined;
-  //     cmPendingCaseService.findConsentPendingCasesByUser($rootScope.currentUser.dacUserId, vm);
-  //     cmPendingCaseService.findDataRequestPendingCasesByUser($rootScope.currentUser.dacUserId, vm);
-
-  // }
-
-  //   function openDULReview(consentId, voteId) {
-  //     $rootScope.currentDULPage = vm.currentDULPage;
-  //     $state.go('dul_review', { consentId: consentId, voteId: voteId });
-  // }
-
-  // function openDULReviewResult(consentId) {
-  //     $rootScope.currentDULPage = vm.currentDULPage;
-  //     $state.go('dul_review_results', { consentId: consentId});
-  // }
-
-  // function openAccessReviewResult(referenceId, electionId) {
-  //     $rootScope.currentAccessPage = vm.currentAccessPage;
-  //     $state.go('access_review_results', { referenceId: referenceId, electionId: electionId });
-  // }
-
-  // function openAccessReview(darId, voteId, rpVoteId) {
-  //     $rootScope.currentAccessPage = vm.currentAccessPage;
-  //     $state.go('access_review', { darId: darId, voteId: voteId, rpVoteId: rpVoteId });
-  // }
-
-  // function openFinalAccessReviewResults(referenceId, electionId, rpElectionId) {
-  //     $rootScope.currentAccessPage = vm.currentAccessPage;
-  //     $state.go('final_access_review_results', { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId });
-  // }
-
-  createPendingCase(ix) {
-    return {
-      frontEndId: 'Front ID' + ix,
-      refrenceId: 'Ref ID' + ix,
-      alreadyVoted: ix % 2 === 0 ? true : false,
-      logged: ix % 2 === 0 ? 'Yes' : 'No',
-      consentGroupName: 'ORS-222',
-      voteId: 'XX' + ix,
-      projectTitle: 'Project Title ' + ix,
-      rpVoteId: 'rpVote ID' + ix,
-      electionStatus: ix % 6 === 0 ? 'Open' :
-        ix % 6 === 1 ? 'Closed' :
-          ix % 6 === 2 ? 'Canceled' :
-            ix % 6 === 3 ? 'un-reviewed' :
-              ix % 6 === 4 ? 'PendingApproval' :
-                ix % 6 === 5 ? 'Final' : '',
-      isFinalVote: ix % 2 === 0 ? true : false,
-    }
+  openDULReview = (voteId, referenceId) => (e) => {
+    this.props.history.push(`dul_review/${voteId}/${referenceId}`);
   }
 
-  openAccessReview = (e) => {
-    const value = e.target.getAttribute('value');
-    console.log('---------openAccessReview----------', value);
-    //(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId)"
+  openDulCollect = (consentId) => (e) => {
+    this.props.history.push(`dul_collect/${consentId}`);
   }
 
-  openDULReview = (e) => {
-    let pendingCase = e.target.getAttribute('value');
-    console.log('---------openDulReview----------', pendingCase);
-    //pendingCase.referenceId, pendingCase.voteId)",
+  openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
+    this.props.history.push({ pathname: 'final_access_review', props:  { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
   }
 
-  openFinalAccessReviewResults = (e) => {
-    let pendingCase = e.target.getAttribute('value');
-    console.log('---------openFinalAccessReviewResults----------', pendingCase);
-    //  (pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId)",
-  }
+  openAccessReview = (darId, voteId, rpVoteId) => (e) => {
+   this.props.history.push({ pathname: 'access_review', props: { darId: darId, voteId: voteId, rpVoteId: rpVoteId } });
+ }
 
-  openAccessReviewResult = (e) => {
-    let pendingCase = e.target.getAttribute('value');
-    console.log('---------openAccessReviewResult----------', pendingCase);
-    //  (pendingCase.referenceId, pendingCase.electionId)"
+  openAccessCollect = (referenceId, electionId) => (e) => {
+    this.props.history.push({ pathname: 'access_collect', props: { referenceId: referenceId, electionId: electionId } });
   }
 
   handleOpenModal() {
@@ -272,16 +163,19 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ''), title: pendingCase.consentGroupName }, [pendingCase.consentGroupName]),
 
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    button({ onClick: this.openDULReview, className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
-                      span({ isRendered: pendingCase.alreadyVoted === false, value: JSON.stringify(pendingCase) }, ["Vote"]),
-                      span({ isRendered: pendingCase.alreadyVoted === true, value: JSON.stringify(pendingCase) }, ["Edit"]),
-                    ]),
+                    button({
+                      onClick: this.openDULReview (pendingCase.voteId, pendingCase.referenceId),
+                      className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
+                    }, [
+                        span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
+                      ]),
                   ]),
 
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
 
                   div({ isRendered: pendingCase.alreadyVoted === true, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    button({ onClick: this.openDULReviewResult, className: "cell-button cancel-color" }, ["Collect Votes"]),
+                    button({ onClick: this.openDulCollect(pendingCase.referenceId), className: "cell-button cancel-color" }, ["Collect Votes"]),
                   ]),
                   div({ isRendered: pendingCase.alreadyVoted === false, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text empty f-center" }, []),
                 ]),
@@ -337,9 +231,10 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
 
                   div({ isRendered: pendingCase.electionStatus !== 'Final', className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    button({ onClick: this.openAccessReview, className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color') }, [
-                      span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final'), value: JSON.stringify(pendingCase) }, ["Vote"]),
-                      span({ isRendered: pendingCase.alreadyVoted === true, value: JSON.stringify(pendingCase) }, ["Edit"])
+                    button({ onClick: this.openAccessReview(pendingCase.darId, pendingCase.voteId, pendingCase.rpVoteId), 
+                      className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color') }, [
+                      span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ["Vote"]),
+                      span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"])
                     ])
                   ]),
                   div({ isRendered: pendingCase.electionStatus === 'Final', className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center empty" }, []),
@@ -347,10 +242,12 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
 
                   div({ isRendered: (pendingCase.alreadyVoted === true) && (!pendingCase.isFinalVote) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center" }, [
-                    button({ onClick: this.openAccessReviewResult, value: pendingCase, className: "cell-button cancel-color" }, ["Collect Votes"])
+                    button({ onClick: this.openAccessCollect(pendingCase.referenceId, pendingCase.electionId),
+                       className: "cell-button cancel-color" }, ["Collect Votes"])
                   ]),
                   div({ isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center" }, [
-                    button({ onClick: this.openFinalAccessReviewResults, value: pendingCase, className: "cell-button cancel-color" }, ["FINAL VOTE"])
+                    button({ onClick: this.openFinalAccessReview(pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId), 
+                      className: "cell-button cancel-color" }, ["FINAL VOTE"])
                   ]),
                   div({ isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text f-center empty" }, [])
                 ]),

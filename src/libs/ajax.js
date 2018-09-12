@@ -56,6 +56,7 @@ export const User = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
+
   list: async () => {
     const url = `${await Config.getApiUrl()}/dacuser`;
     const res = await fetchOk(url, Config.authOpts());
@@ -488,7 +489,7 @@ export const Consent = {
 export const Election = {
 
   create: async (consentId, election) => {
-    console.log('------------------------------------> ', consentId, election );
+    console.log('------------------------------------> ', consentId, election);
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res.json();
@@ -658,13 +659,40 @@ export const DAR = {
   getDataAccessManage: async userId => {
     const url = `${await Config.getApiUrl()}/dar/manage?userId=${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const dars = await res.json();
+    if (dars !== undefined) {
+      dars.forEach(
+        dar => {
+          dar.ownerUser.roles.forEach(role => {
+            if (role.name === 'Researcher') {
+              dar.status = role.status;
+            }
+          });
+        });
+      return dars;
+    } else {
+      return [];
+    }
   },
 
   getPartialDarRequestList: async userId => {
     const url = `${await Config.getApiUrl()}/dar/partials/manage?userId=${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const pdars = await res.json();
+    return pdars;
+  },
+
+  getPartialDarRequest: async userId => {
+    const url = `${await Config.getApiUrl()}/dar/partial/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    const pdars = await res.json();
+    return pdars;
+  },
+
+  getDarFields: async id => {
+  const url = `${await Config.getApiUrl()}/dar/find/${id}`;
+  const res = await fetchOk(url, Config.authOpts());
+  return res.json();
   },
 
 };
@@ -731,74 +759,66 @@ export const PendingCases = {
   findDataRequestPendingCasesByUser: async (userId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const dars = await res.json();
+    let resp = {
+      access: dars,
+      totalAccessPendingVotes: 0
+    };
 
-    // fetchOk(url, Config.authOpts()).then(
-    //   data => {
-    //     let resp = {};
-    //     let info = data.json();
-    //     console.log('------------------- data.json ------------------', info);
-    //     resp.electionsList.access = data;
-    //     resp.totalAccessPendingVotes = 0;
-    //     resp.electionsList.access.forEach(
-    //       access => {
-    //         if (access.alreadyVoted === false) {
-    //           resp.totalAccessPendingVotes += (access.alreadyVoted === false ? 1 : 0);
-    //         }
-    //       }
-    //     );
-    //     console.log('resp ----------------------->', resp);
-    //     return resp;
-    //   },
-    //   error => {
-    //     console.log('----------------------error--------------------', error);
-    //   });
+    resp.access.forEach(
+      dar => {
+        if (dar.alreadyVoted === false) {
+          resp.totalAccessPendingVotes += (dar.alreadyVoted === false ? 1 : 0);
+        }
+      }
+    );
+    console.log('---------------------findDataRequestPendingCasesByUser------------------------------------- ',resp);
+    return resp;
   },
 
 
   findConsentPendingCasesByUser: async (userId) => {
     const url = `${await Config.getApiUrl()}/consent/cases/pending/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
- 
-    // fetchOk(url, Config.authOpts()).then(
-    //   data => {
-    //     console.log('------------------------ data ------------------', data.json());
-    //     let resp = {};
-    //     resp.electionsList.dul = data;
-    //     resp.totalDulPendingVotes = 0;
-    //     resp.electionsList.dul.forEach(
-    //       // dul.consentGroupName = $sce.trustAsHtml(dul.consentGroupName);
-    //       dul => {
-    //         if (dul.alreadyVoted === false) {
-    //           resp.totalDulPendingVotes += (dul.alreadyVoted === false ? 1 : 0);
-    //         }
-    //       }
-    //     );
-    //     return resp;
-    //   },
-    //   error => {
-    //     console.log('----------------------error--------------------', error);
-    //   });
+    const duls = await res.json();
+
+    let resp = {
+      dul: duls,
+      totalDulPendingVotes: 0
+    };
+
+    resp.dul.forEach(
+      // dul.consentGroupName = $sce.trustAsHtml(dul.consentGroupName);
+      dul => {
+        if (dul.alreadyVoted === false) {
+          resp.totalDulPendingVotes += (dul.alreadyVoted === false ? 1 : 0);
+        }
+      }
+    );
+    console.log('---------------------findConsentPendingCasesByUser------------------------------------- ',resp);
+    return resp;
   },
 
 
   findConsentUnReviewed: async (vm) => {
     const url = `${await Config.getApiUrl()}/consent/unreviewed`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const duls = await res.json();
+    return duls;
   },
 
   findDARUnReviewed: async (vm) => {
     const url = `${await Config.getApiUrl()}/dar/cases/unreviewed`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const dars = await res.json();
+    return dars;
   },
 
-  findDataOwnerUnReviewed: async (dataOwnerId, vm) => {
+  findDataOwnerUnReviewed: async (dataOwnerId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const dars = await res.json();
+    return dars;
   },
 
   findSummary: async (data, vm) => {

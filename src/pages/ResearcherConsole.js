@@ -11,7 +11,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 class ResearcherConsole extends Component {
 
   darPageCount = 10;
-  partialDarPageCount = 10;
+  partialDarPageCount = 20;
 
   constructor(props) {
     super(props);
@@ -26,7 +26,6 @@ class ResearcherConsole extends Component {
       currentPartialDarPage: 1,
       showDialogCancelDAR: false,
       showDialogDeletePDAR: false,
-
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -72,6 +71,20 @@ class ResearcherConsole extends Component {
   review = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     console.log('------------review------------', dataRequestId);
+
+    DAR.getDarFields(dataRequestId, null).then(
+      data => {
+        let formData = data;
+        formData.datasetId = [];
+        formData.datasetDetail.forEach(
+          detail => {
+            let obj = {};
+            obj.id = detail.datasetId;
+            obj.concatenation = detail.datasetId + "  " + detail.name;
+            formData.datasetId.push(obj);
+          });
+        this.props.history({ pathname: 'dar_application', props: formData });
+      });
   }
 
   cancelDar = (e) => {
@@ -83,12 +96,18 @@ class ResearcherConsole extends Component {
   resume = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     console.log('------------resume------------', dataRequestId);
+    let dars = DAR.getPartialDarRequest(this.state.currentUser.dacUserId).then(
+    data => {
+      let formData = data;
+      this.props.history({ pathname: 'dar_application', props: formData });
+    });
   }
 
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     console.log('------------deletePartialDar------------', dataRequestId);
     this.setState({ showDialogDeletePDAR: true });
+
   }
 
   dialogHandlerCancelDAR = (answer) => (e) => {
@@ -103,32 +122,17 @@ class ResearcherConsole extends Component {
     let currentUser = Storage.getCurrentUser();
 
     this.setState({ currentUser: currentUser });
+    console.log("-------------------------------------", currentUser)
 
     this.init(currentUser);
   }
 
   async init(currentUser) {
-    let dars = DAR.getDataAccessManage(currentUser.dacUserId);
-    dars.then(
-      dars => {
-        if (dars !== undefined) {
-          dars.forEach(
-            dar => {
-              dar.ownerUser.roles.forEach(role => {
-                if (role.name === 'Researcher') {
-                  dar.status = role.status;
-                }
-              });
-            });
-          this.setState({ dars: dars });
-        }
-      });
+    let dars = await DAR.getDataAccessManage(currentUser.dacUserId);
+    this.setState({ dars: dars });
 
-    let pdars = DAR.getPartialDarRequestList(currentUser.dacUserId);
-    pdars.then(pdars => {
-      if (pdars !== undefined)
-        this.setState({ partialDars: pdars });
-    });
+    let pdars = await DAR.getPartialDarRequestList(currentUser.dacUserId);
+    this.setState({ partialDars: pdars });
   }
 
   render() {
@@ -179,7 +183,7 @@ class ResearcherConsole extends Component {
               hr({ className: "pvotes-main-separator" }),
 
               this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(dar => {
-                return h(Fragment, {key: dar.frontEndId}, [
+                return h(Fragment, { key: dar.frontEndId }, [
                   div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin" }, [
                     div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.frontEndId]),
                     div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.projectTitle]),
@@ -192,14 +196,18 @@ class ResearcherConsole extends Component {
                       span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === true }, ["APPROVED"]),
                     ]),
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center", disabled: dar.isCanceled }, [
-                      button({ id: dar.frontEndId + "_btn_cancel", isRendered: !dar.isCanceled, className: "cell-button cancel-color", 
-                      onClick: this.cancelDar, value: dar.dataRequestId }, ["Cancel"]),
+                      button({
+                        id: dar.frontEndId + "_btn_cancel", isRendered: !dar.isCanceled, className: "cell-button cancel-color",
+                        onClick: this.cancelDar, value: dar.dataRequestId
+                      }, ["Cancel"]),
                       button({ id: dar.frontEndId + "_canceled", isRendered: dar.isCanceled, className: "disabled" }, ["Canceled"]),
                     ]),
-//------------------------
+                    //------------------------
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
-                      button({ id: dar.frontEndId + "_btn_review", className: "cell-button hover-color", onClick: this.review, 
-                      value: dar.dataRequestId }, ["Review"]),
+                      button({
+                        id: dar.frontEndId + "_btn_review", className: "cell-button hover-color", onClick: this.review,
+                        value: dar.dataRequestId
+                      }, ["Review"]),
                     ])
                   ]),
                   hr({ className: "pvotes-separator" })
@@ -232,19 +240,23 @@ class ResearcherConsole extends Component {
                 hr({ className: "pvotes-main-separator" }),
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {
-                  return h(Fragment, {key: pdar.partial_dar_code}, [
+                  return h(Fragment, { key: pdar.partial_dar_code }, [
                     div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin" }, [
-                      a({ id: pdar.partial_dar_code + "_btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color", 
-                      onClick: this.deletePartialDar, value: pdar.dataRequestId }, [
-                        span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
-                      ]),
-//------
+                      a({
+                        id: pdar.partial_dar_code + "_btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
+                        onClick: this.deletePartialDar, value: pdar.dataRequestId
+                      }, [
+                          span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
+                        ]),
+                      //------
                       div({ id: pdar.partial_dar_code + "_partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partial_dar_code]),
                       div({ id: pdar.partial_dar_code + "_partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),
                       div({ id: pdar.partial_dar_code + "_partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),
                       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                        button({ id: pdar.partial_dar_code + "_btn_resume", className: "cell-button hover-color", onClick: this.resume, 
-                        value: pdar.dataRequestId }, ["Resume"]),
+                        button({
+                          id: pdar.partial_dar_code + "_btn_resume", className: "cell-button hover-color", onClick: this.resume,
+                          value: pdar.dataRequestId
+                        }, ["Resume"]),
                       ]),
                     ]),
                     hr({ className: "pvotes-separator" })
@@ -264,16 +276,16 @@ class ResearcherConsole extends Component {
             ]),
           ]),
         ]),
-      ]),
-      ConfirmationDialog({
-        title: 'Cancel saved Request?', color: 'cancel', showModal: this.state.showDialogCancelDAR, action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
-      }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
-    
-      ConfirmationDialog({
-        title: 'Delete saved Request?', color: 'cancel', showModal: this.state.showDialogDeletePDAR, action: { label: "Yes", handler: this.dialogHandlerDeletePDAR }
-      }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Data Access Request?"]),])
+        ConfirmationDialog({
+          title: 'Cancel saved Request?', color: 'cancel', showModal: this.state.showDialogCancelDAR, action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
+        }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
 
-    
+        ConfirmationDialog({
+          title: 'Delete saved Request?', color: 'cancel', showModal: this.state.showDialogDeletePDAR, action: { label: "Yes", handler: this.dialogHandlerDeletePDAR }
+        }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Data Access Request?"]),])
+
+      ])
+
     );
   }
 }
