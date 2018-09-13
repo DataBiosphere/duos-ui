@@ -155,28 +155,27 @@ class AdminManageDul extends Component {
     });
   };
 
-  openDialogDelete = (consentId) => {
-    this.setState({ showDialogDelete: true, payload: consentId });
+  openDialogDelete =(election) => (e) => {
+    this.setState({
+      showDialogDelete: true,
+      deleteId : election.consentId
+    });
   };
 
   dialogHandlerArchive = (answer, election) => (e) => {
     this.setState({ showDialogArchiveOpen: false });
     this.setState({ showDialogArchiveClose: false });
-
-    var electionUpdate = {};
+    let electionUpdate = {};
     electionUpdate.status = election.electionStatus === 'Open' ? 'Canceled' : election.electionStatus;
     electionUpdate.referenceId = election.consentId;
     electionUpdate.electionId = election.electionId;
     electionUpdate.archived = true;
-    electionUpdate.finalVote = election.finalVote;
-    electionUpdate.finalRationale = election.finalRationale;
-    Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate).then(data => {
-      this.getConsentManage();
-    })
+    Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate).then(() =>this.getConsentManage())
   };
 
-  dialogHandlerCancel = (answer, election) => (e) => {
+  dialogHandlerCancel = (answer) => (e) => {
     this.setState({ showDialogCancel: false });
+    let election = this.state.payload;
     if (answer) {
       let electionUpdated = { status: 'Canceled', referenceId: election.consentId, electionId: election.electionId, archived: this.state.archiveCheck};
       Election.electionUpdateResourceUpdate(election.electionId, electionUpdated).then(() => {
@@ -194,16 +193,18 @@ class AdminManageDul extends Component {
     }
   };
 
-  dialogHandlerDelete = (answer, consentId) => (e) => {
+  dialogHandlerDelete = (answer ) => (e) => {
     this.setState({ showDialogDelete: false });
-
+    let consentId = this.state.deleteId;
     if (answer) {
       Consent.DeleteConsentResource(consentId).then(data => {
         if (data.ok) {
-          this.getConsentManage();
-          // this.setState({
-          //   electionList: { dul:this.state.electionsList.dul.filter( election => election.consentId !== consentId)} });
-          // this.state.electionsList.dul = this.state.electionsList.dul.filter( election => election.consentId !== consentId);
+          let updatedDul = this.state.electionsList.dul.filter( election => election.consentId !== consentId);
+          this.setState(prev => {
+            prev.currentPage = 1;
+            prev.electionsList.dul = updatedDul;
+            return prev;
+          });
         }
       });
     }
@@ -294,7 +295,7 @@ class AdminManageDul extends Component {
                       ]),
                     ]),
                     div({ id: election.consentId + "_btn_deleteDul", className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
-                      button({ onClick: () => this.openDialogDelete(election.consentId) }, [
+                      button({ onClick: this.openDialogDelete(election) }, [
                         span({ className: "glyphicon caret-margin glyphicon-trash" })
                       ]),
                     ]),
@@ -368,7 +369,7 @@ class AdminManageDul extends Component {
 
         ConfirmationDialog({
           title: 'Delete Consent?', color: 'cancel', showModal: this.state.showDialogDelete,
-          payload: this.state.payload, action: { label: "Yes", handler: this.dialogHandlerDelete }
+          action: { label: "Yes", handler: this.dialogHandlerDelete }
         }, [
             div({ className: "dialog-description" }, [
               span({}, ["Are you sure you want to delete this Consent?"]),

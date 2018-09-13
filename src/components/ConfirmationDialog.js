@@ -51,7 +51,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
         }, [
 
             div({ className: "dialog-header" }, [
-              button({ id: "btn_dialogClose", type: "button", className: "dialog-close-btn close", onClick: this.props.action.handler(false, this.props.payload) }, [
+              button({ id: "btn_dialogClose", type: "button", className: "dialog-close-btn close", onClick: this.props.action.handler(false) }, [
                 span({ className: "glyphicon glyphicon-remove default-color" }),
               ]),
               h2({ id: "lbl_dialogTitle", className: "dialog-title " + this.props.color + "-color" }, [this.props.title]),
@@ -66,7 +66,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
 
             div({ className: "dialog-footer" }, [
               button({ isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background", onClick: this.props.action.handler(false) }, ["No"]),
-              button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background " + (this.props.type === "informative" ? "f-right" : ""), onClick: this.props.action.handler (true, this.props.payload) }, [this.props.action.label]),
+              button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background " + (this.props.type === "informative" ? "f-right" : ""), onClick: this.props.action.handler (true) }, [this.props.action.label]),
             ])
           ])
       ])
