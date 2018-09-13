@@ -5,6 +5,7 @@ import { DataSet } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
 import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
+import ReactTooltip from 'react-tooltip';
 
 
 const USER_ID = 5;
@@ -203,8 +204,8 @@ class DatasetCatalog extends Component {
                 download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
-                  span({ className: "cm-icon-button glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }, []),
-                  span({}, ["Download selection"]),
+                  span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px'} }),
+                  "Download selection"
                 ]),
             ]),
           ]),
@@ -278,31 +279,29 @@ class DatasetCatalog extends Component {
                               }, [
 
                                   div({ className: "dataset-actions" }, [
-                                    a({
-                                      onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable
-                                      // tooltip: "Delete dataset", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true" })
-                                      ]),
+                                    a({ onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable }, [
+                                      span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true", "data-tip": "", "data-for": "tip_delete" })
+                                    ]),
+                                    h(ReactTooltip, { id: "tip_delete", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Delete dataset"]),
 
-                                    a({
-                                      isRendered: dataSet.active, onClick: this.openDisable(property.propertyValue)
-                                      // "tooltip": "Disable dataset", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true" })
-                                      ]),
+                                    a({ isRendered: dataSet.active, onClick: this.openDisable(property.propertyValue) }, [
+                                      span({ className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true", "data-tip": "", "data-for": "tip_disable" })
+                                    ]),
+                                    h(ReactTooltip, { id: "tip_disable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Disable dataset"]),
 
-                                    a({
-                                      isRendered: !dataSet.active, onClick: this.openEnable(property.propertyValue)
-                                      // "tooltip": "Enable dataset", "tooltip-className": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color", "aria-hidden": "true" }),
-                                      ]),
-
+                                    a({ isRendered: !dataSet.active, onClick: this.openEnable(property.propertyValue) }, [
+                                      span({ className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color", "aria-hidden": "true", "data-tip": "", "data-for": "tip_enable" })
+                                    ]),
+                                    h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
                                     a({
                                       onClick: this.openConnectDataset
                                       // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
-                                      // "tooltip": "Connect with Data Owner", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
-                                    }, [span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true" }),
+                                    }, [
+                                        span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
                                       ]),
+                                    h(ReactTooltip, { id: "tip_connect", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Connect with Data Owner"]),
+
 
                                     ConfirmationDialog({
                                       title: 'Delete Dataset Confirmation?', color: 'cancel', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
@@ -367,10 +366,10 @@ class DatasetCatalog extends Component {
                 disabled: objectIdList.length === 0,
                 onClick: this.exportToRequest(objectIdList),
                 className: "download-button dataset-background apply-dataset",
-                disabled: objectIdList.length === 0 ,
-                tooltip: "Request Access for selected Datasets", "tooltip-class": "tooltip-class", "tooltip-trigger": "true",
-                "tooltip-placement": "top", "tooltip-animation": "false"
+                disabled: objectIdList.length === 0,
+                "data-tip": "", "data-for": "tip_requestAccess"
               }, ["Apply for Access"]),
+              h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
             ])
           ])
         ])
