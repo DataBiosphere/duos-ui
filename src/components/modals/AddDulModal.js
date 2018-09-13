@@ -8,7 +8,13 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      file: {
+        name: "",
+      }
+    }
 
+    this.handleFileChange = this.handleFileChange.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
@@ -40,7 +46,15 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
     // and call parent's after open handler
     this.props.onAfterOpen('addDul');
+  }
 
+  handleFileChange(event) {
+    if (event.target.files !== undefined && event.target.files[0]) {
+      let file = event.target.files[0];
+      this.setState({
+        file: file,
+      });
+    }
   }
 
   render() {
@@ -63,9 +77,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         [
 
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Unique id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+            div({ className: "form-group first-form-group" }, [
+              label({ id: "lbl_consentId", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Unique id"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text", "ng-model": "consent.consentId",
                   id: "txt_consentId", name: "inputConsentId",
@@ -75,9 +89,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+            div({ className: "form-group" }, [
+              label({ id: "lbl_consentName", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text", "ng-model": "consent.name",
                   id: "txt_consentName", name: "inputName",
@@ -87,23 +101,22 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
-              label({ id: "lbl_file", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use Limitations File"]),
+            div({ className: "form-group" }, [
+              label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use Limitations File"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
                   span({}, ["Upload file"]),
                   span({ className: "cm-icon-button glyphicon glyphicon-upload caret-margin", "aria-hidden": "true" }, []),
-                  input({ type: "file", "ng-model": "file.name", "file-upload": "true", id: "txt_file", className: "upload", required: "true" }),
+                  input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
                 ]),
-                p({ className: "fileName" }, [file.name]),
+                p({ id: "txt_uploadFile", className: "fileName" }, [file.name]),
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+            div({ className: "form-group" }, [
+              label({ id: "lbl_sdul", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  "ng-model": "useRestriction",
                   id: "txt_sdul", name: "inputSDUL",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})", required: "true"
@@ -111,11 +124,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+            div({ className: "form-group" }, [
+              label({ id: "lbl_dataUse", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  "ng-model": "dataUse",
                   id: "txt_dataUse", name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})", required: "true"
@@ -125,7 +137,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
           ]),
 
           div({ isRendered: false }, [
-            Alert({ id: "addDul", type: "danger", title: "alert.title", description: "alert.msg" })
+            Alert({ id: "modal", type: "danger", title: "alert.title", description: "alert.msg" })
           ])
         ])
     );

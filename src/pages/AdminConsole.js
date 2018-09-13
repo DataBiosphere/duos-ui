@@ -7,6 +7,8 @@ import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
+import { PendingCases } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 
 class AdminConsole extends Component {
 
@@ -18,170 +20,101 @@ class AdminConsole extends Component {
       showAddUserModal: false,
       showAddDatasetModal: false,
       showAddOntologiesModal: false,
-      showEditDulModal: false,
-      showEditUserModal: false,
-      showElectionTimeoutModal: false
+      showElectionTimeoutModal: false,
+      dulUnreviewedCases: 0,
+      darUnreviewedCases: 0,
     };
-
-    this.okModal = this.okModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
-    this.afterModalOpen = this.afterModalOpen.bind(this);
-
-    this.addDul = this.addDul.bind(this);
-    this.addUser = this.addUser.bind(this);
-    this.addDataset = this.addDataset.bind(this);
-    this.addOntologies = this.addOntologies.bind(this);
-
-    this.editDul = this.editDul.bind(this);
-    this.editUser = this.editUser.bind(this);
-    this.electionTimeout = this.electionTimeout.bind(this);
-
   }
 
-  addDul() {
+  componentWillMount() {
+    let currentUser = Storage.getCurrentUser();
+    this.setState({
+      currentUser: currentUser,
+    });
+
+    PendingCases.findConsentUnReviewed().then(
+      resp => {
+        this.setState({ dulUnreviewedCases: resp.dulUnReviewedCases });
+      });
+
+    PendingCases.findDARUnReviewed().then(
+      resp => {
+        this.setState({ darUnreviewedCases: resp.darUnReviewedCases });
+      });
+  }
+
+  addDul = (e) => {
     this.setState(prev => {
       prev.showAddDulModal = true;
       return prev;
     });
   }
 
-  addUser() {
+  addUser = (e) => {
     this.setState(prev => {
       prev.showAddUserModal = true;
       return prev;
     });
   }
 
-  addDataset() {
+  addDataset = (e) => {
     this.setState(prev => {
       prev.showAddDatasetModal = true;
       return prev;
     });
   }
 
-  addOntologies() {
+  addOntologies = (e) => {
     this.setState(prev => {
       prev.showAddOntologiesModal = true;
       return prev;
     });
   }
 
-  editDul() {
-    this.setState(prev => {
-      prev.showEditDulModal = true;
-      return prev;
-    });
-  }
-
-  editUser() {
-    this.setState(prev => {
-      prev.showEditUserModal = true;
-      return prev;
-    });
-  }
-
-  electionTimeout() {
+  electionTimeout = (e) => {
     this.setState(prev => {
       prev.showElectionTimeoutModal = true;
       return prev;
     });
   }
 
-  okModal(name) {
-    console.log('okModal ------------------> ' + name);
+  okModal = (name) => {
 
     switch (name) {
-      case 'addDul':
-        this.setState(prev => { prev.showAddDulModal = false; return prev; });
-        break;
-      case 'addUser':
-        this.setState(prev => { prev.showAddUserModal = false; return prev; });
-        break;
-      case 'addDataset':
-        this.setState(prev => { prev.showAddDatasetModal = false; return prev; });
-        break;
-      case 'addOntologies':
-        this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
-        break;
-      case 'editDul':
-        this.setState(prev => { prev.showEditDulModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      case 'electionTimeout':
-        this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
-        break;
-      default:
-        break;
+      case 'addDul': this.setState({ showAddDulModal: false }); break;
+      case 'addUser': this.setState({ showAddUserModal: false }); break;
+      case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
+      case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
+      case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
+      default: break;
     }
   }
 
-  closeModal(name) {
-    console.log('closeModel ------------------> ' + name);
-
+  closeModal = (name) => {
     switch (name) {
-      case 'addDul':
-        this.setState(prev => { prev.showAddDulModal = false; return prev; });
-        break;
-      case 'addUser':
-        this.setState(prev => { prev.showAddUserModal = false; return prev; });
-        break;
-      case 'addDataset':
-        this.setState(prev => { prev.showAddDatasetModal = false; return prev; });
-        break;
-      case 'addOntologies':
-        this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
-        break;
-      case 'editDul':
-        this.setState(prev => { prev.showEditDulModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      case 'electionTimeout':
-        this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
-        break;
-      default:
-        break;
+      case 'addDul': this.setState({ showAddDulModal: false }); break;
+      case 'addUser': this.setState({ showAddUserModal: false }); break;
+      case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
+      case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
+      case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
+      default: break;
     }
   }
 
-  afterModalOpen(name) {
-    console.log('afterModalOpen ------------------> ' + name);
-
+  afterModalOpen = (name) => {
     switch (name) {
-      case 'addDul':
-        this.setState(prev => { prev.showAddDulModal = false; return prev; });
-        break;
-      case 'addUser':
-        this.setState(prev => { prev.showAddUserModal = false; return prev; });
-        break;
-      case 'addDataset':
-        this.setState(prev => { prev.showAddDatasetModal = false; return prev; });
-        break;
-      case 'addOntologies':
-        this.setState(prev => { prev.showAddOntologiesModal = false; return prev; });
-        break;
-      case 'editDul':
-        this.setState(prev => { prev.showEditDulModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      case 'electionTimeout':
-        this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; });
-        break;
-      default:
-        break;
+      case 'addDul': this.setState(prev => { prev.showAddDulModal = false; return prev; }); break;
+      case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
+      case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
+      case 'addOntologies': this.setState(prev => { prev.showAddOntologiesModal = false; return prev; }); break;
+      case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
+      default: break;
     }
   }
 
   render() {
 
-    let currentUser = {
-      displayName: 'Nadya Lopez Zalba'
-    }
+    const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
 
     return (
 
@@ -205,7 +138,7 @@ class AdminConsole extends Component {
                   description: 'Select and manage Data Use Limitations Record for review',
                   iconName: 'manage-dul',
                   iconSize: 'default',
-                  unreviewedCases: 9
+                  unreviewedCases: dulUnreviewedCases
                 }),
               ]),
 
@@ -240,7 +173,6 @@ class AdminConsole extends Component {
                   description: 'Select and manage Users and their roles',
                   iconName: 'manage-user',
                   iconSize: 'default',
-                  unreviewedCases: 8
                 }),
               ]),
 
@@ -273,7 +205,7 @@ class AdminConsole extends Component {
                   description: 'Select and manage Data Access Request for review',
                   iconName: 'manage-access',
                   iconSize: 'default',
-                  unreviewedCases: 0
+                  unreviewedCases: darUnreviewedCases
                 }),
               ]),
 

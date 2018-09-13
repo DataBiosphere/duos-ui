@@ -11,6 +11,15 @@ export const EditDulModal = hh(class EditDulModal extends Component {
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
+    this.state = {
+      useRestriction: '',
+      dataUse: '',
+      consent: {
+        consentId: 'id',
+        name: 'name ...'
+      },
+      file : ''
+    }
   }
 
   OKHandler() {
@@ -42,9 +51,20 @@ export const EditDulModal = hh(class EditDulModal extends Component {
 
   }
 
+  formHandler = (e) => {
+
+  }
+
+  onFileChange = (e) => {
+    this.setState({file:e.target.files[0]})
+  }
+
   render() {
-    const file = {
-      name: "MyFile.txt"
+
+    console.log('editDul: ', this.props.showModal, this.props.dul);
+
+    if (this.props.showModal === false) {
+      return null;
     }
 
     return (
@@ -62,11 +82,11 @@ export const EditDulModal = hh(class EditDulModal extends Component {
         [
 
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group admin-form-group first-form-group" }, [
+            div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Unique id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
-                  type: "text", "ng-model": "consent.consentId",
+                  type: "text", value : this.state.consent.consentId, onChange: this.formHandler, 
                   id: "txt_consentId", name: "inputConsentId",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Unique id from Compliance", disabled: true
@@ -74,11 +94,11 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
-                  type: "text", "ng-model": "consent.name",
+                  type: "text", value: this.state.consent.name, onChange: this.formHandler,
                   id: "txt_consentName", name: "inputName",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Consent id", required: "true"
@@ -86,23 +106,23 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group" }, [
+            div({ className: "form-group" }, [
               label({ id: "lbl_file", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use Limitations File"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
                   span({}, ["Upload file"]),
                   span({ className: "cm-icon-button glyphicon glyphicon-upload caret-margin", "aria-hidden": "true" }, []),
-                  input({ type: "file", "ng-model": "file.name", "file-upload": "true", id: "txt_file", className: "upload", required: "true" }),
+                  input({ type: "file", value: '', id: "txt_file", className: "upload", required: "true", onChange: this.onFileChange }),
                 ]),
-                p({ className: "fileName" }, [file.name]),
+                p({ className: "fileName" }, [this.state.file !== null ? this.state.file.name : 'sample.txt']),
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  "ng-model": "useRestriction",
+                  value: this.state.useRestriction, onChange: this.formHandler,
                   id: "txt_sdul", name: "inputSDUL",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})", required: "true"
@@ -110,11 +130,11 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               ]),
             ]),
 
-            div({ className: "form-group admin-form-group " }, [
+            div({ className: "form-group" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 admin-input" }, [
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  "ng-model": "dataUse",
+                  value: this.state.dataUse, onChange: this.formHandler,
                   id: "txt_dataUse", name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})", required: "true"

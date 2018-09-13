@@ -37,7 +37,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
         action: { label: "Close", handler: this.OKHandler }
       },
         [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 translated-restriction" }, [this.props.dataset]),
+          div({ id: "txt_translatedRestrictions", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 translated-restriction" }, [this.props.dataset]),
         ])
     );
   }

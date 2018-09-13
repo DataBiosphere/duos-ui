@@ -145,7 +145,7 @@ class ManageOntologies extends Component {
             div({ className: "col-2 cell-header common-color" }, ["Type"]),
             div({ className: "col-2 cell-header common-color" }, ["Prefix"]),
           ]),
-          hr({ className: "pvotes-main-separator" }),
+          hr({ className: "table-head-separator" }),
 
           this.state.indexedFiles.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
             return h(Fragment, { key: ix }, [
@@ -170,10 +170,9 @@ class ManageOntologies extends Component {
                   ])
                 ])
               ]),
-              hr({ className: "pvotes-separator" }),
+              hr({ className: "table-body-separator" }),
             ]);
           }),
-
           PaginatorBar({
             total: this.state.indexedFiles.length,
             limit: this.state.limit,
