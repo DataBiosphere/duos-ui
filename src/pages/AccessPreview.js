@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { div, button, i, span, b, a, h4, ul, li, label, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { DAR } from "../libs/ajax";
 
 class AccessPreview extends Component {
 
@@ -12,7 +13,7 @@ class AccessPreview extends Component {
   }
 
   componentWillMount() {
-    this.mockState();
+    // this.mockState();
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -22,112 +23,85 @@ class AccessPreview extends Component {
       };
       return prev;
     });
+    this.darReviewInfo();
   }
 
-  mockState() {
-    this.setState(prev => {
-      prev.createDate = '2018-08-30';
-      prev.hasUseRestriction = true;
-      prev.projectTitle = 'My Project 01';
-      prev.consentName = 'ORSP-124';
-      prev.isQ1Expanded = true;
-      prev.isQ2Expanded = false;
-      prev.darInfo = {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
-        hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        rus: 'something',
-        sDar: 'something else',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
-      }
-      return prev;
-    });
-  }
+  back = () => {
+    this.props.history.goBack();
+  };
 
-  initialState() {
+  async darReviewInfo() {
+    const referenceId = this.props.match.params.referenceId;
+    const electionId = this.props.match.params.electionId;
+    console.log('REFERENCE ID', referenceId);
+    console.log('ELECTION ID', electionId);
+
+    if (this.props.match.params.referenceId !== undefined) {
+      let data = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
+        this.setState(prev => {
+          prev.darInfo.rus = data.rus;
+        });
+    }
+    console.log('state darInfo', this.state.darInfo.rus);
+  };
+
+  initialState = () => {
     return {
       hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      consentName: 'ORSP-124',
+      projectTitle: '',
+      consentName: '',
       isQ1Expanded: false,
       isQ2Expanded: false,
 
       darInfo: {
         havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
+        pi: '',
+        profileName: '',
+        status: '',
         hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
+        adminComment: '',
+        institution: '',
+        department: '',
+        city: '',
+        country: '',
         purposeManualReview: true,
         researchTypeManualReview: true,
         hasDiseases: true,
         purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
+          { title: "", description: "", manualReview: true },
+          { title: "", description: "", manualReview: false },
+          { title: "", description: "", manualReview: true },
+          { title: "", description: "", manualReview: false },
         ],
         researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
+          { title: "", description: "", manualReview: true },
+          { title: "", description: "", manualReview: false },
+          { title: "", description: "", manualReview: true },
+          { title: "", description: "", manualReview: false },
         ],
         diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
+          '',
+          '',
+          '',
+          '',
         ]
       }
     };
-  }
+  };
 
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
     console.log('------------download-------------', filename, value);
-  }
+  };
 
   downloadDAR = (e) => {
     console.log('------------downloadDAR-------------', e);
-  }
+  };
 
   downloadDUL = (e) => {
     console.log('------------downloadDUL-------------', e);
-  }
+  };
 
   toggleQ1 = (e) => {
     this.setState(prev => {
@@ -135,7 +109,7 @@ class AccessPreview extends Component {
       return prev;
     });
     console.log('------------toggleQ1--------------');
-  }
+  };
 
   toggleQ2 = (e) => {
     this.setState(prev => {
@@ -143,7 +117,7 @@ class AccessPreview extends Component {
       return prev;
     });
     console.log('------------toggleQ1--------------');
-  }
+  };
 
   render() {
     
@@ -160,7 +134,7 @@ class AccessPreview extends Component {
             PageHeading({ id: "previewAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Preview", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", onClick: "back()", className: "btn vote-button vote-button-back vote-button-bigger" }, [
+            a({ id: "btn_back", onClick: () => this.back(), className: "btn vote-button vote-button-back vote-button-bigger" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),
@@ -236,7 +210,7 @@ class AccessPreview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_purposeStatement" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
@@ -256,7 +230,7 @@ class AccessPreview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_researchType" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
@@ -276,7 +250,7 @@ class AccessPreview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_disease" + rIndex }, [
                                   disease
                                 ]),
@@ -289,7 +263,6 @@ class AccessPreview extends Component {
                   ]),
                 ]),
 
-                //-----
                 div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead dul-color" }, [
                     h4({}, ["Data Use Limitations"]),

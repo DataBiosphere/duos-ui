@@ -689,8 +689,8 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async id => {
-  const url = `${await Config.getApiUrl()}/dar/find/${id}`;
+  getDarFields: async (id, fields)  => {
+  const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
   const res = await fetchOk(url, Config.authOpts());
   return res.json();
   },
