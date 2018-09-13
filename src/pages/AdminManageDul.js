@@ -26,6 +26,7 @@ class AdminManageDul extends Component {
       showDialogCancel: false,
       showDialogCreate: false,
       showDialogDelete: false,
+      archiveCheck: true,
     };
 
     this.myHandler = this.myHandler.bind(this);
@@ -142,7 +143,7 @@ class AdminManageDul extends Component {
     this.setState({
       createWarning: (election.status === 'Open'),
       showDialogCancel: true,
-      payload: election
+      payload: election,
     });
   };
 
@@ -176,9 +177,11 @@ class AdminManageDul extends Component {
 
   dialogHandlerCancel = (answer, election) => (e) => {
     this.setState({ showDialogCancel: false });
-    let electionUpdated = { status: 'Canceled', referenceId: election.consentId, electionId: election.electionId, archived: true};
     if (answer) {
-      Election.electionUpdateResourceUpdate(election.electionId, electionUpdated).then(() => this.getConsentManage());
+      let electionUpdated = { status: 'Canceled', referenceId: election.consentId, electionId: election.electionId, archived: this.state.archiveCheck};
+      Election.electionUpdateResourceUpdate(election.electionId, electionUpdated).then(() => {
+        this.setState({archiveCheck: true});
+        this.getConsentManage();});
     }
   };
 
@@ -204,6 +207,10 @@ class AdminManageDul extends Component {
         }
       });
     }
+  };
+  handleArchiveCheckbox = (e) => {
+    this.setState({archiveCheck: e.target.checked});
+    console.log("checkbox = ", e.target.checked);
   };
 
   render() {
@@ -342,7 +349,7 @@ class AdminManageDul extends Component {
             div({ className: "form-group" }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                 div({ className: "checkbox" }, [
-                  input({ id: "chk_archiveCancelElection", type: "checkbox", className: "checkbox-inline", checked: "checked" }),
+                  input({ id: "chk_archiveCancelElection", type: "checkbox", className: "checkbox-inline",defaultChecked:this.state.archiveCheck , onChange:this.handleArchiveCheckbox}),
                   label({ id: "lbl_archiveCancelElection", htmlFor: "chk_archiveCancelElection", className: "regular-checkbox normal" }, ["Archive election"]),
                 ]),
               ]),
