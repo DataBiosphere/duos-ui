@@ -487,7 +487,7 @@ export const Election = {
     console.log('------------------------------------> ', consentId, election);
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res.json();
+    return res;
   },
 
   describe: async (consentId) => {

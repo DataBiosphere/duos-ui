@@ -155,7 +155,6 @@ class AdminManageDul extends Component {
   };
 
   openDialogDelete = (consentId) => {
-    console.log("ID = ", consentId);
     this.setState({ showDialogDelete: true, payload: consentId });
   };
 
