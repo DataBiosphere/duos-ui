@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { div, hr, label, form } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { User, Researcher } from "../libs/ajax";
 
 class ResearcherReview extends Component {
 
@@ -9,43 +10,83 @@ class ResearcherReview extends Component {
     super(props);
     this.state = {
       value: '',
+      rationale: '',
+      status: '',
+      enableVoteButton: false,
+      voteStatus: null,
       formData: {
-        academicEmail: 'academicEmail',
-        address1: 'address1',
-        address2: 'address2',
-        city: 'city',
-        country: 'country',
-        department: 'department',
-        division: 'division',
-        eRACommonsID: 'eRACommonsID',
-        havePI: true,
-        havePIValue: 'havePIValue',
-        institution: 'institution',
-        isThePI: true,
-        piEmail: 'piEmail',
-        piName: 'piName',
-        piValue: 'piValue',
-        profileName: 'profileName',
-        pubmedID: 'pubmedID',
-        scientificURL: 'scientificURL',
-        state: 'state',
-        zipcode: 'zipcode',
+        academicEmail: '',
+        address1: '',
+        address2: '',
+        city: '',
+        country: '',
+        department: '',
+        division: '',
+        eRACommonsID: '',
+        havePI: false,
+        havePIValue: '',
+        institution: '',
+        isThePI: false,
+        piEmail: '',
+        piName: '',
+        piValue: '',
+        profileName: '',
+        pubmedID: '',
+        scientificURL: '',
+        state: '',
+        zipcode: '',
         status: null,
       }
     }
-
+    this.findUserStatus = this.findUserStatus.bind(this);
+    this.findPropertiesByResearcher = this.findPropertiesByResearcher.bind(this);
   }
 
-  setEnableVoteButton = (event, name, value) => {
-    // TBD
+  componentWillMount() {
+    this.findUserStatus();
+    this.findPropertiesByResearcher();
+  }
+
+  async findPropertiesByResearcher() {
+    Researcher.list(this.props.match.params.dacUserId).then(
+      data => {
+        if (data.isThePI !== undefined) {
+          data.isThePI = JSON.parse(data.isThePI);
+          data.piValue = data.isThePI === true ? data.piValue = 'Yes' : data.piValue = 'No';
+        }
+        if (data.havePI !== undefined) {
+          data.havePI = JSON.parse(data.havePI);
+          data.havePIValue = data.havePI === true ? 'Yes' : data.havePIValue = 'No';
+        }
+        this.setState(prev => {
+          prev.formData = data
+          return prev;
+        });
+      }).catch(error => {
+        console.error('Error getting researcher details:', error);
+      });;
+  }
+  async findUserStatus() {
+    User.findUserStatus(this.props.match.params.dacUserId).then(
+      data => {
+        let status = null;
+        if (data.status === 'approved') {
+          status = true;
+        } else if (data.status === 'rejected') {
+          status = false;
+        }
+        this.setState(prev => {
+          prev.rationale = data.rationale;
+          prev.status = status;
+          prev.voteStatus = status || status === null ? '1' : '0';
+          return prev;
+        });
+      });
   }
 
   render() {
-
     const { formData } = this.state;
-
     return (
-
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
@@ -55,11 +96,12 @@ class ResearcherReview extends Component {
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote" }, [
             SubmitVoteBox({
+              voteStatus: this.state.voteStatus,
+              rationale: this.state.rationale,
+              status: this.state.status,
               id: "researcherReview",
               color: "common",
               title: "Your Vote",
-              isDisabled: "isFormDisabled",
-              voteStatus: this.state.voteStatus,
               showAlert: false,
               alertMessage: "something!",
               action: { label: "Vote", handler: this.submit }
@@ -67,25 +109,6 @@ class ResearcherReview extends Component {
           ]),
         ]),
 
-  //           div({ className: "radio-inline" }, [
-  //             input({ type: "radio", "value": "status", value: "approved", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafidePositive", name: "bonafideVote" }),
-  //             label({ htmlFor: "bonafidePositive" }, []),
-  //             label({ htmlFor: "bonafidePositive", className: "radio-button-text" }, ["Yes"]),
-
-  //             input({ type: "radio", "value": "status", value: "rejected", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafideNegative", name: "bonafideVote" }),
-  //             label({ htmlFor: "bonafideNegative" }, []),
-  //             label({ htmlFor: "bonafideNegative", className: "radio-button-text" }, ["No"]),
-  //           ]),
-  //           YesNoRadioGroup({ value: this.state.formData.status, onChange: this.setEnableVoteButton, name: 'bonafideVote' }),
-  //         ]),
-
-  //         span({ isRendered: "status === 'approved'" }, [
-  //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Comments"]),
-  //         ]),
-  //         span({ isRendered: "status !== 'approved'" }, [
-  //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Rationale"]),
-  //         ]),
-  
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
             div({ className: "row no-margin form-group" }, [
@@ -174,34 +197,34 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id:"lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id:"lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id:"lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
               ]),
             ]),
 
             div({ className: "row no-margin", isRendered: formData.isThePI === true || formData.havePI === false }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id:"lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id:"lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id:"lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
               ]),
             ]),
           ]),

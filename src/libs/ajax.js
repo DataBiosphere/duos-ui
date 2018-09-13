@@ -58,7 +58,7 @@ export const User = {
   findUserStatus: async userId => {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return res !== null ? res.json() : res;
   }
 };
 

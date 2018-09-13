@@ -11,6 +11,28 @@ export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
       value: this.props.value
     }
   }
+  
+  // componentDidUpdate(props) {
+  //   if(props.value !== this.state.value) {
+  //     this.setState(prev => {
+  //       prev.name = this.props.name;
+  //       prev.value = this.props.value;
+  //       return prev;
+  //     });
+  //   }    
+  // }
+
+  
+  componentWillReceiveProps(props) {
+     if(props.value !== this.state.value) {
+       this.setState(prev => {
+         prev.name = this.props.name;
+         prev.value = this.props.value;
+         return prev;
+       });
+     }     
+   }
+
 
   selectOption = (e, value) => {
     this.setState(prev => {

@@ -7,7 +7,6 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
-
   constructor(props) {
     super(props);
     this.state = {
@@ -15,14 +14,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       currentUser: {},
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
+      status: this.props.status,
       showDialogSubmit: false,
+      rationale: ''
     }
-
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
   setEnableVoteButton() {
-    console.log('----------setEnableVoteButton----------');
     this.setState(prev => {
       prev.enableVoteButton = true;
       return prev;
@@ -30,13 +29,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   }
 
   logVote = (e) => {
-    console.log('----------logVote----------');
     this.setState({ showDialogSubmit: true });
   }
 
-  setEnableVoteButton = () => {
-    console.log('----------setEnableVoteButton----------');
-  }
 
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
@@ -86,7 +81,6 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       dialogLabel = "Ok"
     }
 
-
     return (
 
       div({ id: "box_" + this.props.id }, [
@@ -135,7 +129,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
                   title: "Optional: describe your rationale or add comments here (please be as specific as possible)",
                   placeholder: "Optional: describe your rationale or add comments here (please be as specific as possible)",
-                  value: this.state.rationale,
+                  value: this.props.rationale,
                   onChange: this.setEnableVoteButton
                 }),
               ]),
