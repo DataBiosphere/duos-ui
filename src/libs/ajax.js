@@ -1,11 +1,6 @@
 import _ from 'lodash/fp'
 import { Config } from './config';
 
-// Storage Variables
-// const CurrentUser = "CurrentUser"; // System user
-// const GoogleUser = "Gapi"; // Google user info, including token
-// const UserIsLogged = "isLogged"; // User log status flag
-
 const dataTemplate = {
   accessTotal: [
     ['Results', 'Votes'],
@@ -481,7 +476,7 @@ export const Consent = {
   DeleteConsentResource: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    return res;
   },
 
 };
@@ -520,7 +515,7 @@ export const Election = {
 
   electionUpdateResourceUpdate: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
-    const res = await fetchOk(url, _.mergeAll(Config.authOpts(), document, { method: 'PUT' }));
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(document),Config.authOpts(), { method: 'PUT'}]));
     return res.json();
   },
 
