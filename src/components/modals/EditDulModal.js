@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { div, form, input, label, textarea, span, hh, p } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
+import { Consent } from '../../libs/ajax';
 
 
 export const EditDulModal = hh(class EditDulModal extends Component {
@@ -15,12 +16,29 @@ export const EditDulModal = hh(class EditDulModal extends Component {
       useRestriction: '',
       dataUse: '',
       consent: {
-        consentId: 'id',
-        name: 'name ...'
+        consentId: '',
+        name: 'name ...',
       },
       file : ''
     }
   }
+  componentWillMount() {
+    if (this.props.dul !== undefined) {
+      console.log("Will mount -> ", this.props);
+      this.setState(prev => {
+        prev.consent.consentId = this.props.dul.consentId;
+        return prev;
+      });
+    }
+  }
+  // componentWillMount() {
+  //   if (this.props.dul !== undefined) {
+  //     this.setState({consent:{
+  //         consentId: this.props.dul.consentId,
+  //         name: 'leo!'
+  //       }})
+  //   }
+  // };
 
   OKHandler() {
     // this is the method for handling OK click
@@ -53,13 +71,25 @@ export const EditDulModal = hh(class EditDulModal extends Component {
 
   formHandler = (e) => {
 
-  }
+  };
+
+  handleChange = (changeEvent) => {
+    console.log("changeEvent ", changeEvent.target.value);
+    // this.props.onChange(changeEvent, this.props.dul.consentId, changeEvent.target.value)
+  };
 
   onFileChange = (e) => {
     this.setState({file:e.target.files[0]})
-  }
+  };
+
+  // no hacer esto
+  getDataUseLimitationData = (consentId) => {
+    Consent.ConsentDulResource(consentId);
+  };
 
   render() {
+
+
 
     console.log('editDul: ', this.props.showModal, this.props.dul);
 
@@ -68,7 +98,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
     }
 
     return (
-
+      input (type:”text” name:”title” value:”Mr.”),
       BaseModal({
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
@@ -86,7 +116,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Unique id"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
-                  type: "text", value : this.state.consent.consentId, onChange: this.formHandler, 
+                  type: "text", value : this.state.consent.consentId, onChange: this.handleChange,
                   id: "txt_consentId", name: "inputConsentId",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Unique id from Compliance", disabled: true
@@ -98,7 +128,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
-                  type: "text", value: this.state.consent.name, onChange: this.formHandler,
+                  type: "text", value: this.state.consent.name, onChange: this.handleChange,
                   id: "txt_consentName", name: "inputName",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Consent id", required: "true"
@@ -122,7 +152,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  value: this.state.useRestriction, onChange: this.formHandler,
+                  value: this.state.useRestriction, onChange: this.handleChange,
                   id: "txt_sdul", name: "inputSDUL",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})", required: "true"
@@ -134,7 +164,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  value: this.state.dataUse, onChange: this.formHandler,
+                  value: this.state.dataUse, onChange: this.handleChange,
                   id: "txt_dataUse", name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})", required: "true"

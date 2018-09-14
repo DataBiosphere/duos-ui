@@ -12,7 +12,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
       file: {
         name: "",
       }
-    }
+    };
 
     this.handleFileChange = this.handleFileChange.bind(this);
     this.closeHandler = this.closeHandler.bind(this);
@@ -60,7 +60,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   render() {
     const file = {
       name: "MyFile.txt"
-    }
+    };
 
     return (
 
