@@ -444,7 +444,14 @@ export const Consent = {
   getConsentManage: async () => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const data = await res.json();
+    const regex = new RegExp('-', 'g');
+    return data.map(dul => {
+      const str = dul.consentName.replace(regex, ' ');
+      dul.ct = dul.consentName + ' ' + dul.version;
+      dul.cts = str + ' ' + dul.version;
+      return dul;
+    });
   },
 
   CreateConsentResource: async (consent) => {

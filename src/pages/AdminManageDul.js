@@ -37,26 +37,14 @@ class AdminManageDul extends Component {
     this.closeAddDulModal = this.closeAddDulModal.bind(this);
     this.okAddDulModal = this.okAddDulModal.bind(this);
     this.afterAddDulModalOpen = this.afterAddDulModalOpen.bind(this);
-
   }
 
   async getConsentManage() {
-    Consent.getConsentManage().then(data => {
-      const regex = new RegExp('-', 'g');
-
-      let dul = data.map(election => {
-        let str = election.consentName;
-        str = str.replace(regex, ' ');
-        election.ct = election.consentName + ' ' + election.version;
-        election.cts = str + ' ' + election.version;
-        return election;
-      });
-
-      this.setState(prev => {
-        prev.currentPage = 1;
-        prev.electionsList.dul = dul;
-        return prev;
-      });
+    const duls = await Consent.getConsentManage();
+    this.setState(prev => {
+      prev.currentPage = 1;
+      prev.electionsList.dul = duls;
+      return prev;
     });
   }
 
@@ -80,11 +68,11 @@ class AdminManageDul extends Component {
   };
 
   handleOpenModal() {
-    this.setState({ showModal: true });
+    this.setState({showModal: true});
   }
 
   handleCloseModal() {
-    this.setState({ showModal: false });
+    this.setState({showModal: false});
   }
 
   myHandler(event) {
@@ -133,9 +121,9 @@ class AdminManageDul extends Component {
 
   openDialogArchive = (election) => (e) => {
     if (election.electionStatus === 'Open') {
-      this.setState({ showDialogArchiveOpen: true, payload: election });
+      this.setState({showDialogArchiveOpen: true, payload: election});
     } else if (election.electionStatus === 'Closed') {
-      this.setState({ showDialogArchiveClosed: true, payload: election });
+      this.setState({showDialogArchiveClosed: true, payload: election});
     }
 
   };
@@ -151,55 +139,64 @@ class AdminManageDul extends Component {
     this.setState({
       createWarning: (status === 'Closed' && archived !== true),
       showDialogCreate: true,
-      createId : e.target.getAttribute('consentid')
+      createId: e.target.getAttribute('consentid')
     });
   };
 
-  openDialogDelete =(election) => (e) => {
+  openDialogDelete = (election) => (e) => {
     this.setState({
       showDialogDelete: true,
-      deleteId : election.consentId
+      deleteId: election.consentId
     });
   };
 
-  dialogHandlerArchive = (answer, election) => (e) => {
-    this.setState({ showDialogArchiveOpen: false });
-    this.setState({ showDialogArchiveClose: false });
-    let electionUpdate = {};
-    electionUpdate.status = election.electionStatus === 'Open' ? 'Canceled' : election.electionStatus;
-    electionUpdate.referenceId = election.consentId;
-    electionUpdate.electionId = election.electionId;
-    electionUpdate.archived = true;
-    Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate).then(() =>this.getConsentManage())
+  dialogHandlerArchive = (answer) => (e) => {
+    this.setState({showDialogArchiveOpen: false});
+    this.setState({showDialogArchiveClose: false});
+    if (answer) {
+      let electionUpdate = {};
+      let election = this.state.payload;
+      electionUpdate.status = election.electionStatus === 'Open' ? 'Canceled' : election.electionStatus;
+      electionUpdate.referenceId = election.consentId;
+      electionUpdate.electionId = election.electionId;
+      electionUpdate.archived = true;
+      Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate);
+      this.getConsentManage();
+    }
   };
 
   dialogHandlerCancel = (answer) => (e) => {
-    this.setState({ showDialogCancel: false });
+    this.setState({showDialogCancel: false});
     let election = this.state.payload;
     if (answer) {
-      let electionUpdated = { status: 'Canceled', referenceId: election.consentId, electionId: election.electionId, archived: this.state.archiveCheck};
-      Election.electionUpdateResourceUpdate(election.electionId, electionUpdated).then(() => {
-        this.setState({archiveCheck: true});
-        this.getConsentManage();});
+      let electionUpdated = {
+        status: 'Canceled',
+        referenceId: election.consentId,
+        electionId: election.electionId,
+        archived: this.state.archiveCheck
+      };
+      Election.electionUpdateResourceUpdate(election.electionId, electionUpdated);
+      this.setState({archiveCheck: true});
+      this.getConsentManage();
     }
   };
 
   dialogHandlerCreate = (answer) => (e) => {
-    this.setState({ showDialogCreate: false });
+    this.setState({showDialogCreate: false});
     let consentId = this.state.createId;
-    let election = { status: 'Open'};
+    let election = {status: 'Open'};
     if (answer) {
       Election.create(consentId, election).then(() => this.getConsentManage());
     }
   };
 
-  dialogHandlerDelete = (answer ) => (e) => {
-    this.setState({ showDialogDelete: false });
+  dialogHandlerDelete = (answer) => (e) => {
+    this.setState({showDialogDelete: false});
     let consentId = this.state.deleteId;
     if (answer) {
       Consent.DeleteConsentResource(consentId).then(data => {
         if (data.ok) {
-          let updatedDul = this.state.electionsList.dul.filter( election => election.consentId !== consentId);
+          let updatedDul = this.state.electionsList.dul.filter(election => election.consentId !== consentId);
           this.setState(prev => {
             prev.currentPage = 1;
             prev.electionsList.dul = updatedDul;
@@ -215,93 +212,166 @@ class AdminManageDul extends Component {
   };
 
   render() {
-    const { currentPage } = this.state;
+    const {currentPage} = this.state;
 
 
     return (
-      div({ className: "container container-wide" }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "manageDul", imgSrc: "/images/icon_manage_dul.png", iconSize: "medium", color: "dul", title: "Manage Data Use Limitations", description: "Select and manage Data Use Limitations for DAC review" }),
+      div({className: "container container-wide"}, [
+        div({className: "row no-margin"}, [
+          div({className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding"}, [
+            PageHeading({
+              id: "manageDul",
+              imgSrc: "/images/icon_manage_dul.png",
+              iconSize: "medium",
+              color: "dul",
+              title: "Manage Data Use Limitations",
+              description: "Select and manage Data Use Limitations for DAC review"
+            }),
           ]),
-          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
-            div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search dul-color" }),
-                input({ type: "search", className: "form-control users-search", placeholder: "Enter search term..."/*, value: "searchDUL"*/ }),
+          div({className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding"}, [
+            div({className: "col-lg-6 col-md-6 col-sm-7 col-xs-7"}, [
+              div({className: "search-text"}, [
+                i({className: "glyphicon glyphicon-search dul-color"}),
+                input({
+                  type: "search",
+                  className: "form-control users-search",
+                  placeholder: "Enter search term..."/*, value: "searchDUL"*/
+                }),
               ]),
             ]),
 
-            a({ id: 'title_addDUL', className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", onClick: this.addDul }, [
-              div({ className: "all-icons add-dul_white" }),
+            a({
+              id: 'title_addDUL',
+              className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
+              onClick: this.addDul
+            }, [
+              div({className: "all-icons add-dul_white"}),
               span({}, ["Add Data Use Limitations"]),
             ]),
             AddDulModal({
-              showModal: this.state.showModal, onOKRequest: this.okAddDulModal, onCloseRequest: this.closeAddDulModal, onAfterOpen: this.afterAddDulModalOpen
+              showModal: this.state.showModal,
+              onOKRequest: this.okAddDulModal,
+              onCloseRequest: this.closeAddDulModal,
+              onAfterOpen: this.afterAddDulModalOpen
             }),
           ]),
         ]),
 
-        div({ className: "jumbotron table-box" }, [
-          div({ className: "grid-9-row pushed-2" }, [
-            div({ className: "col-2 cell-header dul-color" }, ["Consent id"]),
-            div({ className: "col-2 cell-header dul-color" }, ["Consent Group Name"]),
-            div({ className: "col-1 cell-header dul-color" }, ["Election N°"]),
-            div({ className: "col-1 cell-header dul-color" }, ["Date"]),
-            div({ className: "col-1 cell-header f-center dul-color" }, ["Edit Record"]),
-            div({ className: "col-1 cell-header f-center dul-color" }, ["Election status"]),
-            div({ className: "col-1 cell-header f-center dul-color" }, ["Election actions"]),
+        div({className: "jumbotron table-box"}, [
+          div({className: "grid-9-row pushed-2"}, [
+            div({className: "col-2 cell-header dul-color"}, ["Consent id"]),
+            div({className: "col-2 cell-header dul-color"}, ["Consent Group Name"]),
+            div({className: "col-1 cell-header dul-color"}, ["Election N°"]),
+            div({className: "col-1 cell-header dul-color"}, ["Date"]),
+            div({className: "col-1 cell-header f-center dul-color"}, ["Edit Record"]),
+            div({className: "col-1 cell-header f-center dul-color"}, ["Election status"]),
+            div({className: "col-1 cell-header f-center dul-color"}, ["Election actions"]),
           ]),
 
-          hr({ className: "table-head-separator" }),
+          hr({className: "table-head-separator"}),
 
           this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
             return (
-              h(Fragment, { key: election.consentId }, [
-                div({ id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
-                  div({ id: election.consentId + "_consentName", className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
+              h(Fragment, {key: election.consentId}, [
+                div({
+                  id: election.consentId,
+                  className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "")
+                }, [
+                  div({
+                    id: election.consentId + "_consentName",
+                    className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""),
+                    title: election.consentName
+                  }, [
                     span({
-                      id: election.consentId + "_flag_consentName", isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
+                      id: election.consentId + "_flag_consentName",
+                      isRendered: election.updateStatus,
+                      className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
                     }, []),
-                    a({ id: election.consentId + "_link_consentName", onClick: () => this.open(election.consentId, 'dul_preview', null, true) }, [election.consentName]),
+                    a({
+                      id: election.consentId + "_link_consentName",
+                      onClick: () => this.open(election.consentId, 'dul_preview', null, true)
+                    }, [election.consentName]),
                   ]),
-                  div({ id: election.consentId + "_groupName", className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : ""), title: election.groupName }, [election.groupName]),
-                  div({ id: election.consentId + "_version", className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
-                  div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [Utils.formatDate(election.createDate)]),
-                  div({ id: election.consentId + "_editDUL", className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
-                    button({ id: election.consentId + "_btn_editDUL", className: "cell-button hover-color", onClick: this.editDul(election) }, ["Edit"]),
+                  div({
+                    id: election.consentId + "_groupName",
+                    className: "col-2 cell-body text " + ((election.groupName === false || election.groupName === null) ? "empty" : ""),
+                    title: election.groupName
+                  }, [election.groupName]),
+                  div({
+                    id: election.consentId + "_version",
+                    className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "")
+                  }, [election.version]),
+                  div({
+                    id: election.consentId + "_createDate",
+                    className: "col-1 cell-body text"
+                  }, [Utils.formatDate(election.createDate)]),
+                  div({
+                    id: election.consentId + "_editDUL",
+                    className: "col-1 cell-body f-center",
+                    disabled: (election.electionStatus !== 'un-reviewed' || !election.editable)
+                  }, [
+                    button({
+                      id: election.consentId + "_btn_editDUL",
+                      className: "cell-button hover-color",
+                      onClick: this.editDul(election)
+                    }, ["Edit"]),
 
                   ]),
-                  div({ id: election.consentId + "_electionStatus", className: "col-1 cell-body text f-center bold" }, [
-                    span({ isRendered: election.electionStatus === 'un-reviewed' }, [
-                      a({ onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Un-reviewed"])]),
-                    span({ isRendered: election.electionStatus === 'Open' }, [
-                      a({ onClick: () => this.open(election.consentId, 'dul_collect', null, false) }, ["Open"]),]),
-                    span({ isRendered: election.electionStatus === 'Canceled' }, [
-                      a({ onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Canceled"]),]),
-                    span({ isRendered: election.electionStatus === 'Closed' }, [
-                      a({ onClick: () => this.open(null, 'dul_results_record', election.electionId, false) }, ["Reviewed"]),]),
+                  div({id: election.consentId + "_electionStatus", className: "col-1 cell-body text f-center bold"}, [
+                    span({isRendered: election.electionStatus === 'un-reviewed'}, [
+                      a({onClick: () => this.open(election.consentId, 'dul_preview', null, false)}, ["Un-reviewed"])]),
+                    span({isRendered: election.electionStatus === 'Open'}, [
+                      a({onClick: () => this.open(election.consentId, 'dul_collect', null, false)}, ["Open"]),]),
+                    span({isRendered: election.electionStatus === 'Canceled'}, [
+                      a({onClick: () => this.open(election.consentId, 'dul_preview', null, false)}, ["Canceled"]),]),
+                    span({isRendered: election.electionStatus === 'Closed'}, [
+                      a({onClick: () => this.open(null, 'dul_results_record', election.electionId, false)}, ["Reviewed"]),]),
                   ]),
-                  div({ id: election.consentId + "_createElection", isRendered: election.electionStatus !== 'Open', className: "col-1 cell-body f-center", disabled: !election.editable }, [
-                    button({ consentid: election.consentId, onClick: this.openDialogCreate(election.electionStatus, election.archived), className: "cell-button hover-color" }, ["Create"]),
+                  div({
+                    id: election.consentId + "_createElection",
+                    isRendered: election.electionStatus !== 'Open',
+                    className: "col-1 cell-body f-center",
+                    disabled: !election.editable
+                  }, [
+                    button({
+                      consentid: election.consentId,
+                      onClick: this.openDialogCreate(election.electionStatus, election.archived),
+                      className: "cell-button hover-color"
+                    }, ["Create"]),
                   ]),
-                  div({ id: election.consentId + "_cancelElection", isRendered: election.electionStatus === 'Open', className: "col-1 cell-body f-center" }, [
-                    button({ consentid: election.consentId, onClick: this.openDialogCancel(election), className: "cell-button cancel-color" }, ["Cancel"]),
+                  div({
+                    id: election.consentId + "_cancelElection",
+                    isRendered: election.electionStatus === 'Open',
+                    className: "col-1 cell-body f-center"
+                  }, [
+                    button({
+                      consentid: election.consentId,
+                      onClick: this.openDialogCancel(election),
+                      className: "cell-button cancel-color"
+                    }, ["Cancel"]),
                   ]),
-                  div({ id: election.consentId + "_actions", className: "icon-actions" }, [
-                    div({ id: election.consentId + "_btn_archiveElection", className: "display-inline-block", disabled: (election.electionStatus === 'un-reviewed' || election.archived === true) }, [
-                      button({ onClick: this.openDialogArchive(election) }, [
-                        span({ className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : "") })
+                  div({id: election.consentId + "_actions", className: "icon-actions"}, [
+                    div({
+                      id: election.consentId + "_btn_archiveElection",
+                      className: "display-inline-block",
+                      disabled: (election.electionStatus === 'un-reviewed' || election.archived === true)
+                    }, [
+                      button({onClick: this.openDialogArchive(election)}, [
+                        span({className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : "")})
                       ]),
                     ]),
-                    div({ id: election.consentId + "_btn_deleteDul", className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
-                      button({ onClick: this.openDialogDelete(election) }, [
-                        span({ className: "glyphicon caret-margin glyphicon-trash" })
+                    div({
+                      id: election.consentId + "_btn_deleteDul",
+                      className: "display-inline-block",
+                      disabled: (election.electionStatus !== 'un-reviewed')
+                    }, [
+                      button({onClick: this.openDialogDelete(election)}, [
+                        span({className: "glyphicon caret-margin glyphicon-trash"})
                       ]),
                     ]),
                   ]),
                 ]),
-                hr({ className: "pvotes-separator" }),
+                hr({className: "table-body-separator"}),
               ])
             )
           }),
@@ -316,65 +386,82 @@ class AdminManageDul extends Component {
         ]),
 
         EditDulModal({
-          showModal: this.state.showModal, onOKRequest: this.okAddDulModal, onCloseRequest: this.closeAddDulModal, onAfterOpen: this.afterAddDulModalOpen, dul: this.state.dulToEdit
+          showModal: this.state.showModal,
+          onOKRequest: this.okAddDulModal,
+          onCloseRequest: this.closeAddDulModal,
+          onAfterOpen: this.afterAddDulModalOpen,
+          dul: this.state.dulToEdit
         }),
 
         ConfirmationDialog({
           title: 'Archive election?', color: 'dul', showModal: this.state.showDialogArchiveOpen,
-          payload: this.state.payload, action: { label: "Yes", handler: this.dialogHandlerArchive }
+          payload: this.state.payload, action: {label: "Yes", handler: this.dialogHandlerArchive}
         }, [
-            div({ className: "dialog-description" }, [
-              span({}, ["Are you sure you want to archive this election? "]),
-              span({ className: "no-padding display-inline" }, ["The current election will be stopped without logging a result and this case will no longer be available for DAC Review."]),
-            ]),
+          div({className: "dialog-description"}, [
+            span({}, ["Are you sure you want to archive this election? "]),
+            span({className: "no-padding display-inline"}, ["The current election will be stopped without logging a result and this case will no longer be available for DAC Review."]),
           ]),
+        ]),
 
         ConfirmationDialog({
           title: 'Archive election?', color: 'dul', showModal: this.state.showDialogArchiveClosed,
-          payload: this.state.payload, action: { label: "Yes", handler: this.dialogHandlerArchive }
+          payload: this.state.payload, action: {label: "Yes", handler: this.dialogHandlerArchive}
         }, [
-            div({ className: "dialog-description" }, [
-              span({}, ["Are you sure you want to archive this election? "]),
-              span({ className: "no-padding display-inline" }, ["This election result will no longer be valid."]),
-            ]),
+          div({className: "dialog-description"}, [
+            span({}, ["Are you sure you want to archive this election? "]),
+            span({className: "no-padding display-inline"}, ["This election result will no longer be valid."]),
           ]),
+        ]),
 
         ConfirmationDialog({
           title: 'Cancel election?', color: 'cancel', showModal: this.state.showDialogCancel,
-          payload: this.state.payload, action: { label: "Yes", handler: this.dialogHandlerCancel }
+          payload: this.state.payload, action: {label: "Yes", handler: this.dialogHandlerCancel}
         }, [
-            div({ className: "dialog-description" }, [
-              span({}, ["Are you sure you want to cancel the current election process? "]),
-              span({ className: "no-padding display-inline" }, ["The current election will be stopped without logging a result."]),
-            ]),
-            div({ className: "form-group" }, [
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                div({ className: "checkbox" }, [
-                  input({ id: "chk_archiveCancelElection", type: "checkbox", className: "checkbox-inline",defaultChecked:this.state.archiveCheck , onChange:this.handleArchiveCheckbox}),
-                  label({ id: "lbl_archiveCancelElection", htmlFor: "chk_archiveCancelElection", className: "regular-checkbox normal" }, ["Archive election"]),
-                ]),
+          div({className: "dialog-description"}, [
+            span({}, ["Are you sure you want to cancel the current election process? "]),
+            span({className: "no-padding display-inline"}, ["The current election will be stopped without logging a result."]),
+          ]),
+          div({className: "form-group"}, [
+            div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding"}, [
+              div({className: "checkbox"}, [
+                input({
+                  id: "chk_archiveCancelElection",
+                  type: "checkbox",
+                  className: "checkbox-inline",
+                  defaultChecked: this.state.archiveCheck,
+                  onChange: this.handleArchiveCheckbox
+                }),
+                label({
+                  id: "lbl_archiveCancelElection",
+                  htmlFor: "chk_archiveCancelElection",
+                  className: "regular-checkbox normal"
+                }, ["Archive election"]),
               ]),
             ]),
           ]),
+        ]),
 
         ConfirmationDialog({
           title: 'Create election?', color: 'dul', showModal: this.state.showDialogCreate,
-          action: { label: "Yes", handler: this.dialogHandlerCreate }
+          action: {label: "Yes", handler: this.dialogHandlerCreate}
         }, [
-            div({ className: "dialog-description" }, [
-              span({}, ["Are you sure you want the DAC to vote on this case? "]),
-              span({ isRendered: this.state.createWarning, className: "no-padding display-inline" }, ["The previous election will be archived and it's result will no longer be valid."]),
-            ])
-          ]),
+          div({className: "dialog-description"}, [
+            span({}, ["Are you sure you want the DAC to vote on this case? "]),
+            span({
+              isRendered: this.state.createWarning,
+              className: "no-padding display-inline"
+            }, ["The previous election will be archived and it's result will no longer be valid."]),
+          ])
+        ]),
 
         ConfirmationDialog({
           title: 'Delete Consent?', color: 'cancel', showModal: this.state.showDialogDelete,
-          action: { label: "Yes", handler: this.dialogHandlerDelete }
+          action: {label: "Yes", handler: this.dialogHandlerDelete}
         }, [
-            div({ className: "dialog-description" }, [
-              span({}, ["Are you sure you want to delete this Consent?"]),
-            ]),
+          div({className: "dialog-description"}, [
+            span({}, ["Are you sure you want to delete this Consent?"]),
           ]),
+        ]),
       ])
     );
   }
