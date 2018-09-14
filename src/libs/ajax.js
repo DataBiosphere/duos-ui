@@ -351,7 +351,8 @@ export const Researcher = {
   getResearcherProfile: async userId => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const profile = await res.json();
+    return profile;
   },
 
   list: async (userId) => {
