@@ -35,7 +35,8 @@ class ResearcherReview extends Component {
         status: null,
       },
       rationale: 'this is a rationale ...',
-      voteStatus: true
+      voteStatus: true,
+      message: ""
     }
 
   }
@@ -46,17 +47,20 @@ class ResearcherReview extends Component {
 
   submitVote = (voteStatus, rationale) => {
     console.log('my vote is : ', voteStatus, rationale);
-    this.setState({ showConfirmationDialogOK: true });
+    let message = voteStatus === "true" ? "Your POSITIVE vote has been successfully logged!" 
+    : "Your NEGATIVE vote has been successfully logged!"
+    this.setState({ showConfirmationDialogOK: true, message: message });
   }
 
   confirmationHandlerOK = (answer) => (e) => {
     console.log("confirmationHandlerOK: ", answer);
     this.setState({ showConfirmationDialogOK: false });
+    this.props.history.push('/');
   }
 
   render() {
 
-    const { formData } = this.state;
+    const { formData, message } = this.state;
 
     return (
 
@@ -229,7 +233,7 @@ class ResearcherReview extends Component {
           type: "informative",
           showModal: true, // this.state.showConfirmationDialogOK,
           action: { label: "Ok", handler: this.confirmationHandlerOK }
-        }, [div({ className: "dialog-description" }, ["Your vote has been successfully logged!"])])
+        }, [div({ className: "dialog-description" }, [message])])
 
       ])
     );

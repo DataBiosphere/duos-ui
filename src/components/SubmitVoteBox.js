@@ -19,7 +19,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   }
 
   logVote = (e) => {
-    console.log('----------logVote----------', this.props.action);
+    console.log('----------logVote----------', this.props.action, this.state);
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
   }
 
@@ -45,7 +45,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   changeRationale = (e) => {
     console.log(e.target.value);
-    this.setState({ rationale: e.target.value });
+    this.setState({ rationale: e.target.value, enableVoteButton: true });
   }
 
   render() {
