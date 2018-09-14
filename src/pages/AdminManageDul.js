@@ -97,26 +97,13 @@ class AdminManageDul extends Component {
     this.props.history.push(`${page}/${electionId}`)
   }
 
-  editDul = (election) => (e) => {
-    const consentData = this.getConsent(election.consentId);
+  async editDul(election){
+    const consentData = await Consent.ConsentResource(election.consentId);
     this.setState({
       dulToEdit: election,
       consentToEdit: consentData,
-      showModal: true,
-      }
-    );
-  };
-
-  getConsent(consentId) {
-    let info= {};
-
-    if (!!consentId) {
-      Consent.ConsentResource(consentId).then(data => {
-        info.useRestriction = data.useRestriction;
-        info.dataUse = data.dataUse;
+      showModal: true
       });
-    }
-    return info;
   };
 
   addDul() {
@@ -184,7 +171,6 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerCreate = (answer) => (e) => {
-    //
     this.setState({ showDialogCreate: false });
     let consentId = this.state.createId;
     let election = { status: 'Open'};
@@ -252,7 +238,7 @@ class AdminManageDul extends Component {
                   div({ id: election.consentId + "_version", className: "col-1 cell-body text " + ((election.version === false || election.version === null) ? "empty" : "") }, [election.version]),
                   div({ id: election.consentId + "_createDate", className: "col-1 cell-body text" }, [Utils.formatDate(election.createDate)]),
                   div({ id: election.consentId + "_editDUL", className: "col-1 cell-body f-center", disabled: (election.electionStatus !== 'un-reviewed' || !election.editable) }, [
-                    button({ id: election.consentId + "_btn_editDUL", className: "cell-button hover-color", onClick: this.editDul(election) }, ["Edit"]),
+                    button({ id: election.consentId + "_btn_editDUL", className: "cell-button hover-color", onClick: () => this.editDul(election) }, ["Edit"]),
 
                   ]),
                   div({ id: election.consentId + "_electionStatus", className: "col-1 cell-body text f-center bold" }, [
