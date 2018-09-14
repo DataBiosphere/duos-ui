@@ -2,50 +2,114 @@ import { Component } from 'react';
 import { div, hr, label, form } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { User, Researcher } from "../libs/ajax";
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      showConfirmationDialogOK: false,
+      alertMessage: "Your vote has been successfully logged!",
       value: '',
+      rationale: '',
+      enableVoteButton: false,
+      voteStatus: null,
       formData: {
-        academicEmail: 'academicEmail',
-        address1: 'address1',
-        address2: 'address2',
-        city: 'city',
-        country: 'country',
-        department: 'department',
-        division: 'division',
-        eRACommonsID: 'eRACommonsID',
-        havePI: true,
-        havePIValue: 'havePIValue',
-        institution: 'institution',
-        isThePI: true,
-        piEmail: 'piEmail',
-        piName: 'piName',
-        piValue: 'piValue',
-        profileName: 'profileName',
-        pubmedID: 'pubmedID',
-        scientificURL: 'scientificURL',
-        state: 'state',
-        zipcode: 'zipcode',
-        status: null,
-      }
+        academicEmail: '',
+        address1: '',
+        address2: '',
+        city: '',
+        country: '',
+        department: '',
+        division: '',
+        eRACommonsID: '',
+        havePI: false,
+        havePIValue: '',
+        institution: '',
+        isThePI: false,
+        piEmail: '',
+        piName: '',
+        piValue: '',
+        profileName: '',
+        pubmedID: '',
+        scientificURL: '',
+        state: '',
+        zipcode: ''
+      },
+    }
+  }
+
+  componentWillMount() {
+    this.findResearcherProps();
+    this.findUserStatus();
+  }
+
+  async findResearcherProps() {
+
+    let researcher = await Researcher.list(this.props.match.params.dacUserId);
+
+    if (researcher.isThePI !== undefined) {
+      researcher.isThePI = JSON.parse(researcher.isThePI);
+      researcher.piValue = researcher.isThePI === true ? researcher.piValue = 'Yes' : researcher.piValue = 'No';
     }
 
+    if (researcher.havePI !== undefined) {
+      researcher.havePI = JSON.parse(researcher.havePI);
+      researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
+    }
+
+    this.setState(prev => {
+      prev.formData = researcher;
+      return prev;
+    });
   }
 
-  setEnableVoteButton = (event, name, value) => {
-    // TBD
-  }
+  async findUserStatus() {
+    let user = await User.findUserStatus(this.props.match.params.dacUserId);
+    let status = null;
+    if (user.status === 'approved') {
+      status = true;
+    } else if (user.status === 'rejected') {
+      status = false;
+    }
+
+    this.setState(prev => {
+      prev.rationale = user.rationale;
+      prev.voteStatus = status;
+      return prev;
+    });
+  };
+
+
+  submitVote = (voteStatus, rationale) => {
+    let status = "pending";
+    if(voteStatus === true || voteStatus === "true") {
+      status = "approved";
+    } else if(voteStatus === "false") {
+      status = "rejected";
+    } 
+    let userStatus = {status: status, rationale: rationale, roleId: 5};
+    User.registerStatus(userStatus, this.props.match.params.dacUserId).then( 
+      data => {
+        this.setState({ showConfirmationDialogOK: true });
+      }
+    ).catch(error => {
+        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+    })
+  };
+
+  confirmationHandlerOK = (answer) => (e) => {
+    this.setState({ showConfirmationDialogOK: false });
+    this.props.history.goBack();
+   
+  };
 
   render() {
 
-    const { formData } = this.state;
-
+    const { formData, rationale, voteStatus } = this.state;
     return (
-
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
@@ -59,33 +123,15 @@ class ResearcherReview extends Component {
               color: "common",
               title: "Your Vote",
               isDisabled: "isFormDisabled",
-              voteStatus: this.state.voteStatus,
+              voteStatus: voteStatus,
+              rationale: rationale,
               showAlert: false,
               alertMessage: "something!",
-              action: { label: "Vote", handler: this.submit }
+              action: { label: "Vote", handler: this.submitVote }
             }),
           ]),
         ]),
 
-  //           div({ className: "radio-inline" }, [
-  //             input({ type: "radio", "value": "status", value: "approved", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafidePositive", name: "bonafideVote" }),
-  //             label({ htmlFor: "bonafidePositive" }, []),
-  //             label({ htmlFor: "bonafidePositive", className: "radio-button-text" }, ["Yes"]),
-
-  //             input({ type: "radio", "value": "status", value: "rejected", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafideNegative", name: "bonafideVote" }),
-  //             label({ htmlFor: "bonafideNegative" }, []),
-  //             label({ htmlFor: "bonafideNegative", className: "radio-button-text" }, ["No"]),
-  //           ]),
-  //           YesNoRadioGroup({ value: this.state.formData.status, onChange: this.setEnableVoteButton, name: 'bonafideVote' }),
-  //         ]),
-
-  //         span({ isRendered: "status === 'approved'" }, [
-  //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Comments"]),
-  //         ]),
-  //         span({ isRendered: "status !== 'approved'" }, [
-  //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Rationale"]),
-  //         ]),
-  
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
             div({ className: "row no-margin form-group" }, [
@@ -174,38 +220,46 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id:"lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id:"lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id:"lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
               ]),
             ]),
 
             div({ className: "row no-margin", isRendered: formData.isThePI === true || formData.havePI === false }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id:"lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id:"lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id:"lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
               ]),
             ]),
           ]),
-        ])
+        ]),
+        ConfirmationDialog({
+          isRendered: this.state.showConfirmationDialogOK,
+          title: "Vote confirmation",
+          color: "common",
+          type: "informative",
+          showModal: true,
+          action: { label: "Ok", handler: this.confirmationHandlerOK }
+        }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
 
       ])
     );

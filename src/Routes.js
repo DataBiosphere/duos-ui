@@ -61,7 +61,7 @@ export default ({ props }) => (
     <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={props} />
     <Route path='/login' component={Login} props={{ props }} />
     <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={props} />
-    <AuthenticatedRoute path='/researcher_review' component={ResearcherReview} props={props} />
+    <AuthenticatedRoute path='/researcher_review/:dacUserId' component={ResearcherReview} props={props} />
     <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords} props={props} />
     <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} />
     <AuthenticatedRoute path='/access_review' component={AccessReview} props={props} />
