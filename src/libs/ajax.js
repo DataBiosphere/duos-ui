@@ -97,7 +97,8 @@ export const User = {
   findUserStatus: async userId => {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const user = await res.json();
+    return user; 
   }
 };
 
@@ -352,7 +353,8 @@ export const Researcher = {
   list: async (userId) => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const researcherList = await res.json();
+    return researcherList;
   },
 
   update: async (userId, validate, researcherProperties) => {
