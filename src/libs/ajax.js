@@ -371,6 +371,12 @@ export const Researcher = {
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
     return res.json();
   },
+
+  getResearcherProfileForDar: async (researcherId) => {
+    const url = `${await Config.getApiUrl()}/researcher/${researcherId}/dar`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
 };
 
 export const DataSet = {
@@ -690,14 +696,10 @@ export const DAR = {
   },
 
   getDarFields: async (id, fields)  => {
-  const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
-  const res = await fetchOk(url, Config.authOpts());
-  return res.json();
+    const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
   },
-
-};
-
-export const Purpose = {
 
   darModalSummary: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
@@ -707,7 +709,9 @@ export const Purpose = {
 
   describeDar: async (darId) => {
     let darInfo = {};
-    this.darModalSummary(darId).then((data) => {
+    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json().then(data => {
       darInfo.researcherId = data.userId;
       darInfo.status = data.status;
       darInfo.hasAdminComment = data.rationale !== null;
@@ -715,11 +719,44 @@ export const Purpose = {
       darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
       if (darInfo.hasPurposeStatements) {
         darInfo.purposeStatements = data.purposeStatements;
-        darInfo.purposeManualReview = this.requiresManualReview(darInfo.purposeStatements);
+        darInfo.purposeManualReview = requiresManualReview(darInfo.purposeStatements);
       }
-
+      darInfo.hasDiseases = data.diseases.length > 0;
+      if (darInfo.hasDiseases) {
+        darInfo.diseases = data.diseases;
+      }
+      if (data.researchType.length > 0) {
+        darInfo.researchType = data.researchType;
+        darInfo.researchTypeManualReview = requiresManualReview(darInfo.researchType);
+      }
+      return Researcher.getResearcherProfileForDar(darInfo.researcherId);
+    }).then(data => {
+      darInfo.pi = data.isThePI === 'true' ? data.profileName : data.piName;
+      darInfo.havePI = data.havePI === 'true' || data.isThePI === 'true';
+      darInfo.profileName = data.profileName;
+      darInfo.institution = data.institution;
+      darInfo.department = data.department;
+      darInfo.city = data.city;
+      darInfo.country = data.country;
+      return new Promise(function (resolve) {
+        resolve(darInfo);
+      });
     });
+    function requiresManualReview(object) {
+      let manualReview = false;
+      object.forEach(function (element) {
+        if (element.manualReview === true) {
+          manualReview = true;
+        }
+      });
+      return manualReview;
+    }
   },
+
+};
+
+export const Purpose = {
+
 
   dataAccessRequestManageResource: async (userId) => {
     if (userId === undefined) {

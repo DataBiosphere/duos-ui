@@ -103,7 +103,7 @@ class AdminManageDul extends Component {
       prev.showModal = true;
       return prev;
     });
-  }
+  };
 
   addDul() {
     this.setState(prev => {

@@ -14,15 +14,20 @@ class AccessPreview extends Component {
 
   componentWillMount() {
     // this.mockState();
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
-    });
+    // this.setState(prev => {
+    //   prev.currentUser = {
+    //     roles: [
+    //       { name: 'CHAIRPERSON' },
+    //       { name: 'ADMIN' },
+    //     ]
+    //   };
+    //   return prev;
+    // });
+
+    // this.describeDar(this.props.match.params.referenceId).then(data => {
+    //   console.log(data);
+    // });
+
     this.darReviewInfo();
   }
 
@@ -31,29 +36,77 @@ class AccessPreview extends Component {
   };
 
   async darReviewInfo() {
-    const referenceId = this.props.match.params.referenceId;
-    const electionId = this.props.match.params.electionId;
-    console.log('REFERENCE ID', referenceId);
-    console.log('ELECTION ID', electionId);
 
+    // dar_id: referenceID
+    this.setState(prev => {
+      prev.dar_id = this.props.match.params.referenceId
+    });
+
+    const data1 = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
+    const data2 = await DAR.getDarFields(this.props.match.params.referenceId, 'translated_restriction');
+    const data3 = await DAR.getDarFields(this.props.match.params.referenceId, 'projectTitle');
+    const data4 = await DAR.darConsent(this.props.match.params.referenceId);
+    const data5 = await DAR.describeDar(this.props.match.params.referenceId);
+    // dar: gerDarFields referenceID rus
     if (this.props.match.params.referenceId !== undefined) {
-      let data = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
-        this.setState(prev => {
-          prev.darInfo.rus = data.rus;
-        });
+      console.log(' rus resolved : ', data1.rus);
+      this.setState(prev => {
+        prev.darInfo.rus = data1.rus;
+        console.log('rus', data1);
+        return prev;
+      });
     }
-    console.log('state darInfo', this.state.darInfo.rus);
+
+    // rp: gerDarFields referenceID translated_restriction
+    if (this.props.match.params.referenceId !== undefined) {
+      this.setState(prev => {
+        prev.rp = data2;
+        console.log('translated_restriction', data2.translated_restriction);
+        return prev;
+      });
+    }
+
+    // request: gerDarFields referenceID projectTitle
+    if (this.props.match.params.referenceId !== undefined) {
+      this.setState(prev => {
+        prev.projectTitle = data3.projectTitle;
+        console.log('projectTitle', data3.projectTitle);
+        return prev;
+      });
+    }
+
+    // consent: getDarConsent referenceID
+    if (this.props.match.params.referenceId !== undefined) {
+      this.setState(prev => {
+        prev.consent = data4;
+        prev.consentName = data4.name;
+        console.log('consent', data4);
+        return prev;
+      });
+    }
+
+    this.setState(prev => {
+      prev.darInfo.havePI = data5.havePI;
+      prev.darInfo.pi = data5.pi;
+      prev.darInfo.city = data5.city;
+      prev.darInfo.department = data5.department;
+      prev.darInfo.country = data5.country;
+      console.log('describe dar', data5);
+      return prev;
+    });
+
   };
 
-  initialState = () => {
+  initialState() {
     return {
       hasUseRestriction: true,
       projectTitle: '',
       consentName: '',
-      isQ1Expanded: false,
+      isQ1Expanded: true,
       isQ2Expanded: false,
 
       darInfo: {
+        rus:'empty rus',
         havePI: true,
         pi: '',
         profileName: '',
@@ -87,7 +140,7 @@ class AccessPreview extends Component {
         ]
       }
     };
-  };
+  }
 
   download = (e) => {
     const filename = e.target.getAttribute('filename');
