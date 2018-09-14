@@ -6,6 +6,7 @@ import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 import Select, { createFilter } from 'react-select';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import ReactTooltip from 'react-tooltip';
 
 
 import './DataAccessRequestApplication.css';
@@ -187,7 +188,7 @@ class DataAccessRequestApplication extends Component {
   dialogHandlerSubmit = (answer) => (e) => {
     this.setState({ showDialogSubmit: false });
   };
-  
+
   dialogHandlerSave = (answer) => (e) => {
     this.setState({ showDialogSave: false });
   };
@@ -383,12 +384,10 @@ class DataAccessRequestApplication extends Component {
                     div({ isRendered: (this.state.formData.eraAuthorized === true) && (this.state.formData.dar_code === null) }, [
                       div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
                         div({ className: "auth-id" }, [this.state.formData.nihUsername]),
-                        button({
-                          onClick: "deleteNihAccount()", className: "close auth-clear",
-                          // tooltip-class: "tooltip-class-dark", tooltip-trigger tooltip-placement: "right" tooltip:"Clear account"
-                        }, [
-                            span({ className: "glyphicon glyphicon-remove-circle" })
-                          ])
+                        button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
+                          span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
+                        ]),
+                        h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
                       ]),
 
                       div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
@@ -417,10 +416,12 @@ class DataAccessRequestApplication extends Component {
                     ]),
                     div({ isRendered: (this.state.formData.isLinkedinAuthorized) && (this.state.formData.linkedinProfile) }, [
                       a({ onClick: "openProfile()", target: "_blank", className: "hover-color auth-link" }, ["LinkedIn Profile Link"]),
-                      button({ isRendered: this.state.formData.dar_code === undefined, onClick: "removeLinkedinProfile()", className: "close auth-clear", }, ["LinkedIn Profile Link"]),
-                      // tooltip-class:"tooltip-class-dark", tooltip-trigger tooltip-placement:"right", tooltip:"Clear account"
+                      button({ isRendered: this.state.formData.dar_code === undefined, onClick: "removeLinkedinProfile()", className: "close auth-clear" }, [
+                        span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearLinkedInAccount" })
+                      ]),
+                      h(ReactTooltip, { id: "tip_clearLinkedInAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
+                      span({ isRendered: (this.state.formData.isLinkedinAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span no-padding" }, ["Required field"]),
                     ]),
-                    span({ isRendered: (this.state.formData.isLinkedinAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span no-padding" }, ["Required field"]),
                   ]),
                 ]),
 
@@ -736,10 +737,7 @@ class DataAccessRequestApplication extends Component {
                     span({ className: "cancel-color required-field-error-span", isRendered: step3.inputPurposes.invalid && showValidationMessages, style: { 'marginLeft': '15px' } }, ["All fields are required"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({
-                      className: "control-label rp-choice-questions"
-                      // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", tooltip: "*"
-                    }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
+                    label({ className: "control-label rp-choice-questions" }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, name: 'forProfit', 
@@ -802,10 +800,7 @@ class DataAccessRequestApplication extends Component {
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({
-                      className: "control-label rp-choice-questions",
-                      // "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right", tooltip: "*", "tooltip-container": "body", "tooltip-animation": "false"
-                    }, ["3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [\"SIGNIFICANTLY\"] economically or educationally disadvantaged persons)?"]),
+                    label({ className: "control-label rp-choice-questions" }, ["3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [\"SIGNIFICANTLY\"] economically or educationally disadvantaged persons)?"]),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -855,6 +850,7 @@ class DataAccessRequestApplication extends Component {
                 ]),
               ]),
             ]),
+            
             //------------------ Step 4--------------------------------------
             div({ isRendered: this.state.step === 4 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [

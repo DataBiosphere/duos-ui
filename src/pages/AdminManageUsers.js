@@ -5,6 +5,7 @@ import { AddUserModal } from '../components/modals/AddUserModal';
 import { EditUserModal } from '../components/modals/EditUserModal';
 import { User } from "../libs/ajax";
 import { PaginatorBar } from '../components/PaginatorBar';
+import ReactTooltip from 'react-tooltip';
 
 
 class AdminManageUsers extends Component {
@@ -146,7 +147,7 @@ class AdminManageUsers extends Component {
     const { currentPage } = this.state;
 
     return (
-      div({ className: "container" }, [
+      div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({ id: "manageUsers", imgSrc: "/images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
@@ -237,9 +238,15 @@ class AdminManageUsers extends Component {
                     ]),
 
                     div({ id: user.dacUserId + "_bonafide_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
-                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, tooltip: "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" }, []),
-                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, tooltip: "Non-Bonafide researcher", "tooltip-className": "tooltip-class", "tooltip- trigger": "true", "tooltip-placement": "left" }, []),
-                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, tooltip: "Researcher review pending", "tooltip-className": "tooltip-class", "tooltip -trigger": "true", "tooltip-placement": "left" }, []),
+                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, "data-tip": "", "data-for": "tip_bonafide" }),
+                      h(ReactTooltip, { id: "tip_bonafide", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
+
+                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "", "data-for": "tip_nonBonafide" }),
+                      h(ReactTooltip, { id: "tip_nonBonafide", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
+                      
+                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, "data-tip": "", "data-for": "tip_pendingReview" }),
+                      h(ReactTooltip, { id: "tip_pendingReview", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
+
                       span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                     ]),
 
