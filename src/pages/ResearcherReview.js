@@ -3,15 +3,17 @@ import { div, hr, label, form } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Researcher } from "../libs/ajax";
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      showConfirmationDialogOK: false,
+      alertMessage: "Your vote has been successfully logged!",
       value: '',
       rationale: '',
-      status: '',
       enableVoteButton: false,
       voteStatus: null,
       formData: {
@@ -34,58 +36,79 @@ class ResearcherReview extends Component {
         pubmedID: '',
         scientificURL: '',
         state: '',
-        zipcode: '',
-        status: null,
-      }
+        zipcode: ''
+      },
     }
-    this.findUserStatus = this.findUserStatus.bind(this);
-    this.findPropertiesByResearcher = this.findPropertiesByResearcher.bind(this);
   }
 
   componentWillMount() {
+    this.findResearcherProps();
     this.findUserStatus();
-    this.findPropertiesByResearcher();
   }
 
-  async findPropertiesByResearcher() {
-    Researcher.list(this.props.match.params.dacUserId).then(
-      data => {
-        if (data.isThePI !== undefined) {
-          data.isThePI = JSON.parse(data.isThePI);
-          data.piValue = data.isThePI === true ? data.piValue = 'Yes' : data.piValue = 'No';
-        }
-        if (data.havePI !== undefined) {
-          data.havePI = JSON.parse(data.havePI);
-          data.havePIValue = data.havePI === true ? 'Yes' : data.havePIValue = 'No';
-        }
-        this.setState(prev => {
-          prev.formData = data
-          return prev;
-        });
-      }).catch(error => {
-        console.error('Error getting researcher details:', error);
-      });;
+  async findResearcherProps() {
+
+    let researcher = await Researcher.list(this.props.match.params.dacUserId);
+
+    if (researcher.isThePI !== undefined) {
+      researcher.isThePI = JSON.parse(researcher.isThePI);
+      researcher.piValue = researcher.isThePI === true ? researcher.piValue = 'Yes' : researcher.piValue = 'No';
+    }
+
+    if (researcher.havePI !== undefined) {
+      researcher.havePI = JSON.parse(researcher.havePI);
+      researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
+    }
+
+    this.setState(prev => {
+      prev.formData = researcher;
+      return prev;
+    });
   }
+
   async findUserStatus() {
-    User.findUserStatus(this.props.match.params.dacUserId).then(
+    let user = await User.findUserStatus(this.props.match.params.dacUserId);
+    let status = null;
+    if (user.status === 'approved') {
+      status = true;
+    } else if (user.status === 'rejected') {
+      status = false;
+    }
+
+    this.setState(prev => {
+      prev.rationale = user.rationale;
+      prev.voteStatus = status;
+      return prev;
+    });
+  };
+
+
+  submitVote = (voteStatus, rationale) => {
+    let status = "pending";
+    if(voteStatus === "true") {
+      status = "approved";
+    } else if(voteStatus === "false") {
+      status = "rejected";
+    } 
+    let userStatus = {status: status, rationale: rationale};
+    User.registerStatus(userStatus, this.props.match.params.dacUserId).then( 
       data => {
-        let status = null;
-        if (data.status === 'approved') {
-          status = true;
-        } else if (data.status === 'rejected') {
-          status = false;
-        }
-        this.setState(prev => {
-          prev.rationale = data.rationale;
-          prev.status = status;
-          prev.voteStatus = status || status === null ? '1' : '0';
-          return prev;
-        });
-      });
-  }
+        this.setState({ showConfirmationDialogOK: true });
+      }
+    ).catch(error => {
+        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+    })
+  };
+
+  confirmationHandlerOK = (answer) => (e) => {
+    this.setState({ showConfirmationDialogOK: false });
+    this.props.history.goBack();
+   
+  };
 
   render() {
-    const { formData } = this.state;
+
+    const { formData, rationale, voteStatus } = this.state;
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
@@ -96,15 +119,15 @@ class ResearcherReview extends Component {
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote" }, [
             SubmitVoteBox({
-              voteStatus: this.state.voteStatus,
-              rationale: this.state.rationale,
-              status: this.state.status,
               id: "researcherReview",
               color: "common",
               title: "Your Vote",
+              isDisabled: "isFormDisabled",
+              voteStatus: voteStatus,
+              rationale: rationale,
               showAlert: false,
               alertMessage: "something!",
-              action: { label: "Vote", handler: this.submit }
+              action: { label: "Vote", handler: this.submitVote }
             }),
           ]),
         ]),
@@ -228,7 +251,15 @@ class ResearcherReview extends Component {
               ]),
             ]),
           ]),
-        ])
+        ]),
+        ConfirmationDialog({
+          isRendered: this.state.showConfirmationDialogOK,
+          title: "Vote confirmation",
+          color: "common",
+          type: "informative",
+          showModal: true,
+          action: { label: "Ok", handler: this.confirmationHandlerOK }
+        }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
 
       ])
     );

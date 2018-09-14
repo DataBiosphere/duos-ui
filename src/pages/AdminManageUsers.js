@@ -90,6 +90,9 @@ class AdminManageUsers extends Component {
     });
   };
 
+  openResearcherReview = (userId) => {
+    this.props.history.push(`researcher_review/${userId}`);
+  }
   okModal = (name) => {
 
     switch (name) {
@@ -224,7 +227,7 @@ class AdminManageUsers extends Component {
                 ]),
                 div({ id: user.dacUserId + "_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                   div({ id: user.dacUserId + "_btn_researcherReview", className: "row no-margin" }, [
-                    a({ isRendered: user.researcher !== false && user.completed, "ui-sref": "researcher_review({dacUserId: '{{user.dacUserId}}'})", className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+                    a({ onClick: () => this.openResearcherReview(user.dacUserId), isRendered: user.researcher !== false && user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({
                         className:
                           ((user.researcher && user.completed && user.status === 'pending') || user.status === null) ? 'enabled'
