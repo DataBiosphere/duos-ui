@@ -2,12 +2,14 @@ import { Component } from 'react';
 import { div, hr, label, form } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      showConfirmationDialogOK: false,
       value: '',
       formData: {
         academicEmail: 'academicEmail',
@@ -31,13 +33,25 @@ class ResearcherReview extends Component {
         state: 'state',
         zipcode: 'zipcode',
         status: null,
-      }
+      },
+      rationale: 'this is a rationale ...',
+      voteStatus: true
     }
 
   }
 
   setEnableVoteButton = (event, name, value) => {
     // TBD
+  }
+
+  submitVote = (voteStatus, rationale) => {
+    console.log('my vote is : ', voteStatus, rationale);
+    this.setState({ showConfirmationDialogOK: true });
+  }
+
+  confirmationHandlerOK = (answer) => (e) => {
+    console.log("confirmationHandlerOK: ", answer);
+    this.setState({ showConfirmationDialogOK: false });
   }
 
   render() {
@@ -54,38 +68,40 @@ class ResearcherReview extends Component {
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote" }, [
+
             SubmitVoteBox({
               id: "researcherReview",
               color: "common",
               title: "Your Vote",
               isDisabled: "isFormDisabled",
               voteStatus: this.state.voteStatus,
+              rationale: this.state.rationale,
               showAlert: false,
               alertMessage: "something!",
-              action: { label: "Vote", handler: this.submit }
+              action: { label: "Vote", handler: this.submitVote }
             }),
           ]),
         ]),
 
-  //           div({ className: "radio-inline" }, [
-  //             input({ type: "radio", "value": "status", value: "approved", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafidePositive", name: "bonafideVote" }),
-  //             label({ htmlFor: "bonafidePositive" }, []),
-  //             label({ htmlFor: "bonafidePositive", className: "radio-button-text" }, ["Yes"]),
+        //           div({ className: "radio-inline" }, [
+        //             input({ type: "radio", "value": "status", value: "approved", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafidePositive", name: "bonafideVote" }),
+        //             label({ htmlFor: "bonafidePositive" }, []),
+        //             label({ htmlFor: "bonafidePositive", className: "radio-button-text" }, ["Yes"]),
 
-  //             input({ type: "radio", "value": "status", value: "rejected", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafideNegative", name: "bonafideVote" }),
-  //             label({ htmlFor: "bonafideNegative" }, []),
-  //             label({ htmlFor: "bonafideNegative", className: "radio-button-text" }, ["No"]),
-  //           ]),
-  //           YesNoRadioGroup({ value: this.state.formData.status, onChange: this.setEnableVoteButton, name: 'bonafideVote' }),
-  //         ]),
+        //             input({ type: "radio", "value": "status", value: "rejected", onClick: this.setEnableVoteButton, className: "regular-radio", id: "bonafideNegative", name: "bonafideVote" }),
+        //             label({ htmlFor: "bonafideNegative" }, []),
+        //             label({ htmlFor: "bonafideNegative", className: "radio-button-text" }, ["No"]),
+        //           ]),
+        //           YesNoRadioGroup({ value: this.state.formData.status, onChange: this.setEnableVoteButton, name: 'bonafideVote' }),
+        //         ]),
 
-  //         span({ isRendered: "status === 'approved'" }, [
-  //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Comments"]),
-  //         ]),
-  //         span({ isRendered: "status !== 'approved'" }, [
-  //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Rationale"]),
-  //         ]),
-  
+        //         span({ isRendered: "status === 'approved'" }, [
+        //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Comments"]),
+        //         ]),
+        //         span({ isRendered: "status !== 'approved'" }, [
+        //           label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label common-color" }, ["Rationale"]),
+        //         ]),
+
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
             div({ className: "row no-margin form-group" }, [
@@ -174,38 +190,46 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id:"lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id:"lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id:"lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
               ]),
             ]),
 
             div({ className: "row no-margin", isRendered: formData.isThePI === true || formData.havePI === false }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id:"lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id:"lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id:"lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
               ]),
             ]),
           ]),
-        ])
+        ]),
+        ConfirmationDialog({
+          isRendered: this.state.showConfirmationDialogOK,
+          title: "Vote confirmation",
+          color: "common",
+          type: "informative",
+          showModal: true, // this.state.showConfirmationDialogOK,
+          action: { label: "Ok", handler: this.confirmationHandlerOK }
+        }, [div({ className: "dialog-description" }, ["Your vote has been successfully logged!"])])
 
       ])
     );

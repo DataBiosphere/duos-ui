@@ -742,7 +742,8 @@ class DataAccessRequestApplication extends Component {
                     }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, name: 'forProfit', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, name: 'forProfit', 
+                    disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -750,8 +751,10 @@ class DataAccessRequestApplication extends Component {
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, name: 'onegender', disabled: (this.state.formData.dar_code !== null), required: true }),
-                    div({ isRendered: this.state.formData.onegender === true, className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
+                    YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, name: 'onegender',
+                     disabled: (this.state.formData.dar_code !== null), required: true }),
+                    div({ isRendered: this.state.formData.onegender === 'true' || this.state.formData.onegender === true,
+                     className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
                       span({}, ["Please specify"]),
                       OptionsRadioGroup({
                         value: this.state.formData.gender,
