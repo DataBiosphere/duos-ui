@@ -46,11 +46,11 @@ class DulReview extends Component {
         console.log(data);
         this.setState({election: data});
       });
-    Consent.ConsentResource(this.props.match.params.consentId)
-      .then(data => {
-        console.log(data);
-        this.setState({consent: data});
-      });
+    this.setState({consent: Consent.ConsentResource(this.props.match.params.consentId)});
+      // .then(data => {
+      //   console.log(data);
+      //   this.setState({consent: data});
+      // });
   }
 
   mockState() {

@@ -13,32 +13,67 @@ export const EditDulModal = hh(class EditDulModal extends Component {
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
     this.state = {
-      useRestriction: '',
-      dataUse: '',
       consent: {
         consentId: '',
-        name: 'name ...',
+        name: '',
+        sdul: '',
+        dataUse: '',
       },
       file : ''
     }
   }
-  componentWillMount() {
-    if (this.props.dul !== undefined) {
-      console.log("Will mount -> ", this.props);
-      this.setState(prev => {
-        prev.consent.consentId = this.props.dul.consentId;
-        return prev;
-      });
-    }
+
+componentWillReceiveProps(nextProps) {
+    console.log("------next------");
+    console.log(nextProps);
+    console.log("------next------");
+    console.log(JSON.stringify(nextProps.editConsent));
+    // const consentData = this.getConsent(nextProps.dul.consentId);
+  // let consentData = {};
+
+    // console.log("CONSENT!!! _ ", consentData);
+    this.setState({
+      consent:{
+        consentId: nextProps.dul.consentId,
+        name: nextProps.dul.consentName,
+
+        // sdul: JSON.stringify(consentData.useRestriction),
+        // dataUse: JSON.stringify(consentData.dataUse)
+
+        sdul: JSON.stringify(nextProps.editConsent.useRestriction),
+        dataUse: JSON.stringify(nextProps.editConsent.dataUse)
+    }});
   }
-  // componentWillMount() {
-  //   if (this.props.dul !== undefined) {
-  //     this.setState({consent:{
-  //         consentId: this.props.dul.consentId,
-  //         name: 'leo!'
-  //       }})
+
+  //  getConsent(consentId) {
+  //   let info= {};
+  //
+  //   if (!!consentId) {
+  //     Consent.ConsentResource(consentId).then(data => {
+  //         info.useRestriction = data.useRestriction;
+  //         info.dataUse = data.dataUse;
+  //     });
   //   }
+  //   return info;
   // };
+
+  /*
+  * this.getConsent(nextProps.dul.consentId).then(data => {
+      consentData.useRestriction = data.useRestriction;
+      consentData.dataUse = data.dataUse;
+      // return consentData;
+    });
+    */
+  componentWillMount() {
+
+    // if (this.props.dul !== undefined) {
+    //   console.log("Will mount -> ", this.props);
+    //   this.setState(prev => {
+    //     prev.consent.consentId = this.props.dul.consentId;
+    //     return prev;
+    //   });
+    // }
+  }
 
   OKHandler() {
     // this is the method for handling OK click
@@ -74,8 +109,12 @@ export const EditDulModal = hh(class EditDulModal extends Component {
   };
 
   handleChange = (changeEvent) => {
-    console.log("changeEvent ", changeEvent.target.value);
-    // this.props.onChange(changeEvent, this.props.dul.consentId, changeEvent.target.value)
+    const fieldId = changeEvent.target.id;
+    const value = changeEvent.target.value;
+    console.log("changeEvent", fieldId, value);
+    if (fieldId==='txt_consentName') {  this.setState(prev => {   prev.consent.name = value;   return value;  });  }
+    if (fieldId==='txt_sdul') {  this.setState(prev => {   prev.consent.sdul = value;   return value;  });  }
+    if (fieldId==='txt_dataUse') {  this.setState(prev => {   prev.consent.dataUse = value;   return value;  });  }
   };
 
   onFileChange = (e) => {
@@ -92,13 +131,12 @@ export const EditDulModal = hh(class EditDulModal extends Component {
 
 
     console.log('editDul: ', this.props.showModal, this.props.dul);
-
+    // console.log('editConsent' , this.props.editConsent)
     if (this.props.showModal === false) {
       return null;
     }
 
     return (
-      input (type:”text” name:”title” value:”Mr.”),
       BaseModal({
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
@@ -152,7 +190,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  value: this.state.useRestriction, onChange: this.handleChange,
+                  value: this.state.consent.sdul, onChange: this.handleChange,
                   id: "txt_sdul", name: "inputSDUL",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})", required: "true"
@@ -164,7 +202,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  value: this.state.dataUse, onChange: this.handleChange,
+                  value: this.state.consent.dataUse, onChange: this.handleChange,
                   id: "txt_dataUse", name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})", required: "true"

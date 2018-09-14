@@ -428,10 +428,13 @@ export const DataSet = {
 
 export const Consent = {
 
-  ConsentResource: async consentId => {
+  ConsentResource: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
+    let consent = await res.json();
+    // console.log("Consent Resource ", consent);
+    // return await res.json();
+    return consent;
   },
 
   getInvalidConsentRestriction: async () => {

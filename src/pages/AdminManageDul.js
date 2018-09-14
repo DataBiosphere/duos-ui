@@ -23,6 +23,8 @@ class AdminManageDul extends Component {
       electionsList: {
         dul: []
       },
+      dulToEdit: {},
+      consentToEdit: {},
       showDialogArchive: false,
       showDialogCancel: false,
       showDialogCreate: false,
@@ -30,7 +32,7 @@ class AdminManageDul extends Component {
     };
 
     this.myHandler = this.myHandler.bind(this);
-    this.handleOpenModal = this.handleOpenModal.bind(this);
+    // this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
 
@@ -81,9 +83,7 @@ class AdminManageDul extends Component {
     });
   };
 
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
+
 
   handleCloseModal() {
     this.setState({ showModal: false });
@@ -98,11 +98,25 @@ class AdminManageDul extends Component {
   }
 
   editDul = (election) => (e) => {
-    this.setState(prev => {
-      prev.dulToEdit = election;
-      prev.showModal = true;
-      return prev;
-    });
+    const consentData = this.getConsent(election.consentId);
+    this.setState({
+      dulToEdit: election,
+      consentToEdit: consentData,
+      showModal: true,
+      }
+    );
+  };
+
+  getConsent(consentId) {
+    let info= {};
+
+    if (!!consentId) {
+      Consent.ConsentResource(consentId).then(data => {
+        info.useRestriction = data.useRestriction;
+        info.dataUse = data.dataUse;
+      });
+    }
+    return info;
   };
 
   addDul() {
@@ -273,14 +287,8 @@ class AdminManageDul extends Component {
                   ]),
                 ]),
                 hr({ className: "table-body-separator" }),
-
-                //------------------
-
-                //-------------------
-
               ])
             )
-            //-----------------
           }),
           PaginatorBar({
             total: this.state.electionsList.dul.length,
@@ -293,7 +301,12 @@ class AdminManageDul extends Component {
         ]),
 
         EditDulModal({
-          showModal: this.state.showModal, onOKRequest: this.okAddDulModal, onCloseRequest: this.closeAddDulModal, onAfterOpen: this.afterAddDulModalOpen, dul: this.state.dulToEdit
+          showModal: this.state.showModal,
+          onOKRequest: this.okAddDulModal,
+          onCloseRequest: this.closeAddDulModal,
+          onAfterOpen: this.afterAddDulModalOpen,
+          dul: this.state.dulToEdit,
+          editConsent: this.state.consentToEdit
         }),
 
         ConfirmationDialog({
