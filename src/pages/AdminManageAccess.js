@@ -5,6 +5,8 @@ import { Purpose } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
+import * as Utils from '../libs/utils';
+import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 
 const limit = 10;
 
@@ -14,6 +16,7 @@ class AdminManageAccess extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      showModal: false,
       value: '',
       darElectionList: [],
       currentPage: 1,
@@ -21,9 +24,10 @@ class AdminManageAccess extends Component {
       showDialogCancel: false,
       showDialogCreate: false,
     }
-
     this.getElectionDarList = this.getElectionDarList.bind(this);
     this.myHandler = this.myHandler.bind(this);
+    this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
   }
 
   myHandler(event) {
@@ -34,7 +38,6 @@ class AdminManageAccess extends Component {
     let darElection = [];
     const elections = await Purpose.dataAccessRequestManageResource();
     elections.map(dar => {
-      console.log(dar);
       darElection.push(dar);
       return dar;
     });
@@ -82,11 +85,24 @@ class AdminManageAccess extends Component {
     this.setState({ showDialogCreate: false });
   };
 
-  open(data) {
+  openApplicationSummaryModal(dataRequestId, electionStatus) {
+    this.setState({ showModal: true , dataRequestId: dataRequestId});
+  };
 
+  handleCloseModal() {
+    this.setState({ showModal: false });
+  }
+
+  open() {
+  }
+
+  okApplicationSummaryModal() {
+    this.setState({ showModal: false });
   }
 
   render() {
+
+    const { currentPage } = this.state;
 
     return (
 
@@ -109,7 +125,7 @@ class AdminManageAccess extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.darElectionList.map(dar => {
+          this.state.darElectionList.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map(dar => {
             return h(Fragment, { key: dar.frontEndId }, [
               div({ id: dar.frontEndId, className: "row no-margin " + (dar.needsApproval ? "list-highlighted" : "") }, [
                 div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
@@ -120,12 +136,12 @@ class AdminManageAccess extends Component {
 
                 div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
 
-                div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.createDate | "date:'yyyy-MM-dd'"]),
+                div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(dar.createDate)]),
 
                 div({ id: dar.frontEndId + "_btn_summary", href: "", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
-                  button({ className: "cell-button hover-color", onClick: "this.openApplication(dar.dataRequestId, dar.electionStatus)" }, ["Summary"]),
+                  button({ className: "cell-button hover-color", onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus) }, ["Summary"]),
                 ]),
-
+              
                 div({ id: dar.frontEndId + "_link_electionStatus", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
                   span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
                     a({ onClick: this.open('access_preview_results', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
@@ -140,7 +156,6 @@ class AdminManageAccess extends Component {
                     a({ onClick: this.open('access_results_record', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
                   ]),
                 ]),
-
                 div({ id: dar.frontEndId + "_actions", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
                   div({ className: "row no-margin" }, [
                     div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
@@ -157,10 +172,10 @@ class AdminManageAccess extends Component {
 
                         span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),
                         h(ReactTooltip, { id: "tip_nonBonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
-                        
+
                         span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending', "data-tip": "", "data-for": "tip_pendingReview" }),
                         h(ReactTooltip, { id: "tip_pendingReview", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
-                                       
+
                         span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }),
                       ])
                     ])
@@ -185,6 +200,11 @@ class AdminManageAccess extends Component {
                   ])
                 ]),
             ]);
+          }),
+          ApplicationSummaryModal({
+            showModal: this.state.showModal, 
+            onCloseRequest: this.handleCloseModal,
+            dataRequestId: this.state.dataRequestId
           }),
           PaginatorBar({
             total: this.state.darElectionList.length,

@@ -898,6 +898,16 @@ export const PendingCases = {
   }
 };
 
+export const DataAccess = {
+  getDarModalSummary: async (darId) => {
+    const url = `${await Config.getApiUrl()}/"dar/modalSummary/${darId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  }
+  
+};
+
+
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
   // console.log('------------------------------ res ----------------------', res);

@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataSet } from '../../libs/ajax'
+import { DataAccess } from '../../libs/ajax'
 
 let USER_ID = 5;
 
@@ -9,51 +9,55 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
 
   constructor() {
     super();
-    this.state = {
-      summary: {
-        darCode: 'XYZ-1000',
-        principalInvestigator: 'Nadya Lopez Zalba',
-        researcherName: 'Nadya Researcher',
-        status: 'bonafideResearcher',
-        rationale: 'just because',
-        electionStatus: '',
-        institutionName: 'Belatrix',
-        projectTitle: 'MyFirstProject',
-        needDOApproval: 'Approved by Data Owner(s).',
-        datasetDetail: [
-          { key: "SC-20156", data: "Dataset Name" }
-        ],
-        researchType: [
-          { title: "Type Title 1", description: "Description description description description description description" },
-          { title: "Type Title 2", description: "Description description description description" }
-        ],
-        thereDiseases: true,
-        diseases: ['disease1', 'disease2', 'disease3'],
-        therePurposeStatements: false,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        sensitivePopulation: false,
-        requiresManualReview: false
-      },
-      calledFromAdmin: true,
-    }
-
+    this.state = {summary:{}};
+    // this.state = {
+    //   summary: {
+    //     darCode: 'XYZ-1000',
+    //     principalInvestigator: 'Nadya Lopez Zalba',
+    //     researcherName: 'Nadya Researcher',
+    //     status: 'bonafideResearcher',
+    //     rationale: 'just because',
+    //     electionStatus: '',
+    //     institutionName: 'Belatrix',
+    //     projectTitle: 'MyFirstProject',
+    //     needDOApproval: 'Approved by Data Owner(s).',
+    //     datasetDetail: [
+    //       { key: "SC-20156", data: "Dataset Name" }
+    //     ],
+    //     researchType: [
+    //       { title: "Type Title 1", description: "Description description description description description description" },
+    //       { title: "Type Title 2", description: "Description description description description" }
+    //     ],
+    //     thereDiseases: true,
+    //     diseases: ['disease1', 'disease2', 'disease3'],
+    //     therePurposeStatements: false,
+    //     purposeStatements: [
+    //       { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
+    //       { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
+    //       { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
+    //       { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
+    //     ],
+    //     sensitivePopulation: false,
+    //     requiresManualReview: false
+    //   },
+    //   calledFromAdmin: true,
+    // }
+  //  this.init();
     this.closeHandler = this.closeHandler.bind(this);
-    this.OKHandler = this.OKHandler.bind(this);
   };
 
-  OKHandler() {
-    // this is the method for handling OK click
-    // we might do something here, adding a user for instance
-    // or delegate it to the parent....
+  closeHandler() {
+    this.props.onCloseRequest('summaryModal');
   }
 
-  closeHandler() {
-    // this is the method to handle Cancel click
+  init(){
+    // if(this.props.dataRequestId !== undefined) {
+    //   let darSummary = await DataAccess.getDarModalSummary(this.props.dataRequestId);
+    //   this.setState(prev => {
+    //     prev.summary = darSummary;
+    //     return prev;
+    //   });
+    // }    
   }
 
   render() {
@@ -70,7 +74,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
         iconSize: 'none',
         title: "Application Summary",
         description: 'Data Access Request Application Summary',
-        action: { label: "Close", handler: this.OKHandler }
+        action: { label: "Close", handler: this.closeHandler }
       },
         [
           div({ className: "summary" }, [
