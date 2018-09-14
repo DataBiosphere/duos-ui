@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { Purpose } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import ReactTooltip from 'react-tooltip';
 
 const limit = 10;
 
@@ -89,7 +90,7 @@ class AdminManageAccess extends Component {
 
     return (
 
-      div({ className: "container" }, [
+      div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({ id: "manageAccess", imgSrc: "/images/icon_manage_access.png", iconSize: "medium", color: "access", title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review" }),
@@ -112,8 +113,8 @@ class AdminManageAccess extends Component {
             return h(Fragment, { key: dar.frontEndId }, [
               div({ id: dar.frontEndId, className: "row no-margin " + (dar.needsApproval ? "list-highlighted" : "") }, [
                 div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
-                  div({ id: dar.frontEndId + "_flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : "") }, []),
-                  //  "tooltip": "this.dar.dataSetElectionResult ", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "right"
+                  div({ id: dar.frontEndId + "_flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
+                  h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
                   span({ id: dar.frontEndId + "_name_darId", className: "list-highlighted-item" }, [dar.frontEndId])
                 ]),
 
@@ -151,19 +152,16 @@ class AdminManageAccess extends Component {
 
                     div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
                       a({ id: dar.frontEndId + "_flag_bonafide", onClick: "this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)" }, [
-                        span({
-                          className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved'
-                          // , "tooltip": "Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left"
-                        }, []),
-                        span({
-                          className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected'
-                          // , "tooltip": "Non-Bonafide researcher", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" 
-                        }, []),
-                        span({
-                          className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending'
-                          // , "tooltip": "Researcher review pending", "tooltip-class": "tooltip-class", "tooltip-trigger": "true", "tooltip-placement": "left" 
-                        }, []),
-                        span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }, []),
+                        span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved', "data-tip": "", "data-for": "tip_bonafide" }),
+                        h(ReactTooltip, { id: "tip_bonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
+
+                        span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),
+                        h(ReactTooltip, { id: "tip_nonBonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
+                        
+                        span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending', "data-tip": "", "data-for": "tip_pendingReview" }),
+                        h(ReactTooltip, { id: "tip_pendingReview", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
+                                       
+                        span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }),
                       ])
                     ])
                   ])
