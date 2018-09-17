@@ -50,7 +50,7 @@ class DulPreview extends Component {
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
-    console.log('------------download-------------', filename, value);
+
  };
 
   downloadDUL = () => {

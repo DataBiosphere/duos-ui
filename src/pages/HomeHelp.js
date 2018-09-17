@@ -38,7 +38,6 @@ class HomeHelp extends Component {
   }
 
   showData(data) {
-    console.log('showData: ', data);
   }
 }
 

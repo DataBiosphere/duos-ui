@@ -30,18 +30,24 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
       div({ className: 'radio-inline' }, [
         this.state.optionLabels.map((option, ix) => {
           return (
-            span({ key: this.state.name + ix, onClick: (e) => this.selectOption(e, this.state.optionValues[ix]) }, [
-              input({
-                className: "regular-radio",
-                value: this.state.optionValues[ix],
-                type: "radio",
-                id: "rad_" + this.props.id + ix,
-                name: this.state.name,
-                checked: this.state.value === this.state.optionValues[ix]
-              }),
-              label({ htmlFor: "rad_" + this.props.id + ix }, []),
-              label({ id: "lbl_" + this.props.id + ix, htmlFor: "rad_" + this.props.id + ix, className: "radio-button-text" }, [this.state.optionLabels[ix]]),
-            ])
+
+            label({
+              key: this.state.name + ix,
+              onClick: (e) => this.selectOption(e, this.state.optionValues[ix]),
+              id: "lbl_" + this.state.name + ix,
+              htmlFor: "rad_" + this.state.name + ix,
+              className: "radio-wrapper"
+            }, [
+                input({
+                  type: "radio",
+                  id: "rad_" + this.state.name + ix,
+                  name: this.state.name,
+                  value: this.state.optionValues[ix],
+                  checked: this.state.value === this.state.optionValues[ix],
+                }),
+                span({ className: "radio-check" }),
+                span({ className: "radio-label" }, [this.state.optionLabels[ix]])
+              ])
           )
         })
       ])

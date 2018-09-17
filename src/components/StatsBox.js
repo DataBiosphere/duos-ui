@@ -89,15 +89,13 @@ export const StatsBox = hh(class StatsBox extends Component {
   };
 
   componentDidMount() {
-    console.log('componentDidMount');
+
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('componentDidUpdate', prevProps, prevState, snapshot);
   }
 
   componentWillUnmount() {
-    console.log('componentWillUnmount');
   }
 
   render() {
@@ -122,7 +120,7 @@ export const StatsBox = hh(class StatsBox extends Component {
 
     return (
       div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 jumbotron box-vote-stats" }, [
-        h4({ className: "cm-results-subtitle display-inline-block", id: this.props.subtitle }, [this.props.subtitle]),
+        h4({ className: "cm-results-subtitle", id: this.props.subtitle }, [this.props.subtitle]),
         buttonTag,
         hr({ className: "box-separator-white" }),
         div({ className: "row", style: { 'marginTop': '10px' } }, [

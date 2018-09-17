@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { div, form, input, label, textarea, span, hh, p } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
+import { Consent } from "../../libs/ajax";
 
 
 export const AddDulModal = hh(class AddDulModal extends Component {
@@ -9,8 +10,17 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      file: {
-        name: "",
+      consent: {
+        consentId: '',
+        name: '',
+        useRestriction: '',
+        dataUse: '',
+      },
+      file: '',
+      error: {
+        show: false,
+        title: '',
+        msj: ''
       }
     };
 
@@ -20,14 +30,29 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  OKHandler() {
-    // this is the method for handling OK click
-    // we might do something here, adding a user for instance
-    // or delegate it to the parent....
-    // DO SOMETHING HERE ...
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      consent: {
+        consentId: nextProps.dul.consentId,
+        name: nextProps.dul.consentName,
+        useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
+        dataUse: JSON.stringify(nextProps.editConsent.dataUse)
+      }
+    });
+  }
 
-    // and call parent's OK Handler
-    this.props.onOKRequest('addDul');
+  OKHandler() {
+    if (this.isValidJson(this.state.consent.useRestriction ,"Unable to process Structured Limitations JSON") &&
+      this.isValidJson(this.state.consent.dataUse, "Unable to process Data Use JSON")) {
+      const consentResponse = await this.updateConsent();
+      if (this.state.file.name !== ""
+        && consentResponse === true
+        && this.uploadFile()
+      ) {
+        this.props.onOKRequest('editDul');
+      }
+    }
+    console.log("handle validation");
   }
 
   closeHandler() {
@@ -57,6 +82,103 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
   }
 
+  async uploadFile() {
+
+    const response = await Consent.CreateDulResource(this.state.consent.consentId, this.state.file.name, this.state.file);
+    if (response !== true) {
+      this.setState(prev => {
+        prev.error.title = 'Server Error';
+        prev.error.msj = 'Problem with the file UpLoad.';
+        prev.error.show = true;
+        return prev;
+      });
+    }
+  }
+
+  async updateConsent() {
+    const consent = {};
+    consent.consentId = this.state.consent.consentId;
+    consent.useRestriction = this.state.consent.useRestriction;
+    consent.dataUse = this.state.consent.dataUse;
+    consent.name = this.state.consent.name;
+    const response = await Consent.update(consent);
+
+    if (response) {
+      // this.closeAlert();
+      return true;
+    } else if (response.data.message === undefined) {
+      this.handleErrors(0, response.data.cause.localizedMessage)
+    } else {
+      this.handleErrors(0, response.data.message);
+    }
+    return false;
+  };
+
+  handleErrors (index, message) {
+
+    var tle = 'Conflicts to resolve!';
+    if (message.indexOf("PRIMARY") > -1) {
+      message = "There is a Data Use Limitation already registered with this Consent Id. ";
+    } else if (message.indexOf("name") > -1) {
+      message = "There is a Data Use Limitation already registered with this name.";
+    } else if (message.indexOf("Unable to process JSON") > -1){
+      message = "Structured Limitations or Data Use has invalid format. Please write it as valid JSON.";
+    }
+    else {
+      tle = "Error, unable to create a new Data Use Limitation! ";
+      message = message;
+    }
+
+    this.setState(prev => {
+      prev.error.title = tle,
+        prev.error.show = true;
+      prev.error.msj = message;
+      return prev;
+    });
+  };
+
+  handleChange = (changeEvent) => {
+    const fieldId = changeEvent.target.id;
+    const value = changeEvent.target.value;
+    if (fieldId === 'txt_consentName') {
+      this.setState(prev => {
+        prev.consent.name = value;
+        return value;
+      });
+    }
+    if (fieldId === 'txt_sdul') {
+      this.setState(prev => {
+        prev.consent.useRestriction = value;
+        return value;
+      });
+    }
+    if (fieldId === 'txt_dataUse') {
+      this.setState(prev => {
+        prev.consent.dataUse = value;
+        return value;
+      });
+    }
+  };
+
+  onFileChange = (e) => {
+    console.log("FILE ", this.state.file);
+    if (e.target.files !== undefined && e.target.files[0]) {
+      let file = e.target.files[0];
+      this.setState({
+        file: file,
+      });
+    }
+  };
+
+  isValidJson = (obj, error) => {
+    try {
+      JSON.parse(obj);
+      return true;
+    } catch (err) {
+      this.handleErrors(0, error);
+      return false;
+    }
+  };
   render() {
     const file = {
       name: "MyFile.txt"
@@ -82,9 +204,14 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
                   type: "text", "ng-model": "consent.consentId",
-                  id: "txt_consentId", name: "inputConsentId",
+                  value: this.state.consent.consentId,
+                  onChange: this.handleChange,
+                  id: "txt_consentId",
+                  name: "inputConsentId",
                   className: "form-control col-lg-12 vote-input",
-                  placeholder: "Unique id from Compliance", required: "true"
+                  placeholder: "Unique id from Compliance",
+                  required: "true",
+                  disabled: false
                 }),
               ]),
             ]),
@@ -93,10 +220,14 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               label({ id: "lbl_consentName", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 input({
-                  type: "text", "ng-model": "consent.name",
-                  id: "txt_consentName", name: "inputName",
+                  type: "text",
+                  value: this.state.consent.name,
+                  onChange: this.handleChange,
+                  id: "txt_consentName",
+                  name: "inputName",
                   className: "form-control col-lg-12 vote-input",
-                  placeholder: "Consent id", required: "true"
+                  placeholder: "Consent id",
+                  required: "true",
                 }),
               ]),
             ]),
@@ -107,9 +238,14 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
                   span({}, ["Upload file"]),
                   span({ className: "cm-icon-button glyphicon glyphicon-upload caret-margin", "aria-hidden": "true" }, []),
-                  input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
+                  input({
+                    id: "btn_uploadFile",
+                    type: "file",
+                    onChange: this.onFileChange,
+                    className: "upload",
+                    required: "true" }),
                 ]),
-                p({ id: "txt_uploadFile", className: "fileName" }, [file.name]),
+                p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file !== null ? this.state.file.name : file.name]),
               ]),
             ]),
 
@@ -117,9 +253,13 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               label({ id: "lbl_sdul", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  id: "txt_sdul", name: "inputSDUL",
+                  id: "txt_sdul",
+                  value: this.state.consent.useRestriction,
+                  onChange: this.handleChange,
+                  name: "inputSDUL",
                   className: "form-control col-lg-12 vote-input",
-                  placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})", required: "true"
+                  placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})",
+                  required: "true"
                 })
               ]),
             ]),
@@ -128,9 +268,13 @@ export const AddDulModal = hh(class AddDulModal extends Component {
               label({ id: "lbl_dataUse", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
-                  id: "txt_dataUse", name: "inputDU",
+                  id: "txt_dataUse",
+                  value: this.state.consent.dataUse,
+                  onChange: this.handleChange,
+                  name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
-                  placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})", required: "true"
+                  placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})",
+                  required: "true"
                 })
               ])
             ])

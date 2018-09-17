@@ -5,6 +5,7 @@ import { PageSubHeading } from '../components/PageSubHeading';
 import { Storage } from '../libs/storage';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
+import { SearchBox } from '../components/SearchBox';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -96,12 +97,12 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   }
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push({ pathname: 'final_access_review', props:  { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
+    this.props.history.push({ pathname: 'final_access_review', props: { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
   }
 
   openAccessReview = (darId, voteId, rpVoteId) => (e) => {
-   this.props.history.push({ pathname: 'access_review', props: { darId: darId, voteId: voteId, rpVoteId: rpVoteId } });
- }
+    this.props.history.push({ pathname: 'access_review', props: { darId: darId, voteId: voteId, rpVoteId: rpVoteId } });
+  }
 
   openAccessCollect = (referenceId, electionId) => (e) => {
     this.props.history.push({ pathname: 'access_collect', props: { referenceId: referenceId, electionId: electionId } });
@@ -115,9 +116,25 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.setState({ showModal: false });
   }
 
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  handleSearchDar = (query) => {
+    this.setState({ searchDarText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
+  }
+
   render() {
 
-    const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit } = this.state;
+    const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit, searchDulText, searchDarText } = this.state;
 
     return (
 
@@ -132,10 +149,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Review", description: "Were data use limitations accurately converted to a structured format?" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search dul-color" }),
-                input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", value: this.searchDULCases }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
           ]),
 
@@ -155,7 +169,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
             hr({ className: "table-head-separator" }),
 
-            this.state.electionsList.dul.slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit).map((pendingCase, rIndex) => {
+            this.state.electionsList.dul.filter(this.searchTable(searchDulText)).slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
@@ -164,7 +178,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({
-                      onClick: this.openDULReview (pendingCase.voteId, pendingCase.referenceId),
+                      onClick: this.openDULReview(pendingCase.voteId, pendingCase.referenceId),
                       className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
                     }, [
                         span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
@@ -184,7 +198,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             }),
             PaginatorBar({
               name: 'dul',
-              total: this.state.electionsList.dul.length,
+              total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
               limit: dulLimit,
               pageCount: this.dulPageCount,
               currentPage: currentDulPage,
@@ -198,10 +212,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Request Review", description: "Should data access be granted to this applicant?" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search access-color" }),
-                input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", value: this.searchDULCases }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
             ]),
           ]),
 
@@ -223,7 +234,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
             hr({ className: "table-head-separator" }),
 
-            this.state.electionsList.access.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((pendingCase, rIndex) => {
+            this.state.electionsList.access.filter(this.searchTable(searchDarText)).slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
@@ -231,23 +242,29 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                   div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
 
                   div({ isRendered: pendingCase.electionStatus !== 'Final', className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                    button({ onClick: this.openAccessReview(pendingCase.darId, pendingCase.voteId, pendingCase.rpVoteId), 
-                      className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color') }, [
-                      span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ["Vote"]),
-                      span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"])
-                    ])
+                    button({
+                      onClick: this.openAccessReview(pendingCase.darId, pendingCase.voteId, pendingCase.rpVoteId),
+                      className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
+                    }, [
+                        span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ["Vote"]),
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"])
+                      ])
                   ]),
                   div({ isRendered: pendingCase.electionStatus === 'Final', className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center empty" }, []),
 
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center" }, [pendingCase.logged]),
 
                   div({ isRendered: (pendingCase.alreadyVoted === true) && (!pendingCase.isFinalVote) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center" }, [
-                    button({ onClick: this.openAccessCollect(pendingCase.referenceId, pendingCase.electionId),
-                       className: "cell-button cancel-color" }, ["Collect Votes"])
+                    button({
+                      onClick: this.openAccessCollect(pendingCase.referenceId, pendingCase.electionId),
+                      className: "cell-button cancel-color"
+                    }, ["Collect Votes"])
                   ]),
                   div({ isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center" }, [
-                    button({ onClick: this.openFinalAccessReview(pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId), 
-                      className: "cell-button cancel-color" }, ["FINAL VOTE"])
+                    button({
+                      onClick: this.openFinalAccessReview(pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId),
+                      className: "cell-button cancel-color"
+                    }, ["FINAL VOTE"])
                   ]),
                   div({ isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'), className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text f-center empty" }, [])
                 ]),
@@ -256,7 +273,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             }),
             PaginatorBar({
               name: 'access',
-              total: this.state.electionsList.dul.length,
+              total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
               limit: darLimit,
               pageCount: this.accessPageCount,
               currentPage: currentDarPage,

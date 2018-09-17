@@ -3,10 +3,8 @@ import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'rea
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
-
 
   constructor(props) {
     super(props);
@@ -16,39 +14,34 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
       showDialogSubmit: false,
+      rationale: this.props.rationale
     }
-
-    this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
-  }
-
-  setEnableVoteButton() {
-    console.log('----------setEnableVoteButton----------');
-    this.setState(prev => {
-      prev.enableVoteButton = true;
-      return prev;
-    });
   }
 
   logVote = (e) => {
-    console.log('----------logVote----------');
-    this.setState({ showDialogSubmit: true });
+    this.props.action.handler(this.state.voteStatus, this.state.rationale);
   }
 
-  setEnableVoteButton = () => {
-    console.log('----------setEnableVoteButton----------');
-  }
-
-  dialogHandlerSubmit = (answer) => (e) => {
-    if (answer === true) {
-      console.log(answer);
-    } else {
-      console.log(answer);
+  componentWillReceiveProps(nextProps) {
+    if (this.state.enableVoteButton === false) {
+      this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
     }
-    this.setState({ showDialogSubmit: false });
-    this.props.action.handler(answer);
-  };
+  }
+
+  yesNoChange = (e, name, value) => {
+    this.setState({ voteStatus: value, enableVoteButton: true });
+  }
+
+  optionsChange = (e, name, value) => {
+    this.setState({ voteStatus: value, enableVoteButton: true });
+  }
+
+  changeRationale = (e) => {
+    this.setState({ rationale: e.target.value, enableVoteButton: true });
+  }
 
   render() {
+
     let dialogTitle = "";
     let dialogMessage = "";
     let dialogType = "";
@@ -86,7 +79,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       dialogLabel = "Ok"
     }
 
-
+    const { voteStatus, rationale, enableVoteButton } = this.state;
     return (
 
       div({ id: "box_" + this.props.id }, [
@@ -100,31 +93,32 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
             div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+
                 YesNoRadioGroup({
                   id: this.props.id,
                   isRendered: (this.props.radioType === "boolean") || (this.props.radioType === undefined),
-                  value: this.props.status,
+                  value: voteStatus,
                   name: "rad_" + this.props.id,
-                  onChange: this.setEnableVoteButton
+                  onChange: this.yesNoChange
                 }),
 
                 OptionsRadioGroup({
                   id: this.props.id,
                   isRendered: this.props.radioType === "multiple",
-                  value: this.props.status,
+                  value: voteStatus,
                   optionLabels: this.props.radioLabels,
                   optionValues: this.props.radioValues,
                   name: "rad_" + this.props.id,
-                  onChange: this.setEnableVoteButton
+                  onChange: this.optionsChange
                 }),
               ]),
             ]),
 
             div({ className: "form-group" }, [
-              span({ isRendered: this.state.voteStatus === '1' }, [
+              span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
                 label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: this.state.voteStatus !== '1' }, [
+              span({ isRendered: this.state.voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
@@ -135,8 +129,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
                   title: "Optional: describe your rationale or add comments here (please be as specific as possible)",
                   placeholder: "Optional: describe your rationale or add comments here (please be as specific as possible)",
-                  value: this.state.rationale,
-                  onChange: this.setEnableVoteButton
+                  value: rationale,
+                  onChange: this.changeRationale
                 }),
               ]),
             ]),
@@ -151,16 +145,10 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                 button({
                   type: 'button',
                   id: "btn_submit_" + this.props.id,
-                  disabled: this.state.voteStatus === null || !this.state.enableVoteButton,
+                  disabled: voteStatus === null || !enableVoteButton,
                   onClick: this.logVote,
                   className: "btn btn-primary col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
                 }, [this.props.action.label]),
-
-                ConfirmationDialog({
-                  title: dialogTitle, color: this.props.color, type: dialogType,
-                  showModal: this.state.showDialogSubmit,
-                  action: { label: dialogLabel, handler: this.dialogHandlerSubmit }
-                }, [div({ className: "dialog-description" }, [dialogMessage])])
               ]),
             ]),
           ])

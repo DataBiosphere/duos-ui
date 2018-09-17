@@ -38,12 +38,10 @@ class DulReview extends Component {
   async voteInfo() {
     Votes.find(this.props.match.params.consentId, this.props.match.params.voteId)
       .then(data => {
-        console.log(data);
         this.setState({vote: data});
       });
     Election.electionVote(this.props.match.params.voteId)
       .then(data => {
-        console.log(data);
         this.setState({election: data});
       });
     this.setState({consent: Consent.ConsentResource(this.props.match.params.consentId)});
@@ -63,7 +61,6 @@ class DulReview extends Component {
   }
 
   setEnableVoteButton() {
-    console.log('----------setEnableVoteButton----------');
     this.setState(prev => {
       prev.enableVoteButton = true;
       return prev;
@@ -71,11 +68,9 @@ class DulReview extends Component {
   }
 
   logVote = () => {
-    console.log('----------logVote----------');
   };
 
   downloadDUL = (e) => {
-    console.log('------------downloadDUL-------------', e);
     Files.getDulFile(this.props.match.params.consentId).then(
       blob => {
         if (blob.size !== 0) {
@@ -86,7 +81,6 @@ class DulReview extends Component {
   };
 
   setEnableVoteButton = () => {
-    console.log('----------setEnableVoteButton----------');
   };
 
   render() {
