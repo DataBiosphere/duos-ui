@@ -1,7 +1,7 @@
 import { Component } from 'react';
-import { div, form, input, label, textarea, span, hh, p } from 'react-hyperscript-helpers';
+import { div, form, input, label, textarea, span, hh, p, h4, button } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { Consent, DataSet } from '../../libs/ajax';
+import { Consent } from '../../libs/ajax';
 
 
 export const EditDulModal = hh(class EditDulModal extends Component {
@@ -12,14 +12,20 @@ export const EditDulModal = hh(class EditDulModal extends Component {
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
+    this.handleErrors = this.handleErrors.bind(this);
     this.state = {
       consent: {
         consentId: '',
         name: '',
-        sdul: '',
+        useRestriction: '',
         dataUse: '',
       },
-      file: ''
+      file: '',
+      error: {
+        show: false,
+        title: '',
+        msj: ''
+      }
     }
   }
 
@@ -28,44 +34,80 @@ export const EditDulModal = hh(class EditDulModal extends Component {
       consent: {
         consentId: nextProps.dul.consentId,
         name: nextProps.dul.consentName,
-        sdul: JSON.stringify(nextProps.editConsent.useRestriction),
+        useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
         dataUse: JSON.stringify(nextProps.editConsent.dataUse)
       }
     });
   }
 
-  // OKHandler = () => {
-  //   if (this.state.file.name !== "") {
-  //     DataSet.create(this.state.file, this.state.overwrite, this.USER_ID)
-  //       .then(() => {
-  //         this.setState({errors: false});
-  //         this.props.onOKRequest('addDataset');
-  //       }).then(() => {
-  //       this.setState({errors: false});
-  //       this.props.onOKRequest('addDataset')
-  //     }).catch(errorResponse => {
-  //       this.setState({errors: true});
-  //       errorResponse.json().then(errors => this.generateFileAndUrl(errors));
-  //     });
-  //   }
-  // };
-
-  OKHandler() {
-    if (this.state.file.name !== "") {
-      Consent.CreateDulResource(this.state.consent.consentId, this.state.file.name, this.state.file)
-        .then(() => {
-          this.setState({errors: false});
+  async OKHandler() {
+    if (this.isValidJson(this.state.consent.useRestriction ,"Unable to process Structured Limitations JSON") &&
+        this.isValidJson(this.state.consent.dataUse, "Unable to process Data Use JSON")) {
+      const consentResponse = await this.updateConsent();
+      if (this.state.file.name !== ""
+        && consentResponse === true
+        && this.uploadFile()
+        ) {
           this.props.onOKRequest('editDul');
-        }).then(() => {
-        this.setState({errors: false});
-        this.props.onOKRequest('editDul')
-      }).catch(errorResponse => {
-        this.setState({errors: true});
-        errorResponse.json().then(errors => console.log("ERRORES", errors));
+      }
+    }
+    console.log("handle validation");
+  };
+
+  async uploadFile() {
+
+    const response = await Consent.CreateDulResource(this.state.consent.consentId, this.state.file.name, this.state.file);
+    if (response !== true) {
+      this.setState(prev => {
+        prev.error.title = 'Server Error';
+          prev.error.msj = 'Problem with the file UpLoad.';
+          prev.error.show = true;
+          return prev;
       });
     }
-    this.props.onOKRequest('editDul');
   }
+
+  async updateConsent() {
+    const consent = {};
+    consent.consentId = this.state.consent.consentId;
+    consent.useRestriction = this.state.consent.useRestriction;
+    consent.dataUse = this.state.consent.dataUse;
+    consent.name = this.state.consent.name;
+    const response = await Consent.update(consent);
+
+    if (response) {
+      // this.closeAlert();
+      return true;
+    } else if (response.data.message === undefined) {
+      this.handleErrors(0, response.data.cause.localizedMessage)
+    } else {
+      this.handleErrors(0, response.data.message);
+    }
+    return false;
+  };
+
+  handleErrors (index, message) {
+
+    var tle = 'Conflicts to resolve!';
+    if (message.indexOf("PRIMARY") > -1) {
+      message = "There is a Data Use Limitation already registered with this Consent Id. ";
+    } else if (message.indexOf("name") > -1) {
+      message = "There is a Data Use Limitation already registered with this name.";
+    } else if (message.indexOf("Unable to process JSON") > -1){
+      message = "Structured Limitations or Data Use has invalid format. Please write it as valid JSON.";
+    }
+    else {
+      tle = "Error, unable to create a new Data Use Limitation! ";
+      message = message;
+    }
+
+    this.setState(prev => {
+      prev.error.title = tle,
+      prev.error.show = true;
+      prev.error.msj = message;
+      return prev;
+    });
+  };
 
   closeHandler() {
     // this is the method to handle Cancel click
@@ -101,7 +143,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
     }
     if (fieldId === 'txt_sdul') {
       this.setState(prev => {
-        prev.consent.sdul = value;
+        prev.consent.useRestriction = value;
         return value;
       });
     }
@@ -120,6 +162,16 @@ export const EditDulModal = hh(class EditDulModal extends Component {
       this.setState({
         file: file,
       });
+    }
+  };
+
+  isValidJson = (obj, error) => {
+    try {
+      JSON.parse(obj);
+      return true;
+    } catch (err) {
+      this.handleErrors(0, error);
+      return false;
     }
   };
 
@@ -200,7 +252,7 @@ export const EditDulModal = hh(class EditDulModal extends Component {
               label({className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"}, ["Structured Limitations"]),
               div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
                 textarea({
-                  value: this.state.consent.sdul,
+                  value: this.state.consent.useRestriction,
                   onChange: this.handleChange,
                   id: "txt_sdul",
                   name: "inputSDUL",

@@ -132,7 +132,8 @@ class AdminManageDul extends Component {
 
   afterAddDulModalOpen() {
     // not sure when to use this
-    console.log('afterAddDulModalOpen', this.state, this.props);
+    this.getConsentManage();
+    // console.log('afterAddDulModalOpen', this.state, this.props);
   }
 
   openDialogArchive = (status) => (e) => {

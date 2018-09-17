@@ -465,21 +465,43 @@ export const Consent = {
   },
 
   CreateDulResource: async (consentId, fileName, file) => {
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${fileName}`;
     let formData = new FormData();
     formData.append("data", new Blob([file], { type: 'text/plain' }));
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${file}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), formData, { method: 'POST' }]));
-    return res.json();
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
+    return res.json().then(
+      () => { return true },
+      (error) => { return error }
+    );
   },
 
   update: async (consent) => {
     consent.requiresManualReview = false;
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent`;
+    const url = `${await Config.getApiUrl()}/consent/${consent.consentId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), { method: 'PUT' }]));
-    return res.json();
+    return await res.json().then(
+      () => { return true },
+      (error) => { return error }
+    );
   },
+
+
+  /*
+          function updateConsent(consent) {
+            consent.requiresManualReview = false;
+            var useRestriction = JSON.parse(consent.useRestriction);
+            var dataUse = JSON.parse(consent.dataUse);
+            consent.useRestriction = useRestriction;
+            consent.dataUse = dataUse;
+            return UpdateConsentResource.update({consentId: consent.consentId}, consent);
+        }
+  * */
+
+
+
+
 
   DeleteConsentResource: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
@@ -554,7 +576,7 @@ export const Election = {
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return res;
   },
 
   dataAccessElectionReviewResource: async (electionId, isFinalAccess) => {
