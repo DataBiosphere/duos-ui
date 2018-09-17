@@ -4,7 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-
+import { SearchBox } from '../components/SearchBox';
 
 class ManageOntologies extends Component {
 
@@ -74,7 +74,6 @@ class ManageOntologies extends Component {
 
   afterAddOntologiesModalOpen() {
     // not sure when to use this
-    console.log('afterAddOntologyModalOpen', this.state, this.props);
   }
 
 
@@ -93,12 +92,22 @@ class ManageOntologies extends Component {
   dialogHandlerDelete = (answer) => (e) => {
     this.setState({ showDialogDelete: false });
   };
-  
+
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
+  }
 
   render() {
 
-
-    const { currentPage } = this.state;
+    const { currentPage, searchDulText } = this.state;
 
     return (
 
@@ -110,13 +119,7 @@ class ManageOntologies extends Component {
 
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search common-color" }),
-                input({
-                  type: "search", className: "form-control users-search", placeholder: "Enter search term..."
-                  // , "value": "searchOntologies"
-                }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDul, color: 'common' })
             ]),
 
             a({
@@ -147,7 +150,7 @@ class ManageOntologies extends Component {
           ]),
           hr({ className: "table-head-separator" }),
 
-          this.state.indexedFiles.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
+          this.state.indexedFiles.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
             return h(Fragment, { key: ix }, [
               div({ className: "grid-row pushed-1" }, [
                 a({
@@ -174,7 +177,7 @@ class ManageOntologies extends Component {
             ]);
           }),
           PaginatorBar({
-            total: this.state.indexedFiles.length,
+            total: this.state.indexedFiles.filter(this.searchTable(searchDulText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,

@@ -13,22 +13,18 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
   }
 
   responseGoogle = (response) => {
-    console.log(response);
     Storage.setGoogleData(response);
     this.getUser().then((data) => {
       Storage.setCurrentUser(data);
-      // console.log("USER = ", data);
       this.login(true);
     },
       (data) => {
         Storage.clearStorage();
-        console.log("Error: ", data)
       });
   };
 
   forbidden = (response) => {
     Storage.clearStorage();
-    console.log(response);
   };
 
   logout = () => {

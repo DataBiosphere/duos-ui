@@ -4,7 +4,8 @@ import { Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import ReactTooltip from 'react-tooltip'
+import ReactTooltip from 'react-tooltip';
+import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -40,9 +41,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
-    profile.isThePI = JSON.parse(profile.isThePI);
-    profile.havePI = JSON.parse(profile.havePI);
-    profile.completed = JSON.parse(profile.completed);
+    profile.isThePI = profile.isThePI;
+    profile.havePI = profile.havePI;
+    profile.completed = profile.complete;
     this.setState({ researcherProfile: profile });
   }
 
@@ -55,14 +56,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
     if (field === 'profileAcademicEmail') {
       if (value !== '') {
-        console.log('error ....');
         this.setState(prev => {
           prev.fieldStatus.email = 'error';
-          console.log(prev);
           return prev;
         });
       } else {
-        console.log('no error ....');
         this.setState(prev => {
           prev.fieldStatus.email = '';
           return prev;
@@ -71,35 +69,29 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   }
 
+  handleRadioChange = (e, field, value) => {
+    this.setState(prev => { prev.formData[field] = value; return prev; });
+  }
+
   handlePIChange(event) {
     let researcherProfile = this.state.researcherProfile;
-    console.log(event.target.id, event.target.name);
-    if (event.target.id === 'isThePI') {
+    if (event.target.id === 'rad_isThePI') {
       researcherProfile.isThePI = true;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     } else {
       researcherProfile.isThePI = false;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     }
   }
 
   handlePI2Change(event) {
     let researcherProfile = this.state.researcherProfile;
-    console.log(event.target.id, event.target.name);
-    if (event.target.id === 'doHavePI') {
+    if (event.target.id === 'rad_doHavePI') {
       researcherProfile.havePI = true;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     } else {
       researcherProfile.havePI = false;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     }
   }
 
@@ -120,12 +112,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   saveProfile() {
-    console.log(this.state.researcherProfile);
     this.setState({ showDialogSave: true });
   }
 
   submit(event) {
-    console.log(this.state.researcherProfile);
     Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     event.preventDefault();
     this.setState({ showDialogSubmit: true });
@@ -381,38 +371,40 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   div({ className: "radio-inline" }, [
-                    input({
-                      id: "isThePI",
-                      name: "isThePI",
-                      type: "radio",
-                      className: "regular-radio",
-                      onChange: this.handlePIChange,
-                      value: this.state.researcherProfile.isThePI,
-                      onClick: this.clearNotRelatedPIFields,
-                      required: true
-                    }),
-                    label({ htmlFor: "isThePI" }, []),
-                    label({ id: "lbl_isThePI", htmlFor: "isThePI", className: "radio-button-text" }, ["Yes"]),
+                    label({ id: "lbl_isThePI", htmlFor: "rad_isThePI", className: "radio-wrapper" }, [
+                      input({
+                        id: "rad_isThePI",
+                        name: "isThePI",
+                        type: "radio",
+                        onChange: this.handlePIChange,
+                        value: this.state.researcherProfile.isThePI,
+                        onClick: this.clearNotRelatedPIFields,
+                        required: true
+                      }),
+                      span({ className: "radio-check" }),
+                      span({ className: "radio-label" }, ["Yes"])
+                    ]),
 
-                    input({
-                      id: "isNotThePI",
-                      name: "isThePI",
-                      type: "radio",
-                      className: "regular-radio",
-                      onChange: this.handlePIChange,
-                      value: this.state.researcherProfile.isThePI,
-                      onClick: this.clearNotRelatedPIFields,
-                      required: true
-                    }),
-                    label({ htmlFor: "isNotThePI" }, []),
-                    label({ id: "lbl_isNotThePI", htmlFor: "isNotThePI", className: "radio-button-text" }, ["No"]),
+                    label({ id: "lbl_isNotThePI", htmlFor: "rad_isNotThePI", className: "radio-wrapper" }, [
+                      input({
+                        id: "rad_isNotThePI",
+                        name: "isThePI",
+                        type: "radio",
+                        onChange: this.handlePIChange,
+                        value: this.state.researcherProfile.isThePI,
+                        onClick: this.clearNotRelatedPIFields,
+                        required: true
+                      }),
+                      span({ className: "radio-check" }),
+                      span({ className: "radio-label" }, ["No"])
+                    ])
                   ]),
                   span({
                     className: "cancel-color required-field-error-span",
                     isRendered: (this.state.researcherProfile.isThePI === undefined && showValidationMessages)
                     // researcherForm.havePI.$invalid && showValidationMessages
-                  }, ["Required field"]),
-                ]),
+                  }, ["Required field"])
+                ])
               ]),
 
               div({ isRendered: this.state.researcherProfile.isThePI === false, className: "form-group" }, [
@@ -425,39 +417,41 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   div({ className: "radio-inline", disabled: this.state.researcherProfile.isThePI !== false }, [
-                    input({
-                      id: "doHavePI",
-                      name: "havePI",
-                      type: "radio",
-                      onChange: this.handlePI2Change,
-                      value: this.state.researcherProfile.havePI,
-                      className: "regular-radio",
-                      onClick: this.clearCommonsFields,
-                      disabled: this.state.researcherProfile.isThePI !== false,
-                      required: this.state.researcherProfile.isThePI === false
-                    }),
-                    label({ htmlFor: "doHavePI" }, []),
-                    label({ id: "lbl_doHavePI", htmlFor: "doHavePI", className: "radio-button-text" }, ["Yes"]),
+                    label({ id: "lbl_doHavePI", htmlFor: "rad_doHavePI", className: "radio-wrapper" }, [
+                      input({
+                        id: "rad_doHavePI",
+                        name: "havePI",
+                        type: "radio",
+                        onChange: this.handlePI2Change,
+                        value: this.state.researcherProfile.havePI,
+                        onClick: this.clearCommonsFields,
+                        disabled: this.state.researcherProfile.isThePI !== false,
+                        required: this.state.researcherProfile.isThePI === false
+                      }),
+                      span({ className: "radio-check" }),
+                      span({ className: "radio-label" }, ["Yes"])
+                    ]),
 
-                    input({
-                      id: "doNotHavePI",
-                      name: "havePI",
-                      type: "radio",
-                      onChange: this.handlePI2Change,
-                      value: this.state.researcherProfile.havePI,
-                      className: "regular-radio",
-                      onClick: this.clearNoHasPIFields,
-                      disabled: this.state.researcherProfile.isThePI !== false,
-                      required: this.state.researcherProfile.isThePI === false
-                    }),
-                    label({ htmlFor: "doNotHavePI" }, []),
-                    label({ id: "lbl_doNotHavePI", htmlFor: "doNotHavePI", className: "radio-button-text" }, ["No"]),
-                  ]),
-                  span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.havePI === undefined && showValidationMessages)
-                  }, ["Required field"]),
-                ]),
+                    label({ id: "lbl_doNotHavePI", htmlFor: "rad_doNotHavePI", className: "radio-wrapper" }, [
+                      input({
+                        id: "rad_doNotHavePI",
+                        name: "havePI",
+                        type: "radio",
+                        onChange: this.handlePI2Change,
+                        value: this.state.researcherProfile.havePI,
+                        onClick: this.clearNoHasPIFields,
+                        disabled: this.state.researcherProfile.isThePI !== false,
+                        required: this.state.researcherProfile.isThePI === false
+                      }),
+                      span({ className: "radio-check" }),
+                      span({ className: "radio-label" }, ["No"])
+                    ]),
+                    span({
+                      className: "cancel-color required-field-error-span",
+                      isRendered: (this.state.researcherProfile.havePI === undefined && showValidationMessages)
+                    }, ["Required field"])
+                  ])
+                ])
               ]),
 
               div({ isRendered: this.state.researcherProfile.havePI === true, className: "form-group" }, [
@@ -627,5 +621,4 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       ])
     );
   }
-
 });

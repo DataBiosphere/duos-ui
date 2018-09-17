@@ -22,10 +22,11 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
   }
 
-  dialogHandlerSubmit = (answer) => (e) => {
-    this.setState({ showDialogSubmit: false });
-    this.props.action.handler(answer);
-  };
+  componentWillReceiveProps(nextProps) {
+    if (this.state.enableVoteButton === false) {
+      this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
+    }
+  }
 
   yesNoChange = (e, name, value) => {
     this.setState({ voteStatus: value, enableVoteButton: true });
@@ -39,13 +40,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     this.setState({ rationale: e.target.value, enableVoteButton: true });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.state.enableVoteButton === false) {
-      this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
-    }
-  }
-
   render() {
+
     let dialogTitle = "";
     let dialogMessage = "";
     let dialogType = "";
