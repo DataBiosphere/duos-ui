@@ -12,17 +12,16 @@ export const NameForm = hh(class NameForm extends Component {
   }
 
   handleFirstNameChange(event) {
-    console.log(event.target.value);
+
     this.setState({ fname: event.target.value });
   }
 
   handleLastNameChange(event) {
-    console.log(event.target.value);
+
     this.setState({ lname: event.target.value });
   }
 
   handleSubmit(event) {
-    console.log('A name was submitted: ', this.state);
     event.preventDefault();
     this.props.onSubmit(this.state);
   }

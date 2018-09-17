@@ -3,7 +3,7 @@ import { div, hr, i, input, a, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-
+import { SearchBox } from '../components/SearchBox';
 
 class InvalidRestrictions extends Component {
 
@@ -80,42 +80,25 @@ class InvalidRestrictions extends Component {
 
   }
 
-  searchDul = (row, query) => {
-    let values = Object.values(row);
-    let text = JSON.stringify(row);
-    console.log(text);
-    // ''.concat(values);
-    if (query === undefined || query === null || query === '') {
-      return true;
-    }
-    return text.toLowerCase().includes(query.toLowerCase());
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
   }
 
-  searchDar = (row, query) => {
-    let values = Object.values(row);
-    let text = JSON.stringify(row);
-    console.log(text);
-    // ''.concat(values);
-    if (query === undefined || query === null || query === '') {
-      return true;
-    }
-    return text.toLowerCase().includes(query.toLowerCase());
+  handleSearchDar = (query) => {
+    this.setState({ searchDarText: query });
   }
 
-  filterTable = (row, query) => {
-    let values = Object.values(row);
-    let text = JSON.stringify(row);
-    console.log(text);
-    // ''.concat(values);
-    if (query === undefined || query === null || query === '') {
-      return true;
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
     }
-    return text.toLowerCase().includes(query.toLowerCase());
+    return true;
   }
 
   render() {
 
-    const { currentDulPage, currentDarPage, dulLimit, darLimit } = this.state;
+    const { currentDulPage, currentDarPage, dulLimit, darLimit, searchDulText, searchDarText } = this.state;
 
     return (
 
@@ -139,13 +122,7 @@ class InvalidRestrictions extends Component {
             ]),
 
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search dul-color" }),
-                input({
-                  type: "search", className: "form-control", placeholder: "Enter search term...",
-                  value: this.state.searchDULcases, onChange: this.searchDul
-                }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
           ]),
 
@@ -158,7 +135,7 @@ class InvalidRestrictions extends Component {
             hr({ className: "table-head-separator" }),
 
             this.state.InvalidRestrictions.dulList
-              // .filter(consent => this.filterTable(consent, this.state.searchDULcases))
+              .filter(this.searchTable(searchDulText))
               .slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit).map((dul, index) => {
                 return h(Fragment, { key: index }, [
                   div({ className: "row no-margin" }, [
@@ -171,7 +148,7 @@ class InvalidRestrictions extends Component {
                 ])
               }),
             PaginatorBar({
-              total: this.state.InvalidRestrictions.dulList.length,
+              total: this.state.InvalidRestrictions.dulList.filter(this.searchTable(searchDulText)).length,
               limit: dulLimit,
               currentPage: currentDulPage,
               onPageChange: this.handleDulPageChange,
@@ -184,13 +161,7 @@ class InvalidRestrictions extends Component {
               PageSubHeading({ imgSrc: "/images/icon_access_invalid.png", color: "access", title: "Data Access Requests Invalid Cases", description: "List of Invalid Restrictions for Data Access Requests" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search access-color" }),
-                input({
-                  type: "search", className: "form-control", placeholder: "Enter search term...",
-                  value: this.state.searchDarcases, onChange: this.searchDar
-                }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
             ]),
           ]),
 
@@ -203,7 +174,7 @@ class InvalidRestrictions extends Component {
             hr({ className: "table-head-separator" }),
 
             this.state.InvalidRestrictions.darList
-              // .filter(dar => this.filterTable(dar, this.state.searchDarCases))
+              .filter(this.searchTable(searchDarText))
               .slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((dar, index) => {
                 return h(Fragment, { key: index }, [
                   div({ className: "row no-margin" }, [
@@ -216,7 +187,7 @@ class InvalidRestrictions extends Component {
                 ])
               }),
             PaginatorBar({
-              total: this.state.InvalidRestrictions.darList.length,
+              total: this.state.InvalidRestrictions.darList.filter(this.searchTable(searchDarText)).length,
               limit: darLimit,
               currentPage: currentDarPage,
               onPageChange: this.handleDarPageChange,

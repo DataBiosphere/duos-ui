@@ -61,8 +61,6 @@ export const EditDulModal = hh(class EditDulModal extends Component {
 
   render() {
 
-    console.log('editDul: ', this.props.showModal, this.props.dul);
-
     if (this.props.showModal === false) {
       return null;
     }

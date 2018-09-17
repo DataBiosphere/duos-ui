@@ -134,23 +134,22 @@ class AccessReview extends Component {
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
-    console.log('------------download-------------', filename, value);
   }
 
   downloadDAR = (e) => {
-    console.log('------------downloadDAR-------------', e);
+
   }
 
   downloadDUL = (e) => {
-    console.log('------------downloadDUL-------------', e);
+
   }
 
   positiveVote = (e) => {
-    console.log('------------positiveVote--------------');
+
   }
 
   logVote = (e) => {
-    console.log('------------logVote--------------');
+
   }
 
   toggleQ1 = (e) => {
@@ -158,7 +157,7 @@ class AccessReview extends Component {
       prev.isQ1Expanded = !prev.isQ1Expanded;
       return prev;
     });
-    console.log('------------toggleQ1--------------');
+
   }
 
   toggleQ2 = (e) => {
@@ -166,7 +165,7 @@ class AccessReview extends Component {
       prev.isQ2Expanded = !prev.isQ2Expanded;
       return prev;
     });
-    console.log('------------toggleQ1--------------');
+
   }
 
   render() {

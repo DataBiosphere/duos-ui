@@ -7,6 +7,7 @@ import { Consent, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
+import { SearchBox } from '../components/SearchBox';
 import ReactTooltip from 'react-tooltip';
 
 const limit = 10;
@@ -23,6 +24,7 @@ class AdminManageDul extends Component {
       electionsList: {
         dul: []
       },
+      searchDUL: '',
       showDialogArchive: false,
       showDialogCancel: false,
       showDialogCreate: false,
@@ -137,7 +139,7 @@ class AdminManageDul extends Component {
 
   afterAddDulModalOpen() {
     // not sure when to use this
-    console.log('afterAddDulModalOpen', this.state, this.props);
+
   }
 
   openDialogArchive = (election) => (e) => {
@@ -228,11 +230,22 @@ class AdminManageDul extends Component {
 
   handleArchiveCheckbox = (e) => {
     this.setState({archiveCheck: e.target.checked});
-    console.log("checkbox = ", e.target.checked);
   };
 
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
+  }
+
   render() {
-    const {currentPage} = this.state;
+    const { currentPage, limit, searchDulText } = this.state;
 
 
     return (
@@ -248,16 +261,9 @@ class AdminManageDul extends Component {
               description: "Select and manage Data Use Limitations for DAC review"
             }),
           ]),
-          div({className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding"}, [
-            div({className: "col-lg-6 col-md-6 col-sm-7 col-xs-7"}, [
-              div({className: "search-text"}, [
-                i({className: "glyphicon glyphicon-search dul-color"}),
-                input({
-                  type: "search",
-                  className: "form-control users-search",
-                  placeholder: "Enter search term..."/*, value: "searchDUL"*/
-                }),
-              ]),
+          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+            div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
+              SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
 
             a({
@@ -290,7 +296,7 @@ class AdminManageDul extends Component {
 
           hr({className: "table-head-separator"}),
 
-          this.state.electionsList.dul.slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((election, eIndex) => {
+          this.state.electionsList.dul.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((election, eIndex) => {
             return (
               h(Fragment, { key: election.consentId }, [
                 div({ id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
@@ -377,7 +383,7 @@ class AdminManageDul extends Component {
             )
           }),
           PaginatorBar({
-            total: this.state.electionsList.dul.length,
+            total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,

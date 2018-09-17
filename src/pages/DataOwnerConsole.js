@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { SearchBox } from '../components/SearchBox';
 
 class DataOwnerConsole extends Component {
 
@@ -54,17 +55,29 @@ class DataOwnerConsole extends Component {
 
   editReview = (e) => {
     const data = e.target.getAttribute('data');
-    console.log('------------editReview---------------', data);
+
   }
 
   voteReview = (e) => {
     const data = e.target.getAttribute('data');
-    console.log('------------voteReview---------------', data);
+
+  }
+
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
   }
 
   render() {
 
-    const { currentUser, currentPage, limit } = this.state;
+    const { currentUser, currentPage, limit, searchDulText } = this.state;
 
     return (
       div({ className: "container" }, [
@@ -81,15 +94,8 @@ class DataOwnerConsole extends Component {
           ]),
 
           div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-reviewed no-padding" }, [
-            div({ className: "search-text" }, [
-              i({ className: "glyphicon glyphicon-search dataset-color" }),
-              input({
-                type: "search", className: "form-control users-search",
-                placeholder: "Enter search term..."
-              }),
-            ]),
+            SearchBox({ searchHandler: this.handleSearchDul, color: 'dataset' })
           ]),
-
         ]),
 
         div({ className: "jumbotron table-box" }, [
@@ -102,7 +108,7 @@ class DataOwnerConsole extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.dataOwnerUnreviewedCases.slice((currentPage - 1) * limit, currentPage * limit).map(pendingCase => {
+          this.state.dataOwnerUnreviewedCases.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map(pendingCase => {
             return h(Fragment, { key: pendingCase.darCode }, [
               div({ id: pendingCase.darCode, className: "row no-margin" }, [
 
