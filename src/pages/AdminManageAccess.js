@@ -35,7 +35,6 @@ class AdminManageAccess extends Component {
     let darElection = [];
     const elections = await Purpose.dataAccessRequestManageResource();
     elections.map(dar => {
-      console.log(dar);
       darElection.push(dar);
       return dar;
     });

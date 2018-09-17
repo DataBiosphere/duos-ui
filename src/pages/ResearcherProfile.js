@@ -56,14 +56,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
     if (field === 'profileAcademicEmail') {
       if (value !== '') {
-        console.log('error ....');
         this.setState(prev => {
           prev.fieldStatus.email = 'error';
-          console.log(prev);
           return prev;
         });
       } else {
-        console.log('no error ....');
         this.setState(prev => {
           prev.fieldStatus.email = '';
           return prev;
@@ -78,33 +75,23 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   handlePIChange(event) {
     let researcherProfile = this.state.researcherProfile;
-    console.log(event.target.id, event.target.name);
     if (event.target.id === 'rad_isThePI') {
       researcherProfile.isThePI = true;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     } else {
       researcherProfile.isThePI = false;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     }
   }
 
   handlePI2Change(event) {
     let researcherProfile = this.state.researcherProfile;
-    console.log(event.target.id, event.target.name);
     if (event.target.id === 'rad_doHavePI') {
       researcherProfile.havePI = true;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     } else {
       researcherProfile.havePI = false;
-      this.setState({ researcherProfile: researcherProfile }, () => {
-        console.log(JSON.stringify(this.state, null, 2));
-      });
+      this.setState({ researcherProfile: researcherProfile }, () => { });
     }
   }
 
@@ -125,12 +112,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   saveProfile() {
-    console.log(this.state.researcherProfile);
     this.setState({ showDialogSave: true });
   }
 
   submit(event) {
-    console.log(this.state.researcherProfile);
     Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     event.preventDefault();
     this.setState({ showDialogSubmit: true });

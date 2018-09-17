@@ -494,7 +494,6 @@ export const Consent = {
 export const Election = {
 
   create: async (consentId, election) => {
-    console.log('------------------------------------> ', consentId, election);
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
@@ -777,7 +776,6 @@ export const PendingCases = {
         }
       }
     );
-    console.log('---------------------findDataRequestPendingCasesByUser------------------------------------- ',resp);
     return resp;
   },
 
@@ -800,7 +798,6 @@ export const PendingCases = {
         }
       }
     );
-    console.log('---------------------findConsentPendingCasesByUser------------------------------------- ',resp);
     return resp;
   },
 
@@ -903,7 +900,6 @@ export const PendingCases = {
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
-  // console.log('------------------------------ res ----------------------', res);
   return res.ok ? res : Promise.reject(res);
 };
 

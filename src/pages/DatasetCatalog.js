@@ -51,7 +51,7 @@ class DatasetCatalog extends Component {
       catalog: catalog,
       dictionary: dictionary
     }
-    this.setState({ dataSetList: data, currentPage: 1 }, () => { console.log(this.state) });
+    this.setState({ dataSetList: data, currentPage: 1 });
   }
 
   componentWillMount() {

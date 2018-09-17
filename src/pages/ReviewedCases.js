@@ -38,9 +38,6 @@ class ReviewedCases extends Component {
       access.push(this.createPendingCase(i));
     }
 
-    console.log('dul', dul);
-    console.log('access', access);
-
     this.setState(prev => {
       prev.totalAccessPendingVotes = 5;
       prev.totalDulPendingVotes = 6;

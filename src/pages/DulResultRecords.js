@@ -73,11 +73,10 @@ class DulResultRecords extends Component {
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
-    console.log('------------download-------------', filename, value);
+
   };
 
   downloadDUL = (e) => {
-    console.log('------------downloadDUL-------------', e);
     Files.getDulFile(this.props.match.params.consentId).then(
       blob => {
         if (blob.size !== 0) {
@@ -88,11 +87,11 @@ class DulResultRecords extends Component {
   };
 
   positiveVote = (e) => {
-    console.log('------------positiveVote--------------');
+
   };
 
   logVote = (e) => {
-    console.log('------------logVote--------------');
+
   };
 
   render() {

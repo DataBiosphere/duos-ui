@@ -43,7 +43,6 @@ export const EditUserModal = hh(class EditUserModal extends Component {
   }
 
   render() {
-    console.log('from Modal ...', this.props.user);
 
     return (
 

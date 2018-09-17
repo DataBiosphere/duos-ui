@@ -19,7 +19,6 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   }
 
   logVote = (e) => {
-    console.log('----------logVote----------', this.props.action, this.state);
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
   }
 
@@ -30,17 +29,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   }
 
   yesNoChange = (e, name, value) => {
-    console.log(e, name, value);
     this.setState({ voteStatus: value, enableVoteButton: true });
   }
 
   optionsChange = (e, name, value) => {
-    console.log(e, name, value);
     this.setState({ voteStatus: value, enableVoteButton: true });
   }
 
   changeRationale = (e) => {
-    console.log(e.target.value);
     this.setState({ rationale: e.target.value, enableVoteButton: true });
   }
 

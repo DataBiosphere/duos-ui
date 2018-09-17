@@ -29,7 +29,6 @@ class DulCollect extends Component {
       this.setState({ finalVote: data.election.finalVote });
       this.setState({ finalRationale: data.election.finalRationale });
       this.setState({ finalVoteDate: data.election.finalVoteDate });
-      console.log(data);
     });
 
     this.setState(prev => {
@@ -71,11 +70,11 @@ class DulCollect extends Component {
   download = (e) => {
     const filename = e.target.getAttribute('filename');
     const value = e.target.getAttribute('value');
-    console.log('------------download-------------', filename, value);
+
   };
 
   downloadDUL = (e) => {
-    console.log('------------downloadDUL-------------', e);
+
     Files.getDulFile(this.props.match.params.consentId).then(
       blob => {
         if (blob.size !== 0) {
@@ -86,11 +85,11 @@ class DulCollect extends Component {
   };
 
   positiveVote = (e) => {
-    console.log('------------positiveVote--------------');
+
   };
 
   logVote = (e) => {
-    console.log('------------logVote--------------');
+
   };
 
   render() {

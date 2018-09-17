@@ -139,7 +139,7 @@ class AdminManageDul extends Component {
 
   afterAddDulModalOpen() {
     // not sure when to use this
-    console.log('afterAddDulModalOpen', this.state, this.props);
+
   }
 
   openDialogArchive = (election) => (e) => {
@@ -230,7 +230,6 @@ class AdminManageDul extends Component {
 
   handleArchiveCheckbox = (e) => {
     this.setState({archiveCheck: e.target.checked});
-    console.log("checkbox = ", e.target.checked);
   };
 
   handleSearchDul = (query) => {

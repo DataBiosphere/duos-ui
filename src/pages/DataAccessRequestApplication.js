@@ -175,13 +175,11 @@ class DataAccessRequestApplication extends Component {
 
   attestAndSave = (e) => {
     // implement full save on mongodb here ... after validations
-    console.log(JSON.stringify(this.state.formData, null, 2));
     this.setState({ showDialogSubmit: true });
   }
 
   partialSave = (e) => {
     // implement partial save on mongodb here ... no validations
-    console.log(JSON.stringify(this.state.formData, null, 2));
     this.setState({ showDialogSave: true });
   }
 
@@ -194,8 +192,6 @@ class DataAccessRequestApplication extends Component {
   };
 
   onOntologiesChange = (data, action) => {
-    console.log('data', data);
-    console.log('action', action);
     this.setState(prev => {
       prev.formData.ontologies = data;
       return prev;
@@ -203,8 +199,6 @@ class DataAccessRequestApplication extends Component {
   }
 
   onDatasetsChange = (data, action) => {
-    console.log('data', data);
-    console.log('action', action);
     this.setState(prev => {
       prev.formData.datasets = data;
       return prev;

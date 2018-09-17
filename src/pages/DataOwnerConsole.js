@@ -55,12 +55,12 @@ class DataOwnerConsole extends Component {
 
   editReview = (e) => {
     const data = e.target.getAttribute('data');
-    console.log('------------editReview---------------', data);
+
   }
 
   voteReview = (e) => {
     const data = e.target.getAttribute('data');
-    console.log('------------voteReview---------------', data);
+
   }
 
   handleSearchDul = (query) => {

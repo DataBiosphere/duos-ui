@@ -89,15 +89,13 @@ export const StatsBox = hh(class StatsBox extends Component {
   };
 
   componentDidMount() {
-    console.log('componentDidMount');
+
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('componentDidUpdate', prevProps, prevState, snapshot);
   }
 
   componentWillUnmount() {
-    console.log('componentWillUnmount');
   }
 
   render() {

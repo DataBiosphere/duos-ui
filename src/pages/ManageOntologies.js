@@ -74,7 +74,6 @@ class ManageOntologies extends Component {
 
   afterAddOntologiesModalOpen() {
     // not sure when to use this
-    console.log('afterAddOntologyModalOpen', this.state, this.props);
   }
 
 
