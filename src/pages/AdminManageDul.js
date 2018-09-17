@@ -2,7 +2,6 @@ import { Component, Fragment } from 'react';
 import { div, hr, h, span, i, a, input, button, label } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
-import { EditDulModal } from '../components/modals/EditDulModal';
 import { Consent, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -36,7 +35,6 @@ class AdminManageDul extends Component {
     };
 
     this.myHandler = this.myHandler.bind(this);
-    // this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.addDul = this.addDul.bind(this);
@@ -66,17 +64,6 @@ class AdminManageDul extends Component {
       return prev;
     });
   };
-
-  // updateDul(consentId) {
-  //   let updatedDul = this.state.electionsList.dul.find(election => election.consentId === consentId);
-  //   this.removeDul(consentId);
-  //
-  //   this.setState(prev => {
-  //     prev.currentPage = 1;
-  //     prev.electionsList.dul = updatedDul;
-  //     return prev;
-  //   });
-  // };
 
   handlePageChange = page => {
     this.setState(prev => {
@@ -149,7 +136,6 @@ class AdminManageDul extends Component {
   afterAddDulModalOpen() {
     // not sure when to use this
     this.getConsentManage();
-    // console.log('afterAddDulModalOpen', this.state, this.props);
   }
 
   openDialogArchive = (election) => (e) => {
@@ -525,9 +511,7 @@ class AdminManageDul extends Component {
           ]),
         ])
 
-
       ])
-
 
     );
   }

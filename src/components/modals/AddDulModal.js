@@ -25,7 +25,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
       error: {
         show: false,
         title: '',
-        msj: ''
+        msg: ''
       }
     };
 
@@ -99,7 +99,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     if (response !== true) {
       this.setState(prev => {
         prev.error.title = 'Server Error';
-        prev.error.msj = 'Problem with the file UpLoad.';
+        prev.error.msg = 'Problem with the file UpLoad.';
         prev.error.show = true;
         return prev;
       });
@@ -143,7 +143,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     this.setState(prev => {
       prev.error.title = tle,
         prev.error.show = true;
-      prev.error.msj = message;
+      prev.error.msg = message;
       return prev;
     });
   };
@@ -299,7 +299,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
           ]),
 
           div({ isRendered: this.state.error.show }, [
-            Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msj })
+            Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg })
           ])
         ])
     );

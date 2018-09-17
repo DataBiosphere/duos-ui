@@ -468,7 +468,7 @@ export const Consent = {
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(consent), Config.authOpts(), { method: 'POST'}]));
     return await res.json().then(
       () => { return true },
-      (error) => { return error}
+      (error) => { return error }
     );
   },
 
