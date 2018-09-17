@@ -189,23 +189,23 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
 
   addDul() {
-    console.log('addDul')
+
   }
 
   addUser() {
-    console.log('addUser');
+
   }
 
   addDataSets() {
-    console.log('addDataSets');
+
   }
 
   setTimeout() {
-    console.log('setTimeout');
+
   }
 
   addOntology() {
-    console.log('addOntology');
+
   }
 
   getFile(fileName) {
@@ -220,7 +220,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
   }
 
   getDarReport(fileType, fileName) {
-    console.log("getDarReport");
     const URI = `/dataRequest/${fileType}`;
     Summary.getFile(URI).then(
       blob => {

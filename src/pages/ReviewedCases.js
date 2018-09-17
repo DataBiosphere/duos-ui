@@ -3,6 +3,7 @@ import { div, button, hr, i, input, span, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
+import { SearchBox } from '../components/SearchBox';
 
 class ReviewedCases extends Component {
 
@@ -37,9 +38,6 @@ class ReviewedCases extends Component {
       access.push(this.createPendingCase(i));
     }
 
-    console.log('dul', dul);
-    console.log('access', access);
-
     this.setState(prev => {
       prev.totalAccessPendingVotes = 5;
       prev.totalDulPendingVotes = 6;
@@ -65,7 +63,7 @@ class ReviewedCases extends Component {
       finalVote: ix % 2 === 0 ? true : false,
       alreadyVoted: ix % 2 === 0 ? true : false,
       logged: ix % 2 === 0 ? 'Yes' : 'No',
-      consentGroupName: 'ORS-222',
+      consentGroupName: 'ORS-222'+ix,
       voteId: 'XX' + ix,
       projectTitle: 'Project Title ' + ix,
       rpVoteId: 'rpVote ID' + ix,
@@ -79,10 +77,26 @@ class ReviewedCases extends Component {
     }
   }
 
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  handleSearchDar = (query) => {
+    this.setState({ searchDarText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+    }
+    return true;
+  }
+
   render() {
 
 
-    const { currentDulPage, currentAccessPage } = this.state;
+    const { currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
 
     return (
 
@@ -100,10 +114,7 @@ class ReviewedCases extends Component {
             PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Reviewed Cases", description: "List of Data Use Limitations Reviewed Cases and their results" }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed" }, [
-            div({ className: "search-text" }, [
-              i({ className: "glyphicon glyphicon-search dul-color" }),
-              input({ type: "search", className: "form-control", placeholder: "Enter search term...", value: this.searchDULcases }),
-            ]),
+            SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
           ])
         ]),
 
@@ -127,7 +138,9 @@ class ReviewedCases extends Component {
           ]),
           hr({ className: "table-head-separator" }),
 
-          this.state.electionsList.dul.slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
+          this.state.electionsList.dul
+          .filter(this.searchTable(searchDulText))
+          .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
               div({ className: "grid-row" }, [
                 div({ className: "col-2 cell-body text " + (election.archived ? 'flagged' : ''), title: election.displayId }, [election.displayId]),
@@ -147,10 +160,11 @@ class ReviewedCases extends Component {
           }),
           PaginatorBar({
             name: 'dul',
-            total: this.state.electionsList.dul.length,
+            total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
             limit: this.state.dulLimit,
             pageCount: this.dulPageCount,
             currentPage: this.state.currentDulPage,
+
             onPageChange: (page) => {
               this.setState(prev => {
                 prev.currentDulPage = page;
@@ -173,10 +187,7 @@ class ReviewedCases extends Component {
             PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Reviewed Cases", description: "List of Data Access Request Reviewed Cases and their results" }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed" }, [
-            div({ className: "search-text" }, [
-              i({ className: "glyphicon glyphicon-search access-color" }),
-              input({ type: "search", className: "form-control", placeholder: "Enter search term...", "value": "searchAccessCases" }),
-            ]),
+            SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
           ])
         ]),
 
@@ -190,7 +201,9 @@ class ReviewedCases extends Component {
           ]),
           hr({ className: "table-head-separator" }),
 
-          this.state.electionsList.access.slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
+          this.state.electionsList.access
+          .filter(this.searchTable(searchDarText))
+          .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
               div({ className: "grid-row" }, [
                 div({ className: "col-2 cell-body text", title: "this.election.displayId " }, [election.displayId]),
@@ -209,16 +222,18 @@ class ReviewedCases extends Component {
           }),
           PaginatorBar({
             name: 'access',
-            total: this.state.electionsList.access.length,
+            total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
             limit: this.state.accessLimit,
             pageCount: this.accessPageCount,
             currentPage: this.state.currentAccessPage,
+
             onPageChange: (page) => {
               this.setState(prev => {
                 prev.currentAccessPage = page;
                 return prev;
               });
             },
+
             changeHandler: (size) => {
               this.setState(prev => {
                 prev.accessLimit = size;

@@ -6,7 +6,8 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
 import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 import ReactTooltip from 'react-tooltip';
-
+import { SearchBox } from '../components/SearchBox';
+import { PaginatorBar } from "../components/PaginatorBar";
 
 const USER_ID = 5;
 class DatasetCatalog extends Component {
@@ -17,6 +18,8 @@ class DatasetCatalog extends Component {
       isLogged: false
     }
     this.state = {
+      limit: 5,
+      currentPage: null,
       dataSetList: {
         catalog: [],
         dictionary: [],
@@ -48,7 +51,7 @@ class DatasetCatalog extends Component {
       catalog: catalog,
       dictionary: dictionary
     }
-    this.setState({ dataSetList: data }, () => { console.log(this.state) });
+    this.setState({ dataSetList: data, currentPage: 1 });
   }
 
   componentWillMount() {
@@ -72,14 +75,6 @@ class DatasetCatalog extends Component {
 
   handleCloseTranslatedDULModal() {
     this.setState({ showTranslatedDULModal: false });
-  }
-
-  componentWillMount() {
-    this.getDatasets();
-  }
-
-  componentDidMount() {
-
   }
 
   downloadList() {
@@ -168,13 +163,44 @@ class DatasetCatalog extends Component {
     // TBD
   }
 
+  handlePageChange = page => {
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
+
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
+  }
+
   render() {
+
+    const { searchDulText, currentPage, limit } = this.state;
+
     const isAdmin = true;
     const isResearcher = false;
     const objectIdList = ['a', 'b', 'c'];
     return (
       h(Fragment, {}, [
         div({ className: "container container-wide" }, [
+
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
               PageHeading({
@@ -189,22 +215,13 @@ class DatasetCatalog extends Component {
 
             div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
               div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-                div({ className: "search-text" }, [
-                  i({ className: "glyphicon glyphicon-search dataset-color" }),
-                  input({
-                    id: "txt_search",
-                    type: "search",
-                    className: "form-control users-search",
-                    placeholder: "Enter search term...",
-                    // value: "searchDataset"
-                  })
-                ]),
+                SearchBox({ searchHandler: this.handleSearchDul, color: 'dataset' })
               ]),
               button({
                 download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
-                  span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px'} }),
+                  span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px' } }),
                   "Download selection"
                 ]),
             ]),
@@ -241,8 +258,8 @@ class DatasetCatalog extends Component {
                 ]),
 
                 tbody({}, [
-
-                  this.state.dataSetList.catalog.map((dataSet, trIndex) => {
+                  this.state.dataSetList.catalog.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((dataSet, trIndex) => {
+                    // this.state.dataSetList.catalog.map((dataSet, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
 
                       tr({
@@ -302,23 +319,6 @@ class DatasetCatalog extends Component {
                                       ]),
                                     h(ReactTooltip, { id: "tip_connect", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Connect with Data Owner"]),
 
-
-                                    ConfirmationDialog({
-                                      title: 'Delete Dataset Confirmation?', color: 'cancel', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
-                                    }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
-
-                                    ConfirmationDialog({
-                                      title: 'Disable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogDisable, action: { label: "Yes", handler: this.dialogHandlerDisable }
-                                    }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
-
-                                    ConfirmationDialog({
-                                      title: 'Enable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogEnable, action: { label: "Yes", handler: this.dialogHandlerEnable }
-                                    }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
-
-                                    ConnectDatasetModal({
-                                      showModal: this.state.showConnectDatasetModal, onOKRequest: this.okConnectDatasetModal, onCloseRequest: this.closeConnectDatasetModal
-                                    }),
-
                                   ]),
                                 ])
                             ])
@@ -352,26 +352,52 @@ class DatasetCatalog extends Component {
                           ]),
                         ]),
 
-                      TranslatedDulModal({
-                        showModal: this.state.showTranslatedDULModal, onOKRequest: this.okTranslatedDULModal, onCloseRequest: this.closeTranslatedDULModal
-                      }),
+
                     ]);
                   })
                 ])
               ])
             ]),
-            div({ className: "f-right" }, [
-              button({
-                isRendered: this.isResearcher,
-                disabled: objectIdList.length === 0,
-                onClick: this.exportToRequest(objectIdList),
-                className: "download-button dataset-background apply-dataset",
-                disabled: objectIdList.length === 0,
-                "data-tip": "", "data-for": "tip_requestAccess"
-              }, ["Apply for Access"]),
-              h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
-            ])
-          ])
+          ]),
+          //--------------------
+          PaginatorBar({
+            total: this.state.dataSetList.catalog.filter(this.searchTable(searchDulText)).length,
+            limit: this.state.limit,
+            currentPage: this.state.currentPage,
+            onPageChange: this.handlePageChange,
+            changeHandler: this.handleSizeChange,
+          }),
+
+          div({ className: "f-right" }, [
+            button({
+              isRendered: this.isResearcher,
+              disabled: objectIdList.length === 0,
+              onClick: this.exportToRequest(objectIdList),
+              className: "download-button dataset-background apply-dataset",
+              disabled: objectIdList.length === 0,
+              "data-tip": "", "data-for": "tip_requestAccess"
+            }, ["Apply for Access"]),
+            h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
+          ]),
+          TranslatedDulModal({
+            showModal: this.state.showTranslatedDULModal, onOKRequest: this.okTranslatedDULModal, onCloseRequest: this.closeTranslatedDULModal
+          }),
+
+          ConfirmationDialog({
+            title: 'Delete Dataset Confirmation?', color: 'cancel', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
+          }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
+
+          ConfirmationDialog({
+            title: 'Disable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogDisable, action: { label: "Yes", handler: this.dialogHandlerDisable }
+          }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
+
+          ConfirmationDialog({
+            title: 'Enable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogEnable, action: { label: "Yes", handler: this.dialogHandlerEnable }
+          }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
+
+          ConnectDatasetModal({
+            showModal: this.state.showConnectDatasetModal, onOKRequest: this.okConnectDatasetModal, onCloseRequest: this.closeConnectDatasetModal
+          }),
         ])
       ])
     );

@@ -70,7 +70,6 @@ class ResearcherConsole extends Component {
 
   review = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    console.log('------------review------------', dataRequestId);
 
     DAR.getDarFields(dataRequestId, null).then(
       data => {
@@ -89,13 +88,11 @@ class ResearcherConsole extends Component {
 
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    console.log('------------cancelDar------------', dataRequestId);
     this.setState({ showDialogCancelDAR: true });
   };
 
   resume = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    console.log('------------resume------------', dataRequestId);
     let dars = DAR.getPartialDarRequest(this.state.currentUser.dacUserId).then(
     data => {
       let formData = data;
@@ -105,7 +102,6 @@ class ResearcherConsole extends Component {
 
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    console.log('------------deletePartialDar------------', dataRequestId);
     this.setState({ showDialogDeletePDAR: true });
 
   };
@@ -120,10 +116,7 @@ class ResearcherConsole extends Component {
 
   componentWillMount() {
     let currentUser = Storage.getCurrentUser();
-
     this.setState({ currentUser: currentUser });
-    console.log("-------------------------------------", currentUser)
-
     this.init(currentUser);
   }
 

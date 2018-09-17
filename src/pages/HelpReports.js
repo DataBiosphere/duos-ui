@@ -3,6 +3,7 @@ import { div, hr, i, input, span, a, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { HelpModal } from '../components/modals/HelpModal';
+import { SearchBox } from '../components/SearchBox';
 
 class HelpReports extends Component {
 
@@ -52,7 +53,21 @@ class HelpReports extends Component {
     // TBD
   }
 
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
+  }
+
   render() {
+    const { searchDulText } = this.state;
+
     return (
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
@@ -62,13 +77,7 @@ class HelpReports extends Component {
 
           div({ className: "col-lg-6 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search common-color" }),
-                input({
-                  type: "search", className: "form-control users-search", placeholder: "Enter search term..."
-                  , "value": "searchHelpReports"
-                }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDul, color: 'common' })
             ]),
 
             a({
@@ -100,7 +109,7 @@ class HelpReports extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.reports.slice((this.state.currentPage - 1) * this.state.limit, this.state.currentPage * this.state.limit).map((report, ix) => {
+          this.state.reports.filter(this.searchTable(searchDulText)).slice((this.state.currentPage - 1) * this.state.limit, this.state.currentPage * this.state.limit).map((report, ix) => {
             return h(Fragment, { key: ix }, [
               div({ className: "row no-margin" }, [
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.reportId]),
@@ -113,7 +122,7 @@ class HelpReports extends Component {
             ]);
           }),
           PaginatorBar({
-            total: this.state.reports.length,
+            total: this.state.reports.filter(this.searchTable(searchDulText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,

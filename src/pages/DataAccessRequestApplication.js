@@ -175,13 +175,11 @@ class DataAccessRequestApplication extends Component {
 
   attestAndSave = (e) => {
     // implement full save on mongodb here ... after validations
-    console.log(JSON.stringify(this.state.formData, null, 2));
     this.setState({ showDialogSubmit: true });
   }
 
   partialSave = (e) => {
     // implement partial save on mongodb here ... no validations
-    console.log(JSON.stringify(this.state.formData, null, 2));
     this.setState({ showDialogSave: true });
   }
 
@@ -194,8 +192,6 @@ class DataAccessRequestApplication extends Component {
   };
 
   onOntologiesChange = (data, action) => {
-    console.log('data', data);
-    console.log('action', action);
     this.setState(prev => {
       prev.formData.ontologies = data;
       return prev;
@@ -203,8 +199,6 @@ class DataAccessRequestApplication extends Component {
   }
 
   onDatasetsChange = (data, action) => {
-    console.log('data', data);
-    console.log('action', action);
     this.setState(prev => {
       prev.formData.datasets = data;
       return prev;
@@ -740,7 +734,8 @@ class DataAccessRequestApplication extends Component {
                     label({ className: "control-label rp-choice-questions" }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, name: 'forProfit', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit', 
+                    disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -748,8 +743,10 @@ class DataAccessRequestApplication extends Component {
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, name: 'onegender', disabled: (this.state.formData.dar_code !== null), required: true }),
-                    div({ isRendered: this.state.formData.onegender === true, className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
+                    YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, id: 'onegender', name: 'onegender',
+                     disabled: (this.state.formData.dar_code !== null), required: true }),
+                    div({ isRendered: this.state.formData.onegender === 'true' || this.state.formData.onegender === true,
+                     className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
                       span({}, ["Please specify"]),
                       OptionsRadioGroup({
                         value: this.state.formData.gender,
@@ -765,35 +762,35 @@ class DataAccessRequestApplication extends Component {
                     label({ className: "control-label rp-choice-questions" }, ["3.1.3 Please indicate if this study is restricted to a  pediatric population (under the age of 18)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.pediatric, onChange: this.handleRadioChange, name: 'pediatric', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.pediatric, onChange: this.handleRadioChange, id: 'pediatric', name: 'pediatric', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.4 Does the research aim involve the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization)?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.illegalbehave, onChange: this.handleRadioChange, name: 'illegalbehave', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.illegalbehave, onChange: this.handleRadioChange, id: 'illegalbehave', name: 'illegalbehave', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.5 Does the research aim involve the study of alcohol or drug abuse, or abuse of other addictive products?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.addiction, onChange: this.handleRadioChange, name: 'addiction', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.addiction, onChange: this.handleRadioChange, id: 'addiction', name: 'addiction', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.6 Does the research aim involve the study of sexual preferences or sexually transmitted diseases?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.sexualdiseases, onChange: this.handleRadioChange, name: 'sexualdiseases', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.sexualdiseases, onChange: this.handleRadioChange, id: 'sexualdiseases', name: 'sexualdiseases', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.7 Does the research aim involve the study of any stigmatizing illnesses?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.stigmatizediseases, onChange: this.handleRadioChange, name: 'stigmatizediseases', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.stigmatizediseases, onChange: this.handleRadioChange, id: 'stigmatizediseases', name: 'stigmatizediseases', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -801,28 +798,28 @@ class DataAccessRequestApplication extends Component {
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.vulnerablepop, onChange: this.handleRadioChange, name: 'vulnerablepop', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.vulnerablepop, onChange: this.handleRadioChange, id: 'vulnerablepop', name: 'vulnerablepop', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.9 Does the research aim involve the study of Population Origins/Migration patterns?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.popmigration, onChange: this.handleRadioChange, name: 'popmigration', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.popmigration, onChange: this.handleRadioChange, id: 'popmigration', name: 'popmigration', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.10 Does the research aim involve the study of psychological traits, including intelligence, attention, emotion?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.psychtraits, onChange: this.handleRadioChange, name: 'psychtraits', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.psychtraits, onChange: this.handleRadioChange, id: 'psychtraits', name: 'psychtraits', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-choice-questions" }, ["3.1.11 Does the research correlate ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways that are not easily related to Health?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.nothealth, onChange: this.handleRadioChange, name: 'nothealth', disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({ value: this.state.formData.nothealth, onChange: this.handleRadioChange, id: 'nothealth', name: 'nothealth', disabled: (this.state.formData.dar_code !== null), required: true }),
                   ]),
                 ]),
 

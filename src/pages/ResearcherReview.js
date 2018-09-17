@@ -118,6 +118,7 @@ class ResearcherReview extends Component {
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote" }, [
+
             SubmitVoteBox({
               id: "researcherReview",
               color: "common",

@@ -1,11 +1,6 @@
 import _ from 'lodash/fp'
 import { Config } from './config';
 
-// Storage Variables
-// const CurrentUser = "CurrentUser"; // System user
-// const GoogleUser = "Gapi"; // Google user info, including token
-// const UserIsLogged = "isLogged"; // User log status flag
-
 const dataTemplate = {
   accessTotal: [
     ['Results', 'Votes'],
@@ -354,7 +349,8 @@ export const Researcher = {
   getResearcherProfile: async userId => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const profile = await res.json();
+    return profile;
   },
 
   list: async (userId) => {
@@ -459,7 +455,14 @@ export const Consent = {
   getConsentManage: async () => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const data = await res.json();
+    const regex = new RegExp('-', 'g');
+    return data.map(dul => {
+      const str = dul.consentName.replace(regex, ' ');
+      dul.ct = dul.consentName + ' ' + dul.version;
+      dul.cts = str + ' ' + dul.version;
+      return dul;
+    });
   },
 
   CreateConsentResource: async (consent) => {
@@ -491,7 +494,7 @@ export const Consent = {
   DeleteConsentResource: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    return res;
   },
 
 };
@@ -499,10 +502,9 @@ export const Consent = {
 export const Election = {
 
   create: async (consentId, election) => {
-    console.log('------------------------------------> ', consentId, election);
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res.json();
+    return res;
   },
 
   describe: async (consentId) => {
@@ -530,7 +532,7 @@ export const Election = {
 
   electionUpdateResourceUpdate: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
-    const res = await fetchOk(url, _.mergeAll(Config.authOpts(), document, { method: 'PUT' }));
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(document),Config.authOpts(), { method: 'PUT'}]));
     return res.json();
   },
 
@@ -813,7 +815,6 @@ export const PendingCases = {
         }
       }
     );
-    console.log('---------------------findDataRequestPendingCasesByUser------------------------------------- ',resp);
     return resp;
   },
 
@@ -836,7 +837,6 @@ export const PendingCases = {
         }
       }
     );
-    console.log('---------------------findConsentPendingCasesByUser------------------------------------- ',resp);
     return resp;
   },
 
