@@ -282,7 +282,9 @@ export const Files = {
   getDARFile: async (darId) => {
     // DataRequestReportsResource
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    return getFile(url);
+    const res = await getPDF(url);
+    const respHeaders = res.headers;
+    return {'file': await res.blob(), 'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1]}
   },
 
   getByEmail: async email => {
@@ -937,11 +939,14 @@ export const PendingCases = {
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
-  // console.log('------------------------------ res ----------------------', res);
   return res.ok ? res : Promise.reject(res);
 };
 
 const getFile = async (URI) => {
   const res = await fetchOk(URI, Config.authOpts());
   return res.blob();
+};
+
+const getPDF = async (URI) => {
+  return await fetchOk(URI, Config.fileBody());
 };

@@ -17,6 +17,13 @@ export const Config = {
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' }
   }),
+
+  fileBody: (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: '*/*'
+    }
+  }),
 };
 
 const Token = {

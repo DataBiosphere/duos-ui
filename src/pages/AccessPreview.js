@@ -2,7 +2,7 @@ import { Component, Fragment } from 'react';
 import { div, button, i, span, b, a, h4, ul, li, label, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { DAR } from "../libs/ajax";
+import { DAR, Election, Files } from "../libs/ajax";
 
 class AccessPreview extends Component {
 
@@ -13,21 +13,6 @@ class AccessPreview extends Component {
   }
 
   componentWillMount() {
-    // this.mockState();
-    // this.setState(prev => {
-    //   prev.currentUser = {
-    //     roles: [
-    //       { name: 'CHAIRPERSON' },
-    //       { name: 'ADMIN' },
-    //     ]
-    //   };
-    //   return prev;
-    // });
-
-    // this.describeDar(this.props.match.params.referenceId).then(data => {
-    //   console.log(data);
-    // });
-
     this.darReviewInfo();
   }
 
@@ -37,7 +22,6 @@ class AccessPreview extends Component {
 
   async darReviewInfo() {
 
-    // dar_id: referenceID
     this.setState(prev => {
       prev.dar_id = this.props.match.params.referenceId
     });
@@ -45,14 +29,13 @@ class AccessPreview extends Component {
     const data1 = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
     const data2 = await DAR.getDarFields(this.props.match.params.referenceId, 'translated_restriction');
     const data3 = await DAR.getDarFields(this.props.match.params.referenceId, 'projectTitle');
-    const data4 = await DAR.darConsent(this.props.match.params.referenceId);
+    const consent = await DAR.darConsent(this.props.match.params.referenceId);
     const data5 = await DAR.describeDar(this.props.match.params.referenceId);
+
     // dar: gerDarFields referenceID rus
     if (this.props.match.params.referenceId !== undefined) {
-      console.log(' rus resolved : ', data1.rus);
       this.setState(prev => {
         prev.darInfo.rus = data1.rus;
-        console.log('rus', data1);
         return prev;
       });
     }
@@ -61,7 +44,6 @@ class AccessPreview extends Component {
     if (this.props.match.params.referenceId !== undefined) {
       this.setState(prev => {
         prev.rp = data2;
-        console.log('translated_restriction', data2.translated_restriction);
         return prev;
       });
     }
@@ -70,7 +52,6 @@ class AccessPreview extends Component {
     if (this.props.match.params.referenceId !== undefined) {
       this.setState(prev => {
         prev.projectTitle = data3.projectTitle;
-        console.log('projectTitle', data3.projectTitle);
         return prev;
       });
     }
@@ -78,9 +59,8 @@ class AccessPreview extends Component {
     // consent: getDarConsent referenceID
     if (this.props.match.params.referenceId !== undefined) {
       this.setState(prev => {
-        prev.consent = data4;
-        prev.consentName = data4.name;
-        console.log('consent', data4);
+        prev.consent = consent;
+        prev.consentName = consent.name;
         return prev;
       });
     }
@@ -91,7 +71,16 @@ class AccessPreview extends Component {
       prev.darInfo.city = data5.city;
       prev.darInfo.department = data5.department;
       prev.darInfo.country = data5.country;
-      console.log('describe dar', data5);
+      prev.darInfo.diseases = data5.diseases;
+      prev.darInfo.hasDiseases = data5.hasDiseases;
+      prev.darInfo.institution = data5.institution;
+      prev.darInfo.researchTypeManualReview = data5.researchTypeManualReview;
+      prev.darInfo.purposeManualReview = data5.purposeManualReview;
+      prev.darInfo.hasPurposeStatements = data5.hasPurposeStatements;
+      if (data5.hasPurposeStatements) {
+        prev.darInfo.purposeStatements = data5.purposeStatements;
+      }
+      prev.darInfo.researchType = data5.researchType;
       return prev;
     });
 
@@ -117,51 +106,63 @@ class AccessPreview extends Component {
         department: '',
         city: '',
         country: '',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
+        purposeManualReview: false,
+        researchTypeManualReview: false,
         hasDiseases: true,
-        purposeStatements: [
-          { title: "", description: "", manualReview: true },
-          { title: "", description: "", manualReview: false },
-          { title: "", description: "", manualReview: true },
-          { title: "", description: "", manualReview: false },
-        ],
-        researchType: [
-          { title: "", description: "", manualReview: true },
-          { title: "", description: "", manualReview: false },
-          { title: "", description: "", manualReview: true },
-          { title: "", description: "", manualReview: false },
-        ],
-        diseases: [
-          '',
-          '',
-          '',
-          '',
-        ]
+        purposeStatements: [],
+        researchType: [],
+        hasPurposeStatements: false,
+        diseases: []
       }
     };
   }
 
-  download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
-    console.log('------------download-------------', filename, value);
+  downloadDAR = () => {
+    Files.getDARFile(this.props.match.params.referenceId).then(
+      fileData => {
+        if (fileData.file.size !== 0) {
+          this.createBlobFile(fileData.fileName, fileData.file);
+        }
+      });
   };
 
-  downloadDAR = (e) => {
-    console.log('------------downloadDAR-------------', e);
+  downloadDUL = () => {
+    let consentElection = undefined;
+
+    if (this.props.match.params.electionId !== undefined) {
+      Election.electionConsentResource(this.props.match.params.electionId).then(data => {
+        consentElection = data;
+        if (consentElection !== undefined && consentElection.dulName !== undefined) {
+          download(consentElection.dulName);
+        } else {
+          download(this.state.consentName);
+        }
+
+      });
+    }
+    function download(name) {
+      Files.getDulFile(this.props.match.params.consentId).then(
+        blob => {
+          if (blob.size !== 0) {
+            this.createBlobFile(name, blob);
+          }
+        });
+    }
   };
 
-  downloadDUL = (e) => {
-    console.log('------------downloadDUL-------------', e);
-  };
+  createBlobFile(fileName, blob) {
+    const url = window.URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+  }
 
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
       return prev;
     });
-    console.log('------------toggleQ1--------------');
   };
 
   toggleQ2 = (e) => {
@@ -169,7 +170,6 @@ class AccessPreview extends Component {
       prev.isQ2Expanded = !prev.isQ2Expanded;
       return prev;
     });
-    console.log('------------toggleQ1--------------');
   };
 
   render() {
@@ -257,7 +257,6 @@ class AccessPreview extends Component {
                         div({ className: "control-label access-color" }, ["Research Purpose"]),
                         div({ id: "lbl_rus", className: "response-label" }, [this.state.darInfo.rus]),
                       ]),
-
                       div({ isRendered: this.state.darInfo.hasPurposeStatements, className: "row dar-summary" }, [
                         div({ className: "control-label access-color" }, ["Purpose Statement"]),
                         div({ className: "response-label" }, [
