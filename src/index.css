@@ -963,34 +963,6 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
   padding: 5px 0 0 0 !important;
 }
 
-.regular-radio {
-  display: none;
-}
-
-.regular-radio+label {
-  -webkit-appearance: none;
-  background-color: #ffffff;
-  padding: 9px;
-  border-radius: 50px;
-  display: inline-block;
-  position: relative;
-}
-
-.regular-radio:checked+label:after {
-  content: ' ';
-  width: 12px;
-  height: 12px;
-  border-radius: 50px;
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  background: #2FA4E7;
-}
-
-.regular-radio:checked+label, .regular-radio+label:active, .regular-radio:checked+label:active {
-  box-shadow: 0 0 2px 2px rgba(47, 164, 231, 0.3);
-}
-
 .regular-checkbox {
   cursor: pointer;
   position: relative;
@@ -1016,7 +988,7 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
   border-radius: 3px;
 }
 
-.form-control, .regular-checkbox:before, .regular-radio:checked+label, .regular-radio+label {
+.form-control, .regular-checkbox:before {
   border: 1px solid #999999;
 }
 
