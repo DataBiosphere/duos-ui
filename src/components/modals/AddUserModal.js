@@ -143,7 +143,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
 
   async searchDACUsers(role) {
-    return await User.validateDelegation(role, this.state.user);
+    let user = {
+      roles: this.props.user.roles.map((role, ix) => { name: role.name }),
+      displayName: this.props.user.displayName,
+      email: this.props.user.email,
+    };
+    return await User.validateDelegation(role, user);
   };
 
   checkNoEmptyDelegateCandidates = (needsDelegation, delegateCandidates, role) => {
