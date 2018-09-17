@@ -6,3 +6,13 @@ export const formatDate = (dateval) => {
   let datestr = year + '-' + month + '-' + day;
   return datestr;
 };
+
+export const USER_ROLES = {
+  admin: 'ADMIN',
+  chairperson: 'CHAIRPERSON',
+  member: 'MEMBER',
+  researcher: 'RESEARCHER',
+  alumni: 'ALUMNI',
+  dataOwner: 'DATAOWNER',
+  all: 'ALL'
+};

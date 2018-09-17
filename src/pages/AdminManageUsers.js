@@ -2,7 +2,6 @@ import { Component, Fragment } from 'react';
 import { div, button, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
-import { EditUserModal } from '../components/modals/EditUserModal';
 import { User } from "../libs/ajax";
 import { PaginatorBar } from '../components/PaginatorBar';
 import ReactTooltip from 'react-tooltip';
@@ -18,7 +17,6 @@ class AdminManageUsers extends Component {
       searchText: '',
       userList: [],
       showAddUserModal: false,
-      showEditUserModal: false,
       limit: this.limit,
       currentPage: null,
     };
@@ -79,6 +77,7 @@ class AdminManageUsers extends Component {
 
   addUser = (e) => {
     this.setState(prev => {
+      prev.user = null;
       prev.showAddUserModal = true;
       return prev;
     });
@@ -86,8 +85,8 @@ class AdminManageUsers extends Component {
 
   editUser = (user) => (e) => {
     this.setState(prev => {
-      prev.showEditUserModal = true;
       prev.user = user;
+      prev.showAddUserModal = true;
       return prev;
     });
   };
@@ -96,49 +95,19 @@ class AdminManageUsers extends Component {
     this.props.history.push(`researcher_review/${userId}`);
   }
   okModal = (name) => {
-
-    switch (name) {
-      case 'addUser':
-        this.setState(prev => { prev.showAddUserModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      default:
-        break;
-    }
+    this.setState(prev => { prev.showAddUserModal = false; return prev; });
   }
 
   closeModal = (name) => {
-
-    switch (name) {
-      case 'addUser':
-        this.setState(prev => { prev.showAddUserModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      default:
-        break;
-    }
+    this.setState(prev => { prev.showAddUserModal = false; return prev; });
   }
 
   afterModalOpen = (name) => {
-
-    switch (name) {
-      case 'addUser':
-        this.setState(prev => { prev.showAddUserModal = false; return prev; });
-        break;
-      case 'editUser':
-        this.setState(prev => { prev.showEditUserModal = false; return prev; });
-        break;
-      default:
-        break;
-    }
+    this.setState(prev => { prev.showAddUserModal = false; return prev; });
   };
 
-  handleSearchDul = (query) => {
-    this.setState({ searchDulText: query });
+  handleSearchUser = (query) => {
+    this.setState({ searchUserText: query });
   }
 
   searchTable = (query) => (row) => {
@@ -150,7 +119,7 @@ class AdminManageUsers extends Component {
   }
 
   render() {
-    const { currentPage, searchDulText } = this.state;
+    const { currentPage, searchUserText } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
@@ -160,7 +129,7 @@ class AdminManageUsers extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({ searchHandler: this.handleSearchDul, color:'common' })
+              SearchBox({ searchHandler: this.handleSearchUser, color: 'common' })
             ]),
 
             a({
@@ -175,14 +144,6 @@ class AdminManageUsers extends Component {
             AddUserModal({
               isRendered: this.state.showAddUserModal,
               showModal: this.state.showAddUserModal,
-              onOKRequest: this.okModal,
-              onCloseRequest: this.closeModal,
-              onAfterOpen: this.afterModalOpen
-            }),
-
-            EditUserModal({
-              isRendered: this.state.showEditUserModal,
-              showModal: this.state.showEditUserModal,
               onOKRequest: this.okModal,
               onCloseRequest: this.closeModal,
               onAfterOpen: this.afterModalOpen,
@@ -202,7 +163,7 @@ class AdminManageUsers extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.userList.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
+          this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
             return h(Fragment, { key: user.dacUserId }, [
               div({ id: user.dacUserId, className: "row no-margin" }, [
                 div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
@@ -262,7 +223,7 @@ class AdminManageUsers extends Component {
             ])
           }),
           PaginatorBar({
-            total: this.state.userList.filter(this.searchTable(searchDulText)).length,
+            total: this.state.userList.filter(this.searchTable(searchUserText)).length,
             limit: this.state.limit,
             currentPage: this.state.currentPage,
             onPageChange: this.handlePageChange,
