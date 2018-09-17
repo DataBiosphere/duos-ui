@@ -6,7 +6,7 @@ import { EditUserModal } from '../components/modals/EditUserModal';
 import { User } from "../libs/ajax";
 import { PaginatorBar } from '../components/PaginatorBar';
 import ReactTooltip from 'react-tooltip';
-
+import { SearchBox } from '../components/SearchBox';
 
 class AdminManageUsers extends Component {
 
@@ -15,6 +15,7 @@ class AdminManageUsers extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      searchText: '',
       userList: [],
       showAddUserModal: false,
       showEditUserModal: false,
@@ -133,18 +134,20 @@ class AdminManageUsers extends Component {
     }
   };
 
-  filterTable = (row, query) => {
-    // let values = Object.values(row);
-    let texto = JSON.stringify(row);
-    // ''.concat(values);
-    if (query === undefined || query === null || query === '') {
-      return true;
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
     }
-    return texto.toLowerCase().includes(query.toLowerCase());
-  };
+    return true;
+  }
 
   render() {
-    const { currentPage } = this.state;
+    const { currentPage, searchDulText } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
@@ -154,10 +157,7 @@ class AdminManageUsers extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              div({ className: "search-text" }, [
-                i({ className: "glyphicon glyphicon-search common-color" }),
-                input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", onChange: this.search }),
-              ]),
+              SearchBox({ searchHandler: this.handleSearchDul, color:'common' })
             ]),
 
             a({
@@ -199,7 +199,7 @@ class AdminManageUsers extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.userList.filter(user => this.filterTable(user, this.state.searchUsers)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
+          this.state.userList.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
             return h(Fragment, { key: user.dacUserId }, [
               div({ id: user.dacUserId, className: "row no-margin" }, [
                 div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
@@ -243,7 +243,7 @@ class AdminManageUsers extends Component {
 
                       span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "", "data-for": "tip_nonBonafide" }),
                       h(ReactTooltip, { id: "tip_nonBonafide", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
-                      
+
                       span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, "data-tip": "", "data-for": "tip_pendingReview" }),
                       h(ReactTooltip, { id: "tip_pendingReview", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
 
@@ -255,11 +255,11 @@ class AdminManageUsers extends Component {
                 ]),
 
               ]),
-              hr({ className: "table-body-separator"})
+              hr({ className: "table-body-separator" })
             ])
           }),
           PaginatorBar({
-            total: this.state.userList.length,
+            total: this.state.userList.filter(this.searchTable(searchDulText)).length,
             limit: this.state.limit,
             currentPage: this.state.currentPage,
             onPageChange: this.handlePageChange,

@@ -528,6 +528,7 @@ small {
 
 .search-text input {
   padding-right: 30px;
+  padding-left: 30px;
   height: 40px;
   box-shadow: 3px 3px 0 #cccccc;
 }
@@ -543,6 +544,17 @@ small {
   right: 0;
   padding: 12px;
   pointer-events: none;
+}
+
+.search-text a {
+  position: absolute;
+  left: 0;
+  padding: 12px;
+  top: 0px;
+}
+
+.search-text a i {
+  left: 0;
 }
 
 .hint {

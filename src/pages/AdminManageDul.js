@@ -183,17 +183,20 @@ class AdminManageDul extends Component {
     this.setState({ showDialogDelete: false });
   };
 
-  handleSearch = (query) => {
-    this.setState({ searchDUL: query });
+  handleSearchDul = (query) => {
+    this.setState({ searchDulText: query });
   }
 
-  searchDUL = (row) => {
-    let text = JSON.stringify(row);
-    return text.includes(this.state.searchDUL);
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
   }
 
   render() {
-    const { currentPage, limit } = this.state;
+    const { currentPage, limit, searchDulText } = this.state;
 
 
     return (
@@ -204,11 +207,7 @@ class AdminManageDul extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
             div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-              SearchBox({ searchHandler: this.handleSearch })
-              // div({ className: "search-text" }, [
-              //   i({ className: "glyphicon glyphicon-search dul-color" }),
-              //   input({ type: "search", className: "form-control users-search", placeholder: "Enter search term...", onChange: this.handleSearch  }),
-              // ]),
+              SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
 
             a({ id: 'title_addDUL', className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin", onClick: this.addDul }, [
@@ -234,7 +233,7 @@ class AdminManageDul extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.electionsList.dul.filter(this.searchDUL).slice((currentPage - 1) * limit, currentPage * limit).map((election, eIndex) => {
+          this.state.electionsList.dul.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((election, eIndex) => {
             return (
               h(Fragment, { key: election.consentId }, [
                 div({ id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
@@ -286,7 +285,7 @@ class AdminManageDul extends Component {
             )
           }),
           PaginatorBar({
-            total: this.state.electionsList.dul.length,
+            total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,

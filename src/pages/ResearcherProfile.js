@@ -627,5 +627,4 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       ])
     );
   }
-
 });
