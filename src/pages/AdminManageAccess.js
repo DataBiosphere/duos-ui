@@ -5,6 +5,7 @@ import { Purpose } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
+import { SearchBox } from '../components/SearchBox';
 
 const limit = 10;
 
@@ -86,16 +87,39 @@ class AdminManageAccess extends Component {
 
   }
 
+  handleSearchDar = (query) => {
+    this.setState({ searchDarText: query });
+  }
+
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.includes(query);
+    }
+    return true;
+  }
+
   render() {
 
-    return (
+    const { searchDarText, currentPage, limit } = this.state;
 
+    return (
       div({ className: "container container-wide" }, [
+
         div({ className: "row no-margin" }, [
-          div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "manageAccess", imgSrc: "/images/icon_manage_access.png", iconSize: "medium", color: "access", title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review" }),
+
+          div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
+            PageHeading({
+              id: "manageAccess", imgSrc: "/images/icon_manage_access.png", iconSize: "medium", color: "access",
+              title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review"
+            }),
+          ]),
+
+          div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-reviewed no-padding" }, [
+            SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
           ]),
         ]),
+
 
         div({ className: "jumbotron table-box" }, [
           div({ className: "row no-margin" }, [
@@ -109,7 +133,10 @@ class AdminManageAccess extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.darElectionList.map(dar => {
+          this.state.darElectionList
+          .filter(this.searchTable(searchDarText))
+          .slice((currentPage - 1) * limit, currentPage * limit)
+          .map(dar => {
             return h(Fragment, { key: dar.frontEndId }, [
               div({ id: dar.frontEndId, className: "row no-margin " + (dar.needsApproval ? "list-highlighted" : "") }, [
                 div({ id: dar.frontEndId + "_darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
@@ -157,10 +184,10 @@ class AdminManageAccess extends Component {
 
                         span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),
                         h(ReactTooltip, { id: "tip_nonBonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
-                        
+
                         span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending', "data-tip": "", "data-for": "tip_pendingReview" }),
                         h(ReactTooltip, { id: "tip_pendingReview", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
-                                       
+
                         span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }),
                       ])
                     ])
@@ -187,10 +214,10 @@ class AdminManageAccess extends Component {
             ]);
           }),
           PaginatorBar({
-            total: this.state.darElectionList.length,
-            limit: this.state.limit,
+            total: this.state.darElectionList.filter(this.searchTable(searchDarText)).length,
+            limit: limit,
             pageCount: this.pageCount,
-            currentPage: this.state.currentPage,
+            currentPage: currentPage,
             onPageChange: this.handlePageChange,
             changeHandler: this.handleSizeChange,
           }),
