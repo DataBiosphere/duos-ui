@@ -465,8 +465,11 @@ export const Consent = {
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
     const url = `${await Config.getApiUrl()}/consent`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), { method: 'POST' }]));
-    return res.json();
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(consent), Config.authOpts(), { method: 'POST'}]));
+    return await res.json().then(
+      () => { return true },
+      (error) => { return error}
+    );
   },
 
   CreateDulResource: async (consentId, fileName, file) => {
@@ -491,22 +494,6 @@ export const Consent = {
       (error) => { return error }
     );
   },
-
-
-  /*
-          function updateConsent(consent) {
-            consent.requiresManualReview = false;
-            var useRestriction = JSON.parse(consent.useRestriction);
-            var dataUse = JSON.parse(consent.dataUse);
-            consent.useRestriction = useRestriction;
-            consent.dataUse = dataUse;
-            return UpdateConsentResource.update({consentId: consent.consentId}, consent);
-        }
-  * */
-
-
-
-
 
   DeleteConsentResource: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;

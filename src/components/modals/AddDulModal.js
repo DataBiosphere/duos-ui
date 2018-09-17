@@ -4,12 +4,17 @@ import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
 import { Consent } from "../../libs/ajax";
 
+const CONSENT_ID = "txt_consentId";
+const CONSENT_NAME = "txt_consentName";
+const USE_RESTRICTION = "txt_sdul";
+const DATA_USE = "txt_dataUse";
 
 export const AddDulModal = hh(class AddDulModal extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      editMode: false,
       consent: {
         consentId: '',
         name: '',
@@ -31,20 +36,28 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({
-      consent: {
-        consentId: nextProps.dul.consentId,
-        name: nextProps.dul.consentName,
-        useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
-        dataUse: JSON.stringify(nextProps.editConsent.dataUse)
-      }
-    });
+    if (nextProps.editMode) {
+      this.setState({
+        editMode: nextProps.editMode,
+        consent: {
+          consentId: nextProps.dul.consentId,
+          name: nextProps.dul.consentName,
+          useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
+          dataUse: JSON.stringify(nextProps.editConsent.dataUse)
+        }
+      });
+    } else {
+      this.setState({
+        editMode: nextProps.editMode,
+        consent: {}
+      });
+    }
   }
 
-  OKHandler() {
+  async OKHandler() {
     if (this.isValidJson(this.state.consent.useRestriction ,"Unable to process Structured Limitations JSON") &&
       this.isValidJson(this.state.consent.dataUse, "Unable to process Data Use JSON")) {
-      const consentResponse = await this.updateConsent();
+      const consentResponse = await this.consentHandler();
       if (this.state.file.name !== ""
         && consentResponse === true
         && this.uploadFile()
@@ -52,7 +65,6 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         this.props.onOKRequest('editDul');
       }
     }
-    console.log("handle validation");
   }
 
   closeHandler() {
@@ -83,7 +95,6 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   async uploadFile() {
-
     const response = await Consent.CreateDulResource(this.state.consent.consentId, this.state.file.name, this.state.file);
     if (response !== true) {
       this.setState(prev => {
@@ -95,16 +106,15 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
   }
 
-  async updateConsent() {
+  async consentHandler() {
     const consent = {};
     consent.consentId = this.state.consent.consentId;
     consent.useRestriction = this.state.consent.useRestriction;
     consent.dataUse = this.state.consent.dataUse;
     consent.name = this.state.consent.name;
-    const response = await Consent.update(consent);
+    const response = this.state.editMode ? await Consent.update(consent) : await Consent.CreateConsentResource(consent);
 
     if (response) {
-      // this.closeAlert();
       return true;
     } else if (response.data.message === undefined) {
       this.handleErrors(0, response.data.cause.localizedMessage)
@@ -113,6 +123,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
     return false;
   };
+
 
   handleErrors (index, message) {
 
@@ -140,19 +151,26 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   handleChange = (changeEvent) => {
     const fieldId = changeEvent.target.id;
     const value = changeEvent.target.value;
-    if (fieldId === 'txt_consentName') {
+
+    if (fieldId === CONSENT_ID) {
+      this.setState(prev => {
+        prev.consent.consentId = value;
+        return value;
+      });
+    }
+    if (fieldId === CONSENT_NAME) {
       this.setState(prev => {
         prev.consent.name = value;
         return value;
       });
     }
-    if (fieldId === 'txt_sdul') {
+    if (fieldId === USE_RESTRICTION) {
       this.setState(prev => {
         prev.consent.useRestriction = value;
         return value;
       });
     }
-    if (fieldId === 'txt_dataUse') {
+    if (fieldId === DATA_USE) {
       this.setState(prev => {
         prev.consent.dataUse = value;
         return value;
@@ -161,7 +179,6 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   };
 
   onFileChange = (e) => {
-    console.log("FILE ", this.state.file);
     if (e.target.files !== undefined && e.target.files[0]) {
       let file = e.target.files[0];
       this.setState({
@@ -192,9 +209,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         onAfterOpen: this.afterOpenHandler,
         imgSrc: "/images/icon_add_dul.png",
         color: "dul",
-        title: "Add Data Use Limitations",
-        description: 'Catalog a Data Use Limitation Record in the system',
-        action: { label: "Add", handler: this.OKHandler }
+        title: this.state.editMode ? "Edit Data Use Limitations" : "Add Data Use Limitations",
+        description: this.state.editMode ? "Edit a Data Use Limitations Record" : "Catalog a Data Use Limitation Record in the system",
+        action: { label: this.state.editMode ? "Edit" : "Add",
+        handler: this.OKHandler }
       },
         [
 
@@ -211,7 +229,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Unique id from Compliance",
                   required: "true",
-                  disabled: false
+                  disabled: this.state.editMode
                 }),
               ]),
             ]),
@@ -280,8 +298,8 @@ export const AddDulModal = hh(class AddDulModal extends Component {
             ])
           ]),
 
-          div({ isRendered: false }, [
-            Alert({ id: "modal", type: "danger", title: "alert.title", description: "alert.msg" })
+          div({ isRendered: this.state.error.show }, [
+            Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msj })
           ])
         ])
     );

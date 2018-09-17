@@ -19,6 +19,7 @@ class AdminManageDul extends Component {
     this.state = {
       currentPage: 1,
       showModal: false,
+      editMode: false,
       value: '',
       limit: limit,
       electionsList: {
@@ -108,19 +109,22 @@ class AdminManageDul extends Component {
     this.props.history.push(`${page}/${electionId}`)
   }
 
-  async editDul(election){
+  async editDul(election) {
+    console.log("Edit Dul");
     const consentData = await Consent.ConsentResource(election.consentId);
     this.setState({
       dulToEdit: election,
       consentToEdit: consentData,
-      showModal: true
-      });
+      showModal: true,
+      editMode: 1
+    });
   };
 
   addDul() {
     console.log("addDUL");
     this.setState(prev => {
       prev.showModal = true;
+      prev.editMode = 0;
       return prev;
     });
   }
@@ -135,6 +139,7 @@ class AdminManageDul extends Component {
 
   okAddDulModal() {
     // this state change close AddDul modal
+    this.getConsentManage();
     this.setState(prev => {
       prev.showModal = false;
       return prev;
@@ -189,7 +194,6 @@ class AdminManageDul extends Component {
       electionUpdate.electionId = election.electionId;
       electionUpdate.archived = true;
       Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate);
-      // this.updateDul(election.consentId);
       this.getConsentManage();
     }
   };
@@ -211,7 +215,7 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerCreate = (answer) => (e) => {
-    this.setState({ showDialogCreate: false });
+    this.setState({showDialogCreate: false});
     let consentId = this.state.createId;
 
     let election = {status: 'Open'};
@@ -238,8 +242,8 @@ class AdminManageDul extends Component {
   };
 
   handleSearchDul = (query) => {
-    this.setState({ searchDulText: query });
-  }
+    this.setState({searchDulText: query});
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -247,10 +251,10 @@ class AdminManageDul extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
 
   render() {
-    const { currentPage, limit, searchDulText } = this.state;
+    const {currentPage, limit, searchDulText} = this.state;
 
 
     return (
@@ -266,9 +270,9 @@ class AdminManageDul extends Component {
               description: "Select and manage Data Use Limitations for DAC review"
             }),
           ]),
-          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
-            div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-              SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
+          div({className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding"}, [
+            div({className: "col-lg-6 col-md-6 col-sm-7 col-xs-7"}, [
+              SearchBox({searchHandler: this.handleSearchDul, color: 'dul'})
             ]),
 
             a({
@@ -278,16 +282,9 @@ class AdminManageDul extends Component {
             }, [
               div({className: "all-icons add-dul_white"}),
               span({}, ["Add Data Use Limitations"]),
-            ]),
-            AddDulModal({
-              showModal: this.state.showModal,
-              onOKRequest: this.okAddDulModal,
-              onCloseRequest: this.closeAddDulModal,
-              onAfterOpen: this.afterAddDulModalOpen
-            }),
-          ]),
+            ])
+          ])
         ]),
-
         div({className: "jumbotron table-box"}, [
           div({className: "grid-9-row pushed-2"}, [
             div({className: "col-2 cell-header dul-color"}, ["Consent id"]),
@@ -303,12 +300,34 @@ class AdminManageDul extends Component {
 
           this.state.electionsList.dul.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((election, eIndex) => {
             return (
-              h(Fragment, { key: election.consentId }, [
-                div({ id: election.consentId, className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "") }, [
-                  div({ id: election.consentId + "_consentName", className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""), title: election.consentName }, [
-                    span({ id: election.consentId + "_flag_consentName", isRendered: election.updateStatus, className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color", "data-tip": "", "data-for": "tip_flag" }, []),
-                    h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Consent has been updated"]),
-                    a({ id: election.consentId + "_link_consentName", onClick: () => this.open(election.consentId, 'dul_preview', null, true) }, [election.consentName]),
+              h(Fragment, {key: election.consentId}, [
+                div({
+                  id: election.consentId,
+                  className: "grid-9-row pushed-2 " + (election.updateStatus === true ? " list-highlighted" : "")
+                }, [
+                  div({
+                    id: election.consentId + "_consentName",
+                    className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""),
+                    title: election.consentName
+                  }, [
+                    span({
+                      id: election.consentId + "_flag_consentName",
+                      isRendered: election.updateStatus,
+                      className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
+                      "data-tip": "",
+                      "data-for": "tip_flag"
+                    }, []),
+                    h(ReactTooltip, {
+                      id: "tip_flag",
+                      place: 'right',
+                      effect: 'solid',
+                      multiline: true,
+                      className: 'tooltip-wrapper'
+                    }, ["Consent has been updated"]),
+                    a({
+                      id: election.consentId + "_link_consentName",
+                      onClick: () => this.open(election.consentId, 'dul_preview', null, true)
+                    }, [election.consentName]),
                   ]),
                   div({
                     id: election.consentId + "_groupName",
@@ -331,11 +350,14 @@ class AdminManageDul extends Component {
                     button({
                       id: election.consentId + "_btn_editDUL",
                       className: "cell-button hover-color",
-                      onClick: this.editDul(election)
+                      onClick: () => this.editDul(election)
                     }, ["Edit"]),
 
                   ]),
-                  div({id: election.consentId + "_electionStatus", className: "col-1 cell-body text f-center bold"}, [
+                  div({
+                    id: election.consentId + "_electionStatus",
+                    className: "col-1 cell-body text f-center bold"
+                  }, [
                     span({isRendered: election.electionStatus === 'un-reviewed'}, [
                       a({onClick: () => this.open(election.consentId, 'dul_preview', null, false)}, ["Un-reviewed"])]),
                     span({isRendered: election.electionStatus === 'Open'}, [
@@ -368,22 +390,48 @@ class AdminManageDul extends Component {
                       className: "cell-button cancel-color"
                     }, ["Cancel"]),
                   ]),
-                  div({ id: election.consentId + "_actions", className: "icon-actions" }, [
-                    div({ id: election.consentId + "_btn_archiveElection", className: "display-inline-block", disabled: (election.electionStatus === 'un-reviewed' || election.archived === true) }, [
-                      button({ onClick: this.openDialogArchive(election) }, [
-                        span({ className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""), "data-tip": "", "data-for": "tip_archive" })
+                  div({id: election.consentId + "_actions", className: "icon-actions"}, [
+                    div({
+                      id: election.consentId + "_btn_archiveElection",
+                      className: "display-inline-block",
+                      disabled: (election.electionStatus === 'un-reviewed' || election.archived === true)
+                    }, [
+                      button({onClick: this.openDialogArchive(election)}, [
+                        span({
+                          className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
+                          "data-tip": "",
+                          "data-for": "tip_archive"
+                        })
                       ]),
-                      h(ReactTooltip, { id: "tip_archive", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Archive election"]),
+                      h(ReactTooltip, {
+                        id: "tip_archive",
+                        effect: 'solid',
+                        multiline: true,
+                        className: 'tooltip-wrapper'
+                      }, ["Archive election"]),
                     ]),
-                    div({ id: election.consentId + "_btn_deleteDul", className: "display-inline-block", disabled: (election.electionStatus !== 'un-reviewed') }, [
-                      button({ onClick: this.openDialogDelete(election) }, [
-                        span({ className: "glyphicon caret-margin glyphicon-trash", "data-tip": "", "data-for": "tip_delete" })
+                    div({
+                      id: election.consentId + "_btn_deleteDul",
+                      className: "display-inline-block",
+                      disabled: (election.electionStatus !== 'un-reviewed')
+                    }, [
+                      button({onClick: this.openDialogDelete(election)}, [
+                        span({
+                          className: "glyphicon caret-margin glyphicon-trash",
+                          "data-tip": "",
+                          "data-for": "tip_delete"
+                        })
                       ]),
-                      h(ReactTooltip, { id: "tip_delete", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Delete record"])
+                      h(ReactTooltip, {
+                        id: "tip_delete",
+                        effect: 'solid',
+                        multiline: true,
+                        className: 'tooltip-wrapper'
+                      }, ["Delete record"])
                     ])
                   ])
                 ]),
-                hr({ className: "table-body-separator" })
+                hr({className: "table-body-separator"})
               ])
             )
           }),
@@ -397,8 +445,9 @@ class AdminManageDul extends Component {
           })
         ]),
 
-        EditDulModal({
+        AddDulModal({
           showModal: this.state.showModal,
+          editMode: this.state.editMode,
           onOKRequest: this.okAddDulModal,
           onCloseRequest: this.closeAddDulModal,
           onAfterOpen: this.afterAddDulModalOpen,
@@ -474,8 +523,12 @@ class AdminManageDul extends Component {
           div({className: "dialog-description"}, [
             span({}, ["Are you sure you want to delete this Consent?"]),
           ]),
-        ]),
+        ])
+
+
       ])
+
+
     );
   }
 }
