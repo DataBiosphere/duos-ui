@@ -122,7 +122,7 @@ class InvalidRestrictions extends Component {
             ]),
 
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-              SearchBox({ id: 'invalidRestrictions', searchHandler: this.handleSearchDul, color: 'dul' })
+              SearchBox({ id: 'invalidRestrictionsDul', searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
           ]),
 
@@ -161,7 +161,7 @@ class InvalidRestrictions extends Component {
               PageSubHeading({ imgSrc: "/images/icon_access_invalid.png", color: "access", title: "Data Access Requests Invalid Cases", description: "List of Invalid Restrictions for Data Access Requests" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-              SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
+              SearchBox({ id: 'invalidRestrictionsAccess', searchHandler: this.handleSearchDar, color: 'access' })
             ]),
           ]),
 

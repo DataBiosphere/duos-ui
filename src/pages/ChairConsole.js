@@ -149,7 +149,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Review", description: "Were data use limitations accurately converted to a structured format?" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding" }, [
-              SearchBox({ id: 'chairConsole', searchHandler: this.handleSearchDul, color: 'dul' })
+              SearchBox({ id: 'chairConsoleDul', searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
           ]),
 
@@ -212,7 +212,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Request Review", description: "Should data access be granted to this applicant?" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding" }, [
-              SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
+              SearchBox({ id: 'chairConsoleAccess', searchHandler: this.handleSearchDar, color: 'access' })
             ]),
           ]),
 

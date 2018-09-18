@@ -114,7 +114,7 @@ class ReviewedCases extends Component {
             PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Reviewed Cases", description: "List of Data Use Limitations Reviewed Cases and their results" }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-            SearchBox({ id: 'reviewedCases', searchHandler: this.handleSearchDul, color: 'dul' })
+            SearchBox({ id: 'reviewedCasesDul', searchHandler: this.handleSearchDul, color: 'dul' })
           ])
         ]),
 
@@ -187,7 +187,7 @@ class ReviewedCases extends Component {
             PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Reviewed Cases", description: "List of Data Access Request Reviewed Cases and their results" }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-            SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
+            SearchBox({ id: 'reviewedCasesAccess', searchHandler: this.handleSearchDar, color: 'access' })
           ])
         ]),
 
