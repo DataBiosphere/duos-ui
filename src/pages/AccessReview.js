@@ -3,6 +3,7 @@ import { div, button, i, span, b, a, hr, h4, ul, li, label, h } from 'react-hype
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { DAR, Election, Purpose, Votes } from '../libs/ajax';
 
 class AccessReview extends Component {
 
@@ -23,6 +24,60 @@ class AccessReview extends Component {
       };
       return prev;
     });
+    this.darReviewAccess();
+  }
+
+  back = () => {
+    this.props.history.goBack();
+  };
+
+  async darReviewAccess() {
+    // dar
+    console.log('darId', this.props.match.params.darId);
+    console.log('electionId', this.props.match.params.voteId);
+    console.log('rpVoteId', this.props.match.params.rpVoteId);
+
+    const rusDarData = await DAR.getDarFields(this.props.match.params.darId, 'rus');
+    const consent = await DAR.darConsent(this.props.match.params.darId);
+    const election = await Election.DarElectionResourceGet(this.props.match.params.darId);
+    const vote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.voteId);
+    const rpVote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId);
+    const request = await DAR.getDarFields(this.props.match.params.darId, 'projectTitle');
+    const darInfo = await Purpose.describeDar(this.props.match.params.darId);
+    console.log('rusDarData', rusDarData);
+    console.log('consent', consent);
+    console.log('election', election);
+    console.log('vote', vote.voteId);
+    console.log('rpVote', rpVote);
+    console.log('request', request);
+    console.log('darInfo', darInfo);
+
+    this.setState(prev => {
+      prev.consentName = consent.name;
+      return prev;
+    });
+
+    this.setState(prev => {
+      prev.projectTitle = request.projectTitle;
+      return prev;
+    });
+
+    this.setState(prev => {
+      prev.darInfo = darInfo;
+      if (!darInfo.hasPurposeStatements) {
+        prev.darInfo.purposeStatements = [];
+      }
+      return prev;
+    });
+
+    Election.findConsentElectionByDarElection(vote.electionId).then(data => {
+      if (data.dulName !== null && data.dulElection !== null) {
+        this.setState({dulName: data.dulName});
+        console.log('consent election', data);
+      } else {
+        this.setState({dulName: consent.dulName});
+      }
+    });
   }
 
   mockState() {
@@ -30,7 +85,7 @@ class AccessReview extends Component {
       prev.createDate = '2018-08-30';
       prev.hasUseRestriction = true;
       prev.projectTitle = 'My Project 01';
-      prev.consentName = 'ORSP-124';
+      prev.consentName = 'ORSP-124-cosas que no entendemos';
       prev.isQ1Expanded = true;
       prev.isQ2Expanded = false;
       prev.election = {
@@ -205,16 +260,16 @@ class AccessReview extends Component {
             PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map(rol => {
+            this.state.currentUser.roles.map((rol, ind) => {
               return (
-                a({ id: "btn_back", href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", onClick: () => this.back(), key: ind, isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
             }),
-            this.state.currentUser.roles.map(rol => {
+            this.state.currentUser.roles.map((rol, ind) => {
               return (
-                a({ id: "btn_back", href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", href: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
@@ -294,7 +349,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_purposeStatement" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
@@ -314,7 +369,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_researchType" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
@@ -334,7 +389,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_disease" + rIndex }, [
                                   disease
                                 ]),

@@ -103,6 +103,7 @@ export const User = {
 };
 
 export const Votes = {
+
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -129,6 +130,12 @@ export const Votes = {
 
   findDar: async (requestId, voteId) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  getDarVote: async (requestId, voteId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -369,6 +376,12 @@ export const Researcher = {
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
     return res.json();
   },
+
+  getResearcherProfileForDar: async (researcherId) => {
+    const url = `${await Config.getApiUrl()}/researcher/${researcherId}/dar`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
 };
 
 export const DataSet = {
@@ -528,8 +541,9 @@ export const Election = {
     return res.json();
   },
 
-  electionConsentResource: async (requestElectionId) => {
+  findConsentElectionByDarElection: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
+    console.log(url);
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -711,7 +725,9 @@ export const Purpose = {
 
   describeDar: async (darId) => {
     let darInfo = {};
-    this.darModalSummary(darId).then((data) => {
+    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json().then(data => {
       darInfo.researcherId = data.userId;
       darInfo.status = data.status;
       darInfo.hasAdminComment = data.rationale !== null;
@@ -719,10 +735,38 @@ export const Purpose = {
       darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
       if (darInfo.hasPurposeStatements) {
         darInfo.purposeStatements = data.purposeStatements;
-        darInfo.purposeManualReview = this.requiresManualReview(darInfo.purposeStatements);
+        darInfo.purposeManualReview = requiresManualReview(darInfo.purposeStatements);
       }
-
+      darInfo.hasDiseases = data.diseases.length > 0;
+      if (darInfo.hasDiseases) {
+        darInfo.diseases = data.diseases;
+      }
+      if (data.researchType.length > 0) {
+        darInfo.researchType = data.researchType;
+        darInfo.researchTypeManualReview = requiresManualReview(darInfo.researchType);
+      }
+      return Researcher.getResearcherProfileForDar(darInfo.researcherId);
+    }).then(data => {
+      darInfo.pi = data.isThePI === 'true' ? data.profileName : data.piName;
+      darInfo.havePI = data.havePI === 'true' || data.isThePI === 'true';
+      darInfo.profileName = data.profileName;
+      darInfo.institution = data.institution;
+      darInfo.department = data.department;
+      darInfo.city = data.city;
+      darInfo.country = data.country;
+      return new Promise(function (resolve) {
+        resolve(darInfo);
+      });
     });
+    function requiresManualReview(object) {
+      let manualReview = false;
+      object.forEach(function (element) {
+        if (element.manualReview === true) {
+          manualReview = true;
+        }
+      });
+      return manualReview;
+    }
   },
 
   dataAccessRequestManageResource: async (userId) => {
