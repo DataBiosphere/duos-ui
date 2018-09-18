@@ -1,20 +1,22 @@
 import { Component, Fragment } from 'react';
 import { div, hr, span, a, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { Purpose } from '../libs/ajax';
+import { Purpose, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
+import * as Utils from '../libs/utils';
+import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { SearchBox } from '../components/SearchBox';
 
 const limit = 10;
-
 
 class AdminManageAccess extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      showModal: false,
       value: '',
       darElectionList: [],
       currentPage: 1,
@@ -22,13 +24,9 @@ class AdminManageAccess extends Component {
       showDialogCancel: false,
       showDialogCreate: false,
     }
-
     this.getElectionDarList = this.getElectionDarList.bind(this);
-    this.myHandler = this.myHandler.bind(this);
-  }
-
-  myHandler(event) {
-    // TBD
+    this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
   }
 
   async getElectionDarList() {
@@ -44,11 +42,11 @@ class AdminManageAccess extends Component {
       prev.darElectionList = darElection;
       return prev;
     });
-  }
+  };
 
   componentWillMount() {
     this.getElectionDarList().then(data => { return data });
-  }
+  };
 
 
   handlePageChange = page => {
@@ -66,25 +64,77 @@ class AdminManageAccess extends Component {
     });
   };
 
-  openDialogCancel = (e) => {
-    this.setState({ showDialogCancel: true });
+  openDialogCancel(dataRequestId, electionId) {
+    this.setState({ showDialogCancel: true, dataRequestId: dataRequestId, electionId: electionId });
   };
 
-  openDialogCreate = (e) => {
-    this.setState({ showDialogCreate: true });
+  openDialogCreate(dataRequestId) {
+    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId});
   };
 
   dialogHandlerCancel = (answer) => (e) => {
-    this.setState({ showDialogCancel: false });
+    if(answer === true) {
+      let electionToUpdate = {};
+      electionToUpdate.status = 'Canceled';
+      electionToUpdate.referenceId = this.state.dataRequestId;
+      electionToUpdate.electionId = this.state.electionId;
+      Election.updateElection(this.state.electionId, electionToUpdate).then(response =>{
+         this.getElectionDarList();
+         this.setState({ showDialogCancel: false });
+      });
+    } else {
+      this.setState({ showDialogCancel: false });
+    }
   };
 
   dialogHandlerCreate = (answer) => (e) => {
-    this.setState({ showDialogCreate: false });
+    if (answer === true) {
+      Election.DarElectionResourcePost(this.state.dataRequestId)
+        .then(value => {
+          this.getElectionDarList();
+          this.setState({ showDialogCreate: false });
+        })
+        .catch(errorResponse => {
+          if (errorResponse.status === 500) {
+            this.setState({ alertTitle: 'Email Service Error!', alertMessage: 'The election was created but the participants couldnt be notified by Email.' });
+          } else {
+            errorResponse.json().then(error =>
+              this.setState({ alertTitle: 'Election cannot be created!', alertMessage: error.message })
+            );
+          }
+        });
+    } else {
+      this.setState({ showDialogCreate: false });
+    }
   };
 
-  open(data) {
+  openApplicationSummaryModal(dataRequestId, electionStatus) {
+    this.setState({ showModal: true, dataRequestId: dataRequestId, calledFromAdmin: true });
+  };
 
+  handleCloseModal() {
+    this.setState({ showModal: false });
+  };
+
+  open(page, electionId, dataRequestId) {
+    this.props.history.push(`${page}/${dataRequestId}?electionId=${electionId}`);
   }
+
+  openAccessReview(page, electionId, dataRequestId) {
+    this.props.history.push(`${page}/${electionId}/${dataRequestId}`)
+  }
+
+  openAccessResultRecord(page, electionId, dataRequestId) {
+    this.props.history.push(`${page}/${dataRequestId}/${electionId}`)
+  }
+
+  okApplicationSummaryModal() {
+    this.setState({ showModal: false });
+  };
+
+  openResearcherReview(page, dacUserId) {
+    this.props.history.push(`${page}/${dacUserId}`);
+  };
 
   handleSearchDar = (query) => {
     this.setState({ searchDarText: query });
@@ -146,39 +196,38 @@ class AdminManageAccess extends Component {
 
                 div({ id: dar.frontEndId + "_projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
 
-                div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.createDate | "date:'yyyy-MM-dd'"]),
+                div({ id: dar.frontEndId + "_createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(dar.createDate)]),
 
                 div({ id: dar.frontEndId + "_btn_summary", href: "", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
-                  button({ className: "cell-button hover-color", onClick: "this.openApplication(dar.dataRequestId, dar.electionStatus)" }, ["Summary"]),
+                  button({ className: "cell-button hover-color", onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus) }, ["Summary"]),
                 ]),
 
                 div({ id: dar.frontEndId + "_link_electionStatus", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
                   span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
-                    a({ onClick: this.open('access_preview_results', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
+                    a({ onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
                   ]),
                   span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
-                    a({ onClick: this.open('access_review_results', dar.electionId, dar.dataRequestId) }, ["Open"]),
+                    a({ onClick: () => this.openAccessReview('access_review', dar.electionId, dar.dataRequestId) }, ["Open"]),
                   ]),
                   span({ isRendered: dar.electionStatus === 'Canceled' }, [
-                    a({ onClick: this.open('access_preview_results', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
+                    a({ onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
                   ]),
                   span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                    a({ onClick: this.open('access_results_record', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
+                    a({ onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
                   ]),
                 ]),
-
                 div({ id: dar.frontEndId + "_actions", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
                   div({ className: "row no-margin" }, [
                     div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
-                      button({ onClick: this.openDialogCreate, className: "cell-button hover-color" }, ["Create"]),
+                      button({ onClick: () => this.openDialogCreate(dar.dataRequestId), className: "cell-button hover-color" }, ["Create"]),
                     ]),
                     div({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), id: dar.frontEndId + "_btn_action", href: "", className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
-                      button({ onClick: this.openDialogCancel, className: "cell-button cancel-color" }, ["Cancel"]),
+                      button({ onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId), className: "cell-button cancel-color" }, ["Cancel"]),
                     ]),
 
                     div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
-                      a({ id: dar.frontEndId + "_flag_bonafide", onClick: "this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)" }, [
-                        span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved', "data-tip": "", "data-for": "tip_bonafide" }),
+                      a({ id: dar.frontEndId + "_flag_bonafide", onClick: () => this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId) }, [
+                        span({ className: "glyphicon glyphicon-thumbs-up dataset-color",  "data-tip": "", "data-for": "tip_bonafide" }),
                         h(ReactTooltip, { id: "tip_bonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
 
                         span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),
@@ -193,25 +242,43 @@ class AdminManageAccess extends Component {
                   ])
                 ])
               ]),
-              hr({ className: "table-body-separator" }),
-
-              ConfirmationDialog({
-                title: 'Cancel election?', color: 'cancel', showModal: this.state.showDialogCancel, action: { label: "Yes", handler: this.dialogHandlerCancel }
-              }, [
-                  div({ className: "dialog-description" }, [
-                    span({}, ["Are you sure you want to cancel the current election process? "]),
-                  ]),
-                ]),
-
-              ConfirmationDialog({
-                title: 'Create election?', color: 'access', showModal: this.state.showDialogCreate, action: { label: "Yes", handler: this.dialogHandlerCreate }
-              }, [
-                  div({ className: "dialog-description" }, [
-                    span({}, ["Are you sure you want the DAC to vote on this case? "]),
-                  ])
-                ]),
+              hr({ className: "table-body-separator" })
             ]);
           }),
+          ApplicationSummaryModal({
+            showModal: this.state.showModal,
+            onCloseRequest: this.handleCloseModal,
+            dataRequestId: this.state.dataRequestId
+          }),
+          ConfirmationDialog({
+            title: 'Create election?',
+            color: 'access',
+            showModal: this.state.showDialogCreate,
+            action: {
+              label: "Yes",
+              handler: this.dialogHandlerCreate
+            },
+            alertMessage: this.state.alertMessage,
+            alertTitle: this.state.alertTitle
+          }, [
+              div({ className: "dialog-description" }, [
+                span({}, ["Are you sure you want the DAC to vote on this case? "]),
+              ])
+            ]),
+
+          ConfirmationDialog({
+            title: 'Cancel election?',
+            color: 'cancel',
+            showModal: this.state.showDialogCancel,
+            action: {
+              label: "Yes",
+              handler: this.dialogHandlerCancel
+            }
+          }, [
+              div({ className: "dialog-description" }, [
+                span({}, ["Are you sure you want to cancel the current election process? "]),
+              ]),
+            ]),
           PaginatorBar({
             total: this.state.darElectionList.filter(this.searchTable(searchDarText)).length,
             limit: limit,

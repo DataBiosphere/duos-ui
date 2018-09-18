@@ -12,12 +12,16 @@ export const Config = {
       Accept: 'application/json'
     }
   }),
-
+  fileOpts : (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/text'
+    }
+  }),
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' }
   }),
-
   fileBody: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
