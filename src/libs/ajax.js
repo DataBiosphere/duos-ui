@@ -546,9 +546,9 @@ export const Election = {
     return res.json();
   },
 
-  electionUpdateResourceUpdate: async (electionId, document) => {
+  updateElection: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(document), Config.authOpts(), {method: 'PUT'}]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(),  Config.jsonBody(document), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -618,14 +618,14 @@ export const Election = {
     postElection.finalAccessVote = false;
 
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(postElection), Config.authOpts(), {method: 'POST'}]));
-    return res.json();
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(postElection), Config.authOpts(), { method: 'POST' }]));
+    return await res.json();
   },
 
   DarElectionDatasetVotes: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   },
 
   electionVote: async (voteId) => {
@@ -922,12 +922,22 @@ export const PendingCases = {
   }
 };
 
+export const DataAccess = {
+  getDarModalSummary: async (darId) => {
+    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  }
+  
+};
+
+
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
   return res.ok ? res : Promise.reject(res);
 };
 
 const getFile = async (URI) => {
-  const res = await fetchOk(URI, Config.authOpts());
+  const res = await fetchOk(URI, Config.fileBody());
   return res.blob();
 };

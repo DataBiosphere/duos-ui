@@ -36,6 +36,19 @@ Modal.setAppElement('#root');
 
 export const ConfirmationDialog = hh(class ConfirmationDialog extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      alertMessage: undefined,
+      alertTitle: undefined
+    }
+  }
+
+  componentWillReceiveProps(props) {
+    if(props.alertTitle !== undefined){
+      this.setState({alertMessage: props.alertMessage, alertTitle: props.alertTitle});
+    }
+  }
   render() {
 
     return (
@@ -59,8 +72,8 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
 
             div({ id: "lbl_dialogContent", className: "dialog-content" }, [
               this.props.children,
-              div({ isRendered: this.props.alertTitle !== undefined, className: "dialog-alert" }, [
-                Alert({ id: "dialog", type: "danger", title: this.props.alertTitle, description: this.props.alertMessage })
+              div({ isRendered: this.state.alertTitle !== undefined, className: "dialog-alert" }, [
+                Alert({ id: "dialog", type: "danger", title: this.state.alertTitle, description: this.state.alertMessage })
               ])
             ]),
 
