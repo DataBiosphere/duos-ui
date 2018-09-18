@@ -1,59 +1,80 @@
 import { Component, Fragment } from 'react';
 import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataSet } from '../../libs/ajax'
+import { DataAccess, Election } from '../../libs/ajax'
 
-let USER_ID = 5;
 
 export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+    this.state = { summary: {} };
     this.state = {
       summary: {
-        darCode: 'XYZ-1000',
-        principalInvestigator: 'Nadya Lopez Zalba',
-        researcherName: 'Nadya Researcher',
-        status: 'bonafideResearcher',
-        rationale: 'just because',
+        darCode: '',
+        principalInvestigator: '',
+        researcherName: '',
+        status: '',
+        rationale: '',
         electionStatus: '',
-        institutionName: 'Belatrix',
-        projectTitle: 'MyFirstProject',
-        needDOApproval: 'Approved by Data Owner(s).',
+        institutionName: '',
+        projectTitle: '',
+        needDOApproval: '',
         datasetDetail: [
-          { key: "SC-20156", data: "Dataset Name" }
         ],
         researchType: [
-          { title: "Type Title 1", description: "Description description description description description description" },
-          { title: "Type Title 2", description: "Description description description description" }
         ],
-        thereDiseases: true,
-        diseases: ['disease1', 'disease2', 'disease3'],
+        thereDiseases: false,
+        diseases: [],
         therePurposeStatements: false,
         purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
         ],
         sensitivePopulation: false,
         requiresManualReview: false
       },
-      calledFromAdmin: true,
+      calledFromAdmin: false,
     }
-
     this.closeHandler = this.closeHandler.bind(this);
-    this.OKHandler = this.OKHandler.bind(this);
   };
 
-  OKHandler() {
-    // this is the method for handling OK click
-    // we might do something here, adding a user for instance
-    // or delegate it to the parent....
+  closeHandler() {
+    this.props.onCloseRequest('summaryModal');
   }
 
-  closeHandler() {
-    // this is the method to handle Cancel click
+  async componentWillReceiveProps(props) {
+    if (props.dataRequestId !== undefined && this.state.dataRequestId === undefined) {
+      let darDetails = await DataAccess.getDarModalSummary(props.dataRequestId);
+      if (darDetails.status === "pending") {
+        darDetails.status = "Pending for review";
+      } else if (darDetails.status === "rejected") {
+        darDetails.status = "Non-Bonafide researcher";
+      } else {
+        darDetails.status = "Bonafide researcher";
+      }
+      if (darDetails.rationale !== null && darDetails.rationale !== '' && darDetails.rationale !== undefined) {
+        darDetails.rationaleCheck = true;
+      } else {
+        darDetails.rationaleCheck = false;
+      }
+      Object.entries(darDetails.datasetDetail).map((row, Index) => {
+        console.log(row);
+        console.log(Index);
+      });
+      this.setState({
+        dataRequestId: props.dataRequestId,
+        summary: darDetails,
+        calledFromAdmin: props.calledFromAdmin
+      });
+    }
+  }
+
+  async downloadDetail() {
+   let blob = await Election.downloadDatasetVotesForDARElection("5b9bf38676e95652ba6fccb2");
+   const url = window.URL.createObjectURL(blob);
+   let a = document.createElement('a');
+   a.href = url;
+   a.download = "datasetVotesSummary.txt";
+   a.click();
   }
 
   render() {
@@ -70,7 +91,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
         iconSize: 'none',
         title: "Application Summary",
         description: 'Data Access Request Application Summary',
-        action: { label: "Close", handler: this.OKHandler }
+        action: { label: "Close", handler: this.closeHandler }
       },
         [
           div({ className: "summary" }, [
@@ -88,18 +109,16 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
               label({ id: "lbl_researcher", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Researcher"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 div({}, [summary.researcherName]),
-                div({ id: "txt_status", isRendered: summary.electionStatus !== 'Closed', className: "bold" }, [
-                  "Status: ",
+                div({ id: "txt_status", isRendered: summary.electionStatus !== 'Closed' }, [
+                  span({ className: "bold" }, ["Status: "]),
                   summary.status
-                ]),
-                div({ id: "txt_comment", isRendered: summary.status === "bonafideResearcher", className: "bold" }, [
-                  // "ApplicationModal.rationaleCheck() && summary.status === bonafideResearcher"
-                  "Comment: ",
+                ]),                
+                div({ id: "txt_comment", isRendered: summary.rationaleCheck && summary.status === "bonafideResearcher"}, [
+                  span({ className: "bold" }, ["Comment: "]),
                   summary.rationale
                 ]),
-                div({ id: "txt_rationale", isRendered: summary.status !== "bonafideResearcher", className: "bold" }, [
-                  // "ApplicationModal.rationaleCheck() && summary.status !== bonafideResearcher"
-                  "Rationale: ",
+                div({ id: "txt_rationale", isRendered: summary.rationaleCheck && summary.status !== "bonafideResearcher"}, [
+                  span({ className: "bold" }, ["Rationale: "]),
                   summary.rationale
                 ])
               ]),
@@ -120,13 +139,13 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
               label({ id: "lbl_dataset", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Dataset(s)"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 ul({}, [
-                  summary.datasetDetail.map((row, Index) => {
+                  Object.entries(summary.datasetDetail).map((row, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_dataset" + Index }, [b({}, [row.key]), " ", row.data]),
-                      div({ isRendered: this.calledFromAdmin && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
-                      div({ isRendered: this.calledFromAdmin && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
+                      li({ id: "txt_dataset" + Index }, [b({}, [row[Index]]), " ", row[Index+1]]),
+                      div({ isRendered: this.state.calledFromAdmin && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
+                      div({ isRendered: this.state.calledFromAdmin && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
                         span({ className: "glyphicon glyphicon-download-alt hover-color", style: { "marginRight": "10px" } }),
-                        a({ onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
+                        a({  onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
                       ])
                     ])
                   })

@@ -15,7 +15,7 @@ class ResearcherReview extends Component {
       value: '',
       rationale: '',
       enableVoteButton: false,
-      voteStatus: null,
+      voteStatus: '',
       formData: {
         academicEmail: '',
         address1: '',
