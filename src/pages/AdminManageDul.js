@@ -97,22 +97,21 @@ class AdminManageDul extends Component {
   }
 
   async editDul(election) {
-    console.log("Edit Dul");
     const consentData = await Consent.ConsentResource(election.consentId);
     this.setState({
       dulToEdit: election,
       consentToEdit: consentData,
       showModal: true,
-      editMode: 1
+      isEditMode: true
     });
   };
 
   addDul() {
-    console.log("addDUL");
-    this.setState(prev => {
-      prev.showModal = true;
-      prev.editMode = 0;
-      return prev;
+    this.setState({
+      dulToEdit: null,
+      consentToEdit: null,
+      showModal: true,
+      isEditMode: false
     });
   }
 
@@ -433,7 +432,7 @@ class AdminManageDul extends Component {
 
         AddDulModal({
           showModal: this.state.showModal,
-          editMode: this.state.editMode,
+          isEditMode: this.state.isEditMode,
           onOKRequest: this.okAddDulModal,
           onCloseRequest: this.closeAddDulModal,
           onAfterOpen: this.afterAddDulModalOpen,

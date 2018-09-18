@@ -9,13 +9,12 @@ const CONSENT_NAME = "txt_consentName";
 const USE_RESTRICTION = "txt_sdul";
 const DATA_USE = "txt_dataUse";
 
-
 export const AddDulModal = hh(class AddDulModal extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      editMode: false,
+      isEditMode: false,
       consent: {
         consentId: '',
         name: '',
@@ -38,9 +37,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.editMode) {
+    if (nextProps.isEditMode) {
       this.setState({
-        editMode: nextProps.editMode,
+        isEditMode: nextProps.isEditMode,
+        file: {name: nextProps.editConsent.dulName},
         consent: {
           consentId: nextProps.dul.consentId,
           name: nextProps.dul.consentName,
@@ -50,19 +50,22 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         }
       });
     } else {
-      // clean state for any previous loaded dul
-      this.setState({
-        editMode: nextProps.editMode,
-        consent: {
-          consentId: '',
-          name: '',
-          useRestriction: '',
-          dataUse: '',
-        },
-        error: {show: false}
-      });
+      this.resetConsent();
     }
-  }
+  };
+
+  resetConsent = () => {
+    this.setState({
+      isEditMode: false,
+      consent: {
+        consentId: '',
+        name: '',
+        useRestriction: '',
+        dataUse: '',
+      },
+      file: {}
+    })
+  };
 
   async OKHandler() {
     if (this.isValidJson(this.state.consent.useRestriction, "Unable to process Structured Limitations JSON") &&
@@ -123,7 +126,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     consent.useRestriction = this.state.consent.useRestriction;
     consent.dataUse = this.state.consent.dataUse;
     consent.name = this.state.consent.name;
-    if (this.state.editMode) {
+    if (this.state.isEditMode) {
       response = await Consent.update(consent);
     } else {
       response = await Consent.CreateConsentResource(consent);
@@ -162,7 +165,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   handleChange = (changeEvent) => {
     const fieldId = changeEvent.target.id;
     const value = changeEvent.target.value;
-    switch(fieldId) {
+    switch (fieldId) {
       case CONSENT_ID: {
         this.setState(prev => {
           prev.consent.consentId = value;
@@ -216,6 +219,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
   };
 
+
   render() {
     const file = {
       name: "MyFile.txt"
@@ -224,15 +228,16 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     return (
 
       BaseModal({
+          disableOkBtn: this.state.file === '',
           showModal: this.props.showModal,
           onRequestClose: this.closeHandler,
           onAfterOpen: this.afterOpenHandler,
           imgSrc: "/images/icon_add_dul.png",
           color: "dul",
-          title: this.state.editMode ? "Edit Data Use Limitations" : "Add Data Use Limitations",
-          description: this.state.editMode ? "Edit a Data Use Limitations Record" : "Catalog a Data Use Limitation Record in the system",
+          title: this.state.isEditMode ? "Edit Data Use Limitations" : "Add Data Use Limitations",
+          description: this.state.isEditMode ? "Edit a Data Use Limitations Record" : "Catalog a Data Use Limitation Record in the system",
           action: {
-            label: this.state.editMode ? "Edit" : "Add",
+            label: this.state.isEditMode ? "Edit" : "Add",
             handler: this.OKHandler
           }
         },
@@ -259,7 +264,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Unique id from Compliance",
                   required: true,
-                  disabled: this.state.editMode
+                  disabled: this.state.isEditMode,
                 }),
               ]),
             ]),
