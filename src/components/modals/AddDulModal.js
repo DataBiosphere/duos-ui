@@ -9,6 +9,7 @@ const CONSENT_NAME = "txt_consentName";
 const USE_RESTRICTION = "txt_sdul";
 const DATA_USE = "txt_dataUse";
 
+
 export const AddDulModal = hh(class AddDulModal extends Component {
 
   constructor(props) {
@@ -25,8 +26,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
       error: {
         show: false,
         title: '',
-        msg: ''
+        msg: ['']
       }
+
     };
 
     this.handleFileChange = this.handleFileChange.bind(this);
@@ -43,19 +45,27 @@ export const AddDulModal = hh(class AddDulModal extends Component {
           consentId: nextProps.dul.consentId,
           name: nextProps.dul.consentName,
           useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
-          dataUse: JSON.stringify(nextProps.editConsent.dataUse)
+          dataUse: JSON.stringify(nextProps.editConsent.dataUse),
+          error: {show: false}
         }
       });
     } else {
+      // clean state for any previous loaded dul
       this.setState({
         editMode: nextProps.editMode,
-        consent: {}
+        consent: {
+          consentId: '',
+          name: '',
+          useRestriction: '',
+          dataUse: '',
+        },
+        error: {show: false}
       });
     }
   }
 
   async OKHandler() {
-    if (this.isValidJson(this.state.consent.useRestriction ,"Unable to process Structured Limitations JSON") &&
+    if (this.isValidJson(this.state.consent.useRestriction, "Unable to process Structured Limitations JSON") &&
       this.isValidJson(this.state.consent.dataUse, "Unable to process Data Use JSON")) {
       const consentResponse = await this.consentHandler();
       if (this.state.file.name !== ""
@@ -108,31 +118,32 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
   async consentHandler() {
     const consent = {};
+    let response;
     consent.consentId = this.state.consent.consentId;
     consent.useRestriction = this.state.consent.useRestriction;
     consent.dataUse = this.state.consent.dataUse;
     consent.name = this.state.consent.name;
-    const response = this.state.editMode ? await Consent.update(consent) : await Consent.CreateConsentResource(consent);
-
-    if (response) {
-      return true;
-    } else if (response.data.message === undefined) {
-      this.handleErrors(0, response.data.cause.localizedMessage)
+    if (this.state.editMode) {
+      response = await Consent.update(consent);
     } else {
-      this.handleErrors(0, response.data.message);
+      response = await Consent.CreateConsentResource(consent);
+    }
+    if (response === true) {
+      return true;
+    } else {
+      this.handleErrors(response);
     }
     return false;
   };
 
 
-  handleErrors (index, message) {
-
+  handleErrors(message) {
     var tle = 'Conflicts to resolve!';
     if (message.indexOf("PRIMARY") > -1) {
       message = "There is a Data Use Limitation already registered with this Consent Id. ";
     } else if (message.indexOf("name") > -1) {
       message = "There is a Data Use Limitation already registered with this name.";
-    } else if (message.indexOf("Unable to process JSON") > -1){
+    } else if (message.indexOf("Unable to process JSON") > -1) {
       message = "Structured Limitations or Data Use has invalid format. Please write it as valid JSON.";
     }
     else {
@@ -151,30 +162,38 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   handleChange = (changeEvent) => {
     const fieldId = changeEvent.target.id;
     const value = changeEvent.target.value;
-
-    if (fieldId === CONSENT_ID) {
-      this.setState(prev => {
-        prev.consent.consentId = value;
-        return value;
-      });
-    }
-    if (fieldId === CONSENT_NAME) {
-      this.setState(prev => {
-        prev.consent.name = value;
-        return value;
-      });
-    }
-    if (fieldId === USE_RESTRICTION) {
-      this.setState(prev => {
-        prev.consent.useRestriction = value;
-        return value;
-      });
-    }
-    if (fieldId === DATA_USE) {
-      this.setState(prev => {
-        prev.consent.dataUse = value;
-        return value;
-      });
+    switch(fieldId) {
+      case CONSENT_ID: {
+        this.setState(prev => {
+          prev.consent.consentId = value;
+          return value;
+        });
+        break;
+      }
+      case CONSENT_NAME: {
+        this.setState(prev => {
+          prev.consent.name = value;
+          return value;
+        });
+        break;
+      }
+      case USE_RESTRICTION: {
+        this.setState(prev => {
+          prev.consent.useRestriction = value;
+          return value;
+        });
+        break;
+      }
+      case DATA_USE: {
+        this.setState(prev => {
+          prev.consent.dataUse = value;
+          return value;
+        });
+        break;
+      }
+      default : {
+        break;
+      }
     }
   };
 
@@ -192,10 +211,11 @@ export const AddDulModal = hh(class AddDulModal extends Component {
       JSON.parse(obj);
       return true;
     } catch (err) {
-      this.handleErrors(0, error);
+      this.handleErrors(error);
       return false;
     }
   };
+
   render() {
     const file = {
       name: "MyFile.txt"
@@ -204,22 +224,32 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     return (
 
       BaseModal({
-        showModal: this.props.showModal,
-        onRequestClose: this.closeHandler,
-        onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_add_dul.png",
-        color: "dul",
-        title: this.state.editMode ? "Edit Data Use Limitations" : "Add Data Use Limitations",
-        description: this.state.editMode ? "Edit a Data Use Limitations Record" : "Catalog a Data Use Limitation Record in the system",
-        action: { label: this.state.editMode ? "Edit" : "Add",
-        handler: this.OKHandler }
-      },
+          showModal: this.props.showModal,
+          onRequestClose: this.closeHandler,
+          onAfterOpen: this.afterOpenHandler,
+          imgSrc: "/images/icon_add_dul.png",
+          color: "dul",
+          title: this.state.editMode ? "Edit Data Use Limitations" : "Add Data Use Limitations",
+          description: this.state.editMode ? "Edit a Data Use Limitations Record" : "Catalog a Data Use Limitation Record in the system",
+          action: {
+            label: this.state.editMode ? "Edit" : "Add",
+            handler: this.OKHandler
+          }
+        },
         [
 
-          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
-            div({ className: "form-group first-form-group" }, [
-              label({ id: "lbl_consentId", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Unique id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+          form({
+            className: "form-horizontal css-form",
+            name: "consentForm",
+            noValidate: true,
+            encType: "multipart/form-data"
+          }, [
+            div({className: "form-group first-form-group"}, [
+              label({
+                id: "lbl_consentId",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+              }, ["Unique id"]),
+              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
                 input({
                   type: "text", "ng-model": "consent.consentId",
                   value: this.state.consent.consentId,
@@ -228,15 +258,18 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                   name: "inputConsentId",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Unique id from Compliance",
-                  required: "true",
+                  required: true,
                   disabled: this.state.editMode
                 }),
               ]),
             ]),
 
-            div({ className: "form-group" }, [
-              label({ id: "lbl_consentName", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Consent id"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+            div({className: "form-group"}, [
+              label({
+                id: "lbl_consentName",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+              }, ["Consent id"]),
+              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
                 input({
                   type: "text",
                   value: this.state.consent.name,
@@ -245,61 +278,77 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                   name: "inputName",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "Consent id",
-                  required: "true",
+                  required: true,
                 }),
               ]),
             ]),
 
-            div({ className: "form-group" }, [
-              label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use Limitations File"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
-                div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
+            div({className: "form-group"}, [
+              label({
+                id: "lbl_uploadFile",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+              }, ["Data Use Limitations File"]),
+              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold"}, [
+                div({className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button"}, [
                   span({}, ["Upload file"]),
-                  span({ className: "cm-icon-button glyphicon glyphicon-upload caret-margin", "aria-hidden": "true" }, []),
+                  span({
+                    className: "cm-icon-button glyphicon glyphicon-upload caret-margin",
+                    "aria-hidden": "true"
+                  }, []),
                   input({
                     id: "btn_uploadFile",
                     type: "file",
                     onChange: this.onFileChange,
                     className: "upload",
-                    required: "true" }),
+                    required: true
+                  }),
                 ]),
-                p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file !== null ? this.state.file.name : file.name]),
+                p({
+                  id: "txt_uploadFile",
+                  className: "fileName"
+                }, [this.state.file !== null ? this.state.file.name : file.name]),
               ]),
             ]),
 
-            div({ className: "form-group" }, [
-              label({ id: "lbl_sdul", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Structured Limitations"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+            div({className: "form-group"}, [
+              label({
+                id: "lbl_sdul",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+              }, ["Structured Limitations"]),
+              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
                 textarea({
                   id: "txt_sdul",
                   value: this.state.consent.useRestriction,
                   onChange: this.handleChange,
                   name: "inputSDUL",
                   className: "form-control col-lg-12 vote-input",
-                  placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {&quot;type&quot;:&quot;everything&quot;})",
-                  required: "true"
+                  placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {\"type\":\"everything\"})",
+                  required: true
                 })
               ]),
             ]),
 
-            div({ className: "form-group" }, [
-              label({ id: "lbl_dataUse", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color" }, ["Data Use"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+            div({className: "form-group"}, [
+              label({
+                id: "lbl_dataUse",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+              }, ["Data Use"]),
+              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
                 textarea({
                   id: "txt_dataUse",
                   value: this.state.consent.dataUse,
                   onChange: this.handleChange,
                   name: "inputDU",
                   className: "form-control col-lg-12 vote-input",
-                  placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {&quot;generalUse&quot;:true})",
-                  required: "true"
+                  placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {\"generalUse\":true})",
+                  required: true
                 })
               ])
             ])
           ]),
 
-          div({ isRendered: this.state.error.show }, [
-            Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg })
+          div({isRendered: this.state.error.show}, [
+            Alert({id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg})
           ])
         ])
     );
