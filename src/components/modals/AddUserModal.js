@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { div, form, input, label, hh } from 'react-hyperscript-helpers';
+import { Component, Fragment } from 'react';
+import { div, form, input, label, hh, h, select, option } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { User } from "../../libs/ajax";
 import { Alert } from '../Alert';
@@ -29,8 +29,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         displayName: this.props.user.displayName,
         email: this.props.user.email,
         user: this.props.user,
-        delegateDacUser: {},
-        delegateDataOwner: {},
+        delegateDacUser: {
+          needsDelegation: false,
+          delegateCandidates: []
+        },
+        delegateDataOwner: {
+          needsDelegation: false,
+          delegateCandidates: []
+        },
         delegateMemberRequired: false,
         newAlternativeUserNeeded: {},
       },
@@ -234,8 +240,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               // $scope.delegateDataOwner.delegateCandidates = result.delegateCandidates;
               // $scope.delegateDataOwner.needsDelegation = result.needsDelegation;
               this.setState(prev => {
-                prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
-                prev.delegateDacUser.needsDelegation = result.needsDelegation;
+                prev.delegateDataOwner.delegateCandidates = result.delegateCandidates;
+                prev.delegateDataOwner.needsDelegation = result.needsDelegation;
                 // prev.delegateMemberRequired = false;
                 return prev;
               });
@@ -247,8 +253,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         // $scope.delegateDataOwner.delegateCandidates = [];
         // $scope.delegateDataOwner.needsDelegation = false;
         this.setState(prev => {
-          prev.delegateDacUser.delegateCandidates = [];
-          prev.delegateDacUser.needsDelegation = false;
+          prev.delegateDataOwner.delegateCandidates = [];
+          prev.delegateDataOwner.needsDelegation = false;
           // prev.delegateMemberRequired = false;
           return prev;
         });
@@ -489,6 +495,82 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                 ]),
             ]),
           ]),
+
+          // div({ isRendered: alerts.lenght > 0, className: "form-group alert-form-group" }, [
+          //     div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4", style:"paddingLeft: 26px" }, [
+          //         div({ isRendered: checkModel.ADMIN, className: "checkbox" }, [
+          //              input({ id: "emailPreference", type:"checkbox", className: "checkbox-inline user-checkbox", "set-mail-preference": true, "ng-model":"emailPreference" }),
+          //              label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "emailPreference"}, ["Disable Admin email notifications"]),
+          //          ])
+          //      ]),
+
+          //      div({ className: "admin-alerts" }, [
+          //          alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color" }, [
+          //              h4({}, [alert.title]),
+          //              span({}, [alert.msg]),
+          //              div({ className: "warning" }, [alert.warning]),
+          //          ])
+          //      ]),
+          //  ]),
+
+          div({ isRendered: this.state.delegateDacUser.needsDelegation, className: "form-group" }, [
+            div({ className: "row f-left" }, [
+              div({ className: "default-color", style: { "padding": "0 40px 15px 40px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
+            ]),
+
+            label({ id: "lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
+
+              select({ id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser, required: this.state.delegateDacUser.needsDelegation }, [
+
+                this.state.delegateDacUser.delegateCandidates.map(user => {
+                  return h(Fragment, {}, [
+                    option({  value: user }, [user.displayName])
+                  ]);
+                })
+              ]),
+
+            ]),
+          ]),
+
+
+          div({ isRendered: this.state.delegateDataOwner.needsDelegation, className: "form-group" }, [
+            div({ className: "row f-left" }, [
+              div({ className: "default-color", style: { "padding": "0 40px 15px 40px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
+            ]),
+
+            label({ id: "lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
+
+              select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser, required: this.state.delegateDataOwner.needsDelegation }, [
+
+                this.state.delegateDataOwner.delegateCandidates.map(user => {
+                  return h(Fragment, {}, [
+                    option({  value: user }, [user.displayName])
+                  ]);
+                })
+              ]),
+
+            ]),
+          ]),
+
+          // div({ isRendered: "delegateDataOwner.needsDelegation", className: "form-group" }, [
+          //     div({ className: "row f-left" }, [
+          //         div({ className: "default-color", style: {padding: '0 40px 15px 40px'} }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
+          //     ]),
+
+          //     label({ id:"lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
+          //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
+
+          //         select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", "ng-model": "$parent.alternativeDataOwnerUser", required: "delegateDataOwner.needsDelegation" }, [
+          //             option({ "ng-repeat": "dataOwner in delegateDataOwner.delegateCandidates", value: "{{dataOwner}}" }, [this.dataOwner.displayName] )
+          //         ]),
+
+          //     ]),
+          // ]),
+
+
+
 
           div({ isRendered: false }, [
             Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
