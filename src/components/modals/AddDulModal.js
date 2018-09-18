@@ -63,7 +63,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         useRestriction: '',
         dataUse: '',
       },
-      file: {}
+      file: ''
     })
   };
 
