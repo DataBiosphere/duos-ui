@@ -70,13 +70,7 @@ class DulReview extends Component {
   };
 
   downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(this.state.consentName, blob);
-        }
-      }
-    );
+    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
   };
 
   setEnableVoteButton = () => {

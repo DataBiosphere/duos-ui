@@ -98,9 +98,10 @@ export const User = {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     const user = await res.json();
-    return user;
+    return user; 
   }
 };
+
 
 export const Votes = {
   find: async (consentId, voteId) => {
@@ -250,91 +251,32 @@ export const Files = {
 
   // Get DUL File requires another field for fileName to be downloaded
   // this field is required in the component
-  getDulFile: async (consentId) => {
+  getDulFile: async (consentId, fileName) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-    return getFile(url);
+    return getFile(url, fileName);
   },
 
-  // fileName
-  getDulFileByElectionId: async (consentId, electionId) => {
+  getDulFileByElectionId: async (consentId, electionId, fileName) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?electionId=${electionId}`;
-    return getFile(url);
+    return getFile(url, fileName);
   },
 
-  // fileName
   getOntologyFile: async (fileName, fileUrl) => {
     const encodeURI = encodeURIComponent(fileUrl);
     const url = `${await Config.getApiUrl()}/ontology/file?fileUrl=${encodeURI}&fileName=${fileName}`;
-    return getFile(url);
+    return getFile(url, fileName);
   },
 
-  // fileName
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;
-    return getFile(url);
+    return getFile(url, fileName);
   },
 
   getDARFile: async (darId) => {
-    // DataRequestReportsResource
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    await  getFile(url);
-   
+    return await getFile(url, null);
   },
-
-  getByEmail: async email => {
-    const url = `${await Config.getApiUrl()}/dacuser/${email}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  list: async () => {
-    const url = `${await Config.getApiUrl()}/dacuser`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  create: async user => {
-    const url = `${await Config.getApiUrl()}/dacuser`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
-    return res.json();
-  },
-
-  update: async (user, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
-    return res.json();
-  },
-
-  updateName: async (body, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), { method: 'PUT' }]));
-    return res.json();
-  },
-
-  validateDelegation: async (role, dacUser) => {
-    const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dacUser), { method: 'POST' }]));
-    return res.json();
-  },
-
-  registerUser: async user => {
-    const url = `${await Config.getApiUrl()}/user`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
-    return res.json();
-  },
-
-  registerStatus: async (userRoleStatus, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
-    return res.json();
-  },
-
-  getUserStatus: async userId => {
-    const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  }
-};
+}
 
 export const Summary = {
   getFile: async (URI) => {
@@ -368,6 +310,12 @@ export const Researcher = {
   register: async (userId, validate, researcherProperties) => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
+    return res.json();
+  },
+
+  getResearcherProfileForDar: async (researcherId) => {
+    const url = `${await Config.getApiUrl()}/researcher/${researcherId}/dar`;
+    const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 };
@@ -696,15 +644,11 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async (id, fields) => {
+  getDarFields: async (id, fields)  => {
     const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   },
-
-};
-
-export const Purpose = {
 
   describeDar: async (darId) => {
     let darInfo = {};
@@ -736,6 +680,10 @@ export const Purpose = {
     darInfo.country = researcherProperties.country;
     return await darInfo;
   },
+
+};
+
+export const Purpose = {
 
   dataAccessRequestManageResource: async (userId) => {
     if (userId === undefined) {
@@ -919,7 +867,6 @@ export const DataAccess = {
 
 };
 
-
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
   return res.ok ? res : Promise.reject(res);
@@ -927,8 +874,8 @@ const fetchOk = async (...args) => {
 
 const getFile = async (URI, fileName) => {
   const res = await fetchOk(URI, Config.fileBody());
-  let blob = await res.blob();
   fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
+  let blob = await res.blob();
   const url = window.URL.createObjectURL(blob);
   let a = document.createElement('a');
   a.href = url;
@@ -937,6 +884,9 @@ const getFile = async (URI, fileName) => {
 };
 
 const getFileNameFromHttpResponse = (response) => {
-  var contentDispositionHeader = response.headers('Content-Disposition');
-  return contentDispositionHeader.split(';')[1].trim().split('=')[1];
+  const respHeaders = response.headers;
+  return  respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
 }
+
+
+

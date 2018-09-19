@@ -75,9 +75,9 @@ class HelpReports extends Component {
             PageHeading({ id: "helpReports", imgSrc: "../images/icon_manage_help.png", iconSize: "large", color: "common", title: "Request Help Reports", description: "List of comments, suggestions and bug reports" }),
           ]),
 
-          div({ className: "col-lg-6 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+          div({ className: "col-lg-6 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({ searchHandler: this.handleSearchDul, color: 'common' })
+              SearchBox({ id: 'helpReports', searchHandler: this.handleSearchDul, color: 'common' })
             ]),
 
             a({

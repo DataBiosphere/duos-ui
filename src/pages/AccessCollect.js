@@ -5,7 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { Election, DAR, Purpose, Files } from '../libs/ajax';
+import { Election, DAR, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 
 class AccessCollect extends Component {
@@ -101,8 +101,9 @@ class AccessCollect extends Component {
     const value = e.target.getAttribute('value');
   }
 
-  downloadDAR = (e) => {
-    Files.getDARFile(this.state.referenceId);
+  downloadDAR() {
+    console.log(this.state.election.referenceId);
+    Files.getDARFile(this.state.election.referenceId);
   }
 
   downloadDUL = (e) => {
@@ -164,7 +165,6 @@ class AccessCollect extends Component {
           electionReview.election.translatedUseRestriction,
      voteAccessList: this.chunk(electionReview.reviewVote, 2)
     });
-
   }
 
   async findRPElectionReview() {
@@ -206,7 +206,7 @@ class AccessCollect extends Component {
   async findDarFields() {
     let dar = await DAR.getDarFields(this.props.match.params.referenceId, "rus");
     let request = await DAR.getDarFields(this.props.match.params.referenceId, "projectTitle");
-    let darInfo = await Purpose.describeDar(this.props.match.params.referenceId);
+    let darInfo = await DAR.describeDar(this.props.match.params.referenceId);
     if(!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
     this.setState(prev => {
       prev.darInfo = darInfo;
@@ -344,7 +344,7 @@ class AccessCollect extends Component {
                         label({ className: "control-label access-color" }, ["Country: "]),
                         span({ id: "lbl_country", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country]),
                       ]),
-                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                     ]),
 
                     div({ className: "col-lg-8 col-md-7 col-sm-7 col-xs-12" }, [
@@ -490,7 +490,7 @@ class AccessCollect extends Component {
                   ]),
                   div({ id: "panel_researchPurpose", className: "panel-body cm-boxbody" }, [
                     div({ style: { 'marginBottom': '10px' } }, [this.state.rus]),
-                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                   ])
                 ]),
 

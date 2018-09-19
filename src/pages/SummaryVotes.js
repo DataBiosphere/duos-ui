@@ -85,7 +85,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           ]),
 
           a({
-            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button dul-background",
+            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper download-button dul-background",
             onClick: () => this.getFile("TranslateDUL"),
             isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
           }, [
@@ -116,7 +116,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           ]),
 
           a({
-            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-reviewed download-button access-background",
+            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper download-button access-background",
             onClick: () => this.getFile("DataAccess"),
             isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
           }, [
