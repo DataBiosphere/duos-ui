@@ -84,12 +84,12 @@ class ResearcherConsole extends Component {
           });
         this.props.history({ pathname: 'dar_application', props: formData });
       });
-  }
+  };
 
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogCancelDAR: true });
-  }
+  };
 
   resume = (e) => {
     const dataRequestId = e.target.getAttribute('value');
@@ -98,13 +98,13 @@ class ResearcherConsole extends Component {
       let formData = data;
       this.props.history({ pathname: 'dar_application', props: formData });
     });
-  }
+  };
 
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogDeletePDAR: true });
 
-  }
+  };
 
   dialogHandlerCancelDAR = (answer) => (e) => {
     this.setState({ showDialogCancelDAR: false });
