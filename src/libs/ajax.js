@@ -140,9 +140,15 @@ export const Votes = {
     return res.json();
   },
 
-  postDarVote: async (requestId, voteId, vote) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
+  postDarVote: async (requestId, vote) => {
+    const postObject = {};
+    postObject.vote = vote.vote;
+    postObject.dacUserId = vote.dacUserId;
+    postObject.rationale = vote.rationale;
+    postObject.hasConcerns = vote.hasConcerns;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return res.json();
   },
 
@@ -158,9 +164,15 @@ export const Votes = {
     return res.json();
   },
 
-  updateDarVote: async (requestId, voteId, vote) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'PUT' }]));
+  updateDarVote: async (requestId, vote) => {
+    const postObject = {};
+    postObject.vote = vote.vote;
+    postObject.dacUserId = vote.dacUserId;
+    postObject.rationale = vote.rationale;
+    postObject.hasConcerns = vote.hasConcerns;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -545,7 +557,6 @@ export const Election = {
 
   findConsentElectionByDarElection: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
-    console.log(url);
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
