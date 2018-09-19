@@ -62,10 +62,10 @@ export default ({ props }) => (
     <Route path='/login' component={Login} props={{ props }} />
     <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={props} />
     <AuthenticatedRoute path='/researcher_review/:dacUserId' component={ResearcherReview} props={props} />
-    <AuthenticatedRoute path='/access_result_records' component={AccessResultRecords} props={props} />
+    <AuthenticatedRoute path='/access_result_records/:referenceId/:electionId' component={AccessResultRecords} props={props} />
     <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} />
-    <AuthenticatedRoute path='/access_review' component={AccessReview} props={props} />
-    <AuthenticatedRoute path='/access_preview' component={AccessPreview} props={props} />
+    <AuthenticatedRoute path='/access_review/:electionId/:referenceId' component={AccessReview} props={props} />
+    <AuthenticatedRoute path='/access_preview/:referenceId?/:electionId?' component={AccessPreview} props={props} />
     <AuthenticatedRoute path='/access_collect' component={AccessCollect} props={props} />
     <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} />
     <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} />
