@@ -277,7 +277,9 @@ export const Files = {
   getDARFile: async (darId) => {
     // DataRequestReportsResource
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    return getFile(url);
+    const res = await getPDF(url);
+    const respHeaders = res.headers;
+    return {'file': await res.blob(), 'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1]}
   },
 
   getByEmail: async email => {
@@ -367,6 +369,12 @@ export const Researcher = {
   register: async (userId, validate, researcherProperties) => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
+    return res.json();
+  },
+
+  getResearcherProfileForDar: async (researcherId) => {
+    const url = `${await Config.getApiUrl()}/researcher/${researcherId}/dar`;
+    const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 };
@@ -693,15 +701,11 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async id => {
-  const url = `${await Config.getApiUrl()}/dar/find/${id}`;
-  const res = await fetchOk(url, Config.authOpts());
-  return res.json();
+  getDarFields: async (id, fields)  => {
+    const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
   },
-
-};
-
-export const Purpose = {
 
   darModalSummary: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
@@ -711,7 +715,9 @@ export const Purpose = {
 
   describeDar: async (darId) => {
     let darInfo = {};
-    this.darModalSummary(darId).then((data) => {
+    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json().then(data => {
       darInfo.researcherId = data.userId;
       darInfo.status = data.status;
       darInfo.hasAdminComment = data.rationale !== null;
@@ -719,11 +725,44 @@ export const Purpose = {
       darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
       if (darInfo.hasPurposeStatements) {
         darInfo.purposeStatements = data.purposeStatements;
-        darInfo.purposeManualReview = this.requiresManualReview(darInfo.purposeStatements);
+        darInfo.purposeManualReview = requiresManualReview(darInfo.purposeStatements);
       }
-
+      darInfo.hasDiseases = data.diseases.length > 0;
+      if (darInfo.hasDiseases) {
+        darInfo.diseases = data.diseases;
+      }
+      if (data.researchType.length > 0) {
+        darInfo.researchType = data.researchType;
+        darInfo.researchTypeManualReview = requiresManualReview(darInfo.researchType);
+      }
+      return Researcher.getResearcherProfileForDar(darInfo.researcherId);
+    }).then(data => {
+      darInfo.pi = data.isThePI === 'true' ? data.profileName : data.piName;
+      darInfo.havePI = data.havePI === 'true' || data.isThePI === 'true';
+      darInfo.profileName = data.profileName;
+      darInfo.institution = data.institution;
+      darInfo.department = data.department;
+      darInfo.city = data.city;
+      darInfo.country = data.country;
+      return new Promise(function (resolve) {
+        resolve(darInfo);
+      });
     });
+    function requiresManualReview(object) {
+      let manualReview = false;
+      object.forEach(function (element) {
+        if (element.manualReview === true) {
+          manualReview = true;
+        }
+      });
+      return manualReview;
+    }
   },
+
+};
+
+export const Purpose = {
+
 
   dataAccessRequestManageResource: async (userId) => {
     if (userId === undefined) {
@@ -916,4 +955,8 @@ const fetchOk = async (...args) => {
 const getFile = async (URI) => {
   const res = await fetchOk(URI, Config.fileBody());
   return res.blob();
+};
+
+const getPDF = async (URI) => {
+  return await fetchOk(URI, Config.fileBody());
 };
