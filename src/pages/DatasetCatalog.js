@@ -213,9 +213,9 @@ class DatasetCatalog extends Component {
               }),
             ]),
 
-            div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+            div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
               div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-                SearchBox({ searchHandler: this.handleSearchDul, color: 'dataset' })
+                SearchBox({ id: 'datasetCatalog', searchHandler: this.handleSearchDul, color: 'dataset' })
               ]),
               button({
                 download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),

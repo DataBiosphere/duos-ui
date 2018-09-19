@@ -84,12 +84,12 @@ class ResearcherConsole extends Component {
           });
         this.props.history({ pathname: 'dar_application', props: formData });
       });
-  }
+  };
 
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogCancelDAR: true });
-  }
+  };
 
   resume = (e) => {
     const dataRequestId = e.target.getAttribute('value');
@@ -98,13 +98,13 @@ class ResearcherConsole extends Component {
       let formData = data;
       this.props.history({ pathname: 'dar_application', props: formData });
     });
-  }
+  };
 
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogDeletePDAR: true });
 
-  }
+  };
 
   dialogHandlerCancelDAR = (answer) => (e) => {
     this.setState({ showDialogCancelDAR: false });
@@ -157,7 +157,7 @@ class ResearcherConsole extends Component {
               ]),
 
               a({
-                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 admin-add-button access-background search-reviewed", href: "/dar_application"
+                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 admin-add-button access-background search-wrapper", href: "/dar_application"
               }, [
                   div({ className: "all-icons add-access_white" }, []),
                   span({}, ["Create Data Access Request"]),

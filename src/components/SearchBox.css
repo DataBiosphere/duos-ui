@@ -1,0 +1,37 @@
+
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  padding-right: 30px;
+  padding-left: 30px;
+  height: 40px;
+  border: 1px solid #cccccc;
+  box-shadow: 3px 3px 0 #cccccc;
+  transition: all .2s ease;
+}
+
+.search-box input:focus {
+  padding-right: 30px;
+  height: 40px;
+  box-shadow: 3px 3px 0 #2FA4E7;
+}
+
+.search-box i {
+  position: absolute;
+  right: 0;
+  padding: 12px;
+  pointer-events: none;
+}
+
+.search-box-reset {
+  position: absolute;
+  left: 0;
+  padding: 12px;
+  top: 0px;
+}
+
+.search-box-reset i {
+  left: 0;
+}

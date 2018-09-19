@@ -284,7 +284,9 @@ export const Files = {
   getDARFile: async (darId) => {
     // DataRequestReportsResource
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    return getFile(url);
+    const res = await getPDF(url);
+    const respHeaders = res.headers;
+    return {'file': await res.blob(), 'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1]}
   },
 
   getByEmail: async email => {
@@ -707,15 +709,11 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async id => {
-  const url = `${await Config.getApiUrl()}/dar/find/${id}`;
-  const res = await fetchOk(url, Config.authOpts());
-  return res.json();
+  getDarFields: async (id, fields)  => {
+    const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
   },
-
-};
-
-export const Purpose = {
 
   darModalSummary: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
@@ -768,6 +766,11 @@ export const Purpose = {
       return manualReview;
     }
   },
+
+};
+
+export const Purpose = {
+
 
   dataAccessRequestManageResource: async (userId) => {
     if (userId === undefined) {
@@ -960,4 +963,8 @@ const fetchOk = async (...args) => {
 const getFile = async (URI) => {
   const res = await fetchOk(URI, Config.fileBody());
   return res.blob();
+};
+
+const getPDF = async (URI) => {
+  return await fetchOk(URI, Config.fileBody());
 };
