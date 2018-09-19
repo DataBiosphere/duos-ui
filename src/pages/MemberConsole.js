@@ -134,8 +134,8 @@ class MemberConsole extends Component {
             div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
               PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Review", description: "Were data use limitations accurately converted to a structured format?" }),
             ]),
-            div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
-              SearchBox({ searchHandler: this.handleSearchDul, color: 'dul' })
+            div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding" }, [
+              SearchBox({ id: 'memberConsoleDul', searchHandler: this.handleSearchDul, color: 'dul' })
             ]),
           ]),
 
@@ -194,8 +194,8 @@ class MemberConsole extends Component {
               PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Request Review", description: "Should data access be granted to this applicant?" }),
             ]),
 
-            div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-reviewed no-padding" }, [
-              SearchBox({ searchHandler: this.handleSearchDar, color: 'access' })
+            div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding" }, [
+              SearchBox({ id: 'memberConsoleAccess', searchHandler: this.handleSearchDar, color: 'access' })
             ]),
           ]),
           div({ className: "jumbotron table-box" }, [

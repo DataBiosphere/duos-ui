@@ -509,52 +509,17 @@ small {
 
 /***************************************************Search*/
 
-.search-reviewed {
+.search-wrapper {
   margin-top: 35px !important;
 }
 
 @media (max-width: 800px) {
-  .search-reviewed {
+  .search-wrapper {
     margin: 5px 0 !important;
   }
-  .search-reviewed>div {
+  .search-wrapper>div {
     padding-left: 0;
   }
-}
-
-.search-text {
-  position: relative;
-}
-
-.search-text input {
-  padding-right: 30px;
-  padding-left: 30px;
-  height: 40px;
-  box-shadow: 3px 3px 0 #cccccc;
-}
-
-.search-text input:focus {
-  padding-right: 30px;
-  height: 40px;
-  box-shadow: 3px 3px 0 #2FA4E7;
-}
-
-.search-text i {
-  position: absolute;
-  right: 0;
-  padding: 12px;
-  pointer-events: none;
-}
-
-.search-text a {
-  position: absolute;
-  left: 0;
-  padding: 12px;
-  top: 0px;
-}
-
-.search-text a i {
-  left: 0;
 }
 
 .hint {

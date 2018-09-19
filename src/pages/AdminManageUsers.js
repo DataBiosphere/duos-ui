@@ -158,9 +158,9 @@ class AdminManageUsers extends Component {
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({ id: "manageUsers", imgSrc: "/images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
           ]),
-          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({ searchHandler: this.handleSearchDul, color:'common' })
+              SearchBox({ id: 'manageUsers', searchHandler: this.handleSearchDul, color:'common' })
             ]),
 
             a({
