@@ -141,7 +141,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
 
   handleErrors(message) {
-    var tle = 'Conflicts to resolve!';
+    let errorTitle = 'Conflicts to resolve!';
     if (message.indexOf("PRIMARY") > -1) {
       message = "There is a Data Use Limitation already registered with this Consent Id. ";
     } else if (message.indexOf("name") > -1) {
@@ -150,13 +150,13 @@ export const AddDulModal = hh(class AddDulModal extends Component {
       message = "Structured Limitations or Data Use has invalid format. Please write it as valid JSON.";
     }
     else {
-      tle = "Error, unable to create a new Data Use Limitation! ";
+      errorTitle = "Error, unable to create a new Data Use Limitation! ";
       message = message;
     }
 
     this.setState(prev => {
-      prev.error.title = tle,
-        prev.error.show = true;
+      prev.error.title = errorTitle;
+      prev.error.show = true;
       prev.error.msg = message;
       return prev;
     });

@@ -18,7 +18,6 @@ class AdminManageDul extends Component {
     this.state = {
       currentPage: 1,
       showModal: false,
-      editMode: false,
       value: '',
       limit: limit,
       electionsList: {
