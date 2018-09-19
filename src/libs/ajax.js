@@ -959,7 +959,7 @@ export const Ontology = {
 
   postOntologyFile: async (fileData) => {
     var formData = new FormData();
-    var uuid = this.guid();
+    var uuid = Ontology.guid();
     var metadata = {};
     metadata[uuid] = fileData.fileMetadata;
     formData.append(uuid, fileData.file);
