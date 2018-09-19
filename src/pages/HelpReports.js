@@ -4,6 +4,8 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { HelpModal } from '../components/modals/HelpModal';
 import { SearchBox } from '../components/SearchBox';
+import { Help } from "../libs/ajax";
+import { Storage } from '../libs/storage';
 
 class HelpReports extends Component {
 
@@ -13,22 +15,27 @@ class HelpReports extends Component {
       value: '',
       limit: 10,
       currentPage: 1,
-      reports: [
-        {
-          reportId: 'some id',
-          userName: 'John Hongo',
-          createDate: '2018-05-22',
-          subject: 'some subject',
-          description: 'some description'
-        }
-      ],
+      reports: [],
       showHelpModal: false,
       isAdmin: false
-
-    }
+    };
 
     this.myHandler = this.myHandler.bind(this);
   }
+
+  async getReportsList() {
+    const reports = await Help.findHelpMeReports(Storage.getCurrentUser().dacUserId);
+    this.setState(prev => {
+      prev.currentPage = 1;
+      prev.reports = reports;
+      return prev;
+    });
+  }
+
+
+  componentWillMount() {
+    this.getReportsList();
+  };
 
   helpModal = (e) => {
     this.setState(prev => {
@@ -55,7 +62,7 @@ class HelpReports extends Component {
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -63,7 +70,22 @@ class HelpReports extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
+
+  handlePageChange = page => {
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
 
   render() {
     const { searchDulText } = this.state;
