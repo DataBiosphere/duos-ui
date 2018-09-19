@@ -970,6 +970,26 @@ export const DataAccess = {
   
 };
 
+export const Help = {
+
+
+  findHelpMeReports: async (userId, vm) => {
+    const url = `${await Config.getApiUrl()}/report/user/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+    // vm.reports = data;
+    // return await vm;
+  },
+  /*
+  * const url = `${await Config.getApiUrl()}/consent/manage`;
+    const res = await fetchOk(url, Config.authOpts());
+    const data = await res.json();
+  * */
+  createHelpMeReport: async (report) => {
+
+  }
+};
+
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
