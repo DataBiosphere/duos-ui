@@ -117,9 +117,9 @@ class ManageOntologies extends Component {
             PageHeading({ id: "manageOntologies", imgSrc: "../images/icon-manage-ontology.png", iconSize: "large", color: "common", title: "Manage Ontologies", description: "Select and manage Ontologies for index" }),
           ]),
 
-          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-reviewed no-padding" }, [
+          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({ searchHandler: this.handleSearchDul, color: 'common' })
+              SearchBox({ id: 'manageOntologies', searchHandler: this.handleSearchDul, color: 'common' })
             ]),
 
             a({
