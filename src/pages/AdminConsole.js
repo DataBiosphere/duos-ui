@@ -155,11 +155,13 @@ class AdminConsole extends Component {
                 }),
                 AddDulModal({
                   showModal: this.state.showAddDulModal,
+                  editMode: false,
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
+                  onAfterOpen: this.afterModalOpen,
+                  dul: '',
+                  editConsent: ''
                 }),
-
               ]),
             ]),
 
