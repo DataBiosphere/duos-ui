@@ -120,8 +120,8 @@ class AdminManageAccess extends Component {
     this.props.history.push(`${page}/${dataRequestId}?electionId=${electionId}`);
   }
 
-  openAccessReview(page, electionId, dataRequestId) {
-    this.props.history.push(`${page}/${electionId}/${dataRequestId}`)
+  openAccessCollect(page, electionId, dataRequestId) {
+    this.props.history.push(`${page}/${dataRequestId}/${electionId}`)
   }
 
   openAccessResultRecord(page, electionId, dataRequestId) {
@@ -207,7 +207,7 @@ class AdminManageAccess extends Component {
                     a({ onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
                   ]),
                   span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
-                    a({ onClick: () => this.openAccessReview('access_review', dar.electionId, dar.dataRequestId) }, ["Open"]),
+                    a({ onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId) }, ["Open"]),
                   ]),
                   span({ isRendered: dar.electionStatus === 'Canceled' }, [
                     a({ onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
@@ -227,7 +227,7 @@ class AdminManageAccess extends Component {
 
                     div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
                       a({ id: dar.frontEndId + "_flag_bonafide", onClick: () => this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId) }, [
-                        span({ className: "glyphicon glyphicon-thumbs-up dataset-color",  "data-tip": "", "data-for": "tip_bonafide" }),
+                        span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved', "data-tip": "", "data-for": "tip_bonafide" }),
                         h(ReactTooltip, { id: "tip_bonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
 
                         span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),

@@ -98,7 +98,7 @@ export const User = {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     const user = await res.json();
-    return user; 
+    return user;
   }
 };
 
@@ -277,7 +277,8 @@ export const Files = {
   getDARFile: async (darId) => {
     // DataRequestReportsResource
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    return getFile(url);
+    await  getFile(url);
+   
   },
 
   getByEmail: async email => {
@@ -348,7 +349,7 @@ export const Researcher = {
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     const profile = await res.json();
-    return profile;
+    return await profile;
   },
 
   list: async (userId) => {
@@ -511,9 +512,9 @@ export const Election = {
     return res.json();
   },
 
-  downloadDatasetVotesForDARElection: async (requestId) => {
+  downloadDatasetVotesForDARElection: async (requestId, fileName) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
-    return getFile(url);
+    return getFile(url, fileName);
   },
 
   electionUpdateResource: async (electionId) => {
@@ -524,7 +525,7 @@ export const Election = {
 
   updateElection: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(),  Config.jsonBody(document), { method: 'PUT' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -558,16 +559,18 @@ export const Election = {
     return res.json();
   },
 
-  dataAccessElectionReviewResource: async (electionId, isFinalAccess) => {
+  findDataAccessElectionReview: async (electionId, isFinalAccess) => {
     const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}?isFinalAccess=${isFinalAccess}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
 
-  RPElectionReviewResource: async (electionId, isFinalAccess) => {
+  findRPElectionReview: async (electionId, isFinalAccess) => {
     const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return  res.json().catch(function() {
+      return null;
+    });
   },
 
   ElectionReviewedConsents: async () => {
@@ -693,36 +696,45 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async id => {
-  const url = `${await Config.getApiUrl()}/dar/find/${id}`;
-  const res = await fetchOk(url, Config.authOpts());
-  return res.json();
+  getDarFields: async (id, fields) => {
+    const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
   },
 
 };
 
 export const Purpose = {
 
-  darModalSummary: async (darId) => {
-    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
   describeDar: async (darId) => {
     let darInfo = {};
-    this.darModalSummary(darId).then((data) => {
-      darInfo.researcherId = data.userId;
-      darInfo.status = data.status;
-      darInfo.hasAdminComment = data.rationale !== null;
-      darInfo.adminComment = data.rationale;
-      darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
-      if (darInfo.hasPurposeStatements) {
-        darInfo.purposeStatements = data.purposeStatements;
-        darInfo.purposeManualReview = this.requiresManualReview(darInfo.purposeStatements);
-      }
-
-    });
+    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    let data = await res.json(); 
+    darInfo.researcherId = data.userId;
+    darInfo.status = data.status;
+    darInfo.hasAdminComment = data.rationale !== null;
+    darInfo.adminComment = data.rationale;
+    darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
+    if (darInfo.hasPurposeStatements) {
+      darInfo.purposeStatements = data.purposeStatements;
+      darInfo.purposeManualReview = Purpose.requiresManualReview(darInfo.purposeStatements);
+    }
+    darInfo.hasDiseases = data.diseases.length > 0;
+    darInfo.diseases = darInfo.hasDiseases ? data.diseases : [];
+    if (data.researchType.length > 0) {
+      darInfo.researchType = data.researchType;
+      darInfo.researchTypeManualReview = Purpose.requiresManualReview(darInfo.researchType);
+    }
+    let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
+    darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
+    darInfo.havePI = researcherProperties.havePI === 'true' || researcherProperties.isThePI === 'true';
+    darInfo.profileName = researcherProperties.profileName;
+    darInfo.institution = researcherProperties.institution;
+    darInfo.department = researcherProperties.department;
+    darInfo.city = researcherProperties.city;
+    darInfo.country = researcherProperties.country;
+    return await darInfo;
   },
 
   dataAccessRequestManageResource: async (userId) => {
@@ -904,7 +916,7 @@ export const DataAccess = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   }
-  
+
 };
 
 
@@ -913,7 +925,18 @@ const fetchOk = async (...args) => {
   return res.ok ? res : Promise.reject(res);
 };
 
-const getFile = async (URI) => {
+const getFile = async (URI, fileName) => {
   const res = await fetchOk(URI, Config.fileBody());
-  return res.blob();
+  let blob = await res.blob();
+  fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
+  const url = window.URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  a.click();
 };
+
+const getFileNameFromHttpResponse = (response) => {
+  var contentDispositionHeader = response.headers('Content-Disposition');
+  return contentDispositionHeader.split(';')[1].trim().split('=')[1];
+}

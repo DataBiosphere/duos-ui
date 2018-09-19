@@ -3,6 +3,18 @@ import { div, hh, label, h4, h, hr, span } from 'react-hyperscript-helpers';
 import { Chart } from "react-google-charts";
 
 export const CollectResultBox = hh(class CollectResultBox extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      chartData: {Results: '', Yes: 0, No: 0, Pending: 0}
+    }
+  }
+
+  componentWillReceiveProps(props) {
+    this.setState({chartData: props.chartData});
+  }
+
   chartOptions = {
     'dul': {
       pieHole: 0.4,
@@ -24,7 +36,8 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
       height: 138,
       slices: {
         0: { color: '#C16B0C' },
-        1: { color: '#D1B6A1' }
+        1: { color: '#D1B6A1' },
+        2: { color: '#FFFFFF' }
       },
       legend: {
         position: 'right',
@@ -65,7 +78,8 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
       height: 138,
       slices: {
         0: { color: '#603B9B' },
-        1: { color: '#AC9EC6' }
+        1: { color: '#AC9EC6' },
+        2: { color: '#FFFFFF' }
       },
       legend: {
         position: 'right',
@@ -88,6 +102,7 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
   };
 
   render() {
+    console.log(this.props.chartData);
 
     return (
       div({ className: "jumbotron box-vote-results " + this.props.class }, [

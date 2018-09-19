@@ -10,6 +10,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     super(props);
     this.state = { summary: {} };
     this.state = {
+      dataRequestId: null,
       summary: {
         darCode: '',
         principalInvestigator: '',
@@ -69,7 +70,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
   }
 
   async downloadDetail() {
-   let blob = await Election.downloadDatasetVotesForDARElection("5b9bf38676e95652ba6fccb2");
+   let blob = await Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
    const url = window.URL.createObjectURL(blob);
    let a = document.createElement('a');
    a.href = url;

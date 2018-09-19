@@ -1,10 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { Election, DAR, Purpose, Files } from '../libs/ajax';
+import { Config } from '../libs/config';
 
 class AccessCollect extends Component {
 
@@ -15,7 +17,7 @@ class AccessCollect extends Component {
   }
 
   componentWillMount() {
-    this.mockState();
+    this.loadData();
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -27,208 +29,65 @@ class AccessCollect extends Component {
     });
   }
 
-  mockState() {
-    this.setState(prev => {
-      prev.createDate = '2018-08-30';
-      prev.hasUseRestriction = true;
-      prev.projectTitle = 'My Project 01';
-      prev.consentName = 'ORSP-124';
-      prev.isQ1Expanded = true;
-      prev.isQ2Expanded = false;
-      prev.election = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionAccess = {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionRP = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.darInfo = {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
-        hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        rus: 'something',
-        sDar: 'something else',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
-      }
-      return prev;
-    });
-  }
 
   initialState() {
     return {
-      voteStatus: '1',
-      createDate: '2018-08-30',
-      hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      consentName: 'ORSP-124',
-      isQ1Expanded: false,
+      access: {
+        chartData: [
+          ['Results', 'Votes'],
+          ['Yes', 0],
+          ['No', 0],
+          ['Pending', 0]
+        ]
+      },
+      rp: {
+        chartData: [
+          ['Results', 'Votes'],
+          ['Yes', 0],
+          ['No', 0],
+          ['Pending', 0]
+        ]
+      },
+      rus:'',
+      voteStatus: '',
+      createDate: '',
+      hasUseRestriction: false,
+      projectTitle: '',
+      consentName: '',
+      isQ1Expanded: true,
       isQ2Expanded: false,
-
+      isFormDisabled: false,
       electionAccess: {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-31'
+        finalVote: '',
+        finalRationale: '',
+        finalVoteDate: ''
       },
       electionRP: {
-        finalVote: '0',
+        finalVote: '',
         finalRationale: '',
-        finalVoteDate: '2018-08-30'
+        finalVoteDate: ''
       },
 
-      voteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: null,
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: null,
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: null,
-              rationale: 'lala',
-              createDate: '',
-              updateDate: null
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ]
-      ],
-      rpVoteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Tadeo Riveros", vote: {
-              vote: '0',
-              rationale: 'lalala',
-              createDate: '',
-              updateDate: ''
-            }
-          }
-        ]
-      ],
+      voteAccessList: [],
+      rpVoteAccessList: [],
 
       darInfo: {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
+        havePI: false,
+        pi: '',
+        profileName: '',
+        status: '',
         hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
+        adminComment: '',
+        institution: '',
+        department: '',
+        city: '',
+        country: '',
+        purposeManualReview: false,
+        researchTypeManualReview: false,
+        hasDiseases: false,
+        purposeStatements: [],
+        researchType: [],
+        diseases: []
       }
     };
   }
@@ -243,6 +102,7 @@ class AccessCollect extends Component {
   }
 
   downloadDAR = (e) => {
+    Files.getDARFile(this.state.referenceId);
   }
 
   downloadDUL = (e) => {
@@ -277,8 +137,136 @@ class AccessCollect extends Component {
     this.props.history.goBack();
   }
 
-  render() {
+  loadData(){
+    this.findDataAccessElectionReview();
+    this.findRPElectionReview();
+    this.findDarFields();
+  }
 
+  async findDataAccessElectionReview() {
+   let electionReview = await Election.findDataAccessElectionReview(this.props.match.params.electionId, false);
+   this.getRPGraphData('access', electionReview.reviewVote);
+
+   this.setState({
+     isQ1Expanded: true,
+     isQ2Expanded: false,
+     consentName: electionReview.associatedConsent.name, 
+     electionType: "access", 
+     election: electionReview.election,
+     darOriginalFinalVote: electionReview.election.finalVote,
+     darOriginalFinalRationale: electionReview.election.finalRationale,
+     downloadUrl:  Config.getApiUrl() + 'consent/' + electionReview.associatedConsent.consentId + '/dul',
+     dulName: electionReview.associatedConsent.dulName,
+     status: electionReview.election.status,
+     accessAlreadyVote: electionReview.election.finalVote !== null? true: false,
+     userestriction: electionReview.election.translatedUseRestriction === null? 
+          "This includes sensitive research objectives that requires manual review.":
+          electionReview.election.translatedUseRestriction,
+     voteAccessList: this.chunk(electionReview.reviewVote, 2)
+    });
+
+  }
+
+  async findRPElectionReview() {
+    let rpElectionReview = await Election.findRPElectionReview(this.props.match.params.electionId, false);
+    if(rpElectionReview !== null && rpElectionReview.election !== undefined) {
+      this.getRPGraphData('rp', rpElectionReview.reviewVote);
+      this.setState(prev => {
+        prev.rpElection = rpElectionReview.election;
+        prev.rpVoteAccessList = this.chunk(rpElectionReview.reviewVote, 2);
+        prev.showRPaccordion = true;
+        prev.openAccordion = false;
+        prev.rpAlreadyVote = rpElectionReview.election.finalVote !== null ? true : false;
+        prev.rpOriginalFinalVote = rpElectionReview.election.finalVote;
+        prev.rpOriginalFinalRationale = rpElectionReview.election.finalRationale;
+        prev.hasUseRestriction = true;
+        return prev;
+      });
+    } else {
+      this.setState({
+        rpVoteAccessList: [],
+        showRPaccordion: false,
+        openAccordion: true
+      });
+    }
+    this.setState({
+      buttonDisabled: false,
+      openAccordion: true
+    });
+  };
+
+  chunk(arr, size) {
+    var newArr = [];
+    for (var i = 0; i < arr.length; i += size) {
+        newArr.push(arr.slice(i, i + size));
+    }
+    return newArr;
+  };
+
+  async findDarFields() {
+    let dar = await DAR.getDarFields(this.props.match.params.referenceId, "rus");
+    let request = await DAR.getDarFields(this.props.match.params.referenceId, "projectTitle");
+    let darInfo = await Purpose.describeDar(this.props.match.params.referenceId);
+    if(!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
+    this.setState(prev => {
+      prev.darInfo = darInfo;
+      prev.rus = dar.rus;
+      prev.projectTitle = request.projectTitle;
+      return prev;
+    });
+  };
+
+  getRPGraphData(type, reviewVote) {
+    var yes = 0, no = 0, empty = 0;
+    for (var i = 0; i < reviewVote.length; i++) {
+        switch (reviewVote[i].vote.vote) {
+            case true:
+                yes++;
+                break;
+            case false:
+                no++;
+                break;
+            default:
+                empty++;
+                break;
+        }
+    }
+    let isFormDisabled = true; 
+    if(type === 'access' && empty === 0) {
+      isFormDisabled = false;
+    }
+    if(type === 'access'){
+      this.setAccessChartData(yes, no, empty, isFormDisabled);
+    } else{
+      this.setRPChartData(yes, no, empty, isFormDisabled);
+    }
+  }
+
+  setAccessChartData(yes, no, empty, isFormDisabled) {
+    this.setState(prev => {
+      prev.isFormDisabled = isFormDisabled;
+      prev.access.chartData = [
+        ['Results', 'Votes'],
+        ['Yes', yes],
+        ['No', no],
+        ['Pending', empty]
+      ];
+      return prev;
+    })
+  };
+  setRPChartData(yes, no, empty, isFormDisabled) {
+    this.setState(prev => {
+      prev.isFormDisabled = isFormDisabled;
+      prev.rp.chartData = [
+        ['Results', 'Votes'],
+        ['Yes', yes],
+        ['No', no],
+        ['Pending', empty]
+      ];
+      return prev;
+    })
+  }
+  render() {
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -304,7 +292,7 @@ class AccessCollect extends Component {
             id: "accessCollectVotes",
             onClick: this.toggleQ1,
             color: 'access',
-            title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
+            title: this.state.showRPaccordion ? "Q1. Should data access be granted to this applicant?"
               : "Should data access be granted to this applicant?",
             expanded: this.state.isQ1Expanded
           }, [
@@ -363,7 +351,7 @@ class AccessCollect extends Component {
 
                       div({ className: "row dar-summary" }, [
                         div({ className: "control-label access-color" }, ["Research Purpose"]),
-                        div({ id: "lbl_rus", className: "response-label" }, [this.state.darInfo.rus]),
+                        div({ id: "lbl_rus", className: "response-label" }, [this.state.rus]),
                       ]),
 
                       div({ isRendered: this.state.darInfo.hasPurposeStatements, className: "row dar-summary" }, [
@@ -446,11 +434,7 @@ class AccessCollect extends Component {
                   color: "access",
                   type: "stats",
                   class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.access.chartData
                 }),
 
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
@@ -459,7 +443,7 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: "isFormDisabled",
+                    isDisabled: this.state.isFormDisabled,
                     voteStatus: this.state.voteStatus,
                     action: { label: "Vote", handler: this.handleVote }
                   }),
@@ -505,7 +489,7 @@ class AccessCollect extends Component {
                     h4({}, ["Research Purpose"]),
                   ]),
                   div({ id: "panel_researchPurpose", className: "panel-body cm-boxbody" }, [
-                    div({ style: { 'marginBottom': '10px' } }, [this.state.darInfo.rus]),
+                    div({ style: { 'marginBottom': '10px' } }, [this.state.rus]),
                     button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
                   ])
                 ]),
@@ -513,8 +497,8 @@ class AccessCollect extends Component {
                 div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead access-color" }, [
                     h4({}, ["Structured Research Purpose"]),
-                  ]),
-                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction" }, [this.state.darInfo.sDar])
+                  ]), 
+                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML:{__html: this.state.userestriction}}, [])
                 ]),
               ]),
 
@@ -527,11 +511,7 @@ class AccessCollect extends Component {
                   color: "access",
                   type: "stats",
                   class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.rp.chartData
                 }),
 
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
@@ -539,7 +519,7 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: "isFormDisabled",
+                    isDisabled: this.state.isFormDisabled,
                     voteStatus: this.state.voteStatus,
                     action: { label: "Vote", handler: this.handleVote }
                   }),
