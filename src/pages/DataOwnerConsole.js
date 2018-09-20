@@ -17,6 +17,7 @@ class DataOwnerConsole extends Component {
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.voteReview = this.voteReview.bind(this);
   }
 
   handlePageChange = page => {
@@ -35,9 +36,9 @@ class DataOwnerConsole extends Component {
   };
 
   componentWillMount() {
-    let currentUser = Storage.getCurrentUser();
+    let currentUser = Storage.getCurrentUser().displayName;
     this.setState({ currentUser: currentUser }, () => {
-      PendingCases.findDataOwnerUnReviewed().then(
+      PendingCases.findDataOwnerUnReviewed(Storage.getCurrentUser().dacUserId).then(
         dars => {
           this.setState({ dataOwnerUnreviewedCases: dars });
         }
@@ -56,16 +57,15 @@ class DataOwnerConsole extends Component {
   editReview = (e) => {
     const data = e.target.getAttribute('data');
 
-  }
+  };
 
-  voteReview = (e) => {
-    const data = e.target.getAttribute('data');
-
-  }
+  voteReview = (pendingCase) => {
+    this.props.history.push(`${'data_owner_review'}/${pendingCase.voteId}/${pendingCase.referenceId}/${pendingCase.dataSetId}`);
+  };
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -123,17 +123,17 @@ class DataOwnerConsole extends Component {
                     className: "cell-button cancel-color",
                     isRendered: !pendingCase.alreadyVoted && (pendingCase.hasConcerns === null || !pendingCase.hasConcerns),
                     data: pendingCase.darCode,
-                    onClick: this.voteReview
+                    onClick: () => this.voteReview(pendingCase)
                   }, ["Vote"]),
-
+// review this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
                   button({
                     id: pendingCase.darCode + "_btn_edit",
                     className: "cell-button default-color",
                     isRendered: pendingCase.alreadyVoted || pendingCase.hasConcerns,
                     data: pendingCase.darCode,
-                    onClick: this.editReview
+                    onClick: () => this.voteReview(pendingCase)
                   }, ["Edit"]),
-
+// review this ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                 ]),
               ]),
               hr({ className: "table-body-separator" }),
