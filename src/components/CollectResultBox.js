@@ -102,8 +102,6 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
   };
 
   render() {
-    console.log(this.props.chartData);
-
     return (
       div({ className: "jumbotron box-vote-results " + this.props.class }, [
 

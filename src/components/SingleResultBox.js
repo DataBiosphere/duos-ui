@@ -25,7 +25,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
     //if reminder sent succesfully
     const dialogTitle = "Email Notification Sent";
     const dialogColor = this.props.color;
-    const reminderSent = true;
+    const reminderSent = this.props.reminderSent;
 
     //if error sending reminder
     // const dialogTitle = "Email Notification Error";

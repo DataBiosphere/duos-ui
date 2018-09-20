@@ -117,7 +117,7 @@ class AdminManageAccess extends Component {
   };
 
   open(page, electionId, dataRequestId) {
-    this.props.history.push(`${page}/${dataRequestId}?electionId=${electionId}`);
+    this.props.history.push(`${page}/${dataRequestId}/?electionId=${electionId}`);
   }
 
   openAccessCollect(page, electionId, dataRequestId) {

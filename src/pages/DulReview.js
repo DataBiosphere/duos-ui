@@ -44,10 +44,7 @@ class DulReview extends Component {
       .then(data => {
         this.setState({election: data});
       });
-    Consent.ConsentResource(this.props.match.params.consentId)
-      .then(data => {
-        this.setState({consent: data});
-      });
+    this.setState({consent: Consent.findConsentById(this.props.match.params.consentId)});
   }
 
   mockState() {
