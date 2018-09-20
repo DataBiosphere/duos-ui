@@ -26,6 +26,7 @@ class AccessReview extends Component {
       return prev;
     });
     this.darReviewAccess();
+    this.submitRpVote = this.submitRpVote.bind(this);
     this.submitVote = this.submitVote.bind(this);
   }
 
@@ -38,14 +39,24 @@ class AccessReview extends Component {
     if (this.state.rpVote.createDate === null) {
       Votes.postDarVote(this.state.election.referenceId, vote).then(
         data => {
-          this.setState({ showConfirmationDialogOK: true });
+          this.alertVoteRemember();
+          this.setState(prev => {
+            prev.alertrpVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
         }).catch(error => {
         this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
     } else {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
-          this.setState({ showConfirmationDialogOK: true });
+          this.alertVoteRemember();
+          this.setState(prev => {
+            prev.alertrpVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
         }).catch(error => {
         this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
@@ -62,14 +73,23 @@ class AccessReview extends Component {
     if (this.state.rpVote.createDate === null) {
       Votes.postDarVote(this.state.election.referenceId, vote).then(
         data => {
-          this.setState({ showConfirmationDialogOK: true });
+          this.setState(prev => {
+            prev.alertVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
+          this.alertRPVoteRemember();
         }).catch(error => {
         this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
     } else {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
-          this.setState({ showConfirmationDialogOK: true });
+          this.setState(prev => {
+            prev.alertVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
         }).catch(error => {
         this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
@@ -80,6 +100,35 @@ class AccessReview extends Component {
   back = () => {
     this.props.history.goBack();
   };
+
+  alertRPVoteRemember = () => {
+    if (this.state.hasUseRestriction && this.state.vote.vote !== null && this.state.rpVote.vote === null) {
+      this.setState(prev => {
+        prev.alertRPVote = true;
+        return prev;
+      });
+    } else {
+      this.setState(prev => {
+        prev.alertRPVote = false;
+        return prev;
+      });
+    }
+  };
+
+  alertVoteRemember = () => {
+    if (this.state.rpVote.vote !== null && !this.state.alertVote && this.state.vote.vote === null) {
+      this.setState(prev => {
+        prev.alertVote = true;
+        return prev;
+      });
+    } else {
+      this.setState(prev => {
+        prev.alertVote = false;
+        return prev;
+      });
+    }
+  };
+
 
   async darReviewAccess() {
     // dar
@@ -123,7 +172,10 @@ class AccessReview extends Component {
 
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialogOK: false });
-    // this.props.history.goBack();
+
+    if (!this.state.alertRPVote && !this.state.alertVote) {
+      this.props.history.goBack();
+    }
   };
 
   initialState() {
@@ -140,6 +192,8 @@ class AccessReview extends Component {
       rpVote: {},
       election: {},
       vote: {},
+      alertVote: false,
+      alertRPVote: false,
 
       darInfo: {
         havePI: true,
@@ -394,7 +448,9 @@ class AccessReview extends Component {
                       isDisabled: "isFormDisabled",
                       voteStatus: this.state.vote.vote,
                       rationale: this.state.vote.rationale,
-                      action: { label: "Vote", handler: this.submitVote }
+                      action: { label: "Vote", handler: this.submitVote },
+                      showAlert: this.state.alertRPVote,
+                      alertMessage: 'Remember to log a vote on: 2. Was the research purpose accurately converted to a structured format?'
                     })
                   ])
                 ])
@@ -446,7 +502,9 @@ class AccessReview extends Component {
                       isDisabled: "isFormDisabled",
                       voteStatus: this.state.rpVote.vote,
                       rationale: this.state.rpVote.rationale,
-                      action: { label: "Vote", handler: this.submitRpVote }
+                      action: { label: "Vote", handler: this.submitRpVote },
+                      showAlert: this.state.alertVote,
+                      alertMessage: 'Remember to log a vote on: 1. Should data access be granted to this applicant?'
                     }),
                   ])
                 ])
