@@ -103,6 +103,7 @@ export const User = {
 };
 
 export const Votes = {
+
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -133,9 +134,21 @@ export const Votes = {
     return res.json();
   },
 
-  postDarVote: async (requestId, voteId, vote) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
+  getDarVote: async (requestId, voteId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${voteId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  postDarVote: async (requestId, vote) => {
+    const postObject = {};
+    postObject.vote = vote.vote;
+    postObject.dacUserId = vote.dacUserId;
+    postObject.rationale = vote.rationale;
+    postObject.hasConcerns = vote.hasConcerns;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return res.json();
   },
 
@@ -151,9 +164,15 @@ export const Votes = {
     return res.json();
   },
 
-  updateDarVote: async (requestId, voteId, vote) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'PUT'}]));
+  updateDarVote: async (requestId, vote) => {
+    const postObject = {};
+    postObject.vote = vote.vote;
+    postObject.dacUserId = vote.dacUserId;
+    postObject.rationale = vote.rationale;
+    postObject.hasConcerns = vote.hasConcerns;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -568,7 +587,7 @@ export const Election = {
     return res.json();
   },
 
-  electionConsentResource: async (requestElectionId) => {
+  findConsentElectionByDarElection: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
