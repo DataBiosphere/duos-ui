@@ -29,7 +29,7 @@ class AccessPreview extends Component {
     const data1 = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
     const data2 = await DAR.getDarFields(this.props.match.params.referenceId, 'translated_restriction');
     const data3 = await DAR.getDarFields(this.props.match.params.referenceId, 'projectTitle');
-    const consent = await DAR.darConsent(this.props.match.params.referenceId);
+    const consent = await DAR.getDarConsent(this.props.match.params.referenceId);
     const data5 = await DAR.describeDar(this.props.match.params.referenceId);
 
     // dar: gerDarFields referenceID rus
@@ -124,7 +124,7 @@ class AccessPreview extends Component {
   downloadDUL() {
     let consentElection = undefined;
     if (this.props.match.params.electionId !== undefined) {
-      Election.electionConsentResource(this.props.match.params.electionId).then(data => {
+      Election.findConsentElectionByDarElection(this.props.match.params.electionId).then(data => {
         consentElection = data;
         if (consentElection !== undefined && consentElection.dulName !== undefined) {
           Files.getDulFile(this.props.match.params.consentId, consentElection.dulName);

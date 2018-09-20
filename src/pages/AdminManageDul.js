@@ -177,7 +177,7 @@ class AdminManageDul extends Component {
       electionUpdate.referenceId = election.consentId;
       electionUpdate.electionId = election.electionId;
       electionUpdate.archived = true;
-      Election.electionUpdateResource(electionUpdate.electionId, electionUpdate);
+      Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     }
   };
@@ -192,7 +192,7 @@ class AdminManageDul extends Component {
         electionId: election.electionId,
         archived: this.state.archiveCheck
       };
-      Election.electionUpdateResource(election.electionId, electionUpdated);
+      Election.updateElection(election.electionId, electionUpdated);
       this.setState({archiveCheck: true});
       this.getConsentManage();
     }
@@ -201,10 +201,8 @@ class AdminManageDul extends Component {
   dialogHandlerCreate = (answer) => (e) => {
     this.setState({showDialogCreate: false});
     let consentId = this.state.createId;
-
-    let election = {status: 'Open'};
     if (answer) {
-      Election.create(consentId, election);
+      Election.createElection(consentId);
       this.getConsentManage();
     }
   };

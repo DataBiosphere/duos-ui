@@ -46,7 +46,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
 
   OKHandler = () => {
     if (this.state.file.name !== "") {
-      DataSet.create(this.state.file, this.state.overwrite, this.USER_ID)
+      DataSet.postDatasetFile(this.state.file, this.state.overwrite, this.USER_ID)
         .then(() => {
           this.setState({errors: false});
           this.props.onOKRequest('addDataset');

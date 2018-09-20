@@ -40,7 +40,7 @@ class DulReview extends Component {
       .then(data => {
         this.setState({vote: data});
       });
-    Election.electionVote(this.props.match.params.voteId)
+    Election.findElectionByVoteId(this.props.match.params.voteId)
       .then(data => {
         this.setState({election: data});
       });

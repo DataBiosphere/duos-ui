@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataAccess, Election } from '../../libs/ajax'
+import { DAR, Election } from '../../libs/ajax'
 
 
 export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends Component {
@@ -44,9 +44,8 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
   }
 
   async componentWillReceiveProps(props) {
-    console.log("test");
     if (props.dataRequestId !== undefined && (this.state.dataRequestId === undefined || this.state.dataRequestId === null)) {
-      let darDetails = await DataAccess.getDarModalSummary(props.dataRequestId);
+      let darDetails = await DAR.getDarModalSummary(props.dataRequestId);
       if (darDetails.status === "pending") {
         darDetails.status = "Pending for review";
       } else if (darDetails.status === "rejected") {

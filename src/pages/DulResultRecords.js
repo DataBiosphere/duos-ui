@@ -40,7 +40,7 @@ class DulResultRecords extends Component {
   }
 
   async voteInfo() {
-    Election.electionReview(this.props.match.params.electionId).then(data => {
+    Election.findReviewedElections(this.props.match.params.electionId).then(data => {
       this.setState({ dulVoteList: this.chunk(data.reviewVote, 2) });
       this.setState({ consentGroupName: data.consent.groupName });
       this.setState({ consentName: data.consent.name });

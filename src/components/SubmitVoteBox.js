@@ -9,7 +9,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
+//      value: '',
       currentUser: {},
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
@@ -20,32 +20,32 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   logVote = (e) => {
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
-  }
+  };
 
   componentWillReceiveProps(nextProps) {
-    if (this.state.enableVoteButton === false) {
+    // if (this.state.enableVoteButton === false) {
       this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
-    }
+    // }
   }
 
   yesNoChange = (e, name, value) => {
     this.setState({ voteStatus: value, enableVoteButton: true });
-  }
+  };
 
   optionsChange = (e, name, value) => {
     this.setState({ voteStatus: value, enableVoteButton: true });
-  }
+  };
 
   changeRationale = (e) => {
     this.setState({ rationale: e.target.value, enableVoteButton: true });
-  }
+  };
 
   render() {
 
     let dialogTitle = "";
     let dialogMessage = "";
     let dialogType = "";
-    let dialogLabel = ""
+    let dialogLabel = "";
 
     //if agreement election
     if (this.props.id === "agreement") {
@@ -118,7 +118,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
                 label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: this.state.voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
+              span({ isRendered: voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [

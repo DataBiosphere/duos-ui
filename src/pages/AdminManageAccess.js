@@ -89,7 +89,7 @@ class AdminManageAccess extends Component {
 
   dialogHandlerCreate = (answer) => (e) => {
     if (answer === true) {
-      Election.DarElectionResourcePost(this.state.dataRequestId)
+      Election.createDARElection(this.state.dataRequestId)
         .then(value => {
           this.getElectionDarList();
           this.setState({ showDialogCreate: false });
