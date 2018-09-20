@@ -5,6 +5,7 @@ import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election, DarCases } from '../libs/ajax';
+import * as Utils from "../libs/utils";
 
 class ReviewedCases extends Component {
 
@@ -25,10 +26,6 @@ class ReviewedCases extends Component {
     return true;
   };
 
-  sort = (val) => {
-    const filename = val.target;
-  };
-
   constructor(props) {
     super(props);
     this.state = {
@@ -46,6 +43,10 @@ class ReviewedCases extends Component {
     this.getReviewedConsents = this.getReviewedConsents.bind(this);
     this.open = this.open.bind(this);
   }
+
+  sort = (val) => {
+    const filename = val.target;
+  };
 
   componentWillMount() {
     this.getReviewedConsents();
@@ -137,7 +138,7 @@ class ReviewedCases extends Component {
                   title: election.consentGroupName
                 }, [election.consentGroupName]),
                 div({ className: "col-1 cell-body text" }, [election.version < 10 ? '0' + election.version : election.version]),
-                div({ className: "col-1 cell-body text" }, [new Date(election.finalVoteDate).toLocaleDateString()]),
+                div({ className: "col-1 cell-body text" }, [ Utils.formatDate(election.finalVoteDate)]),
                 div({ className: "col-1 cell-body text f-center bold" }, [
                   span({ isRendered: election.finalVoteString === 'Yes', className: "dul-color" }, ["YES"]),
                   span({ isRendered: election.finalVoteString === 'No' }, ["NO"]),
@@ -208,7 +209,7 @@ class ReviewedCases extends Component {
               div({ className: "grid-row" }, [
                 div({ className: "col-2 cell-body text", title: "this.election.displayId " }, [election.displayId]),
                 div({ className: "col-3 cell-body text", title: "this.election.projectTitle " }, [election.projectTitle]),
-                div({ className: "col-1 cell-body text" }, [election.finalVoteDate /* | date:dateFormat*/]),
+                div({ className: "col-1 cell-body text" }, [ Utils.formatDate(election.finalVoteDate)]),
                 div({ className: "col-1 cell-body text f-center bold" }, [
                   span({ isRendered: election.finalVote === true, className: "access-color" }, ["YES"]),
                   span({ isRendered: election.finalVote === false }, ["NO"]),
