@@ -10,14 +10,27 @@ class ReviewedCases extends Component {
 
   dulPageCount = 5;
   accessPageCount = 5;
-
-  searchAccessCases = '';
+  sort = (val) => {
+    const filename = val.target;
+  };
+  handleSearchDul = (query) => {
+    this.setState({searchDulText: query});
+  };
+  handleSearchDar = (query) => {
+    this.setState({searchDarText: query});
+  };
+  searchTable = (query) => (row) => {
+    if (query && query !== undefined) {
+      let text = JSON.stringify(row);
+      return text.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+    }
+    return true;
+  };
 
   constructor(props) {
     super(props);
     this.state = {
       showModal: false,
-      currentUser: {},
       dulLimit: 5,
       accessLimit: 5,
       currentDulPage: 1,
@@ -32,26 +45,8 @@ class ReviewedCases extends Component {
     this.open = this.open.bind(this);
   }
 
-  sort = (val) => {
-    const filename = val.target;
-  };
-
   componentWillMount() {
-    let dul = [];
-    let access = [];
-    for (var i = 0; i < 77; i++) {
-      dul.push(this.createPendingCase(i));
-      access.push(this.createPendingCase(i));
-    }
-
-    this.setState(prev => {
-      prev.totalAccessPendingVotes = 5;
-      prev.totalDulPendingVotes = 6;
-      prev.currentUser = {
-        displayName: 'Nadya Lopez Zalba',
-      };
-      this.getReviewedConsents();
-    });
+    this.getReviewedConsents();
   };
 
   async getReviewedConsents() {
@@ -67,48 +62,7 @@ class ReviewedCases extends Component {
     });
   }
 
-  createPendingCase(ix) {
-    return {
-      displayId: 'displayId-' + ix,
-      frontEndId: 'Front ID-' + ix,
-      refrenceId: 'Ref ID' + ix,
-      version: ix % 11,
-      finalVoteDate: '2018-01-01',
-      finalVoteString: ix % 2 === 0 ? 'Yes' : 'No',
-      finalVote: ix % 2 === 0 ? true : false,
-      alreadyVoted: ix % 2 === 0 ? true : false,
-      logged: ix % 2 === 0 ? 'Yes' : 'No',
-      consentGroupName: 'ORS-222' + ix,
-      voteId: 'XX' + ix,
-      projectTitle: 'Project Title ' + ix,
-      rpVoteId: 'rpVote ID' + ix,
-      electionStatus: ix % 6 === 0 ? 'Open' :
-        ix % 6 === 1 ? 'Closed' :
-          ix % 6 === 2 ? 'Canceled' :
-            ix % 6 === 3 ? 'un-reviewed' :
-              ix % 6 === 4 ? 'PendingApproval' :
-                ix % 6 === 5 ? 'Final' : '',
-      isFinalVote: ix % 2 === 0 ? true : false,
-    }
-  }
-
-  handleSearchDul = (query) => {
-    this.setState({searchDulText: query});
-  };
-
-  handleSearchDar = (query) => {
-    this.setState({searchDarText: query});
-  };
-
-  searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
-      let text = JSON.stringify(row);
-      return text.toLocaleLowerCase().includes(query.toLocaleLowerCase());
-    }
-    return true;
-  };
-
-  open(electionId, page, action, status) {
+  open(electionId, page) {
     this.props.history.push(`${page}/${electionId}`);
   }
 
@@ -261,7 +215,7 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
-                    onClick: () => this.open(election.electionId, 'dul_results_record', null, false)
+                    onClick: () => this.open(election.electionId, 'dul_results_record')
                   }, ["Record"])
                 ]),
               ]),
