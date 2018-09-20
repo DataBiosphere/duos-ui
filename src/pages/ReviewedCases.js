@@ -135,7 +135,7 @@ class ReviewedCases extends Component {
                   title: election.consentGroupName
                 }, [election.consentGroupName]),
                 div({className: "col-1 cell-body text"}, [election.version < 10 ? '0' + election.version : election.version]),
-                div({className: "col-1 cell-body text"}, [election.finalVoteDate /* | date:dateFormat */]),
+                div({className: "col-1 cell-body text"}, [new Date(election.finalVoteDate).toLocaleDateString()]),
                 div({className: "col-1 cell-body text f-center bold"}, [
                   span({isRendered: election.finalVoteString === 'Yes', className: "dul-color"}, ["YES"]),
                   span({isRendered: election.finalVoteString === 'No'}, ["NO"]),
