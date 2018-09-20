@@ -42,7 +42,9 @@ class ReviewedCases extends Component {
       }
     };
     this.getReviewedConsents = this.getReviewedConsents.bind(this);
-    this.open = this.open.bind(this);
+    this.openAccessResultRecords = this.openAccessResultRecords.bind(this);
+    this.openDulResultsRecord = this.openDulResultsRecord.bind(this);
+
   }
 
   sort = (val) => {
@@ -66,14 +68,12 @@ class ReviewedCases extends Component {
     });
   }
 
-  open = (electionId, page, referenceId) => {
-    let url;
-    if (referenceId !== null ) {
-      url = page.concat('/', referenceId, '/', electionId);
-    } else {
-      url = page.concat('/', electionId);
-    }
-    this.props.history.push(url);
+  openDulResultsRecord = (electionId, page) => {
+    this.props.history.push(`${page}/${electionId}`);
+  };
+
+  openAccessResultRecords = (electionId, page, referenceId) => {
+    this.props.history.push(`${page}/${referenceId}/${electionId}`);
   };
 
   render() {
@@ -154,7 +154,7 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})",
-                    onClick: () => this.open(election.electionId, 'dul_results_record', null)
+                    onClick: () => this.openDulResultsRecord(election.electionId, 'dul_results_record')
                     }, ["Record"]),
                 ]),
               ]),
@@ -225,7 +225,7 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
-                    onClick: () => this.open(election.electionId, 'access_result_records', election.referenceId)
+                    onClick: () => this.openAccessResultRecords(election.electionId, 'access_result_records', election.referenceId)
                   }, ["Record"])
                 ]),
               ]),
