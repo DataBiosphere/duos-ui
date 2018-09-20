@@ -465,9 +465,30 @@ export const Election = {
   findConsentElectionByDarElection: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   }
 
+};
+
+export const ElectionTimeout = {
+
+  findApprovalExpirationTime: async (requestElectionId) => {
+    const url = `${await Config.getApiUrl()}/approvalExpirationTime`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  updateApprovalExpirationTime: async (approvalExpirationTime) => {
+    const url = `${await Config.getApiUrl()}/approvalExpirationTime/${approvalExpirationTime.id}`;
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
+    return res;
+  },
+
+  createApprovalExpirationTime: async (approvalExpirationTime) => {
+    const url = `${await Config.getApiUrl()}/approvalExpirationTime`;
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
+    return await res.json();
+  }
 };
 
 export const User = {
@@ -530,6 +551,7 @@ export const User = {
 
 
 export const Votes = {
+
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -544,13 +566,13 @@ export const Votes = {
 
   postVote: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'POST'}]));
     return res.json();
   },
 
   updateVote: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'PUT' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'PUT'}]));
     return res.json();
   },
 
@@ -560,27 +582,45 @@ export const Votes = {
     return res.json();
   },
 
-  postDarVote: async (requestId, voteId, vote) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
+  getDarVote: async (requestId, voteId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${voteId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  postDarVote: async (requestId, vote) => {
+    const postObject = {};
+    postObject.vote = vote.vote;
+    postObject.dacUserId = vote.dacUserId;
+    postObject.rationale = vote.rationale;
+    postObject.hasConcerns = vote.hasConcerns;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return res.json();
   },
 
   finalAccessDarVote: async (requestId, voteId, vote) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}/final/`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
     return res.json();
   },
 
   createDarVote: async (requestId, voteId, vote) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), {method: 'POST'}]));
     return res.json();
   },
 
-  updateDarVote: async (requestId, voteId, vote) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'PUT' }]));
+  updateDarVote: async (requestId, vote) => {
+    const postObject = {};
+    postObject.vote = vote.vote;
+    postObject.dacUserId = vote.dacUserId;
+    postObject.rationale = vote.rationale;
+    postObject.hasConcerns = vote.hasConcerns;
+
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -604,13 +644,13 @@ export const Votes = {
   // @Path("{api : (api/)?}dataRequest/{requestId}/vote")
   deleteVote: async (requestId, id) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${id}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
     return res.json();
   },
 
   deleteVotes: async (requestId) => {
     const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
     return res.json();
   },
 };
