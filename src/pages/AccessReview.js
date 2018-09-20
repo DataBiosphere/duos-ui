@@ -15,7 +15,6 @@ class AccessReview extends Component {
   }
 
   componentWillMount() {
-    // this.mockState();
     this.setState(prev => {
       prev.currentUser = {
         roles: [
