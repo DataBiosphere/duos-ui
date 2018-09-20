@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h, hh, form, label, input, span, hr, ul, li, a } from 'react-hyperscript-helpers';
+import { div, h, hh, form, label, input, span, hr, ul, li, a, button } from 'react-hyperscript-helpers';
 import { Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
@@ -131,7 +131,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   render() {
 
-    const showValidationMessages = true;
+    const showValidationMessages = false;
     return (
 
       div({ className: "container" }, [
@@ -206,6 +206,88 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     isRendered: (this.state.researcherProfile.institution === undefined && showValidationMessages)
                   }, ["Institution Name is required"]),
                 ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  label({ className: "control-label rp-title-question default-color" }, [
+                    "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
+                    span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
+                  ]),
+                  //properly handle validations, at least one is required
+                  span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: false }, ["At least one of the following is required"]),
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["NIH eRA Commons ID"]),
+                      //show when appropriate
+                      div({ isRendered: true }, [
+                        a({ onClick: "RPApplication.redirectToNihLogin()", target: "_blank", className: "auth-button eRACommons" }, [
+                          div({ className: "logo" }, []),
+                          span({}, ["Authenticate your account"])
+                        ])
+                      ]),
+                        //show when appropriate
+                      div({ isRendered: false }, [
+                        div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, ["this.state.formData.nihUsername"]),
+                          button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
+                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
+                          ]),
+                          h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
+                        ]),
+  
+                        div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ isRendered: "this.state.formData.eraExpirationCount !== 0", className: "default-color display-block" }, ["Your NIH authentication will expire in " + "this.state.formData.eraExpirationCount" + " days"]),
+                          div({ isRendered: "this.state.formData.eraExpirationCount === 0", className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                        ]),
+                        div({ isRendered: "this.state.formData.dar_code !== null", className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, ["this.state.formData.nihUsername"])
+                        ]),
+                      ]),
+
+                    ]),
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["LinkedIn Profile"]),
+                      input({
+                        id: "profileLinkedIn",
+                        name: "linkedIn",
+                        type: "text",
+                        className: "form-control",
+                        onChange: this.handleChange,
+                        value: this.state.researcherProfile.linkedIn
+                      })
+                    ]),
+                  ]),
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileOrcid", className: "control-label" }, ["ORCID iD"]),
+                      input({
+                        id: "profileOrcid",
+                        name: "orcid",
+                        type: "text",
+                        className: "form-control",
+                        onChange: this.handleChange,
+                        value: this.state.researcherProfile.orcid
+                      })
+                    ]),
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileResearcherGate", className: "control-label" }, ["Researcher Gate ID"]),
+                      input({
+                        id: "profileResearcherGate",
+                        name: "researcherGate",
+                        type: "text",
+                        className: "form-control",
+                        onChange: this.handleChange,
+                        value: this.state.researcherProfile.researcherGate
+                      })
+                    ]),
+                  ]),
+                ]),
+
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -229,7 +311,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({
                         id: "lbl_profileDivision",
                         className: "control-label"
-                      }, ["Division ", span({ className: "italic" }, ["(optional)"]),]),
+                      }, ["Division ", span({ className: "italic" }, ["(optional)"])]),
                       input({
                         id: "profileDivision",
                         name: "division",
