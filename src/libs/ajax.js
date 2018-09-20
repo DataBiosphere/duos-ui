@@ -468,7 +468,7 @@ export const Consent = {
     return consent;
   },
 
-  getInvalidConsentRestriction: async () => {
+  findInvalidConsentRestriction: async () => {
     const url = `${await Config.getApiUrl()}/consent/invalid`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
@@ -701,7 +701,7 @@ export const DAR = {
     return res.json();
   },
 
-  dataAccessInvalidUseRestriction: async () => {
+  findDataAccessInvalidUseRestriction: async () => {
     const url = `${await Config.getApiUrl()}/dar/invalid`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
