@@ -6,6 +6,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election, DarCases } from '../libs/ajax';
 import * as Utils from "../libs/utils";
+import AccessResultRecords from "./AccessResultRecords";
 
 class ReviewedCases extends Component {
 
@@ -65,9 +66,15 @@ class ReviewedCases extends Component {
     });
   }
 
-  open(electionId, page) {
-    this.props.history.push(`${page}/${electionId}`);
-  }
+  open = (electionId, page, referenceId) => {
+    let url;
+    if (referenceId !== null ) {
+      url = page.concat('/', referenceId, '/', electionId);
+    } else {
+      url = page.concat('/', electionId);
+    }
+    this.props.history.push(url);
+  };
 
   render() {
 
@@ -147,8 +154,8 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})",
-                    onClick: () => this.open(election.electionId, 'dul_results_record', null, false)
-                  }, ["Record"]),
+                    onClick: () => this.open(election.electionId, 'dul_results_record', null)
+                    }, ["Record"]),
                 ]),
               ]),
               hr({ className: "table-body-separator" }),
@@ -218,7 +225,7 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
-                    onClick: () => this.open(election.electionId, 'dul_results_record')
+                    onClick: () => this.open(election.electionId, 'access_result_records', election.referenceId)
                   }, ["Record"])
                 ]),
               ]),
