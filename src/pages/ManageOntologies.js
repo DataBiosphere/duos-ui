@@ -5,7 +5,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { SearchBox } from '../components/SearchBox';
-import { Ontology, Files, Consent, Election } from "../libs/ajax";
+import { Ontology, Files } from "../libs/ajax";
 
 class ManageOntologies extends Component {
 
@@ -15,15 +15,6 @@ class ManageOntologies extends Component {
       value: '',
       limit: 5,
       currentPage: 1,
-      // indexedFiles: [
-      //   {
-      //     fileurl: 'fileUrl',
-      //     filename: 'fileName',
-      //     ontologytype: 'OID',
-      //     prefix: 'orsp-'
-      //   }
-      //
-      // ],
       indexedFiles: [],
       showDialogDelete: false,
     };
@@ -49,12 +40,6 @@ class ManageOntologies extends Component {
   componentWillMount() {
     this.getOntologiesManage();
   }
-
-  componentDidUpdate() {
-    console.log("ONTOLOGIES");
-    console.log(this.state.indexedFiles);
-
-}
 
   handlePageChange = page => {
     this.setState(prev => {

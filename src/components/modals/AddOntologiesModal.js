@@ -6,6 +6,14 @@ import { Ontology } from "../../libs/ajax";
 
 export const AddOntologiesModal = hh(class AddOntologiesModal extends Component {
 
+  fileUploadErrorAlert = (msg) => {
+    this.setState(prev => {
+      prev.error.show = true;
+      prev.error.title = "Ontologies weren't Indexed";
+      prev.error.msg = msg;
+    });
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -34,7 +42,7 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
 
   async getOntologiesType() {
 
-    // types are sent as uppercase strings, this code portion corrects these values.
+    // types are sent in uppercase strings, this code sets first capital letter and the rest lowercase.
     let ontologyTypes = [];
     for (let type of await Ontology.getOntologyTypes()) {
       type = type.toLowerCase();
@@ -69,7 +77,6 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
       this.setState(prev => {
         prev.error.show = false;
       });
-
       this.props.onOKRequest('addOntologies');
     }).catch((errorResponse) => {
       if (errorResponse.status === 304) {
@@ -80,15 +87,6 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
     });
 
   }
-
-  fileUploadErrorAlert = (msg) => {
-
-    this.setState(prev => {
-      prev.error.show = true;
-      prev.error.title = "Ontologies weren't Indexed";
-      prev.error.msg = msg;
-    });
-  };
 
   closeHandler() {
     // this is the method to handle Cancel click
