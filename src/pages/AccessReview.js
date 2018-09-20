@@ -3,6 +3,8 @@ import { div, button, i, span, b, a, hr, h4, ul, li, label, h } from 'react-hype
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { DAR, Election, Files, Votes } from '../libs/ajax';
+import { ConfirmationDialog } from "../components/ConfirmationDialog";
 
 class AccessReview extends Component {
 
@@ -13,7 +15,6 @@ class AccessReview extends Component {
   }
 
   componentWillMount() {
-    this.mockState();
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -23,134 +24,225 @@ class AccessReview extends Component {
       };
       return prev;
     });
+    this.darReviewAccess();
+    this.submitRpVote = this.submitRpVote.bind(this);
+    this.submitVote = this.submitVote.bind(this);
   }
 
-  mockState() {
+  submitRpVote = (voteStatus, rationale) => {
+    let vote = this.state.rpVote;
+
+    vote.vote = voteStatus;
+    vote.rationale = rationale;
+
+    if (this.state.rpVote.createDate === null) {
+      Votes.postDarVote(this.state.election.referenceId, vote).then(
+        data => {
+          this.alertVoteRemember();
+          this.setState(prev => {
+            prev.alertrpVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
+        }).catch(error => {
+        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      });
+    } else {
+      Votes.updateDarVote(this.state.election.referenceId, vote).then(
+        data => {
+          this.alertVoteRemember();
+          this.setState(prev => {
+            prev.alertrpVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
+        }).catch(error => {
+        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      });
+    }
+
+  };
+
+  submitVote(voteStatus, rationale) {
+    let vote = this.state.vote;
+
+    vote.vote = voteStatus;
+    vote.rationale = rationale;
+
+    if (this.state.rpVote.createDate === null) {
+      Votes.postDarVote(this.state.election.referenceId, vote).then(
+        data => {
+          this.setState(prev => {
+            prev.alertVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
+          this.alertRPVoteRemember();
+        }).catch(error => {
+        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      });
+    } else {
+      Votes.updateDarVote(this.state.election.referenceId, vote).then(
+        data => {
+          this.setState(prev => {
+            prev.alertVote = false;
+            prev.showConfirmationDialogOK = true;
+            return prev;
+          });
+        }).catch(error => {
+        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      });
+    }
+
+  };
+
+  back = () => {
+    this.props.history.goBack();
+  };
+
+  alertRPVoteRemember = () => {
+    if (this.state.hasUseRestriction && this.state.vote.vote !== null && this.state.rpVote.vote === null) {
+      this.setState(prev => {
+        prev.alertRPVote = true;
+        return prev;
+      });
+    } else {
+      this.setState(prev => {
+        prev.alertRPVote = false;
+        return prev;
+      });
+    }
+  };
+
+  alertVoteRemember = () => {
+    if (this.state.rpVote.vote !== null && !this.state.alertVote && this.state.vote.vote === null) {
+      this.setState(prev => {
+        prev.alertVote = true;
+        return prev;
+      });
+    } else {
+      this.setState(prev => {
+        prev.alertVote = false;
+        return prev;
+      });
+    }
+  };
+
+
+  async darReviewAccess() {
+    // dar
+    const rusDarData = await DAR.getDarFields(this.props.match.params.darId, 'rus');
+    const consent = await DAR.darConsent(this.props.match.params.darId);
+    const election = await Election.DarElectionResourceGet(this.props.match.params.darId);
+    const vote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.voteId);
+    const rpVote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId);
+    const request = await DAR.getDarFields(this.props.match.params.darId, 'projectTitle');
+    const darInfo = await DAR.describeDar(this.props.match.params.darId);
+
     this.setState(prev => {
-      prev.createDate = '2018-08-30';
-      prev.hasUseRestriction = true;
-      prev.projectTitle = 'My Project 01';
-      prev.consentName = 'ORSP-124';
-      prev.isQ1Expanded = true;
-      prev.isQ2Expanded = false;
-      prev.election = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionAccess = {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionRP = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.darInfo = {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
-        hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        rus: 'something',
-        sDar: 'something else',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
+      prev.consentName = consent.name;
+      prev.consentId = consent.consentId;
+      prev.projectTitle = request.projectTitle;
+      prev.darInfo = darInfo;
+      prev.darInfo.rus = rusDarData.rus;
+      prev.darInfo.sDar = election.translatedUseRestriction;
+      prev.election = election;
+      prev.rpVote = rpVote;
+      if (!darInfo.hasPurposeStatements) {
+        prev.darInfo.purposeStatements = [];
       }
+      if (election.useRestriction !== null) {
+        prev.hasUseRestriction = true;
+      } else {
+        prev.hasUseRestriction = false;
+      }
+      prev.vote = vote;
       return prev;
+    });
+
+    Election.findConsentElectionByDarElection(vote.electionId).then(data => {
+      if (data.dulName !== null && data.dulElection !== null) {
+        this.setState({dulName: data.dulName});
+      } else {
+        this.setState({dulName: consent.dulName});
+      }
     });
   }
 
+  confirmationHandlerOK = (answer) => (e) => {
+    this.setState({ showConfirmationDialogOK: false });
+
+    if (!this.state.alertRPVote && !this.state.alertVote) {
+      this.props.history.goBack();
+    }
+  };
+
   initialState() {
     return {
-      hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      consentName: 'ORSP-124',
+      showConfirmationDialogOK: false,
+      alertMessage: "Your vote has been successfully logged!",
+      hasUseRestriction: '',
+      projectTitle: '',
+      consentName: '',
+      consentId: '',
+      dulName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
+      rpVote: {},
+      election: {},
+      vote: {},
+      alertVote: false,
+      alertRPVote: false,
 
       darInfo: {
         havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
+        pi: '',
+        profileName: '',
+        status: '',
         hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
+        adminComment: '',
+        institution: '',
+        department: '',
+        city: '',
+        country: '',
         purposeManualReview: true,
         researchTypeManualReview: true,
         hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
+        purposeStatements: [],
+        researchType: [],
+        diseases: [],
+        rus: '',
+        sDar: '',
       }
     };
   }
 
-  download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
+  downloadDAR = () => {
+    Files.getDARFile(this.props.match.params.darId).then(
+      fileData => {
+        if (fileData.file.size !== 0) {
+          this.createBlobFile(fileData.fileName, fileData.file);
+        }
+      });
+  };
+
+  createBlobFile(fileName, blob) {
+    const url = window.URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
   }
 
-  downloadDAR = (e) => {
-
-  }
-
+  // TODO add name file
   downloadDUL = (e) => {
-
-  }
-
-  positiveVote = (e) => {
-
-  }
-
-  logVote = (e) => {
-
-  }
+    Files.getDulFile(this.state.consentId).then(
+      blob => {
+        if (blob.size !== 0) {
+          this.createBlobFile(this.state.dulName, blob);
+        }
+      });
+  };
 
   toggleQ1 = (e) => {
     this.setState(prev => {
@@ -158,34 +250,16 @@ class AccessReview extends Component {
       return prev;
     });
 
-  }
+  };
 
   toggleQ2 = (e) => {
     this.setState(prev => {
       prev.isQ2Expanded = !prev.isQ2Expanded;
       return prev;
     });
-
-  }
+  };
 
   render() {
-
-    // let vote = {
-    //   vote: null,
-    //   rationale: ''
-    // }
-
-    // let alertsDAR = [
-    //   { title: "Alert 01" },
-    //   { title: "Alert 02" },
-    // ];
-
-    // let alertsAgree = [
-    //   { title: "Alert Agree 01" },
-    //   { title: "Alert Agree 02" },
-    // ];
-
-    // let alertOn = null;
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -195,7 +269,7 @@ class AccessReview extends Component {
     let userRoles = {
       member: 'MEMBER',
       chairperson: "CHAIRPERSON"
-    }
+    };
 
     return (
 
@@ -205,16 +279,16 @@ class AccessReview extends Component {
             PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map(rol => {
+            this.state.currentUser.roles.map((rol, ind) => {
               return (
-                a({ id: "btn_back", href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", onClick: () => this.back(), key: ind, isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
             }),
-            this.state.currentUser.roles.map(rol => {
+            this.state.currentUser.roles.map((rol, ind) => {
               return (
-                a({ id: "btn_back", href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", href: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
@@ -294,7 +368,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_purposeStatement" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
@@ -314,7 +388,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_researchType" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
@@ -334,7 +408,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
-                              return h(Fragment, {}, [
+                              return h(Fragment, {key: rIndex}, [
                                 li({ id: "lbl_disease" + rIndex }, [
                                   disease
                                 ]),
@@ -371,8 +445,11 @@ class AccessReview extends Component {
                       title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                         : "Should data access be granted to this applicant?",
                       isDisabled: "isFormDisabled",
-                      voteStatus: this.state.voteStatus,
-                      action: { label: "Vote", handler: this.submit }
+                      voteStatus: this.state.vote.vote,
+                      rationale: this.state.vote.rationale,
+                      action: { label: "Vote", handler: this.submitVote },
+                      showAlert: this.state.alertRPVote,
+                      alertMessage: 'Remember to log a vote on: 2. Was the research purpose accurately converted to a structured format?'
                     })
                   ])
                 ])
@@ -409,7 +486,7 @@ class AccessReview extends Component {
                   div({ className: "panel-heading cm-boxhead access-color" }, [
                     h4({}, ["Structured Research Purpose"]),
                   ]),
-                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction" }, [this.state.darInfo.sDar])
+                  div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML:{ __html: this.state.darInfo.sDar}  }, []),
                 ]),
               ]),
 
@@ -422,14 +499,25 @@ class AccessReview extends Component {
                       color: "access",
                       title: "Q2. Was the research purpose accurately converted to a structured format?",
                       isDisabled: "isFormDisabled",
-                      voteStatus: this.state.voteStatus,
-                      action: { label: "Vote", handler: this.submit }
+                      voteStatus: this.state.rpVote.vote,
+                      rationale: this.state.rpVote.rationale,
+                      action: { label: "Vote", handler: this.submitRpVote },
+                      showAlert: this.state.alertVote,
+                      alertMessage: 'Remember to log a vote on: 1. Should data access be granted to this applicant?'
                     }),
                   ])
                 ])
               ])
             ])
-        ])
+        ]),
+        ConfirmationDialog({
+          isRendered: this.state.showConfirmationDialogOK,
+          title: "Vote confirmation",
+          color: "common",
+          type: "informative",
+          showModal: true,
+          action: { label: "Ok", handler: this.confirmationHandlerOK }
+        }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
       ])
     );
   }
