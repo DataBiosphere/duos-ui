@@ -233,10 +233,10 @@ export const DarCases = {
     return res.json();
   },
 
-  describeClosedElections: async () => {
-    const url = `${await Config.getApiUrl()}/datarequest/cases/closed/`;
+  findReviewedDRs: async () => {
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/closed`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   },
 };
 
@@ -629,10 +629,10 @@ export const Election = {
     return res.json();
   },
 
-  ElectionReviewedConsents: async () => {
+  findReviewedConsents: async () => {
     const url = `${await Config.getApiUrl()}/consent/cases/closed`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   },
 
   DataSetElection: async () => {
