@@ -491,6 +491,16 @@ export const ElectionTimeout = {
   }
 };
 
+export const Email = {
+
+  sendReminderEmail: async (voteId) => {
+    const url = `${await Config.getApiUrl()}/emailNotifier/reminderMessage/${voteId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST'}]));
+    return await res.json();
+  }
+
+};
+
 export const User = {
 
   getByEmail: async email => {
@@ -974,22 +984,18 @@ export const PendingCases = {
 
 export const Help = {
 
-
-  findHelpMeReports: async (userId, vm) => {
+  findHelpMeReports: async (userId) => {
     const url = `${await Config.getApiUrl()}/report/user/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
-    // vm.reports = data;
-    // return await vm;
   },
-  /*
-  * const url = `${await Config.getApiUrl()}/consent/manage`;
-  const res = await fetchOk(url, Config.authOpts());
-  const data = await res.json();
-  * */
-  createHelpMeReport: async (report) => {
 
+  createHelpMeReport: async (report) => {
+    const url = `${await Config.getApiUrl()}/report`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(report), { method: 'POST' }]));
+    return await res.json();
   }
+
 };
 
 export const Ontology = {
@@ -1036,6 +1042,16 @@ export const Ontology = {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
       s4() + '-' + s4() + s4() + s4();
   }
+};
+
+export const Match = {
+
+  findMatch: async (consentId, purposeId) => {
+    const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  }
+  
 };
 
 const fetchOk = async (...args) => {
