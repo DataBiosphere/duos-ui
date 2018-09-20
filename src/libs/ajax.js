@@ -442,10 +442,11 @@ export const DataSet = {
 
 export const Consent = {
 
-  ConsentResource: async consentId => {
+  ConsentResource: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'GET'}]));
+    let consent = await res.json();
+    return consent;
   },
 
   getInvalidConsentRestriction: async () => {
@@ -478,25 +479,48 @@ export const Consent = {
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
     const url = `${await Config.getApiUrl()}/consent`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'POST'}]));
-    return res.json();
+    try {
+      const res = await fetchOk(url, _.mergeAll([Config.jsonBody(consent), Config.authOpts(), {method: 'POST'}]));
+      if (res.ok) {
+        return true;
+      }
+    } catch (err) {
+      return await err.json().then(message => {
+        return message.message
+      });
+    }
   },
 
   CreateDulResource: async (consentId, fileName, file) => {
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${fileName}`;
     let formData = new FormData();
     formData.append("data", new Blob([file], {type: 'text/plain'}));
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${file}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), formData, {method: 'POST'}]));
-    return res.json();
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'POST', body: formData}]));
+    return res.json().then(
+      () => {
+        return true
+      },
+      (error) => {
+        return error
+      }
+    );
   },
 
   update: async (consent) => {
     consent.requiresManualReview = false;
     consent.useRestriction = JSON.parse(consent.useRestriction);
     consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'PUT'}]));
-    return res.json();
+    const url = `${await Config.getApiUrl()}/consent/${consent.consentId}`;
+    try {
+      const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), {method: 'PUT'}]));
+      return await res.json().then(() => {
+        return true
+      });
+    } catch (err) {
+      return await err.json().then(message => {
+        return message.message
+      });
+    }
   },
 
   DeleteConsentResource: async (consentId) => {
@@ -571,7 +595,7 @@ export const Election = {
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return res;
   },
 
   dataAccessElectionReviewResource: async (electionId, isFinalAccess) => {
@@ -998,6 +1022,19 @@ export const Ontology = {
 
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
       s4() + '-' + s4() + s4() + s4();
+  }
+};
+export const Help = {
+
+  findHelpMeReports: async (userId, vm) => {
+    const url = `${await Config.getApiUrl()}/report/user/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+
+  },
+
+  createHelpMeReport: async (report) => {
+
   }
 };
 
