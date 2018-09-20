@@ -68,12 +68,12 @@ class ReviewedCases extends Component {
     });
   }
 
-  openDulResultsRecord = (electionId, page) => {
-    this.props.history.push(`${page}/${electionId}`);
+  openDulResultsRecord = (electionId) => {
+    this.props.history.push(`dul_results_record/${electionId}`);
   };
 
-  openAccessResultRecords = (electionId, page, referenceId) => {
-    this.props.history.push(`${page}/${referenceId}/${electionId}`);
+  openAccessResultRecords = (electionId, referenceId) => {
+    this.props.history.push(`access_result_records/${referenceId}/${electionId}`);
   };
 
   render() {
@@ -154,7 +154,7 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})",
-                    onClick: () => this.openDulResultsRecord(election.electionId, 'dul_results_record')
+                    onClick: () => this.openDulResultsRecord(election.electionId)
                     }, ["Record"]),
                 ]),
               ]),
@@ -225,7 +225,7 @@ class ReviewedCases extends Component {
                   button({
                     className: "cell-button hover-color",
                     "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
-                    onClick: () => this.openAccessResultRecords(election.electionId, 'access_result_records', election.referenceId)
+                    onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
                   }, ["Record"])
                 ]),
               ]),
