@@ -265,7 +265,12 @@ export const Files = {
   getOntologyFile: async (fileName, fileUrl) => {
     const encodeURI = encodeURIComponent(fileUrl);
     const url = `${await Config.getApiUrl()}/ontology/file?fileUrl=${encodeURI}&fileName=${fileName}`;
-    return getFile(url);
+    let blob = await getFile(url);
+    const ontologyUrl = window.URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = ontologyUrl;
+    a.download = fileName;
+    a.click();
   },
 
   // fileName
@@ -279,7 +284,10 @@ export const Files = {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     const res = await getPDF(url);
     const respHeaders = res.headers;
-    return {'file': await res.blob(), 'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1]}
+    return {
+      'file': await res.blob(),
+      'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1]
+    }
   },
 
   getByEmail: async email => {
@@ -556,7 +564,7 @@ export const Election = {
 
   updateElection: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(),  Config.jsonBody(document), { method: 'PUT' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(document), {method: 'PUT'}]));
     return res.json();
   },
 
@@ -626,7 +634,7 @@ export const Election = {
     postElection.finalAccessVote = false;
 
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(postElection), Config.authOpts(), { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(postElection), Config.authOpts(), {method: 'POST'}]));
     return await res.json();
   },
 
@@ -725,7 +733,7 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async (id, fields)  => {
+  getDarFields: async (id, fields) => {
     const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
@@ -772,6 +780,7 @@ export const DAR = {
         resolve(darInfo);
       });
     });
+
     function requiresManualReview(object) {
       let manualReview = false;
       object.forEach(function (element) {
@@ -967,29 +976,67 @@ export const DataAccess = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   }
-  
+
 };
 
-export const Help = {
+export const Ontology = {
 
+  postOntologyFile: async (fileData) => {
+    var formData = new FormData();
+    var uuid = Ontology.guid();
+    var metadata = {};
+    metadata[uuid] = fileData.fileMetadata;
+    formData.append(uuid, fileData.file);
+    formData.append("metadata", JSON.stringify(metadata));
+
+    const url = `${await Config.getApiUrl()}/ontology`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'POST', body: formData}]));
+    return await res.json();
+  },
+
+  retrieveIndexedFiles: async () => {
+    const url = `${await Config.getApiUrl()}/ontology`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'GET'}]));
+    return await res.json().then((data) => {return data});
+  },
+
+  deleteOntologyFile: async (fileUrl) => {
+    const url = `${await Config.getApiUrl()}/ontology`;
+    const obj = {fileUrl: fileUrl};
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(obj), {method: 'PUT'}]));
+    return await res.json();
+  },
+
+  getOntologyTypes: async () => {
+    const url = `${await Config.getApiUrl()}/ontology/types`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'GET'}]));
+    return await res.json();
+  },
+
+  guid: () => {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  }
+};
+export const Help = {
 
   findHelpMeReports: async (userId, vm) => {
     const url = `${await Config.getApiUrl()}/report/user/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
-    // vm.reports = data;
-    // return await vm;
+
   },
-  /*
-  * const url = `${await Config.getApiUrl()}/consent/manage`;
-    const res = await fetchOk(url, Config.authOpts());
-    const data = await res.json();
-  * */
+
   createHelpMeReport: async (report) => {
 
   }
 };
-
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
