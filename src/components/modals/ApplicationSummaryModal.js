@@ -36,6 +36,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       calledFromAdmin: false,
     }
     this.closeHandler = this.closeHandler.bind(this);
+    this.downloadDetail = this.downloadDetail.bind(this);
   };
 
   closeHandler() {
@@ -43,7 +44,8 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
   }
 
   async componentWillReceiveProps(props) {
-    if (props.dataRequestId !== undefined && this.state.dataRequestId === undefined) {
+    console.log("test");
+    if (props.dataRequestId !== undefined && (this.state.dataRequestId === undefined || this.state.dataRequestId === null)) {
       let darDetails = await DataAccess.getDarModalSummary(props.dataRequestId);
       if (darDetails.status === "pending") {
         darDetails.status = "Pending for review";
@@ -57,10 +59,6 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       } else {
         darDetails.rationaleCheck = false;
       }
-      Object.entries(darDetails.datasetDetail).map((row, Index) => {
-        console.log(row);
-        console.log(Index);
-      });
       this.setState({
         dataRequestId: props.dataRequestId,
         summary: darDetails,
@@ -70,12 +68,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
   }
 
   async downloadDetail() {
-   let blob = await Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
-   const url = window.URL.createObjectURL(blob);
-   let a = document.createElement('a');
-   a.href = url;
-   a.download = "datasetVotesSummary.txt";
-   a.click();
+   Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
   }
 
   render() {

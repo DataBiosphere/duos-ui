@@ -109,47 +109,62 @@ class AccessCollect extends Component {
     };
   };
 
-  confirmationHandlerOK = () => (e) => {
-    let election = this.state.election;
-    election.status = 'Final';
-    election.finalVote = this.state.accessVote;
-    election.finalRationale = this.state.accessRationale;
-    this.updateElection(election);
-    if (this.state.rpAlreadyVote) {
-      this.props.history.goBack();
+  confirmationHandlerOK = (answer) => (e) => {
+    if(answer === true) {
+      let election = this.state.election;
+      election.status = 'Final';
+      election.finalVote = this.state.accessVote;
+      election.finalRationale = this.state.accessRationale;
+      this.updateElection(election);
+      if (this.state.rpAlreadyVote) {
+        this.props.history.goBack();
+      } else {
+        this.setState(prev => {
+          prev.accessAlreadyVote = true;
+          prev.showConfirmationDialogOK = prev.showConfirmationDialogOK = false;
+          prev.alertAccessMessage = 'Remember to log a vote on: Q2. Was the research purpose accurately converted to a structured format?';
+          prev.showAlertAccess = true;
+          return prev;
+        })
+      }
     } else {
       this.setState(prev => {
-        prev.accessAlreadyVote = true;
-        prev.showConfirmationDialogOK = prev.showConfirmationDialogOK = false;
-        prev.alertAccessMessage = 'Remember to log a vote on: Q2. Was the research purpose accurately converted to a structured format?';
-        prev.showAlertAccess = true;
+        prev.showConfirmationDialogOK =  false;
         return prev;
-      })
-    }
+      }); 
+    }   
   };
 
   async updateElection(election) {
     return await Election.updateElection(election.electionId, election);
   };
   
-  confirmationRPHandlerOK = () => (e) => {
-    let election = this.state.rpElection;
-    election.finalVote = this.state.rpVote;
-    election.finalRationale = this.state.rpRationale;
-    election.status = 'Final';
-    this.updateElection(election);
-    if (this.state.accessAlreadyVote) {
-      this.props.history.goBack();
-    } else {
+  confirmationRPHandlerOK = (answer) => (e) => {
+    if(answer === true) {
+      let election = this.state.rpElection;
+      election.finalVote = this.state.rpVote;
+      election.finalRationale = this.state.rpRationale;
+      election.status = 'Final';
+      this.updateElection(election);
+      if (this.state.accessAlreadyVote) {
+        this.props.history.goBack();
+      } else {
+        this.setState(prev => {
+          prev.rpAlreadyVote = true;
+          prev.showConfirmationRPDialogOK =  false;
+          prev.alertRPMessage = 'Remember to log a vote on: Q1. Should data access be granted to this applicant?';
+          prev.showAlertAccess = false;
+          prev.showAlertRP = true;
+          return prev;
+        });
+      }
+    }else {
       this.setState(prev => {
-        prev.rpAlreadyVote = true;
         prev.showConfirmationRPDialogOK =  false;
-        prev.alertRPMessage = 'Remember to log a vote on: Q1. Should data access be granted to this applicant?';
-        prev.showAlertAccess = false;
-        prev.showAlertRP = true;
         return prev;
-      });
-    }
+      }); 
+    }  
+    
   };
 
   downloadDAR() {

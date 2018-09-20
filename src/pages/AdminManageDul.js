@@ -177,7 +177,7 @@ class AdminManageDul extends Component {
       electionUpdate.referenceId = election.consentId;
       electionUpdate.electionId = election.electionId;
       electionUpdate.archived = true;
-      Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate);
+      Election.electionUpdateResource(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     }
   };
@@ -192,7 +192,7 @@ class AdminManageDul extends Component {
         electionId: election.electionId,
         archived: this.state.archiveCheck
       };
-      Election.electionUpdateResourceUpdate(election.electionId, electionUpdated);
+      Election.electionUpdateResource(election.electionId, electionUpdated);
       this.setState({archiveCheck: true});
       this.getConsentManage();
     }

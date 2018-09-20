@@ -592,7 +592,7 @@ export const Election = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
-
+  
   delete: async (consentId, id) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election/${id}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
