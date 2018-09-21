@@ -48,7 +48,7 @@ class ResearcherReview extends Component {
 
   async findResearcherProps() {
 
-    let researcher = await Researcher.list(this.props.match.params.dacUserId);
+    let researcher = await Researcher.getPropertiesByResearcherId(this.props.match.params.dacUserId);
 
     if (researcher.isThePI !== undefined) {
       researcher.isThePI = JSON.parse(researcher.isThePI);

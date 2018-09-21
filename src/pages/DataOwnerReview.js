@@ -236,16 +236,10 @@ class DataOwnerReview extends Component {
   render() {
     return (
 
-      div({className: "container container-wide"}, [
-        div({className: "row no-margin"}, [
-          div({className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding"}, [
-            PageHeading({
-              imgSrc: "/images/icon_dataset_review.png",
-              iconSize: "large",
-              color: "dataset",
-              title: "Dataset Access Request Review",
-              description: "Should data access be granted to this applicant?"
-            }),
+      div({ className: "container container-wide" }, [
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+            PageHeading({ id: "dataOwnerReview", imgSrc: "/images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
           ]),
         ]),
         hr({className: "section-separator"}),
@@ -297,14 +291,14 @@ class DataOwnerReview extends Component {
               color: "dataset",
               title: "Your Vote",
               isDisabled: this.state.isFormDisabled,
-              // status: this.state.vote.voteStatus,
+              voteStatus: "1",
               radioType: "multiple",
               radioLabels: ['Approve', "Disapprove", "Raise a concern"],
-              radioValues: ['1', '0', "2"],
+              radioValues: ['1', '0', '2'],
               showAlert: false,
               alertMessage: "something",
+              rationale: this.state.vote.rationale,
               action: {label: "Vote", handler: this.submit,
-              rationale: this.state.vote.rationale
               }
             }),
           ]),

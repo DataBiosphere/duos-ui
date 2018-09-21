@@ -60,6 +60,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
     return (
 
       BaseModal({
+        id: "datasetSummaryModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         color: "dataset",

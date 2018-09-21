@@ -81,10 +81,11 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
-            PageSubHeading({ imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Statistics", description: "Summary of votes on whether the consent limitations were accurately converted into a structured format" }),
+            PageSubHeading({ id: "summaryVotesDul", imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Statistics", description: "Summary of votes on whether the consent limitations were accurately converted into a structured format" }),
           ]),
 
           a({
+            id: "btn_downloadStatsDul",
             className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper download-button dul-background",
             onClick: () => this.getFile("TranslateDUL"),
             isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
@@ -96,6 +97,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
           StatsBox({
+            id: "allCasesDul",
             subtitle: "All Cases",
             data: this.chartData.dulTotal,
             options: 'dul',
@@ -103,6 +105,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           }),
 
           StatsBox({
+            id: "reviewedCasesDul",
             subtitle: "Reviewed cases results",
             data: this.chartData.dulReviewed,
             options: 'dul',
@@ -112,10 +115,11 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
-            PageSubHeading({ imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Statistics", description: "Summary of votes on whether the researcher should be allowed to access a research study" }),
+            PageSubHeading({ id: "summaryVotesAccess", imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Statistics", description: "Summary of votes on whether the researcher should be allowed to access a research study" }),
           ]),
 
           a({
+            id: "btn_downloadStatsAccess",
             className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper download-button access-background",
             onClick: () => this.getFile("DataAccess"),
             isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
@@ -129,6 +133,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
           StatsBox({
+            id: "allCasesAccess",
             subtitle: "All Cases",
             data: this.chartData.accessTotal,
             options: 'access',
@@ -137,6 +142,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             buttonLabel: 'Download all cases'
           }),
           StatsBox({
+            id: "reviewedCasesAccess",
             subtitle: "Reviewed cases results",
             data: this.chartData.accessReviewed,
             options: 'access',
@@ -152,12 +158,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
           StatsBox({
+            id: "allCasesRP",
             subtitle: "All Cases",
             data: this.chartData.RPTotal,
             options: 'access',
             className: "result_chart"
           }),
           StatsBox({
+            id: "reviewedCasesRP",
             subtitle: "Reviewed cases results",
             data: this.chartData.RPReviewed,
             options: 'access',
@@ -171,12 +179,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
           StatsBox({
+            id: "automatedCases",
             subtitle: "Cases reviewed by automated matching",
             data: this.chartData.VaultReviewed,
             options: 'access',
             className: "result_chart"
           }),
           StatsBox({
+            id: "agreement",
             subtitle: "Agreement between automated matching and Data Access Committee",
             data: this.chartData.Agreement,
             options: 'access',

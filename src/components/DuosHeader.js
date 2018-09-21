@@ -166,7 +166,7 @@ class DuosHeader extends Component {
                 ]),
               ]),
 
-              li({}, [a({ isRendered: isLogged, href: "/dataset_catalog" }, ["Dataset Catalog"]),]),
+              li({}, [a({ id: "link_datasetCatalog", isRendered: isLogged, href: "/dataset_catalog" }, ["Dataset Catalog"]),]),
 
               li({ className: "dropdown", onToggle: this.toggled }, [
                 a({ id: "sel_requestHelp", isRendered: isLogged, role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [

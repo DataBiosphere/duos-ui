@@ -47,6 +47,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     return (
 
       BaseModal({
+        id: "electionTimeoutModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
