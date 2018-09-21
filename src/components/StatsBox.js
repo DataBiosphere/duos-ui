@@ -114,13 +114,13 @@ export const StatsBox = hh(class StatsBox extends Component {
 
     if (this.props.clickHandler !== undefined) {
       buttonTag = div({ className: "no-padding f-right display-inline-block" }, [
-        button({ onClick: this.props.clickHandler, className: "btn vote-reminder " + this.props.options + "-color" }, [this.props.buttonLabel]),
+        button({ id: this.props.id + "_btnDownload", onClick: this.props.clickHandler, className: "btn vote-reminder " + this.props.options + "-color" }, [this.props.buttonLabel]),
       ])
     }
 
     return (
       div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 jumbotron box-vote-stats" }, [
-        h4({ className: "cm-results-subtitle", id: this.props.subtitle }, [this.props.subtitle]),
+        h4({ id: this.props.id + "_title", className: "cm-results-subtitle" }, [this.props.subtitle]),
         buttonTag,
         hr({ className: "box-separator-white" }),
         div({ className: "row", style: { 'marginTop': '10px' } }, [

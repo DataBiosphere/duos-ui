@@ -56,7 +56,7 @@ export const BaseModal = hh(class BaseModal extends Component {
               button({ type: "button", className: "modal-close-btn close", onClick: this.props.onRequestClose }, [
                 span({ className: "glyphicon glyphicon-remove default-color" }),
               ]),
-              PageSubHeading({ imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
+              PageSubHeading({ id: this.props.id, imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
             ]),
 
             div({ className: "modal-content" }, [

@@ -135,7 +135,7 @@ class InvalidRestrictions extends Component {
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
-              PageSubHeading({ imgSrc: "/images/icon_dul_invalid.png", color: "dul", title: "Data Use Limitations Invalid Cases", description: "List of Invalid Restrictions for Data Use Limitations" }),
+              PageSubHeading({ id: "invalidRestrictionsDul", imgSrc: "/images/icon_dul_invalid.png", color: "dul", title: "Data Use Limitations Invalid Cases", description: "List of Invalid Restrictions for Data Use Limitations" }),
             ]),
 
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
@@ -155,10 +155,10 @@ class InvalidRestrictions extends Component {
               .filter(this.searchTable(searchDulText))
               .slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit).map((dul, index) => {
                 return h(Fragment, { key: index }, [
-                  div({ className: "row no-margin" }, [
-                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dul.name]),
+                  div({ className: "row no-margin tableRow" }, [
+                    div({ id: dul.name + "_consentId", name: "consentId", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dul.name]),
                     div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-body text" }, [
-                      a({ onClick: () => this.download(dul.name, dul.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
+                      a({ id: dul.name + "_linkRestrictions", name: "link_restrictionsDul", onClick: () => this.download(dul.name, dul.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
                     ])
                   ]),
                   hr({ className: "table-body-separator" })
@@ -175,7 +175,7 @@ class InvalidRestrictions extends Component {
 
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
-              PageSubHeading({ imgSrc: "/images/icon_access_invalid.png", color: "access", title: "Data Access Requests Invalid Cases", description: "List of Invalid Restrictions for Data Access Requests" }),
+              PageSubHeading({ id: "invalidRestrictionsAccess", imgSrc: "/images/icon_access_invalid.png", color: "access", title: "Data Access Requests Invalid Cases", description: "List of Invalid Restrictions for Data Access Requests" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
               SearchBox({ id: 'invalidRestrictionsAccess', searchHandler: this.handleSearchDar, color: 'access' })
@@ -194,10 +194,10 @@ class InvalidRestrictions extends Component {
               .filter(this.searchTable(searchDarText))
               .slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((dar, index) => {
                 return h(Fragment, { key: index }, [
-                  div({ className: "row no-margin" }, [
-                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.name]),
+                  div({ className: "row no-margin tableRow" }, [
+                    div({ id: dar.name + "_darId", name: "darId", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.name]),
                     div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-body text" }, [
-                      a({ onClick: () => this.download(dar.name, dar.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
+                      a({ id: dar.name + "_linkRestrictions", name: "link_restrictionsAccess", onClick: () => this.download(dar.name, dar.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
                     ]),
                   ]),
                   hr({ className: "table-body-separator" }),

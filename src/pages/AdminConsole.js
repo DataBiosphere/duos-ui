@@ -234,7 +234,7 @@ class AdminConsole extends Component {
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
-                  id: 'btn_invalidRequest',
+                  id: 'btn_electionTimeout',
                   clickHandler: this.electionTimeout,
                   color: 'common',
                   title: 'Set Data Owner election Timeout',
@@ -281,11 +281,11 @@ class AdminConsole extends Component {
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
-                  id: 'btn_manageOntologies',
+                  id: 'btn_addOntologies',
                   clickHandler: this.addOntologies,
                   color: 'common',
                   title: 'Add Ontologies',
-                  description: 'Select and manage Ontologies for index',
+                  description: 'Store Ontologies for index',
                   iconName: 'add-ontologies',
                   iconSize: 'large',
                   unreviewedCases: 0
@@ -295,11 +295,11 @@ class AdminConsole extends Component {
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
                   onAfterOpen: this.afterModalOpen
-                }),
-              ]),
-            ]),
-          ]),
-        ]),
+                })
+              ])
+            ])
+          ])
+        ])
       ])
     );
   }

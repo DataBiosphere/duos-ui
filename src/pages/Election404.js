@@ -30,7 +30,9 @@ class Election404 extends Component {
               description: "Please, return to your console and check if the election is still open. Thanks!",
             }),
           ]),
-          a({ className: "btn vote-button vote-button-back vote-button-bigger f-left " + (this.state.isAccessElection ? 'access-background' : this.state.isDataUseLimitations ? 'dul-background' : ''),
+          a({ 
+            id: "btn_back",
+            className: "btn vote-button vote-button-back vote-button-bigger f-left " + (this.state.isAccessElection ? 'access-background' : this.state.isDataUseLimitations ? 'dul-background' : ''),
             style: { 'marginTop': '15px' },
             onClick: this.goToConsole }, ["Back to Your Console"]),
         ])

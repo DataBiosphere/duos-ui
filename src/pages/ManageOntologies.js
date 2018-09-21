@@ -28,7 +28,7 @@ class ManageOntologies extends Component {
   }
 
 
-  async getOntologiesManage () {
+  async getOntologiesManage() {
     const ontologies = await Ontology.retrieveIndexedFiles();
     this.setState(prev => {
       prev.currentPage = 1;
@@ -88,14 +88,15 @@ class ManageOntologies extends Component {
     // TBD
   }
 
-  async downloadOntology (fileName, fileUrl) {
-      await Files.getOntologyFile(fileName, fileUrl);
+  async downloadOntology(fileName, fileUrl) {
+    await Files.getOntologyFile(fileName, fileUrl);
   };
 
   openDelete = (fileUrl) => {
     this.setState({
       showDialogDelete: true,
-      fileUrlId: fileUrl});
+      fileUrlId: fileUrl
+    });
   };
 
   dialogHandlerDelete = (answer) => (e) => {
@@ -149,7 +150,7 @@ class ManageOntologies extends Component {
             ]),
 
             a({
-              id: 'title_addOntologies',
+              id: 'btn_addOntologies',
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
               onClick: this.addOntologiesModal
             }, [
@@ -178,20 +179,22 @@ class ManageOntologies extends Component {
 
           this.state.indexedFiles.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((indexFile, ix) => {
             return h(Fragment, { key: ix }, [
-              div({ className: "grid-row pushed-1" }, [
+              div({ className: "grid-row pushed-1 tableRow" }, [
                 a({
+                  id: ix + "_linkFileName",
+                  name: "fileName",
                   className: "col-5 cell-body text",
                   style: { "cursor": "pointer" },
                   onClick: () => this.downloadOntology(indexFile.fileName, indexFile.fileUrl),
                   filename: indexFile.fileName,
                   fileurl: indexFile.fileUrl
                 }, [indexFile.fileName]),
-                div({ className: "col-2 cell-body text" }, [indexFile.ontologyType]),
-                div({ className: "col-2 cell-body text" }, [indexFile.prefix]),
+                div({ id: ix + "_type", name: "type", className: "col-2 cell-body text" }, [indexFile.ontologyType]),
+                div({ id: ix + "_prefix", name: "prefix", className: "col-2 cell-body text" }, [indexFile.prefix]),
 
                 div({ className: "icon-actions" }, [
                   div({ className: "display-inline-block", disabled: false }, [
-                    button({ onClick: () => this.openDelete(indexFile.fileUrl) }, [span({ className: "glyphicon glyphicon-trash caret-margin" }),
+                    button({ id: ix + "_btnDelete", name: "btn_delete", onClick: () => this.openDelete(indexFile.fileUrl) }, [span({ className: "glyphicon glyphicon-trash caret-margin" }),
                     ]),
                     ConfirmationDialog({
                       title: 'Delete Ontology file?', color: 'common', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
