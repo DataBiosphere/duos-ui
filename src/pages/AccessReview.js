@@ -425,7 +425,7 @@ class AccessReview extends Component {
                       color: "access",
                       title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                         : "Should data access be granted to this applicant?",
-                      isDisabled: "isFormDisabled",
+                      disabled: false,
                       voteStatus: this.state.vote.vote,
                       rationale: this.state.vote.rationale,
                       action: { label: "Vote", handler: this.submitVote },
@@ -479,7 +479,7 @@ class AccessReview extends Component {
                       id: "rpReview",
                       color: "access",
                       title: "Q2. Was the research purpose accurately converted to a structured format?",
-                      isDisabled: "isFormDisabled",
+                      disabled: false,
                       voteStatus: this.state.rpVote.vote,
                       rationale: this.state.rpVote.rationale,
                       action: { label: "Vote", handler: this.submitRpVote },
