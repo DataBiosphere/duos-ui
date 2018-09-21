@@ -66,7 +66,7 @@ export default ({ props }) => (
     <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} />
     <AuthenticatedRoute path='/access_review/:darId/:voteId/:rpVoteId' component={AccessReview} props={props} />
     <AuthenticatedRoute path='/access_preview/:referenceId?/:electionId?' component={AccessPreview} props={props} />
-    <AuthenticatedRoute path='/access_collect' component={AccessCollect} props={props} />
+    <AuthenticatedRoute path='/access_collect/:referenceId/:electionId' component={AccessCollect} props={props} />
     <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} />
     <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} />
     <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} />

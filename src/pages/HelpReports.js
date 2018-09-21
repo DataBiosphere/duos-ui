@@ -6,6 +6,7 @@ import { HelpModal } from '../components/modals/HelpModal';
 import { SearchBox } from '../components/SearchBox';
 import { Help } from "../libs/ajax";
 import { Storage } from '../libs/storage';
+import * as Utils from "../libs/utils";
 
 class HelpReports extends Component {
 
@@ -136,7 +137,7 @@ class HelpReports extends Component {
               div({ className: "row no-margin" }, [
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.reportId]),
                 div({ isRendered: this.state.isAdmin, className: "cell-body text col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [report.userName]),
-                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [new Date(report.createDate).toLocaleDateString()]),
+                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [Utils.formatDate(report.createDate)]),
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-3 col-xs-3" : "") }, [report.subject]),
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-4 col-xs-4" : !this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-5 col-xs-5" : "") }, [report.description]),
               ]),
