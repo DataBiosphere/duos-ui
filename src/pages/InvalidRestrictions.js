@@ -4,7 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { Consent, DAR } from '../libs/ajax';
+import { Consent, DarCases } from '../libs/ajax';
 
 class InvalidRestrictions extends Component {
 
@@ -46,7 +46,7 @@ class InvalidRestrictions extends Component {
 
   async loadAsyncData() {
     const invalidConsents = await Consent.findInvalidConsentRestriction();
-    const invalidDars = await DAR.findDataAccessInvalidUseRestriction();
+    const invalidDars = await DarCases.findDataAccessInvalidUseRestriction();
     this.setState(prev => {
       prev.InvalidRestrictions.dulList = invalidConsents;
       prev.InvalidRestrictions.darList = invalidDars;
