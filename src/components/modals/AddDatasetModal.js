@@ -132,7 +132,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
               div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
                 div({ className: "checkbox dataset-label" }, [
                   input({ id: "chk_overwrite", onChange: this.handleOverwriteChange, checked: this.state.overwrite, type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
-                  label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "txt_overwrite" }, ["Overwrite existing Datasets"]),
+                  label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "chk_overwrite" }, ["Overwrite existing Datasets"]),
                 ])
               ])
             ])
