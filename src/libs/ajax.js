@@ -424,6 +424,12 @@ export const Election = {
     return await res.json();
   },
 
+  findInvalidConsentRestriction: async () => {
+    const url = `${await Config.getApiUrl()}/consent/invalid`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
   findReviewedDRs: async () => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/closed`;
     const res = await fetchOk(url, Config.authOpts());
@@ -681,6 +687,12 @@ export const DarCases = {
 
   darSummaryCases: async type => {
     const url = `${await Config.getApiUrl()}/datarequest/cases/summary/${type}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  findDataAccessInvalidUseRestriction: async () => {
+    const url = `${await Config.getApiUrl()}/dar/invalid`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },

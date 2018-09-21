@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
+import { Consent, DAR } from '../libs/ajax';
 
 class InvalidRestrictions extends Component {
 
@@ -29,13 +30,10 @@ class InvalidRestrictions extends Component {
   }
 
   componentWillMount() {
+    this.loadAsyncData();
     let duls = [];
     let dars = [];
 
-    for (var i = 0; i < 50; i++) {
-      duls.push({ name: 'name ' + i, useRestriction: 'use restriction .... ' + i });
-      dars.push({ name: 'name ' + i, useRestriction: 'use restriction .... ' + i });
-    }
     this.setState({
       searchDulCases: '',
       searchDarCases: '',
@@ -45,6 +43,18 @@ class InvalidRestrictions extends Component {
       }
     })
   }
+
+  async loadAsyncData() {
+    const invalidConsents = await Consent.findInvalidConsentRestriction();
+    const invalidDars = await DAR.findDataAccessInvalidUseRestriction();
+    this.setState(prev => {
+      prev.InvalidRestrictions.dulList = invalidConsents;
+      prev.InvalidRestrictions.darList = invalidDars;
+      return prev;
+    });
+
+
+  };
 
   handleDulPageChange = page => {
     this.setState(prev => {
@@ -59,7 +69,7 @@ class InvalidRestrictions extends Component {
       prev.currentDulPage = 1;
       return prev;
     });
-  }
+  };
 
   handleDarPageChange = page => {
     this.setState(prev => {
@@ -74,19 +84,26 @@ class InvalidRestrictions extends Component {
       prev.currentDarPage = 1;
       return prev;
     });
-  }
+  };
 
-  download = (name, useRestriction) => {
-
-  }
+  download = (fileName, text) => {
+    const break_line =  '\r\n \r\n';
+    text = break_line+ text;
+    let blob = new Blob([text], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = fileName + '-restriction';
+    a.click();
+  };
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   handleSearchDar = (query) => {
     this.setState({ searchDarText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -94,7 +111,7 @@ class InvalidRestrictions extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
 
   render() {
 
@@ -141,7 +158,7 @@ class InvalidRestrictions extends Component {
                   div({ className: "row no-margin" }, [
                     div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dul.name]),
                     div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-body text" }, [
-                      a({ href: "", onClick: this.download(dul.name, dul.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
+                      a({ onClick: () => this.download(dul.name, dul.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
                     ])
                   ]),
                   hr({ className: "table-body-separator" })
@@ -180,7 +197,7 @@ class InvalidRestrictions extends Component {
                   div({ className: "row no-margin" }, [
                     div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.name]),
                     div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-body text" }, [
-                      a({ href: "", onClick: this.download(dar.name, dar.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
+                      a({ onClick: () => this.download(dar.name, dar.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
                     ]),
                   ]),
                   hr({ className: "table-body-separator" }),
