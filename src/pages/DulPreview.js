@@ -22,7 +22,7 @@ class DulPreview extends Component {
 
   async electionReview() {
     const consentId = this.props.match.params.consentId;
-    const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
+    const consent = await Election.findReviewedElections(consentId, 'TranslateDUL');
     this.setState({consentPreview: consent.consent});
   }
 
@@ -54,13 +54,7 @@ class DulPreview extends Component {
  };
 
   downloadDUL = () => {
-    Files.getDulFile(this.props.match.params.consentId).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(this.state.consentPreview.name, blob);
-        }
-      }
-    );
+    Files.getDulFile(this.props.match.params.consentId, this.state.consentPreview.name);
   };
 
 

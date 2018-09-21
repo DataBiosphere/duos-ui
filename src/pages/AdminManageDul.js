@@ -43,7 +43,7 @@ class AdminManageDul extends Component {
   }
 
   async getConsentManage() {
-    const duls = await Consent.getConsentManage();
+    const duls = await Consent.findConsentManage();
     this.setState(prev => {
       prev.currentPage = 1;
       prev.electionsList.dul = duls;
@@ -96,7 +96,7 @@ class AdminManageDul extends Component {
   }
 
   async editDul(election) {
-    const consentData = await Consent.ConsentResource(election.consentId);
+    const consentData = await Consent.findConsentById(election.consentId);
     this.setState({
       dulToEdit: election,
       consentToEdit: consentData,
@@ -177,7 +177,7 @@ class AdminManageDul extends Component {
       electionUpdate.referenceId = election.consentId;
       electionUpdate.electionId = election.electionId;
       electionUpdate.archived = true;
-      Election.electionUpdateResourceUpdate(electionUpdate.electionId, electionUpdate);
+      Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     }
   };
@@ -192,7 +192,7 @@ class AdminManageDul extends Component {
         electionId: election.electionId,
         archived: this.state.archiveCheck
       };
-      Election.electionUpdateResourceUpdate(election.electionId, electionUpdated);
+      Election.updateElection(election.electionId, electionUpdated);
       this.setState({archiveCheck: true});
       this.getConsentManage();
     }
@@ -201,10 +201,8 @@ class AdminManageDul extends Component {
   dialogHandlerCreate = (answer) => (e) => {
     this.setState({showDialogCreate: false});
     let consentId = this.state.createId;
-
-    let election = {status: 'Open'};
     if (answer) {
-      Election.create(consentId, election);
+      Election.createElection(consentId);
       this.getConsentManage();
     }
   };
@@ -213,7 +211,7 @@ class AdminManageDul extends Component {
     this.setState({showDialogDelete: false});
     let consentId = this.state.deleteId;
     if (answer) {
-      Consent.DeleteConsentResource(consentId).then(data => {
+      Consent.deleteConsent(consentId).then(data => {
         if (data.ok) {
           this.removeDul(consentId);
         }

@@ -108,7 +108,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   async uploadFile() {
-    const response = await Consent.CreateDulResource(this.state.consent.consentId, this.state.file.name, this.state.file);
+    const response = await Consent.postDul(this.state.consent.consentId, this.state.file.name, this.state.file);
     if (response !== true) {
       this.setState(prev => {
         prev.error.title = 'Server Error';
@@ -129,7 +129,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     if (this.state.isEditMode) {
       response = await Consent.update(consent);
     } else {
-      response = await Consent.CreateConsentResource(consent);
+      response = await Consent.postConsent(consent);
     }
     if (response === true) {
       return true;

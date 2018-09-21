@@ -45,8 +45,8 @@ class DatasetCatalog extends Component {
   }
 
   async getDatasets() {
-    const dictionary = await DataSet.getDictionary();
-    const catalog = await DataSet.list(USER_ID);
+    const dictionary = await DataSet.findDictionary();
+    const catalog = await DataSet.findDataSets(USER_ID);
     const data = {
       catalog: catalog,
       dictionary: dictionary
