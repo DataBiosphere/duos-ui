@@ -10,13 +10,12 @@ class Election404 extends Component {
       value: '',
       isAccessElection: false,
       isDataUseLimitations: true, 
-    }
+    };
   }
 
   goToConsole = (e) => {
-    // TBD: fix back logic ... return to ?? when coming from ???
-    this.props.history.push('/admin_console')
-  }
+    this.props.history.goBack();
+  };
 
   render() {
 
