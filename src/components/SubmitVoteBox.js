@@ -24,6 +24,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   componentWillReceiveProps(nextProps) {
     // if (this.state.enableVoteButton === false) {
+    console.log("Status? ", nextProps.voteStatus);
       this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
     // }
   }
@@ -118,7 +119,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
                 label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
+              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null  || voteStatus === undefined}, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [

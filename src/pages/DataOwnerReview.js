@@ -1,29 +1,51 @@
 import { Component } from 'react';
-import { div, button, hr, h4, a } from 'react-hyperscript-helpers';
+import { div, button, hr, h4, a, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
-import { DAR } from '../libs/ajax';
-const APPROVE = 0;
-const DISAPPROVE = 1;
+import { DAR, Files, DataSet, Consent, Votes } from '../libs/ajax';
+import { Alert } from "../components/Alert";
+import { ConfirmationDialog } from "../components/ConfirmationDialog";
+const APPROVE = "1";
+const DISAPPROVE = "0";
+const HAS_CONCERNS = "2";
 class DataOwnerReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      showConfirmDialog: false,
       pendingCase: {
         voteId: '',
         referenceId: '',
         dataSetId: ''
       },
       value: '',
-      voteStatus: null,
-      rationale: '',
+      vote: {
+        dacUserId: '',
+        voteId: '',
+        vote: null,
+        rationale: '',
+        hasConcerns: false,
+        createDate: null
+      },
       darFields: {
         rus: ''
       },
-      isFormDisabled: false
+      dataSet: {
+        id: '',
+        data: {}
+      },
+      consent: {
+        id: '',
+        data: {}
+      },
+      error: {
+      show: false,
+        title: '',
+        msg: ['']
+    }
     };
 
     this.myHandler = this.myHandler.bind(this);
@@ -40,31 +62,64 @@ class DataOwnerReview extends Component {
     this.closeDatasetSummaryModal = this.closeDatasetSummaryModal.bind(this);
     this.okDatasetSummaryModal = this.okDatasetSummaryModal.bind(this);
     this.submit = this.submit.bind(this);
+    this.getDarInfo = this.getDarInfo.bind(this);
+    this.getConsentInfo = this.getConsentInfo.bind(this);
+    this.downloadDUL = this.downloadDUL.bind(this);
+    this.getVote = this.getVote.bind(this)
   }
-  componentWillMount () {
 
-    // console.log(this.props.match.params.referenceId);
-
-
-
-     this.getDarInfo();
+  async componentWillMount () {
+     await this.getDarInfo();
+     await this.getVote();
+     await this.getDataSetInfo();
+     await this.getConsentInfo();
   }
 
   async getDarInfo() {
-    console.log("que onda!?= ", this.state.pendingCase.dataSetId);
     const darRus = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
-
     this.setState(prev => {
       prev.darFields.rus = darRus.rus;
-      return prev;
-    });
-
-    this.setState(prev => {
       prev.pendingCase.voteId = this.props.match.params.voteId;
       prev.pendingCase.referenceId = this.props.match.params.referenceId;
       prev.pendingCase.dataSetId = this.props.match.params.dataSetId;
       return prev;
     });
+  }
+
+  async getDataSetInfo() {
+    const dataSet = await  DataSet.getDataSetsByDatasetId(this.state.pendingCase.dataSetId);
+    this.setState(prev => {
+      prev.dataSet.id = dataSet.consentId;
+      prev.dataSet.data = dataSet;
+      return prev;
+    });
+  }
+
+  async getConsentInfo() {
+    const consent = await Consent.findConsentById(this.state.dataSet.data.consentId);
+    console.log("HEY!", consent);
+    this.setState(prev => {
+      prev.consent.id = consent.consentId;
+      prev.consent.data = consent;
+      return prev;
+    })
+  }
+
+  async getVote() {
+    if (this.props.match.params.voteId !== null && Boolean(this.props.match.params.referenceId)) {
+      const pendingCaseReview =  await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
+      console.log("Pending Case review? ", pendingCaseReview);
+      this.setState(prev => {
+        prev.vote.dacUserId = pendingCaseReview.dacUserId;
+        prev.vote.voteId = pendingCaseReview.voteId;
+        prev.vote.vote = pendingCaseReview.vote;
+        prev.vote.hasConcerns = pendingCaseReview.hasConcerns;
+        prev.vote.rationale = pendingCaseReview.rationale;
+        prev.vote.createDate = pendingCaseReview.createDate;
+        prev.pendingCase.referenceId = this.props.match.params.referenceId;
+        return prev;
+      })
+    }
   }
 
   myHandler(event) {
@@ -132,31 +187,49 @@ class DataOwnerReview extends Component {
       return prev;
     });
   }
-
-  downloadDUL = (e) => {
-
+  dialogHandlerCreate = () => (e) => {
+    this.setState(prev => {prev.showConfirmDialog=false; return prev;});
+  };
+  downloadDUL = () =>  (e) => {
+    Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
   };
 
-  handleRadioChange = (e, field, value) => {
-    this.setState(prev => {
-      prev[field] = value;
-      return prev;
-    });
-  };
-
-  submit = (answer, rationale) => {
-    console.log(answer, " ---- ", rationale);
+  async submit (answer, rationale) {
+    let  updatedVote = {};
+    let result;
 
     switch (answer) {
-      case APPROVE: {
+      case (APPROVE): {
+        updatedVote.vote = true;
+        updatedVote.hasConcerns = false;
         break;
       }
       case DISAPPROVE: {
+        updatedVote.vote = false;
+        updatedVote.hasConcerns = false;
+        break;
+      }
+      case HAS_CONCERNS: {
+        updatedVote.vote = null;
+        updatedVote.hasConcerns = true;
         break;
       }
       default: {
         break;
       }
+    }
+    updatedVote.rationale = rationale;
+    updatedVote.voteId = this.state.vote.voteId;
+    updatedVote.dacUserId = this.state.vote.dacUserId;
+
+    if ((updatedVote.vote !== this.state.vote.vote) || (updatedVote.rationale !== this.state.vote.rationale) || updatedVote.hasConcerns !== this.state.vote.hasConcerns) {
+      if (this.state.vote.createDate === null) {
+        result = await Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote);
+      } else {
+        result = await Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote);
+      }
+      this.setState({showConfirmDialog:true});
+      console.log("RESULT -> ", result);
     }
   };
 
@@ -188,6 +261,7 @@ class DataOwnerReview extends Component {
                 }, ["Application summary"]),
               ]),
               ApplicationSummaryModal({
+                dataRequestId: this.props.match.params.referenceId,
                 showModal: this.state.showApplicationSummaryModal,
                 onOKRequest: this.okApplicationSummaryModal,
                 onCloseRequest: this.closeApplicationSummaryModal
@@ -212,13 +286,7 @@ class DataOwnerReview extends Component {
                 className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color",
                 onClick: this.downloadDUL
               }, ["Download Data Use Letter"]),
-            ]),
-            div({id: "adsfasdf", className: "panel-body cm-boxbody"}, [
-              button({
-                className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color",
-                onClick: this.handleRadioChange
-              }, ["JJJJJJJJJJJJJJJJJILADA"]),
-            ]),
+            ])
           ]),
         ]),
 
@@ -229,17 +297,35 @@ class DataOwnerReview extends Component {
               color: "dataset",
               title: "Your Vote",
               isDisabled: this.state.isFormDisabled,
-              status: this.state.voteStatus,
+              // status: this.state.vote.voteStatus,
               radioType: "multiple",
               radioLabels: ['Approve', "Disapprove", "Raise a concern"],
               radioValues: ['1', '0', "2"],
               showAlert: false,
               alertMessage: "something",
-              action: {label: "Vote", handler: this.submit
+              action: {label: "Vote", handler: this.submit,
+              rationale: this.state.vote.rationale
               }
             }),
           ]),
         ]),
+        ConfirmationDialog({
+          title: 'Vote confirmation',
+          color: 'dataset',
+          showModal: this.state.showConfirmDialog,
+          type: 'informative',
+          action: {
+            label: "Ok",
+            handler: this.dialogHandlerCreate
+          }
+        }, [
+          div({className: "dialog-description"}, [
+            span({}, ["Your vote has been successfully edited!"]),
+          ])
+        ]),
+        div({isRendered: this.state.error.show}, [
+          Alert({id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg})
+        ])
       ])
     );
   }
