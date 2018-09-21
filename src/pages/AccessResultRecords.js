@@ -150,14 +150,21 @@ class AccessResultRecords extends Component {
 
     // formerly resolved on route ....
     const referenceId = this.props.match.params.referenceId;
-    const electionId = this.props.match.params.electionId;
-    const darElection = await Election.findElectionById(electionId);
-    const hasUseRestriction = await DAR.hasUseRestriction(referenceId);
+    console.log("referenceId: ", referenceId);
 
-    console.log(darElection);
+    const electionId = this.props.match.params.electionId;
+    console.log("electionId: ", electionId);
+
+    const darElection = await Election.findElectionById(electionId);
+    console.log("darElection: ", darElection);
+
+    const hasUseRestriction_obj = await DAR.hasUseRestriction(referenceId);
+    const hasUseRestriction = hasUseRestriction_obj.hasUseRestriction;
+    console.log("hasUseRestriction: ", hasUseRestriction, hasUseRestriction_obj.hasUseRestriction);
 
     const oneAtATime = false;
     const darInfo = await DAR.describeDar(darElection.referenceId);
+    console.log("darInfo: ", darInfo);
 
     let hideMatch = false;
     let match = "-1";
@@ -177,28 +184,31 @@ class AccessResultRecords extends Component {
     let rpeReview = {};
     let electionReview;
 
-    console.log('electionId -------------> ', electionId);
-
     // if (electionId === null) {
     //   this.props.history.push('reviewed_cases');
     // }
 
     //-----
     finalDACVote = await Votes.getDarFinalAccessVote(electionId);
+    console.log("finalDACVote", finalDACVote);
 
     daer = await Election.findDataAccessElectionReview(electionId, false);
+    console.log("daer", daer);
     // showAccessData(data);
     //--------------------
     // function showAccessData(electionReview) {
 
     darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
+    console.log("darElectionReview.dar", darElectionReview.dar);
 
     DAR.getDarFields(daer.election.referenceId, "dar_code").then(function (data) {
       darElectionReview.darCode = data.dar_code;
+      console.log("darElectionReview.darCode", darElectionReview.darCode);
     });
 
     DAR.getDarFields(daer.election.referenceId, "projectTitle").then(function (data) {
       darElectionReview.projectTitle = data.projectTitle;
+      console.log("darElectionReview.projectTitle", darElectionReview.projectTitle);
     });
 
     darElectionReview.electionAccess = daer.election;
@@ -220,7 +230,8 @@ class AccessResultRecords extends Component {
     //....................
 
     let data2 = await Election.findRPElectionReview(electionId, false);
-    if (data2 === null) data2 = {};
+    if (data2 === null || data2 === undefined) data2 = {};
+    console.log("data2",data2);
 
     if (data2.election !== undefined) {
       rpeReview.electionRP = data2.election;
@@ -236,7 +247,9 @@ class AccessResultRecords extends Component {
     }
 
 
-    electionReview = Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
+    electionReview = await Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
+    console.log("electionReview: ", electionReview);
+
     election = electionReview.election;
     if (electionReview.election.finalRationale === null) {
       election.finalRationale = '';
@@ -308,12 +321,12 @@ class AccessResultRecords extends Component {
   initialState() {
     return {
       voteStatus: '1',
-      createDate: '2018-08-30',
+      createDate: '',
       enableFinalButton: false,
       enableAgreementButton: false,
       hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      darCode: 'DAR-02',
+      projectTitle: '',
+      darCode: '',
       isQ1Expanded: false,
       isQ2Expanded: false,
       isDulExpanded: false,
@@ -337,173 +350,26 @@ class AccessResultRecords extends Component {
         vote: '0',
         rationale: '',
       },
-      voteList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Tadeo Riveros", vote: {
-              vote: '0',
-              rationale: 'lalala',
-              createDate: '',
-              updateDate: ''
-            }
-          }
-        ]
-      ],
-      voteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ]
-      ],
-      rpVoteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Tadeo Riveros", vote: {
-              vote: '0',
-              rationale: 'lalala',
-              createDate: '',
-              updateDate: ''
-            }
-          }
-        ]
-      ],
-
+      voteList: [],
+      voteAccessList: [],
+      rpVoteAccessList: [],
       darInfo: {
         havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
+        pi: '',
+        profileName: '',
+        status: '',
         hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
+        adminComment: '',
+        institution: '',
+        department: '',
+        city: '',
+        country: '',
         purposeManualReview: true,
         researchTypeManualReview: true,
         hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
+        purposeStatements: [],
+        researchType: [],
+        diseases: []
       }
     };
   }
@@ -670,6 +536,8 @@ class AccessResultRecords extends Component {
 
   render() {
 
+    console.log('----------------------------------------------------------------------------------------------------');
+    console.log(JSON.stringify(this.state, null, 2));
     // let vote = {
     //   vote: null,
     //   rationale: ''
@@ -726,7 +594,7 @@ class AccessResultRecords extends Component {
 
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
-                div({ className: "response-label", "ng-bind html": "sDar" }, [this.state.darInfo.sDar]),
+                div({ className: "response-label" }, [this.state.darInfo.sDar]),
                 a({
                   isRendered: this.state.hasUseRestriction, onClick: this.downloadSDAR,
                   filename: 'machine-readable-DAR.json',
@@ -734,7 +602,7 @@ class AccessResultRecords extends Component {
                 }, ["Download DAR machine-readable format"]),
               ]),
 
-              div({ isRendered: this.state.darInfo.hasPurposeStatements, className: "row dar-summary" }, [
+              div({ isRendered: this.state.darInfo.hasPurposeStatements && this.state.darInfo.purposeStatements !== undefined, className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Purpose Statement"]),
                 div({ className: "response-label" }, [
                   ul({}, [
@@ -835,7 +703,7 @@ class AccessResultRecords extends Component {
               ]),
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-                div({ className: "response-label", "ng-bind-html": "sDul" }, ["sDul"]),
+                div({ className: "response-label" }, ["sDul"]),
                 a({ filename: 'machine-readable-DUL.json', value: "mrDUL", className: "italic hover-color", onClick: this.downloadSDUL }, ["Download DUL machine-readable format"]),
               ]),
             ]),
