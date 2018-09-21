@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h, hh, form, label, input, span, hr, ul, li, a } from 'react-hyperscript-helpers';
+import { div, h, hh, form, label, input, span, hr, ul, li, a, button } from 'react-hyperscript-helpers';
 import { Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
@@ -131,7 +131,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   render() {
 
-    const showValidationMessages = true;
+    const showValidationMessages = false;
     return (
 
       div({ className: "container" }, [
@@ -206,6 +206,90 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     isRendered: (this.state.researcherProfile.institution === undefined && showValidationMessages)
                   }, ["Institution Name is required"]),
                 ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  label({ className: "control-label rp-title-question default-color" }, [
+                    "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
+                    span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
+                  ]),
+                  //properly handle validations, at least one is required
+                  span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: false }, ["At least one of the following is required"]),
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["NIH eRA Commons ID"]),
+                      //show when appropriate
+                      div({ isRendered: true }, [
+                        a({ onClick: "RPApplication.redirectToNihLogin()", target: "_blank", className: "auth-button eRACommons" }, [
+                          div({ className: "logo" }, []),
+                          span({}, ["Authenticate your account"])
+                        ])
+                      ]),
+                      //show when appropriate
+                      div({ isRendered: false }, [
+                        div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, ["this.state.formData.nihUsername"]),
+                          button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
+                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
+                          ]),
+                          h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
+                        ]),
+
+                        div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ isRendered: "this.state.formData.eraExpirationCount !== 0", className: "default-color display-block" }, ["Your NIH authentication will expire in " + "this.state.formData.eraExpirationCount" + " days"]),
+                          div({ isRendered: "this.state.formData.eraExpirationCount === 0", className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                        ]),
+                        div({ isRendered: "this.state.formData.dar_code !== null", className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, ["this.state.formData.nihUsername"])
+                        ]),
+                      ]),
+
+                    ]),
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["LinkedIn Profile"]),
+                      input({
+                        id: "profileLinkedIn",
+                        name: "linkedIn",
+                        type: "text",
+                        className: "form-control",
+                        onChange: this.handleChange,
+                        value: this.state.researcherProfile.linkedIn
+                      })
+                    ]),
+                  ]),
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileOrcid", className: "control-label" }, ["ORCID iD"]),
+                      input({
+                        id: "profileOrcid",
+                        name: "orcid",
+                        type: "text",
+                        className: "form-control",
+                        onChange: this.handleChange,
+                        value: this.state.researcherProfile.orcid
+                      })
+                    ]),
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                      label({ id: "lbl_profileResearcherGate", className: "control-label" }, ["Researcher Gate ID"]),
+                      input({
+                        id: "profileResearcherGate",
+                        name: "researcherGate",
+                        type: "text",
+                        className: "form-control",
+                        onChange: this.handleChange,
+                        value: this.state.researcherProfile.researcherGate
+                      })
+                    ])
+                  ]),
+                  hr({ className: "section-separator", style: { 'margin': '10px 15px'} }),
+                ]),
+
+                
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -229,7 +313,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({
                         id: "lbl_profileDivision",
                         className: "control-label"
-                      }, ["Division ", span({ className: "italic" }, ["(optional)"]),]),
+                      }, ["Division ", span({ className: "italic" }, ["(optional)"])]),
                       input({
                         id: "profileDivision",
                         name: "division",
@@ -451,65 +535,97 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       isRendered: (this.state.researcherProfile.havePI === undefined && showValidationMessages)
                     }, ["Required field"])
                   ])
+                ]),
+              
+                div({ isRendered: this.state.researcherProfile.havePI === true, className: "form-group" }, [
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({ id: "lbl_profilePIName", className: "control-label" }, ["Principal Investigator Name*"]),
+                    input({
+                      id: "profilePIName",
+                      name: "pIName",
+                      type: "text",
+                      className: "form-control ",
+                      //  + (researcherForm.profilePIName.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
+                      onChange: this.handleChange,
+                      value: this.state.researcherProfile.piName,
+                      required: this.state.researcherProfile.havePI === true,
+                    }),
+                    span({
+                      className: "cancel-color required-field-error-span",
+                      isRendered: (this.state.researcherProfile.piName === undefined && showValidationMessages)
+                    }, ["Principal Investigator is required"]),
+                  ]),
+  
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({
+                      id: "lbl_profilePIEmail",
+                      className: "control-label"
+                    }, ["Principal Investigator Email Address*"]),
+                    input({
+                      id: "profilePIEmail",
+                      name: "pIEmail",
+                      type: "email",
+                      className: "form-control ",
+                      //  + (researcherForm.profilePIEmail.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
+                      onChange: this.handleChange,
+                      value: this.state.researcherProfile.piEmail,
+                      required: this.state.researcherProfile.havePI === true,
+                    }),
+                    span({
+                      className: "cancel-color required-field-error-span",
+                      isRendered: ((this.state.researcherProfile.piEmail === undefined || this.state.researcherProfile.piEmail.indexOf('@') === -1) && showValidationMessages)
+                      // (researcherForm.profilePIEmail.$invalid && showValidationMessages)
+                    }, ["Email Address is empty or has invalid format"]),
+                  ]),
+  
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({
+                      id: "lbl_profileEraCommons",
+                      className: "control-label"
+                    }, ["eRA Commons ID ", span({ className: "italic" }, ["(optional)"])]),
+                    input({
+                      id: "profileEraCommons",
+                      name: "eRACommonsID",
+                      type: "text",
+                      className: "form-control",
+                      onChange: this.handleChange,
+                      value: this.state.researcherProfile.eRACommonsID
+                    }),
+                  ]),
+  
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({
+                      id: "lbl_profilePubmedID",
+                      className: "control-label"
+                    }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
+                    input({
+                      id: "profilePubmedID",
+                      name: "profilePubmedID",
+                      type: "text",
+                      className: "form-control",
+                      onChange: this.handleChange,
+                      value: this.state.researcherProfile.pubmedID
+                    }),
+                  ]),
+  
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({
+                      id: "lbl_profileScientificURL",
+                      className: "control-label"
+                    }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
+                    input({
+                      id: "profileScientificURL",
+                      name: "scientificURL",
+                      type: "text",
+                      className: "form-control",
+                      onChange: this.handleChange,
+                      value: this.state.researcherProfile.scientificURL
+                    })
+                  ])
                 ])
               ]),
 
-              div({ isRendered: this.state.researcherProfile.havePI === true, className: "form-group" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  label({ id: "lbl_profilePIName", className: "control-label" }, ["Principal Investigator Name*"]),
-                  input({
-                    id: "profilePIName",
-                    name: "pIName",
-                    type: "text",
-                    className: "form-control ",
-                    //  + (researcherForm.profilePIName.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
-                    onChange: this.handleChange,
-                    value: this.state.researcherProfile.piName,
-                    required: this.state.researcherProfile.havePI === true,
-                  }),
-                  span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.piName === undefined && showValidationMessages)
-                  }, ["Principal Investigator is required"]),
-                ]),
-
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  label({
-                    id: "lbl_profilePIEmail",
-                    className: "control-label"
-                  }, ["Principal Investigator Email Address*"]),
-                  input({
-                    id: "profilePIEmail",
-                    name: "pIEmail",
-                    type: "email",
-                    className: "form-control ",
-                    //  + (researcherForm.profilePIEmail.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
-                    onChange: this.handleChange,
-                    value: this.state.researcherProfile.piEmail,
-                    required: this.state.researcherProfile.havePI === true,
-                  }),
-                  span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: ((this.state.researcherProfile.piEmail === undefined || this.state.researcherProfile.piEmail.indexOf('@') === -1) && showValidationMessages)
-                    // (researcherForm.profilePIEmail.$invalid && showValidationMessages)
-                  }, ["Email Address is empty or has invalid format"]),
-                ]),
-
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  label({
-                    id: "lbl_profileEraCommons",
-                    className: "control-label"
-                  }, ["eRA Commons ID ", span({ className: "italic" }, ["(optional)"])]),
-                  input({
-                    id: "profileEraCommons",
-                    name: "eRACommonsID",
-                    type: "text",
-                    className: "form-control",
-                    onChange: this.handleChange,
-                    value: this.state.researcherProfile.eRACommonsID
-                  }),
-                ]),
-
+              div({ isRendered: (this.state.researcherProfile.isThePI === true || this.state.researcherProfile.havePI === false), className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                   label({
                     id: "lbl_profilePubmedID",
@@ -517,12 +633,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
                   input({
                     id: "profilePubmedID",
-                    name: "profilePubmedID",
+                    name: "pubmedID",
                     type: "text",
                     className: "form-control",
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.pubmedID
-                  }),
+                  })
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
@@ -537,60 +653,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     className: "form-control",
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.scientificURL
-                  }),
-                ]),
+                  })
+                ])
               ]),
-
-              div({
-                isRendered: (this.state.researcherProfile.isThePI === true || this.state.researcherProfile.havePI === false),
-                className: "form-group",
-                style: { "border": "5px solid red" }
-              }, [
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({
-                      id: "lbl_profileEraCommons",
-                      className: "control-label"
-                    }, ["eRA Commons ID ", span({ className: "italic" }, ["(optional)"]),]),
-                    input({
-                      id: "profileEraCommons",
-                      name: "eRACommonsID",
-                      type: "text",
-                      className: "form-control",
-                      onChange: this.handleChange,
-                      value: this.state.researcherProfile.eRACommonsID
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({
-                      id: "lbl_profilePubmedID",
-                      className: "control-label"
-                    }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
-                    input({
-                      id: "profilePubmedID",
-                      name: "pubmedID",
-                      type: "text",
-                      className: "form-control",
-                      onChange: this.handleChange,
-                      value: this.state.researcherProfile.pubmedID
-                    }),
-                  ]),
-
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({
-                      id: "lbl_profileScientificURL",
-                      className: "control-label"
-                    }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
-                    input({
-                      id: "profileScientificURL",
-                      name: "scientificURL",
-                      type: "text",
-                      className: "form-control",
-                      onChange: this.handleChange,
-                      value: this.state.researcherProfile.scientificURL
-                    }),
-                  ]),
-                ]),
 
               ul({ className: "no-style-list" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 multi-step-pager" }, [

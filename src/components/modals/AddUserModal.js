@@ -368,6 +368,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     return (
       BaseModal({
+        id: "addUserModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,

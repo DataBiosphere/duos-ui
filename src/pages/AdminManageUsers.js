@@ -165,10 +165,10 @@ class AdminManageUsers extends Component {
 
           this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
             return h(Fragment, { key: user.dacUserId }, [
-              div({ id: user.dacUserId, className: "row no-margin" }, [
-                div({ id: user.dacUserId + "_name", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
-                div({ id: user.dacUserId + "_email", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text" }, [user.email]),
-                div({ id: user.dacUserId + "_roles", className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold" }, [
+              div({ id: user.dacUserId, className: "row no-margin tableRow" }, [
+                div({ id: user.dacUserId + "_name", name: "userName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
+                div({ id: user.dacUserId + "_email", name: "userEmail", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text" }, [user.email]),
+                div({ id: user.dacUserId + "_roles", name: "userRoles", className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold" }, [
                   user.roles.map((role, eIndex) =>
                     span({ key: user.dacUserId + "_roles_" + eIndex, id: user.dacUserId + "_roles_" + eIndex, className: "admin-users-list" }, [
                       span({ className: "enabled default-color", isRendered: role.name === 'Admin' }, ["Admin"]),
@@ -180,16 +180,17 @@ class AdminManageUsers extends Component {
                     ])
                   )
                 ]),
-                div({ id: user.dacUserId + "_btn_edit", className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
+                div({ className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
                   button({
-                    id: 'title_editUser',
+                    id: user.dacUserId + "_btnEditUser",
+                    name: 'btn_editUser',
                     className: "cell-button hover-color",
                     onClick: this.editUser(user)
                   }, ["Edit"]),
                 ]),
-                div({ id: user.dacUserId + "_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
-                  div({ id: user.dacUserId + "_btn_researcherReview", className: "row no-margin" }, [
-                    a({ onClick: () => this.openResearcherReview(user.dacUserId), isRendered: user.researcher !== false && user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
+                  div({ className: "row no-margin" }, [
+                    a({ id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId), isRendered: user.researcher !== false && user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({
                         className:
                           ((user.researcher && user.completed && user.status === 'pending') || user.status === null) ? 'enabled'
@@ -201,7 +202,7 @@ class AdminManageUsers extends Component {
                       div({ className: "disabled" }, ["Review"]),
                     ]),
 
-                    div({ id: user.dacUserId + "_bonafide_researcherReview", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
+                    div({ id: user.dacUserId + "_flagBonafide", name: "flag_bonafide", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
                       span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, "data-tip": "", "data-for": "tip_bonafide" }),
                       h(ReactTooltip, { id: "tip_bonafide", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
 

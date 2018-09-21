@@ -39,10 +39,11 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
           div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12" }, [
             span({ isRendered: this.props.data.vote.updateDate !== null, className: "vote-update f-right" }, ["Updated vote!"]),
             input({
+              id: "btn_reminder_" + this.props.id,
               isRendered: this.props.data.vote.vote === null,
               type: "button",
               value: "Send a reminder",
-              disable: this.props.data.buttonDisabled,
+              disabled: this.props.data.buttonDisabled,
               onClick: this.openDialogReminder,
               className: "btn btn-primary vote-reminder f-right " + (this.props.color) + "-color"
             }),

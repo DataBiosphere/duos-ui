@@ -26,6 +26,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
     return (
 
       BaseModal({
+        id: "translatedDulModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,

@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, br, h, small, h3, a, span, form, ol, ul, li, label, button, input, textarea, img } from 'react-hyperscript-helpers';
+import { div, hr, br, h, small, h3, a, span, form, ol, ul, li, label, button, input, textarea, img, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
@@ -113,10 +113,23 @@ class DataAccessRequestApplication extends Component {
       completed: true,
       showDialogSubmit: false,
       showDialogSave: false,
+      file: {
+        name: '',
+      }
     };
 
+    this.handleFileChange = this.handleFileChange.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
+  }
+
+  handleFileChange(event) {
+    if (event.target.files !== undefined && event.target.files[0]) {
+      let file = event.target.files[0];
+      this.setState({
+        file: file,
+      });
+    }
   }
 
   handleOpenModal() {
@@ -215,6 +228,15 @@ class DataAccessRequestApplication extends Component {
       inputResearcher: {
         invalid: false
       },
+      inputLinkedIn: {
+        invalid: false
+      },
+      inputOrcid: {
+        invalid: false
+      },
+      inputResearcherGate: {
+        invalid: false
+      },
       inputInvestigator: {
         invalid: false
       },
@@ -259,70 +281,68 @@ class DataAccessRequestApplication extends Component {
 
     return (
 
-      div({ className: "container " }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({
-              imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application",
-              description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
-            }),
-          ]),
-        ]),
-        hr({ className: "section-separator" }),
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-            div({ className: "row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin" }, [
+      div({ className: "container" }, [
+        div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
+          PageHeading({
+            id: "requestApplication", imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application",
+            description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
+          }),
 
-              a({
-                onClick: this.step1,
-                className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
-                  + (this.state.step === 1 ? 'active' : '')
-              }, [
-                  small({}, ["Step 1"]),
-                  "Researcher Information",
-                  span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
-                ]),
+          hr({ className: "section-separator" }),
 
-              a({
-                onClick: this.step2,
-                className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
-                  + (this.state.step === 2 ? 'active' : '')
-              }, [
-                  small({}, ["Step 2"]),
-                  "Data Access Request",
-                  span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
-                ]),
+          div({ className: "row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin" }, [
 
-              a({
-                onClick: this.step3,
-                className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
-                  + (this.state.step === 3 ? 'active' : '')
-              }, [
-                  small({}, ["Step 3"]),
-                  "Research Purpose Statement",
-                  span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
-                ]),
+            a({
+              id: "btn_step_1",
+              onClick: this.step1,
+              className: "col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title "
+                + (this.state.step === 1 ? 'active' : '')
+            }, [
+                small({}, ["Step 1"]),
+                "Researcher Information",
+                span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
+              ]),
 
-              a({
-                onClick: this.step4,
-                className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
-                  + (this.state.step === 4 ? 'active' : '')
-              }, [
-                  small({}, ["Step 4"]),
-                  "Attestation Statement",
-                  span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
-                ])
+            a({
+              id: "btn_step_2",
+              onClick: this.step2,
+              className: "col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title "
+                + (this.state.step === 2 ? 'active' : '')
+            }, [
+                small({}, ["Step 2"]),
+                "Data Access Request",
+                span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
+              ]),
 
-            ]),
-          ]),
+            a({
+              id: "btn_step_3",
+              onClick: this.step3,
+              className: "col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title "
+                + (this.state.step === 3 ? 'active' : '')
+            }, [
+                small({}, ["Step 3"]),
+                "Research Purpose Statement",
+                span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
+              ]),
+
+            a({
+              id: "btn_step_4",
+              onClick: this.step4,
+              className: "col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title "
+                + (this.state.step === 4 ? 'active' : '')
+            }, [
+                small({}, ["Step 4"]),
+                "Data Use Attestation",
+                span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
+              ])
+          ])
         ]),
         form({ name: "form", "noValidate": true }, [
           div({ id: "form-views" }, [
 
             //------------------ Step 1--------------------------------------
             div({ isRendered: this.state.step === 1 }, [
-
-              div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+              div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
 
                 div({ isRendered: this.state.completed === false, className: "rp-alert" }, [
                   Alert({ id: "profileUnsubmitted", type: "danger", title: profileUnsubmitted })
@@ -358,71 +378,103 @@ class DataAccessRequestApplication extends Component {
                       id: "checkCollaborator",
                       name: "checkCollaborator",
                       className: "checkbox-inline rp-checkbox",
-                      disable: this.state.formData.dar_code !== null
+                      disabled: this.state.formData.dar_code !== null
                     }),
                     label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkCollaborator" }, ["I am a collaborator of the PI/Data Custodian for the selected dataset(s)"]),
                   ]),
 
-                  div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
-                    label({ className: "control-label" }, [
-                      "NIH eRA Commons ID*",
-                    ]),
-
-                    div({ isRendered: this.state.formData.eraAuthorized !== true }, [
-                      a({ onClick: "RPApplication.redirectToNihLogin()", target: "_blank", className: "auth-button eRACommons" }, [
-                        div({ className: "logo" }, []),
-                        span({}, ["Authenticate your account"])
-                      ])
-                    ]),
-
-                    div({ isRendered: (this.state.formData.eraAuthorized === true) && (this.state.formData.dar_code === null) }, [
-                      div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
-                        div({ className: "auth-id" }, [this.state.formData.nihUsername]),
-                        button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
-                          span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
-                        ]),
-                        h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
-                      ]),
-
-                      div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                        div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
-                        div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
-                      ]),
-                      div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                        div({ className: "auth-id" }, [this.state.formData.nihUsername])
-                      ]),
-                    ]),
-                    span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
-                  ]),
-
-                  div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 rp-group" }, [
-                    label({ className: "control-label rp-title-question default-color" }, [
-                      "Researcher Identification*",
-                      span({}, ["Please authenticate either your LinkedIn or your ORCID iD"]),
+                  div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12" }, [
+                    label({ className: "control-label rp-title-question" }, [
+                      "1.2 Researcher Identification*",
+                      span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
                     ])
                   ]),
 
-                  div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
-                    div({ isRendered: this.state.formData.isLinkedinAuthorized !== true }, [
-                      a({ onClick: "linkedinAuth()", target: "_blank" }, [
-                        img({ className: "auth-button linkedin" }),
-                      ])
-                    ]),
-                    div({ isRendered: (this.state.formData.isLinkedinAuthorized) && (this.state.formData.linkedinProfile) }, [
-                      a({ onClick: "openProfile()", target: "_blank", className: "hover-color auth-link" }, ["LinkedIn Profile Link"]),
-                      button({ isRendered: this.state.formData.dar_code === undefined, onClick: "removeLinkedinProfile()", className: "close auth-clear" }, [
-                        span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearLinkedInAccount" })
+                  span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following is required"]),
+
+                  div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
+                      label({ className: "control-label" }, ["NIH eRA Commons ID"]),
+
+                      div({ isRendered: this.state.formData.eraAuthorized !== true }, [
+                        a({ onClick: "RPApplication.redirectToNihLogin()", target: "_blank", className: "auth-button eRACommons" }, [
+                          div({ className: "logo" }, []),
+                          span({}, ["Authenticate your account"])
+                        ])
                       ]),
-                      h(ReactTooltip, { id: "tip_clearLinkedInAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
-                      span({ isRendered: (this.state.formData.isLinkedinAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span no-padding" }, ["Required field"]),
+
+                      div({ isRendered: (this.state.formData.eraAuthorized === true) && (this.state.formData.dar_code === null) }, [
+                        div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, [this.state.formData.nihUsername]),
+                          button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
+                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
+                          ]),
+                          h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
+                        ]),
+
+                        div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
+                          div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                        ]),
+                        div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, [this.state.formData.nihUsername])
+                        ]),
+                      ]),
+                      span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
                     ]),
+
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
+                      label({ className: "control-label" }, ["LinkedIn Profile"]),
+                      input({
+                        type: "text",
+                        name: "linkedIn",
+                        id: "inputLinkedIn",
+                        value: this.state.formData.linkedIn,
+                        onChange: this.handleChange,
+                        disabled: false,
+                        className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                        required: true
+                      }),
+                      span({ isRendered: (step1.inputLinkedIn.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                    ])
                   ]),
+
+                  div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                      label({ className: "control-label" }, ["ORCID iD"]),
+                      input({
+                        type: "text",
+                        name: "orcid",
+                        id: "inputOrcid",
+                        value: this.state.formData.orcid,
+                        onChange: this.handleChange,
+                        disabled: false,
+                        className: step1.inputOrcid.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                        required: true
+                      }),
+                      span({ isRendered: (step1.inputOrcid.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                    ]),
+
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                      label({ className: "control-label" }, ["Researcher Gate ID"]),
+                      input({
+                        type: "text",
+                        name: "researcherGate",
+                        id: "inputResearcherGate",
+                        value: this.state.formData.researcherGate,
+                        onChange: this.handleChange,
+                        disabled: false,
+                        className: step1.inputResearcherGate.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                        required: true
+                      })
+                    ])
+                  ])
                 ]),
 
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "1.2 Principal Investigator* ",
+                      "1.3 Principal Investigator* ",
                       span({}, ["By typing in the name of the principal investigator, I certify that he or she is aware of this research study."]),]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -436,14 +488,14 @@ class DataAccessRequestApplication extends Component {
                       className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                       required: true
                     }),
-                    span({ className: "cancel-color required-field-error-span", isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages) }, ["Required field"]),
-                  ]),
+                    span({ className: "cancel-color required-field-error-span", isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages) }, ["Required field"])
+                  ])
                 ]),
 
                 div({ className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                     label({ className: "control-label rp-title-question" }, [
-                      "1.3 Descriptive Title of Project* ",
+                      "1.4 Descriptive Title of Project* ",
                       span({}, ["Please note that coordinated requests by collaborating institutions should each use the same title."]),
                     ]),
                   ]),
@@ -458,8 +510,8 @@ class DataAccessRequestApplication extends Component {
                       required: true,
                       disabled: this.state.formData.dar_code !== null
                     }),
-                    span({ className: "cancel-color required-field-error-span", isRendered: step1.inputTitle.invalid && showValidationMessages }, ["Required field"]),
-                  ]),
+                    span({ className: "cancel-color required-field-error-span", isRendered: step1.inputTitle.invalid && showValidationMessages }, ["Required field"])
+                  ])
                 ]),
 
                 ul({ className: "pager" }, [
@@ -470,16 +522,15 @@ class DataAccessRequestApplication extends Component {
                     ]),
                     li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save" }, [
                       a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                    ]),
-                  ]),
-                ]),
-
-              ]),
+                    ])
+                  ])
+                ])
+              ])
             ]),
 
             //------------------ Step 2--------------------------------------
             div({ isRendered: this.state.step === 2 }, [
-              div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+              div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
 
                 h3({ className: "rp-form-title access-color" }, ["2. Data Access Request"]),
 
@@ -706,20 +757,20 @@ class DataAccessRequestApplication extends Component {
                     li({ className: "next f-right multi-step-next" }, [
                       a({ onClick: this.step3, className: "access-background" }, [
                         "Next Step",
-                        span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, []),]),
+                        span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])])
                     ]),
 
                     li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
                       a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                    ]),
-                  ]),
-                ]),
-              ]),
+                    ])
+                  ])
+                ])
+              ])
             ]),
 
             //------------------ Step 3--------------------------------------
             div({ isRendered: this.state.step === 3 }, [
-              div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+              div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
 
                 h3({ className: "rp-form-title access-color" }, ["3. Research Purpose Statement"]),
 
@@ -734,8 +785,10 @@ class DataAccessRequestApplication extends Component {
                     label({ className: "control-label rp-choice-questions" }, ["3.1.1 Will this data be used exclusively or partially for a commercial purpose?"]),
                   ]),
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit', 
-                    disabled: (this.state.formData.dar_code !== null), required: true }),
+                    YesNoRadioGroup({
+                      value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
+                      disabled: (this.state.formData.dar_code !== null), required: true
+                    }),
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -743,19 +796,23 @@ class DataAccessRequestApplication extends Component {
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({ value: this.state.formData.onegender, onChange: this.handleRadioChange, id: 'onegender', name: 'onegender',
-                     disabled: (this.state.formData.dar_code !== null), required: true }),
-                    div({ isRendered: this.state.formData.onegender === 'true' || this.state.formData.onegender === true,
-                     className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null) }, [
-                      span({}, ["Please specify"]),
-                      OptionsRadioGroup({
-                        value: this.state.formData.gender,
-                        optionLabels: ['Female', "Male"],
-                        optionValues: ['F', 'M'],
-                        name: 'gender',
-                        onChange: this.handleRadioChange
-                      }),
-                    ]),
+                    YesNoRadioGroup({
+                      value: this.state.formData.onegender, onChange: this.handleRadioChange, id: 'onegender', name: 'onegender',
+                      disabled: (this.state.formData.dar_code !== null), required: true
+                    }),
+                    div({
+                      isRendered: this.state.formData.onegender === 'true' || this.state.formData.onegender === true,
+                      className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null)
+                    }, [
+                        span({}, ["Please specify"]),
+                        OptionsRadioGroup({
+                          value: this.state.formData.gender,
+                          optionLabels: ['Female', "Male"],
+                          optionValues: ['F', 'M'],
+                          name: 'rad_gender',
+                          onChange: this.handleRadioChange
+                        })
+                      ])
                   ]),
 
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -828,7 +885,7 @@ class DataAccessRequestApplication extends Component {
                     li({ className: "previous f-left multi-step-prev" }, [
                       a({ onClick: this.step2, className: "access-background" }, [span({
                         className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true"
-                      }, []), "Previous Step"]),
+                      }, []), "Previous Step"])
                     ]),
 
                     li({ className: "next f-right multi-step-next" }, [
@@ -839,63 +896,100 @@ class DataAccessRequestApplication extends Component {
 
                     li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
                       a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                    ]),
-                  ]),
-                ]),
-              ]),
+                    ])
+                  ])
+                ])
+              ])
             ]),
-            
+
             //------------------ Step 4--------------------------------------
             div({ isRendered: this.state.step === 4 }, [
-              div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+              div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
 
-                h3({ className: "rp-form-title access-color" }, ["4. Attestation Statement"]),
+                h3({ className: "rp-form-title access-color" }, ["4. Data Use Attestation"]),
 
-                div({ className: "row no-margin form-group" }, [
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    label({ className: "control-label rp-title-question" }, ["I attest to the following:"]),
+                div({ className: "form-group" }, [
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({ className: "control-label rp-title-question" }, [
+                      "4.1 Data Access Agreement*",
+                      // span({ className: "default-color" }, ["Please download, complete, and upload the Data Access Agreement"]),
+                    ])
                   ]),
 
-                  ol({ className: "rp-accept-statement rp-last-group" }, [
-                    li({}, ["Data will only be used for approved research"]),
-                    li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
-                    li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),
-                    li({}, ["No attempts will be made to identify individual study participants from whom data were obtained."]),
-                    li({}, ["Data will not be sold or shared with third parties."]),
-                    li({}, ["The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data."]),
-                  ]),
-                ]),
-
-                div({ className: "row no-margin" }, [
-                  div({ isRendered: showValidationMessages, className: "rp-alert" }, [
-                    Alert({ id: "formErrors", type: "danger", title: "Please, complete all required fields." })
-                  ]),
-
-                  div({ isRendered: problemSavingRequest, className: "rp-alert" }, [
-                    Alert({ id: "problemSavingRequest", type: "danger", title: "Some errors occurred, Data Access Request Application couldn't be created." })
-                  ]),
-                ]),
-
-                ul({ className: "pager", style: { "marginTop": "0 !important" } }, [
-                  div({ className: "row multi-step-pager" }, [
-                    li({ className: "previous f-left multi-step-prev" }, [
-                      a({ onClick: this.step3, className: "access-background" }, [
-                        span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"]),
+                  div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                      label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and complete it"])
                     ]),
 
-                    li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-next" }, [
-                      a({ onClick: this.attestAndSave, className: "access-background bold" }, ["Attest and Send"]),
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                      button({ id: "btn_downloadAgreement", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadAgreement }, [
+                        span({ className: "glyphicon glyphicon-download" }),
+                        "Download Agreement Template",
+                      ])
                     ]),
-                    ConfirmationDialog({
-                      title: 'Data Request Confirmation', color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
-                    }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
-                    li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
-                      a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                      label({ className: "control-label default-color" }, ["2. Upload your signed version of the Data Access Agreement"])
                     ]),
-                    ConfirmationDialog({
-                      title: 'Save changes?', color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
-                    }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
+
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                      div({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn download-pdf hover-color" }, [
+                        span({ className: "glyphicon glyphicon-upload" }),
+                        "Upload Signed Agreement",
+                        input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
+                      ]),
+                      p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name])
+                    ])
+                  ]),
+
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({ className: "control-label rp-title-question" }, ["4.2 Attestation Statement"]),
+                  ]),
+
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                    label({ className: "control-label default-color" }, ["I attest to the following:"]),
+
+                    ol({ className: "rp-accept-statement rp-last-group" }, [
+                      li({}, ["Data will only be used for approved research"]),
+                      li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
+                      li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),
+                      li({}, ["No attempts will be made to identify individual study participants from whom data were obtained."]),
+                      li({}, ["Data will not be sold or shared with third parties."]),
+                      li({}, ["The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data."]),
+                    ]),
+                  ]),
+
+                  div({ className: "row no-margin" }, [
+                    div({ isRendered: showValidationMessages, className: "rp-alert" }, [
+                      Alert({ id: "formErrors", type: "danger", title: "Please, complete all required fields." })
+                    ]),
+
+                    div({ isRendered: problemSavingRequest, className: "rp-alert" }, [
+                      Alert({ id: "problemSavingRequest", type: "danger", title: "Some errors occurred, Data Access Request Application couldn't be created." })
+                    ]),
+                  ]),
+
+                  ul({ className: "pager", style: { "marginTop": "0 !important" } }, [
+                    div({ className: "row multi-step-pager" }, [
+                      li({ className: "previous f-left multi-step-prev" }, [
+                        a({ onClick: this.step3, className: "access-background" }, [
+                          span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"]),
+                      ]),
+
+                      li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-next" }, [
+                        a({ onClick: this.attestAndSave, className: "access-background bold" }, ["Attest and Send"]),
+                      ]),
+                      ConfirmationDialog({
+                        title: 'Data Request Confirmation', color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                      }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
+
+                      li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
+                        a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
+                      ]),
+                      ConfirmationDialog({
+                        title: 'Save changes?', color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                      }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
+                    ])
                   ])
                 ])
               ])
@@ -908,5 +1002,4 @@ class DataAccessRequestApplication extends Component {
 }
 
 export default DataAccessRequestApplication;
-
 

@@ -131,6 +131,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     return (
 
       BaseModal({
+        id: "connectDatasetModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,

@@ -136,6 +136,7 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
     return (
 
       BaseModal({
+        id: "addOntologiesModal",
           showModal: this.props.showModal,
           onRequestClose: this.closeHandler,
           onAfterOpen: this.afterOpenHandler,
