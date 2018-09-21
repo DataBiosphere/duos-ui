@@ -18,7 +18,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   componentWillMount() {
     console.log(this.props);
     this.initForm();
-
   }
 
   initForm() {
@@ -53,7 +52,21 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         mode: 'Add',
         roles: [],
         displayName: '',
-        email: ''
+        email: '',
+        delegateDacUser: {
+          needsDelegation: false,
+          delegateCandidates: []
+        },
+        delegateDataOwner: {
+          needsDelegation: false,
+          delegateCandidates: []
+        },
+        delegateMemberRequired: false,
+        newAlternativeUserNeeded: {},
+        wasChairperson: false,
+        wasMember: false,
+        wasDataOwner: false,
+        wasResearcher: false,
       });
     }
   }
@@ -209,7 +222,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               this.setState(prev => {
                 prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
                 prev.delegateDacUser.needsDelegation = result.needsDelegation;;
-                // prev.delegateMemberRequired = false;
                 return prev;
               });
               return;
@@ -237,12 +249,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         this.searchDACUsers(USER_ROLES.dataOwner).then(
           (result) => {
             if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.dataOwner)) {
-              // $scope.delegateDataOwner.delegateCandidates = result.delegateCandidates;
-              // $scope.delegateDataOwner.needsDelegation = result.needsDelegation;
               this.setState(prev => {
                 prev.delegateDataOwner.delegateCandidates = result.delegateCandidates;
                 prev.delegateDataOwner.needsDelegation = result.needsDelegation;
-                // prev.delegateMemberRequired = false;
                 return prev;
               });
               return;
@@ -250,12 +259,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           });
       } else {
         this.closeNoAvailableCandidatesAlert(USER_ROLES.dataOwner);
-        // $scope.delegateDataOwner.delegateCandidates = [];
-        // $scope.delegateDataOwner.needsDelegation = false;
         this.setState(prev => {
           prev.delegateDataOwner.delegateCandidates = [];
           prev.delegateDataOwner.needsDelegation = false;
-          // prev.delegateMemberRequired = false;
           return prev;
         });
       }
@@ -304,7 +310,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   errorNoAvailableCandidates = (role) => {
-    this.state.newAlternativeUserNeeded[role] = true;
+    this.setState(prev =>{ prev.newAlternativeUserNeeded[role] = true; return prev});
     this.alerts.push({
       type: 'danger',
       title: "Edition can't be made!",
@@ -525,7 +531,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
                 this.state.delegateDacUser.delegateCandidates.map(user => {
                   return h(Fragment, {}, [
-                    option({  value: user }, [user.displayName])
+                    option({ value: user }, [user.displayName])
                   ]);
                 })
               ]),
@@ -546,7 +552,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
                 this.state.delegateDataOwner.delegateCandidates.map(user => {
                   return h(Fragment, {}, [
-                    option({  value: user }, [user.displayName])
+                    option({ value: user }, [user.displayName])
                   ]);
                 })
               ]),

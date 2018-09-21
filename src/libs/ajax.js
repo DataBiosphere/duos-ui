@@ -99,9 +99,13 @@ export const User = {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
     const user = await res.json();
-    return user; 
+    return user;
   }
 };
+
+export const Match = {
+  
+}
 
 export const Votes = {
   find: async (consentId, voteId) => {
@@ -280,7 +284,7 @@ export const Files = {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     const res = await getPDF(url);
     const respHeaders = res.headers;
-    return {'file': await res.blob(), 'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1]}
+    return { 'file': await res.blob(), 'fileName': respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1] }
   },
 
   getByEmail: async email => {
@@ -533,7 +537,7 @@ export const Election = {
 
   updateElection: async (electionId, document) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(),  Config.jsonBody(document), { method: 'PUT' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return res.json();
   },
 
@@ -702,7 +706,7 @@ export const DAR = {
     return pdars;
   },
 
-  getDarFields: async (id, fields)  => {
+  getDarFields: async (id, fields) => {
     const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
@@ -944,7 +948,7 @@ export const DataAccess = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   }
-  
+
 };
 
 
@@ -955,6 +959,7 @@ const fetchOk = async (...args) => {
 
 const getFile = async (URI) => {
   const res = await fetchOk(URI, Config.fileBody());
+  console.log(res);
   return res.blob();
 };
 
