@@ -25,7 +25,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
     //if reminder sent succesfully
     const dialogTitle = "Email Notification Sent";
     const dialogColor = this.props.color;
-    // const reminderSent = true;
+    const reminderSent = this.props.reminderSent;
 
     //if error sending reminder
     // const dialogTitle = "Email Notification Error";
@@ -67,8 +67,8 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
           div({
             id: "lbl_vote_" + this.props.id, className: "col-lg-4 col-md-4 col-sm-9 col-xs-9 vote-label bold"
           }, [
-              span({ isRendered: this.props.data.vote.vote === true || this.props.data.vote.vote === 'true' || this.props.data.vote.vote === '1' }, ["YES"]),
-              span({ isRendered: this.props.data.vote.vote === false || this.props.data.vote.vote === 'false' || this.props.data.vote.vote === '0' }, ["NO"]),
+              span({ isRendered: this.props.data.vote.vote === '1' || this.props.data.vote.vote === true || this.props.data.vote.vote === 'true'  }, ["YES"]),
+              span({ isRendered: this.props.data.vote.vote === '0' || this.props.data.vote.vote === false || this.props.data.vote.vote === 'false'}, ["NO"]),
               span({ isRendered: this.props.data.vote.vote === null }, ["---"]),
             ]),
 

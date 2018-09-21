@@ -110,15 +110,16 @@ class DulResultRecords extends Component {
   };
 
   downloadDUL = (e) => {
-    const consentId = this.state.consentId; //  this.props.match.params.consentId;
-    console.log(consentId);
-    Files.getDulFile(consentId).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(this.state.consentName, blob);
-        }
-      }
-    );
+    // const consentId = this.state.consentId; //  this.props.match.params.consentId;
+    // console.log(consentId);
+    // Files.getDulFile(consentId).then(
+    //   blob => {
+    //     if (blob.size !== 0) {
+    //       this.createBlobFile(this.state.consentName, blob);
+    //     }
+    //   }
+    // );
+    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
   };
 
   positiveVote = (e) => {

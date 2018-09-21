@@ -4,6 +4,9 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { HelpModal } from '../components/modals/HelpModal';
 import { SearchBox } from '../components/SearchBox';
+import { Help } from "../libs/ajax";
+import { Storage } from '../libs/storage';
+import * as Utils from "../libs/utils";
 
 class HelpReports extends Component {
 
@@ -13,22 +16,27 @@ class HelpReports extends Component {
       value: '',
       limit: 10,
       currentPage: 1,
-      reports: [
-        {
-          reportId: 'some id',
-          userName: 'John Hongo',
-          createDate: '2018-05-22',
-          subject: 'some subject',
-          description: 'some description'
-        }
-      ],
+      reports: [],
       showHelpModal: false,
       isAdmin: false
-
-    }
+    };
 
     this.myHandler = this.myHandler.bind(this);
   }
+
+  async getReportsList() {
+    const reports = await Help.findHelpMeReports(Storage.getCurrentUser().dacUserId);
+    this.setState(prev => {
+      prev.currentPage = 1;
+      prev.reports = reports;
+      return prev;
+    });
+  }
+
+
+  componentWillMount() {
+    this.getReportsList();
+  };
 
   helpModal = (e) => {
     this.setState(prev => {
@@ -55,7 +63,7 @@ class HelpReports extends Component {
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -63,7 +71,22 @@ class HelpReports extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
+
+  handlePageChange = page => {
+    this.setState(prev => {
+      prev.currentPage = page;
+      return prev;
+    });
+  };
+
+  handleSizeChange = size => {
+    this.setState(prev => {
+      prev.limit = size;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
 
   render() {
     const { searchDulText } = this.state;
@@ -114,7 +137,7 @@ class HelpReports extends Component {
               div({ className: "row no-margin" }, [
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.reportId]),
                 div({ isRendered: this.state.isAdmin, className: "cell-body text col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [report.userName]),
-                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.createDate]),
+                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [Utils.formatDate(report.createDate)]),
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-3 col-xs-3" : "") }, [report.subject]),
                 div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-4 col-xs-4" : !this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-5 col-xs-5" : "") }, [report.description]),
               ]),
