@@ -259,12 +259,12 @@ class DataAccessRequestApplication extends Component {
 
     return (
 
-      div({ className: "container " }, [
+      div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({
-              imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application",
-              description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
+              id: "requestApplication", imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access",
+              title: "Data Access Request Application", description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
             }),
           ]),
         ]),
@@ -274,6 +274,7 @@ class DataAccessRequestApplication extends Component {
             div({ className: "row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin" }, [
 
               a({
+                id: "btn_step_1",
                 onClick: this.step1,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 1 ? 'active' : '')
@@ -284,6 +285,7 @@ class DataAccessRequestApplication extends Component {
                 ]),
 
               a({
+                id: "btn_step_2",
                 onClick: this.step2,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 2 ? 'active' : '')
@@ -294,6 +296,7 @@ class DataAccessRequestApplication extends Component {
                 ]),
 
               a({
+                id: "btn_step_3",
                 onClick: this.step3,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 3 ? 'active' : '')
@@ -304,6 +307,7 @@ class DataAccessRequestApplication extends Component {
                 ]),
 
               a({
+                id: "btn_step_4",
                 onClick: this.step4,
                 className: "col-lg-3 col-md-6 col-sm-6 col-xs-12 access-color jumbotron box-vote multi-step-title "
                   + (this.state.step === 4 ? 'active' : '')
@@ -752,7 +756,7 @@ class DataAccessRequestApplication extends Component {
                         value: this.state.formData.gender,
                         optionLabels: ['Female', "Male"],
                         optionValues: ['F', 'M'],
-                        name: 'gender',
+                        name: 'rad_gender',
                         onChange: this.handleRadioChange
                       }),
                     ]),

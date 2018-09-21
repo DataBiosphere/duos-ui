@@ -77,6 +77,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     return (
 
       BaseModal({
+        id: "applicationSummaryModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         color: "access",

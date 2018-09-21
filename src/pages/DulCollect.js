@@ -118,7 +118,7 @@ class DulCollect extends Component {
               h4({}, ["Data Use Limitations"]),
             ]),
             div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
             ])
           ]),
 
@@ -166,7 +166,7 @@ class DulCollect extends Component {
               row.map((vm, vIndex) => {
                 return h(Fragment, { key: vIndex }, [
                   SingleResultBox({
-                    id: "dulSingleResult" + vIndex,
+                    id: "dulSingleResult_" + vIndex,
                     color: "dul",
                     data: vm
                   })

@@ -115,7 +115,7 @@ class DataOwnerReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ imgSrc: "../images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
+            PageHeading({ id: "dataOwnerReview", imgSrc: "/images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
           ]),
         ]),
         hr({ className: "section-separator" }),
@@ -125,7 +125,7 @@ class DataOwnerReview extends Component {
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
             div({ className: "panel-heading cm-boxhead dataset-color" }, [
               h4({}, ["Research Purpose",
-                a({ className: "enabled hover-color application-link", onClick: this.openApplication }, ["Application summary"]),
+                a({ id:"link_applicationSummary", className: "enabled hover-color application-link", onClick: this.openApplication }, ["Application summary"]),
               ]),
               ApplicationSummaryModal({
                 showModal: this.state.showApplicationSummaryModal, onOKRequest: this.okApplicationSummaryModal, onCloseRequest: this.closeApplicationSummaryModal
@@ -137,14 +137,14 @@ class DataOwnerReview extends Component {
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
             div({ className: "panel-heading cm-boxhead dataset-color" }, [
               h4({}, ["Data Use Limitations",
-                a({ className: "enabled hover-color application-link", onClick: this.openDataset }, ["Dataset summary"]),
+                a({ id:"link_datasetSummary", className: "enabled hover-color application-link", onClick: this.openDataset }, ["Dataset summary"]),
               ]),
               DatasetSummaryModal({
                 showModal: this.state.showDatasetSummaryModal, onOKRequest: this.okDatasetSummaryModal, onCloseRequest: this.closeDatasetSummaryModal
               }),
             ]),
             div({ id: "dul", className: "panel-body cm-boxbody" }, [
-              button({ className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
             ]),
           ]),
         ]),
