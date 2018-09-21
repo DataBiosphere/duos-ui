@@ -136,7 +136,7 @@
 
 .auth-clear {
   float: left;
-  margin: 2px 0 0 15px;
+  margin: 2px 0 0 10px;
 }
 
 .auth-message {
@@ -144,3 +144,37 @@
   font-style: italic;
   display: block;
 }
+
+.download-pdf {
+  height: 35px;
+}
+
+.download-pdf .glyphicon {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.fileUpload.download-pdf {
+  height: 35px;
+  padding-top: 6px;
+  margin-bottom: 10px;
+  -webkit-transition: background 0.3s ease;
+  -o-transition: background 0.3s ease;
+  transition: background 0.3s ease;
+}
+
+.fileUpload.download-pdf:hover {
+  background: #2FA4E7 !important;
+  color: #ffffff !important;
+}
+
+.fileUpload.download-pdf .fileName {
+  padding-top: 10px;
+}
+
+.fileUpload.download-pdf .glyphicon {
+  margin-top: 2px;
+}
+
+
+
