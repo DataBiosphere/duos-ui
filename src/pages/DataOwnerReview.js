@@ -4,18 +4,26 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
-
+import { DAR } from '../libs/ajax';
+const APPROVE = 0;
+const DISAPPROVE = 1;
 class DataOwnerReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      pendingCase: {
+        voteId: '',
+        referenceId: '',
+        dataSetId: ''
+      },
       value: '',
       voteStatus: null,
       rationale: '',
       darFields: {
-        rus: ' rus rus rus rus rus ......'
-      }
+        rus: ''
+      },
+      isFormDisabled: false
     };
 
     this.myHandler = this.myHandler.bind(this);
@@ -31,11 +39,33 @@ class DataOwnerReview extends Component {
     this.openDataset = this.openDataset.bind(this);
     this.closeDatasetSummaryModal = this.closeDatasetSummaryModal.bind(this);
     this.okDatasetSummaryModal = this.okDatasetSummaryModal.bind(this);
+    this.submit = this.submit.bind(this);
   }
   componentWillMount () {
-    getDarFields
+
+    // console.log(this.props.match.params.referenceId);
+
+
+
+     this.getDarInfo();
   }
 
+  async getDarInfo() {
+    console.log("que onda!?= ", this.state.pendingCase.dataSetId);
+    const darRus = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
+
+    this.setState(prev => {
+      prev.darFields.rus = darRus.rus;
+      return prev;
+    });
+
+    this.setState(prev => {
+      prev.pendingCase.voteId = this.props.match.params.voteId;
+      prev.pendingCase.referenceId = this.props.match.params.referenceId;
+      prev.pendingCase.dataSetId = this.props.match.params.dataSetId;
+      return prev;
+    });
+  }
 
   myHandler(event) {
     // TBD
@@ -114,6 +144,21 @@ class DataOwnerReview extends Component {
     });
   };
 
+  submit = (answer, rationale) => {
+    console.log(answer, " ---- ", rationale);
+
+    switch (answer) {
+      case APPROVE: {
+        break;
+      }
+      case DISAPPROVE: {
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  };
 
   render() {
     return (
@@ -122,7 +167,7 @@ class DataOwnerReview extends Component {
         div({className: "row no-margin"}, [
           div({className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding"}, [
             PageHeading({
-              imgSrc: "../images/icon_dataset_review.png",
+              imgSrc: "/images/icon_dataset_review.png",
               iconSize: "large",
               color: "dataset",
               title: "Dataset Access Request Review",
@@ -168,6 +213,12 @@ class DataOwnerReview extends Component {
                 onClick: this.downloadDUL
               }, ["Download Data Use Letter"]),
             ]),
+            div({id: "adsfasdf", className: "panel-body cm-boxbody"}, [
+              button({
+                className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color",
+                onClick: this.handleRadioChange
+              }, ["JJJJJJJJJJJJJJJJJILADA"]),
+            ]),
           ]),
         ]),
 
@@ -177,14 +228,15 @@ class DataOwnerReview extends Component {
               id: "dataOwnerReview",
               color: "dataset",
               title: "Your Vote",
-              isDisabled: "isFormDisabled",
+              isDisabled: this.state.isFormDisabled,
               status: this.state.voteStatus,
               radioType: "multiple",
               radioLabels: ['Approve', "Disapprove", "Raise a concern"],
               radioValues: ['1', '0', "2"],
               showAlert: false,
               alertMessage: "something",
-              action: {label: "Vote", handler: this.submit}
+              action: {label: "Vote", handler: this.submit
+              }
             }),
           ]),
         ]),
