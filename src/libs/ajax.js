@@ -274,8 +274,8 @@ export const DAR = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
-
-  findInvalidDataAccessUseRestriction: async () => {
+  
+  findDataAccessInvalidUseRestriction: async () => {
     const url = `${await Config.getApiUrl()}/dar/invalid`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
@@ -691,14 +691,14 @@ export const PendingCases = {
     return await res.json();
   },
 
-  findSummary: async (data) => {
+  findSummary: async () => {
     const consentUrl = `${await Config.getApiUrl()}/consent/cases/summary`;
     const dataAccessUrl = `${await Config.getApiUrl()}/dataRequest/cases/summary/DataAccess`;
     const rpUrl = `${await Config.getApiUrl()}/dataRequest/cases/summary/RP`;
     const matchUrl = `${await Config.getApiUrl()}/dataRequest/cases/matchsummary`;
     const accessResponse = await fetchOk(consentUrl, Config.authOpts());
     const access = await accessResponse.json();
-    data = dataTemplate;
+    let data = dataTemplate;
     data.dulTotal[1][1] = access.reviewedPositiveCases + access.reviewedNegativeCases;
     // pending cases
     data.dulTotal[2][1] = access.pendingCases;
