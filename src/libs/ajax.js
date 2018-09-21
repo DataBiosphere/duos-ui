@@ -399,9 +399,10 @@ export const Election = {
   findRPElectionReview: async (electionId, isFinalAccess) => {
     const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json().catch(function () {
-      return null;
-    });
+    if (res.status === 204) {
+      return {};
+    }
+    return await res.json();
   },
 
   updateElection: async (electionId, document) => {
@@ -669,6 +670,13 @@ export const Votes = {
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), {method: 'DELETE'}]));
     return res.json();
   },
+
+  getDarFinalAccessVote: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${electionId}/vote/final/`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
 };
 
 export const DarCases = {

@@ -146,21 +146,23 @@ class AccessResultRecords extends Component {
   //   });
   // }
 
-  async initState()  {
+  async initState() {
 
     // formerly resolved on route ....
     const referenceId = this.props.match.params.referenceId;
     const electionId = this.props.match.params.electionId;
-    const darElection = Election.findElectionById(electionId);
-    const hasUseRestriction = DAR.hasUseRestriction(referenceId);
-  
+    const darElection = await Election.findElectionById(electionId);
+    const hasUseRestriction = await DAR.hasUseRestriction(referenceId);
+
+    console.log(darElection);
+
     const oneAtATime = false;
     const darInfo = await DAR.describeDar(darElection.referenceId);
-  
+
     let hideMatch = false;
     let match = "-1";
     let createDate = null;
-  
+
     let election;
     let downloadUrl;
     let dulName;
@@ -169,107 +171,137 @@ class AccessResultRecords extends Component {
     let chartDataDUL;
     let mrDUL;
     let sDUL;
-  
-  
-    if (electionId === null) {
-      this.props.history.push('reviewed_cases');
-  
-      //-----
-      const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
-  
-      let darElectionReview = {};
-      let daer = await Election.findDataAccessElectionReview(electionId, false);
-      // showAccessData(data);
-      //--------------------
-      // function showAccessData(electionReview) {
-  
-      darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
-  
-      DAR.getDarFields(daer.election.referenceId, "dar_code").then(function (data) {
-        darElectionReview.darCode = data.dar_code;
-      });
-  
-      DAR.getDarFields(daer.election.referenceId, "projectTitle").then(function (data) {
-        darElectionReview.projectTitle = data.projectTitle;
-      });
-  
-      darElectionReview.electionAccess = daer.election;
-      if (daer.election.finalRationale === null) {
-        darElectionReview.electionAccess.finalRationale = '';
+    let darElectionReview = {};
+    let daer = {};
+    let finalDACVote;
+    let rpeReview = {};
+    let electionReview;
+
+    console.log('electionId -------------> ', electionId);
+
+    // if (electionId === null) {
+    //   this.props.history.push('reviewed_cases');
+    // }
+
+    //-----
+    finalDACVote = await Votes.getDarFinalAccessVote(electionId);
+
+    daer = await Election.findDataAccessElectionReview(electionId, false);
+    // showAccessData(data);
+    //--------------------
+    // function showAccessData(electionReview) {
+
+    darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
+
+    DAR.getDarFields(daer.election.referenceId, "dar_code").then(function (data) {
+      darElectionReview.darCode = data.dar_code;
+    });
+
+    DAR.getDarFields(daer.election.referenceId, "projectTitle").then(function (data) {
+      darElectionReview.projectTitle = data.projectTitle;
+    });
+
+    darElectionReview.electionAccess = daer.election;
+    if (daer.election.finalRationale === null) {
+      darElectionReview.electionAccess.finalRationale = '';
+    }
+    darElectionReview.status = daer.election.status;
+    darElectionReview.voteAccessList = this.chunk(daer.reviewVote, 2);
+    darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
+    darElectionReview.voteAgreement = daer.voteAgreement;
+
+
+    // this data is used to construct structured_ files
+    darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
+    darElectionReview.sDAR = daer.election.translatedUseRestriction;
+
+    // }
+
+    //....................
+
+    let data2 = await Election.findRPElectionReview(electionId, false);
+    if (data2 === null) data2 = {};
+
+    if (data2.election !== undefined) {
+      rpeReview.electionRP = data2.election;
+      if (data2.election.finalRationale === null) {
+        rpeReview.electionRP.finalRationale = '';
       }
-      darElectionReview.status = daer.election.status;
-      darElectionReview.voteAccessList = this.chunk(daer.reviewVote, 2);
-      darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
-      darElectionReview.voteAgreement = daer.voteAgreement;
-  
-  
-      // this data is used to construct structured_ files
-      darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
-      darElectionReview.sDAR = daer.election.translatedUseRestriction;
-  
-      // }
-  
-      //....................
-      let rpeReview = {};
-      let data2 = await Election.findRPElectionReview(electionId, false);
-      if (data2.election !== undefined) {
-        rpeReview.electionRP = data2.election;
-        if (data2.election.finalRationale === null) {
-          rpeReview.electionRP.finalRationale = '';
-        }
-        rpeReview.statusRP = data2.election.status;
-        rpeReview.rpVoteAccessList = this.chunk(data2.reviewVote, 2);
-        rpeReview.chartRP = this.getGraphData(data2.reviewVote);
-        rpeReview.showRPaccordion = true;
-      } else {
-        rpeReview.showRPaccordion = false;
-      }
-  
-  
-      let electionReview = Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
-      election = electionReview.election;
-      if (electionReview.election.finalRationale === null) {
-        election.finalRationale = '';
-      }
-      downloadUrl = this.apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
-      dulName = electionReview.election.dulName;
-      status = electionReview.election.status;
-      voteList = this.chunk(electionReview.reviewVote, 2);
-      chartDataDUL = this.getGraphData(electionReview.reviewVote);
-      mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
-      sDUL = electionReview.election.translatedUseRestriction;
-  
-      const data4 = await Match.findMatch(electionReview.consent.consentId, darElectionReview.electionAccess.referenceId);
-      if (data4.failed !== null && data4.failed !== undefined && data4.failed) {
-        hideMatch = false;
-        match = "-1";
-        createDate = data4.createDate;
-      } else if (data4.match !== null && data4.match !== undefined) {
-        hideMatch = false;
-        match = data4.match;
-        createDate = data4.createDate;
-      } else {
-        hideMatch = true;
-      }
-    };
+      rpeReview.statusRP = data2.election.status;
+      rpeReview.rpVoteAccessList = this.chunk(data2.reviewVote, 2);
+      rpeReview.chartRP = this.getGraphData(data2.reviewVote);
+      rpeReview.showRPaccordion = true;
+    } else {
+      rpeReview.showRPaccordion = false;
+    }
+
+
+    electionReview = Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
+    election = electionReview.election;
+    if (electionReview.election.finalRationale === null) {
+      election.finalRationale = '';
+    }
+    downloadUrl = this.apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
+    dulName = electionReview.election.dulName;
+    status = electionReview.election.status;
+    voteList = this.chunk(electionReview.reviewVote, 2);
+    chartDataDUL = this.getGraphData(electionReview.reviewVote);
+    mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
+    sDUL = electionReview.election.translatedUseRestriction;
+
+    const data4 = await Match.findMatch(electionReview.consent.consentId, darElectionReview.electionAccess.referenceId);
+    if (data4.failed !== null && data4.failed !== undefined && data4.failed) {
+      hideMatch = false;
+      match = "-1";
+      createDate = data4.createDate;
+    } else if (data4.match !== null && data4.match !== undefined) {
+      hideMatch = false;
+      match = data4.match;
+      createDate = data4.createDate;
+    } else {
+      hideMatch = true;
+    }
+
     //------------------------------------
-  
-  
-  
+
+
+    this.setState({
+      voteStatus: status,
+      createDate: createDate,
+      enableFinalButton: false,
+      enableAgreementButton: false,
+      hasUseRestriction: hasUseRestriction,
+      projectTitle: darElectionReview.projectTitle,
+      darCode: darElectionReview.darCode,
+      isQ1Expanded: false,
+      isQ2Expanded: false,
+      isDulExpanded: false,
+      match: true,
+      election: election,
+      electionAccess: darElectionReview.electionAccess,
+      electionRP: rpeReview,
+      voteAgreement: darElectionReview.voteAgreement,
+      voteList: voteList,
+      voteAccessList: darElectionReview.voteAccessList,
+      rpVoteAccessList: rpeReview.rpVoteAccessList,
+      darInfo: darInfo,
+    },
+      () => { console.log(this.state) });
+
     // $scope.downloadDUL = function () {
     //   cmFilesService.getDULFile($scope.electionReview.consent.consentId, $scope.electionReview.election.dulName);
     // };
-  
+
     // $scope.back = function () {
     //   $state.go($rootScope.pathFrom);
     //   $rootScope.pathFrom = undefined;
     // };
     // $scope.download = downloadFileService.downloadFile;
-  
+
     // $scope.downloadDAR = function () {
     //   cmFilesService.getDARFile($scope.darElection.referenceId);
     // };
-  
+
   }
 
 
@@ -1020,130 +1052,130 @@ export default AccessResultRecords;
 
 
 
-//-------------------------------------------------
+// //-------------------------------------------------
 
-const init2 = async (apiUrl) => {
+// const init2 = async (apiUrl) => {
 
-  // formerly resolved on route ....
-  const referenceId = this.props.match.params.referenceId;
-  const electionId = this.props.match.params.electionId;
-  const darElection = Election.findElectionById(electionId);
-  const hasUseRestriction = DAR.hasUseRestriction(referenceId);
+//   // formerly resolved on route ....
+//   const referenceId = this.props.match.params.referenceId;
+//   const electionId = this.props.match.params.electionId;
+//   const darElection = Election.findElectionById(electionId);
+//   const hasUseRestriction = DAR.hasUseRestriction(referenceId);
 
-  const oneAtATime = false;
-  const darInfo = await DAR.describeDar(darElection.referenceId);
+//   const oneAtATime = false;
+//   const darInfo = await DAR.describeDar(darElection.referenceId);
 
-  let hideMatch = false;
-  let match = "-1";
-  let createDate = null;
+//   let hideMatch = false;
+//   let match = "-1";
+//   let createDate = null;
 
-  let election;
-  let downloadUrl;
-  let dulName;
-  let status;
-  let voteList;
-  let chartDataDUL;
-  let mrDUL;
-  let sDUL;
-
-
-  if (electionId === null) {
-    this.props.history.push('reviewed_cases');
-
-    //-----
-    const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
-
-    let darElectionReview = {};
-    let daer = await Election.findDataAccessElectionReview(electionId, false);
-    // showAccessData(data);
-    //--------------------
-    // function showAccessData(electionReview) {
-
-    darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
-
-    DAR.getDarFields(daer.election.referenceId, "dar_code").then(function (data) {
-      darElectionReview.darCode = data.dar_code;
-    });
-
-    DAR.getDarFields(daer.election.referenceId, "projectTitle").then(function (data) {
-      darElectionReview.projectTitle = data.projectTitle;
-    });
-
-    darElectionReview.electionAccess = daer.election;
-    if (daer.election.finalRationale === null) {
-      darElectionReview.electionAccess.finalRationale = '';
-    }
-    darElectionReview.status = daer.election.status;
-    darElectionReview.voteAccessList = this.chunk(daer.reviewVote, 2);
-    darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
-    darElectionReview.voteAgreement = daer.voteAgreement;
+//   let election;
+//   let downloadUrl;
+//   let dulName;
+//   let status;
+//   let voteList;
+//   let chartDataDUL;
+//   let mrDUL;
+//   let sDUL;
 
 
-    // this data is used to construct structured_ files
-    darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
-    darElectionReview.sDAR = daer.election.translatedUseRestriction;
+//   if (electionId === null) {
+//     this.props.history.push('reviewed_cases');
 
-    // }
+//     //-----
+//     const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
 
-    //....................
-    let rpeReview = {};
-    let data2 = await Election.findRPElectionReview(electionId, false);
-    if (data2.election !== undefined) {
-      rpeReview.electionRP = data2.election;
-      if (data2.election.finalRationale === null) {
-        rpeReview.electionRP.finalRationale = '';
-      }
-      rpeReview.statusRP = data2.election.status;
-      rpeReview.rpVoteAccessList = this.chunk(data2.reviewVote, 2);
-      rpeReview.chartRP = this.getGraphData(data2.reviewVote);
-      rpeReview.showRPaccordion = true;
-    } else {
-      rpeReview.showRPaccordion = false;
-    }
+//     let darElectionReview = {};
+//     let daer = await Election.findDataAccessElectionReview(electionId, false);
+//     // showAccessData(data);
+//     //--------------------
+//     // function showAccessData(electionReview) {
 
+//     darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
 
-    let electionReview = Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
-    election = electionReview.election;
-    if (electionReview.election.finalRationale === null) {
-      election.finalRationale = '';
-    }
-    downloadUrl = apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
-    dulName = electionReview.election.dulName;
-    status = electionReview.election.status;
-    voteList = this.chunk(electionReview.reviewVote, 2);
-    chartDataDUL = this.getGraphData(electionReview.reviewVote);
-    mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
-    sDUL = electionReview.election.translatedUseRestriction;
+//     DAR.getDarFields(daer.election.referenceId, "dar_code").then(function (data) {
+//       darElectionReview.darCode = data.dar_code;
+//     });
 
-    const data4 = await Match.findMatch(electionReview.consent.consentId, darElectionReview.electionAccess.referenceId);
-    if (data4.failed !== null && data4.failed !== undefined && data4.failed) {
-      hideMatch = false;
-      match = "-1";
-      createDate = data4.createDate;
-    } else if (data4.match !== null && data4.match !== undefined) {
-      hideMatch = false;
-      match = data4.match;
-      createDate = data4.createDate;
-    } else {
-      hideMatch = true;
-    }
-  };
-  //------------------------------------
+//     DAR.getDarFields(daer.election.referenceId, "projectTitle").then(function (data) {
+//       darElectionReview.projectTitle = data.projectTitle;
+//     });
+
+//     darElectionReview.electionAccess = daer.election;
+//     if (daer.election.finalRationale === null) {
+//       darElectionReview.electionAccess.finalRationale = '';
+//     }
+//     darElectionReview.status = daer.election.status;
+//     darElectionReview.voteAccessList = this.chunk(daer.reviewVote, 2);
+//     darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
+//     darElectionReview.voteAgreement = daer.voteAgreement;
 
 
+//     // this data is used to construct structured_ files
+//     darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
+//     darElectionReview.sDAR = daer.election.translatedUseRestriction;
 
-  // $scope.downloadDUL = function () {
-  //   cmFilesService.getDULFile($scope.electionReview.consent.consentId, $scope.electionReview.election.dulName);
-  // };
+//     // }
 
-  // $scope.back = function () {
-  //   $state.go($rootScope.pathFrom);
-  //   $rootScope.pathFrom = undefined;
-  // };
-  // $scope.download = downloadFileService.downloadFile;
+//     //....................
+//     let rpeReview = {};
+//     let data2 = await Election.findRPElectionReview(electionId, false);
+//     if (data2.election !== undefined) {
+//       rpeReview.electionRP = data2.election;
+//       if (data2.election.finalRationale === null) {
+//         rpeReview.electionRP.finalRationale = '';
+//       }
+//       rpeReview.statusRP = data2.election.status;
+//       rpeReview.rpVoteAccessList = this.chunk(data2.reviewVote, 2);
+//       rpeReview.chartRP = this.getGraphData(data2.reviewVote);
+//       rpeReview.showRPaccordion = true;
+//     } else {
+//       rpeReview.showRPaccordion = false;
+//     }
 
-  // $scope.downloadDAR = function () {
-  //   cmFilesService.getDARFile($scope.darElection.referenceId);
-  // };
 
-}
+//     let electionReview = Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
+//     election = electionReview.election;
+//     if (electionReview.election.finalRationale === null) {
+//       election.finalRationale = '';
+//     }
+//     downloadUrl = apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
+//     dulName = electionReview.election.dulName;
+//     status = electionReview.election.status;
+//     voteList = this.chunk(electionReview.reviewVote, 2);
+//     chartDataDUL = this.getGraphData(electionReview.reviewVote);
+//     mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
+//     sDUL = electionReview.election.translatedUseRestriction;
+
+//     const data4 = await Match.findMatch(electionReview.consent.consentId, darElectionReview.electionAccess.referenceId);
+//     if (data4.failed !== null && data4.failed !== undefined && data4.failed) {
+//       hideMatch = false;
+//       match = "-1";
+//       createDate = data4.createDate;
+//     } else if (data4.match !== null && data4.match !== undefined) {
+//       hideMatch = false;
+//       match = data4.match;
+//       createDate = data4.createDate;
+//     } else {
+//       hideMatch = true;
+//     }
+//   };
+//   //------------------------------------
+
+
+
+//   // $scope.downloadDUL = function () {
+//   //   cmFilesService.getDULFile($scope.electionReview.consent.consentId, $scope.electionReview.election.dulName);
+//   // };
+
+//   // $scope.back = function () {
+//   //   $state.go($rootScope.pathFrom);
+//   //   $rootScope.pathFrom = undefined;
+//   // };
+//   // $scope.download = downloadFileService.downloadFile;
+
+//   // $scope.downloadDAR = function () {
+//   //   cmFilesService.getDARFile($scope.darElection.referenceId);
+//   // };
+
+// }
