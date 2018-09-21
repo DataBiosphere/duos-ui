@@ -9,7 +9,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
+//      value: '',
       currentUser: {},
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
@@ -20,32 +20,32 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   logVote = (e) => {
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
-  }
+  };
 
   componentWillReceiveProps(nextProps) {
-    if (this.state.enableVoteButton === false) {
+    // if (this.state.enableVoteButton === false) {
       this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
-    }
+    // }
   }
 
   yesNoChange = (e, name, value) => {
     this.setState({ voteStatus: value, enableVoteButton: true });
-  }
+  };
 
   optionsChange = (e, name, value) => {
     this.setState({ voteStatus: value, enableVoteButton: true });
-  }
+  };
 
   changeRationale = (e) => {
     this.setState({ rationale: e.target.value, enableVoteButton: true });
-  }
+  };
 
   render() {
 
     let dialogTitle = "";
     let dialogMessage = "";
     let dialogType = "";
-    let dialogLabel = ""
+    let dialogLabel = "";
 
     //if agreement election
     if (this.props.id === "agreement") {
@@ -82,14 +82,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     const { voteStatus, rationale, enableVoteButton } = this.state;
     return (
 
-      div({ id: "box_" + this.props.id }, [
+      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : ""  }, [
         h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
         hr({ className: "box-separator" }),
 
         div({ isRendered: this.props.agreementData !== undefined }, [this.props.agreementData]),
 
         form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
-          fieldset({ disable: this.props.isDisabled }, [
+          fieldset({ disabled: this.props.isDisabled }, [
             div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
@@ -116,14 +116,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group" }, [
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
-                label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
+                label({ id: "lbl_comments_" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: this.state.voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
-                label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
+              span({ isRendered: voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
+                label({ id: "lbl_rationale_" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                 input({
-                  id: "txt_rationale" + this.props.id,
+                  id: "txt_rationale_" + this.props.id,
                   name: "inputRationale" + this.props.id,
                   type: "text",
                   className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",

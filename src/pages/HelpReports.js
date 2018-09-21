@@ -6,6 +6,7 @@ import { HelpModal } from '../components/modals/HelpModal';
 import { SearchBox } from '../components/SearchBox';
 import { Help } from "../libs/ajax";
 import { Storage } from '../libs/storage';
+import * as Utils from "../libs/utils";
 
 class HelpReports extends Component {
 
@@ -103,7 +104,7 @@ class HelpReports extends Component {
             ]),
 
             a({
-              id: 'title_requestHelp',
+              id: 'btn_requestHelp',
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
               onClick: this.helpModal
             }, [
@@ -133,12 +134,12 @@ class HelpReports extends Component {
 
           this.state.reports.filter(this.searchTable(searchDulText)).slice((this.state.currentPage - 1) * this.state.limit, this.state.currentPage * this.state.limit).map((report, ix) => {
             return h(Fragment, { key: ix }, [
-              div({ className: "row no-margin" }, [
-                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.reportId]),
-                div({ isRendered: this.state.isAdmin, className: "cell-body text col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [report.userName]),
-                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [new Date(report.createDate).toLocaleDateString()]),
-                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-3 col-xs-3" : "") }, [report.subject]),
-                div({ className: "cell-body text " + (this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-4 col-xs-4" : !this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-5 col-xs-5" : "") }, [report.description]),
+              div({ className: "row no-margin tableRow" }, [
+                div({ id: report.reportId + "_reportId", name: "reportId", className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.reportId]),
+                div({ id: report.reportId + "_userName", name: "userName", isRendered: this.state.isAdmin, className: "cell-body text col-lg-2 col-md-2 col-sm-2 col-xs-2" }, [report.userName]),
+                div({ id: report.reportId + "_date", name: "date", className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [Utils.formatDate(report.createDate)]),
+                div({ id: report.reportId + "_subject", name: "subject", className: "cell-body text " + (this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-3 col-md-3 col-sm-3 col-xs-3" : "") }, [report.subject]),
+                div({ id: report.reportId + "_description", className: "cell-body text " + (this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-4 col-xs-4" : !this.state.isAdmin ? "col-lg-5 col-md-5 col-sm-5 col-xs-5" : "") }, [report.description]),
               ]),
               hr({ className: "table-body-separator" }),
             ]);

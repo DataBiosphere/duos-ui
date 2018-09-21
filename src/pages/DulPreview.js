@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, button, i, span, b, a, h4 } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, h4, hr } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Election, Files } from '../libs/ajax';
 
@@ -22,7 +22,7 @@ class DulPreview extends Component {
 
   async electionReview() {
     const consentId = this.props.match.params.consentId;
-    const consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
+    const consent = await Election.findReviewedElections(consentId, 'TranslateDUL');
     this.setState({consentPreview: consent.consent});
   }
 
@@ -54,20 +54,14 @@ class DulPreview extends Component {
  };
 
   downloadDUL = () => {
-    Files.getDulFile(this.props.match.params.consentId).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(this.state.consentPreview.name, blob);
-        }
-      }
-    );
+    Files.getDulFile(this.props.match.params.consentId, this.state.consentPreview.name);
   };
 
 
   render() {
 
     const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [this.state.consentPreview.groupName]),
+      b({ className: "pipe", isRendered: this.state.consentPreview.groupName }, [this.state.consentPreview.groupName]),
       this.state.consentPreview.name
     ]);
 
@@ -97,6 +91,7 @@ class DulPreview extends Component {
 
         div({ className: "accordion-title dul-color" },
           ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
+        hr({ className: "section-separator" }),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
@@ -107,6 +102,7 @@ class DulPreview extends Component {
               id: "panel_dul",
               className: "panel-body cm-boxbody" }, [
               button({
+                id: "btn_downloadDataUseLetter",
                 className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color",
                 onClick: () => this.downloadDUL()
               }, ["Download Data Use Letter"]),
@@ -117,7 +113,7 @@ class DulPreview extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.consentPreview.translatedUseRestriction])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML:{ __html: this.state.consentPreview.translatedUseRestriction }  }, [])
           ]),
         ]),
       ])

@@ -32,15 +32,15 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
           return (
 
             label({
-              key: this.state.name + ix,
+              key: this.props.id + ix,
               onClick: (e) => this.selectOption(e, this.state.optionValues[ix]),
-              id: "lbl_" + this.state.name + ix,
-              htmlFor: "rad_" + this.state.name + ix,
+              id: "lbl_" + this.props.id + "_" + ix,
+              htmlFor: "rad_" + this.props.id + "_" + ix,
               className: "radio-wrapper"
             }, [
                 input({
                   type: "radio",
-                  id: "rad_" + this.state.name + ix,
+                  id: "rad_" + this.props.id + "_" + ix,
                   name: this.state.name,
                   value: this.state.optionValues[ix],
                   checked: this.state.value === this.state.optionValues[ix],

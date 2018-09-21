@@ -25,7 +25,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
     //if reminder sent succesfully
     const dialogTitle = "Email Notification Sent";
     const dialogColor = this.props.color;
-    const reminderSent = true;
+    const reminderSent = this.props.reminderSent;
 
     //if error sending reminder
     // const dialogTitle = "Email Notification Error";
@@ -39,10 +39,11 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
           div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12" }, [
             span({ isRendered: this.props.data.vote.updateDate !== null, className: "vote-update f-right" }, ["Updated vote!"]),
             input({
+              id: "btn_reminder_" + this.props.id,
               isRendered: this.props.data.vote.vote === null,
               type: "button",
               value: "Send a reminder",
-              disable: this.props.data.buttonDisabled,
+              disabled: this.props.data.buttonDisabled,
               onClick: this.openDialogReminder,
               className: "btn btn-primary vote-reminder f-right " + (this.props.color) + "-color"
             }),
@@ -67,8 +68,8 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
           div({
             id: "lbl_vote_" + this.props.id, className: "col-lg-4 col-md-4 col-sm-9 col-xs-9 vote-label bold"
           }, [
-              span({ isRendered: this.props.data.vote.vote === '1' }, ["YES"]),
-              span({ isRendered: this.props.data.vote.vote === '0' }, ["NO"]),
+              span({ isRendered: this.props.data.vote.vote === '1' || this.props.data.vote.vote === true || this.props.data.vote.vote === 'true'  }, ["YES"]),
+              span({ isRendered: this.props.data.vote.vote === '0' || this.props.data.vote.vote === false || this.props.data.vote.vote === 'false'}, ["NO"]),
               span({ isRendered: this.props.data.vote.vote === null }, ["---"]),
             ]),
 
@@ -97,8 +98,8 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
             label({ className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale:"]),
           ]),
           div({ id: "lbl_rationale_" + this.props.id, className: "inputRationale col-lg-10 col-md-10 col-sm-9 col-xs-9 vote-label" }, [
-            span({ isRendered: this.props.data.vote.vote !== null }, [this.props.data.vote.rationale]),
-            span({ isRendered: this.props.data.vote.vote === null }, ["---"]),
+            span({ isRendered: this.props.data.vote.rationale !== null }, [this.props.data.vote.rationale]),
+            span({ isRendered: this.props.data.vote.rationale === null }, ["---"]),
           ]),
         ]),
       ])

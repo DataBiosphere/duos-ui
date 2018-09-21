@@ -46,17 +46,17 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
 
   OKHandler = () => {
     if (this.state.file.name !== "") {
-      DataSet.create(this.state.file, this.state.overwrite, this.USER_ID)
+      DataSet.postDatasetFile(this.state.file, this.state.overwrite, this.USER_ID)
         .then(() => {
-          this.setState({errors: false});
+          this.setState({ errors: false });
           this.props.onOKRequest('addDataset');
         }).then(() => {
-        this.setState({errors: false});
-        this.props.onOKRequest('addDataset')
-      }).catch(errorResponse => {
-        this.setState({errors: true});
-        errorResponse.json().then(errors => this.generateFileAndUrl(errors));
-      });
+          this.setState({ errors: false });
+          this.props.onOKRequest('addDataset')
+        }).catch(errorResponse => {
+          this.setState({ errors: true });
+          errorResponse.json().then(errors => this.generateFileAndUrl(errors));
+        });
     }
   };
 
@@ -65,9 +65,9 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     for (let i = 0; i < errors.length; i++) {
       content += errors[i] + "\r\n";
     }
-    let blob = new Blob([content], {type: 'text/plain'});
+    let blob = new Blob([content], { type: 'text/plain' });
     let url = (window.URL || window.webkitURL).createObjectURL(blob);
-    this.setState({url: url});
+    this.setState({ url: url });
   };
 
   closeHandler() {
@@ -103,18 +103,19 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     return (
 
       BaseModal({
-          showModal: this.props.showModal,
-          onRequestClose: this.closeHandler,
-          onAfterOpen: this.afterOpenHandler,
-          imgSrc: "/images/icon_dataset_add.png",
-          color: "dataset",
-          iconSize: 'large',
-          title: "Add Datasets",
-          description: 'Store Datasets associated with Data Use Limitations',
-          action: { label: "Add", handler: this.OKHandler }
-        },
+        id: "addDatasetModal",
+        showModal: this.props.showModal,
+        onRequestClose: this.closeHandler,
+        onAfterOpen: this.afterOpenHandler,
+        imgSrc: "/images/icon_dataset_add.png",
+        color: "dataset",
+        iconSize: 'large',
+        title: "Add Datasets",
+        description: 'Store Datasets associated with Data Use Limitations',
+        action: { label: "Add", handler: this.OKHandler }
+      },
         [
-          
+
           form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
             div({ className: "form-group first-form-group" }, [
               label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
@@ -132,7 +133,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
               div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
                 div({ className: "checkbox dataset-label" }, [
                   input({ id: "chk_overwrite", onChange: this.handleOverwriteChange, checked: this.state.overwrite, type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
-                  label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "txt_overwrite" }, ["Overwrite existing Datasets"]),
+                  label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "chk_overwrite" }, ["Overwrite existing Datasets"]),
                 ])
               ])
             ])

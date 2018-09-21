@@ -29,7 +29,7 @@ class AccessPreview extends Component {
     const data1 = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
     const data2 = await DAR.getDarFields(this.props.match.params.referenceId, 'translated_restriction');
     const data3 = await DAR.getDarFields(this.props.match.params.referenceId, 'projectTitle');
-    const consent = await DAR.darConsent(this.props.match.params.referenceId);
+    const consent = await DAR.getDarConsent(this.props.match.params.referenceId);
     const data5 = await DAR.describeDar(this.props.match.params.referenceId);
 
     // dar: gerDarFields referenceID rus
@@ -118,45 +118,22 @@ class AccessPreview extends Component {
   }
 
   downloadDAR = () => {
-    Files.getDARFile(this.props.match.params.referenceId).then(
-      fileData => {
-        if (fileData.file.size !== 0) {
-          this.createBlobFile(fileData.fileName, fileData.file);
-        }
-      });
+    Files.getDARFile(this.props.match.params.referenceId);
   };
 
-  downloadDUL = () => {
+  downloadDUL() {
     let consentElection = undefined;
-
     if (this.props.match.params.electionId !== undefined) {
-      Election.electionConsentResource(this.props.match.params.electionId).then(data => {
+      Election.findConsentElectionByDarElection(this.props.match.params.electionId).then(data => {
         consentElection = data;
         if (consentElection !== undefined && consentElection.dulName !== undefined) {
-          download(consentElection.dulName);
-        } else {
-          download(this.state.consentName);
+          Files.getDulFile(this.props.match.params.consentId, consentElection.dulName);
         }
-
       });
-    }
-    function download(name) {
-      Files.getDulFile(this.props.match.params.consentId).then(
-        blob => {
-          if (blob.size !== 0) {
-            this.createBlobFile(name, blob);
-          }
-        });
+    } else {
+      Files.getDulFile(this.state.consent.consentId,this.state.consentName);
     }
   };
-
-  createBlobFile(fileName, blob) {
-    const url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-  }
 
   toggleQ1 = (e) => {
     this.setState(prev => {
@@ -321,7 +298,7 @@ class AccessPreview extends Component {
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () =>  this.downloadDUL() }, ["Download Data Use Letter"]),
                     ])
                   ])
                 ])

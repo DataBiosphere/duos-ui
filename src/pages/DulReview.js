@@ -40,11 +40,11 @@ class DulReview extends Component {
       .then(data => {
         this.setState({vote: data});
       });
-    Election.electionVote(this.props.match.params.voteId)
+    Election.findElectionByVoteId(this.props.match.params.voteId)
       .then(data => {
         this.setState({election: data});
       });
-    this.setState({consent: Consent.ConsentResource(this.props.match.params.consentId)});
+    this.setState({consent: Consent.findConsentById(this.props.match.params.consentId)});
   }
 
   mockState() {
@@ -67,13 +67,7 @@ class DulReview extends Component {
   };
 
   downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(this.state.consentName, blob);
-        }
-      }
-    );
+    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
   };
 
   setEnableVoteButton = () => {
@@ -127,7 +121,7 @@ class DulReview extends Component {
               h4({}, ["Data Use Limitations"]),
             ]),
             div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
             ])
           ]),
 
