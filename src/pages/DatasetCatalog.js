@@ -218,6 +218,7 @@ class DatasetCatalog extends Component {
                 SearchBox({ id: 'datasetCatalog', searchHandler: this.handleSearchDul, color: 'dataset' })
               ]),
               button({
+                id: "btn_downloadSelection",
                 download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
@@ -262,12 +263,8 @@ class DatasetCatalog extends Component {
                     // this.state.dataSetList.catalog.map((dataSet, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
 
-                      tr({
-                        id: 'tr-' + dataSet.dataSetId,
-                        "dir-paginate": "dataSet in DatasetCatalog.dataSetList.catalog | filter: searchDataset | itemsPerPage:10"
-                        , "current-page": "pagination.current"
-                      }, [
-
+                      //THIS ID IS SHOWING "UNDEFINED"
+                      tr({ id: dataSet.dataSetId, className: "tableRow" }, [                        
                           dataSet.properties.map((property, dIndex) => {
                             return h(Fragment, { key: dIndex }, [
 
@@ -277,9 +274,9 @@ class DatasetCatalog extends Component {
                               }, [
                                   div({ className: "checkbox" }, [
                                     input({
-                                      type: "checkbox", id: property.propertyValue
+                                      type: "checkbox", id: property.propertyValue,
                                       // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
-                                      , value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
+                                      value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
                                     }),
                                     label({ className: "regular-checkbox rp-choice-questions", htmlFor: property.propertyValue }),
                                   ])

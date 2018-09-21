@@ -46,6 +46,7 @@ export const HelpModal = hh(class HelpModal extends Component {
 
     return (
       BaseModal({
+        id: "helpModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,

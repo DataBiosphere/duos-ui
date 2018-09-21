@@ -22,11 +22,25 @@ html, body {
   /* must be same height as the footer */
 }
 
+@media (max-width: 1200px) {
+  .container {
+    width: 100%;
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+
+@media (min-width: 1201px) {
+  .container {
+    width: 1170px;
+  }
+}
+
 @media (max-width: 1600px) {
   .container-wide {
     width: 100%;
-    padding-right: 50px;
-    padding-left: 50px;
+    padding-right: 40px;
+    padding-left: 40px;
   }
 }
 
@@ -1533,6 +1547,7 @@ input:-webkit-autofill {
   opacity: 0;
   filter: alpha(opacity=0);
   height: 100%;
+  width: 100%;
 }
 
 .fileName {

@@ -14,10 +14,10 @@ class ReviewedCases extends Component {
   accessPageCount = 5;
 
   handleSearchDul = (query) => {
-    this.setState({searchDulText: query});
+    this.setState({ searchDulText: query });
   };
   handleSearchDar = (query) => {
-    this.setState({searchDarText: query});
+    this.setState({ searchDarText: query });
   };
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -100,6 +100,7 @@ class ReviewedCases extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
             PageSubHeading({
+              id: "reviewedCasesDul",
               imgSrc: "/images/icon_dul.png",
               color: "dul",
               title: "Data Use Limitations Reviewed Cases",
@@ -134,33 +135,39 @@ class ReviewedCases extends Component {
           this.state.electionsList.dul
             .filter(this.searchTable(searchDulText))
             .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
-            return h(Fragment, { key: rIndex }, [
-              div({ className: "grid-row" }, [
-                div({
-                  className: "col-2 cell-body text " + (election.archived ? 'flagged' : ''),
-                  title: election.displayId
-                }, [election.displayId]),
-                div({
-                  className: "col-2 cell-body text " + (!election.consentGroupName ? 'empty' : ''),
-                  title: election.consentGroupName
-                }, [election.consentGroupName]),
-                div({ className: "col-1 cell-body text" }, [election.version < 10 ? '0' + election.version : election.version]),
-                div({ className: "col-1 cell-body text" }, [ Utils.formatDate(election.finalVoteDate)]),
-                div({ className: "col-1 cell-body text f-center bold" }, [
-                  span({ isRendered: election.finalVoteString === 'Yes', className: "dul-color" }, ["YES"]),
-                  span({ isRendered: election.finalVoteString === 'No' }, ["NO"]),
-                ]),
-                div({ className: "col-1 cell-body f-center" }, [
-                  button({
-                    className: "cell-button hover-color",
-                    "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})",
-                    onClick: () => this.openDulResultsRecord(election.electionId)
+              return h(Fragment, { key: rIndex }, [
+                div({ className: "grid-row tableRow" }, [
+                  div({
+                    id: election.displayId + "_consentId",
+                    name: "consentId",
+                    className: "col-2 cell-body text " + (election.archived ? 'flagged' : ''),
+                    title: election.displayId
+                  }, [election.displayId]),
+                  div({
+                    id: election.displayId + "_consentGroup",
+                    name: "consentGroup",
+                    className: "col-2 cell-body text " + (!election.consentGroupName ? 'empty' : ''),
+                    title: election.consentGroupName
+                  }, [election.consentGroupName]),
+                  div({ id: election.displayId + "_electionVersion", name: "electionVersion", className: "col-1 cell-body text" }, [election.version < 10 ? '0' + election.version : election.version]),
+                  div({ id: election.displayId + "_resultDateDul", name: "resultDateDul", className: "col-1 cell-body text" }, [Utils.formatDate(election.finalVoteDate)]),
+                  div({ id: election.displayId + "_finalResultDul", name: "finalResulDul", className: "col-1 cell-body text f-center bold" }, [
+                    span({ isRendered: election.finalVoteString === 'Yes', className: "dul-color" }, ["YES"]),
+                    span({ isRendered: election.finalVoteString === 'No' }, ["NO"]),
+                  ]),
+                  div({ className: "col-1 cell-body f-center" }, [
+                    button({
+                      id: election.displayId + "_btnRecordDul",
+                      name: "btn_recordDul",
+                      className: "cell-button hover-color",
+                      "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})",
+                      onClick: () => this.openDulResultsRecord(election.electionId)
                     }, ["Record"]),
+                  ]),
                 ]),
-              ]),
-              hr({ className: "table-body-separator" }),
-            ]);
-          }),
+                hr({ className: "table-body-separator" }),
+              ]);
+            }),
           PaginatorBar({
             name: 'dul',
             total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
@@ -176,10 +183,10 @@ class ReviewedCases extends Component {
             },
             changeHandler: (size) => {
               this.setState(prev => {
-                  prev.dulLimit = size;
-                  prev.currentDulPage = 1;
-                  return prev;
-                },
+                prev.dulLimit = size;
+                prev.currentDulPage = 1;
+                return prev;
+              },
               )
             },
           }),
@@ -188,6 +195,7 @@ class ReviewedCases extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
             PageSubHeading({
+              id: "reviewedCasesAccess",
               imgSrc: "/images/icon_access.png",
               color: "access",
               title: "Data Access Reviewed Cases",
@@ -212,26 +220,28 @@ class ReviewedCases extends Component {
           this.state.electionsList.access
             .filter(this.searchTable(searchDarText))
             .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
-            return h(Fragment, { key: rIndex }, [
-              div({ className: "grid-row" }, [
-                div({ className: "col-2 cell-body text", title: "this.election.displayId " }, [election.displayId]),
-                div({ className: "col-3 cell-body text", title: "this.election.projectTitle " }, [election.projectTitle]),
-                div({ className: "col-1 cell-body text" }, [ Utils.formatDate(election.finalVoteDate)]),
-                div({ className: "col-1 cell-body text f-center bold" }, [
-                  span({ isRendered: election.finalVote === true, className: "access-color" }, ["YES"]),
-                  span({ isRendered: election.finalVote === false }, ["NO"]),
+              return h(Fragment, { key: rIndex }, [
+                div({ className: "grid-row tableRow" }, [
+                  div({ id: election.displayId + "_darId", name: "darId", className: "col-2 cell-body text", title: "this.election.displayId " }, [election.displayId]),
+                  div({ id: election.displayId + "_projectTitle", name: "projectTitle", className: "col-3 cell-body text", title: "this.election.projectTitle " }, [election.projectTitle]),
+                  div({ id: election.displayId + "_resultDateAccess", name: "resultDateAccess", className: "col-1 cell-body text" }, [Utils.formatDate(election.finalVoteDate)]),
+                  div({ id: election.displayId + "_finalResultAccess", name: "finalResultAccess", className: "col-1 cell-body text f-center bold" }, [
+                    span({ isRendered: election.finalVote === true, className: "access-color" }, ["YES"]),
+                    span({ isRendered: election.finalVote === false }, ["NO"]),
+                  ]),
+                  div({ className: "col-1 cell-body f-center" }, [
+                    button({
+                      id: election.displayId + "_btnRecordAccess",
+                      name: "btn_recordAccess",
+                      className: "cell-button hover-color",
+                      "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
+                      onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
+                    }, ["Record"])
+                  ]),
                 ]),
-                div({ className: "col-1 cell-body f-center" }, [
-                  button({
-                    className: "cell-button hover-color",
-                    "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
-                    onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
-                  }, ["Record"])
-                ]),
-              ]),
-              hr({ className: "table-body-separator" }),
-            ])
-          }),
+                hr({ className: "table-body-separator" }),
+              ])
+            }),
           PaginatorBar({
             name: 'access',
             total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,

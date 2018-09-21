@@ -555,7 +555,7 @@ class AccessCollect extends Component {
                     row.map((vm, vIndex) => {
                       return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
-                          id: "accessSingleResult" + vIndex,
+                          id: "accessSingleResult_" + vIndex,
                           color: "access",
                           data: vm                        })
                       ]);
@@ -633,7 +633,7 @@ class AccessCollect extends Component {
                     row.map((vm, vIndex) => {
                       return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
-                          id: "rpSingleResult" + vIndex,
+                          id: "rpSingleResult_" + vIndex,
                           color: "access",
                           data: vm
                         })

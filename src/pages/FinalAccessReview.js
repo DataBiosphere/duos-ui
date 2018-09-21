@@ -519,12 +519,12 @@ class FinalAccessReview extends Component {
             ]),
             div({ id: "dul", className: "panel-body cm-boxbody" }, [
               div({ className: "row no-margin" }, [
-                button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
               ]),
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label dul-color" }, ["Structured Limitations"]),
                 div({ className: "response-label", "ng-bind-html": "sDul" }, ["sDul"]),
-                a({ onClick: this.download, filename: 'machine-readable-DUL.json', value: "mrDUL", className: "italic hover-color" }, ["Download DUL machine-readable format"]),
+                a({ id: "btn_downloadSDul", onClick: this.download, filename: 'machine-readable-DUL.json', value: "mrDUL", className: "italic hover-color" }, ["Download DUL machine-readable format"]),
               ]),
             ]),
           ]),
@@ -621,7 +621,7 @@ class FinalAccessReview extends Component {
                     row.map((vm, vIndex) => {
                       return h(Fragment, {}, [
                         SingleResultBox({
-                          id: "accessSingleResult" + vIndex,
+                          id: "accessSingleResult_" + vIndex,
                           color: "access",
                           data: vm
                         })
@@ -667,7 +667,7 @@ class FinalAccessReview extends Component {
                     row.map((vm, vIndex) => {
                       return h(Fragment, {}, [
                         SingleResultBox({
-                          id: "rpSingleResult" + vIndex,
+                          id: "rpSingleResult_" + vIndex,
                           color: "access",
                           data: vm
                         })
@@ -712,7 +712,7 @@ class FinalAccessReview extends Component {
                     row.map((vm, vIndex) => {
                       return h(Fragment, {}, [
                         SingleResultBox({
-                          id: "dulSingleResult" + vIndex,
+                          id: "dulSingleResult_" + vIndex,
                           color: "dul",
                           data: vm
                         })
