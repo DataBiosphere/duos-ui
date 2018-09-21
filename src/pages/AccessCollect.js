@@ -1,10 +1,14 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { Election, DAR, Files } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+
 
 class AccessCollect extends Component {
 
@@ -12,10 +16,14 @@ class AccessCollect extends Component {
   constructor(props) {
     super(props);
     this.state = this.initialState();
+    this.accessCollectVote = this.accessCollectVote.bind(this);
+    this.rpCollectVote = this.rpCollectVote.bind(this);
+    this.confirmationHandlerOK = this.confirmationHandlerOK.bind(this);
+    this.confirmationRPHandlerOK = this.confirmationRPHandlerOK.bind(this);
   }
 
   componentWillMount() {
-    this.mockState();
+    this.loadData();
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -27,235 +35,167 @@ class AccessCollect extends Component {
     });
   }
 
-  mockState() {
-    this.setState(prev => {
-      prev.createDate = '2018-08-30';
-      prev.hasUseRestriction = true;
-      prev.projectTitle = 'My Project 01';
-      prev.consentName = 'ORSP-124';
-      prev.isQ1Expanded = true;
-      prev.isQ2Expanded = false;
-      prev.election = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionAccess = {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionRP = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.darInfo = {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
-        hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        rus: 'something',
-        sDar: 'something else',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
-      }
-      return prev;
-    });
-  }
 
   initialState() {
     return {
-      voteStatus: '1',
-      createDate: '2018-08-30',
-      hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      consentName: 'ORSP-124',
-      isQ1Expanded: false,
+      alertAccessMessage: '',
+      showAlertAccess: false,
+      showAlertRP: false,
+      alertRPMessage: null,
+      accessVote: null,
+      accessRationale: null,
+      rpVote: null,
+      rpRationale: null,
+      showConfirmationDialogOK: false,
+      showConfirmationRPDialogOK: false,
+      access: {
+        isFormDisabled: false,
+        chartData: [
+          ['Results', 'Votes'],
+          ['Yes', 0],
+          ['No', 0],
+          ['Pending', 0]
+        ]
+      },
+      rp: {
+        isFormDisabled: false,
+        chartData: [
+          ['Results', 'Votes'],
+          ['Yes', 0],
+          ['No', 0],
+          ['Pending', 0]
+        ]
+      },
+      rus: '',
+      voteStatus: '',
+      createDate: '',
+      hasUseRestriction: false,
+      projectTitle: '',
+      consentName: '',
+      isQ1Expanded: true,
       isQ2Expanded: false,
-
       electionAccess: {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-31'
+        finalVote: '',
+        finalRationale: '',
+        finalVoteDate: ''
       },
       electionRP: {
-        finalVote: '0',
+        finalVote: '',
         finalRationale: '',
-        finalVoteDate: '2018-08-30'
+        finalVoteDate: ''
       },
 
-      voteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: null,
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: null,
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: null,
-              rationale: 'lala',
-              createDate: '',
-              updateDate: null
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ]
-      ],
-      rpVoteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Tadeo Riveros", vote: {
-              vote: '0',
-              rationale: 'lalala',
-              createDate: '',
-              updateDate: ''
-            }
-          }
-        ]
-      ],
+      voteAccessList: [],
+      rpVoteAccessList: [],
 
       darInfo: {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
+        havePI: false,
+        pi: '',
+        profileName: '',
+        status: '',
         hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
+        adminComment: '',
+        institution: '',
+        department: '',
+        city: '',
+        country: '',
+        purposeManualReview: false,
+        researchTypeManualReview: false,
+        hasDiseases: false,
+        purposeStatements: [],
+        researchType: [],
+        diseases: []
       }
     };
-  }
+  };
 
-  handleVote = (answer) => (e) => {
+  confirmationHandlerOK = (answer) => (e) => {
+    if(answer === true) {
+      let election = this.state.election;
+      election.status = 'Final';
+      election.finalVote = this.state.accessVote;
+      election.finalRationale = this.state.accessRationale;
+      this.updateElection(election);
+      if (this.state.rpAlreadyVote) {
+        this.props.history.goBack();
+      } else {
+        this.setState(prev => {
+          prev.accessAlreadyVote = true;
+          prev.showConfirmationDialogOK = prev.showConfirmationDialogOK = false;
+          prev.alertAccessMessage = 'Remember to log a vote on: Q2. Was the research purpose accurately converted to a structured format?';
+          prev.showAlertAccess = true;
+          return prev;
+        })
+      }
+    } else {
+      this.setState(prev => {
+        prev.showConfirmationDialogOK =  false;
+        return prev;
+      }); 
+    }   
+  };
 
-  }
+  async updateElection(election) {
+    return await Election.updateElection(election.electionId, election);
+  };
+  
+  confirmationRPHandlerOK = (answer) => (e) => {
+    if(answer === true) {
+      let election = this.state.rpElection;
+      election.finalVote = this.state.rpVote;
+      election.finalRationale = this.state.rpRationale;
+      election.status = 'Final';
+      this.updateElection(election);
+      if (this.state.accessAlreadyVote) {
+        this.props.history.goBack();
+      } else {
+        this.setState(prev => {
+          prev.rpAlreadyVote = true;
+          prev.showConfirmationRPDialogOK =  false;
+          prev.alertRPMessage = 'Remember to log a vote on: Q1. Should data access be granted to this applicant?';
+          prev.showAlertAccess = false;
+          prev.showAlertRP = true;
+          return prev;
+        });
+      }
+    }else {
+      this.setState(prev => {
+        prev.showConfirmationRPDialogOK =  false;
+        return prev;
+      }); 
+    }  
+    
+  };
 
-  download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
-  }
+  downloadDAR() {
+    Files.getDARFile(this.state.election.referenceId);
+  };
 
-  downloadDAR = (e) => {
-  }
+  downloadDUL() {
+    Files.getDulFile(this.state.consentId, this.state.dulName);
+  };
 
-  downloadDUL = (e) => {
+  accessCollectVote = (vote, rationale) => {
+    this.setState(
+      prev => {
+        prev.showConfirmationDialogOK = true;
+        prev.accessVote = vote;
+        prev.accessRationale = rationale;
+        return prev;
+      }
+    );
+  };
 
-  }
-
-  positiveVote = (e) => {
-
-  }
-
-  logVote = (e) => {
-
-  }
+  rpCollectVote = (vote, rationale) => {
+    this.setState(
+      prev => {
+        prev.showConfirmationRPDialogOK = true;
+        prev.rpVote = vote;
+        prev.rpRationale = rationale;
+        return prev;
+      }
+    );
+  };
 
   toggleQ1 = (e) => {
     this.setState(prev => {
@@ -263,7 +203,7 @@ class AccessCollect extends Component {
       return prev;
     });
 
-  }
+  };
 
   toggleQ2 = (e) => {
     this.setState(prev => {
@@ -271,14 +211,141 @@ class AccessCollect extends Component {
       return prev;
     });
 
-  }
+  };
 
   back = (e) => {
     this.props.history.goBack();
+  };
+
+  loadData() {
+    this.findDataAccessElectionReview();
+    this.findRPElectionReview();
+    this.findDarFields();
   }
 
-  render() {
+  async findDataAccessElectionReview() {
+    let electionReview = await Election.findDataAccessElectionReview(this.props.match.params.electionId, false);
+    this.getRPGraphData('access', electionReview.reviewVote);
 
+    this.setState(prev => {
+      prev.isQ1Expanded = true;
+      prev.isQ2Expanded = false;
+      prev.consentName = electionReview.associatedConsent.name;
+      prev.consentId = electionReview.consent.consentId;
+      prev.electionType = "access";
+      prev.election = electionReview.election;
+      prev.darOriginalFinalVote = electionReview.election.finalVote;
+      prev.darOriginalFinalRationale = electionReview.election.finalRationale;
+      prev.downloadUrl = Config.getApiUrl() + 'consent/' + electionReview.associatedConsent.consentId + '/dul';
+      prev.dulName = electionReview.consent.dulName;
+      prev.status = electionReview.election.status;
+      prev.accessAlreadyVote = electionReview.election.finalVote !== null ? true : false;
+      prev.userestriction = electionReview.election.translatedUseRestriction === null ? "This includes sensitive research objectives that requires manual review." :
+        electionReview.election.translatedUseRestriction;
+      prev.voteAccessList = this.chunk(electionReview.reviewVote, 2);
+      return prev;
+    });
+  }
+
+  async findRPElectionReview() {
+    let rpElectionReview = await Election.findRPElectionReview(this.props.match.params.electionId, false);
+    if (rpElectionReview !== null && rpElectionReview.election !== undefined) {
+      this.getRPGraphData('rp', rpElectionReview.reviewVote);
+      this.setState(prev => {
+        prev.rpElection = rpElectionReview.election;
+        prev.rpVoteAccessList = this.chunk(rpElectionReview.reviewVote, 2);
+        prev.showRPaccordion = true;
+        prev.openAccordion = false;
+        prev.rpAlreadyVote = rpElectionReview.election.finalVote !== null ? true : false;
+        prev.rpOriginalFinalVote = rpElectionReview.election.finalVote;
+        prev.rpOriginalFinalRationale = rpElectionReview.election.finalRationale;
+        prev.hasUseRestriction = true;
+        return prev;
+      });
+    } else {
+      this.setState(prev => {
+        prev.rpVoteAccessList = [];
+        prev.showRPaccordion = false;
+        prev.openAccordion = true;
+        return prev;
+      });
+    }
+    this.setState(prev => {
+      prev.buttonDisabled = false;
+      prev.openAccordion = true;
+      return prev;
+    });
+  };
+
+  chunk(arr, size) {
+    var newArr = [];
+    for (var i = 0; i < arr.length; i += size) {
+      newArr.push(arr.slice(i, i + size));
+    }
+    return newArr;
+  };
+
+  async findDarFields() {
+    let dar = await DAR.getDarFields(this.props.match.params.referenceId, "rus");
+    let request = await DAR.getDarFields(this.props.match.params.referenceId, "projectTitle");
+    let darInfo = await DAR.describeDar(this.props.match.params.referenceId);
+    if (!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
+    this.setState(prev => {
+      prev.darInfo = darInfo;
+      prev.rus = dar.rus;
+      prev.projectTitle = request.projectTitle;
+      return prev;
+    });
+  };
+
+  getRPGraphData(type, reviewVote) {
+    var yes = 0, no = 0, empty = 0;
+    for (var i = 0; i < reviewVote.length; i++) {
+      switch (reviewVote[i].vote.vote) {
+        case true:
+          yes++;
+          break;
+        case false:
+          no++;
+          break;
+        default:
+          empty++;
+          break;
+      }
+    }
+    if (type === 'access') {
+      this.setAccessChartData(yes, no, empty, empty === 0 ? false : true);
+    } else {
+      this.setRPChartData(yes, no, empty, empty === 0 ? false : true);
+    }
+  }
+
+  setAccessChartData(yes, no, empty, isFormDisabled) {
+    this.setState(prev => {
+      prev.access.isFormDisabled = isFormDisabled;
+      prev.access.chartData = [
+        ['Results', 'Votes'],
+        ['Yes', yes],
+        ['No', no],
+        ['Pending', empty]
+      ];
+      return prev;
+    })
+  };
+  setRPChartData(yes, no, empty, isFormDisabled) {
+    this.setState(prev => {
+      prev.isFormDisabled = isFormDisabled;
+      prev.rp.isFormDisabled = isFormDisabled;
+      prev.rp.chartData = [
+        ['Results', 'Votes'],
+        ['Yes', yes],
+        ['No', no],
+        ['Pending', empty]
+      ];
+      return prev;
+    })
+  }
+  render() {
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -286,7 +353,6 @@ class AccessCollect extends Component {
     ]);
 
     return (
-
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
@@ -304,7 +370,7 @@ class AccessCollect extends Component {
             id: "accessCollectVotes",
             onClick: this.toggleQ1,
             color: 'access',
-            title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
+            title: this.state.showRPaccordion ? "Q1. Should data access be granted to this applicant?"
               : "Should data access be granted to this applicant?",
             expanded: this.state.isQ1Expanded
           }, [
@@ -356,14 +422,14 @@ class AccessCollect extends Component {
                         label({ className: "control-label access-color" }, ["Country: "]),
                         span({ id: "lbl_country", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country]),
                       ]),
-                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                     ]),
 
                     div({ className: "col-lg-8 col-md-7 col-sm-7 col-xs-12" }, [
 
                       div({ className: "row dar-summary" }, [
                         div({ className: "control-label access-color" }, ["Research Purpose"]),
-                        div({ id: "lbl_rus", className: "response-label" }, [this.state.darInfo.rus]),
+                        div({ id: "lbl_rus", className: "response-label" }, [this.state.rus]),
                       ]),
 
                       div({ isRendered: this.state.darInfo.hasPurposeStatements, className: "row dar-summary" }, [
@@ -431,7 +497,7 @@ class AccessCollect extends Component {
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
                     ]),
                   ]),
                 ]),
@@ -446,11 +512,7 @@ class AccessCollect extends Component {
                   color: "access",
                   type: "stats",
                   class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.access.chartData
                 }),
 
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
@@ -459,10 +521,29 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: "isFormDisabled",
-                    voteStatus: this.state.voteStatus,
-                    action: { label: "Vote", handler: this.handleVote }
+                    isDisabled: this.state.access.isFormDisabled,
+                    voteStatus: this.state.darOriginalFinalVote,
+                    action: { label: "Vote", handler: this.accessCollectVote },
+                    rationale: this.state.darOriginalFinalRationale,
+                    alertMessage: this.state.alertAccessMessage,
+                    showAlert: this.state.showAlertAccess
                   }),
+                  ConfirmationDialog({
+                    title: "Post Final Vote?", color: 'access', showModal: this.state.showConfirmationDialogOK,
+                    action: { label: "Yes", handler: this.confirmationHandlerOK }
+                  }, [
+                      div({ className: "dialog-description" }, [
+                        span({}, ["If you post this vote the Election will be closed with current results."]),
+                      ]),
+                    ]),
+                  ConfirmationDialog({
+                    title: "Post Final Vote?", color: 'access', showModal: this.state.showConfirmationRPDialogOK,
+                    action: { label: "Yes", handler: this.confirmationRPHandlerOK }
+                  }, [
+                      div({ className: "dialog-description" }, [
+                        span({}, ["If you post this vote the Election will be closed with current results."]),
+                      ]),
+                    ])
                 ]),
               ]),
 
@@ -476,8 +557,7 @@ class AccessCollect extends Component {
                         SingleResultBox({
                           id: "accessSingleResult" + vIndex,
                           color: "access",
-                          data: vm
-                        })
+                          data: vm                        })
                       ]);
                     })
                   ]),
@@ -505,8 +585,8 @@ class AccessCollect extends Component {
                     h4({}, ["Research Purpose"]),
                   ]),
                   div({ id: "panel_researchPurpose", className: "panel-body cm-boxbody" }, [
-                    div({ style: { 'marginBottom': '10px' } }, [this.state.darInfo.rus]),
-                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                    div({ style: { 'marginBottom': '10px' } }, [this.state.rus]),
+                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                   ])
                 ]),
 
@@ -514,7 +594,7 @@ class AccessCollect extends Component {
                   div({ className: "panel-heading cm-boxhead access-color" }, [
                     h4({}, ["Structured Research Purpose"]),
                   ]),
-                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction" }, [this.state.darInfo.sDar])
+                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.userestriction } }, [])
                 ]),
               ]),
 
@@ -527,11 +607,7 @@ class AccessCollect extends Component {
                   color: "access",
                   type: "stats",
                   class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.rp.chartData
                 }),
 
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results access-background-lighter" }, [
@@ -539,9 +615,12 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: "isFormDisabled",
-                    voteStatus: this.state.voteStatus,
-                    action: { label: "Vote", handler: this.handleVote }
+                    isDisabled: this.state.rp.isFormDisabled,
+                    voteStatus: this.state.rpOriginalFinalVote,
+                    action: { label: "Vote", handler: this.rpCollectVote },
+                    rationale: this.state.rpOriginalFinalRationale,
+                    alertMessage: this.state.alertRPMessage,
+                    showAlert: this.state.showAlertRP
                   }),
                 ]),
               ]),
@@ -560,7 +639,7 @@ class AccessCollect extends Component {
                         })
                       ]);
                     })
-                  ]),
+                  ])
                 ]);
               })
             ])

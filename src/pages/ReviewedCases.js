@@ -4,7 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { Election, DarCases } from '../libs/ajax';
+import { Election } from '../libs/ajax';
 import * as Utils from "../libs/utils";
 import AccessResultRecords from "./AccessResultRecords";
 
@@ -57,7 +57,7 @@ class ReviewedCases extends Component {
 
   async getReviewedConsents() {
     const dul = await Election.findReviewedConsents();
-    const access = await DarCases.findReviewedDRs();
+    const access = await Election.findReviewedDRs();
 
     this.setState(prev => {
       prev.electionsList = {

@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataAccess, Election } from '../../libs/ajax'
+import { DAR, Election } from '../../libs/ajax'
 
 
 export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends Component {
@@ -10,6 +10,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     super(props);
     this.state = { summary: {} };
     this.state = {
+      dataRequestId: null,
       summary: {
         darCode: '',
         principalInvestigator: '',
@@ -35,6 +36,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       calledFromAdmin: false,
     }
     this.closeHandler = this.closeHandler.bind(this);
+    this.downloadDetail = this.downloadDetail.bind(this);
   };
 
   closeHandler() {
@@ -42,8 +44,8 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
   }
 
   async componentWillReceiveProps(props) {
-    if (props.dataRequestId !== undefined && this.state.dataRequestId === undefined) {
-      let darDetails = await DataAccess.getDarModalSummary(props.dataRequestId);
+    if (props.dataRequestId !== undefined && (this.state.dataRequestId === undefined || this.state.dataRequestId === null)) {
+      let darDetails = await DAR.getDarModalSummary(props.dataRequestId);
       if (darDetails.status === "pending") {
         darDetails.status = "Pending for review";
       } else if (darDetails.status === "rejected") {
@@ -56,10 +58,6 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       } else {
         darDetails.rationaleCheck = false;
       }
-      Object.entries(darDetails.datasetDetail).map((row, Index) => {
-        console.log(row);
-        console.log(Index);
-      });
       this.setState({
         dataRequestId: props.dataRequestId,
         summary: darDetails,
@@ -69,12 +67,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
   }
 
   async downloadDetail() {
-   let blob = await Election.downloadDatasetVotesForDARElection("5b9bf38676e95652ba6fccb2");
-   const url = window.URL.createObjectURL(blob);
-   let a = document.createElement('a');
-   a.href = url;
-   a.download = "datasetVotesSummary.txt";
-   a.click();
+   Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
   }
 
   render() {

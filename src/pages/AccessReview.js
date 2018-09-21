@@ -132,8 +132,8 @@ class AccessReview extends Component {
   async darReviewAccess() {
     // dar
     const rusDarData = await DAR.getDarFields(this.props.match.params.darId, 'rus');
-    const consent = await DAR.darConsent(this.props.match.params.darId);
-    const election = await Election.DarElectionResourceGet(this.props.match.params.darId);
+    const consent = await DAR.getDarConsent(this.props.match.params.darId);
+    const election = await Election.findElectionByDarId(this.props.match.params.darId);
     const vote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.voteId);
     const rpVote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId);
     const request = await DAR.getDarFields(this.props.match.params.darId, 'projectTitle');
@@ -218,30 +218,11 @@ class AccessReview extends Component {
   }
 
   downloadDAR = () => {
-    Files.getDARFile(this.props.match.params.darId).then(
-      fileData => {
-        if (fileData.file.size !== 0) {
-          this.createBlobFile(fileData.fileName, fileData.file);
-        }
-      });
+    Files.getDARFile(this.props.match.params.darId);
   };
 
-  createBlobFile(fileName, blob) {
-    const url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-  }
-
-  // TODO add name file
   downloadDUL = (e) => {
-    Files.getDulFile(this.state.consentId).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(this.state.dulName, blob);
-        }
-      });
+    Files.getDulFile(this.state.consentId, this.state.dulName);
   };
 
   toggleQ1 = (e) => {

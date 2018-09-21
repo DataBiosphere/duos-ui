@@ -82,14 +82,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     const { voteStatus, rationale, enableVoteButton } = this.state;
     return (
 
-      div({ id: "box_" + this.props.id }, [
+      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : ""  }, [
         h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
         hr({ className: "box-separator" }),
 
         div({ isRendered: this.props.agreementData !== undefined }, [this.props.agreementData]),
 
         form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
-          fieldset({ disable: this.props.isDisabled }, [
+          fieldset({ disabled: this.props.isDisabled }, [
             div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
