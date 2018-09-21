@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, hr, span, a, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { Purpose, Election } from '../libs/ajax';
+import { DAR, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
@@ -31,7 +31,7 @@ class AdminManageAccess extends Component {
 
   async getElectionDarList() {
     let darElection = [];
-    const elections = await Purpose.dataAccessRequestManageResource();
+    const elections = await DAR.getDataAccessManage();
     elections.map(dar => {
       darElection.push(dar);
       return dar;
