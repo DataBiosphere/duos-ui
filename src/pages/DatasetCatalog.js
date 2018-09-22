@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, i, span, a, p } from 'react-hyperscript-helpers';
+import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { DataSet } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -8,6 +8,7 @@ import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 import { PaginatorBar } from "../components/PaginatorBar";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 const USER_ID = 5;
 class DatasetCatalog extends Component {
@@ -18,6 +19,7 @@ class DatasetCatalog extends Component {
       isLogged: false
     }
     this.state = {
+      loading: true,
       limit: 5,
       currentPage: null,
       dataSetList: {
@@ -51,14 +53,11 @@ class DatasetCatalog extends Component {
       catalog: catalog,
       dictionary: dictionary
     }
-    this.setState({ dataSetList: data, currentPage: 1 });
-  }
-
-  componentWillMount() {
-    this.getDatasets();
+    this.setState({ dataSetList: data, currentPage: 1, loading: false });
   }
 
   componentDidMount() {
+    this.getDatasets();
   }
 
   handleOpenConnectDatasetModal() {
@@ -192,6 +191,8 @@ class DatasetCatalog extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+    
     const { searchDulText, currentPage, limit } = this.state;
 
     const isAdmin = true;
@@ -264,90 +265,90 @@ class DatasetCatalog extends Component {
                     return h(Fragment, { key: trIndex }, [
 
                       //THIS ID IS SHOWING "UNDEFINED"
-                      tr({ id: dataSet.dataSetId, className: "tableRow" }, [                        
-                          dataSet.properties.map((property, dIndex) => {
-                            return h(Fragment, { key: dIndex }, [
+                      tr({ id: dataSet.dataSetId, className: "tableRow" }, [
+                        dataSet.properties.map((property, dIndex) => {
+                          return h(Fragment, { key: dIndex }, [
 
-                              td({
-                                isRendered: property.propertyName === 'Dataset ID',
-                                id: property.propertyName + '-' + trIndex
-                              }, [
-                                  div({ className: "checkbox" }, [
-                                    input({
-                                      type: "checkbox", id: property.propertyValue,
-                                      // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
-                                      value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
-                                    }),
-                                    label({ className: "regular-checkbox rp-choice-questions", htmlFor: property.propertyValue }),
-                                  ])
+                            td({
+                              isRendered: property.propertyName === 'Dataset ID',
+                              id: property.propertyName + '-' + trIndex
+                            }, [
+                                div({ className: "checkbox" }, [
+                                  input({
+                                    type: "checkbox", id: property.propertyValue,
+                                    // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
+                                    value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
+                                  }),
+                                  label({ className: "regular-checkbox rp-choice-questions", htmlFor: property.propertyValue }),
                                 ])
-                            ])
-                          }),
+                              ])
+                          ])
+                        }),
 
-                          dataSet.properties.map((property, dIndex) => {
-                            return h(Fragment, { key: dIndex }, [
+                        dataSet.properties.map((property, dIndex) => {
+                          return h(Fragment, { key: dIndex }, [
 
-                              td({
-                                className: "fixed-col", id: 'td-' + property.propertyName,
-                                isRendered: property.propertyName === 'Dataset ID' && isAdmin && !isResearcher
-                              }, [
+                            td({
+                              className: "fixed-col", id: 'td-' + property.propertyName,
+                              isRendered: property.propertyName === 'Dataset ID' && isAdmin && !isResearcher
+                            }, [
 
-                                  div({ className: "dataset-actions" }, [
-                                    a({ onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable }, [
-                                      span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true", "data-tip": "", "data-for": "tip_delete" })
-                                    ]),
-                                    h(ReactTooltip, { id: "tip_delete", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Delete dataset"]),
-
-                                    a({ isRendered: dataSet.active, onClick: this.openDisable(property.propertyValue) }, [
-                                      span({ className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true", "data-tip": "", "data-for": "tip_disable" })
-                                    ]),
-                                    h(ReactTooltip, { id: "tip_disable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Disable dataset"]),
-
-                                    a({ isRendered: !dataSet.active, onClick: this.openEnable(property.propertyValue) }, [
-                                      span({ className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color", "aria-hidden": "true", "data-tip": "", "data-for": "tip_enable" })
-                                    ]),
-                                    h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
-
-                                    a({
-                                      onClick: this.openConnectDataset
-                                      // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
-                                    }, [
-                                        span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
-                                      ]),
-                                    h(ReactTooltip, { id: "tip_connect", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Connect with Data Owner"]),
-
+                                div({ className: "dataset-actions" }, [
+                                  a({ onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable }, [
+                                    span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true", "data-tip": "", "data-for": "tip_delete" })
                                   ]),
-                                ])
-                            ])
-                          }),
+                                  h(ReactTooltip, { id: "tip_delete", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Delete dataset"]),
 
-                          dataSet.properties.map((property, dIndex) => {
-                            return h(Fragment, { key: dIndex }, [
-                              td({
-                                className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '')
-                              }, [
-                                  p({ isRendered: property.propertyName !== 'dbGAP' }, [property.propertyValue]),
+                                  a({ isRendered: dataSet.active, onClick: this.openDisable(property.propertyValue) }, [
+                                    span({ className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true", "data-tip": "", "data-for": "tip_disable" })
+                                  ]),
+                                  h(ReactTooltip, { id: "tip_disable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Disable dataset"]),
+
+                                  a({ isRendered: !dataSet.active, onClick: this.openEnable(property.propertyValue) }, [
+                                    span({ className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color", "aria-hidden": "true", "data-tip": "", "data-for": "tip_enable" })
+                                  ]),
+                                  h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
                                   a({
-                                    isRendered: property.propertyName === 'dbGAP',
-                                    href: property.propertyValue,
-                                    target: "_blank",
-                                    className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
-                                  }, ["Link"]),
-                                ])
-                            ])
-                          }),
+                                    onClick: this.openConnectDataset
+                                    // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
+                                  }, [
+                                      span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
+                                    ]),
+                                  h(ReactTooltip, { id: "tip_connect", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Connect with Data Owner"]),
 
-                          td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
+                                ]),
+                              ])
+                          ])
+                        }),
 
-                          td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                            a({ onClick: this.openTranslatedDUL, className: "enabled" }, ["Translated Use Restriction"])
-                          ]),
+                        dataSet.properties.map((property, dIndex) => {
+                          return h(Fragment, { key: dIndex }, [
+                            td({
+                              className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '')
+                            }, [
+                                p({ isRendered: property.propertyName !== 'dbGAP' }, [property.propertyValue]),
 
-                          td({ isRendered: isAdmin, className: "table-items cell-size" }, [
-                            a({ onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
-                          ]),
+                                a({
+                                  isRendered: property.propertyName === 'dbGAP',
+                                  href: property.propertyValue,
+                                  target: "_blank",
+                                  className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
+                                }, ["Link"]),
+                              ])
+                          ])
+                        }),
+
+                        td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
+
+                        td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                          a({ onClick: this.openTranslatedDUL, className: "enabled" }, ["Translated Use Restriction"])
                         ]),
+
+                        td({ isRendered: isAdmin, className: "table-items cell-size" }, [
+                          a({ onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
+                        ]),
+                      ]),
 
 
                     ]);
@@ -371,7 +372,6 @@ class DatasetCatalog extends Component {
               disabled: objectIdList.length === 0,
               onClick: this.exportToRequest(objectIdList),
               className: "download-button dataset-background apply-dataset",
-              disabled: objectIdList.length === 0,
               "data-tip": "", "data-for": "tip_requestAccess"
             }, ["Apply for Access"]),
             h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),

@@ -250,6 +250,7 @@ export const DAR = {
             dar.status = role.status;
             return dar;
           }
+          return dar;
         });
       }      
       return dar;

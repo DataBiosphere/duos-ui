@@ -9,12 +9,14 @@ import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal'
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AdminConsole extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       showAddDulModal: false,
       showAddUserModal: false,
@@ -26,21 +28,20 @@ class AdminConsole extends Component {
     };
   }
 
-  componentWillMount() {
-    let currentUser = Storage.getCurrentUser();
+  componentDidMount() {
+    this.init();
+  }
+
+  async init() {
+    const currentUser = Storage.getCurrentUser();
+    const duls = await PendingCases.findConsentUnReviewed();
+    const dars = await PendingCases.findDARUnReviewed();
     this.setState({
       currentUser: currentUser,
+      dulUnreviewedCases: duls.dulUnReviewedCases,
+      darUnreviewedCases: dars.darUnReviewedCases,
+      loading: false
     });
-
-    PendingCases.findConsentUnReviewed().then(
-      resp => {
-        this.setState({ dulUnreviewedCases: resp.dulUnReviewedCases });
-      });
-
-    PendingCases.findDARUnReviewed().then(
-      resp => {
-        this.setState({ darUnreviewedCases: resp.darUnReviewedCases });
-      });
   }
 
   addDul = (e) => {
@@ -113,6 +114,8 @@ class AdminConsole extends Component {
   }
 
   render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
 

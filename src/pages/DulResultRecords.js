@@ -6,6 +6,7 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files } from '../libs/ajax';
 import * as Utils from '../libs/utils';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulResultRecords extends Component {
 
@@ -23,7 +24,7 @@ class DulResultRecords extends Component {
     return newArr;
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -40,23 +41,24 @@ class DulResultRecords extends Component {
   }
 
   async voteInfo() {
-    Election.electionReview(this.props.match.params.electionId).then(data => {
-      console.log(data);
-      this.setState({ chartData: this.getGraphData(data.reviewVote) },
-        () => {
-          this.setState({
-            consentId: data.election.referenceId,
-            dulVoteList: this.chunk(data.reviewVote, 2),
-            consentGroupName: data.consent.groupName,
-            consentName: data.consent.name,
-            sDul: data.election.translatedUseRestriction,
-            projectTitle: data.election.projectTitle,
-            finalVote: data.election.finalVote,
-            finalRationale: data.election.finalRationale,
-            finalVoteDate: Utils.formatDate(data.election.finalVoteDate),
+    Election.findReviewedElections(this.props.match.params.electionId).then(
+      data => {
+        this.setState({ chartData: this.getGraphData(data.reviewVote) },
+          () => {
+            this.setState({
+              loading: false,
+              consentId: data.election.referenceId,
+              dulVoteList: this.chunk(data.reviewVote, 2),
+              consentGroupName: data.consent.groupName,
+              consentName: data.consent.name,
+              sDul: data.election.translatedUseRestriction,
+              projectTitle: data.election.projectTitle,
+              finalVote: data.election.finalVote,
+              finalRationale: data.election.finalRationale,
+              finalVoteDate: Utils.formatDate(data.election.finalVoteDate),
+            });
           });
-        });
-    });
+      });
   }
 
   getGraphData(reviewVote) {
@@ -87,6 +89,7 @@ class DulResultRecords extends Component {
 
   initialState() {
     return {
+      loading: true,
       voteStatus: '',
       createDate: '',
       hasUseRestriction: true,
@@ -104,9 +107,8 @@ class DulResultRecords extends Component {
 
 
   download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
-
+    // const filename = e.target.getAttribute('filename');
+    // const value = e.target.getAttribute('value');
   };
 
   downloadDUL = (e) => {
@@ -131,6 +133,8 @@ class DulResultRecords extends Component {
   };
 
   render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const { chartData } = this.state;
 

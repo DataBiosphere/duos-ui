@@ -1,11 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, a, span, i, h, input } from 'react-hyperscript-helpers';
+import { div, button, hr, h3, a, span, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { User } from "../libs/ajax";
 import { PaginatorBar } from '../components/PaginatorBar';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AdminManageUsers extends Component {
 
@@ -14,12 +15,17 @@ class AdminManageUsers extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       searchText: '',
       userList: [],
       showAddUserModal: false,
       limit: this.limit,
       currentPage: null,
     };
+  }
+
+  componentDidMount() {
+    this.getUsers();
   }
 
   async getUsers() {
@@ -39,6 +45,7 @@ class AdminManageUsers extends Component {
       });
 
       this.setState(prev => {
+        prev.loading = false;
         prev.currentPage = 1;
         prev.userList = userList;
         return prev;
@@ -54,10 +61,6 @@ class AdminManageUsers extends Component {
       return prev;
     });
 
-  }
-
-  componentWillMount() {
-    this.getUsers();
   }
 
   handlePageChange = page => {
@@ -119,8 +122,11 @@ class AdminManageUsers extends Component {
   }
 
   render() {
-    const { currentPage, searchUserText } = this.state;
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
+    const { currentPage, searchUserText } = this.state;
+    
     return (
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
@@ -129,7 +135,7 @@ class AdminManageUsers extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({  id: 'manageUsers', searchHandler: this.handleSearchUser, color: 'common' })
+              SearchBox({ id: 'manageUsers', searchHandler: this.handleSearchUser, color: 'common' })
             ]),
 
             a({

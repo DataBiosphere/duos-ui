@@ -3,6 +3,7 @@ import { div, form, input, label, span, hh, p, select, h, option } from 'react-h
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
 import { Ontology } from "../../libs/ajax";
+import { LoadingIndicator } from '../LoadingIndicator';
 
 export const AddOntologiesModal = hh(class AddOntologiesModal extends Component {
 
@@ -17,6 +18,7 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       ontologyTypes: [],
       file: {
         name: ''
@@ -50,6 +52,7 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
     }
 
     this.setState(prev => {
+      prev.loading = false;
       prev.ontologyTypes = ontologyTypes;
       prev.ontology.type = ontologyTypes[0];
       return prev;
@@ -57,7 +60,7 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
 
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.getOntologiesType();
   };
 
@@ -133,21 +136,27 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
 
   render() {
 
+    const { loading } = this.state;
+
+    if (loading) {
+      return LoadingIndicator();
+    }
+
     return (
 
       BaseModal({
         id: "addOntologiesModal",
-          showModal: this.props.showModal,
-          onRequestClose: this.closeHandler,
-          onAfterOpen: this.afterOpenHandler,
-          imgSrc: "/images/icon-add-ontology.png",
-          color: "common",
-          iconName: 'add-ontologies',
-          iconSize: 'large',
-          title: 'Add Ontologies',
-          description: 'Store Ontologies for index',
-          action: {label: "Add", handler: this.OKHandler}
-        },
+        showModal: this.props.showModal,
+        onRequestClose: this.closeHandler,
+        onAfterOpen: this.afterOpenHandler,
+        imgSrc: "/images/icon-add-ontology.png",
+        color: "common",
+        iconName: 'add-ontologies',
+        iconSize: 'large',
+        title: 'Add Ontologies',
+        description: 'Store Ontologies for index',
+        action: { label: "Add", handler: this.OKHandler }
+      },
         [
           form({
             className: "form-horizontal css-form",
@@ -155,75 +164,75 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
             noValidate: true,
             encType: "multipart/form-data"
           }, [
-            div({className: "form-group first-form-group"}, [
-              label({
-                id: "lbl_uploadFile",
-                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-              }, ["Ontology File"]),
-              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold"}, [
-                div({className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 common-color upload-button"}, [
-                  span({}, ["Upload file"]),
-                  span({
-                    className: "cm-icon-button glyphicon glyphicon-upload caret-margin",
-                    "aria-hidden": "true"
-                  }, []),
+              div({ className: "form-group first-form-group" }, [
+                label({
+                  id: "lbl_uploadFile",
+                  className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+                }, ["Ontology File"]),
+                div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
+                  div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 common-color upload-button" }, [
+                    span({}, ["Upload file"]),
+                    span({
+                      className: "cm-icon-button glyphicon glyphicon-upload caret-margin",
+                      "aria-hidden": "true"
+                    }, []),
+                    input({
+                      id: "btn_uploadFile",
+                      type: "file",
+                      onChange: this.handleFileChange,
+                      className: "upload",
+                      required: true
+                    }),
+                  ]),
+                  p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
+                ]),
+              ]),
+
+
+              div({ className: "form-group" }, [
+                label({
+                  id: "lbl_type",
+                  className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+                }, ["Type"]),
+                div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+                  select({
+                    id: "sel_type", className: "form-control select-option",
+                    value: this.state.ontology.type,
+                    onChange: this.handleSelection
+                  }, [
+                      this.state.ontologyTypes.map((type, index) => {
+                        return h(Fragment, { key: index }, [
+                          option({ value: type }, [type]),
+                        ])
+                      })
+                    ])
+                ])
+              ]),
+
+              div({ className: "form-group" }, [
+                label({
+                  id: "lbl_prefix",
+                  className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+                }, ["Prefix"]),
+                div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   input({
-                    id: "btn_uploadFile",
-                    type: "file",
-                    onChange: this.handleFileChange,
-                    className: "upload",
-                    required: true
+                    id: "txt_prefix",
+                    type: "text",
+                    "ng-model": "prefix",
+                    className: "form-control col-lg-12 vote-input",
+                    value: this.state.ontology.prefix,
+                    name: "ontology_prefix",
+                    placeholder: "Ontology Prefix",
+                    required: true,
+                    onChange: this.handlePrefixChange
                   }),
                 ]),
-                p({id: "txt_uploadFile", className: "fileName"}, [this.state.file.name]),
               ]),
-            ]),
 
-
-            div({className: "form-group"}, [
-              label({
-                id: "lbl_type",
-                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-              }, ["Type"]),
-              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
-                select({
-                  id: "sel_type", className: "form-control select-option",
-                  value: this.state.ontology.type,
-                  onChange: this.handleSelection
-                }, [
-                  this.state.ontologyTypes.map((type, index) => {
-                    return h(Fragment, {key: index}, [
-                      option({value: type}, [type]),
-                    ])
-                  })
-                ])
+              div({ isRendered: this.state.error.show }, [
+                Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg })
               ])
-            ]),
-
-            div({className: "form-group"}, [
-              label({
-                id: "lbl_prefix",
-                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-              }, ["Prefix"]),
-              div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8"}, [
-                input({
-                  id: "txt_prefix",
-                  type: "text",
-                  "ng-model": "prefix",
-                  className: "form-control col-lg-12 vote-input",
-                  value: this.state.ontology.prefix,
-                  name: "ontology_prefix",
-                  placeholder: "Ontology Prefix",
-                  required: true,
-                  onChange: this.handlePrefixChange
-                }),
-              ]),
-            ]),
-
-            div({isRendered: this.state.error.show}, [
-              Alert({id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg})
             ])
-          ])
         ])
     );
   }

@@ -1,17 +1,19 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, h, i, input, span, a } from 'react-hyperscript-helpers';
+import { div, button, hr, h, span, a } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { SearchBox } from '../components/SearchBox';
 import { Ontology, Files } from "../libs/ajax";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ManageOntologies extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading:true,
       value: '',
       limit: 5,
       currentPage: 1,
@@ -24,20 +26,19 @@ class ManageOntologies extends Component {
     this.closeAddOntologiesModal = this.closeAddOntologiesModal.bind(this);
     this.okAddOntologiesModal = this.okAddOntologiesModal.bind(this);
     this.afterAddOntologiesModalOpen = this.afterAddOntologiesModalOpen.bind(this);
-
   }
-
 
   async getOntologiesManage() {
     const ontologies = await Ontology.retrieveIndexedFiles();
     this.setState(prev => {
+      prev.loading = false;
       prev.currentPage = 1;
       prev.indexedFiles = ontologies;
       return prev;
     });
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.getOntologiesManage();
   }
 
@@ -134,6 +135,8 @@ class ManageOntologies extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+    
     const { currentPage, searchDulText } = this.state;
 
     return (

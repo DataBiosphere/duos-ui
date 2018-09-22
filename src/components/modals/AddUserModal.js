@@ -4,6 +4,7 @@ import { BaseModal } from '../BaseModal';
 import { User } from "../../libs/ajax";
 import { Alert } from '../Alert';
 import { USER_ROLES } from '../../libs/utils';
+import { LoadingIndicator } from '../LoadingIndicator';
 
 export const AddUserModal = hh(class AddUserModal extends Component {
 
@@ -11,11 +12,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      loading: true
+    };
     this.toggleState = this.toggleState.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     console.log(this.props);
     this.initForm();
   }
@@ -45,6 +49,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             wasMember: this.userWas(USER_ROLES.member),
             wasDataOwner: this.userWas(USER_ROLES.dataOwner),
             wasResearcher: this.userWas(USER_ROLES.researcher),
+            loading: false
           });
         });
     } else {
@@ -67,6 +72,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         wasMember: false,
         wasDataOwner: false,
         wasResearcher: false,
+        loading: false
       });
     }
   }
@@ -163,7 +169,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   async searchDACUsers(role) {
     let user = {
-      roles: this.props.user.roles.map((role, ix) => { name: role.name }),
+      roles: this.props.user.roles.map(
+        (role, ix) => {
+          return { name: role.name };
+        }
+      ),
       displayName: this.props.user.displayName,
       email: this.props.user.email,
     };
@@ -310,7 +320,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   errorNoAvailableCandidates = (role) => {
-    this.setState(prev =>{ prev.newAlternativeUserNeeded[role] = true; return prev});
+    this.setState(prev => { prev.newAlternativeUserNeeded[role] = true; return prev });
     this.alerts.push({
       type: 'danger',
       title: "Edition can't be made!",
@@ -347,7 +357,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     while (i < l) {
       if (this.alerts[i].alertType === role) {
         // this.alerts.splice(i, 1);
-        this.state.newAlternativeUserNeeded[role] = false;
+        this.setState(prev => {
+          prev.newAlternativeUserNeeded[role] = false;
+          return prev;
+        });
         return;
       }
       i++;
@@ -362,9 +375,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   }
 
   render() {
-    console.log(this.state);
 
-    const { displayName, email, roles } = this.state;
+    const { loading, displayName, email, roles } = this.state;
+
+    if (loading) {
+      return LoadingIndicator();
+    }
 
     return (
       BaseModal({

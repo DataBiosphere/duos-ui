@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hr, h, span, i, a, input, button, label } from 'react-hyperscript-helpers';
+import { div, hr, h, span, a, input, button, label } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { Consent, Election } from '../libs/ajax';
@@ -8,6 +8,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
 import { SearchBox } from '../components/SearchBox';
 import ReactTooltip from 'react-tooltip';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 const limit = 10;
 
@@ -16,6 +17,7 @@ class AdminManageDul extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       currentPage: 1,
       showModal: false,
       value: '',
@@ -45,13 +47,14 @@ class AdminManageDul extends Component {
   async getConsentManage() {
     const duls = await Consent.findConsentManage();
     this.setState(prev => {
+      prev.loading = false;
       prev.currentPage = 1;
       prev.electionsList.dul = duls;
       return prev;
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getConsentManage();
   }
 
@@ -193,7 +196,7 @@ class AdminManageDul extends Component {
         archived: this.state.archiveCheck
       };
       Election.updateElection(election.electionId, electionUpdated);
-      this.setState({archiveCheck: true});
+      this.setState({ archiveCheck: true });
       this.getConsentManage();
     }
   };
@@ -236,8 +239,10 @@ class AdminManageDul extends Component {
   };
 
   render() {
-    const { currentPage, limit, searchDulText } = this.state;
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
+    const { currentPage, limit, searchDulText } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
@@ -283,7 +288,8 @@ class AdminManageDul extends Component {
           this.state.electionsList.dul.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((election, eIndex) => {
             return (
               h(Fragment, { key: election.consentId }, [
-                div({ id: election.consentId, className: "grid-9-row pushed-2 tableRow " + (election.updateStatus === true ? " list-highlighted" : "")
+                div({
+                  id: election.consentId, className: "grid-9-row pushed-2 tableRow " + (election.updateStatus === true ? " list-highlighted" : "")
                 }, [
                     div({
                       id: election.consentId + "_consentId",
@@ -380,17 +386,17 @@ class AdminManageDul extends Component {
                         className: "display-inline-block",
                         disabled: (election.electionStatus === 'un-reviewed' || election.archived === true)
                       }, [
-                          button({ 
+                          button({
                             id: election.consentId + "_btnArchiveElection",
                             name: "btn_archiveElection",
                             onClick: this.openDialogArchive(election)
-                           }, [
-                            span({
-                              className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
-                              "data-tip": "",
-                              "data-for": "tip_archive"
-                            })
-                          ]),
+                          }, [
+                              span({
+                                className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
+                                "data-tip": "",
+                                "data-for": "tip_archive"
+                              })
+                            ]),
                           h(ReactTooltip, {
                             id: "tip_archive",
                             effect: 'solid',
@@ -402,16 +408,17 @@ class AdminManageDul extends Component {
                         className: "display-inline-block",
                         disabled: (election.electionStatus !== 'un-reviewed')
                       }, [
-                          button({ 
+                          button({
                             id: election.consentId + "_btnDeleteDul",
                             name: "btn_deleteDul",
-                            onClick: this.openDialogDelete(election) }, [
-                            span({
-                              className: "glyphicon caret-margin glyphicon-trash",
-                              "data-tip": "",
-                              "data-for": "tip_delete"
-                            })
-                          ]),
+                            onClick: this.openDialogDelete(election)
+                          }, [
+                              span({
+                                className: "glyphicon caret-margin glyphicon-trash",
+                                "data-tip": "",
+                                "data-for": "tip_delete"
+                              })
+                            ]),
                           h(ReactTooltip, {
                             id: "tip_delete",
                             effect: 'solid',

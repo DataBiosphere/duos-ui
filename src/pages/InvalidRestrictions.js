@@ -1,16 +1,18 @@
 import { Component, Fragment } from 'react';
-import { div, hr, i, input, a, h } from 'react-hyperscript-helpers';
+import { div, hr, a, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Consent, DAR } from '../libs/ajax';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class InvalidRestrictions extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       value: '',
       searchDulCases: '',
       searchDarCases: '',
@@ -29,17 +31,14 @@ class InvalidRestrictions extends Component {
     }
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.loadAsyncData();
-    let duls = [];
-    let dars = [];
-
     this.setState({
       searchDulCases: '',
       searchDarCases: '',
       InvalidRestrictions: {
-        dulList: duls,
-        darList: dars,
+        dulList: [],
+        darList: [],
       }
     })
   }
@@ -48,6 +47,7 @@ class InvalidRestrictions extends Component {
     const invalidConsents = await Consent.findInvalidConsentRestriction();
     const invalidDars = await DAR.findDataAccessInvalidUseRestriction();
     this.setState(prev => {
+      prev.loading = false;
       prev.InvalidRestrictions.dulList = invalidConsents;
       prev.InvalidRestrictions.darList = invalidDars;
       return prev;
@@ -115,6 +115,8 @@ class InvalidRestrictions extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
     const { currentDulPage, currentDarPage, dulLimit, darLimit, searchDulText, searchDarText } = this.state;
 
     return (
@@ -132,7 +134,7 @@ class InvalidRestrictions extends Component {
 
         hr({ className: "section-separator" }),
 
-        div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+        div({ className: "col-lg-12 col-md-12  col-sm-12 col-xs-12" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
               PageSubHeading({ id: "invalidRestrictionsDul", imgSrc: "/images/icon_dul_invalid.png", color: "dul", title: "Data Use Limitations Invalid Cases", description: "List of Invalid Restrictions for Data Use Limitations" }),

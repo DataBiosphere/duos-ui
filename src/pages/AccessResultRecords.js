@@ -16,137 +16,43 @@ class AccessResultRecords extends Component {
     this.state = this.initialState();
   }
 
-  componentWillMount() {
-    this.setState(prev => {
-      prev.currentUser = Storage.getCurrentUser()
-      return prev;
-    });
+  static getDerivedStateFromProps(props, state) {
+    console.log(props, state);
+    // this.setState(prev => {
+    //   prev.currentUser = Storage.getCurrentUser()
+    //   return prev;
+    // });
 
+    //  this.initState().then(
+    //    data => {
+    //      return data;
+    //    }
+    //  );
+
+  }
+
+  componentDidMount() {
     this.initState();
   }
 
-  // async initState() {
-
-  //   const referenceId = this.props.match.params.referenceId;
-
-  //   // formerly resolved on route ....
-  //   const electionId = this.props.match.params.electionId;
-  //   const darElection = Election.findElectionById(electionId);
-  //   const hasUseRestriction = DAR.hasUseRestriction(referenceId);
-
-  //   const oneAtATime = false;
-
-  //   const darInfo = await DAR.describeDar(darElection.referenceId)
-  //   const finalDACVote = await Votes.getDarFinalAccessVote(electionId)
-
-  //   let statusRP;
-  //   let rpVoteAccessList = [];
-  //   let chartRP = [];
-  //   let showRPaccordion = false;
-
-  //   const darElectionReview = await Election.findDataAccessElectionReview(electionId, false);
-
-  //   const dar = await DAR.getDarFields(darElectionReview.election.referenceId, "rus");
-  //   const darCode = await DAR.getDarFields(darElectionReview.election.referenceId, "dar_code").dar_code;
-  //   const darFields = await DAR.getDarFields(darElectionReview.election.referenceId, "projectTitle");
-  //   const projectTitle = darFields.projectTitle;
-  //   const electionAccess = darElectionReview.election;
-
-  //   if (darElectionReview.election.finalRationale === null) {
-  //     electionAccess.finalRationale = '';
-  //   }
-  //   const status = darElectionReview.election.status;
-  //   const voteAccessList = this.chunk(darElectionReview.reviewVote, 2);
-  //   const chartDataAccess = this.getGraphData(darElectionReview.reviewVote);
-  //   const voteAgreement = darElectionReview.voteAgreement;
-
-  //   // this data is used to construct structured_ files
-  //   const mrDAR = JSON.stringify(darElectionReview.election.useRestriction, null, 2);
-  //   const sDAR = darElectionReview.election.translatedUseRestriction;
-
-  //   //    function createMarkup() { return {__html: 'First &middot; Second'}; };
-  //   // <div dangerouslySetInnerHTML={createMarkup()} />
-
-  //   let electionRP = {};
-
-  //   const rpElectionReview = Election.findRPElectionReview(electionId, false)
-  //   if (rpElectionReview.election !== undefined) {
-  //     electionRP = rpElectionReview.election;
-  //     if (rpElectionReview.election.finalRationale === null) {
-  //       electionRP.finalRationale = '';
-  //     }
-  //     statusRP = rpElectionReview.election.status;
-  //     rpVoteAccessList = this.chunk(rpElectionReview.reviewVote, 2);
-  //     chartRP = this.getGraphData(rpElectionReview.reviewVote);
-  //     showRPaccordion = true;
-  //   } else {
-  //     showRPaccordion = false;
-  //   }
-
-
-  //   const electionReview = Election.findElectionReviewById(darElectionReview.associatedConsent.electionId,
-  //     darElectionReview.associatedConsent.consentId)
-  //   // .then(data => {
-  //   // electionReview = data;
-  //   // this.showDULData(data);
-
-  //   const election = electionReview.election;
-  //   if (electionReview.election.finalRationale === null) {
-  //     election.finalRationale = '';
-  //   }
-
-  //   const downloadUrl = this.apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
-  //   const dulName = electionReview.election.dulName;
-  //   const status = electionReview.election.status;
-  //   const voteList = this.chunk(electionReview.reviewVote, 2);
-  //   const chartDataDUL = this.getGraphData(electionReview.reviewVote);
-  //   const mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
-  //   const sDUL = electionReview.election.translatedUseRestriction;
-
-
-  //   this.vaultVote(darElectionReview.consent.consentId);
-  //   // })
-
-  //   // });
-
-  //   this.setState(prev => {
-
-  //     prev.isQ1Expanded = false;
-  //     prev.isQ2Expanded = false;
-  //     prev.isDulExpanded = false;
-
-  //     prev.createDate = '2018-08-30';
-  //     prev.enableFinalButton = true;
-  //     prev.enableAgreementButton = true;
-
-  //     //--------------------------------------
-  //     prev.oneAtATime = oneAtATime;
-  //     prev.referenceId = referenceId;
-  //     prev.electionID = electionId;
-  //     prev.darElection = darElection;
-  //     prev.hasUseRestriction = hasUseRestriction;
-  //     prev.darInfo = darInfo;
-  //     prev.finalDACVote = finalDACVote;
-  //     prev.statusRP = statusRP;
-  //     prev.rpVoteAccessList = rpVoteAccessList;
-  //     prev.chartRP = chartRP;
-  //     prev.showRPaccordion = showRPaccordion;
-  //     prev.electionReview = electionReview;
-
-  //     //-------------------
-
-  //     prev.projectTitle = projectTitle;
-  //     prev.darCode = darCode;
-  //     prev.match = '-1';
-  //     prev.election = election;
-  //     prev.electionAccess = electionAccess;
-  //     prev.electionRP = electionRP;
-  //     prev.voteAgreement = voteAgreement;
-  //     return prev;
-  //   });
-  // }
-
   async initState() {
+
+    let hideMatch = false;
+    let match = "-1";
+    let createDate = null;
+    let election;
+    let downloadUrl;
+    let dulName;
+    let status;
+    let voteList;
+    let chartDataDUL;
+    let mrDUL;
+    let sDUL;
+    let darElectionReview = {};
+    let daer = {};
+    let finalDACVote;
+    let rpeReview = {};
+    let electionReview;
 
     // formerly resolved on route ....
     const referenceId = this.props.match.params.referenceId;
@@ -166,37 +72,11 @@ class AccessResultRecords extends Component {
     const darInfo = await DAR.describeDar(darElection.referenceId);
     console.log("darInfo: ", darInfo);
 
-    let hideMatch = false;
-    let match = "-1";
-    let createDate = null;
-
-    let election;
-    let downloadUrl;
-    let dulName;
-    let status;
-    let voteList;
-    let chartDataDUL;
-    let mrDUL;
-    let sDUL;
-    let darElectionReview = {};
-    let daer = {};
-    let finalDACVote;
-    let rpeReview = {};
-    let electionReview;
-
-    // if (electionId === null) {
-    //   this.props.history.push('reviewed_cases');
-    // }
-
-    //-----
     finalDACVote = await Votes.getDarFinalAccessVote(electionId);
     console.log("finalDACVote", finalDACVote);
 
     daer = await Election.findDataAccessElectionReview(electionId, false);
     console.log("daer", daer);
-    // showAccessData(data);
-    //--------------------
-    // function showAccessData(electionReview) {
 
     darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
     console.log("darElectionReview.dar", darElectionReview.dar);
@@ -220,18 +100,12 @@ class AccessResultRecords extends Component {
     darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
     darElectionReview.voteAgreement = daer.voteAgreement;
 
-
-    // this data is used to construct structured_ files
     darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
     darElectionReview.sDAR = daer.election.translatedUseRestriction;
 
-    // }
-
-    //....................
-
     let data2 = await Election.findRPElectionReview(electionId, false);
     if (data2 === null || data2 === undefined) data2 = {};
-    console.log("data2",data2);
+    console.log("data2", data2);
 
     if (data2.election !== undefined) {
       rpeReview.electionRP = data2.election;
@@ -245,7 +119,6 @@ class AccessResultRecords extends Component {
     } else {
       rpeReview.showRPaccordion = false;
     }
-
 
     electionReview = await Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
     console.log("electionReview: ", electionReview);
@@ -275,16 +148,15 @@ class AccessResultRecords extends Component {
       hideMatch = true;
     }
 
-    //------------------------------------
-
-
     this.setState({
+      currentUser: Storage.getCurrentUser(),
       voteStatus: status,
       createDate: createDate,
       enableFinalButton: false,
       enableAgreementButton: false,
       hasUseRestriction: hasUseRestriction,
       projectTitle: darElectionReview.projectTitle,
+      dar: darElectionReview.dar,
       darCode: darElectionReview.darCode,
       isQ1Expanded: false,
       isQ2Expanded: false,
@@ -298,8 +170,13 @@ class AccessResultRecords extends Component {
       voteAccessList: darElectionReview.voteAccessList,
       rpVoteAccessList: rpeReview.rpVoteAccessList,
       darInfo: darInfo,
+      loading: false
     },
-      () => { console.log(this.state) });
+      () => {
+        console.log('----------------------------------------------------------------------------------------------------');
+        console.log(JSON.stringify(this.state, null, 2));
+        console.log('----------------------------------------------------------------------------------------------------');
+      });
 
     // $scope.downloadDUL = function () {
     //   cmFilesService.getDULFile($scope.electionReview.consent.consentId, $scope.electionReview.election.dulName);
@@ -320,6 +197,7 @@ class AccessResultRecords extends Component {
 
   initialState() {
     return {
+      loading: true,
       voteStatus: '1',
       createDate: '',
       enableFinalButton: false,
@@ -374,44 +252,6 @@ class AccessResultRecords extends Component {
     };
   }
 
-
-  // async showAccessData(electionReview) {
-  //   const dar = await DAR.getDarFields(electionReview.election.referenceId, "rus");
-  //   const darCode = await DAR.getDarFields(electionReview.election.referenceId, "dar_code").dar_code;
-  //   const darFields = await DAR.getDarFields(electionReview.election.referenceId, "projectTitle");
-  //   const projectTitle = darFields.projectTitle;
-  //   const electionAccess = electionReview.election;
-
-  //   if (electionReview.election.finalRationale === null) {
-  //     electionAccess.finalRationale = '';
-  //   }
-  //   const status = electionReview.election.status;
-  //   const voteAccessList = this.chunk(electionReview.reviewVote, 2);
-  //   const chartDataAccess = this.getGraphData(electionReview.reviewVote);
-  //   const voteAgreement = electionReview.voteAgreement;
-
-  //   // this data is used to construct structured_ files
-  //   const mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
-  //   const sDAR = electionReview.election.translatedUseRestriction;
-
-  //   //    function createMarkup() { return {__html: 'First &middot; Second'}; };
-  //   // <div dangerouslySetInnerHTML={createMarkup()} />
-  // }
-
-  // showDULData(electionReview) {
-  //   const election = electionReview.election;
-  //   if (electionReview.election.finalRationale === null) {
-  //     election.finalRationale = '';
-  //   }
-  //   const downloadUrl = this.apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
-  //   const dulName = electionReview.election.dulName;
-  //   const status = electionReview.election.status;
-  //   const voteList = this.chunk(electionReview.reviewVote, 2);
-  //   const chartDataDUL = this.getGraphData(electionReview.reviewVote);
-  //   const mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
-  //   const sDUL = electionReview.election.translatedUseRestriction;
-  // }
-
   chunk(arr, size) {
     var newArr = [];
     for (var i = 0; i < arr.length; i += size) {
@@ -452,14 +292,14 @@ class AccessResultRecords extends Component {
 
   downloadSDUL = (e) => {
     console.log('-------------------downloadSDUL---------------------');
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
+    // const filename = e.target.getAttribute('filename');
+    // const value = e.target.getAttribute('value');
   }
 
   downloadSDAR = (e) => {
     console.log('-------------------downloadSDAR---------------------');
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
+    // const filename = e.target.getAttribute('filename');
+    // const value = e.target.getAttribute('value');
   }
 
   downloadDAR = (e) => {
@@ -509,54 +349,17 @@ class AccessResultRecords extends Component {
 
   }
 
-  // $scope.openApplication = function openApplication() {
-  //     $scope.electionStatus = 'Closed';
-  //     var modalInstance = $modal.open({
-  //         animation: false,
-  //         templateUrl: 'app/modals/application-summary-modal/application-summary-modal.html',
-  //         controller: 'ApplicationModal',
-  //         controllerAs: 'ApplicationModal',
-  //         scope: $scope,
-  //         resolve: {
-  //             darDetails: function () {
-  //                 return cmRPService.getDarModalSummary($scope.darElection.referenceId);
-  //             },
-  //             dar_id: function(){
-  //                 return $scope.darElection.referenceId;
-  //             },
-  //             calledFromAdmin: function() {
-  //                 return false;
-  //             }
-  //         }
-  //     });
-  //     modalInstance.result.then(function () {
-  //         init();
-  //     });
-  // };
-
   render() {
 
-    console.log('----------------------------------------------------------------------------------------------------');
+    console.log('-------------------------------------------render---------------------------------------------------------');
     console.log(JSON.stringify(this.state, null, 2));
-    // let vote = {
-    //   vote: null,
-    //   rationale: ''
-    // }
+    console.log('----------------------------------------------------------------------------------------------------');
 
-    // let alertsDAR = [
-    //   { title: "Alert 01" },
-    //   { title: "Alert 02" },
-    // ];
+    const { loading, projectTitle, darCode, dar, darInfo } = this.state;
 
-    // let alertsAgree = [
-    //   { title: "Alert Agree 01" },
-    //   { title: "Alert Agree 02" },
-    // ];
-
-    // let alertOn = null;
-
-    const { projectTitle, darCode } = this.state;
-
+    if (loading) {
+      return h3({}, [" Cargando datos ...."]);
+    }
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [projectTitle]), darCode
     ]);
@@ -566,7 +369,10 @@ class AccessResultRecords extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access - Results Record", description: consentData }),
+            PageHeading({
+              id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access",
+              title: "Data Access - Results Record", description: consentData
+            }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             a({ id: "btn_back", href: "/chair_console", className: "btn vote-button vote-button-back vote-button-bigger" }, [
@@ -589,12 +395,12 @@ class AccessResultRecords extends Component {
             div({ id: "rp", className: "panel-body" }, [
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Research Purpose"]),
-                div({ className: "response-label" }, [this.state.darInfo.rus]),
+                div({ className: "response-label" }, [dar.rus]),
               ]),
 
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
-                div({ className: "response-label" }, [this.state.darInfo.sDar]),
+                div({ className: "response-label" }, [darInfo.sDar]),
                 a({
                   isRendered: this.state.hasUseRestriction, onClick: this.downloadSDAR,
                   filename: 'machine-readable-DAR.json',
@@ -602,11 +408,11 @@ class AccessResultRecords extends Component {
                 }, ["Download DAR machine-readable format"]),
               ]),
 
-              div({ isRendered: this.state.darInfo.hasPurposeStatements && this.state.darInfo.purposeStatements !== undefined, className: "row dar-summary" }, [
+              div({ isRendered: darInfo.hasPurposeStatements && darInfo.purposeStatements !== undefined, className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Purpose Statement"]),
                 div({ className: "response-label" }, [
                   ul({}, [
-                    this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
+                    darInfo.purposeStatements.map((purpose, rIndex) => {
                       return h(Fragment, {}, [
                         li({ className: purpose.manualReview ? 'cancel-color' : '' }, [
                           b({}, [purpose.title]), purpose.description
@@ -614,7 +420,7 @@ class AccessResultRecords extends Component {
                       ]);
                     })
                   ]),
-                  div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "dar-summary" }, [
+                  div({ isRendered: darInfo.purposeManualReview && !darInfo.researchTypeManualReview, className: "dar-summary" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
                       "This research involves studying a sensitive population and requires manual review."
                     ]),
@@ -625,7 +431,7 @@ class AccessResultRecords extends Component {
                   div({ className: "control-label access-color" }, ["Type of Research"]),
                   div({ className: "response-label" }, [
                     ul({}, [
-                      this.state.darInfo.researchType.map((type, rIndex) => {
+                      darInfo.researchType.map((type, rIndex) => {
                         return h(Fragment, {}, [
                           li({ className: type.manualReview ? 'cancel-color' : '' }, [
                             b({}, [type.title]), type.description
@@ -635,17 +441,17 @@ class AccessResultRecords extends Component {
                     ]),
                   ]),
                 ]),
-                div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "row dar-summary" }, [
+                div({ isRendered: darInfo.researchTypeManualReview, className: "row dar-summary" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
                     "This research requires manual review."
                   ]),
                 ]),
 
-                div({ isRendered: this.state.darInfo.hasDiseases, className: "row dar-summary" }, [
+                div({ isRendered: darInfo.hasDiseases, className: "row dar-summary" }, [
                   div({ className: "control-label access-color" }, ["Disease area(s)"]),
                   div({ className: "response-label" }, [
                     ul({}, [
-                      this.state.darInfo.diseases.map((disease, rIndex) => {
+                      darInfo.diseases.map((disease, rIndex) => {
                         return h(Fragment, {}, [
                           li({}, [
                             disease
@@ -655,37 +461,37 @@ class AccessResultRecords extends Component {
                     ]),
                   ]),
                 ]),
-                div({ isRendered: this.state.darInfo.havePI, className: "row no-margin" }, [
+                div({ isRendered: darInfo.havePI, className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Principal Investigator: "]),
-                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.pi]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.pi]),
                 ]),
                 div({ className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Researcher: "]),
-                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.profileName]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.profileName]),
                   div({ className: "row no-margin" }, [
                     label({ className: "control-label no-padding" }, ["Status: "]),
-                    span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.status]),
-                    span({ isRendered: this.state.darInfo.hasAdminComment }, [
+                    span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.status]),
+                    span({ isRendered: darInfo.hasAdminComment }, [
                       label({ className: "control-label no-padding" }, [" - Comment: "]),
-                      span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
+                      span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.adminComment]),
                     ]),
                   ]),
                 ]),
                 div({ className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Institution: "]),
-                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.institution]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.institution]),
                 ]),
                 div({ className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Department: "]),
-                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.department]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.department]),
                 ]),
                 div({ className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["City: "]),
-                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.city]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.city]),
                 ]),
                 div({ className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Country: "]),
-                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.country]),
                 ]),
                 button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
               ]),
@@ -915,135 +721,3 @@ class AccessResultRecords extends Component {
 }
 
 export default AccessResultRecords;
-
-
-
-
-
-// //-------------------------------------------------
-
-// const init2 = async (apiUrl) => {
-
-//   // formerly resolved on route ....
-//   const referenceId = this.props.match.params.referenceId;
-//   const electionId = this.props.match.params.electionId;
-//   const darElection = Election.findElectionById(electionId);
-//   const hasUseRestriction = DAR.hasUseRestriction(referenceId);
-
-//   const oneAtATime = false;
-//   const darInfo = await DAR.describeDar(darElection.referenceId);
-
-//   let hideMatch = false;
-//   let match = "-1";
-//   let createDate = null;
-
-//   let election;
-//   let downloadUrl;
-//   let dulName;
-//   let status;
-//   let voteList;
-//   let chartDataDUL;
-//   let mrDUL;
-//   let sDUL;
-
-
-//   if (electionId === null) {
-//     this.props.history.push('reviewed_cases');
-
-//     //-----
-//     const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
-
-//     let darElectionReview = {};
-//     let daer = await Election.findDataAccessElectionReview(electionId, false);
-//     // showAccessData(data);
-//     //--------------------
-//     // function showAccessData(electionReview) {
-
-//     darElectionReview.dar = await DAR.getDarFields(daer.election.referenceId, "rus")
-
-//     DAR.getDarFields(daer.election.referenceId, "dar_code").then(function (data) {
-//       darElectionReview.darCode = data.dar_code;
-//     });
-
-//     DAR.getDarFields(daer.election.referenceId, "projectTitle").then(function (data) {
-//       darElectionReview.projectTitle = data.projectTitle;
-//     });
-
-//     darElectionReview.electionAccess = daer.election;
-//     if (daer.election.finalRationale === null) {
-//       darElectionReview.electionAccess.finalRationale = '';
-//     }
-//     darElectionReview.status = daer.election.status;
-//     darElectionReview.voteAccessList = this.chunk(daer.reviewVote, 2);
-//     darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
-//     darElectionReview.voteAgreement = daer.voteAgreement;
-
-
-//     // this data is used to construct structured_ files
-//     darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
-//     darElectionReview.sDAR = daer.election.translatedUseRestriction;
-
-//     // }
-
-//     //....................
-//     let rpeReview = {};
-//     let data2 = await Election.findRPElectionReview(electionId, false);
-//     if (data2.election !== undefined) {
-//       rpeReview.electionRP = data2.election;
-//       if (data2.election.finalRationale === null) {
-//         rpeReview.electionRP.finalRationale = '';
-//       }
-//       rpeReview.statusRP = data2.election.status;
-//       rpeReview.rpVoteAccessList = this.chunk(data2.reviewVote, 2);
-//       rpeReview.chartRP = this.getGraphData(data2.reviewVote);
-//       rpeReview.showRPaccordion = true;
-//     } else {
-//       rpeReview.showRPaccordion = false;
-//     }
-
-
-//     let electionReview = Election.findElectionReviewById(daer.associatedConsent.electionId, daer.associatedConsent.consentId);
-//     election = electionReview.election;
-//     if (electionReview.election.finalRationale === null) {
-//       election.finalRationale = '';
-//     }
-//     downloadUrl = apiUrl + 'consent/' + electionReview.consent.consentId + '/dul';
-//     dulName = electionReview.election.dulName;
-//     status = electionReview.election.status;
-//     voteList = this.chunk(electionReview.reviewVote, 2);
-//     chartDataDUL = this.getGraphData(electionReview.reviewVote);
-//     mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
-//     sDUL = electionReview.election.translatedUseRestriction;
-
-//     const data4 = await Match.findMatch(electionReview.consent.consentId, darElectionReview.electionAccess.referenceId);
-//     if (data4.failed !== null && data4.failed !== undefined && data4.failed) {
-//       hideMatch = false;
-//       match = "-1";
-//       createDate = data4.createDate;
-//     } else if (data4.match !== null && data4.match !== undefined) {
-//       hideMatch = false;
-//       match = data4.match;
-//       createDate = data4.createDate;
-//     } else {
-//       hideMatch = true;
-//     }
-//   };
-//   //------------------------------------
-
-
-
-//   // $scope.downloadDUL = function () {
-//   //   cmFilesService.getDULFile($scope.electionReview.consent.consentId, $scope.electionReview.election.dulName);
-//   // };
-
-//   // $scope.back = function () {
-//   //   $state.go($rootScope.pathFrom);
-//   //   $rootScope.pathFrom = undefined;
-//   // };
-//   // $scope.download = downloadFileService.downloadFile;
-
-//   // $scope.downloadDAR = function () {
-//   //   cmFilesService.getDARFile($scope.darElection.referenceId);
-//   // };
-
-// }
