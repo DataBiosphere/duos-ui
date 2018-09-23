@@ -3,12 +3,14 @@ import { div, b, span, a, h4, hr, i, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       value: '',
       currentUser: {},
       enableVoteButton: false,
@@ -21,7 +23,7 @@ class DulReview extends Component {
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.mockState();
     this.setState(prev => {
       prev.currentUser = {
@@ -38,17 +40,18 @@ class DulReview extends Component {
   async voteInfo() {
     Votes.find(this.props.match.params.consentId, this.props.match.params.voteId)
       .then(data => {
-        this.setState({vote: data});
+        this.setState({ vote: data });
       });
     Election.findElectionByVoteId(this.props.match.params.voteId)
       .then(data => {
-        this.setState({election: data});
+        this.setState({ election: data });
       });
-    this.setState({consent: Consent.findConsentById(this.props.match.params.consentId)});
+    this.setState({ consent: Consent.findConsentById(this.props.match.params.consentId) });
   }
 
   mockState() {
     this.setState(prev => {
+      prev.loading = false;
       prev.consentGroupName = 'OD-256: Jackson / HS-08-000245';
       prev.consentName = 'ORSP-124';
       prev.sDul = 'something';
@@ -74,6 +77,8 @@ class DulReview extends Component {
   };
 
   render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
       b({ isRendered: this.state.consent.groupName, className: "pipe", "ng-bind-html": "consentGroupName" }, [this.state.consent.groupName]),

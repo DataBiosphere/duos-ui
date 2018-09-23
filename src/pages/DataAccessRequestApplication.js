@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, br, h, small, h3, a, span, form, ol, ul, li, label, button, input, textarea, img, p } from 'react-hyperscript-helpers';
+import { div, hr, br, h, small, h3, a, span, form, ol, ul, li, label, button, input, textarea, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';

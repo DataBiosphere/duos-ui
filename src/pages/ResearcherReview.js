@@ -4,12 +4,14 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Researcher } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showConfirmationDialogOK: false,
       alertMessage: "Your vote has been successfully logged!",
       value: '',
@@ -41,12 +43,11 @@ class ResearcherReview extends Component {
     }
   }
 
-  componentWillMount() {
-    this.findResearcherProps();
-    this.findUserStatus();
+  componentDidMount() {
+    this.findResearcherInfo();
   }
 
-  async findResearcherProps() {
+  async findResearcherInfo() {
 
     let researcher = await Researcher.getPropertiesByResearcherId(this.props.match.params.dacUserId);
 
@@ -59,15 +60,9 @@ class ResearcherReview extends Component {
       researcher.havePI = JSON.parse(researcher.havePI);
       researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
     }
-
-    this.setState(prev => {
-      prev.formData = researcher;
-      return prev;
-    });
-  }
-
-  async findUserStatus() {
+ 
     let user = await User.findUserStatus(this.props.match.params.dacUserId);
+
     let status = null;
     if (user.status === 'approved') {
       status = true;
@@ -76,6 +71,8 @@ class ResearcherReview extends Component {
     }
 
     this.setState(prev => {
+      prev.loading = false; 
+      prev.formData = researcher;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
       return prev;
@@ -103,12 +100,14 @@ class ResearcherReview extends Component {
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialogOK: false });
     this.props.history.goBack();
-   
   };
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
     const { formData, rationale, voteStatus } = this.state;
+    
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [

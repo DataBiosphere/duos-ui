@@ -1,11 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, hh, h, hr, i, input, span, button } from 'react-hyperscript-helpers';
+import { div, hh, h, hr, span, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { Storage } from '../libs/storage';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
 import { SearchBox } from '../components/SearchBox';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -18,6 +19,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       currentUser: {},
       dulLimit: 5,
@@ -64,9 +66,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     });
   };
 
-  componentWillMount() {
+  componentDidMount() {
     let currentUser = Storage.getCurrentUser();
-    this.setState({ currentUser: currentUser }, () => {
+    this.setState({
+      currentUser: currentUser
+    }, () => {
       this.init(currentUser);
     });
   }
@@ -74,14 +78,12 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   async init(currentUser) {
 
     let duls = await PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
-    this.setState(prev => {
-      prev.electionsList.dul = duls.dul;
-      prev.totalDulPendingVotes = duls.totalDulPendingVotes
-      return prev;
-    });
-
     let dars = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
+
     this.setState(prev => {
+      prev.loading = false;
+      prev.electionsList.dul = duls.dul;
+      prev.totalDulPendingVotes = duls.totalDulPendingVotes;
       prev.electionsList.access = dars.access;
       prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
       return prev;
@@ -134,13 +136,15 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
     const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit, searchDulText, searchDarText } = this.state;
 
     return (
 
       div({ className: "container" }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          PageHeading({ id:"chairConsole", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
+          PageHeading({ id: "chairConsole", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "These are your pending cases for review" }),
 
           hr({ className: "section-separator" }),
 
@@ -178,7 +182,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({
-                      id: pendingCase.frontEndId + "_btnVote", 
+                      id: pendingCase.frontEndId + "_btnVote",
                       name: "btn_voteDul",
                       onClick: this.openDULReview(pendingCase.voteId, pendingCase.referenceId),
                       className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')

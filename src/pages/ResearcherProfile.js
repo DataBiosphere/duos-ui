@@ -5,7 +5,7 @@ import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -13,13 +13,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     super(props);
 
     this.state = {
+      loading: true,
       researcherProfile: {},
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
     };
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
-
     this.handleChange = this.handleChange.bind(this);
     this.handlePIChange = this.handlePIChange.bind(this);
     this.handlePI2Change = this.handlePI2Change.bind(this);
@@ -31,7 +31,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.submit = this.submit.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getResearcherProfile();
   }
 
@@ -44,7 +44,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     profile.isThePI = profile.isThePI;
     profile.havePI = profile.havePI;
     profile.completed = profile.complete;
-    this.setState({ researcherProfile: profile });
+    this.setState({
+      loading: false,
+      researcherProfile: profile,
+      formData: {
+        nihUsername: 'nihUsername',
+        eraExpirationCount: 10,
+      
+      }
+    });
   }
 
   handleChange(event) {
@@ -131,7 +139,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+    
     const showValidationMessages = false;
+
     return (
 
       div({ className: "container" }, [
@@ -230,7 +241,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       //show when appropriate
                       div({ isRendered: false }, [
                         div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                          div({ className: "auth-id" }, ["this.state.formData.nihUsername"]),
+                          div({ className: "auth-id" }, [this.state.formData.nihUsername]),
                           button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
                             span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
                           ]),
@@ -238,11 +249,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         ]),
 
                         div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                          div({ isRendered: "this.state.formData.eraExpirationCount !== 0", className: "default-color display-block" }, ["Your NIH authentication will expire in " + "this.state.formData.eraExpirationCount" + " days"]),
-                          div({ isRendered: "this.state.formData.eraExpirationCount === 0", className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                          div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
+                          div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
                         ]),
                         div({ isRendered: "this.state.formData.dar_code !== null", className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                          div({ className: "auth-id" }, ["this.state.formData.nihUsername"])
+                          div({ className: "auth-id" }, [this.state.formData.nihUsername])
                         ]),
                       ]),
 
@@ -286,10 +297,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       })
                     ])
                   ]),
-                  hr({ className: "section-separator", style: { 'margin': '10px 15px'} }),
+                  hr({ className: "section-separator", style: { 'margin': '10px 15px' } }),
                 ]),
 
-                
+
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -536,7 +547,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }, ["Required field"])
                   ])
                 ]),
-              
+
                 div({ isRendered: this.state.researcherProfile.havePI === true, className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                     label({ id: "lbl_profilePIName", className: "control-label" }, ["Principal Investigator Name*"]),
@@ -555,7 +566,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       isRendered: (this.state.researcherProfile.piName === undefined && showValidationMessages)
                     }, ["Principal Investigator is required"]),
                   ]),
-  
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                     label({
                       id: "lbl_profilePIEmail",
@@ -577,7 +588,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       // (researcherForm.profilePIEmail.$invalid && showValidationMessages)
                     }, ["Email Address is empty or has invalid format"]),
                   ]),
-  
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                     label({
                       id: "lbl_profileEraCommons",
@@ -592,7 +603,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       value: this.state.researcherProfile.eRACommonsID
                     }),
                   ]),
-  
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                     label({
                       id: "lbl_profilePubmedID",
@@ -607,7 +618,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       value: this.state.researcherProfile.pubmedID
                     }),
                   ]),
-  
+
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                     label({
                       id: "lbl_profileScientificURL",

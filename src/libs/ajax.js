@@ -250,6 +250,7 @@ export const DAR = {
             dar.status = role.status;
             return dar;
           }
+          return dar;
         });
       }      
       return dar;
@@ -412,9 +413,10 @@ export const Election = {
   findRPElectionReview: async (electionId, isFinalAccess) => {
     const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json().catch(function () {
-      return null;
-    });
+    if (res.status === 204) {
+      return {};
+    }
+    return await res.json();
   },
 
   updateElection: async (electionId, document) => {

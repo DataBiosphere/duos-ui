@@ -3,16 +3,16 @@ import { div, button, i, span, b, a, h4, ul, li, label, h } from 'react-hyperscr
 import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files } from "../libs/ajax";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AccessPreview extends Component {
-
 
   constructor(props) {
     super(props);
     this.state = this.initialState();
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.darReviewInfo();
   }
 
@@ -84,10 +84,15 @@ class AccessPreview extends Component {
       return prev;
     });
 
+    this.setState({
+      loading: false
+    });
+    
   };
 
   initialState() {
     return {
+      loading: true,
       hasUseRestriction: true,
       projectTitle: '',
       consentName: '',
@@ -151,6 +156,12 @@ class AccessPreview extends Component {
 
   render() {
     
+    const { loading } = this.state;
+
+    if (loading) {
+      return LoadingIndicator();
+    }
+
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
       this.state.consentName

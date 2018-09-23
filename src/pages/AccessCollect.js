@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h, p } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
@@ -8,10 +8,9 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Election, DAR, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AccessCollect extends Component {
-
 
   constructor(props) {
     super(props);
@@ -22,7 +21,7 @@ class AccessCollect extends Component {
     this.confirmationRPHandlerOK = this.confirmationRPHandlerOK.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.loadData();
     this.setState(prev => {
       prev.currentUser = {
@@ -35,9 +34,9 @@ class AccessCollect extends Component {
     });
   }
 
-
   initialState() {
     return {
+      loading: true,
       alertAccessMessage: '',
       showAlertAccess: false,
       showAlertRP: false,
@@ -110,7 +109,7 @@ class AccessCollect extends Component {
   };
 
   confirmationHandlerOK = (answer) => (e) => {
-    if(answer === true) {
+    if (answer === true) {
       let election = this.state.election;
       election.status = 'Final';
       election.finalVote = this.state.accessVote;
@@ -129,18 +128,18 @@ class AccessCollect extends Component {
       }
     } else {
       this.setState(prev => {
-        prev.showConfirmationDialogOK =  false;
+        prev.showConfirmationDialogOK = false;
         return prev;
-      }); 
-    }   
+      });
+    }
   };
 
   async updateElection(election) {
     return await Election.updateElection(election.electionId, election);
   };
-  
+
   confirmationRPHandlerOK = (answer) => (e) => {
-    if(answer === true) {
+    if (answer === true) {
       let election = this.state.rpElection;
       election.finalVote = this.state.rpVote;
       election.finalRationale = this.state.rpRationale;
@@ -151,20 +150,20 @@ class AccessCollect extends Component {
       } else {
         this.setState(prev => {
           prev.rpAlreadyVote = true;
-          prev.showConfirmationRPDialogOK =  false;
+          prev.showConfirmationRPDialogOK = false;
           prev.alertRPMessage = 'Remember to log a vote on: Q1. Should data access be granted to this applicant?';
           prev.showAlertAccess = false;
           prev.showAlertRP = true;
           return prev;
         });
       }
-    }else {
+    } else {
       this.setState(prev => {
-        prev.showConfirmationRPDialogOK =  false;
+        prev.showConfirmationRPDialogOK = false;
         return prev;
-      }); 
-    }  
-    
+      });
+    }
+
   };
 
   downloadDAR() {
@@ -221,6 +220,9 @@ class AccessCollect extends Component {
     this.findDataAccessElectionReview();
     this.findRPElectionReview();
     this.findDarFields();
+    this.setState({
+      loading: false
+    });
   }
 
   async findDataAccessElectionReview() {
@@ -345,7 +347,14 @@ class AccessCollect extends Component {
       return prev;
     })
   }
+
   render() {
+
+    const { loading } = this.state;
+
+    if (loading) {
+      return LoadingIndicator();
+    }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -557,7 +566,8 @@ class AccessCollect extends Component {
                         SingleResultBox({
                           id: "accessSingleResult_" + vIndex,
                           color: "access",
-                          data: vm                        })
+                          data: vm
+                        })
                       ]);
                     })
                   ]),

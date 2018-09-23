@@ -5,6 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files } from '../libs/ajax';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulCollect extends Component {
 
@@ -18,18 +19,23 @@ class DulCollect extends Component {
     this.props.history.goBack();
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
     const consentId = this.props.match.params.consentId;
-    Election.electionReviewResource(consentId, 'TranslateDUL').then(data => {
-      this.setState({ dulVoteList: this.chunk(data.reviewVote, 2) });
-      this.setState({ consentGroupName: data.consent.groupName });
-      this.setState({ consentName: data.consent.name });
-      this.setState({ translatedUseRestriction: data.election.translatedUseRestriction });
-      this.setState({ projectTitle: data.election.projectTitle });
-      this.setState({ finalVote: data.election.finalVote });
-      this.setState({ finalRationale: data.election.finalRationale });
-      this.setState({ finalVoteDate: data.election.finalVoteDate });
-    });
+    Election.electionReviewResource(consentId, 'TranslateDUL').then(
+      data => {
+        console.log(data);
+        this.setState({
+          loading: false,
+          dulVoteList: this.chunk(data.reviewVote, 2),
+          consentGroupName: data.consent.groupName,
+          consentName: data.consent.name,
+          translatedUseRestriction: data.election.translatedUseRestriction,
+          projectTitle: data.election.projectTitle,
+          finalVote: data.election.finalVote,
+          finalRationale: data.election.finalRationale,
+          finalVoteDate: data.election.finalVoteDate
+        });
+      });
 
     this.setState(prev => {
       prev.currentUser = {
@@ -39,7 +45,7 @@ class DulCollect extends Component {
         ]
       };
       return prev;
-   });
+    });
   }
 
   chunk(arr, size) {
@@ -52,6 +58,7 @@ class DulCollect extends Component {
 
   initialState() {
     return {
+      loading: true,
       voteStatus: '',
       createDate: '',
       hasUseRestriction: Boolean,
@@ -65,11 +72,11 @@ class DulCollect extends Component {
       dulVoteList: []
     };
   }
-  
-  
+
+
   download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
+    // const filename = e.target.getAttribute('filename');
+    // const value = e.target.getAttribute('value');
 
   };
 
@@ -87,6 +94,8 @@ class DulCollect extends Component {
   };
 
   render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.consentGroupName]),
