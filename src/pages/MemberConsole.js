@@ -1,11 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, hr, i, input, span, h, button } from 'react-hyperscript-helpers';
+import { div, hr, span, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { Storage } from '../libs/storage';
 import { PendingCases } from '../libs/ajax';
 import { SearchBox } from '../components/SearchBox';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class MemberConsole extends Component {
 
@@ -15,6 +16,7 @@ class MemberConsole extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       dulLimit: 5,
       accessLimit: 5,
@@ -70,28 +72,25 @@ class MemberConsole extends Component {
     this.setState({ showModal: false });
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    this.getMembersInfo();
+  }
+
+  async getMembersInfo() {
     let currentUser = Storage.getCurrentUser();
 
-    this.setState({ currentUser: currentUser });
+    const duls = await PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
+    const dars = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
 
-    PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId).then(
-      resp => {
-        this.setState(prev => {
-          prev.totalDulPendingVotes = resp.totalDulPendingVotes;
-          prev.electionsList.dul = resp.dul;
-          return prev;
-        });
-      });
-
-    PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
-      resp => {
-        this.setState(prev => {
-          prev.totalAccessPendingVotes = resp.totalAccessPendingVotes;
-          prev.electionsList.access = resp.access;
-          return prev;
-        });
-      });
+    this.setState(prev => {
+      prev.currentUser = currentUser;
+      prev.loading = false;
+      prev.totalDulPendingVotes = duls.totalDulPendingVotes;
+      prev.electionsList.dul = duls.dul;
+      prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
+      prev.electionsList.access = dars.access;
+      return prev;
+    });
 
   }
 
@@ -121,6 +120,8 @@ class MemberConsole extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+    
     const { currentUser, currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
 
     return (
@@ -229,7 +230,7 @@ class MemberConsole extends Component {
                       onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
                       className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center"
                     }, [
-                        button({ id: pendingCase.frontEndId + "_btnVoteAccess", name: "btn_voteAccess",  className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
+                        button({ id: pendingCase.frontEndId + "_btnVoteAccess", name: "btn_voteAccess", className: "cell-button " + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color') }, [
                           span({ isRendered: pendingCase.alreadyVoted === false }, ["Vote"]),
                           span({ isRendered: pendingCase.alreadyVoted === true }, ["Edit"]),
                         ]),

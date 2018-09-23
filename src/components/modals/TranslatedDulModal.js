@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataSet } from '../../libs/ajax'
+// import { DataSet } from '../../libs/ajax'
 
 const MODAL_ID = 'translatedDul';
 

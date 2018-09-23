@@ -5,16 +5,16 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AccessReview extends Component {
-
 
   constructor(props) {
     super(props);
     this.state = this.initialState();
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -167,6 +167,13 @@ class AccessReview extends Component {
         this.setState({dulName: consent.dulName});
       }
     });
+
+
+    this.setState({
+      loading: false
+    });
+    
+    
   }
 
   confirmationHandlerOK = (answer) => (e) => {
@@ -179,6 +186,7 @@ class AccessReview extends Component {
 
   initialState() {
     return {
+      loading: true,
       showConfirmationDialogOK: false,
       alertMessage: "Your vote has been successfully logged!",
       hasUseRestriction: '',
@@ -241,6 +249,12 @@ class AccessReview extends Component {
   };
 
   render() {
+
+    const { loading } = this.state;
+
+    if (loading) {
+      return LoadingIndicator();
+    }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),

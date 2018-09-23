@@ -42,42 +42,42 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
-    let dialogTitle = "";
-    let dialogMessage = "";
-    let dialogType = "";
-    let dialogLabel = "";
+    // let dialogTitle = "";
+    // let dialogMessage = "";
+    // let dialogType = "";
+    // let dialogLabel = "";
 
-    //if agreement election
-    if (this.props.id === "agreement") {
-      dialogTitle = "Post Decision Agreement?";
-      dialogMessage = "Are you sure you want to post this Decision Agreement?";
-      dialogType = "";
-      dialogLabel = "Yes"
-    }
+    // //if agreement election
+    // if (this.props.id === "agreement") {
+    //   dialogTitle = "Post Decision Agreement?";
+    //   dialogMessage = "Are you sure you want to post this Decision Agreement?";
+    //   dialogType = "";
+    //   dialogLabel = "Yes"
+    // }
 
-    //if final election
-    if (this.props.id === "finalAccess") {
-      dialogTitle = "Post Final Access Decision?";
-      dialogMessage = "Are you sure you want to post this Final Access Decision?";
-      dialogType = "";
-      dialogLabel = "Yes"
-    }
+    // //if final election
+    // if (this.props.id === "finalAccess") {
+    //   dialogTitle = "Post Final Access Decision?";
+    //   dialogMessage = "Are you sure you want to post this Final Access Decision?";
+    //   dialogType = "";
+    //   dialogLabel = "Yes"
+    // }
 
-    //if collect election 
-    if (this.props.id === "accessCollect" || this.props.id === "rpCollect" || this.props.id === "dulCollect") {
-      dialogTitle = "Post Final Vote?";
-      dialogMessage = "If you post this vote the Election will be closed with current results.";
-      dialogType = "";
-      dialogLabel = "Yes"
-    }
+    // //if collect election 
+    // if (this.props.id === "accessCollect" || this.props.id === "rpCollect" || this.props.id === "dulCollect") {
+    //   dialogTitle = "Post Final Vote?";
+    //   dialogMessage = "If you post this vote the Election will be closed with current results.";
+    //   dialogType = "";
+    //   dialogLabel = "Yes"
+    // }
 
-    //if review election
-    if (this.props.id === "accessReview" || this.props.id === "rpReview" || this.props.id === "dulReview" || this.props.id === "dataOwnerReview" || this.props.id === "researcherReview") {
-      dialogTitle = "Vote confirmation";
-      dialogMessage = "Your vote has been successfully logged!";
-      dialogType = "informative";
-      dialogLabel = "Ok"
-    }
+    // //if review election
+    // if (this.props.id === "accessReview" || this.props.id === "rpReview" || this.props.id === "dulReview" || this.props.id === "dataOwnerReview" || this.props.id === "researcherReview") {
+    //   dialogTitle = "Vote confirmation";
+    //   dialogMessage = "Your vote has been successfully logged!";
+    //   dialogType = "informative";
+    //   dialogLabel = "Ok"
+    // }
 
     const { voteStatus, rationale, enableVoteButton } = this.state;
     return (

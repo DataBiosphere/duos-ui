@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, hr, i, input, span, a, h } from 'react-hyperscript-helpers';
+import { div, hr, span, a, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { HelpModal } from '../components/modals/HelpModal';
@@ -7,12 +7,14 @@ import { SearchBox } from '../components/SearchBox';
 import { Help } from "../libs/ajax";
 import { Storage } from '../libs/storage';
 import * as Utils from "../libs/utils";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class HelpReports extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       value: '',
       limit: 10,
       currentPage: 1,
@@ -27,14 +29,14 @@ class HelpReports extends Component {
   async getReportsList() {
     const reports = await Help.findHelpMeReports(Storage.getCurrentUser().dacUserId);
     this.setState(prev => {
+      prev.loading = false;
       prev.currentPage = 1;
       prev.reports = reports;
       return prev;
     });
   }
 
-
-  componentWillMount() {
+  componentDidMount() {
     this.getReportsList();
   };
 
@@ -89,6 +91,9 @@ class HelpReports extends Component {
   };
 
   render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
+
     const { searchDulText } = this.state;
 
     return (

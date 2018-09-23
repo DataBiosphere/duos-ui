@@ -6,6 +6,7 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files } from '../libs/ajax';
 import * as Utils from '../libs/utils';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulResultRecords extends Component {
 
@@ -23,7 +24,7 @@ class DulResultRecords extends Component {
     return newArr;
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState(prev => {
       prev.currentUser = {
         roles: [
@@ -40,20 +41,55 @@ class DulResultRecords extends Component {
   }
 
   async voteInfo() {
-    Election.findReviewedElections(this.props.match.params.electionId).then(data => {
-      this.setState({ dulVoteList: this.chunk(data.reviewVote, 2) });
-      this.setState({ consentGroupName: data.consent.groupName });
-      this.setState({ consentName: data.consent.name });
-      this.setState({ sDul: data.election.translatedUseRestriction });
-      this.setState({ projectTitle: data.election.projectTitle });
-      this.setState({ finalVote: data.election.finalVote });
-      this.setState({ finalRationale: data.election.finalRationale });
-      this.setState({ finalVoteDate: Utils.formatDate(data.election.finalVoteDate) });
-    });
+    Election.findReviewedElections(this.props.match.params.electionId).then(
+      data => {
+        this.setState({ chartData: this.getGraphData(data.reviewVote) },
+          () => {
+            this.setState({
+              loading: false,
+              consentId: data.election.referenceId,
+              dulVoteList: this.chunk(data.reviewVote, 2),
+              consentGroupName: data.consent.groupName,
+              consentName: data.consent.name,
+              sDul: data.election.translatedUseRestriction,
+              projectTitle: data.election.projectTitle,
+              finalVote: data.election.finalVote,
+              finalRationale: data.election.finalRationale,
+              finalVoteDate: Utils.formatDate(data.election.finalVoteDate),
+            });
+          });
+      });
+  }
+
+  getGraphData(reviewVote) {
+    let yes = 0;
+    let no = 0;
+    let empty = 0;
+    for (var i = 0; i < reviewVote.length; i++) {
+      switch (reviewVote[i].vote.vote) {
+        case true:
+          yes++;
+          break;
+        case false:
+          no++;
+          break;
+        default:
+          empty++;
+          break;
+      }
+    }
+    const chartData = [
+      ['Results', 'Votes'],
+      ['YES', yes],
+      ['NO', no],
+      ['Pending', empty]
+    ];
+    return chartData;
   }
 
   initialState() {
     return {
+      loading: true,
       voteStatus: '',
       createDate: '',
       hasUseRestriction: true,
@@ -65,18 +101,26 @@ class DulResultRecords extends Component {
         finalRationale: '',
         finalVoteDate: ''
       },
-      dulVoteList: [ [], [] ],
+      dulVoteList: [[], []],
     };
   }
 
 
   download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
-
+    // const filename = e.target.getAttribute('filename');
+    // const value = e.target.getAttribute('value');
   };
 
   downloadDUL = (e) => {
+    // const consentId = this.state.consentId; //  this.props.match.params.consentId;
+    // console.log(consentId);
+    // Files.getDulFile(consentId).then(
+    //   blob => {
+    //     if (blob.size !== 0) {
+    //       this.createBlobFile(this.state.consentName, blob);
+    //     }
+    //   }
+    // );
     Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
   };
 
@@ -90,8 +134,14 @@ class DulResultRecords extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
+    const { chartData } = this.state;
+
+    console.log(chartData);
+
     const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [this.state.consentGroupName]),
+      b({ className: "pipe", isRendered: this.state.consentGroupName }, [this.state.consentGroupNsame]),
       this.state.consentName
     ]);
 
@@ -143,11 +193,7 @@ class DulResultRecords extends Component {
               vote: this.state.finalVote,
               voteDate: this.state.finalVoteDate,
               rationale: this.state.finalRationale,
-              chartData: [
-                ['Results', 'Votes'],
-                ['Yes', 90],
-                ['No', 110]
-              ]
+              chartData: chartData
             }),
           ]),
         ]),
@@ -161,10 +207,11 @@ class DulResultRecords extends Component {
             expanded: this.state.isQ1Expanded
           }, [
               this.state.dulVoteList.map((row, rIndex) => {
-                return h(Fragment, {key: rIndex}, [
+                return h(Fragment, { key: rIndex }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
-                      return h(Fragment, {key: vIndex}, [
+                      console.log(vm);
+                      return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
                           id: "dulSingleResult_" + vIndex,
                           color: "dul",

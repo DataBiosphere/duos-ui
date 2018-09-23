@@ -25,7 +25,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
     //if reminder sent succesfully
     const dialogTitle = "Email Notification Sent";
     const dialogColor = this.props.color;
-    const reminderSent = this.props.reminderSent;
+    // const reminderSent = this.props.reminderSent;
 
     //if error sending reminder
     // const dialogTitle = "Email Notification Error";
@@ -52,8 +52,8 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
               title: dialogTitle, color: dialogColor, showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
             }, [
                 div({ className: "dialog-description" }, [
-                  span({ isRendered: reminderSent === true }, ["The reminder was successfully sent."]),
-                  span({ isRendered: reminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
+                  span({ isRendered: this.props.data.vote.isReminderSent === true || this.props.data.vote.isReminderSent === 'true' || this.props.data.vote.isReminderSent === '1'}, ["The reminder was successfully sent."]),
+                  span({ isRendered: this.props.data.vote.isReminderSent === false || this.props.data.vote.isReminderSent === 'false' || this.props.data.vote.isReminderSent === '0' }, ["The reminder couldn't be sent. Please contact Support."]),
                 ]),
               ]),
           ])

@@ -105,7 +105,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   handleLSelection = (e) => {
     const target = e.target;
     const value = target.value;
-    const options = target.options;
+    // const options = target.options;
     const selectedOptions = target.selectedOptions;
     selectedOptions.this.setState(prev => {
         prev.available.push(value);
@@ -116,8 +116,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   handleRSelection = (e) => {
     const target = e.target;
     const value = target.value;
-    const options = target.options;
-    const selectedOptions = target.selectedOptions;
+    // const options = target.options;
+    // const selectedOptions = target.selectedOptions;
     this.setState(prev => {
       prev.selected.push(value);
       return prev;
@@ -127,7 +127,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   render() {
 
     const { available, selected, availableclients, selectedclients } = this.state;
-
+    console.log(availableclients, selectedclients);
     return (
 
       BaseModal({

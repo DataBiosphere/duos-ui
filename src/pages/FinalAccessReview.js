@@ -5,6 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class FinalAccessReview extends Component {
 
@@ -13,7 +14,7 @@ class FinalAccessReview extends Component {
     this.state = this.initialState();
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.mockState();
     this.setState(prev => {
       prev.currentUser = {
@@ -28,6 +29,7 @@ class FinalAccessReview extends Component {
 
   mockState() {
     this.setState(prev => {
+      prev.loading = false;
       prev.createDate = '2018-08-30';
       prev.enableFinalButton = true;
       prev.enableAgreementButton = true;
@@ -99,6 +101,7 @@ class FinalAccessReview extends Component {
 
   initialState() {
     return {
+      loading: true,
       voteStatus: '1',
       createDate: '2018-08-30',
       enableFinalButton: false,
@@ -301,8 +304,8 @@ class FinalAccessReview extends Component {
   }
 
   download = (e) => {
-    const filename = e.target.getAttribute('filename');
-    const value = e.target.getAttribute('value');
+    // const filename = e.target.getAttribute('filename');
+    // const value = e.target.getAttribute('value');
   }
 
   downloadDAR = (e) => {
@@ -359,6 +362,8 @@ class FinalAccessReview extends Component {
     // ];
 
     // let alertOn = null;
+
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -603,7 +608,7 @@ class FinalAccessReview extends Component {
                           span({ isRendered: this.state.match === '0' }, ["NO"]),
                           span({ isRendered: this.state.match === null }, []),
                           span({ className: "cancel-color", isRendered: this.state.match === '-1' }, [
-                            "Automated Vote System Failure. Please report this issue via the \"Request Help\" link" 
+                            "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"
                           ]),
                         ]),
                       ]),
