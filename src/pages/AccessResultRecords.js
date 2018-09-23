@@ -16,8 +16,9 @@ class AccessResultRecords extends Component {
     this.state = this.initialState();
   }
 
-  static getDerivedStateFromProps(props, state) {
-    console.log(props, state);
+  static getDerivedStateFromProps(nextProps, prevState) {
+    console.log(nextProps, prevState);
+
     // this.setState(prev => {
     //   prev.currentUser = Storage.getCurrentUser()
     //   return prev;
@@ -29,6 +30,7 @@ class AccessResultRecords extends Component {
     //    }
     //  );
 
+    return {};
   }
 
   componentDidMount() {

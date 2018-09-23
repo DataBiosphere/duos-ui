@@ -36,9 +36,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
+  static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.isEditMode) {
-      this.setState({
+      return {
         isEditMode: nextProps.isEditMode,
         file: { name: nextProps.editConsent.dulName },
         consent: {
@@ -48,14 +48,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
           dataUse: JSON.stringify(nextProps.editConsent.dataUse),
           error: { show: false }
         }
-      });
-    } else {
-      this.resetConsent();
+      };
     }
-  };
 
-  resetConsent = () => {
-    this.setState({
+    return {
       isEditMode: false,
       consent: {
         consentId: '',
@@ -64,7 +60,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         dataUse: '',
       },
       file: ''
-    })
+    };
   };
 
   async OKHandler() {
