@@ -19,7 +19,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.addDul = this.addDul.bind(this);
   }
 
   componentDidMount() {
@@ -237,27 +236,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         ]),
       ])
     )
-  }
-
-
-  addDul() {
-
-  }
-
-  addUser() {
-
-  }
-
-  addDataSets() {
-
-  }
-
-  setTimeout() {
-
-  }
-
-  addOntology() {
-
   }
 
   getFile(fileName) {
