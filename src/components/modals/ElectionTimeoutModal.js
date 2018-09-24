@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { div, form, input, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
-import { ElectionTimeout } from '../../libs/ajax';
+import { ElectionTimeout, Election } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import * as Utils from "../../libs/utils";
 
@@ -12,19 +12,17 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     super(props);
     this.state = {
       timeOut:{
-        amountOfDays: 0,
+        amountOfDays: 7,
         createDate: null,
         displayName: '',
-        id: 0,
+        id: null,
         updateDate: null,
         userId: null
       },
       updatedTimeOut: {
-        userId: null,
-        id: null,
-        amountOfDays: null
+        amountOfDays: 0
       },
-      showError: false
+      isDataSetElection: false
     };
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
@@ -36,8 +34,13 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     this.getElectionTimeOut();
   }
 
+  componentDidUpdate() {
+    this.getElectionTimeOut();
+  }
+
   async getElectionTimeOut() {
     const timeOut = await ElectionTimeout.findApprovalExpirationTime();
+    const isDataSetElection = await Election.isDataSetElectionOpen();
     this.setState(prev => {
       prev.timeOut.amountOfDays = timeOut.amountOfDays;
       prev.timeOut.createDate = timeOut.createDate;
@@ -45,6 +48,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
       prev.timeOut.id = timeOut.id;
       prev.timeOut.updateDate = timeOut.updateDate;
       prev.timeOut.userId = timeOut.userId;
+      prev.isDataSetElection = isDataSetElection.open;
       return prev;
     });
   }
@@ -57,17 +61,22 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     });
   };
 
-  OKHandler() {
-    var approvalExpirationTime = {};
+  async OKHandler() {
+    let approvalExpirationTime = {};
     approvalExpirationTime.userId = Storage.getCurrentUser().dacUserId;
     approvalExpirationTime.id = this.state.timeOut.id;
     approvalExpirationTime.amountOfDays = this.state.updatedTimeOut.amountOfDays;
     if (this.state.timeOut.id === null) {
-      console.log("Create -> ", approvalExpirationTime);
+      await ElectionTimeout.createApprovalExpirationTime(approvalExpirationTime);
       this.props.onOKRequest('electionTimeout');
     } else {
-      console.log("Update -> ", approvalExpirationTime);
+      await ElectionTimeout.updateApprovalExpirationTime(approvalExpirationTime);
+      this.props.onOKRequest('electionTimeout');
     }
+  }
+
+  updateDate (updateDate, createDate) {
+    return updateDate === null ? Utils.formatDate(createDate) : Utils.formatDate(updateDate);
   }
 
   closeHandler() {
@@ -104,24 +113,18 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
         iconName: 'manage-timeout',
         title: 'Set Data Owner election Timeout',
         description: 'Manage Data Owner election expiration time',
-        action: { label: "Save", handler: this.OKHandler }
+        action: { label: "Save", handler: this.OKHandler },
+        disableOkBtn: this.state.isDataSetElection
       },
         [
-          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
+          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
             div({ className: "form-group first-form-group" }, [
               label({ id: "lbl_currentTimeout", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Current timeout:"]),
               div({ className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 response-label" }, [
                 label({ id: "txt_currentTimeout" }, [amountOfDays]),
               ]),
             ]),
-/*
-        prev.amountOfDays = timeOut.amountOfDays;
-        prev.createDate = timeOut.createDate;
-        prev.displayName = timeOut.displayName;
-        prev.id = timeOut.id;
-        prev.updateDate = timeOut.updateDate;
-        prev.userId = timeOut.userId;
-* */
+
             div({ className: "form-group" }, [
               label({ id: "lbl_lastUpdatedBy", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Last updated by:"]),
               div({ className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 response-label" }, [
@@ -132,27 +135,20 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
             div({ className: "form-group", isRendered: "timeout.updateDate != null" }, [
               label({ id: "lbl_lastUpdatedDate", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Last updated date:"]),
               div({ className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 response-label" }, [
-                label({ id: "txt_lastUpdatedDate" }, [Utils.formatDate(updateDate)]),
+                label({ id: "txt_lastUpdatedDate" }, [this.updateDate(updateDate, createDate)]),
               ]),
             ]),
-
-            // div({ className: "form-group", isRendered: "timeout.updateDate == null && timeout.createDate != null" }, [
-            //   label({ id: "lbl_currentTimeout", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Last updated date:"]),
-            //   div({ id: "txt_currentTimeout", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 response-label" }, [
-            //     label({}, ["timeout.createDate | date:dateFormat"]),
-            //   ]),
-            // ]),
 
             div({ className: "form-group" }, [
               label({ id: "lbl_setTimeout", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Set new timeout:"]),
               div({ className: "col-lg-8 col-md-8 col-sm-6 col-xs-12" }, [
-                input({ id: "txt_setTimeout", type: "number", min: "1", "ng-model": "timeout.newTimeout", name: "days", required: true, onChange: this.timeChangeHandler, style: { 'width': '55px', 'padding': '5px 2px 2px 5px', 'color': '#777777' } }),
+                input({ id: "txt_setTimeout", type: "number", min: "1", "ng-model": "timeout.newTimeout", name: "days", required: true, onChange: this.timeChangeHandler, value : this.state.updatedTimeOut.amountOfDays, style: { 'width': '55px', 'padding': '5px 2px 2px 5px', 'color': '#777777' } }),
               ])
             ])
           ]),
 
-          div({ isRendered: this.state.showError }, [
-            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
+          div({ isRendered: this.state.isDataSetElection }, [
+            Alert({ id: "modal", type: "danger", title: "Data Owner election Timeout value can't be updated because there are open elections."})
           ])
         ])
     );
