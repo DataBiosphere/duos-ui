@@ -44,11 +44,16 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
     }
   }
 
-  componentWillReceiveProps(props) {
-    if(props.alertTitle !== undefined){
-      this.setState({alertMessage: props.alertMessage, alertTitle: props.alertTitle});
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.alertTitle !== undefined) {
+      return {
+        alertMessage: nextProps.alertMessage,
+        alertTitle: nextProps.alertTitle
+      };
     }
+    return {};
   }
+
   render() {
 
     return (

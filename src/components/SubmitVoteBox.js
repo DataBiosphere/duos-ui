@@ -9,7 +9,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-//      value: '',
+      //      value: '',
       currentUser: {},
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
@@ -22,10 +22,11 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
   };
 
-  componentWillReceiveProps(nextProps) {
-    // if (this.state.enableVoteButton === false) {
-      this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
-    // }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return {
+      rationale: nextProps.rationale,
+      voteStatus: nextProps.voteStatus
+    };
   }
 
   yesNoChange = (e, name, value) => {
@@ -82,7 +83,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     const { voteStatus, rationale, enableVoteButton } = this.state;
     return (
 
-      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : ""  }, [
+      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : "" }, [
         h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
         hr({ className: "box-separator" }),
 
