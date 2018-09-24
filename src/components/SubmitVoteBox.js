@@ -23,10 +23,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    return {
-      rationale: nextProps.rationale,
-      voteStatus: nextProps.voteStatus
-    };
+    if (prevState.flag === false || prevState.flag === undefined) {
+      return {
+        flag: true,
+        rationale: nextProps.rationale,
+        voteStatus: nextProps.voteStatus
+      };
+    }
+    return null;
   }
 
   yesNoChange = (e, name, value) => {
@@ -42,7 +46,6 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   };
 
   render() {
-
     // let dialogTitle = "";
     // let dialogMessage = "";
     // let dialogType = "";
@@ -81,6 +84,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     // }
 
     const { voteStatus, rationale, enableVoteButton } = this.state;
+
     return (
 
       div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : "" }, [
@@ -117,14 +121,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group" }, [
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
-                label({ id: "lbl_comments_" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
+                label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: voteStatus === '0' || voteStatus === 'false' || voteStatus === false || voteStatus === null }, [
-                label({ id: "lbl_rationale_" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
+              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null  || voteStatus === undefined}, [
+                label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                 input({
-                  id: "txt_rationale_" + this.props.id,
+                  id: "txt_rationale" + this.props.id,
                   name: "inputRationale" + this.props.id,
                   type: "text",
                   className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
