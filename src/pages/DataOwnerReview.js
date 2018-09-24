@@ -1,29 +1,57 @@
 import { Component } from 'react';
-import { div, button, hr, h4, a } from 'react-hyperscript-helpers';
+import { div, button, hr, h4, a, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
+import { DAR, Files, DataSet, Consent, Votes } from '../libs/ajax';
+import { ConfirmationDialog } from "../components/ConfirmationDialog";
+import { LoadingIndicator } from "../components/LoadingIndicator";
 
+const APPROVE = "1";
+const DISAPPROVE = "0";
+const HAS_CONCERNS = "2";
 class DataOwnerReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
+      showConfirmDialog: false,
+      pendingCase: {
+        voteId: '',
+        referenceId: '',
+        dataSetId: ''
+      },
       value: '',
-      voteStatus: null,
-      rationale: '',
+      vote: {
+        dacUserId: '',
+        voteId: '',
+        vote: null,
+        rationale: '',
+        hasConcerns: false,
+        createDate: null
+      },
       darFields: {
-        rus: ' rus rus rus rus rus ......'
-      }
-    }
+        rus: ''
+      },
+      dataSet: {
+        id: '',
+        data: {}
+      },
+      consent: {
+        id: '',
+        data: {}
+      },
+      showError: false
+    };
 
     this.myHandler = this.myHandler.bind(this);
     this.handleOpenApplicationModal = this.handleOpenApplicationModal.bind(this);
     this.handleCloseApplicationModal = this.handleCloseApplicationModal.bind(this);
     this.handleOpenDatasetModal = this.handleOpenDatasetModal.bind(this);
     this.handleCloseDatasetModal = this.handleCloseDatasetModal.bind(this);
-  
+
     this.openApplication = this.openApplication.bind(this);
     this.closeApplicationSummaryModal = this.closeApplicationSummaryModal.bind(this);
     this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
@@ -31,6 +59,66 @@ class DataOwnerReview extends Component {
     this.openDataset = this.openDataset.bind(this);
     this.closeDatasetSummaryModal = this.closeDatasetSummaryModal.bind(this);
     this.okDatasetSummaryModal = this.okDatasetSummaryModal.bind(this);
+    this.submitVote = this.submitVote.bind(this);
+    this.getDarInfo = this.getDarInfo.bind(this);
+    this.getConsentInfo = this.getConsentInfo.bind(this);
+    this.downloadDUL = this.downloadDUL.bind(this);
+    this.getVote = this.getVote.bind(this);
+  }
+
+  async componentDidMount () {
+     await this.getDarInfo();
+     await this.getVote();
+     await this.getDataSetInfo();
+     await this.getConsentInfo();
+     this.setState({
+       loading: false
+     });
+  }
+
+  async getDarInfo() {
+    const darRus = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
+    this.setState(prev => {
+      prev.darFields.rus = darRus.rus;
+      prev.pendingCase.voteId = this.props.match.params.voteId;
+      prev.pendingCase.referenceId = this.props.match.params.referenceId;
+      prev.pendingCase.dataSetId = this.props.match.params.dataSetId;
+      return prev;
+    });
+  }
+
+  async getDataSetInfo() {
+    const dataSet = await  DataSet.getDataSetsByDatasetId(this.state.pendingCase.dataSetId);
+    this.setState(prev => {
+      prev.dataSet.id = dataSet.consentId;
+      prev.dataSet.data = dataSet;
+      return prev;
+    });
+  }
+
+  async getConsentInfo() {
+    const consent = await Consent.findConsentById(this.state.dataSet.data.consentId);
+    this.setState(prev => {
+      prev.consent.id = consent.consentId;
+      prev.consent.data = consent;
+      return prev;
+    })
+  }
+
+  async getVote() {
+    if (this.props.match.params.voteId !== null && Boolean(this.props.match.params.referenceId)) {
+      const pendingCaseReview =  await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
+      this.setState(prev => {
+        prev.vote.dacUserId = pendingCaseReview.dacUserId;
+        prev.vote.voteId = pendingCaseReview.voteId;
+        prev.vote.vote = pendingCaseReview.vote;
+        prev.vote.hasConcerns = pendingCaseReview.hasConcerns;
+        prev.vote.rationale = pendingCaseReview.rationale;
+        prev.vote.createDate = pendingCaseReview.createDate;
+        prev.pendingCase.referenceId = this.props.match.params.referenceId;
+        return prev;
+      })
+    }
   }
 
   myHandler(event) {
@@ -38,23 +126,19 @@ class DataOwnerReview extends Component {
   }
 
   handleOpenApplicationModal() {
-    this.setState({ showApplicationSummaryModal: true });
+    this.setState({showApplicationSummaryModal: true});
   }
 
   handleOpenDatasetModal() {
-    this.setState({ showDatasetSummaryModal: true });
+    this.setState({showDatasetSummaryModal: true});
   }
 
   handleCloseApplicationModal() {
-    this.setState({ showApplicationSummaryModal: false });
+    this.setState({showApplicationSummaryModal: false});
   }
-  
+
   handleCloseDatasetModal() {
-    this.setState({ showDatasetSummaryModal: false });
-  }
-
-  logVote = (e) => {
-
+    this.setState({showDatasetSummaryModal: false});
   }
 
   openApplication = (e) => {
@@ -62,14 +146,14 @@ class DataOwnerReview extends Component {
       prev.showApplicationSummaryModal = true;
       return prev;
     });
-  }
+  };
 
   openDataset = (e) => {
     this.setState(prev => {
       prev.showDatasetSummaryModal = true;
       return prev;
     });
-  }
+  };
 
   closeApplicationSummaryModal() {
     this.setState(prev => {
@@ -98,18 +182,70 @@ class DataOwnerReview extends Component {
       return prev;
     });
   }
+  dialogHandlerCreate = () => (e) => {
+    this.setState(prev => {
+      prev.showConfirmDialog=false;
+      return prev;}
+      );
+    this.props.history.goBack();
+  };
+  downloadDUL = () =>  (e) => {
+    Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
+  };
 
-  downloadDUL = (e) => {
+  async submitVote (answer, rationale) {
+    let  updatedVote = {};
+    let result;
 
-  }
+    switch (answer) {
+      case (APPROVE): {
+        updatedVote.vote = true;
+        updatedVote.hasConcerns = false;
+        break;
+      }
+      case DISAPPROVE: {
+        updatedVote.vote = false;
+        updatedVote.hasConcerns = false;
+        break;
+      }
+      case HAS_CONCERNS: {
+        updatedVote.vote = null;
+        updatedVote.hasConcerns = true;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    updatedVote.rationale = rationale;
+    updatedVote.voteId = this.state.vote.voteId;
+    updatedVote.dacUserId = this.state.vote.dacUserId;
+    if ((updatedVote.vote !== this.state.vote.vote) ||
+        (updatedVote.rationale !== this.state.vote.rationale) ||
+        (updatedVote.hasConcerns !== this.state.vote.hasConcerns)) {
+      if (this.state.vote.createDate === null) {
+        result = Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote);
+      } else {
+        result = Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote);
+      }
 
-  handleRadioChange = (e, field, value) => {
-    this.setState(prev => { 
-      prev[field] = value; return prev; });
-  }
-
+      await result.then(
+        () => {
+          this.setState({
+            showConfirmDialog:true,
+            showError:false});
+        },
+        () => {
+          this.setState({showError:true});
+        }
+      );
+    }
+  };
 
   render() {
+
+    if (this.state.loading) return LoadingIndicator();
+
     return (
 
       div({ className: "container container-wide" }, [
@@ -118,53 +254,80 @@ class DataOwnerReview extends Component {
             PageHeading({ id: "dataOwnerReview", imgSrc: "/images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
           ]),
         ]),
-        hr({ className: "section-separator" }),
+        hr({className: "section-separator"}),
 
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+        div({className: "row fsi-row-lg-level fsi-row-md-level no-margin"}, [
 
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dataset-color" }, [
+          div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes"}, [
+            div({className: "panel-heading cm-boxhead dataset-color"}, [
               h4({}, ["Research Purpose",
-                a({ id:"link_applicationSummary", className: "enabled hover-color application-link", onClick: this.openApplication }, ["Application summary"]),
+                a({
+                  className: "enabled hover-color application-link",
+                  onClick: this.openApplication
+                }, ["Application summary"]),
               ]),
               ApplicationSummaryModal({
-                showModal: this.state.showApplicationSummaryModal, onOKRequest: this.okApplicationSummaryModal, onCloseRequest: this.closeApplicationSummaryModal
+                dataRequestId: this.props.match.params.referenceId,
+                showModal: this.state.showApplicationSummaryModal,
+                onOKRequest: this.okApplicationSummaryModal,
+                onCloseRequest: this.closeApplicationSummaryModal
               }),
             ]),
-            div({ id: "rp", className: "panel-body cm-boxbody" }, [ this.state.darFields.rus]),
+            div({id: "rp", className: "panel-body cm-boxbody"}, [this.state.darFields.rus]),
           ]),
 
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dataset-color" }, [
+          div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes"}, [
+            div({className: "panel-heading cm-boxhead dataset-color"}, [
               h4({}, ["Data Use Limitations",
-                a({ id:"link_datasetSummary", className: "enabled hover-color application-link", onClick: this.openDataset }, ["Dataset summary"]),
+                a({className: "enabled hover-color application-link", onClick: this.openDataset}, ["Dataset summary"]),
               ]),
               DatasetSummaryModal({
-                showModal: this.state.showDatasetSummaryModal, onOKRequest: this.okDatasetSummaryModal, onCloseRequest: this.closeDatasetSummaryModal
+                showModal: this.state.showDatasetSummaryModal,
+                onOKRequest: this.okDatasetSummaryModal,
+                onCloseRequest: this.closeDatasetSummaryModal
               }),
             ]),
-            div({ id: "dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-            ]),
+            div({id: "dul", className: "panel-body cm-boxbody"}, [
+              button({
+                className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color",
+                onClick: this.downloadDUL
+              }, ["Download Data Use Letter"]),
+            ])
           ]),
         ]),
 
-        div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
-          div({ className: "jumbotron box-vote" }, [
+        div({className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12"}, [
+          div({className: "jumbotron box-vote"}, [
             SubmitVoteBox({
               id: "dataOwnerReview",
               color: "dataset",
               title: "Your Vote",
-              isDisabled: "isFormDisabled",
-              status: this.state.voteStatus,
+              isDisabled: this.state.isFormDisabled,
+              voteStatus: this.state.vote.vote,
               radioType: "multiple",
               radioLabels: ['Approve', "Disapprove", "Raise a concern"],
-              radioValues: ['1', '0', "2"],
-              showAlert: false,
-              alertMessage: "something",
-              action: { label: "Vote", handler: this.submit }
+              radioValues: ['1', '0', '2'],
+              showAlert: this.state.showError,
+              alertMessage: "Error updating vote.",
+              rationale: this.state.vote.rationale,
+              action: {label: "Vote", handler: this.submitVote,
+              }
             }),
           ]),
+        ]),
+        ConfirmationDialog({
+          title: 'Vote confirmation',
+          color: 'dataset',
+          showModal: this.state.showConfirmDialog,
+          type: 'informative',
+          action: {
+            label: "Ok",
+            handler: this.dialogHandlerCreate
+          }
+        }, [
+          div({className: "dialog-description"}, [
+            span({}, ["Your vote has been successfully edited!"]),
+          ])
         ]),
       ])
     );
