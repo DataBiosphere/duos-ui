@@ -6,6 +6,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match } from '../libs/ajax';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AccessResultRecords extends Component {
 
@@ -39,7 +40,7 @@ class AccessResultRecords extends Component {
 
   async initState() {
 
-    let hideMatch = false;
+    // let hideMatch = false;
     let match = "-1";
     let createDate = null;
     let election;
@@ -70,8 +71,10 @@ class AccessResultRecords extends Component {
     const hasUseRestriction = hasUseRestriction_obj.hasUseRestriction;
     console.log("hasUseRestriction: ", hasUseRestriction, hasUseRestriction_obj.hasUseRestriction);
 
-    const oneAtATime = false;
     const darInfo = await DAR.describeDar(darElection.referenceId);
+    if (darInfo.purposeStatements === undefined) {
+      darInfo.purposeStatements = [];
+    }
     console.log("darInfo: ", darInfo);
 
     finalDACVote = await Votes.getDarFinalAccessVote(electionId);
@@ -99,8 +102,15 @@ class AccessResultRecords extends Component {
     }
     darElectionReview.status = daer.election.status;
     darElectionReview.voteAccessList = this.chunk(daer.reviewVote, 2);
+    if (darElectionReview.voteAccessList === null || darElectionReview.voteAccessList === undefined) {
+      darElectionReview.voteAccessList = [];
+    }
+
     darElectionReview.chartDataAccess = this.getGraphData(daer.reviewVote);
     darElectionReview.voteAgreement = daer.voteAgreement;
+    if (darElectionReview.voteAgreement === null || darElectionReview.voteAgreement === undefined) {
+      darElectionReview.voteAgreement = {};
+    }
 
     darElectionReview.mrDAR = JSON.stringify(daer.election.useRestriction, null, 2);
     darElectionReview.sDAR = daer.election.translatedUseRestriction;
@@ -116,9 +126,14 @@ class AccessResultRecords extends Component {
       }
       rpeReview.statusRP = data2.election.status;
       rpeReview.rpVoteAccessList = this.chunk(data2.reviewVote, 2);
+      if (rpeReview.rpVoteAccessList === null || rpeReview.rpVoteAccessList === undefined) {
+        rpeReview.rpVoteAccessList = [];
+      }
+
       rpeReview.chartRP = this.getGraphData(data2.reviewVote);
       rpeReview.showRPaccordion = true;
     } else {
+      rpeReview.rpVoteAccessList = [];
       rpeReview.showRPaccordion = false;
     }
 
@@ -133,21 +148,25 @@ class AccessResultRecords extends Component {
     dulName = electionReview.election.dulName;
     status = electionReview.election.status;
     voteList = this.chunk(electionReview.reviewVote, 2);
+    if (voteList === null || voteList === undefined) {
+      voteList = [];
+    }
+
     chartDataDUL = this.getGraphData(electionReview.reviewVote);
     mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
     sDUL = electionReview.election.translatedUseRestriction;
 
     const data4 = await Match.findMatch(electionReview.consent.consentId, darElectionReview.electionAccess.referenceId);
     if (data4.failed !== null && data4.failed !== undefined && data4.failed) {
-      hideMatch = false;
+      // hideMatch = false;
       match = "-1";
       createDate = data4.createDate;
     } else if (data4.match !== null && data4.match !== undefined) {
-      hideMatch = false;
+      // hideMatch = false;
       match = data4.match;
       createDate = data4.createDate;
     } else {
-      hideMatch = true;
+      // hideMatch = true;
     }
 
     this.setState({
@@ -163,7 +182,7 @@ class AccessResultRecords extends Component {
       isQ1Expanded: false,
       isQ2Expanded: false,
       isDulExpanded: false,
-      match: true,
+      match: match,
       election: election,
       electionAccess: darElectionReview.electionAccess,
       electionRP: rpeReview,
@@ -172,7 +191,8 @@ class AccessResultRecords extends Component {
       voteAccessList: darElectionReview.voteAccessList,
       rpVoteAccessList: rpeReview.rpVoteAccessList,
       darInfo: darInfo,
-      loading: false
+      loading: false.hasUseRestriction,
+      finalDACVote: finalDACVote,
     },
       () => {
         console.log('----------------------------------------------------------------------------------------------------');
@@ -357,11 +377,10 @@ class AccessResultRecords extends Component {
     console.log(JSON.stringify(this.state, null, 2));
     console.log('----------------------------------------------------------------------------------------------------');
 
-    const { loading, projectTitle, darCode, dar, darInfo } = this.state;
+    if (this.state.loading) { return LoadingIndicator() }
 
-    if (loading) {
-      return h3({}, [" Cargando datos ...."]);
-    }
+    const { projectTitle, darCode, dar, darInfo } = this.state;
+
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [projectTitle]), darCode
     ]);
@@ -411,6 +430,7 @@ class AccessResultRecords extends Component {
               ]),
 
               div({ isRendered: darInfo.hasPurposeStatements && darInfo.purposeStatements !== undefined, className: "row dar-summary" }, [
+
                 div({ className: "control-label access-color" }, ["Purpose Statement"]),
                 div({ className: "response-label" }, [
                   ul({}, [
@@ -443,6 +463,7 @@ class AccessResultRecords extends Component {
                     ]),
                   ]),
                 ]),
+
                 div({ isRendered: darInfo.researchTypeManualReview, className: "row dar-summary" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
                     "This research requires manual review."
@@ -467,6 +488,7 @@ class AccessResultRecords extends Component {
                   label({ className: "control-label access-color" }, ["Principal Investigator: "]),
                   span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.pi]),
                 ]),
+
                 div({ className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Researcher: "]),
                   span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.profileName]),
@@ -533,9 +555,9 @@ class AccessResultRecords extends Component {
                 color: "access",
                 type: "records",
                 class: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-                vote: this.state.electionAccess.finalVote,
-                voteDate: this.state.electionAccess.finalVoteDate,
-                rationale: this.state.electionAccess.finalRationale
+                vote: this.state.finalDACVote.finalVote,
+                voteDate: this.state.finalDACVote.finalVoteDate,
+                rationale: this.state.finalDACVote.finalRationale
               }),
             ]),
 
@@ -548,7 +570,7 @@ class AccessResultRecords extends Component {
               class: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
               vote: this.state.voteAgreement.vote,
               voteDate: this.state.voteAgreement.createDate,
-              rationale: this.state.electionAccess.finalRationale
+              rationale: this.state.voteAgreement.finalRationale
             }),
           ]),
         ]),
@@ -715,6 +737,7 @@ class AccessResultRecords extends Component {
                   ]),
                 ]);
               })
+
             ]),
         ])
       ])

@@ -37,6 +37,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
+    console.log('-----------------------------------------------------------------');
     if (nextProps.isEditMode) {
       return {
         isEditMode: nextProps.isEditMode,

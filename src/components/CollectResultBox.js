@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, hh, label, h4, h, hr, span } from 'react-hyperscript-helpers';
 import { Chart } from "react-google-charts";
-
+import * as Utils from '../libs/utils';
 export const CollectResultBox = hh(class CollectResultBox extends Component {
 
   constructor(props) {
@@ -119,7 +119,7 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
               label({ className: "col-lg-2 col-md-2 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Date: "]),
 
               div({ id: "lbl_date" + this.props.id, className: "col-lg-4 col-md-4 col-sm-8 col-xs-8 vote-label" }, [
-                this.props.voteDate /*| date: dateFormat */
+                Utils.formatDate(this.props.voteDate)
               ]),
               span({ isRendered: this.props.vote === true || this.props.vote === 'true' || this.props.vote === '1' }, [
                 label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
