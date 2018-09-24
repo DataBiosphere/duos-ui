@@ -24,19 +24,13 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (prevState.flag === false || prevState.flag === undefined) {
-      prevState.flag = true;
       return {
+        flag: true,
         rationale: nextProps.rationale,
         voteStatus: nextProps.voteStatus
       };
     }
-  }
-
-  componentDidMount() {
-    this.setState({
-      rationale: this.props.rationale,
-      voteStatus: this.props.voteStatus
-    });
+    return null;
   }
 
   yesNoChange = (e, name, value) => {
