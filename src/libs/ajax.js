@@ -551,13 +551,12 @@ export const Files = {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
   },
-}
+};
 
 export const Summary = {
-  getFile: async (URI) => {
+  getFile: async (URI, nameFile) => {
     const url = `${await Config.getApiUrl()}${URI}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.blob();
+    return await getFile(url, nameFile);
   }
 };
 
