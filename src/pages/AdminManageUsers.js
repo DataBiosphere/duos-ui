@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, h3, a, span, h } from 'react-hyperscript-helpers';
+import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { User } from "../libs/ajax";

@@ -43,9 +43,10 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     this.props.onCloseRequest('summaryModal');
   }
 
-  async componentWillReceiveProps(props) {
-    if (props.dataRequestId !== undefined && (this.state.dataRequestId === undefined || this.state.dataRequestId === null)) {
-      let darDetails = await DAR.getDarModalSummary(props.dataRequestId);
+  static async getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.dataRequestId !== undefined 
+      && (prevState.dataRequestId === undefined || prevState.dataRequestId === null)) {
+      let darDetails = await DAR.getDarModalSummary(nextProps.dataRequestId);
       if (darDetails.status === "pending") {
         darDetails.status = "Pending for review";
       } else if (darDetails.status === "rejected") {
@@ -58,16 +59,17 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       } else {
         darDetails.rationaleCheck = false;
       }
-      this.setState({
-        dataRequestId: props.dataRequestId,
+
+      return {
+        dataRequestId: nextProps.dataRequestId,
         summary: darDetails,
-        calledFromAdmin: props.calledFromAdmin
-      });
+        calledFromAdmin: nextProps.calledFromAdmin
+      };
     }
   }
 
   async downloadDetail() {
-   Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
+    Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
   }
 
   render() {
@@ -106,12 +108,12 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 div({ id: "txt_status", isRendered: summary.electionStatus !== 'Closed' }, [
                   span({ className: "bold" }, ["Status: "]),
                   summary.status
-                ]),                
-                div({ id: "txt_comment", isRendered: summary.rationaleCheck && summary.status === "bonafideResearcher"}, [
+                ]),
+                div({ id: "txt_comment", isRendered: summary.rationaleCheck && summary.status === "bonafideResearcher" }, [
                   span({ className: "bold" }, ["Comment: "]),
                   summary.rationale
                 ]),
-                div({ id: "txt_rationale", isRendered: summary.rationaleCheck && summary.status !== "bonafideResearcher"}, [
+                div({ id: "txt_rationale", isRendered: summary.rationaleCheck && summary.status !== "bonafideResearcher" }, [
                   span({ className: "bold" }, ["Rationale: "]),
                   summary.rationale
                 ])
@@ -135,11 +137,11 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   Object.entries(summary.datasetDetail).map((row, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_dataset" + Index }, [b({}, [row[Index]]), " ", row[Index+1]]),
+                      li({ id: "txt_dataset" + Index }, [b({}, [row[Index]]), " ", row[Index + 1]]),
                       div({ isRendered: this.state.calledFromAdmin && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
                       div({ isRendered: this.state.calledFromAdmin && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
                         span({ className: "glyphicon glyphicon-download-alt hover-color", style: { "marginRight": "10px" } }),
-                        a({  onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
+                        a({ onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
                       ])
                     ])
                   })
