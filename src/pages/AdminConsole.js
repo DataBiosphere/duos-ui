@@ -7,7 +7,7 @@ import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
-import { PendingCases } from '../libs/ajax';
+import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 
@@ -25,7 +25,10 @@ class AdminConsole extends Component {
       showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
+      timeOut: {},
+      isDataSetElection: {}
     };
+    this.electionTimeout = this.electionTimeout.bind(this);
   }
 
   componentDidMount() {
@@ -49,32 +52,37 @@ class AdminConsole extends Component {
       prev.showAddDulModal = true;
       return prev;
     });
-  }
+  };
 
   addUser = (e) => {
     this.setState(prev => {
       prev.showAddUserModal = true;
       return prev;
     });
-  }
+  };
 
   addDataset = (e) => {
     this.setState(prev => {
       prev.showAddDatasetModal = true;
       return prev;
     });
-  }
+  };
 
   addOntologies = (e) => {
     this.setState(prev => {
       prev.showAddOntologiesModal = true;
       return prev;
     });
-  }
+  };
 
-  electionTimeout = (e) => {
+  async electionTimeout (e) {
+    const timeOut = await ElectionTimeout.findApprovalExpirationTime();
+    const isDataSetElection = await Election.isDataSetElectionOpen();
+
     this.setState(prev => {
       prev.showElectionTimeoutModal = true;
+      prev.timeOut = timeOut;
+      prev.isDataSetElection = isDataSetElection;
       return prev;
     });
   }
@@ -89,7 +97,7 @@ class AdminConsole extends Component {
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
-  }
+  };
 
   closeModal = (name) => {
     switch (name) {
@@ -100,7 +108,7 @@ class AdminConsole extends Component {
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
-  }
+  };
 
   afterModalOpen = (name) => {
     switch (name) {
@@ -111,7 +119,7 @@ class AdminConsole extends Component {
       case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
     }
-  }
+  };
 
   render() {
 
@@ -247,6 +255,8 @@ class AdminConsole extends Component {
                   unreviewedCases: 0
                 }),
                 ElectionTimeoutModal({
+                  timeOut: this.state.timeOut,
+                  isDataSetElection: this.state.isDataSetElection,
                   showModal: this.state.showElectionTimeoutModal,
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,

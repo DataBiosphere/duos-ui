@@ -401,7 +401,7 @@ export const Election = {
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res;
+    return await res.json();
   },
 
   findDataAccessElectionReview: async (electionId, isFinalAccess) => {
@@ -493,7 +493,7 @@ export const Election = {
 
 export const ElectionTimeout = {
 
-  findApprovalExpirationTime: async (requestElectionId) => {
+  findApprovalExpirationTime: async () => {
     const url = `${await Config.getApiUrl()}/approvalExpirationTime`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
@@ -507,7 +507,7 @@ export const ElectionTimeout = {
 
   createApprovalExpirationTime: async (approvalExpirationTime) => {
     const url = `${await Config.getApiUrl()}/approvalExpirationTime`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'POST' }]));
     return await res.json();
   }
 };
@@ -517,7 +517,7 @@ export const Email = {
   sendReminderEmail: async (voteId) => {
     const url = `${await Config.getApiUrl()}/emailNotifier/reminderMessage/${voteId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return await res.json();
+    return res;
   }
 
 };
@@ -551,13 +551,12 @@ export const Files = {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
   },
-}
+};
 
 export const Summary = {
-  getFile: async (URI) => {
+  getFile: async (URI, nameFile) => {
     const url = `${await Config.getApiUrl()}${URI}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.blob();
+    return await getFile(url, nameFile);
   }
 };
 

@@ -54,7 +54,7 @@ export default ({ props }) => (
     <AuthenticatedRoute path='/researcher_profile' component={ResearcherProfile} props={props} />
     <AuthenticatedRoute path='/admin_manage_access' component={AdminManageAccess} props={props} />
     <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={props} />
-    <AuthenticatedRoute path='/data_owner_review' component={DataOwnerReview} props={props} />
+    <AuthenticatedRoute path='/data_owner_review/:voteId/:referenceId/:dataSetId' component={DataOwnerReview} props={props} />
     <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={props} />
     <Route path='/help_reports' component={HelpReports} props={props} />
     <AuthenticatedRoute path='/home_register' component={HomeRegister} props={props} />
