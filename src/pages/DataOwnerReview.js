@@ -63,7 +63,7 @@ class DataOwnerReview extends Component {
     this.getDarInfo = this.getDarInfo.bind(this);
     this.getConsentInfo = this.getConsentInfo.bind(this);
     this.downloadDUL = this.downloadDUL.bind(this);
-    this.getVote = this.getVote.bind(this)
+    this.getVote = this.getVote.bind(this);
   }
 
   async componentDidMount () {
@@ -183,7 +183,11 @@ class DataOwnerReview extends Component {
     });
   }
   dialogHandlerCreate = () => (e) => {
-    this.setState(prev => {prev.showConfirmDialog=false; return prev;});
+    this.setState(prev => {
+      prev.showConfirmDialog=false;
+      return prev;}
+      );
+    this.props.history.goBack();
   };
   downloadDUL = () =>  (e) => {
     Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
