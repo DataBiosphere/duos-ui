@@ -3,7 +3,7 @@ import { div, hr, hh, span, a, h3 } from 'react-hyperscript-helpers';
 import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
-import { Summary } from '../libs/ajax'
+import { PendingCases, Summary } from '../libs/ajax'
 
 export const SummaryVotes = hh(class SummaryVotes extends Component {
 
@@ -60,6 +60,11 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
     this.addDul = this.addDul.bind(this);
   }
 
+  async getSummaryInfo() {
+    const summaryData = await PendingCases.findSummary({}, {});
+    console.log('summary data', summaryData);
+  }
+
   handleOpenModal() {
     this.setState({ showModal: true });
   }
@@ -74,14 +79,27 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "summaryVotes", imgSrc: "/images/icon_statistics.png", iconSize: "large", color: "common", title: "Votes Statistics", description: "Summary statistics on the Data Access Committee and votes system" }),
+            PageHeading({
+              id: "summaryVotes",
+              imgSrc: "/images/icon_statistics.png",
+              iconSize: "large",
+              color: "common",
+              title: "Votes Statistics",
+              description: "Summary statistics on the Data Access Committee and votes system"
+            }),
           ]),
         ]),
         hr({ className: "section-separator" }),
 
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
-            PageSubHeading({ id: "summaryVotesDul", imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Statistics", description: "Summary of votes on whether the consent limitations were accurately converted into a structured format" }),
+            PageSubHeading({
+              id: "summaryVotesDul",
+              imgSrc: "/images/icon_dul.png",
+              color: "dul",
+              title: "Data Use Limitations Statistics",
+              description: "Summary of votes on whether the consent limitations were accurately converted into a structured format"
+            }),
           ]),
 
           a({
@@ -115,7 +133,13 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
-            PageSubHeading({ id: "summaryVotesAccess", imgSrc: "/images/icon_access.png", color: "access", title: "Data Access Statistics", description: "Summary of votes on whether the researcher should be allowed to access a research study" }),
+            PageSubHeading({
+              id: "summaryVotesAccess",
+              imgSrc: "/images/icon_access.png",
+              color: "access",
+              title: "Data Access Statistics",
+              description: "Summary of votes on whether the researcher should be allowed to access a research study"
+            }),
           ]),
 
           a({
