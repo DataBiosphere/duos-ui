@@ -3,66 +3,82 @@ import { div, hr, hh, span, a, h3 } from 'react-hyperscript-helpers';
 import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
-import { PendingCases, Summary } from '../libs/ajax'
+import { PendingCases, StatFiles, Summary } from '../libs/ajax'
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 export const SummaryVotes = hh(class SummaryVotes extends Component {
 
-  chartData = {
-    accessTotal: [
-      ['Results', 'Votes'],
-      ['Reviewed cases', 50],
-      ['Pending cases', 18]
-    ],
-    accessReviewed: [
-      ['Results', 'Votes'],
-      ['Yes', 40],
-      ['No', 10]
-    ],
-    dulTotal: [
-      ['Results', 'Votes'],
-      ['Reviewed cases', 200],
-      ['Pending cases', 45]
-    ],
-    dulReviewed: [
-      ['Results', 'Votes'],
-      ['Yes', 90],
-      ['No', 110]
-    ],
-    RPTotal: [
-      ['Results', 'Votes'],
-      ['Reviewed cases', 80],
-      ['Pending cases', 10]
-    ],
-    RPReviewed: [
-      ['Results', 'Votes'],
-      ['Yes', 40],
-      ['No', 40]
-    ],
-    VaultReviewed: [
-      ['Results', 'Votes'],
-      ['Yes', 100],
-      ['No', 50]
-    ],
-    Agreement: [
-      ['Results', 'Votes'],
-      ['Agreement', 40],
-      ['Disagreement', 10]
-    ]
-  };
 
   constructor(props) {
     super(props);
     this.state = {
-      showModal: false
+      showModal: false,
+      loading: true,
+      chartData: this.initialState()
     };
+
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.addDul = this.addDul.bind(this);
   }
 
-  async getSummaryInfo() {
-    const summaryData = await PendingCases.findSummary({}, {});
-    console.log('summary data', summaryData);
+  componentDidMount() {
+    this.getSummaryInfo();
+  }
+
+  initialState() {
+    return {
+      accessTotal: [
+        ['Results', 'Votes'],
+        ['Reviewed cases', 0],
+        ['Pending cases', 0]
+      ],
+      accessReviewed: [
+        ['Results', 'Votes'],
+        ['Yes', 0],
+        ['No', 0]
+      ],
+      dulTotal: [
+        ['Results', 'Votes'],
+        ['Reviewed cases', 0],
+        ['Pending cases', 0]
+      ],
+      dulReviewed: [
+        ['Results', 'Votes'],
+        ['Yes', 0],
+        ['No', 0]
+      ],
+      RPTotal: [
+        ['Results', 'Votes'],
+        ['Reviewed cases', 0],
+        ['Pending cases', 0]
+      ],
+      RPReviewed: [
+        ['Results', 'Votes'],
+        ['Yes', 0],
+        ['No', 0]
+      ],
+      VaultReviewed: [
+        ['Results', 'Votes'],
+        ['Yes', 0],
+        ['No', 0]
+      ],
+      Agreement: [
+        ['Results', 'Votes'],
+        ['Agreement', 0],
+        ['Disagreement', 0]
+      ]
+    };
+  }
+
+  getSummaryInfo() {
+    PendingCases.findSummary({}, {}).then( summaryData => {
+      this.setState(prev => {
+        prev.chartData = summaryData;
+        prev.loading = false;
+        return prev;
+      });
+    });
   }
 
   handleOpenModal() {
@@ -73,8 +89,10 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
     this.setState({ showModal: false });
   }
 
-  render() {    
-    
+  render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
+
     return (
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
@@ -117,7 +135,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           StatsBox({
             id: "allCasesDul",
             subtitle: "All Cases",
-            data: this.chartData.dulTotal,
+            data: this.state.chartData.dulTotal,
             options: 'dul',
             className: "result_chart"
           }),
@@ -125,7 +143,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           StatsBox({
             id: "reviewedCasesDul",
             subtitle: "Reviewed cases results",
-            data: this.chartData.dulReviewed,
+            data: this.state.chartData.dulReviewed,
             options: 'dul',
             className: "result_chart"
           })
@@ -159,7 +177,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           StatsBox({
             id: "allCasesAccess",
             subtitle: "All Cases",
-            data: this.chartData.accessTotal,
+            data: this.state.chartData.accessTotal,
             options: 'access',
             className: "result_chart",
             clickHandler: () => this.getDarReport('reviewed', 'ReviewedDataAccessRequests.tsv'),
@@ -168,7 +186,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           StatsBox({
             id: "reviewedCasesAccess",
             subtitle: "Reviewed cases results",
-            data: this.chartData.accessReviewed,
+            data: this.state.chartData.accessReviewed,
             options: 'access',
             className: "result_chart",
             clickHandler: () => this.getDarReport('approved', 'ApprovedDataAccessRequests.tsv'),
@@ -184,14 +202,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           StatsBox({
             id: "allCasesRP",
             subtitle: "All Cases",
-            data: this.chartData.RPTotal,
+            data: this.state.chartData.RPTotal,
             options: 'access',
             className: "result_chart"
           }),
           StatsBox({
             id: "reviewedCasesRP",
             subtitle: "Reviewed cases results",
-            data: this.chartData.RPReviewed,
+            data: this.state.chartData.RPReviewed,
             options: 'access',
             className: "result_chart"
           }),
@@ -205,14 +223,14 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           StatsBox({
             id: "automatedCases",
             subtitle: "Cases reviewed by automated matching",
-            data: this.chartData.VaultReviewed,
+            data: this.state.chartData.VaultReviewed,
             options: 'access',
             className: "result_chart"
           }),
           StatsBox({
             id: "agreement",
             subtitle: "Agreement between automated matching and Data Access Committee",
-            data: this.chartData.Agreement,
+            data: this.state.chartData.Agreement,
             options: 'access',
             className: "result_chart"
           }),
@@ -244,32 +262,15 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
   getFile(fileName) {
     const URI = `/consent/cases/summary/file?fileType=${fileName}`;
-    Summary.getFile(URI).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile('summary.txt', blob);
-        }
-      }
-    );
+    if (fileName === 'TranslateDUL') {
+      Summary.getFile(URI, 'summary.txt');
+    } else {
+      Summary.getFile(URI, 'DAR_summary.txt');
+    }
   }
 
   getDarReport(fileType, fileName) {
-    const URI = `/dataRequest/${fileType}`;
-    Summary.getFile(URI).then(
-      blob => {
-        if (blob.size !== 0) {
-          this.createBlobFile(fileName, blob)
-        }
-      }
-    );
-  }
-
-  createBlobFile(fileName, blob) {
-    const url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
+    StatFiles.getDARsReport(fileType, fileName);
   }
 
 });
