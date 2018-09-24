@@ -23,10 +23,13 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    return {
-      rationale: nextProps.rationale,
-      voteStatus: nextProps.voteStatus
-    };
+    if (prevState.flag === false || prevState.flag === undefined) {
+      return {
+        flag: true,
+        rationale: nextProps.rationale,
+        voteStatus: nextProps.voteStatus
+      };
+    }
   }
 
   yesNoChange = (e, name, value) => {
@@ -43,6 +46,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
+    console.log('render : ', this.state);
     // let dialogTitle = "";
     // let dialogMessage = "";
     // let dialogType = "";

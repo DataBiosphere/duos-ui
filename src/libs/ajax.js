@@ -401,7 +401,7 @@ export const Election = {
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res;
+    return await res.json();
   },
 
   findDataAccessElectionReview: async (electionId, isFinalAccess) => {
@@ -517,7 +517,7 @@ export const Email = {
   sendReminderEmail: async (voteId) => {
     const url = `${await Config.getApiUrl()}/emailNotifier/reminderMessage/${voteId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return await res.json();
+    return await res;
   }
 
 };

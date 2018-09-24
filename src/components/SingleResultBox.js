@@ -13,12 +13,9 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
   }
 
   openDialogReminder = (e) => {
-    this.setState({ showDialogReminder: true });
+    this.props.handler(this.props.data.vote.voteId);
   };
 
-  dialogHandlerReminder = (answer) => (e) => {
-    this.setState({ showDialogReminder: false });
-  };
 
   render() {
 
@@ -46,16 +43,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
               disabled: this.props.data.buttonDisabled,
               onClick: this.openDialogReminder,
               className: "btn btn-primary vote-reminder f-right " + (this.props.color) + "-color"
-            }),
-
-            ConfirmationDialog({
-              title: dialogTitle, color: dialogColor, showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
-            }, [
-                div({ className: "dialog-description" }, [
-                  span({ isRendered: this.props.data.vote.isReminderSent === true || this.props.data.vote.isReminderSent === 'true' || this.props.data.vote.isReminderSent === '1'}, ["The reminder was successfully sent."]),
-                  span({ isRendered: this.props.data.vote.isReminderSent === false || this.props.data.vote.isReminderSent === 'false' || this.props.data.vote.isReminderSent === '0' }, ["The reminder couldn't be sent. Please contact Support."]),
-                ]),
-              ]),
+            })
           ])
         ]),
 
