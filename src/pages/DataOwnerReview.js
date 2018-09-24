@@ -5,8 +5,9 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
 import { DAR, Files, DataSet, Consent, Votes } from '../libs/ajax';
-import { Alert } from "../components/Alert";
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
+import { LoadingIndicator } from "../components/LoadingIndicator";
+
 const APPROVE = "1";
 const DISAPPROVE = "0";
 const HAS_CONCERNS = "2";
@@ -15,6 +16,7 @@ class DataOwnerReview extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showConfirmDialog: false,
       pendingCase: {
         voteId: '',
@@ -41,11 +43,7 @@ class DataOwnerReview extends Component {
         id: '',
         data: {}
       },
-      error: {
-      show: false,
-        title: '',
-        msg: ['']
-    }
+      showError: false
     };
 
     this.myHandler = this.myHandler.bind(this);
@@ -61,18 +59,21 @@ class DataOwnerReview extends Component {
     this.openDataset = this.openDataset.bind(this);
     this.closeDatasetSummaryModal = this.closeDatasetSummaryModal.bind(this);
     this.okDatasetSummaryModal = this.okDatasetSummaryModal.bind(this);
-    this.submit = this.submit.bind(this);
+    this.submitVote = this.submitVote.bind(this);
     this.getDarInfo = this.getDarInfo.bind(this);
     this.getConsentInfo = this.getConsentInfo.bind(this);
     this.downloadDUL = this.downloadDUL.bind(this);
     this.getVote = this.getVote.bind(this)
   }
 
-  async componentWillMount () {
+  async componentDidMount () {
      await this.getDarInfo();
      await this.getVote();
      await this.getDataSetInfo();
      await this.getConsentInfo();
+     this.setState({
+       loading: false
+     });
   }
 
   async getDarInfo() {
@@ -97,7 +98,6 @@ class DataOwnerReview extends Component {
 
   async getConsentInfo() {
     const consent = await Consent.findConsentById(this.state.dataSet.data.consentId);
-    console.log("HEY!", consent);
     this.setState(prev => {
       prev.consent.id = consent.consentId;
       prev.consent.data = consent;
@@ -108,7 +108,6 @@ class DataOwnerReview extends Component {
   async getVote() {
     if (this.props.match.params.voteId !== null && Boolean(this.props.match.params.referenceId)) {
       const pendingCaseReview =  await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
-      console.log("Pending Case review? ", pendingCaseReview);
       this.setState(prev => {
         prev.vote.dacUserId = pendingCaseReview.dacUserId;
         prev.vote.voteId = pendingCaseReview.voteId;
@@ -141,10 +140,6 @@ class DataOwnerReview extends Component {
   handleCloseDatasetModal() {
     this.setState({showDatasetSummaryModal: false});
   }
-
-  logVote = (e) => {
-
-  };
 
   openApplication = (e) => {
     this.setState(prev => {
@@ -194,7 +189,7 @@ class DataOwnerReview extends Component {
     Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
   };
 
-  async submit (answer, rationale) {
+  async submitVote (answer, rationale) {
     let  updatedVote = {};
     let result;
 
@@ -221,19 +216,32 @@ class DataOwnerReview extends Component {
     updatedVote.rationale = rationale;
     updatedVote.voteId = this.state.vote.voteId;
     updatedVote.dacUserId = this.state.vote.dacUserId;
-
-    if ((updatedVote.vote !== this.state.vote.vote) || (updatedVote.rationale !== this.state.vote.rationale) || updatedVote.hasConcerns !== this.state.vote.hasConcerns) {
+    if ((updatedVote.vote !== this.state.vote.vote) ||
+        (updatedVote.rationale !== this.state.vote.rationale) ||
+        (updatedVote.hasConcerns !== this.state.vote.hasConcerns)) {
       if (this.state.vote.createDate === null) {
-        result = await Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote);
+        result = Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote);
       } else {
-        result = await Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote);
+        result = Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote);
       }
-      this.setState({showConfirmDialog:true});
-      console.log("RESULT -> ", result);
+
+      await result.then(
+        () => {
+          this.setState({
+            showConfirmDialog:true,
+            showError:false});
+        },
+        () => {
+          this.setState({showError:true});
+        }
+      );
     }
   };
 
   render() {
+
+    if (this.state.loading) return LoadingIndicator();
+
     return (
 
       div({ className: "container container-wide" }, [
@@ -291,14 +299,14 @@ class DataOwnerReview extends Component {
               color: "dataset",
               title: "Your Vote",
               isDisabled: this.state.isFormDisabled,
-              voteStatus: "1",
+              voteStatus: this.state.vote.vote,
               radioType: "multiple",
               radioLabels: ['Approve', "Disapprove", "Raise a concern"],
               radioValues: ['1', '0', '2'],
-              showAlert: false,
-              alertMessage: "something",
+              showAlert: this.state.showError,
+              alertMessage: "Error updating vote.",
               rationale: this.state.vote.rationale,
-              action: {label: "Vote", handler: this.submit,
+              action: {label: "Vote", handler: this.submitVote,
               }
             }),
           ]),
@@ -317,9 +325,6 @@ class DataOwnerReview extends Component {
             span({}, ["Your vote has been successfully edited!"]),
           ])
         ]),
-        div({isRendered: this.state.error.show}, [
-          Alert({id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg})
-        ])
       ])
     );
   }

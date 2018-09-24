@@ -78,7 +78,7 @@ class DataOwnerConsole extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
 
   render() {
 

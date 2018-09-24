@@ -23,10 +23,20 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    return {
-      rationale: nextProps.rationale,
-      voteStatus: nextProps.voteStatus
-    };
+    if (prevState.flag === false || prevState.flag === undefined) {
+      prevState.flag = true;
+      return {
+        rationale: nextProps.rationale,
+        voteStatus: nextProps.voteStatus
+      };
+    }
+  }
+
+  componentDidMount() {
+    this.setState({
+      rationale: this.props.rationale,
+      voteStatus: this.props.voteStatus
+    });
   }
 
   yesNoChange = (e, name, value) => {
@@ -42,7 +52,6 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   };
 
   render() {
-
     // let dialogTitle = "";
     // let dialogMessage = "";
     // let dialogType = "";
@@ -81,6 +90,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     // }
 
     const { voteStatus, rationale, enableVoteButton } = this.state;
+
     return (
 
       div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : "" }, [
