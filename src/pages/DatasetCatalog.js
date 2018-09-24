@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet } from "../libs/ajax";
+import { DataSet, Files } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
 import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
@@ -9,15 +9,17 @@ import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Storage } from "../libs/storage";
 
-const USER_ID = 5;
 class DatasetCatalog extends Component {
 
+  USER_ID = Storage.getCurrentUser().dacUserId;
+  // USER_ID = 5;
   constructor(props) {
     super(props);
     this.state = {
       isLogged: false
-    }
+    };
     this.state = {
       loading: true,
       limit: 5,
@@ -48,11 +50,11 @@ class DatasetCatalog extends Component {
 
   async getDatasets() {
     const dictionary = await DataSet.findDictionary();
-    const catalog = await DataSet.findDataSets(USER_ID);
+    const catalog = await DataSet.findDataSets(this.USER_ID);
     const data = {
       catalog: catalog,
       dictionary: dictionary
-    }
+    };
     this.setState({ dataSetList: data, currentPage: 1, loading: false });
   }
 
@@ -76,8 +78,15 @@ class DatasetCatalog extends Component {
     this.setState({ showTranslatedDULModal: false });
   }
 
-  downloadList() {
+  downloadList(dataSet) {
+    let dataSetId = '';
+    dataSet.properties.forEach(property => {
+      if (property.propertyName === 'Dataset ID') {
+        dataSetId = property.propertyValue;
+      }
+    });
 
+    Files.getApprovedUsersFile(dataSetId + '-ApprovedRequestors.tsv', dataSetId);
   }
 
   exportToRequest() {
@@ -109,9 +118,11 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openTranslatedDUL() {
+  openTranslatedDUL(translatedUR) {
+    console.log(translatedUR);
     this.setState(prev => {
       prev.showTranslatedDULModal = true;
+      prev.translatedUseRestriction = translatedUR;
       return prev;
     });
   }
@@ -132,15 +143,15 @@ class DatasetCatalog extends Component {
 
   openDelete = (answer) => (e) => {
     this.setState({ showDialogDelete: true });
-  }
+  };
 
   openEnable = (answer) => (e) => {
     this.setState({ showDialogEnable: true });
-  }
+  };
 
   openDisable = (answer) => (e) => {
     this.setState({ showDialogDisable: true });
-  }
+  };
 
   dialogHandlerDelete = (answer) => (e) => {
     this.setState({ showDialogDelete: false });
@@ -154,8 +165,8 @@ class DatasetCatalog extends Component {
     this.setState({ showDialogDisable: false });
   };
 
-  download() {
-
+  download(objectList) {
+    console.log(objectList);
   }
 
   myHandler(event) {
@@ -179,7 +190,7 @@ class DatasetCatalog extends Component {
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -187,7 +198,7 @@ class DatasetCatalog extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
 
   render() {
 
@@ -220,7 +231,7 @@ class DatasetCatalog extends Component {
               ]),
               button({
                 id: "btn_downloadSelection",
-                download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),
+                download: "", disabled: objectIdList.length === 0, onClick: () => this.download(objectIdList),
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
                   span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px' } }),
@@ -310,7 +321,7 @@ class DatasetCatalog extends Component {
                                   h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
                                   a({
-                                    onClick: this.openConnectDataset
+                                    onClick: () => this.openConnectDataset
                                     // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
                                   }, [
                                       span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
@@ -342,11 +353,11 @@ class DatasetCatalog extends Component {
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                          a({ onClick: this.openTranslatedDUL, className: "enabled" }, ["Translated Use Restriction"])
+                          a({ onClick: () => this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
                         ]),
 
                         td({ isRendered: isAdmin, className: "table-items cell-size" }, [
-                          a({ onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
+                          a({ onClick: () => this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
                         ]),
                       ]),
 
@@ -377,7 +388,10 @@ class DatasetCatalog extends Component {
             h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
           ]),
           TranslatedDulModal({
-            showModal: this.state.showTranslatedDULModal, onOKRequest: this.okTranslatedDULModal, onCloseRequest: this.closeTranslatedDULModal
+            showModal: this.state.showTranslatedDULModal,
+            onOKRequest: this.okTranslatedDULModal,
+            onCloseRequest: this.closeTranslatedDULModal,
+            translatedUseRestriction: this.state.translatedUseRestriction,
           }),
 
           ConfirmationDialog({

@@ -10,7 +10,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
   constructor(props) {
     super(props);
     this.state = {
-      rus: this.props.rus
+      translatedUseRestriction: this.props.translatedUseRestriction
     }
   };
 
@@ -38,7 +38,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
         action: { label: "Close", handler: this.OKHandler }
       },
         [
-          div({ id: "txt_translatedRestrictions", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 translated-restriction" }, [this.props.dataset]),
+          div({ id: "txt_translatedRestrictions", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 translated-restriction" }, [this.props.translatedUseRestriction]),
         ])
     );
   }
