@@ -7,12 +7,12 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      chartData: {Results: '', Yes: 0, No: 0, Pending: 0}
+      chartData: { Results: '', Yes: 0, No: 0, Pending: 0 }
     }
   }
 
-  componentWillReceiveProps(props) {
-    this.setState({chartData: props.chartData});
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return { chartData: nextProps.chartData };
   }
 
   chartOptions = {
@@ -112,8 +112,8 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
             div({ className: "row results-box" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Vote: "]),
               div({ id: "lbl_result" + this.props.id, className: "col-lg-3 col-md-3 col-sm-8 col-xs-8 vote-label bold" }, [
-                span({ isRendered: this.props.vote === '1' }, ["YES"]),
-                span({ isRendered: this.props.vote === '0' }, ["NO"]),
+                span({ isRendered: this.props.vote === true || this.props.vote === 'true' || this.props.vote === '1' }, ["YES"]),
+                span({ isRendered: this.props.vote === false || this.props.vote === 'false' || this.props.vote === '0' }, ["NO"]),
                 span({ isRendered: this.props.vote === null }, []),
               ]),
               label({ className: "col-lg-2 col-md-2 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Date: "]),
@@ -121,15 +121,15 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
               div({ id: "lbl_date" + this.props.id, className: "col-lg-4 col-md-4 col-sm-8 col-xs-8 vote-label" }, [
                 this.props.voteDate /*| date: dateFormat */
               ]),
-              span({ isRendered: this.props.vote === '1' }, [
+              span({ isRendered: this.props.vote === true || this.props.vote === 'true' || this.props.vote === '1' }, [
                 label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
               ]),
-              span({ isRendered: this.props.vote === '0' || this.props.vote === null }, [
+              span({ isRendered: this.props.vote === false || this.props.vote === 'false' || this.props.vote === '0' || this.props.vote === null }, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Rationale:"]),
               ]),
               div({ className: "col-lg-9 col-md-9 col-sm-8 col-xs-8 vote-label" }, [
-                span({ isRendered: this.props.vote !== null }, [this.props.rationale]),
-                span({ isRendered: this.props.vote === null }, ["---"]),
+                span({ isRendered: this.props.rationale !== null }, [this.props.rationale]),
+                span({ isRendered: this.props.rationale === null }, ["---"]),
               ]),
             ]),
           ]),

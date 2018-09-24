@@ -8,6 +8,7 @@ import ReactTooltip from 'react-tooltip';
 import * as Utils from '../libs/utils';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { SearchBox } from '../components/SearchBox';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 const limit = 10;
 
@@ -16,6 +17,7 @@ class AdminManageAccess extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       value: '',
       darElectionList: [],
@@ -38,16 +40,16 @@ class AdminManageAccess extends Component {
     });
 
     this.setState(prev => {
+      prev.loading = false;
       prev.currentPage = 1;
       prev.darElectionList = darElection;
       return prev;
     });
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.getElectionDarList().then(data => { return data });
   };
-
 
   handlePageChange = page => {
     this.setState(prev => {
@@ -69,18 +71,18 @@ class AdminManageAccess extends Component {
   };
 
   openDialogCreate(dataRequestId) {
-    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId});
+    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId });
   };
 
   dialogHandlerCancel = (answer) => (e) => {
-    if(answer === true) {
+    if (answer === true) {
       let electionToUpdate = {};
       electionToUpdate.status = 'Canceled';
       electionToUpdate.referenceId = this.state.dataRequestId;
       electionToUpdate.electionId = this.state.electionId;
-      Election.updateElection(this.state.electionId, electionToUpdate).then(response =>{
-         this.getElectionDarList();
-         this.setState({ showDialogCancel: false });
+      Election.updateElection(this.state.electionId, electionToUpdate).then(response => {
+        this.getElectionDarList();
+        this.setState({ showDialogCancel: false });
       });
     } else {
       this.setState({ showDialogCancel: false });
@@ -152,6 +154,8 @@ class AdminManageAccess extends Component {
 
     const { searchDarText, currentPage, limit } = this.state;
 
+    if (this.state.loading) { return LoadingIndicator(); }
+
     return (
       div({ className: "container container-wide" }, [
 
@@ -183,68 +187,68 @@ class AdminManageAccess extends Component {
           hr({ className: "table-head-separator" }),
 
           this.state.darElectionList
-          .filter(this.searchTable(searchDarText))
-          .slice((currentPage - 1) * limit, currentPage * limit)
-          .map(dar => {
-            return h(Fragment, { key: dar.frontEndId }, [
-              div({ id: dar.frontEndId, className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "") }, [
-                div({ id: dar.frontEndId + "_darId", name:"darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
-                  div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
-                  h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
-                  span({ className: "list-highlighted-item" }, [dar.frontEndId])
-                ]),
-
-                div({ id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
-
-                div({ id: dar.frontEndId + "_createDate", name: "createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(dar.createDate)]),
-
-                div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
-                  button({ id: dar.frontEndId + "_btnSummary", name: "btn_summary", className: "cell-button hover-color", onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus) }, ["Summary"]),
-                ]),
-
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
-                  span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
-                    a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed", onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
+            .filter(this.searchTable(searchDarText))
+            .slice((currentPage - 1) * limit, currentPage * limit)
+            .map(dar => {
+              return h(Fragment, { key: dar.frontEndId }, [
+                div({ id: dar.frontEndId, className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "") }, [
+                  div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
+                    div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
+                    h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
+                    span({ className: "list-highlighted-item" }, [dar.frontEndId])
                   ]),
-                  span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
-                    a({ id: dar.frontEndId + "_linkOpen", name: "link_open", onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId) }, ["Open"]),
+
+                  div({ id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
+
+                  div({ id: dar.frontEndId + "_createDate", name: "createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(dar.createDate)]),
+
+                  div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
+                    button({ id: dar.frontEndId + "_btnSummary", name: "btn_summary", className: "cell-button hover-color", onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus) }, ["Summary"]),
                   ]),
-                  span({ isRendered: dar.electionStatus === 'Canceled' }, [
-                    a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled", onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
-                  ]),
-                  span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                    a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed", onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
-                  ]),
-                ]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
-                  div({ className: "row no-margin" }, [
-                    div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
-                      button({ id: dar.frontEndId + "_btnCreate", name: "btn_create", onClick: () => this.openDialogCreate(dar.dataRequestId), className: "cell-button hover-color" }, ["Create"]),
+
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
+                    span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
+                      a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed", onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Un-reviewed"]),
                     ]),
-                    div({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
-                      button({ id: dar.frontEndId + "_btnCancel", name: "btn_cancel", onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId), className: "cell-button cancel-color" }, ["Cancel"]),
+                    span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
+                      a({ id: dar.frontEndId + "_linkOpen", name: "link_open", onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId) }, ["Open"]),
                     ]),
+                    span({ isRendered: dar.electionStatus === 'Canceled' }, [
+                      a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled", onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
+                    ]),
+                    span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
+                      a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed", onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
+                    ]),
+                  ]),
+                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
+                    div({ className: "row no-margin" }, [
+                      div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
+                        button({ id: dar.frontEndId + "_btnCreate", name: "btn_create", onClick: () => this.openDialogCreate(dar.dataRequestId), className: "cell-button hover-color" }, ["Create"]),
+                      ]),
+                      div({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
+                        button({ id: dar.frontEndId + "_btnCancel", name: "btn_cancel", onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId), className: "cell-button cancel-color" }, ["Cancel"]),
+                      ]),
 
-                    div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
-                      a({ id: dar.frontEndId + "_flagBonafide", name: "flag_bonafide", onClick: () => this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId) }, [
-                        span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved', "data-tip": "", "data-for": "tip_bonafide" }),
-                        h(ReactTooltip, { id: "tip_bonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
+                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
+                        a({ id: dar.frontEndId + "_flagBonafide", name: "flag_bonafide", onClick: () => this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId) }, [
+                          span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: dar.status === 'approved', "data-tip": "", "data-for": "tip_bonafide" }),
+                          h(ReactTooltip, { id: "tip_bonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
 
-                        span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),
-                        h(ReactTooltip, { id: "tip_nonBonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
+                          span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: dar.status === 'rejected', "data-tip": "", "data-for": "tip_nonBonafide" }),
+                          h(ReactTooltip, { id: "tip_nonBonafide", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
 
-                        span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending', "data-tip": "", "data-for": "tip_pendingReview" }),
-                        h(ReactTooltip, { id: "tip_pendingReview", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
+                          span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: dar.status === 'pending', "data-tip": "", "data-for": "tip_pendingReview" }),
+                          h(ReactTooltip, { id: "tip_pendingReview", place: 'left', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
 
-                        span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }),
+                          span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: dar.status === null }),
+                        ])
                       ])
                     ])
                   ])
-                ])
-              ]),
-              hr({ className: "table-body-separator" })
-            ]);
-          }),
+                ]),
+                hr({ className: "table-body-separator" })
+              ]);
+            }),
           ApplicationSummaryModal({
             showModal: this.state.showModal,
             onCloseRequest: this.handleCloseModal,

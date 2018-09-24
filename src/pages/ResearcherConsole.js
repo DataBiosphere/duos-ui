@@ -7,6 +7,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { DAR } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ResearcherConsole extends Component {
 
@@ -16,6 +17,7 @@ class ResearcherConsole extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       currentUser: {},
       dars: [],
@@ -87,21 +89,21 @@ class ResearcherConsole extends Component {
   };
 
   cancelDar = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
+    // const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogCancelDAR: true });
   };
 
   resume = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
-    let dars = DAR.getPartialDarRequest(this.state.currentUser.dacUserId).then(
-    data => {
-      let formData = data;
-      this.props.history({ pathname: 'dar_application', props: formData });
-    });
+    // const dataRequestId = e.target.getAttribute('value');
+    DAR.getPartialDarRequest(this.state.currentUser.dacUserId).then(
+      data => {
+        let formData = data;
+        this.props.history({ pathname: 'dar_application', props: formData });
+      });
   };
 
   deletePartialDar = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
+    // const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogDeletePDAR: true });
 
   };
@@ -114,7 +116,7 @@ class ResearcherConsole extends Component {
     this.setState({ showDialogDeletePDAR: false });
   };
 
-  componentWillMount() {
+  componentDidMount() {
     let currentUser = Storage.getCurrentUser();
     this.setState({ currentUser: currentUser });
     this.init(currentUser);
@@ -122,14 +124,14 @@ class ResearcherConsole extends Component {
 
   async init(currentUser) {
     let dars = await DAR.getDataAccessManage(currentUser.dacUserId);
-    this.setState({ dars: dars });
-
     let pdars = await DAR.getPartialDarRequestList(currentUser.dacUserId);
-    this.setState({ partialDars: pdars });
+    this.setState({ dars: dars, partialDars: pdars, loading: false });
   }
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+    
     const { currentUser, currentDarPage, darLimit, currentPartialDarPage, partialDarLimit } = this.state;
 
     return (

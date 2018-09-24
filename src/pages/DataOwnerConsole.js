@@ -1,16 +1,18 @@
 import { Component, Fragment } from 'react';
-import { div, hr, input, i, h, button } from 'react-hyperscript-helpers';
+import { div, hr, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { SearchBox } from '../components/SearchBox';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DataOwnerConsole extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      loading:true,
       dataOwnerUnreviewedCases: [],
       limit: 5,
       currentPage: 1
@@ -34,12 +36,15 @@ class DataOwnerConsole extends Component {
     });
   };
 
-  componentWillMount() {
+  componentDidMount() {
     let currentUser = Storage.getCurrentUser();
     this.setState({ currentUser: currentUser }, () => {
-      PendingCases.findDataOwnerUnReviewed().then(
+      PendingCases.findDataOwnerUnReviewed(currentUser.dacUserId).then(
         dars => {
-          this.setState({ dataOwnerUnreviewedCases: dars });
+          this.setState({
+            dataOwnerUnreviewedCases: dars,
+            loading: false
+          });
         }
       )
     });
@@ -54,12 +59,12 @@ class DataOwnerConsole extends Component {
   }
 
   editReview = (e) => {
-    const data = e.target.getAttribute('data');
+    // const data = e.target.getAttribute('data');
 
   }
 
   voteReview = (e) => {
-    const data = e.target.getAttribute('data');
+    // const data = e.target.getAttribute('data');
 
   }
 
@@ -76,6 +81,8 @@ class DataOwnerConsole extends Component {
   }
 
   render() {
+
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, currentPage, limit, searchDulText } = this.state;
 

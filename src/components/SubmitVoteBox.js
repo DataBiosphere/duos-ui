@@ -9,7 +9,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-//      value: '',
+      //      value: '',
       currentUser: {},
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
@@ -22,10 +22,11 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
   };
 
-  componentWillReceiveProps(nextProps) {
-    // if (this.state.enableVoteButton === false) {
-      this.setState({ rationale: nextProps.rationale, voteStatus: nextProps.voteStatus });
-    // }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return {
+      rationale: nextProps.rationale,
+      voteStatus: nextProps.voteStatus
+    };
   }
 
   yesNoChange = (e, name, value) => {
@@ -42,47 +43,47 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
-    let dialogTitle = "";
-    let dialogMessage = "";
-    let dialogType = "";
-    let dialogLabel = "";
+    // let dialogTitle = "";
+    // let dialogMessage = "";
+    // let dialogType = "";
+    // let dialogLabel = "";
 
-    //if agreement election
-    if (this.props.id === "agreement") {
-      dialogTitle = "Post Decision Agreement?";
-      dialogMessage = "Are you sure you want to post this Decision Agreement?";
-      dialogType = "";
-      dialogLabel = "Yes"
-    }
+    // //if agreement election
+    // if (this.props.id === "agreement") {
+    //   dialogTitle = "Post Decision Agreement?";
+    //   dialogMessage = "Are you sure you want to post this Decision Agreement?";
+    //   dialogType = "";
+    //   dialogLabel = "Yes"
+    // }
 
-    //if final election
-    if (this.props.id === "finalAccess") {
-      dialogTitle = "Post Final Access Decision?";
-      dialogMessage = "Are you sure you want to post this Final Access Decision?";
-      dialogType = "";
-      dialogLabel = "Yes"
-    }
+    // //if final election
+    // if (this.props.id === "finalAccess") {
+    //   dialogTitle = "Post Final Access Decision?";
+    //   dialogMessage = "Are you sure you want to post this Final Access Decision?";
+    //   dialogType = "";
+    //   dialogLabel = "Yes"
+    // }
 
-    //if collect election 
-    if (this.props.id === "accessCollect" || this.props.id === "rpCollect" || this.props.id === "dulCollect") {
-      dialogTitle = "Post Final Vote?";
-      dialogMessage = "If you post this vote the Election will be closed with current results.";
-      dialogType = "";
-      dialogLabel = "Yes"
-    }
+    // //if collect election 
+    // if (this.props.id === "accessCollect" || this.props.id === "rpCollect" || this.props.id === "dulCollect") {
+    //   dialogTitle = "Post Final Vote?";
+    //   dialogMessage = "If you post this vote the Election will be closed with current results.";
+    //   dialogType = "";
+    //   dialogLabel = "Yes"
+    // }
 
-    //if review election
-    if (this.props.id === "accessReview" || this.props.id === "rpReview" || this.props.id === "dulReview" || this.props.id === "dataOwnerReview" || this.props.id === "researcherReview") {
-      dialogTitle = "Vote confirmation";
-      dialogMessage = "Your vote has been successfully logged!";
-      dialogType = "informative";
-      dialogLabel = "Ok"
-    }
+    // //if review election
+    // if (this.props.id === "accessReview" || this.props.id === "rpReview" || this.props.id === "dulReview" || this.props.id === "dataOwnerReview" || this.props.id === "researcherReview") {
+    //   dialogTitle = "Vote confirmation";
+    //   dialogMessage = "Your vote has been successfully logged!";
+    //   dialogType = "informative";
+    //   dialogLabel = "Ok"
+    // }
 
     const { voteStatus, rationale, enableVoteButton } = this.state;
     return (
 
-      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : ""  }, [
+      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : "" }, [
         h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
         hr({ className: "box-separator" }),
 

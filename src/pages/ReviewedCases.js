@@ -1,12 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, i, input, span, h } from 'react-hyperscript-helpers';
+import { div, button, hr, span, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
 import * as Utils from "../libs/utils";
-import AccessResultRecords from "./AccessResultRecords";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ReviewedCases extends Component {
 
@@ -30,6 +30,7 @@ class ReviewedCases extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       showModal: false,
       dulLimit: 5,
       accessLimit: 5,
@@ -48,10 +49,10 @@ class ReviewedCases extends Component {
   }
 
   sort = (val) => {
-    const filename = val.target;
+    // const filename = val.target;
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.getReviewedConsents();
   };
 
@@ -60,6 +61,7 @@ class ReviewedCases extends Component {
     const access = await Election.findReviewedDRs();
 
     this.setState(prev => {
+      prev.loading = false;
       prev.electionsList = {
         dul: dul,
         access: access,
@@ -78,6 +80,8 @@ class ReviewedCases extends Component {
 
   render() {
 
+    if (this.state.loading) { return LoadingIndicator(); }
+    
     const { currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
 
     return (

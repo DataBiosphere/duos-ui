@@ -36,9 +36,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  componentWillReceiveProps(nextProps) {
+  static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.isEditMode) {
-      this.setState({
+      return {
         isEditMode: nextProps.isEditMode,
         file: { name: nextProps.editConsent.dulName },
         consent: {
@@ -48,14 +48,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
           dataUse: JSON.stringify(nextProps.editConsent.dataUse),
           error: { show: false }
         }
-      });
-    } else {
-      this.resetConsent();
+      };
     }
-  };
 
-  resetConsent = () => {
-    this.setState({
+    return {
       isEditMode: false,
       consent: {
         consentId: '',
@@ -64,7 +60,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
         dataUse: '',
       },
       file: ''
-    })
+    };
   };
 
   async OKHandler() {
@@ -141,23 +137,23 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
 
   handleErrors(message) {
+    let errMessage = '';
     let errorTitle = 'Conflicts to resolve!';
     if (message.indexOf("PRIMARY") > -1) {
-      message = "There is a Data Use Limitation already registered with this Consent Id. ";
+      errMessage = "There is a Data Use Limitation already registered with this Consent Id. ";
     } else if (message.indexOf("name") > -1) {
-      message = "There is a Data Use Limitation already registered with this name.";
+      errMessage = "There is a Data Use Limitation already registered with this name.";
     } else if (message.indexOf("Unable to process JSON") > -1) {
-      message = "Structured Limitations or Data Use has invalid format. Please write it as valid JSON.";
-    }
-    else {
+      errMessage = "Structured Limitations or Data Use has invalid format. Please write it as valid JSON.";
+    } else {
       errorTitle = "Error, unable to create a new Data Use Limitation! ";
-      message = message;
+      errMessage = message;
     }
 
     this.setState(prev => {
       prev.error.title = errorTitle;
       prev.error.show = true;
-      prev.error.msg = message;
+      prev.error.msg = errMessage;
       return prev;
     });
   };
