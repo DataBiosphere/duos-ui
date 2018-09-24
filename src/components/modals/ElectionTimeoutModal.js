@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { div, form, input, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
-import { ElectionTimeout, Election } from '../../libs/ajax';
+import { ElectionTimeout } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import * as Utils from "../../libs/utils";
 
@@ -29,29 +29,13 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-
-  componentDidMount() {
-    this.getElectionTimeOut();
+  static getDerivedStateFromProps(nextProps, prevState) {
+    return{
+      timeOut: nextProps.timeOut,
+      isDataSetElection: nextProps.isDataSetElection.open
+    }
   }
 
-  componentDidUpdate() {
-    this.getElectionTimeOut();
-  }
-
-  async getElectionTimeOut() {
-    const timeOut = await ElectionTimeout.findApprovalExpirationTime();
-    const isDataSetElection = await Election.isDataSetElectionOpen();
-    this.setState(prev => {
-      prev.timeOut.amountOfDays = timeOut.amountOfDays;
-      prev.timeOut.createDate = timeOut.createDate;
-      prev.timeOut.displayName = timeOut.displayName;
-      prev.timeOut.id = timeOut.id;
-      prev.timeOut.updateDate = timeOut.updateDate;
-      prev.timeOut.userId = timeOut.userId;
-      prev.isDataSetElection = isDataSetElection.open;
-      return prev;
-    });
-  }
 
   timeChangeHandler = (e) => {
     const days = e.target.value;
@@ -68,6 +52,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     approvalExpirationTime.amountOfDays = this.state.updatedTimeOut.amountOfDays;
     if (this.state.timeOut.id === null) {
       await ElectionTimeout.createApprovalExpirationTime(approvalExpirationTime);
+      this.setState(prev => {prev.timeOut.amountOfDays = approvalExpirationTime.amountOfDays; return prev;});
       this.props.onOKRequest('electionTimeout');
     } else {
       await ElectionTimeout.updateApprovalExpirationTime(approvalExpirationTime);
@@ -76,7 +61,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
   }
 
   updateDate (updateDate, createDate) {
-    return updateDate === null ? Utils.formatDate(createDate) : Utils.formatDate(updateDate);
+    return updateDate === null ? Utils.formatDate(createDate): Utils.formatDate(updateDate);
   }
 
   closeHandler() {
@@ -142,7 +127,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
             div({ className: "form-group" }, [
               label({ id: "lbl_setTimeout", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 control-label common-color" }, ["Set new timeout:"]),
               div({ className: "col-lg-8 col-md-8 col-sm-6 col-xs-12" }, [
-                input({ id: "txt_setTimeout", type: "number", min: "1", "ng-model": "timeout.newTimeout", name: "days", required: true, onChange: this.timeChangeHandler, value : this.state.updatedTimeOut.amountOfDays, style: { 'width': '55px', 'padding': '5px 2px 2px 5px', 'color': '#777777' } }),
+                input({ id: "txt_setTimeout", type: "number", min: "1", "ng-model": "timeout.newTimeout", name: "days", required: true, onChange: this.timeChangeHandler, value: this.state.updatedTimeOut.amountOfDays, style: { 'width': '55px', 'padding': '5px 2px 2px 5px', 'color': '#777777' } }),
               ])
             ])
           ]),

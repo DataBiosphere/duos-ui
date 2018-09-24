@@ -493,7 +493,7 @@ export const Election = {
 
 export const ElectionTimeout = {
 
-  findApprovalExpirationTime: async () => {
+  findApprovalExpirationTime: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/approvalExpirationTime`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
@@ -507,7 +507,7 @@ export const ElectionTimeout = {
 
   createApprovalExpirationTime: async (approvalExpirationTime) => {
     const url = `${await Config.getApiUrl()}/approvalExpirationTime`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
     return await res.json();
   }
 };
