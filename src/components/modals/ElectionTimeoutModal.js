@@ -2,18 +2,45 @@ import { Component } from 'react';
 import { div, form, input, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
+import { ElectionTimeout } from '../../libs/ajax';
 
 export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Component {
 
   constructor(props) {
     super(props);
-
+    this.state = {
+      amountOfDays: 0,
+      createDate: null,
+      displayName: '',
+      id: 0,
+      updateDate: null,
+      userId: null
+    };
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  OKHandler() {
+
+    componentDidMount() {
+      this.getElectionTimeOut();
+    }
+
+    async getElectionTimeOut() {
+      const timeOut = await ElectionTimeout.findApprovalExpirationTime();
+      console.log("TimeOut? ", timeOut);
+      this.setState(prev => {
+        prev.amountOfDays = timeOut.amountOfDays;
+        prev.createDate = timeOut.createDate;
+        prev.displayName = timeOut.displayName;
+        prev.id = timeOut.id;
+        prev.updateDate = timeOut.updateDate;
+        prev.userId = timeOut.userId;
+        return prev;
+      })
+    }
+
+    OKHandler() {
     // this is the method for handling OK click
     // we might do something here, adding a user for instance
     // or delegate it to the parent....
