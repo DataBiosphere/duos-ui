@@ -37,8 +37,10 @@ class DulCollect extends Component {
       prev.finalRationale = election.election.finalRationale;
       prev.finalVoteDate = election.election.finalVoteDate;
       prev.election = election.election;
+      prev.loading = false;
       return prev;
     });
+  
   };
 
   chunk(arr, size) {
@@ -51,6 +53,7 @@ class DulCollect extends Component {
 
   initialState() {
     return {
+      loading: true,
       isFormDisabled: true,
       showConfirmationDialogOK: false,
       dialogTitle: 'Email Notification Sent.',

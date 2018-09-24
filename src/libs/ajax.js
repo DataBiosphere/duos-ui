@@ -517,7 +517,7 @@ export const Email = {
   sendReminderEmail: async (voteId) => {
     const url = `${await Config.getApiUrl()}/emailNotifier/reminderMessage/${voteId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return await res;
+    return res;
   }
 
 };

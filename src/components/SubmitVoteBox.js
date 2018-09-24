@@ -46,7 +46,6 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
-    console.log('render : ', this.state);
     // let dialogTitle = "";
     // let dialogMessage = "";
     // let dialogType = "";
