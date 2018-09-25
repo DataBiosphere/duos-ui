@@ -25,14 +25,14 @@ class DulResultRecords extends Component {
   }
 
   componentDidMount() {
-    // this.setState(prev => {
-    //   prev.currentUser = {
-    //     roles: [
-    //       { name: 'ADMIN' },
-    //     ]
-    //   };
-    //   return prev;
-    // });
+    this.setState(prev => {
+      prev.currentUser = {
+        roles: [
+          { name: 'ADMIN' },
+        ]
+      };
+      return prev;
+    });
     this.voteInfo();
   }
 
