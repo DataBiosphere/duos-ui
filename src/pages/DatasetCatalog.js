@@ -50,6 +50,7 @@ class DatasetCatalog extends Component {
 
     this.download = this.download.bind(this);
     this.selectAll = this.selectAll.bind(this);
+    this.exportToRequest = this.exportToRequest.bind(this);
   }
 
   async getDatasets() {
@@ -97,9 +98,11 @@ class DatasetCatalog extends Component {
     Files.getApprovedUsersFile(dataSetId + '-ApprovedRequestors.tsv', dataSetId);
   }
 
-  exportToRequest(objectIdList) {
-    console.log(objectIdList);
-  }
+  exportToRequest = () => {
+    const listToExport = this.state.dataSetList.catalog.filter(row => row.checked);
+    console.log(listToExport);
+    this.props.history.push({ pathname: 'dar_application', props: {listToExport} });
+  };
 
   associate() {
 
@@ -425,7 +428,7 @@ class DatasetCatalog extends Component {
             button({
               isRendered: this.isResearcher,
               disabled: this.state.dataSetList.catalog.filter(row => row.checked) > 0,
-              onClick: () => this.exportToRequest(undefined),
+              onClick: this.exportToRequest,
               className: "download-button dataset-background apply-dataset",
               "data-tip": "", "data-for": "tip_requestAccess"
             }, ["Apply for Access"]),
