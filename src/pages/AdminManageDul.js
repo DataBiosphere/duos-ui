@@ -125,9 +125,9 @@ class AdminManageDul extends Component {
     });
   }
 
-  okAddDulModal() {
+  async okAddDulModal() {
     // this state change close AddDul modal
-    this.getConsentManage();
+    await this.getConsentManage();
     this.setState(prev => {
       prev.showModal = false;
       return prev;
@@ -136,7 +136,6 @@ class AdminManageDul extends Component {
 
   afterAddDulModalOpen() {
     // not sure when to use this
-    this.getConsentManage();
   }
 
   openDialogArchive = (election) => (e) => {
@@ -170,7 +169,7 @@ class AdminManageDul extends Component {
     });
   };
 
-  dialogHandlerArchive = (answer) => (e) => {
+  dialogHandlerArchive = (answer) => async (e) => {
     this.setState({ showDialogArchiveOpen: false });
     this.setState({ showDialogArchiveClose: false });
     if (answer) {
@@ -180,12 +179,12 @@ class AdminManageDul extends Component {
       electionUpdate.referenceId = election.consentId;
       electionUpdate.electionId = election.electionId;
       electionUpdate.archived = true;
-      Election.updateElection(electionUpdate.electionId, electionUpdate);
+      await Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     }
   };
 
-  dialogHandlerCancel = (answer) => (e) => {
+  dialogHandlerCancel = (answer) => async (e) => {
     this.setState({ showDialogCancel: false });
     let election = this.state.payload;
     if (answer) {
@@ -195,19 +194,27 @@ class AdminManageDul extends Component {
         electionId: election.electionId,
         archived: this.state.archiveCheck
       };
-      Election.updateElection(election.electionId, electionUpdated);
+      await Election.updateElection(election.electionId, electionUpdated);
       this.setState({ archiveCheck: true });
       this.getConsentManage();
     }
   };
 
-  dialogHandlerCreate = (answer) => (e) => {
-    this.setState({ showDialogCreate: false });
+  dialogHandlerCreate = (answer) => async (e) => {
+
     let consentId = this.state.createId;
     if (answer) {
-      Election.createElection(consentId);
+      await Election.createElection(consentId).then(
+        () => {
+          this.setState({ showDialogCreate: false });
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
       this.getConsentManage();
     }
+
   };
 
   dialogHandlerDelete = (answer) => (e) => {
@@ -354,7 +361,7 @@ class AdminManageDul extends Component {
                       span({ isRendered: election.electionStatus === 'Canceled' }, [
                         a({ id: election.consentId + "_linkCanceled", name: "link_canceled", onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Canceled"]),]),
                       span({ isRendered: election.electionStatus === 'Closed' }, [
-                        a({ id: election.consentId + "_linkReviewed", name: "link_reviewed", onClick: () => this.open(null, 'dul_results_record', election.electionId, false) }, ["Reviewed"]),]),
+                        a({ id: election.consentId + "_linkReviewed", name: "link_reviewed", onClick: () => this.open(null, 'dul_results_record', election.electionId, false) }, [election.vote]),]),
                     ]),
                     div({
                       isRendered: election.electionStatus !== 'Open',
@@ -443,6 +450,7 @@ class AdminManageDul extends Component {
         ]),
 
         AddDulModal({
+          isRendered: this.state.showModal,
           showModal: this.state.showModal,
           isEditMode: this.state.isEditMode,
           onOKRequest: this.okAddDulModal,
@@ -500,8 +508,12 @@ class AdminManageDul extends Component {
             ]),
           ]),
 
+
         ConfirmationDialog({
-          title: 'Create election?', color: 'dul', showModal: this.state.showDialogCreate,
+          title: 'Create election?',
+          color: 'dul',
+          isRendered: this.state.showDialogCreate,
+          showModal: this.state.showDialogCreate,
           action: { label: "Yes", handler: this.dialogHandlerCreate }
         }, [
             div({ className: "dialog-description" }, [

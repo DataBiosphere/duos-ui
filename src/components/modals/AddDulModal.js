@@ -36,31 +36,31 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.isEditMode) {
-      return {
-        isEditMode: nextProps.isEditMode,
-        file: { name: nextProps.editConsent.dulName },
+  componentDidMount() {
+    if (this.props.isEditMode) {
+      this.setState({
+        isEditMode: this.props.isEditMode,
+        file: { name: this.props.editConsent.dulName },
         consent: {
-          consentId: nextProps.dul.consentId,
-          name: nextProps.dul.consentName,
-          useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
-          dataUse: JSON.stringify(nextProps.editConsent.dataUse),
+          consentId: this.props.dul.consentId,
+          name: this.props.dul.consentName,
+          useRestriction: JSON.stringify(this.props.editConsent.useRestriction),
+          dataUse: JSON.stringify(this.props.editConsent.dataUse),
           error: { show: false }
         }
-      };
+      });
+    } else {
+      this.setState({
+        isEditMode: false,
+        consent: {
+          consentId: '',
+          name: '',
+          useRestriction: '',
+          dataUse: '',
+        },
+        file: ''
+      });
     }
-
-    return {
-      isEditMode: false,
-      consent: {
-        consentId: '',
-        name: '',
-        useRestriction: '',
-        dataUse: '',
-      },
-      file: ''
-    };
   };
 
   async OKHandler() {
@@ -161,32 +161,33 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   handleChange = (changeEvent) => {
     const fieldId = changeEvent.target.id;
     const value = changeEvent.target.value;
+
     switch (fieldId) {
       case CONSENT_ID: {
         this.setState(prev => {
           prev.consent.consentId = value;
-          return value;
+          return prev;
         });
         break;
       }
       case CONSENT_NAME: {
         this.setState(prev => {
           prev.consent.name = value;
-          return value;
+          return prev;
         });
         break;
       }
       case USE_RESTRICTION: {
         this.setState(prev => {
           prev.consent.useRestriction = value;
-          return value;
+          return prev;
         });
         break;
       }
       case DATA_USE: {
         this.setState(prev => {
           prev.consent.dataUse = value;
-          return value;
+          return prev;
         });
         break;
       }
@@ -214,7 +215,6 @@ export const AddDulModal = hh(class AddDulModal extends Component {
       return false;
     }
   };
-
 
   render() {
     const file = {
@@ -257,7 +257,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     value: this.state.consent.consentId,
                     onChange: this.handleChange,
                     id: "txt_consentId",
-                    name: "inputConsentId",
+                    name: "consentId",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Unique id from Compliance",
                     required: true,
@@ -276,8 +276,8 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     type: "text",
                     value: this.state.consent.name,
                     onChange: this.handleChange,
-                    id: "txt_consentName",
-                    name: "inputName",
+                    id: CONSENT_NAME,
+                    name: "name",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Consent id",
                     required: true,
