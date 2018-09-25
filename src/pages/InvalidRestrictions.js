@@ -125,7 +125,7 @@ class InvalidRestrictions extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({
-              id: "invalidRestrictions", imgSrc: "../images/icon_invalid_restrictions.png",
+              id: "invalidRestrictions", imgSrc: "/images/icon_invalid_restrictions.png",
               iconSize: "large", color: "common", title: "Invalid Request Restrictions",
               description: "List of Invalid Restrictions for Data Use Limitations and Data Access Requests"
             })
@@ -157,7 +157,7 @@ class InvalidRestrictions extends Component {
               .filter(this.searchTable(searchDulText))
               .slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit).map((dul, index) => {
                 return h(Fragment, { key: index }, [
-                  div({ className: "row no-margin tableRow" }, [
+                  div({ className: "row no-margin tableRowDul" }, [
                     div({ id: dul.name + "_consentId", name: "consentId", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dul.name]),
                     div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-body text" }, [
                       a({ id: dul.name + "_linkRestrictions", name: "link_restrictionsDul", onClick: () => this.download(dul.name, dul.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),
@@ -196,7 +196,7 @@ class InvalidRestrictions extends Component {
               .filter(this.searchTable(searchDarText))
               .slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((dar, index) => {
                 return h(Fragment, { key: index }, [
-                  div({ className: "row no-margin tableRow" }, [
+                  div({ className: "row no-margin tableRowAccess" }, [
                     div({ id: dar.name + "_darId", name: "darId", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.name]),
                     div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-8 cell-body text" }, [
                       a({ id: dar.name + "_linkRestrictions", name: "link_restrictionsAccess", onClick: () => this.download(dar.name, dar.useRestriction), className: "bold hover-color" }, ["Download Restrictions"]),

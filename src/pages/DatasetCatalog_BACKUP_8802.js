@@ -291,8 +291,13 @@ class DatasetCatalog extends Component {
           div({ className: "table-wrap" }, [
             form({ className: "pos-relative" }, [
               div({ className: "checkbox check-all" }, [
-                input({ checked: this.state.allChecked ,type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll", onChange: this.selectAll }),
+<<<<<<< HEAD
+                input({ checked: this.state.allChecked ,type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "all", onChange: this.selectAll }),
+                label({ className: "regular-checkbox", htmlFor: "all" }, []),
+=======
+                input({ type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll" }),
                 label({ className: "regular-checkbox", htmlFor: "chk_selectAll" }, []),
+>>>>>>> migration-playground
               ]),
             ]),
 
@@ -323,20 +328,33 @@ class DatasetCatalog extends Component {
                         dataSet.properties.map((property, dIndex) => {
                           return h(Fragment, { key: dIndex }, [
 
+<<<<<<< HEAD
                             td({
-                              isRendered: property.propertyName === 'Dataset ID'
+                              isRendered: property.propertyName === 'Dataset ID',
+                              id: property.propertyName + '-' + trIndex
                             }, [
                                 div({ className: "checkbox" }, [
                                   input({
-                                    type: "checkbox",
-                                    id: trIndex + "_chkSelect",
-                                    name: "chk_select",
+                                    type: "checkbox", id: property.propertyValue,
                                     // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
                                     checked: dataSet.checked, className: "checkbox-inline user-checkbox", "add-object-id": "true", onChange: this.checkSingleRow(dataSet.ix)
                                   }),
-                                  label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chkSelect" }),
+                                  label({ className: "regular-checkbox rp-choice-questions", htmlFor: property.propertyValue }),
                                 ])
+=======
+                            td({ isRendered: property.propertyName === 'Dataset ID' }, [
+                              div({ className: "checkbox" }, [
+                                input({
+                                  type: "checkbox",
+                                  id: trIndex + "_chkSelect",
+                                  name: "chk_select",
+                                  // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
+                                  value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
+                                }),
+                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: "chk_select_" + trIndex }),
+>>>>>>> migration-playground
                               ])
+                            ])
                           ])
                         }),
 
@@ -400,15 +418,25 @@ class DatasetCatalog extends Component {
                         td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                          a({
-                           id: trIndex + "_linkTranslatedDul", name: "link_translatedDul",
-                    onClick: () => this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
+<<<<<<< HEAD
+                          a({ onClick: () => this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
                         ]),
 
                         td({ isRendered: isAdmin, className: "table-items cell-size" }, [
-                          a({ id: trIndex + "_linkDownloadList", name: "link_downloadList", onClick: () => this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
+                          a({ onClick: () => this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
                         ]),
                       ]),
+
+
+=======
+                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL, className: "enabled" }, ["Translated Use Restriction"])
+                        ]),
+
+                        td({ isRendered: isAdmin, className: "table-items cell-size" }, [
+                          a({ id: trIndex + "_linkDownloadList", name: "link_downloadList", onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
+                        ])
+                      ])
+>>>>>>> migration-playground
                     ]);
                   })
                 ])
