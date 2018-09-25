@@ -178,7 +178,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                 div({ className: "row no-margin tableRowDul" }, [
                   div({ id: pendingCase.frontEndId, name: "consentId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
 
-                  div({ id: pendingCase.frontEndId + "_consentGroup", name: "consentGroup", className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ''), title: pendingCase.consentGroupName }, [pendingCase.consentGroupName]),
+                  div({ id: pendingCase.frontEndId + "_consentGroup", name: "consentGroup", className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ''), title: pendingCase.consentGroupName, dangerouslySetInnerHTML: { __html: pendingCase.consentGroupName } }, []),
 
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({
