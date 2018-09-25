@@ -22,6 +22,7 @@ class DatasetCatalog extends Component {
     };
     this.state = {
       loading: true,
+      showConnectDatasetModal: false,
       limit: 5,
       currentPage: null,
       allChecked: false,
@@ -56,6 +57,7 @@ class DatasetCatalog extends Component {
   async getDatasets() {
     const dictionary = await DataSet.findDictionary();
     const catalog = await DataSet.findDataSets(this.USER_ID);
+    console.log(catalog);
     catalog.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
@@ -108,8 +110,10 @@ class DatasetCatalog extends Component {
 
   }
 
-  openConnectDataset() {
+  openConnectDataset(dataset) {
+    console.log(dataset);
     this.setState(prev => {
+      prev.datasetConnect = dataset;
       prev.showConnectDatasetModal = true;
       return prev;
     });
@@ -360,7 +364,7 @@ class DatasetCatalog extends Component {
                                 ]),
                                 h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
-                                a({ id: trIndex + "_btnConnect", name: "btn_connect", onClick: this.openConnectDataset
+                                a({ id: trIndex + "_btnConnect", name: "btn_connect", onClick: () => this.openConnectDataset(dataSet)
                                   // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
                                 }, [
                                     span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
@@ -455,7 +459,11 @@ class DatasetCatalog extends Component {
           }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
 
           ConnectDatasetModal({
-            showModal: this.state.showConnectDatasetModal, onOKRequest: this.okConnectDatasetModal, onCloseRequest: this.closeConnectDatasetModal
+            isRendered: this.state.showConnectDatasetModal,
+            showModal: this.state.showConnectDatasetModal,
+            onOKRequest: this.okConnectDatasetModal,
+            onCloseRequest: this.closeConnectDatasetModal,
+            dataset: this.state.datasetConnect
           }),
         ])
       ])

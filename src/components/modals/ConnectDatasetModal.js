@@ -2,52 +2,56 @@ import { Component, Fragment } from 'react';
 import { div, h, form, input, label, select, hh, option } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
+import { DatasetAssociation } from '../../libs/ajax';
 
 export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       available: [],
       selected: [],
-      availableclients: [
-        { id: '0010', name: 'client 01' },
-        { id: '0020', name: 'client 02' },
-        { id: '0030', name: 'client 03' },
-        { id: '0040', name: 'client 04' },
-        { id: '0050', name: 'client 05' },
-        { id: '0060', name: 'client 06' },
-        { id: '0070', name: 'client 07' },
-        { id: '0080', name: 'client 08' },
-        { id: '0090', name: 'client 09' },
-        { id: '01000', name: 'client 10' },
-        { id: '01100', name: 'client 11' },
-        { id: '01200', name: 'client 12' },
-        { id: '01300', name: 'client 13' },
-        { id: '01400', name: 'client 14' },
-        { id: '01500', name: 'client 15' },
-        { id: '01600', name: 'client 16' },
-        { id: '01700', name: 'client 17' },
-        { id: '01800', name: 'client 18' },
-        { id: '01900', name: 'client 19' },
-      ],
+      availableclients: [],
       selectedclients: [],
       needsApproval: false
-    }
+    };
 
     this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
 
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
+    this.handleLSelection  = this.handleLSelection.bind(this);
   };
+
+  componentDidMount() {
+    this.getAvailableClients(this.props.dataset);
+  }
+
+  async getAvailableClients(dataset) {
+    let datasetId = '';
+    dataset.properties.forEach(property => {
+      if (property.propertyName === 'Dataset ID') {
+        datasetId = property.propertyValue;
+      }
+    });
+
+    const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetId);
+    const availableClients = clients.not_associated_users.map(user => {
+      return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
+    });
+    this.setState(prev => {
+      prev.availableclients = availableClients;
+      return prev;
+    });
+  }
 
   OKHandler() {
     // this is the method for handling OK click
   }
 
   closeHandler() {
-    // this is the method to handle Cancel click
+    this.props.onCloseRequest();
   }
 
   afterOpenHandler() {
@@ -74,12 +78,11 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
     this.setState(prev => {
       prev.available = [];
-      prev.available = [];
       prev.availableclients = filteredFrom;
       prev.selectedclients = filteredTo;
       return prev;
     });
-  }
+  };
 
   moveRItem = (e) => {
 
@@ -99,7 +102,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.selectedclients = filteredFrom;
       return prev;
     });
-  }
+  };
 
 
   handleLSelection = (e) => {
@@ -107,11 +110,11 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     const value = target.value;
     // const options = target.options;
     const selectedOptions = target.selectedOptions;
-    selectedOptions.this.setState(prev => {
+    this.setState(prev => {
         prev.available.push(value);
         return prev;
       });
-  }
+  };
 
   handleRSelection = (e) => {
     const target = e.target;
@@ -127,7 +130,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   render() {
 
     const { available, selected, availableclients, selectedclients } = this.state;
-    console.log(availableclients, selectedclients);
+    // console.log(availableclients, selectedclients);
     return (
 
       BaseModal({
