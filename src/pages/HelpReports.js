@@ -100,7 +100,7 @@ class HelpReports extends Component {
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-6 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "helpReports", imgSrc: "../images/icon_manage_help.png", iconSize: "large", color: "common", title: "Request Help Reports", description: "List of comments, suggestions and bug reports" }),
+            PageHeading({ id: "helpReports", imgSrc: "/images/icon_manage_help.png", iconSize: "large", color: "common", title: "Request Help Reports", description: "List of comments, suggestions and bug reports" }),
           ]),
 
           div({ className: "col-lg-6 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [

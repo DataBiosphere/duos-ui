@@ -87,7 +87,7 @@
   height: 27px;
   width: 38px;
   background-size: cover !important;
-  background-image: url('../images/era-commons-logo.png');
+  background-image: url('/images/era-commons-logo.png');
   display: inline-block;
 }
 
@@ -107,11 +107,11 @@
 }
 
 .auth-button.linkedin {
-    background: url(../images/linkedin-sign-in.png) no-repeat;
+    background: url(/images/linkedin-sign-in.png) no-repeat;
 }
 
 .auth-button.linkedin:hover {
-    background: url(../images/linkedin-sign-in-hover.png) no-repeat;
+    background: url(/images/linkedin-sign-in-hover.png) no-repeat;
 }
 
 .auth-button {

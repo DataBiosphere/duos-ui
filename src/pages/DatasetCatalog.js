@@ -192,7 +192,7 @@ class DatasetCatalog extends Component {
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
-    
+
     const { searchDulText, currentPage, limit } = this.state;
 
     const isAdmin = true;
@@ -347,24 +347,23 @@ class DatasetCatalog extends Component {
 
                         td({ isRendered: isAdmin, className: "table-items cell-size" }, [
                           a({ onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
-                        ]),
-                      ]),
-
-
+                        ])
+                      ])
                     ]);
                   })
                 ])
               ])
             ]),
+            div({ style: { 'margin': '10px 20px' } }, [
+              PaginatorBar({
+                total: this.state.dataSetList.catalog.filter(this.searchTable(searchDulText)).length,
+                limit: this.state.limit,
+                currentPage: this.state.currentPage,
+                onPageChange: this.handlePageChange,
+                changeHandler: this.handleSizeChange,
+              })
+            ])
           ]),
-          //--------------------
-          PaginatorBar({
-            total: this.state.dataSetList.catalog.filter(this.searchTable(searchDulText)).length,
-            limit: this.state.limit,
-            currentPage: this.state.currentPage,
-            onPageChange: this.handlePageChange,
-            changeHandler: this.handleSizeChange,
-          }),
 
           div({ className: "f-right" }, [
             button({
