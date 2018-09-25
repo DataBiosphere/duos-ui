@@ -8,11 +8,25 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
     super(props);
     this.state = {
       name: this.props.name,
-      value: this.props.value,
+      value: this.fixValue(this.props.value),
       optionLabels: this.props.optionLabels,
       optionValues: this.props.optionValues
     }
   }
+  fixValue(value) {
+    if (value === false) return '0';
+    if (value === true) return '1';
+    if (value === null) return '2';
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    let newValue = nextProps.voteStatus === false ? '0' :
+    nextProps.voteStatus === true ? '1' : '2';
+      return {
+        rationale: nextProps.rationale,
+        voteStatus: newValue
+      };
+    }
 
   selectOption = (e, value) => {
     this.setState(prev => {
@@ -21,7 +35,7 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
     }, () => {
       this.props.onChange(e, this.state.name, value);
     });
-  }
+  };
 
   render() {
 
@@ -42,7 +56,7 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
                   type: "radio",
                   id: "rad_" + this.props.id + "_" + ix,
                   name: this.state.name,
-                  value: this.state.optionValues[ix],
+                  // value: this.state.optionValues[ix],
                   checked: this.state.value === this.state.optionValues[ix],
                 }),
                 span({ className: "radio-check" }),
