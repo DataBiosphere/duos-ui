@@ -4,60 +4,47 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { Storage } from "../libs/storage";
 
 class DulReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
+      showConfirmationDialog: false,
       loading: true,
       value: '',
       currentUser: {},
       enableVoteButton: false,
-      voteStatus: '1',
       consent: {},
       election: {},
-      vote: {}
+      vote: {vote: '', rational: null}
     };
-
+    this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
   componentDidMount() {
-    this.mockState();
     this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
+      prev.currentUser = Storage.getCurrentUser();
       return prev;
     });
     this.voteInfo();
   }
 
   async voteInfo() {
-    Votes.find(this.props.match.params.consentId, this.props.match.params.voteId)
-      .then(data => {
-        this.setState({ vote: data });
-      });
-    Election.findElectionByVoteId(this.props.match.params.voteId)
-      .then(data => {
-        this.setState({ election: data });
-      });
-    this.setState({ consent: Consent.findConsentById(this.props.match.params.consentId) });
-  }
-
-  mockState() {
-    this.setState(prev => {
+    let vote = await Votes.find(this.props.match.params.consentId, this.props.match.params.voteId);
+    let election = await Election.findElectionByVoteId(this.props.match.params.voteId);
+    let consent = await Consent.findConsentById(this.props.match.params.consentId);
+    this.setState(prev => { 
+      prev.vote = vote; 
       prev.loading = false;
-      prev.consentGroupName = 'OD-256: Jackson / HS-08-000245';
-      prev.consentName = 'ORSP-124';
-      prev.sDul = 'something';
+      prev.election = election; 
+      prev.consent = consent;
       return prev;
     });
-  }
+  };
 
   setEnableVoteButton() {
     this.setState(prev => {
@@ -66,14 +53,41 @@ class DulReview extends Component {
     });
   }
 
-  logVote = () => {
+  logVote(vote, rationale) {
+    let voteToUpdate = this.state.vote;
+    voteToUpdate.vote = vote;
+    voteToUpdate.rationale = rationale;
+    this.processVote(voteToUpdate);
+  };
+
+  async processVote(vote) {
+    if(vote.createDate === null){
+      Votes.postVote(this.state.consent.consentId, vote).then( 
+        data => {
+          this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully logged!" });
+        }
+      ).catch(error => {
+          this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      })
+
+    } else  {
+      Votes.updateVote(this.state.consent.consentId, vote).then( 
+        data => {
+          this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully edited!" });
+        }
+      ).catch(error => {
+          this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      })
+    }
   };
 
   downloadDUL = (e) => {
     Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
   };
 
-  setEnableVoteButton = () => {
+  confirmationHandlerOK = (answer) => (e) => {
+    this.setState({ showConfirmationDialog: false });
+    this.props.history.goBack();
   };
 
   render() {
@@ -81,7 +95,7 @@ class DulReview extends Component {
     if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
-      b({ isRendered: this.state.consent.groupName, className: "pipe", "ng-bind-html": "consentGroupName" }, [this.state.consent.groupName]),
+      b({ isRendered: this.state.consent.groupName, className: "pipe", "ng-bind-html": "consentGroupName", dangerouslySetInnerHTML: { __html: this.state.consent.groupName } }, []),
       this.state.consent.name
     ]);
 
@@ -134,7 +148,7 @@ class DulReview extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.consent.translatedUseRestriction])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction }}, [])
           ]),
         ]),
 
@@ -144,11 +158,20 @@ class DulReview extends Component {
               id: "dulReview",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-              isDisabled: "isFormDisabled",
-              voteStatus: this.state.voteStatus,
-              action: { label: "Vote", handler: this.submit }
-            }),
+              voteStatus: this.state.vote.vote,
+              rationale: this.state.vote.rationale,
+              action: { label: "Vote", handler: this.logVote }
+            })
           ]),
+        
+            ConfirmationDialog({
+              isRendered: this.state.showConfirmationDialog,
+              showModal: this.state.showConfirmationDialog,
+              title: "Vote confirmation",
+              color: "dul",
+              type: "informative",
+              action: { label: "Ok", handler: this.confirmationHandlerOK }
+            }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
         ]),
       ])
     );
