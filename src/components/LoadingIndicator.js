@@ -14,10 +14,12 @@ const customStyles = {
 
   content: {
     position: 'relative',
-    top: '-10px',
+    top: '0',
     right: '0',
     bottom: '0',
-    left: '-10px',
+    left: '0',
+    width: '100px',
+    margin: '45vh auto 20px auto',
     background: 'transparent',
     border: '0',
   }
