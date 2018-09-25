@@ -15,7 +15,7 @@ export const Config = {
   fileOpts : (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/text'
+      Accept: 'application/json'
     }
   }),
   jsonBody: body => ({

@@ -24,6 +24,7 @@ class DatasetCatalog extends Component {
       loading: true,
       limit: 5,
       currentPage: null,
+      allChecked: false,
       dataSetList: {
         catalog: [],
         dictionary: [],
@@ -46,11 +47,18 @@ class DatasetCatalog extends Component {
     this.openTranslatedDUL = this.openTranslatedDUL.bind(this);
     this.closeTranslatedDULModal = this.closeTranslatedDULModal.bind(this);
     this.okTranslatedDULModal = this.okTranslatedDULModal.bind(this);
+
+    this.download = this.download.bind(this);
+    this.selectAll = this.selectAll.bind(this);
   }
 
   async getDatasets() {
     const dictionary = await DataSet.findDictionary();
     const catalog = await DataSet.findDataSets(this.USER_ID);
+    catalog.forEach((row, index) => {
+      row.checked = false;
+      row.ix = index;
+    });
     const data = {
       catalog: catalog,
       dictionary: dictionary
@@ -89,8 +97,8 @@ class DatasetCatalog extends Component {
     Files.getApprovedUsersFile(dataSetId + '-ApprovedRequestors.tsv', dataSetId);
   }
 
-  exportToRequest() {
-
+  exportToRequest(objectIdList) {
+    console.log(objectIdList);
   }
 
   associate() {
@@ -165,8 +173,16 @@ class DatasetCatalog extends Component {
     this.setState({ showDialogDisable: false });
   };
 
-  download(objectList) {
-    console.log(objectList);
+  download() {
+    const listDownload = this.state.dataSetList.catalog.filter(row => row.checked);
+    let dataSetsId = [];
+    listDownload[0].properties.forEach(property => {
+      if (property.propertyName === 'Dataset ID') {
+        dataSetsId.push(property.propertyValue);
+      }
+    });
+
+    DataSet.downloadDataSets(dataSetsId, 'datasets.tsv');
   }
 
   myHandler(event) {
@@ -200,6 +216,33 @@ class DatasetCatalog extends Component {
     return true;
   };
 
+  selectAll = (e) => {
+    const checked = e.target.checked;
+    const checkedCatalog = this.state.dataSetList.catalog.map(row => {row.checked = checked; return row;});
+    this.setState(prev => {
+      prev.allChecked = checked;
+      prev.dataSetList.catalog = checkedCatalog;
+      return prev;
+    });
+  };
+
+  checkSingleRow = (index) => (e) => {
+    let catalog = this.state.dataSetList.catalog;
+    const catalogElement = catalog[index];
+    catalogElement.checked = e.target.checked;
+
+    catalog = [
+      ...catalog.slice(0, index),
+      ...[catalogElement],
+      ...catalog.slice(index+1)
+    ];
+
+    this.setState(prev => {
+      prev.dataSetList.catalog = catalog;
+      return prev;
+    });
+  };
+
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
@@ -208,7 +251,6 @@ class DatasetCatalog extends Component {
 
     const isAdmin = true;
     const isResearcher = false;
-    const objectIdList = ['a', 'b', 'c'];
     return (
       h(Fragment, {}, [
         div({ className: "container container-wide" }, [
@@ -231,7 +273,9 @@ class DatasetCatalog extends Component {
               ]),
               button({
                 id: "btn_downloadSelection",
-                download: "", disabled: objectIdList.length === 0, onClick: () => this.download(objectIdList),
+                download: "",
+                disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
+                onClick: this.download,
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
                   span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px' } }),
@@ -245,7 +289,7 @@ class DatasetCatalog extends Component {
 
             form({ className: "pos-relative" }, [
               div({ className: "checkbox check-all" }, [
-                input({ type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "all" }),
+                input({ checked: this.state.allChecked ,type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "all", onChange: this.selectAll }),
                 label({ className: "regular-checkbox", htmlFor: "all" }, []),
               ]),
             ]),
@@ -288,7 +332,7 @@ class DatasetCatalog extends Component {
                                   input({
                                     type: "checkbox", id: property.propertyValue,
                                     // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
-                                    value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
+                                    checked: dataSet.checked, className: "checkbox-inline user-checkbox", "add-object-id": "true", onChange: this.checkSingleRow(dataSet.ix)
                                   }),
                                   label({ className: "regular-checkbox rp-choice-questions", htmlFor: property.propertyValue }),
                                 ])
@@ -321,7 +365,7 @@ class DatasetCatalog extends Component {
                                   h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
                                   a({
-                                    onClick: () => this.openConnectDataset
+                                    onClick: this.openConnectDataset
                                     // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
                                   }, [
                                       span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
@@ -380,8 +424,8 @@ class DatasetCatalog extends Component {
           div({ className: "f-right" }, [
             button({
               isRendered: this.isResearcher,
-              disabled: objectIdList.length === 0,
-              onClick: this.exportToRequest(objectIdList),
+              disabled: this.state.dataSetList.catalog.filter(row => row.checked) > 0,
+              onClick: () => this.exportToRequest(undefined),
               className: "download-button dataset-background apply-dataset",
               "data-tip": "", "data-for": "tip_requestAccess"
             }, ["Apply for Access"]),

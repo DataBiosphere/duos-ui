@@ -321,9 +321,19 @@ export const DataSet = {
     return await res.json();
   },
 
-  downloadDataSets: async (objectIdList) => {
+  downloadDataSets: async (objectIdList, fileName) => {
     const url = `${await Config.getApiUrl()}/dataset/download`;
-    return getFile(url, 'datasets.tsv');
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(objectIdList), Config.fileOpts(), { method: 'POST' }]));
+
+    fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
+    const responseObj = await res.json();
+
+    let blob = new Blob([responseObj.datasets], {type: 'text/plain'});
+    const urlBlob = window.URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = urlBlob;
+    a.download = fileName;
+    a.click();
   },
 
   deleteDataset: async (datasetObjectId, dacUserId) => {

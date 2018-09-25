@@ -122,7 +122,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.selected.push(value);
       return prev;
     });
-  }
+  };
 
   render() {
 
