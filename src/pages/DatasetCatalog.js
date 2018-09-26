@@ -57,7 +57,6 @@ class DatasetCatalog extends Component {
   async getDatasets() {
     const dictionary = await DataSet.findDictionary();
     const catalog = await DataSet.findDataSets(this.USER_ID);
-    console.log(catalog);
     catalog.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
@@ -111,7 +110,6 @@ class DatasetCatalog extends Component {
   }
 
   openConnectDataset(dataset) {
-    console.log(dataset);
     this.setState(prev => {
       prev.datasetConnect = dataset;
       prev.showConnectDatasetModal = true;
