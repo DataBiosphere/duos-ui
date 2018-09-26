@@ -36,31 +36,31 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.isEditMode) {
-      return {
-        isEditMode: nextProps.isEditMode,
-        file: { name: nextProps.editConsent.dulName },
+  componentDidMount() {
+    if (this.props.isEditMode) {
+      this.setState({
+        isEditMode: this.props.isEditMode,
+        file: { name: this.props.editConsent.dulName },
         consent: {
-          consentId: nextProps.dul.consentId,
-          name: nextProps.dul.consentName,
-          useRestriction: JSON.stringify(nextProps.editConsent.useRestriction),
-          dataUse: JSON.stringify(nextProps.editConsent.dataUse),
+          consentId: this.props.dul.consentId,
+          name: this.props.dul.consentName,
+          useRestriction: JSON.stringify(this.props.editConsent.useRestriction),
+          dataUse: JSON.stringify(this.props.editConsent.dataUse),
           error: { show: false }
         }
-      };
+      });
+    } else {
+      this.setState({
+        isEditMode: false,
+        consent: {
+          consentId: '',
+          name: '',
+          useRestriction: '',
+          dataUse: '',
+        },
+        file: ''
+      });
     }
-
-    return {
-      isEditMode: false,
-      consent: {
-        consentId: '',
-        name: '',
-        useRestriction: '',
-        dataUse: '',
-      },
-      file: ''
-    };
   };
 
   async OKHandler() {
@@ -77,20 +77,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   closeHandler() {
-    // this is the method to handle Cancel click
-    // could do some cleaning here 
-    // or delegate it to the parent
-    // we need to use it to close the
-    // DO SOMETHING HERE ...
-
-    // and call parent's close handler
     this.props.onCloseRequest('addDul');
   }
 
   afterOpenHandler() {
-    // DO SOMETHING HERE ...
-
-    // and call parent's after open handler
     this.props.onAfterOpen('addDul');
   }
 
@@ -159,41 +149,14 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   };
 
   handleChange = (changeEvent) => {
-    const fieldId = changeEvent.target.id;
+    const name = changeEvent.target.name;
     const value = changeEvent.target.value;
-    switch (fieldId) {
-      case CONSENT_ID: {
-        this.setState(prev => {
-          prev.consent.consentId = value;
-          return value;
-        });
-        break;
-      }
-      case CONSENT_NAME: {
-        this.setState(prev => {
-          prev.consent.name = value;
-          return value;
-        });
-        break;
-      }
-      case USE_RESTRICTION: {
-        this.setState(prev => {
-          prev.consent.useRestriction = value;
-          return value;
-        });
-        break;
-      }
-      case DATA_USE: {
-        this.setState(prev => {
-          prev.consent.dataUse = value;
-          return value;
-        });
-        break;
-      }
-      default: {
-        break;
-      }
-    }
+
+    this.setState(prev => {
+      prev.consent[name] = value;
+      return prev;
+    });
+
   };
 
   onFileChange = (e) => {
@@ -215,8 +178,8 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
   };
 
-
   render() {
+
     const file = {
       name: "MyFile.txt"
     };
@@ -256,8 +219,8 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     type: "text", "ng-model": "consent.consentId",
                     value: this.state.consent.consentId,
                     onChange: this.handleChange,
-                    id: "txt_consentId",
-                    name: "inputConsentId",
+                    id: CONSENT_ID,
+                    name: "consentId",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Unique id from Compliance",
                     required: true,
@@ -276,8 +239,8 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     type: "text",
                     value: this.state.consent.name,
                     onChange: this.handleChange,
-                    id: "txt_consentName",
-                    name: "inputName",
+                    id: CONSENT_NAME,
+                    name: "name",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Consent id",
                     required: true,
@@ -319,10 +282,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 }, ["Structured Limitations"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   textarea({
-                    id: "txt_sdul",
+                    id: USE_RESTRICTION,
                     value: this.state.consent.useRestriction,
                     onChange: this.handleChange,
-                    name: "inputSDUL",
+                    name: "useRestriction",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {\"type\":\"everything\"})",
                     required: true
@@ -337,10 +300,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 }, ["Data Use"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   textarea({
-                    id: "txt_dataUse",
+                    id: DATA_USE,
                     value: this.state.consent.dataUse,
                     onChange: this.handleChange,
-                    name: "inputDU",
+                    name: "dataUse",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {\"generalUse\":true})",
                     required: true
