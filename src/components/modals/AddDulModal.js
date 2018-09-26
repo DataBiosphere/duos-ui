@@ -77,20 +77,10 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   }
 
   closeHandler() {
-    // this is the method to handle Cancel click
-    // could do some cleaning here 
-    // or delegate it to the parent
-    // we need to use it to close the
-    // DO SOMETHING HERE ...
-
-    // and call parent's close handler
     this.props.onCloseRequest('addDul');
   }
 
   afterOpenHandler() {
-    // DO SOMETHING HERE ...
-
-    // and call parent's after open handler
     this.props.onAfterOpen('addDul');
   }
 
@@ -159,42 +149,14 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   };
 
   handleChange = (changeEvent) => {
-    const fieldId = changeEvent.target.id;
+    const name = changeEvent.target.name;
     const value = changeEvent.target.value;
 
-    switch (fieldId) {
-      case CONSENT_ID: {
-        this.setState(prev => {
-          prev.consent.consentId = value;
-          return prev;
-        });
-        break;
-      }
-      case CONSENT_NAME: {
-        this.setState(prev => {
-          prev.consent.name = value;
-          return prev;
-        });
-        break;
-      }
-      case USE_RESTRICTION: {
-        this.setState(prev => {
-          prev.consent.useRestriction = value;
-          return prev;
-        });
-        break;
-      }
-      case DATA_USE: {
-        this.setState(prev => {
-          prev.consent.dataUse = value;
-          return prev;
-        });
-        break;
-      }
-      default: {
-        break;
-      }
-    }
+    this.setState(prev => {
+      prev.consent[name] = value;
+      return prev;
+    });
+
   };
 
   onFileChange = (e) => {
@@ -217,6 +179,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   };
 
   render() {
+
     const file = {
       name: "MyFile.txt"
     };
@@ -322,7 +285,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     id: USE_RESTRICTION,
                     value: this.state.consent.useRestriction,
                     onChange: this.handleChange,
-                    name: "inputSDUL",
+                    name: "useRestriction",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Structured string of the Data Use Limitations (JSON format, e.g. {\"type\":\"everything\"})",
                     required: true
@@ -340,7 +303,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     id: DATA_USE,
                     value: this.state.consent.dataUse,
                     onChange: this.handleChange,
-                    name: "inputDU",
+                    name: "dataUse",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Structured string of the Data Use Questions/Answers (JSON format, e.g. {\"generalUse\":true})",
                     required: true
