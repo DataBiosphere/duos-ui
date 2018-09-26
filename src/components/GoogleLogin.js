@@ -1,4 +1,5 @@
-import { Component } from 'react';
+import { Component, Redirect, React } from 'react';
+import {browserHistory, withRouter } from "react-router-dom";
 import { h, hh } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
 import { User } from '../libs/ajax';
@@ -7,7 +8,10 @@ import { Storage } from '../libs/storage';
 export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
   constructor(props) {
     super(props);
-    this.state = { googleButton: null };
+    this.state = {
+      googleButton: null,
+      toDashBoard: false
+    };
     this.login = props.loginState;
     this.getUser = this.getUser.bind(this);
   }
@@ -16,6 +20,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
     Storage.setGoogleData(response);
     this.getUser().then((data) => {
       Storage.setCurrentUser(data);
+      this.redirectByRole();
       this.login(true);
     },
       (data) => {
@@ -34,7 +39,7 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
   async getGoogleConfig() {
     const googleButton = h(GoogleLogin, {
       className: "btn navbar-duos-button",
-      clientId: "complete-clientId",
+      clientId: "",
       buttonText: "Sign In",
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden,
@@ -48,6 +53,13 @@ export const GoogleLoginButton = hh(class GoogleLoginButton extends Component {
 
   componentWillMount() {
     this.getGoogleConfig();
+  }
+
+  redirectByRole() {
+    // this.props.history.push(`${'chair_console'}`);
+    window.location.href = 'chair_console';
+
+    // this.props.history.push("/chair_console");
   }
 
   render() {

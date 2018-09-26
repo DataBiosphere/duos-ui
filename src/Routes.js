@@ -1,5 +1,6 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, Link, withRouter  } from "react-router-dom";
+
 import Home from './pages/Home';
 import InvalidRestrictions from "./pages/InvalidRestrictions";
 import HomeHelp from "./pages/HomeHelp";
@@ -41,7 +42,7 @@ export default ({ props }) => (
   <Switch>
     <Route exact path='/' component={Home} props={{ props }} />
     <Route exact path='/home' component={Home} props={{ props }} />
-    <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={props} />
+    <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={props} roles={['Admin', 'ChairPerson']} />
     <AuthenticatedRoute path='/admin_manage_users' component={AdminManageUsers} props={props} />
     <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={props} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} />

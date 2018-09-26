@@ -13,7 +13,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLogged: false
+      isLogged: false,
+      roles: {}
     };
     this.loginState = this.loginState.bind(this);
   }
@@ -47,6 +48,7 @@ class App extends React.Component {
             }),
 
             h(Routes, {
+              roles: Storage.getCurrentUser().roles,
               isLogged: Storage.userIsLogged(),
               loginState: this.loginState
             }),

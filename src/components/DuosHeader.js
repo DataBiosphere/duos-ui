@@ -41,6 +41,7 @@ class DuosHeader extends Component {
   render() {
 
     // let roles = ['chairperson', 'member', 'admin', 'researcher', 'dataOwner', 'alumni'];
+
     let roles = ['admin', 'researcher'];
     let isChairPerson = false;
     let isMember = false;
@@ -52,23 +53,26 @@ class DuosHeader extends Component {
     let isLogged = Storage.userIsLogged();
 
     if (isLogged) {
-      roles.forEach(role => {
-        if (role === 'chairperson') {
+      let prueb = Storage.getCurrentUser().roles;
+
+
+      prueb.forEach(role => {
+        if (role.name === 'Chairperson') {
           isChairPerson = true;
         }
-        if (role === 'member') {
+        if (role.name === 'Member') {
           isMember = true;
         }
-        if (role === 'admin') {
+        if (role.name === 'Admin') {
           isAdmin = true;
         }
-        if (role === 'researcher') {
+        if (role.name === 'Researcher') {
           isResearcher = true;
         }
-        if (role === 'dataOwner') {
+        if (role.name === 'DataOwner') {
           isDataOwner = true;
         }
-        if (role === 'alumni') {
+        if (role.name === 'Alumni') {
           isAlumni = true;
         }
       });
