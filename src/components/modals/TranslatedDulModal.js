@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { b, div, hh } from 'react-hyperscript-helpers';
+import { div, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 // import { DataSet } from '../../libs/ajax'
 
