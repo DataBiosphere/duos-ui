@@ -256,7 +256,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     type: "text", "ng-model": "consent.consentId",
                     value: this.state.consent.consentId,
                     onChange: this.handleChange,
-                    id: "txt_consentId",
+                    id: CONSENT_ID,
                     name: "consentId",
                     className: "form-control col-lg-12 vote-input",
                     placeholder: "Unique id from Compliance",
@@ -319,7 +319,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 }, ["Structured Limitations"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   textarea({
-                    id: "txt_sdul",
+                    id: USE_RESTRICTION,
                     value: this.state.consent.useRestriction,
                     onChange: this.handleChange,
                     name: "inputSDUL",
@@ -337,7 +337,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 }, ["Data Use"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   textarea({
-                    id: "txt_dataUse",
+                    id: DATA_USE,
                     value: this.state.consent.dataUse,
                     onChange: this.handleChange,
                     name: "inputDU",
