@@ -165,6 +165,7 @@ class AdminConsole extends Component {
                   iconSize: 'default',
                 }),
                 AddDulModal({
+                  isRendered: this.state.showAddDulModal,
                   showModal: this.state.showAddDulModal,
                   editMode: false,
                   onOKRequest: this.okModal,
