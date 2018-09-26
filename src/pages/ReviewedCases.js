@@ -91,7 +91,7 @@ class ReviewedCases extends Component {
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({
               id: "reviewedCases",
-              imgSrc: "../images/icon_reviewed.png",
+              imgSrc: "/images/icon_reviewed.png",
               iconSize: "medium",
               color: "common",
               title: "Reviewed Cases Record",
@@ -140,7 +140,7 @@ class ReviewedCases extends Component {
             .filter(this.searchTable(searchDulText))
             .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
               return h(Fragment, { key: rIndex }, [
-                div({ className: "grid-row tableRow" }, [
+                div({ className: "grid-row tableRowDul" }, [
                   div({
                     id: election.displayId + "_consentId",
                     name: "consentId",
@@ -225,7 +225,7 @@ class ReviewedCases extends Component {
             .filter(this.searchTable(searchDarText))
             .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
               return h(Fragment, { key: rIndex }, [
-                div({ className: "grid-row tableRow" }, [
+                div({ className: "grid-row tableRowAccess" }, [
                   div({ id: election.displayId + "_darId", name: "darId", className: "col-2 cell-body text", title: "this.election.displayId " }, [election.displayId]),
                   div({ id: election.displayId + "_projectTitle", name: "projectTitle", className: "col-3 cell-body text", title: "this.election.projectTitle " }, [election.projectTitle]),
                   div({ id: election.displayId + "_resultDateAccess", name: "resultDateAccess", className: "col-1 cell-body text" }, [Utils.formatDate(election.finalVoteDate)]),

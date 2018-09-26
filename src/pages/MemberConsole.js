@@ -157,7 +157,7 @@ class MemberConsole extends Component {
               .filter(this.searchTable(searchDulText))
               .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
-                  div({ className: "row no-margin tableRow" }, [
+                  div({ className: "row no-margin tableRowDul" }, [
                     div({ id: pendingCase.frontEndId + "_consentId", name: "consentId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
                     div({
                       id: pendingCase.frontEndId + "_consentGroup", name: "consentGroup",
@@ -217,7 +217,7 @@ class MemberConsole extends Component {
               .filter(this.searchTable(searchDarText))
               .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
-                  div({ className: "row no-margin tableRow" }, [
+                  div({ className: "row no-margin tableRowAccess" }, [
                     div({ id: pendingCase.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
                     div({ id: pendingCase.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
                     div({ id: pendingCase.frontEndId + "_statusAccess", name: "statusAccess", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center bold" }, [
