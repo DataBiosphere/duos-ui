@@ -1,6 +1,7 @@
 import React from 'react';
 import Modal from 'react-modal';
 import DuosHeader from './components/DuosHeader';
+import DuosFooter from './components/DuosFooter';
 import { div, h } from 'react-hyperscript-helpers';
 import './App.css';
 import Routes from "./Routes"
@@ -33,21 +34,25 @@ class App extends React.Component {
 
   render() {
     return (
-      div({}, [
+      div({ className: "body"}, [
+        div({ className: "wrap" }, [
+          div({ className: "main" }, [
+            h(DuosHeader, {
+              isLogged: this.state.isLogged,
+              loginState: this.loginState,
+              button: GoogleLoginButton({
+                isLogged: Storage.userIsLogged(),
+                loginState: this.loginState
+              })
+            }),
 
-        h(DuosHeader, {
-          isLogged: this.state.isLogged,
-          loginState: this.loginState,
-          button: GoogleLoginButton({
-            isLogged: Storage.userIsLogged(),
-            loginState: this.loginState
-          })
-        }),
-
-        h(Routes, {
-          isLogged: Storage.userIsLogged(),
-          loginState: this.loginState
-        })
+            h(Routes, {
+              isLogged: Storage.userIsLogged(),
+              loginState: this.loginState
+            }),
+          ])
+        ]),
+        h(DuosFooter, {})
       ])
     );
   }

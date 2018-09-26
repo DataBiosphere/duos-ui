@@ -250,9 +250,11 @@ class AdminManageAccess extends Component {
               ]);
             }),
           ApplicationSummaryModal({
+            isRendered: this.state.showModal, 
             showModal: this.state.showModal,
             onCloseRequest: this.handleCloseModal,
-            dataRequestId: this.state.dataRequestId
+            dataRequestId: this.state.dataRequestId,
+            calledFromAdmin: true
           }),
           ConfirmationDialog({
             title: 'Create election?',

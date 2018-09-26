@@ -5,7 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { Election, DAR, Files } from '../libs/ajax';
+import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { LoadingIndicator } from '../components/LoadingIndicator';
@@ -19,23 +19,18 @@ class AccessCollect extends Component {
     this.rpCollectVote = this.rpCollectVote.bind(this);
     this.confirmationHandlerOK = this.confirmationHandlerOK.bind(this);
     this.confirmationRPHandlerOK = this.confirmationRPHandlerOK.bind(this);
+    this.handlerReminder = this.handlerReminder(this);
   }
 
   componentDidMount() {
     this.loadData();
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
-    });
   }
 
   initialState() {
     return {
+      dialogTitle: 'Email Notification Sent.',
+      showDialogReminder: false,
+      isReminderSent: false,
       loading: true,
       alertAccessMessage: '',
       showAlertAccess: false,
@@ -108,6 +103,31 @@ class AccessCollect extends Component {
     };
   };
 
+  handlerReminder = (e) => (voteId) => {
+    this.sendReminder(voteId).then(reminder => {
+      this.setState(prev => {
+        prev.showDialogReminder = true;
+        prev.isReminderSent = true;
+        return prev;
+      });
+    }).catch(error => {
+      this.setState(prev => {
+        prev.showDialogReminder = true;
+        prev.isReminderSent = false;
+        prev.dialogTitle = 'Email Notification Error.';
+        return prev;
+      });
+    })
+  };
+
+  async sendReminder(voteId) {
+    return await Email.sendReminderEmail(voteId);
+  };
+
+  dialogHandlerReminder = (answer) => (e) => {
+    this.setState({ showDialogReminder: false });
+  };
+
   confirmationHandlerOK = (answer) => (e) => {
     if (answer === true) {
       let election = this.state.election;
@@ -120,7 +140,7 @@ class AccessCollect extends Component {
       } else {
         this.setState(prev => {
           prev.accessAlreadyVote = true;
-          prev.showConfirmationDialogOK = prev.showConfirmationDialogOK = false;
+          prev.showConfirmationDialogOK = false;
           prev.alertAccessMessage = 'Remember to log a vote on: Q2. Was the research purpose accurately converted to a structured format?';
           prev.showAlertAccess = true;
           return prev;
@@ -216,10 +236,10 @@ class AccessCollect extends Component {
     this.props.history.goBack();
   };
 
-  loadData() {
-    this.findDataAccessElectionReview();
-    this.findRPElectionReview();
-    this.findDarFields();
+  async loadData() {
+    await this.findDataAccessElectionReview();
+    await this.findRPElectionReview();
+    await this.findDarFields();
     this.setState({
       loading: false
     });
@@ -566,13 +586,23 @@ class AccessCollect extends Component {
                         SingleResultBox({
                           id: "accessSingleResult_" + vIndex,
                           color: "access",
-                          data: vm
+                          data: vm,
+                          handler: this.handlerReminder
                         })
                       ]);
                     })
                   ]),
                 ]);
-              })
+              }),
+              ConfirmationDialog({
+                title: this.state.dialogTitle, color: 'access', showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
+              }, [
+                  div({ className: "dialog-description" }, [
+                    span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
+                    span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
+                  ]),
+                ]),
+
             ])
         ]),
 
@@ -645,7 +675,8 @@ class AccessCollect extends Component {
                         SingleResultBox({
                           id: "rpSingleResult_" + vIndex,
                           color: "access",
-                          data: vm
+                          data: vm,
+                          handler: this.handlerReminder
                         })
                       ]);
                     })
