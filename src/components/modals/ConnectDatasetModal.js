@@ -13,7 +13,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       selected: [],
       availableclients: [],
       selectedclients: [],
-      needsApproval: false
+      needsApproval: props.dataset.needsApproval,
+      updatedInfoModal: false,
     };
 
     this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
@@ -22,6 +23,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
     this.handleLSelection  = this.handleLSelection.bind(this);
+    this.handleStateSubmit = this.handleStateSubmit.bind(this);
   };
 
   componentDidMount() {
@@ -37,11 +39,19 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetId);
+    console.log(clients);
     const availableClients = clients.not_associated_users.map(user => {
       return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
     });
+
+    const selectedClients = clients.associated_users.map(user => {
+      return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
+    });
+
     this.setState(prev => {
       prev.availableclients = availableClients;
+      prev.selectedclients = selectedClients;
+      prev.availableToCompare = selectedClients;
       return prev;
     });
   }
@@ -60,9 +70,17 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   }
 
   handleNeedsApprovalChange(event) {
-    this.setState({
-      needsApproval: event.target.checked
+    const checked = event.target.checked;
+    console.log('event.target.checked', event.target.checked);
+    this.setState(prev =>{
+      prev.needsApproval = checked;
+      this.handleStateSubmit();
+      return prev;
     });
+
+
+    console.log('this.state.needsApproval', this.state.needsApproval);
+    this.handleStateSubmit();
   }
 
   moveLItem = (e) => {
@@ -82,6 +100,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.selectedclients = filteredTo;
       return prev;
     });
+
+    this.handleStateSubmit();
   };
 
   moveRItem = (e) => {
@@ -102,8 +122,47 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.selectedclients = filteredFrom;
       return prev;
     });
+
+    this.handleStateSubmit();
   };
 
+  isSelectedListModified = () => {
+    console.log('cambios en las listas?');
+    console.log('selected', JSON.stringify(this.state.selectedclients));
+    console.log('availabl', JSON.stringify(this.state.availableToCompare));
+    if (JSON.stringify(this.state.availableToCompare) === JSON.stringify(this.state.selectedclients)) {
+      console.log('la lista NO cambió');
+      return false;
+    } else {
+      console.log('la lista SÍ cambió');
+      return true;
+    }
+  };
+
+  handleStateSubmit = () => {
+    let needsApprovalModified = false;
+    const modifiedList = this.isSelectedListModified();
+
+    console.log('this.props.dataset.needsApproval', this.props.dataset.needsApproval);
+    console.log('this.state.needsApproval', this.state.needsApproval);
+
+    if (this.props.dataset.needsApproval !== this.state.needsApproval) {
+      console.log('needsApproval cambió de estado');
+      needsApprovalModified = true;
+    }
+
+    console.log('needsApprovalModified', needsApprovalModified);
+    console.log('selectedclients.length', this.state.selectedclients.length);
+
+    if (needsApprovalModified || (this.state.selectedclients.length > 0 && modifiedList)){
+      console.log('habilitar botón');
+      this.setState({ updatedInfoModal: true });
+    } else {
+      this.setState({ updatedInfoModal: false });
+      console.log('deshabilitar botón');
+    }
+
+  };
 
   handleLSelection = (e) => {
     const target = e.target;
@@ -129,7 +188,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   render() {
 
-    const { available, selected, availableclients, selectedclients } = this.state;
+    const { available, selected } = this.state;
     // console.log(availableclients, selectedclients);
     return (
 
@@ -143,7 +202,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
         iconSize: 'large',
         title: "Connect Dataset with Data Owner",
         description: 'Associate Dataset with Data Owners and check for approval',
-        action: { label: "Submit", handler: this.OKHandler }
+        action: { label: "Submit", handler: this.OKHandler },
+        disableOkBtn: !this.state.updatedInfoModal,
       },
         [
 
