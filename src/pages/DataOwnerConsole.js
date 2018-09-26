@@ -133,7 +133,6 @@ class DataOwnerConsole extends Component {
                     data: pendingCase.darCode,
                     onClick: () => this.voteReview(pendingCase)
                   }, ["Vote"]),
-// review this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
                   button({
                     id: pendingCase.darCode + "_btnEdit",
                     name: "btn_edit",
@@ -142,7 +141,6 @@ class DataOwnerConsole extends Component {
                     data: pendingCase.darCode,
                     onClick: () => this.voteReview(pendingCase)
                   }, ["Edit"]),
-// review this ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                 ]),
               ]),
               hr({ className: "table-body-separator" }),

@@ -70,6 +70,7 @@ export const HelpModal = hh(class HelpModal extends Component {
     return (
       BaseModal({
         id: "helpModal",
+        disableOkBtn: (this.state.subject === '' || this.state.description === ''),
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
