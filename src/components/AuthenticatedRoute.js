@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { Storage } from "../libs/storage";
 
-export default ({component: Component, props: componentProps, ...rest, rolesAllowed:rolesAllowed}) =>
+export default ({component: Component, props: componentProps, ...rest, rolesAllowed}) =>
   <Route
     {...rest}
     render={
@@ -18,6 +18,7 @@ export default ({component: Component, props: componentProps, ...rest, rolesAllo
   const verifyUser = (allowedComponentRoles) => {
     if (Storage.userIsLogged()) {
       const usrRoles = Storage.getCurrentUser().roles.map(roles => roles.name);
+      usrRoles.push('All');
       return allowedComponentRoles.some(
         componentRoles => usrRoles.indexOf(componentRoles) >= 0
       );
