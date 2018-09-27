@@ -13,8 +13,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLogged: false,
-      roles: {}
+      isLogged: false
     };
     this.loginState = this.loginState.bind(this);
   }

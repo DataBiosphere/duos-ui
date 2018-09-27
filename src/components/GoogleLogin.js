@@ -1,4 +1,4 @@
-import { Component, Redirect, React } from 'react';
+import { Component } from 'react';
 import { h, hh } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
 import { User } from '../libs/ajax';

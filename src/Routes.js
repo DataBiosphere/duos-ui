@@ -1,6 +1,5 @@
-import  React from "react";
+import React from "react";
 import { Switch, Route } from "react-router-dom";
-
 import Home from './pages/Home';
 import InvalidRestrictions from "./pages/InvalidRestrictions";
 import HomeHelp from "./pages/HomeHelp";
