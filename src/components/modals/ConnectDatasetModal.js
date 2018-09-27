@@ -86,6 +86,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
     if (this.state.isUpdate) {
       DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(response => {
+          this.props.onOKRequest('ConnectDatasetModal');
         }
       , (error) => {
         this.setState(prev => {
@@ -95,6 +96,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       });
     } else {
       DatasetAssociation.createDatasetAssociations(this.state.datasetId, usersId).then(response => {
+        this.props.onOKRequest('ConnectDatasetModal');
       }, (error) => {
         this.setState(prev => {
           prev.showError = true;

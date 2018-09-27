@@ -345,7 +345,7 @@ export const DataSet = {
   disableDataset: async (datasetObjectId, active) => {
     const url = `${await Config.getApiUrl()}/dataset/disable/${datasetObjectId}/${active}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return await res.json();
+    return res;
   },
 
   reviewDataSet: async (dataSetId, needsApproval) => {
@@ -358,7 +358,6 @@ export const DataSet = {
 export const DatasetAssociation = {
 
   createDatasetAssociations: async (objectId, usersIdList) => {
-    console.log(objectId, usersIdList);
     const url = `${await Config.getApiUrl()}/datasetAssociation/${objectId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList) , { method: 'POST' }]));
     return await res.json();

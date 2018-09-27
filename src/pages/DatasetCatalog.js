@@ -14,7 +14,7 @@ import { Storage } from "../libs/storage";
 class DatasetCatalog extends Component {
 
   USER_ID = Storage.getCurrentUser().dacUserId;
-  // USER_ID = 5;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -112,7 +112,6 @@ class DatasetCatalog extends Component {
 
   exportToRequest = () => {
     const listToExport = this.state.dataSetList.catalog.filter(row => row.checked);
-    console.log(listToExport);
     this.props.history.push({ pathname: 'dar_application', props: {listToExport} });
   };
 
@@ -139,7 +138,7 @@ class DatasetCatalog extends Component {
     this.setState(prev => {
       prev.showConnectDatasetModal = false;
       return prev;
-    });
+    }, () => this.getDatasets());
   }
 
   openTranslatedDUL= (translatedUseRestriction) => () => {
@@ -171,12 +170,18 @@ class DatasetCatalog extends Component {
     });
   };
 
-  openEnable = (answer) => (e) => {
-    this.setState({ showDialogEnable: true });
+  openEnable = (datasetId) => (e) => {
+    this.setState({
+      showDialogEnable: true,
+      datasetId: datasetId
+    });
   };
 
-  openDisable = (answer) => (e) => {
-    this.setState({ showDialogDisable: true });
+  openDisable = (datasetId) => (e) => {
+    this.setState({
+      showDialogDisable: true,
+      datasetId: datasetId
+    });
   };
 
   dialogHandlerDelete = (answer) => (e) => {
@@ -187,10 +192,20 @@ class DatasetCatalog extends Component {
   };
 
   dialogHandlerEnable = (answer) => (e) => {
+    if (answer) {
+      DataSet.disableDataset(this.state.datasetId, true).then(resp =>{
+        this.getDatasets();
+      });
+    }
     this.setState({ showDialogEnable: false });
   };
 
   dialogHandlerDisable = (answer) => (e) => {
+    if (answer) {
+      DataSet.disableDataset(this.state.datasetId, false).then(resp =>{
+        this.getDatasets();
+      });
+    }
     this.setState({ showDialogDisable: false });
   };
 
