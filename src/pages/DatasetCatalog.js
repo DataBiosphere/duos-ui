@@ -32,7 +32,8 @@ class DatasetCatalog extends Component {
         showDialogDelete: false,
         showDialogEnable: false,
         showDialogDisable: false,
-      }
+      },
+      translatedUseRestrictionModal: {}
     };
     this.myHandler = this.myHandler.bind(this);
     this.getDatasets = this.getDatasets.bind(this);
@@ -131,14 +132,13 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openTranslatedDUL(translatedUR) {
-    console.log(translatedUR);
+  openTranslatedDUL= (translatedUseRestriction) => () => {
     this.setState(prev => {
+      prev.translatedUseRestrictionModal = translatedUseRestriction;
       prev.showTranslatedDULModal = true;
-      prev.translatedUseRestriction = translatedUR;
       return prev;
     });
-  }
+  };
 
   closeTranslatedDULModal() {
     this.setState(prev => {
@@ -402,9 +402,7 @@ class DatasetCatalog extends Component {
                         td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                          a({
-                           id: trIndex + "_linkTranslatedDul", name: "link_translatedDul",
-                    onClick: () => this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
+                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
                         ]),
 
                         td({ isRendered: isAdmin, className: "table-items cell-size" }, [
@@ -438,10 +436,11 @@ class DatasetCatalog extends Component {
             h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
           ]),
           TranslatedDulModal({
+            isRendered: this.state.showTranslatedDULModal,
             showModal: this.state.showTranslatedDULModal,
+            useRestriction: this.state.translatedUseRestrictionModal,
             onOKRequest: this.okTranslatedDULModal,
-            onCloseRequest: this.closeTranslatedDULModal,
-            translatedUseRestriction: this.state.translatedUseRestriction,
+            onCloseRequest: this.closeTranslatedDULModal
           }),
 
           ConfirmationDialog({
