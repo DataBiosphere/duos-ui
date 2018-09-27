@@ -2,48 +2,26 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { Storage } from "../libs/storage";
 
-// export default ({component: Component, props: componentProps, roles: roles, ...rest}) =>
-//   <Route
-//     {...rest}
-//     render={
-//       roles => {
-//         console.log(roles)
-//       },
-//       props =>
-//         Storage.userIsLogged()
-//           ? <Component {...props} {...componentProps} />
-//           : <Redirect
-//             to={'/'}
-//           />}
-//   />;
+export default ({component: Component, props: componentProps, ...rest, rolesAllowed:rolesAllowed}) =>
+  <Route
+    {...rest}
+    render={
+      props =>
+        verifyUser(rolesAllowed)
+          ? <Component {...props} {...componentProps} />
+          : <Redirect
+            to={'/'}
+          />}
+  />;
 
-
-
-// Route handler
-class AuthenticatedRoute extends React.Component {
-  constructor(props) {
-    super(props)
-    // Load user from wherever into state.
-  }
-
-  render() {
-    return <Authorization allowed={this.props.allowed} user={this.state.user}>
-      {() =>
-        /* the rest of your page */
-      }
-      <Authorization>
-        }
-        }
-
-        export default YourRoute
-
-        // Router configuration
-        <Router history={BrowserHistory}>
-          <Route path="/" component={App}>
-            <Route
-              allowed={['manager', 'admin']}
-              path="feature"
-              component={YourRoute}
-            />
-          </Route>
-        </Router>
+  // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
+  const verifyUser = (allowedComponentRoles) => {
+    if (Storage.userIsLogged()) {
+      const usrRoles = Storage.getCurrentUser().roles.map(roles => roles.name);
+      return allowedComponentRoles.some(
+        componentRoles => usrRoles.indexOf(componentRoles) >= 0
+      );
+    }
+    // User is not Logged
+    return false;
+  };

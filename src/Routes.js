@@ -42,36 +42,36 @@ export default ({ props }) => (
   <Switch>
     <Route exact path='/' component={Home} props={{ props }} />
     <Route exact path='/home' component={Home} props={{ props }} />
-    <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={props} roles={['Admin', 'ChairPerson']} />
-    <AuthenticatedRoute path='/admin_manage_users' component={AdminManageUsers} props={props} />
+    <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={props} rolesAllowed={["Admin"]}/>
+    <AuthenticatedRoute path='/admin_manage_users' component={AdminManageUsers} props={props} rolesAllowed={["Admin"]}/>
     <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={props} />
-    <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} />
-    <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props} />
-    <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} />
-    <AuthenticatedRoute path='/data_owner_console' component={DataOwnerConsole} props={props} />
-    <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} />
+    <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} rolesAllowed={["Researcher"]}/>
+    <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props} rolesAllowed={["Chairperson"]}/>
+    <AuthenticatedRoute path='/member_console' component={MemberConsole} props={props} rolesAllowed={["Member", "Chairperson"]}/>
+    <AuthenticatedRoute path='/data_owner_console' component={DataOwnerConsole} props={props} rolesAllowed={["DataOwner"]}/>
+    <AuthenticatedRoute path='/dar_application' component={DataAccessRequestApplication} props={props} rolesAllowed={["Researcher"]}/>
     <Route path='/home_help' component={HomeHelp} />
     <Route path='/home_about' component={HomeAbout} />
-    <AuthenticatedRoute path='/researcher_profile' component={ResearcherProfile} props={props} />
-    <AuthenticatedRoute path='/admin_manage_access' component={AdminManageAccess} props={props} />
-    <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={props} />
-    <AuthenticatedRoute path='/data_owner_review/:voteId/:referenceId/:dataSetId' component={DataOwnerReview} props={props} />
-    <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={props} />
+    <AuthenticatedRoute path='/researcher_profile' component={ResearcherProfile} props={props} rolesAllowed={["Researcher"]}/>
+    <AuthenticatedRoute path='/admin_manage_access' component={AdminManageAccess} props={props} rolesAllowed={["Admin"]}/>
+    <AuthenticatedRoute path='/admin_manage_dul' component={AdminManageDul} props={props} rolesAllowed={["Admin"]}/>
+    <AuthenticatedRoute path='/data_owner_review/:voteId/:referenceId/:dataSetId' component={DataOwnerReview} props={props} rolesAllowed={["DataOwner"]}/>
+    <AuthenticatedRoute path='/dataset_catalog' component={DatasetCatalog} props={props} rolesAllowed={["Admin", "Researcher"]}/>
     <Route path='/help_reports' component={HelpReports} props={props} />
-    <AuthenticatedRoute path='/home_register' component={HomeRegister} props={props} />
-    <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={props} />
+    <AuthenticatedRoute path='/home_register' component={HomeRegister} props={props} rolesAllowed={["Admin"]}/>
+    <AuthenticatedRoute path='/invalid_restrictions' component={InvalidRestrictions} props={props} rolesAllowed={["Admin"]}/>
     <Route path='/login' component={Login} props={{ props }} />
-    <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={props} />
-    <AuthenticatedRoute path='/researcher_review/:dacUserId' component={ResearcherReview} props={props} />
-    <AuthenticatedRoute path='/access_result_records/:referenceId/:electionId' component={AccessResultRecords} props={props} />
-    <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} />
-    <AuthenticatedRoute path='/access_review/:darId/:voteId/:rpVoteId' component={AccessReview} props={props} />
-    <AuthenticatedRoute path='/access_preview/:referenceId?/:electionId?' component={AccessPreview} props={props} />
-    <AuthenticatedRoute path='/access_collect/:referenceId/:electionId' component={AccessCollect} props={props} />
-    <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} />
-    <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} />
-    <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} />
-    <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} />
+    <AuthenticatedRoute path='/manage_ontologies' component={ManageOntologies} props={props} rolesAllowed={["Admin"]}/>
+    <AuthenticatedRoute path='/researcher_review/:dacUserId' component={ResearcherReview} props={props} rolesAllowed={["Admin"]}/>
+    <AuthenticatedRoute path='/access_result_records/:referenceId/:electionId' component={AccessResultRecords} props={props} rolesAllowed={["Admin", "Researcher"]}/>
+    <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} rolesAllowed={["Admin", "Chairperson"]}/>
+    <AuthenticatedRoute path='/access_review/:darId/:voteId/:rpVoteId' component={AccessReview} props={props} rolesAllowed={["Researcher"]}/>
+    <AuthenticatedRoute path='/access_preview/:referenceId?/:electionId?' component={AccessPreview} props={props} rolesAllowed={["Researcher"]}/>
+    <AuthenticatedRoute path='/access_collect/:referenceId/:electionId' component={AccessCollect} props={props} rolesAllowed={["Chairperson"]}/>
+    <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} rolesAllowed={["Admin", "Chairperson"]}/>
+    <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} rolesAllowed={["Admin", "Chairperson"]}/>
+    <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} rolesAllowed={["Chairperson"]}/>
+    <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} rolesAllowed={["Chairperson"]}/>
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} />
     <Route path='/election404' component={Election404} />
     <Route path='*' component={NotFound} />

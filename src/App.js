@@ -48,7 +48,6 @@ class App extends React.Component {
             }),
 
             h(Routes, {
-              roles: Storage.getCurrentUser().roles,
               isLogged: Storage.userIsLogged(),
               loginState: this.loginState
             }),
