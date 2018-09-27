@@ -81,14 +81,11 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   createOrUpdateAssociations = () => {
     const usersId = [];
     this.state.selectedclients.forEach(user => {
-      console.log(JSON.parse(user.id));
       usersId.push(JSON.parse(user.id));
     });
 
-    console.log(usersId, this.state.datasetId);
     if (this.state.isUpdate) {
       DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(response => {
-        console.log('actualizado correctamente');
         }
       , (error) => {
         this.setState(prev => {
@@ -98,7 +95,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       });
     } else {
       DatasetAssociation.createDatasetAssociations(this.state.datasetId, usersId).then(response => {
-        console.log('creado correctamente');
       }, (error) => {
         this.setState(prev => {
           prev.showError = true;

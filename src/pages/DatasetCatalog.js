@@ -33,7 +33,9 @@ class DatasetCatalog extends Component {
         showDialogEnable: false,
         showDialogDisable: false,
       },
-      translatedUseRestrictionModal: {}
+      translatedUseRestrictionModal: {},
+      isAdmin: null,
+      isResearcher: null,
     };
     this.myHandler = this.myHandler.bind(this);
     this.getDatasets = this.getDatasets.bind(this);
@@ -70,6 +72,14 @@ class DatasetCatalog extends Component {
   }
 
   componentDidMount() {
+    Storage.getCurrentUser().roles.forEach(role => {
+      if (role.roleId === 4) {
+        this.setState({isAdmin: true});
+      }
+      if (role.roleId === 5) {
+        this.setState({isResearcher: true});
+      }
+    });
     this.getDatasets();
   }
 
@@ -154,8 +164,11 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openDelete = (answer) => (e) => {
-    this.setState({ showDialogDelete: true });
+  openDelete = (datasetId) => (e) => {
+    this.setState({
+      showDialogDelete: true,
+      datasetId: datasetId
+    });
   };
 
   openEnable = (answer) => (e) => {
@@ -168,6 +181,9 @@ class DatasetCatalog extends Component {
 
   dialogHandlerDelete = (answer) => (e) => {
     this.setState({ showDialogDelete: false });
+    if (answer) {
+      DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then();
+    }
   };
 
   dialogHandlerEnable = (answer) => (e) => {
@@ -254,8 +270,6 @@ class DatasetCatalog extends Component {
 
     const { searchDulText, currentPage, limit } = this.state;
 
-    const isAdmin = true;
-    const isResearcher = false;
     return (
       h(Fragment, {}, [
         div({ className: "container container-wide" }, [
@@ -298,7 +312,7 @@ class DatasetCatalog extends Component {
               ]),
             ]),
 
-            div({ className: isAdmin && !isResearcher ? 'table-scroll-admin' : 'table-scroll' }, [
+            div({ className: this.state.isAdmin && !this.state.isResearcher ? 'table-scroll-admin' : 'table-scroll' }, [
               table({ className: "table" }, [
                 thead({}, [
                   tr({}, [
@@ -312,7 +326,7 @@ class DatasetCatalog extends Component {
                     }),
                     th({ className: "table-titles dataset-color cell-size" }, ["ConsentId"]),
                     th({ className: "table-titles dataset-color cell-size" }, ["Structured Data Use Limitations"]),
-                    th({ isRendered: isAdmin, className: "table-titles dataset-color cell-size" }, ["Approved Requestors"]),
+                    th({ isRendered: this.state.isAdmin, className: "table-titles dataset-color cell-size" }, ["Approved Requestors"]),
                   ]),
                 ]),
 
@@ -345,7 +359,7 @@ class DatasetCatalog extends Component {
                         dataSet.properties.map((property, dIndex) => {
                           return h(Fragment, { key: dIndex }, [
 
-                            td({ className: "fixed-col", isRendered: property.propertyName === 'Dataset ID' && isAdmin && !isResearcher }, [
+                            td({ className: "fixed-col", isRendered: property.propertyName === 'Dataset ID' && this.state.isAdmin && !this.state.isResearcher }, [
                               div({ className: "dataset-actions" }, [
                                 a({ id: trIndex + "_btnDelete", name: "btn_delete", onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable }, [
                                   span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true", "data-tip": "", "data-for": "tip_delete" })
@@ -405,7 +419,7 @@ class DatasetCatalog extends Component {
                           a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
                         ]),
 
-                        td({ isRendered: isAdmin, className: "table-items cell-size" }, [
+                        td({ isRendered: this.state.isAdmin, className: "table-items cell-size" }, [
                           a({ id: trIndex + "_linkDownloadList", name: "link_downloadList", onClick: () => this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
                         ]),
                       ]),
@@ -444,11 +458,17 @@ class DatasetCatalog extends Component {
           }),
 
           ConfirmationDialog({
-            title: 'Delete Dataset Confirmation?', color: 'cancel', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
+            title: 'Delete Dataset Confirmation?',
+            color: 'cancel',
+            showModal: this.state.showDialogDelete,
+            action: { label: "Yes", handler: this.dialogHandlerDelete }
           }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
 
           ConfirmationDialog({
-            title: 'Disable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogDisable, action: { label: "Yes", handler: this.dialogHandlerDisable }
+            title: 'Disable Dataset Confirmation?',
+            color: 'dataset',
+            showModal: this.state.showDialogDisable,
+            action: { label: "Yes", handler: this.dialogHandlerDisable }
           }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
 
           ConfirmationDialog({
