@@ -23,28 +23,36 @@ export const USER_ROLES = {
 
 // returns the initial page to be redirected when a user logs in
 export const redirect =
-   () => {
+  () => {
     if (Storage.userIsLogged()) {
       const usrRoles = Storage.getCurrentUser().roles.map(roles => roles.name);
-      usrRoles.push('All');
-      if (navigateInitalpage([USER_ROLES.chairperson], usrRoles)) {
-        return 'chair_console';
-      } else if (navigateInitalpage([USER_ROLES.member], usrRoles)) {
-        return 'member_console';
-      } else if (navigateInitalpage([USER_ROLES.admin], usrRoles)) {
-        return 'admin_console';
-      } else if (navigateInitalpage([USER_ROLES.researcher], usrRoles)) {
-        return 'dataset_catalog';
-      } else if (navigateInitalpage([USER_ROLES.alumni], usrRoles)) {
-        return 'summary_votes';
-      } else if (navigateInitalpage([USER_ROLES.dataOwner], usrRoles)) {
-        return 'data_owner_console';
+      let page = '';
+      for (let role of usrRoles) {
+        if (role === USER_ROLES.chairperson) {
+          page = 'chair_console';
+          break;
+        }
+        if (role === USER_ROLES.member) {
+          page = 'member_console';
+          break;
+        }
+        if (role === USER_ROLES.admin) {
+          page = 'admin_console';
+          break;
+        }
+        if (role === USER_ROLES.researcher) {
+          page = 'dataset_catalog';
+          break;
+        }
+        if (role === USER_ROLES.dataOwner) {
+          page = 'data_owner_console';
+          break;
+        }
+        if (role === USER_ROLES.alumni) {
+          page = 'summary_votes';
+          break;
+        }
       }
+      return page;
     }
   };
-
-  const navigateInitalpage = (allowedComponentRoles, usrRoles) => {
-    return allowedComponentRoles.some(
-      componentRoles => usrRoles.indexOf(componentRoles) >= 0
-  );
-};
