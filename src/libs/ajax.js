@@ -358,8 +358,9 @@ export const DataSet = {
 export const DatasetAssociation = {
 
   createDatasetAssociations: async (objectId, usersIdList) => {
+    console.log(objectId, usersIdList);
     const url = `${await Config.getApiUrl()}/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: Config.jsonBody(usersIdList) }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList) , { method: 'POST' }]));
     return await res.json();
   },
 
@@ -371,7 +372,7 @@ export const DatasetAssociation = {
 
   updateDatasetAssociations: async (objectId, usersIdList) => {
     const url = `${await Config.getApiUrl()}/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'PUT', body: Config.jsonBody(usersIdList) }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList), { method: 'PUT' }]));
     return res.json();
   }
 
