@@ -18,6 +18,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       needsApprovalModified: false,
       showError: false,
       alert: {},
+      isUpdate: false,
     };
 
     this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
@@ -57,6 +58,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.selectedclients = selectedClients;
       prev.originalDataOwners = selectedClients.slice();
       prev.datasetId = datasetId;
+      prev.isUpdate = (!(clients.associated_users === undefined || clients.associated_users.length === 0));
       return prev;
     });
   }
@@ -98,7 +100,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   }
 
   handleNeedsApprovalChange(event) {
-    // TODO fix when the state is the same as it cames
     const checked = event.target.checked;
     this.setState(prev =>{
       prev.needsApproval = checked;
@@ -171,7 +172,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       });
     }
 
-    if (this.state.needsApprovalModified || (this.state.selectedclients.length > 0 && modifiedList)){
+    if (this.props.dataset.needsApproval !== this.state.needsApproval || (this.state.selectedclients.length > 0 && modifiedList)){
       this.setState({ updatedInfoModal: true });
     } else {
       this.setState({ updatedInfoModal: false });
