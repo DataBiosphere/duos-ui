@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, button, i, span, b, a, h4, hr } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { Election, Files } from '../libs/ajax';
+import { Consent, Election, Files } from '../libs/ajax';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulPreview extends Component {
@@ -24,37 +24,20 @@ class DulPreview extends Component {
 
   async electionReview() {
     const consentId = this.props.match.params.consentId;
-    const consent = await Election.findReviewedElections(consentId, 'TranslateDUL');
-    this.setState({ consentPreview: consent.consent, loading: false });
+    let consent = await Election.findReviewedElections(consentId, 'TranslateDUL');
+
+    if (consent.election !== undefined) {
+      this.setState({ consentPreview: consent.consent, loading: false });
+    } else {
+      Consent.findConsentById(consentId).then(resp => {
+        this.setState({ consentPreview: resp, loading: false });
+      });
+    }
   }
 
   componentDidMount() {
-    // this.mockState();
     this.electionReview();
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
-    });
   }
-
-  mockState() {
-    this.setState(prev => {
-      prev.consentGroupName = 'GroupName 01';
-      prev.consentName = 'ORSP-124';
-      return prev;
-    });
-  }
-
-  download = (e) => {
-    // const filename = e.target.getAttribute('filename');
-    // const value = e.target.getAttribute('value');
-
-  };
 
   downloadDUL = () => {
     Files.getDulFile(this.props.match.params.consentId, this.state.consentPreview.name);

@@ -452,9 +452,12 @@ export const Election = {
   },
 
   findReviewedElections: async (electionId) => {
-    const url = `${await Config.getApiUrl()}/electionReview/${electionId}`;
+    const url = `${await Config.getApiUrl()}/electionReview/?referenceId=${electionId}&type=TranslateDUL`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    if (res.status === 204) {
+      return {};
+    }
+    return await res.json();
   },
 
   createDARElection: async (requestId) => {
@@ -943,7 +946,7 @@ export const Votes = {
 
   }
 
-}
+};
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
