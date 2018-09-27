@@ -116,9 +116,10 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   Object.entries(summary.datasetDetail).map((row, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_dataset" + Index }, [b({}, [row[Index]]), " ", row[Index + 1]]),
+                      li({ id: "txt_dataset_" + Index }, [b({}, [row[Index]]), " ", row[Index + 1]]),
                       div({ isRendered: this.state.calledFromAdmin === true && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
                       div({ isRendered: this.state.calledFromAdmin === true && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
+
                         span({ className: "glyphicon glyphicon-download-alt hover-color", style: { "marginRight": "10px" } }),
                         a({ onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
                       ])
@@ -135,7 +136,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   summary.researchType.map((rt, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_typeResearch" + Index }, [b({}, [rt.title]), " ", rt.description]),
+                      li({ id: "txt_typeResearch_" + Index }, [b({}, [rt.title]), " ", rt.description]),
                     ])
                   })
                 ]),
@@ -149,7 +150,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   summary.diseases.map((disease, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_disease" + Index }, [disease])
+                      li({ id: "txt_disease_" + Index }, [disease])
                     ])
                   })
                 ]),
@@ -163,7 +164,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   summary.purposeStatements.map((rt, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_statement" + Index, className: rt.manualReview ? 'cancel-color' : '' }, [
+                      li({ id: "txt_statement_" + Index, className: rt.manualReview ? 'cancel-color' : '' }, [
                         b({}, [rt.title]), " ", rt.description
                       ])
                     ])

@@ -364,7 +364,7 @@ class AccessReview extends Component {
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
                               return h(Fragment, {key: rIndex}, [
-                                li({ id: "lbl_purposeStatement" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
+                                li({ id: "lbl_purposeStatement_" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
                               ]);
@@ -384,7 +384,7 @@ class AccessReview extends Component {
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
                               return h(Fragment, {key: rIndex}, [
-                                li({ id: "lbl_researchType" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
+                                li({ id: "lbl_researchType_" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
                               ]);
@@ -404,7 +404,7 @@ class AccessReview extends Component {
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
                               return h(Fragment, {key: rIndex}, [
-                                li({ id: "lbl_disease" + rIndex }, [
+                                li({ id: "lbl_disease_" + rIndex }, [
                                   disease
                                 ]),
                               ]);
