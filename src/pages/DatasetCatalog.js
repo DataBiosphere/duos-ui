@@ -271,12 +271,12 @@ class DatasetCatalog extends Component {
                               div({ className: "checkbox" }, [
                                 input({
                                   type: "checkbox",
-                                  id: trIndex + "_chkSelect",
+                                  id: trIndex + "_chk_select",
                                   name: "chk_select",
                                   // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
                                   value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
                                 }),
-                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: "chk_select_" + trIndex }),
+                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chk_select" }),
                               ])
                             ])
                           ])
