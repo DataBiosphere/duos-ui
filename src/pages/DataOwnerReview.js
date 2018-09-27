@@ -282,6 +282,8 @@ class DataOwnerReview extends Component {
                 a({className: "enabled hover-color application-link", onClick: this.openDataset}, ["Dataset summary"]),
               ]),
               DatasetSummaryModal({
+                isRendered: this.state.showDatasetSummaryModal,
+                dataSetId: this.props.match.params.dataSetId,
                 showModal: this.state.showDatasetSummaryModal,
                 onOKRequest: this.okDatasetSummaryModal,
                 onCloseRequest: this.closeDatasetSummaryModal
