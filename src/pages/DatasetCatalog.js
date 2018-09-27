@@ -1,7 +1,8 @@
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet } from "../libs/ajax";
+import { DataSet, Researcher } from "../libs/ajax";
+import { Storage } from "../libs/storage";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
 import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
@@ -47,6 +48,10 @@ class DatasetCatalog extends Component {
   }
 
   async getDatasets() {
+    const researcher  = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
+    if (researcher.completed !== 'true') {
+      this.props.history.push('researcher_profile');
+    }
     const dictionary = await DataSet.findDictionary();
     const catalog = await DataSet.findDataSets(USER_ID);
     const data = {

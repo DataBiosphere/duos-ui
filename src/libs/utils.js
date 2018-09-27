@@ -1,4 +1,5 @@
 import { Storage } from "./storage";
+import { Researcher } from "./ajax";
 import React from "react";
 
 export const formatDate = (dateval) => {
@@ -33,7 +34,7 @@ export const redirect =
       } else if (navigateInitalpage([USER_ROLES.admin], usrRoles)) {
         return 'admin_console';
       } else if (navigateInitalpage([USER_ROLES.researcher], usrRoles)) {
-        return 'researcher_console';
+        return 'dataset_catalog';
       } else if (navigateInitalpage([USER_ROLES.alumni], usrRoles)) {
         return 'summary_votes';
       } else if (navigateInitalpage([USER_ROLES.dataOwner], usrRoles)) {
@@ -42,8 +43,8 @@ export const redirect =
     }
   };
 
-const navigateInitalpage = (allowedComponentRoles, usrRoles) => {
-  return allowedComponentRoles.some(
-    componentRoles => usrRoles.indexOf(componentRoles) >= 0
+  const navigateInitalpage = (allowedComponentRoles, usrRoles) => {
+    return allowedComponentRoles.some(
+      componentRoles => usrRoles.indexOf(componentRoles) >= 0
   );
 };

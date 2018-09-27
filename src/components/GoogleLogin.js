@@ -21,8 +21,8 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     Storage.setGoogleData(response);
     this.getUser().then((data) => {
       Storage.setCurrentUser(data);
-        this.props.history.push(redirect());
         this.login(true);
+        this.props.history.push(redirect());
     },
       (data) => {
         Storage.clearStorage();
