@@ -10,7 +10,6 @@ import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { LoadingIndicator } from '../components/LoadingIndicator';
-import { Storage } from "../libs/storage";
 
 class DatasetCatalog extends Component {
 
