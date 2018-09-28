@@ -947,6 +947,9 @@ export const Votes = {
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
+  if (!res.ok && res.status === 401) {
+    window.location.href = '/';
+  }
   return res.ok ? res : Promise.reject(res);
 };
 
