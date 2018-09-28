@@ -18,6 +18,10 @@ export const Storage = {
     return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)) : null;
   },
 
+  getCurrentUserRoles: () => {
+    return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)).user : null;
+  },
+
   setGoogleData: data => {
     sessionStorage.setItem(GoogleUser, JSON.stringify(data));
   },

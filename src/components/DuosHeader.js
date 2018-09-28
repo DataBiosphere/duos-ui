@@ -50,30 +50,15 @@ class DuosHeader extends Component {
     let isLogged = Storage.userIsLogged();
 
     if (isLogged) {
-      let userRoles = Storage.getCurrentUser().roles;
-
-
-      userRoles.forEach(role => {
-        if (role.name === 'Chairperson') {
-          isChairPerson = true;
-        }
-        if (role.name === 'Member') {
-          isMember = true;
-        }
-        if (role.name === 'Admin') {
-          isAdmin = true;
-        }
-        if (role.name === 'Researcher') {
-          isResearcher = true;
-        }
-        if (role.name === 'DataOwner') {
-          isDataOwner = true;
-        }
-        if (role.name === 'Alumni') {
-          isAlumni = true;
-        }
-      });
+      let userRoles = Storage.getCurrentUserRoles();
+      isChairPerson = !!userRoles.isChairPerson ? userRoles.isChairPerson : false;
+      isMember = !!userRoles.isMember ? userRoles.isMember : false;
+      isAdmin = !!userRoles.isAdmin ? userRoles.isAdmin : false;
+      isResearcher = !!userRoles.isResearcher ? userRoles.isResearcher : false;
+      isDataOwner = !!userRoles.isDataOwner ? userRoles.isDataOwner : false;
+      isAlumni = !!userRoles.isAlumni ? userRoles.isAlumni : false;
     }
+
     let currentUser = {};
     let profile = Storage.getGoogleData();
     if (isLogged && profile !== null) {
@@ -82,6 +67,7 @@ class DuosHeader extends Component {
         email: profile.profileObj.email
       };
     }
+
     return (
 
       nav({ className: "navbar top-navigator-bar", role: "navigation" }, [

@@ -3,7 +3,7 @@ import { h, hh } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
 import { User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { redirect }  from '../libs/utils';
+import { redirect, rolesHandler }  from '../libs/utils';
 import { withRouter } from 'react-router-dom';
 
 const LoginButton = hh(class GoogleLoginButton extends Component {
@@ -20,9 +20,10 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   responseGoogle = (response) => {
     Storage.setGoogleData(response);
     this.getUser().then((data) => {
+      data.user = rolesHandler(data.roles);
       Storage.setCurrentUser(data);
         this.login(true);
-        this.props.history.push(redirect());
+        this.props.history.push(redirect(data.user));
     },
       (data) => {
         Storage.clearStorage();

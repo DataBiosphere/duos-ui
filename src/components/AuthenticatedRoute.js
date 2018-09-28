@@ -1,13 +1,14 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import { Storage } from "../libs/storage";
+import * as Utils  from "../libs/utils";
 
 export default ({component: Component, props: componentProps, ...rest, rolesAllowed}) =>
   <Route
     {...rest}
     render={
       props =>
-        verifyUser(rolesAllowed)
+        verifyUser(rolesAllowed, Storage.getCurrentUser().roles)
           ? <Component {...props} {...componentProps} />
           : <Redirect
             to={'/'}
@@ -15,12 +16,12 @@ export default ({component: Component, props: componentProps, ...rest, rolesAllo
   />;
 
   // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
-  const verifyUser = (allowedComponentRoles) => {
-    if (Storage.userIsLogged()) {
-      const usrRoles = Storage.getCurrentUser().roles.map(roles => roles.name);
-      usrRoles.push('All');
+  const verifyUser = (allowedComponentRoles, usrRoles) => {
+    if (Storage.userIsLogged() && usrRoles) {
+      const currentUserRoles = usrRoles.map(roles => roles.name);
       return allowedComponentRoles.some(
-        componentRoles => usrRoles.indexOf(componentRoles) >= 0
+        componentRoles => (currentUserRoles.indexOf(componentRoles) >= 0 ||
+                           componentRoles === Utils.USER_ROLES.all)
       );
     }
     // User is not Logged
