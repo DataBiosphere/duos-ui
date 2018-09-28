@@ -209,7 +209,10 @@ export const DAR = {
   },
 
   getDarFields: async (id, fields) => {
-    const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
+    let url = `${await Config.getApiUrl()}/dar/find/${id}`;
+    if(fields !== null) {
+      url = url + `?fields=${fields}`;
+    }    
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -217,7 +220,7 @@ export const DAR = {
   postDataAccessRequest: async dar => {
     const url = `${await Config.getApiUrl()}/dar`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
-    return await res.json();
+    return await res;
   },
 
   cancelDar: async referenceId => {
@@ -233,7 +236,7 @@ export const DAR = {
   },
 
   getAutoCompleteOT: async partial => {
-    const url = `${await Config.getApiUrl()}/autocomplete?q=${partial}`;
+    const url = `${await Config.getOntologyApiUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -261,7 +264,7 @@ export const DAR = {
   updateDar: async (dar, id) => {
     const url = `${await Config.getApiUrl()}/dar/${id}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'PUT' }]));
-    return await res.json();
+    return await res;
   },
 
   getDarModalSummary: async (darId) => {

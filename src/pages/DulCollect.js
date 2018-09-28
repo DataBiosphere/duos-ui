@@ -37,7 +37,6 @@ class DulCollect extends Component {
       prev.finalRationale = election.election.finalRationale;
       prev.finalVoteDate = election.election.finalVoteDate;
       prev.election = election.election;
-      prev.loading = false;
       return prev;
     });
   
@@ -59,7 +58,6 @@ class DulCollect extends Component {
       dialogTitle: 'Email Notification Sent.',
       showDialogReminder: false,
       isReminderSent: false,
-      loading: true,
       createDate: '',
       hasUseRestriction: Boolean,
       projectTitle: '',
