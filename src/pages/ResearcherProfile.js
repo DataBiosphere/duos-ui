@@ -29,6 +29,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
     this.saveProfile = this.saveProfile.bind(this);
     this.submit = this.submit.bind(this);
+    this.deleteNihAccount = this.deleteNihAccount.bind(this);
+    this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
   }
 
   componentDidMount() {
@@ -55,6 +57,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   }
 
+  deleteNihAccount() {
+
+  }
+
+  redirectToNihLogin() {
+
+  }
+
   handleChange(event) {
     let field = event.target.name;
     let value = event.target.value;
@@ -79,7 +89,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   handleRadioChange = (e, field, value) => {
     this.setState(prev => { prev.formData[field] = value; return prev; });
-  }
+  };
 
   handlePIChange(event) {
     let researcherProfile = this.state.researcherProfile;
@@ -233,7 +243,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["NIH eRA Commons ID"]),
                       //show when appropriate
                       div({ isRendered: true }, [
-                        a({ onClick: "RPApplication.redirectToNihLogin()", target: "_blank", className: "auth-button eRACommons" }, [
+                        a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
                           div({ className: "logo" }, []),
                           span({}, ["Authenticate your account"])
                         ])
@@ -242,7 +252,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       div({ isRendered: false }, [
                         div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                           div({ className: "auth-id" }, [this.state.formData.nihUsername]),
-                          button({ onClick: "deleteNihAccount()", className: "close auth-clear" }, [
+                          button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
                             span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
                           ]),
                           h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
