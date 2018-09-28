@@ -1,7 +1,8 @@
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet } from "../libs/ajax";
+import { DataSet, Researcher, Files } from "../libs/ajax";
+import { Storage } from "../libs/storage";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
 import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
@@ -9,19 +10,23 @@ import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Storage } from "../libs/storage";
 
-const USER_ID = 5;
 class DatasetCatalog extends Component {
+
+  USER_ID = Storage.getCurrentUser().dacUserId;
 
   constructor(props) {
     super(props);
     this.state = {
       isLogged: false
-    }
+    };
     this.state = {
       loading: true,
+      showConnectDatasetModal: false,
       limit: 5,
       currentPage: null,
+      allChecked: false,
       dataSetList: {
         catalog: [],
         dictionary: [],
@@ -29,7 +34,9 @@ class DatasetCatalog extends Component {
         showDialogEnable: false,
         showDialogDisable: false,
       },
-      translatedUseRestrictionModal: {}
+      translatedUseRestrictionModal: {},
+      isAdmin: null,
+      isResearcher: null,
     };
     this.myHandler = this.myHandler.bind(this);
     this.getDatasets = this.getDatasets.bind(this);
@@ -45,19 +52,39 @@ class DatasetCatalog extends Component {
     this.openTranslatedDUL = this.openTranslatedDUL.bind(this);
     this.closeTranslatedDULModal = this.closeTranslatedDULModal.bind(this);
     this.okTranslatedDULModal = this.okTranslatedDULModal.bind(this);
+
+    this.download = this.download.bind(this);
+    this.selectAll = this.selectAll.bind(this);
+    this.exportToRequest = this.exportToRequest.bind(this);
   }
 
   async getDatasets() {
+    const researcher  = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
+    if (researcher.completed !== 'true') {
+      this.props.history.push('researcher_profile');
+    }
     const dictionary = await DataSet.findDictionary();
-    const catalog = await DataSet.findDataSets(USER_ID);
+    const catalog = await DataSet.findDataSets(this.USER_ID);
+    catalog.forEach((row, index) => {
+      row.checked = false;
+      row.ix = index;
+    });
     const data = {
       catalog: catalog,
       dictionary: dictionary
-    }
+    };
     this.setState({ dataSetList: data, currentPage: 1, loading: false });
   }
 
   componentDidMount() {
+    Storage.getCurrentUser().roles.forEach(role => {
+      if (role.roleId === 4) {
+        this.setState({isAdmin: true});
+      }
+      if (role.roleId === 5) {
+        this.setState({isResearcher: true});
+      }
+    });
     this.getDatasets();
   }
 
@@ -77,20 +104,29 @@ class DatasetCatalog extends Component {
     this.setState({ showTranslatedDULModal: false });
   }
 
-  downloadList() {
+  downloadList(dataSet) {
+    let dataSetId = '';
+    dataSet.properties.forEach(property => {
+      if (property.propertyName === 'Dataset ID') {
+        dataSetId = property.propertyValue;
+      }
+    });
 
+    Files.getApprovedUsersFile(dataSetId + '-ApprovedRequestors.tsv', dataSetId);
   }
 
-  exportToRequest() {
-
-  }
+  exportToRequest = () => {
+    const listToExport = this.state.dataSetList.catalog.filter(row => row.checked);
+    this.props.history.push({ pathname: 'dar_application', props: {listToExport} });
+  };
 
   associate() {
 
   }
 
-  openConnectDataset() {
+  openConnectDataset(dataset) {
     this.setState(prev => {
+      prev.datasetConnect = dataset;
       prev.showConnectDatasetModal = true;
       return prev;
     });
@@ -107,7 +143,7 @@ class DatasetCatalog extends Component {
     this.setState(prev => {
       prev.showConnectDatasetModal = false;
       return prev;
-    });
+    }, () => this.getDatasets());
   }
 
   openTranslatedDUL= (translatedUseRestriction) => () => {
@@ -132,32 +168,62 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openDelete = (answer) => (e) => {
-    this.setState({ showDialogDelete: true });
-  }
+  openDelete = (datasetId) => (e) => {
+    this.setState({
+      showDialogDelete: true,
+      datasetId: datasetId
+    });
+  };
 
-  openEnable = (answer) => (e) => {
-    this.setState({ showDialogEnable: true });
-  }
+  openEnable = (datasetId) => (e) => {
+    this.setState({
+      showDialogEnable: true,
+      datasetId: datasetId
+    });
+  };
 
-  openDisable = (answer) => (e) => {
-    this.setState({ showDialogDisable: true });
-  }
+  openDisable = (datasetId) => (e) => {
+    this.setState({
+      showDialogDisable: true,
+      datasetId: datasetId
+    });
+  };
 
   dialogHandlerDelete = (answer) => (e) => {
     this.setState({ showDialogDelete: false });
+    if (answer) {
+      DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then();
+    }
   };
 
   dialogHandlerEnable = (answer) => (e) => {
+    if (answer) {
+      DataSet.disableDataset(this.state.datasetId, true).then(resp =>{
+        this.getDatasets();
+      });
+    }
     this.setState({ showDialogEnable: false });
   };
 
   dialogHandlerDisable = (answer) => (e) => {
+    if (answer) {
+      DataSet.disableDataset(this.state.datasetId, false).then(resp =>{
+        this.getDatasets();
+      });
+    }
     this.setState({ showDialogDisable: false });
   };
 
   download() {
+    const listDownload = this.state.dataSetList.catalog.filter(row => row.checked);
+    let dataSetsId = [];
+    listDownload[0].properties.forEach(property => {
+      if (property.propertyName === 'Dataset ID') {
+        dataSetsId.push(property.propertyValue);
+      }
+    });
 
+    DataSet.downloadDataSets(dataSetsId, 'datasets.tsv');
   }
 
   myHandler(event) {
@@ -181,7 +247,7 @@ class DatasetCatalog extends Component {
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -189,7 +255,34 @@ class DatasetCatalog extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
+
+  selectAll = (e) => {
+    const checked = e.target.checked;
+    const checkedCatalog = this.state.dataSetList.catalog.map(row => {row.checked = checked; return row;});
+    this.setState(prev => {
+      prev.allChecked = checked;
+      prev.dataSetList.catalog = checkedCatalog;
+      return prev;
+    });
+  };
+
+  checkSingleRow = (index) => (e) => {
+    let catalog = this.state.dataSetList.catalog;
+    const catalogElement = catalog[index];
+    catalogElement.checked = e.target.checked;
+
+    catalog = [
+      ...catalog.slice(0, index),
+      ...[catalogElement],
+      ...catalog.slice(index+1)
+    ];
+
+    this.setState(prev => {
+      prev.dataSetList.catalog = catalog;
+      return prev;
+    });
+  };
 
   render() {
 
@@ -197,9 +290,6 @@ class DatasetCatalog extends Component {
 
     const { searchDulText, currentPage, limit } = this.state;
 
-    const isAdmin = true;
-    const isResearcher = false;
-    const objectIdList = ['a', 'b', 'c'];
     return (
       h(Fragment, {}, [
         div({ className: "container container-wide" }, [
@@ -222,7 +312,9 @@ class DatasetCatalog extends Component {
               ]),
               button({
                 id: "btn_downloadSelection",
-                download: "", disabled: objectIdList.length === 0, onClick: this.download(objectIdList),
+                download: "",
+                disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
+                onClick: this.download,
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
               }, [
                   span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px' } }),
@@ -235,12 +327,12 @@ class DatasetCatalog extends Component {
           div({ className: "table-wrap" }, [
             form({ className: "pos-relative" }, [
               div({ className: "checkbox check-all" }, [
-                input({ type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll" }),
+                input({ checked: this.state.allChecked ,type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll", onChange: this.selectAll }),
                 label({ className: "regular-checkbox", htmlFor: "chk_selectAll" }, []),
               ]),
             ]),
 
-            div({ className: isAdmin && !isResearcher ? 'table-scroll-admin' : 'table-scroll' }, [
+            div({ className: this.state.isAdmin && !this.state.isResearcher ? 'table-scroll-admin' : 'table-scroll' }, [
               table({ className: "table" }, [
                 thead({}, [
                   tr({}, [
@@ -254,7 +346,7 @@ class DatasetCatalog extends Component {
                     }),
                     th({ className: "table-titles dataset-color cell-size" }, ["ConsentId"]),
                     th({ className: "table-titles dataset-color cell-size" }, ["Structured Data Use Limitations"]),
-                    th({ isRendered: isAdmin, className: "table-titles dataset-color cell-size" }, ["Approved Requestors"]),
+                    th({ isRendered: this.state.isAdmin, className: "table-titles dataset-color cell-size" }, ["Approved Requestors"]),
                   ]),
                 ]),
 
@@ -267,25 +359,27 @@ class DatasetCatalog extends Component {
                         dataSet.properties.map((property, dIndex) => {
                           return h(Fragment, { key: dIndex }, [
 
-                            td({ isRendered: property.propertyName === 'Dataset ID' }, [
-                              div({ className: "checkbox" }, [
-                                input({
-                                  type: "checkbox",
-                                  id: trIndex + "_chk_select",
-                                  name: "chk_select",
-                                  // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
-                                  value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
-                                }),
-                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chk_select" }),
+                            td({
+                              isRendered: property.propertyName === 'Dataset ID'
+                            }, [
+                                div({ className: "checkbox" }, [
+                                  input({
+                                    type: "checkbox",
+                                    id: trIndex + "_chkSelect",
+                                    name: "chk_select",
+                                    // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
+                                    checked: dataSet.checked, className: "checkbox-inline user-checkbox", "add-object-id": "true", onChange: this.checkSingleRow(dataSet.ix)
+                                  }),
+                                  label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chkSelect" }),
+                                ])
                               ])
-                            ])
                           ])
                         }),
 
                         dataSet.properties.map((property, dIndex) => {
                           return h(Fragment, { key: dIndex }, [
 
-                            td({ className: "fixed-col", isRendered: property.propertyName === 'Dataset ID' && isAdmin && !isResearcher }, [
+                            td({ className: "fixed-col", isRendered: property.propertyName === 'Dataset ID' && this.state.isAdmin && !this.state.isResearcher }, [
                               div({ className: "dataset-actions" }, [
                                 a({ id: trIndex + "_btnDelete", name: "btn_delete", onClick: this.openDelete(property.propertyValue), disabled: !dataSet.deletable }, [
                                   span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true", "data-tip": "", "data-for": "tip_delete" })
@@ -302,7 +396,7 @@ class DatasetCatalog extends Component {
                                 ]),
                                 h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
-                                a({ id: trIndex + "_btnConnect", name: "btn_connect", onClick: this.openConnectDataset
+                                a({ id: trIndex + "_btnConnect", name: "btn_connect", onClick: () => this.openConnectDataset(dataSet)
                                   // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
                                 }, [
                                     span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
@@ -345,10 +439,10 @@ class DatasetCatalog extends Component {
                           a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
                         ]),
 
-                        td({ isRendered: isAdmin, className: "table-items cell-size" }, [
-                          a({ id: trIndex + "_linkDownloadList", name: "link_downloadList", onClick: this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
-                        ])
-                      ])
+                        td({ isRendered: this.state.isAdmin, className: "table-items cell-size" }, [
+                          a({ id: trIndex + "_linkDownloadList", name: "link_downloadList", onClick: () => this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
+                        ]),
+                      ]),
                     ]);
                   })
                 ])
@@ -368,8 +462,8 @@ class DatasetCatalog extends Component {
           div({ className: "f-right" }, [
             button({
               isRendered: this.isResearcher,
-              disabled: objectIdList.length === 0,
-              onClick: this.exportToRequest(objectIdList),
+              disabled: this.state.dataSetList.catalog.filter(row => row.checked).length > 0,
+              onClick: this.exportToRequest,
               className: "download-button dataset-background apply-dataset",
               "data-tip": "", "data-for": "tip_requestAccess"
             }, ["Apply for Access"]),
@@ -384,11 +478,17 @@ class DatasetCatalog extends Component {
           }),
 
           ConfirmationDialog({
-            title: 'Delete Dataset Confirmation?', color: 'cancel', showModal: this.state.showDialogDelete, action: { label: "Yes", handler: this.dialogHandlerDelete }
+            title: 'Delete Dataset Confirmation?',
+            color: 'cancel',
+            showModal: this.state.showDialogDelete,
+            action: { label: "Yes", handler: this.dialogHandlerDelete }
           }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
 
           ConfirmationDialog({
-            title: 'Disable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogDisable, action: { label: "Yes", handler: this.dialogHandlerDisable }
+            title: 'Disable Dataset Confirmation?',
+            color: 'dataset',
+            showModal: this.state.showDialogDisable,
+            action: { label: "Yes", handler: this.dialogHandlerDisable }
           }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
 
           ConfirmationDialog({
@@ -396,7 +496,11 @@ class DatasetCatalog extends Component {
           }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
 
           ConnectDatasetModal({
-            showModal: this.state.showConnectDatasetModal, onOKRequest: this.okConnectDatasetModal, onCloseRequest: this.closeConnectDatasetModal
+            isRendered: this.state.showConnectDatasetModal,
+            showModal: this.state.showConnectDatasetModal,
+            onOKRequest: this.okConnectDatasetModal,
+            onCloseRequest: this.closeConnectDatasetModal,
+            dataset: this.state.datasetConnect
           }),
         ])
       ])

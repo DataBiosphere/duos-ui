@@ -10,7 +10,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
   constructor(props) {
     super(props);
     this.state = {
-      rus: this.props.rus
+      translatedUseRestriction: this.props.translatedUseRestriction
     }
   };
 
