@@ -60,16 +60,6 @@ class DuosHeader extends Component {
       isAlumni = currentUser.isAlumni;
     }
 
-    // let profile = Storage.getGoogleData();
-    // if (isLogged && profile !== null) {
-    //   currentUser = {
-    //     displayName: profile.profileObj.name,
-    //     email: profile.profileObj.email
-    //   };
-    // }
-
-    console.log(isLogged, currentUser);
-
     return (
 
       nav({ className: "navbar top-navigator-bar", role: "navigation" }, [
