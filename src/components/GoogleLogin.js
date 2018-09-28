@@ -17,9 +17,9 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     this.getUser = this.getUser.bind(this);
   }
 
-  responseGoogle = (response) => {
+  responseGoogle = async (response) => {
     Storage.setGoogleData(response);
-    this.getUser().then(
+    await this.getUser().then(
       user => {
 
         const currentUserRoles = user.roles.map(roles => roles.name);
@@ -50,12 +50,15 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   async getGoogleConfig() {
     const googleButton = h(GoogleLogin, {
       className: "btn navbar-duos-button",
-      clientId: "complete-clientId",
+      clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
       buttonText: "Sign In",
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden,
     });
-    this.setState({ googleButton: googleButton })
+    console.log("Boton Google login GetGoogleConfig() ", googleButton);
+    this.setState( prev => {
+      prev.googleButton = googleButton;
+      return prev;})
   }
 
   async getUser() {
@@ -67,6 +70,8 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   }
 
   render() {
+    console.log("RENDERIZA BOTON en googleLogin", this.state.googleButton );
+
     return (this.state.googleButton);
   }
 

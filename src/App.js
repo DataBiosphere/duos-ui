@@ -33,22 +33,29 @@ class App extends React.Component {
   }
 
   render() {
+
     return (
       div({ className: "body"}, [
         div({ className: "wrap" }, [
           div({ className: "main" }, [
+            h(GoogleLoginButton, {}),
             h(DuosHeader, {
               isLogged: this.state.isLogged,
               loginState: this.loginState,
-              button: GoogleLoginButton({
-                isLogged: Storage.userIsLogged(),
-                loginState: this.loginState
-              })
+              // button: GoogleLoginButton({
+              //   isLogged: Storage.userIsLogged(),
+              //   loginState: this.loginState
+              // })
             }),
 
             h(Routes, {
               isLogged: Storage.userIsLogged(),
-              loginState: this.loginState
+              loginState: this.loginState,
+              // button:button
+              // button: GoogleLoginButton({
+              //         isLogged: Storage.userIsLogged(),
+              //         loginState: this.loginState
+              // })
             }),
           ])
         ]),

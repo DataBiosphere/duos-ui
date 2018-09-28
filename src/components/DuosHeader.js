@@ -101,7 +101,8 @@ class DuosHeader extends Component {
                 li({}, [a({ id: "link_about", className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }), "About"]),]),
                 li({}, [a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }), "Help"]),]),
                 li({}, [
-                  a({ id: "link_signIn", onClick: this.signIn }, [this.state.googleButton])
+                  // a({ id: "link_signIn", onClick: this.signIn }, [this.state.googleButton])
+                  a({ className: "navbar-duos-button", href: "/login"},["Sign In"])
                   // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                   // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
