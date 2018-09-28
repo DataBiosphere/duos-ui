@@ -42,6 +42,7 @@ class DulReview extends Component {
       prev.loading = false;
       prev.election = election; 
       prev.consent = consent;
+      prev.consentName = consent.dulName
       return prev;
     });
   };

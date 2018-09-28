@@ -954,7 +954,9 @@ const fetchOk = async (...args) => {
 };
 
 const getFile = async (URI, fileName) => {
+  console.log('getFile: ', URI, fileName);
   const res = await fetchOk(URI, Config.fileBody());
+  console.log(res);
   fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
   let blob = await res.blob();
   const url = window.URL.createObjectURL(blob);

@@ -5,7 +5,7 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Storage } from '../libs/storage';
-import { DAR, Election, Votes, Match } from '../libs/ajax';
+import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
@@ -91,12 +91,13 @@ class AccessResultRecords extends Component {
 
   downloadDAR = (e) => {
     console.log('-------------------downloadDAR---------------------');
-    // cmFilesService.getDARFile($scope.darElection.referenceId);
+    Files.getDARFile(this.state.darElection.referenceId);
+
   }
 
   downloadDUL = (e) => {
     console.log('-------------------downloadDUL---------------------');
-    // cmFilesService.getDULFile($scope.electionReview.consent.consentId, $scope.electionReview.election.dulName);
+    Files.getDulFile(this.state.electionReview.consent.consentId, this.state.electionReview.election.dulName);
 
   }
 
@@ -179,7 +180,7 @@ class AccessResultRecords extends Component {
 
         hr({ className: "section-separator" }),
 
-        div({ className: "row no-margin", style: { "border": "1px solid red" } }, [
+        div({ className: "row no-margin" }, [
           this.renderCollectResultBox1(hasUseRestriction, this.state.finalDACVote),
           this.renderCollectResultBox2(hasUseRestriction, this.state.voteAgreement),
         ]),
