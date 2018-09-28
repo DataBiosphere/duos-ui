@@ -468,7 +468,7 @@ class DatasetCatalog extends Component {
 
           div({ className: "f-right" }, [
             button({
-              isRendered: this.isResearcher,
+              isRendered: this.state.isResearcher,
               disabled: this.state.dataSetList.catalog.filter(row => row.checked).length > 0,
               onClick: this.exportToRequest,
               className: "download-button dataset-background apply-dataset",
