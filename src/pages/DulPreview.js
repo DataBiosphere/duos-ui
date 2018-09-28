@@ -24,7 +24,7 @@ class DulPreview extends Component {
 
   async electionReview() {
     const consentId = this.props.match.params.consentId;
-    let consent = await Election.findReviewedElections(consentId, 'TranslateDUL');
+    let consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
 
     if (consent.election !== undefined) {
       this.setState({ consentPreview: consent.consent, loading: false });
