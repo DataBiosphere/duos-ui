@@ -4,7 +4,6 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
-// import Select, { createFilter } from 'react-select';
 import AsyncSelect from 'react-select/lib/Async';
 
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -109,7 +108,8 @@ class DataAccessRequestApplication extends Component {
         inputPurposes: {
           invalid: false
         }
-      }
+      },
+      problemSavingRequest: false
     };
 
     this.handleFileChange = this.handleFileChange.bind(this);
@@ -144,9 +144,11 @@ class DataAccessRequestApplication extends Component {
     formData.zipcode = rpProperties.zipcode;
     formData.country = rpProperties.country;
     formData.state = rpProperties.state;
-    formData.linkedIn = rpProperties.linkedIn;
-    formData.researcherGate = rpProperties.researcherGate;
-    formData.orcid = rpProperties.orcid;
+    if(formData.dar_code === null) {
+      formData.linkedIn = rpProperties.linkedIn;
+      formData.researcherGate = rpProperties.researcherGate;
+      formData.orcid = rpProperties.orcid;
+    }    
     formData.userId = Storage.getCurrentUser().dacUserId;
     let datasets = [];
     if (formData.dar_code !== null || formData.partial_dar_code !== null) {
@@ -254,10 +256,10 @@ class DataAccessRequestApplication extends Component {
   };
 
   attestAndSave = (e) => {
-    this.verifyStep1();
-    this.verifyStep2();
-    this.verifyStep3();
-    if (this.state.showValidationMessages === false) {
+    let invalidStep1 = this.verifyStep1();
+    let invalidStep2 = this.verifyStep2();
+    let invalidStep3 = this.verifyStep3();
+    if (!invalidStep1 && !invalidStep2 && !invalidStep3) {
       this.setState({ showDialogSubmit: true });
     }
   };
@@ -278,12 +280,15 @@ class DataAccessRequestApplication extends Component {
 
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
+      showValidationMessages = true;
     }
     if (!this.isValid(this.state.formData.profileName)) {
       isResearcherInvalid = true;
+      showValidationMessages = true;
     }
     if (!this.isValid(this.state.formData.investigator)) {
       isInvestigatorInvalid = true;
+      showValidationMessages = true;
     }
     if (this.state.formData.checkCollaborator !== true
       && !this.isValid(this.state.formData.linkedIn)
@@ -292,6 +297,7 @@ class DataAccessRequestApplication extends Component {
       isLinkedInInvalid = true;
       isOrcidInvalid = true;
       isResearcherGateInvalid = true;
+      showValidationMessages = true;
     }
     this.setState(prev => {
       prev.step1.inputTitle.invalid = isTitleInvalid;
@@ -303,6 +309,7 @@ class DataAccessRequestApplication extends Component {
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
       return prev;
     });
+    return  showValidationMessages;
   };
 
   verifyStep2() {
@@ -316,10 +323,12 @@ class DataAccessRequestApplication extends Component {
     if (!this.isValid(this.state.formData.non_tech_rus)) {
       isSummaryInvalid = true;
     }
-    this.verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid);
+    let isCheckboxesInvalid = this.verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid);
+    return isDatasetsInvalid || isRusInvalid || isSummaryInvalid || isCheckboxesInvalid;
   };
 
   verifyStep3() {
+    let invalid = false;
     if (!(this.isValid(this.state.formData.forProfit) ||
       this.isValid(this.state.formData.onegender) ||
       this.isValid(this.state.formData.pediatric) ||
@@ -335,12 +344,14 @@ class DataAccessRequestApplication extends Component {
         prev.step3.inputPurposes.invalid = true;
         return prev;
       });
+      invalid = true;
     } else {
       this.setState(prev => {
         prev.step3.inputPurposes.invalid = false;
         return prev;
       });
     }
+    return invalid;
   }
 
   verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
@@ -359,6 +370,7 @@ class DataAccessRequestApplication extends Component {
         prev.step2.inputDatasets.invalid = isDatasetsInvalid;
         return prev;
       });
+      return true;
     } else {
       this.setState(prev => {
         prev.atLeastOneCheckboxChecked = true;
@@ -367,6 +379,7 @@ class DataAccessRequestApplication extends Component {
         prev.step2.inputDatasets.invalid = isDatasetsInvalid;
         return prev;
       });
+      return false;
     }
   };
 
@@ -392,8 +405,14 @@ class DataAccessRequestApplication extends Component {
         DAR.postDataAccessRequest(formData).then(response => {
           this.setState({ showDialogSubmit: false });
           this.props.history.push('researcher_console');
-        });
+        }).catch(e =>
+          this.setState(prev => {
+            prev.problemSavingRequest = true;
+            return prev;
+          }));
       }
+    } else {
+      this.setState({ showDialogSubmit: false });
     }
 
   };
@@ -488,8 +507,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   render() {
-    const { showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
-    let problemSavingRequest = false;
+    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
@@ -773,6 +791,7 @@ class DataAccessRequestApplication extends Component {
                     ]),
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       h(AsyncSelect, {
+                        id: "sel_datasets",
                         key: this.state.datasets.value,
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
@@ -783,7 +802,7 @@ class DataAccessRequestApplication extends Component {
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: "select",
                         placeholder: "Dataset Name, Sample Collection ID, or PI",
-                        className: "basic-multi-select"
+                        className: "select-autocomplete"
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputDatasets.invalid && showValidationMessages }, ["Required field"]),
                     ]),
@@ -964,13 +983,14 @@ class DataAccessRequestApplication extends Component {
                     ]),
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group " }, [
                       h(AsyncSelect, {
+                        id: "sel_diseases",
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
                         loadOptions: (query, callback) => this.searchOntologies(query, callback),
                         onChange: (option) => this.onOntologiesChange(option),
                         value: this.state.formData.ontologies,
-                        placeholder: "Plase select diseases ...",
-                        className: "basic-multi-select",
+                        placeholder: "Please enter one or more ontologies",
+                        className: "select-autocomplete",
                         classNamePrefix: "select"
                       }),
                     ]),
@@ -1169,21 +1189,23 @@ class DataAccessRequestApplication extends Component {
                       ])
                     ]),
 
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      label({ className: "control-label rp-title-question" }, ["4.2 Attestation Statement"]),
-                    ]),
-
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      label({ className: "control-label default-color" }, ["I attest to the following:"]),
-
-                      ol({ className: "rp-accept-statement rp-last-group" }, [
-                        li({}, ["Data will only be used for approved research"]),
-                        li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
-                        li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),
-                        li({}, ["No attempts will be made to identify individual study participants from whom data were obtained."]),
-                        li({}, ["Data will not be sold or shared with third parties."]),
-                        li({}, ["The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data."]),
+                    div({ className: "row no-margin" }, [
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                        label({ className: "control-label rp-title-question" }, ["4.2 Attestation Statement"]),
                       ]),
+
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                        label({ className: "control-label default-color" }, ["I attest to the following:"]),
+
+                        ol({ className: "rp-accept-statement rp-last-group" }, [
+                          li({}, ["Data will only be used for approved research"]),
+                          li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
+                          li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),
+                          li({}, ["No attempts will be made to identify individual study participants from whom data were obtained."]),
+                          li({}, ["Data will not be sold or shared with third parties."]),
+                          li({}, ["The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data."]),
+                        ])
+                      ])
                     ]),
 
                     div({ className: "row no-margin" }, [
