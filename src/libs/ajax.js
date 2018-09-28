@@ -209,7 +209,10 @@ export const DAR = {
   },
 
   getDarFields: async (id, fields) => {
-    const url = `${await Config.getApiUrl()}/dar/find/${id}?fields=${fields}`;
+    let url = `${await Config.getApiUrl()}/dar/find/${id}`;
+    if(fields !== null) {
+      url = url + `?fields=${fields}`;
+    }    
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -233,7 +236,7 @@ export const DAR = {
   },
 
   getAutoCompleteOT: async partial => {
-    const url = `${await Config.getApiUrl()}/autocomplete?q=${partial}`;
+    const url = `${await Config.getOntologyApiUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

@@ -176,5 +176,8 @@
   margin-top: 2px;
 }
 
+fieldset {
+  min-width: 100%;
+}
 
 
