@@ -4,7 +4,6 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
-// import Select, { createFilter } from 'react-select';
 import AsyncSelect from 'react-select/lib/Async';
 
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -201,7 +200,7 @@ class DataAccessRequestApplication extends Component {
   attestAndSave = (e) => {
     // implement full save on mongodb here ... after validations
     this.verifyCheckboxes();
-  //  this.setState({ showDialogSubmit: true });
+    //  this.setState({ showDialogSubmit: true });
   }
 
   verifyCheckboxes() {
@@ -327,7 +326,7 @@ class DataAccessRequestApplication extends Component {
   render() {
     const { showValidationMessages } = this.state;
     let atLeastOneCheckboxChecked = false;
-    
+
     let problemSavingRequest = false;
 
     let step1 = {
@@ -445,7 +444,7 @@ class DataAccessRequestApplication extends Component {
         ]),
         form({ name: "form", "noValidate": true }, [
           fieldset({ disabled: this.state.formData.dar_code !== null }, [
-            div({ id: "form-views" }, [
+          div({ id: "form-views" }, [
 
               ConfirmationDialog({
                 title: 'Save changes?', color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
@@ -456,7 +455,7 @@ class DataAccessRequestApplication extends Component {
                 div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
 
                   div({ isRendered: this.state.completed === false, className: "rp-alert" }, [
-                    Alert({ id: "profileUnsubmitted", type: "danger", title: profileUnsubmitted })
+                  Alert({ id: "profileUnsubmitted", type: "danger", title: profileUnsubmitted })
                   ]),
                   div({ isRendered: this.state.completed === true, className: "rp-alert" }, [
                     Alert({ id: "profileSubmitted", type: "info", title: profileSubmitted })
@@ -656,6 +655,7 @@ class DataAccessRequestApplication extends Component {
                     ]),
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       h(AsyncSelect, {
+                        id: "sel_datasets",
                         key: this.state.datasets.value,
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
@@ -666,7 +666,7 @@ class DataAccessRequestApplication extends Component {
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: "select",
                         placeholder: "Dataset Name, Sample Collection ID, or PI",
-                        className: "basic-multi-select"
+                        className: "select-autocomplete"
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputDatasets.invalid && showValidationMessages }, ["Required field"]),
                     ]),
@@ -847,13 +847,14 @@ class DataAccessRequestApplication extends Component {
                     ]),
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group " }, [
                       h(AsyncSelect, {
+                        id: "sel_diseases",
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
                         loadOptions: (query, callback) => this.searchOntologies(query, callback),
                         onChange: (option) => this.onOntologiesChange(option),
                         value: this.state.formData.ontologies,
-                        placeholder: "Plase select diseases ...",
-                        className: "basic-multi-select",
+                        placeholder: "Please enter one or more ontologies",
+                        className: "select-autocomplete",
                         classNamePrefix: "select"
                       }),
                     ]),
@@ -1052,21 +1053,23 @@ class DataAccessRequestApplication extends Component {
                       ])
                     ]),
 
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      label({ className: "control-label rp-title-question" }, ["4.2 Attestation Statement"]),
-                    ]),
-
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      label({ className: "control-label default-color" }, ["I attest to the following:"]),
-
-                      ol({ className: "rp-accept-statement rp-last-group" }, [
-                        li({}, ["Data will only be used for approved research"]),
-                        li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
-                        li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),
-                        li({}, ["No attempts will be made to identify individual study participants from whom data were obtained."]),
-                        li({}, ["Data will not be sold or shared with third parties."]),
-                        li({}, ["The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data."]),
+                    div({ className: "row no-margin" }, [
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                        label({ className: "control-label rp-title-question" }, ["4.2 Attestation Statement"]),
                       ]),
+
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                        label({ className: "control-label default-color" }, ["I attest to the following:"]),
+
+                        ol({ className: "rp-accept-statement rp-last-group" }, [
+                          li({}, ["Data will only be used for approved research"]),
+                          li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
+                          li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),
+                          li({}, ["No attempts will be made to identify individual study participants from whom data were obtained."]),
+                          li({}, ["Data will not be sold or shared with third parties."]),
+                          li({}, ["The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data."]),
+                        ])
+                      ])
                     ]),
 
                     div({ className: "row no-margin" }, [
