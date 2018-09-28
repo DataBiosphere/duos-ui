@@ -32,7 +32,7 @@ class DataAccessRequestApplication extends Component {
         name: '',
       },
       showModal: false,
-      completed: false,
+      completed: true,
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
@@ -46,8 +46,7 @@ class DataAccessRequestApplication extends Component {
         eraAuthorized: '',
         nihUsername: '',
         eraExpirationCount: '',
-        isLinkedinAuthorized: '',
-        linkedinProfile: '',
+        linkedIn: '',
         orcid: '',
         ontologies: [],
         onegender: '',
@@ -71,6 +70,45 @@ class DataAccessRequestApplication extends Component {
         investigator: '',
         researcher: '',
         projectTitle: ''
+      },
+      step1: {
+        inputResearcher: {
+          invalid: false
+        },
+        inputLinkedIn: {
+          invalid: false
+        },
+        inputOrcid: {
+          invalid: false
+        },
+        inputResearcherGate: {
+          invalid: false
+        },
+        inputInvestigator: {
+          invalid: false
+        },
+        inputTitle: {
+          invalid: false
+        }
+      },
+      step2: {
+        inputDatasets: {
+          invalid: false
+        },
+        inputRUS: {
+          invalid: false
+        },
+        inputNonTechRUS: {
+          invalid: false
+        },
+        inputOther: {
+          invalid: false
+        }
+      },
+      step3: {
+        inputPurposes: {
+          invalid: false
+        }
       }
     };
 
@@ -106,7 +144,7 @@ class DataAccessRequestApplication extends Component {
     formData.zipcode = rpProperties.zipcode;
     formData.country = rpProperties.country;
     formData.state = rpProperties.state;
-    formData.linkedinProfile = rpProperties.linkedinProfile;
+    formData.linkedIn = rpProperties.linkedIn;
     formData.researcherGate = rpProperties.researcherGate;
     formData.orcid = rpProperties.orcid;
     formData.userId = Storage.getCurrentUser().dacUserId;
@@ -133,8 +171,6 @@ class DataAccessRequestApplication extends Component {
   };
 
 
-  ///////////////////////////////////////////////////////////////////
-
   handleFileChange(event) {
     if (event.target.files !== undefined && event.target.files[0]) {
       let file = event.target.files[0];
@@ -142,45 +178,64 @@ class DataAccessRequestApplication extends Component {
         file: file,
       });
     }
-  }
+  };
 
   handleOpenModal() {
     this.setState({ showModal: true });
-  }
+  };
 
   handleCloseModal() {
     this.setState({ showModal: false });
-  }
+  };
 
   handleChange = (e) => {
     const field = e.target.name;
     const value = e.target.value;
-    this.setState(prev => { prev.formData[field] = value; return prev; });
-  }
+    this.setState(prev => {
+      prev.formData[field] = value;
+      return prev;
+    }, () => this.checkValidations());
+  };
+
+  checkValidations() {
+    if (this.state.showValidationMessages === true && this.state.step === 1) {
+      this.verifyStep1();
+    }
+    else if (this.state.showValidationMessages === true && this.state.step === 2) {
+      this.verifyStep2();
+    }
+    else if (this.state.showValidationMessages === true && this.state.step === 3) {
+      this.verifyStep3();
+    }
+  };
 
   handleCheckboxChange = (e) => {
     const field = e.target.name;
     const value = e.target.checked;
-    this.setState(prev => { prev.formData[field] = value; return prev; });
-  }
+    this.setState(prev => {
+      prev.formData[field] = value; return prev;
+    }, () => this.checkValidations());
+  };
 
   handleRadioChange = (e, field, value) => {
-    this.setState(prev => { prev.formData[field] = value; return prev; });
-  }
+    this.setState(prev => {
+      prev.formData[field] = value; return prev;
+    }, () => this.checkValidations());
+  };
 
   step1 = (e) => {
     this.setState(prev => {
       prev.step = 1;
       return prev;
     });
-  }
+  };
 
   step2 = (e) => {
     this.setState(prev => {
       prev.step = 2;
       return prev;
     });
-  }
+  };
 
   step3 = (e) => {
     this.setState(prev => {
@@ -188,7 +243,7 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     window.scrollTo(0, 0);
-  }
+  };
 
   step4 = (e) => {
     this.setState(prev => {
@@ -196,43 +251,151 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     window.scrollTo(0, 0);
-  }
+  };
 
   attestAndSave = (e) => {
-    // implement full save on mongodb here ... after validations
-    this.verifyCheckboxes();
-  //  this.setState({ showDialogSubmit: true });
+    this.verifyStep1();
+    this.verifyStep2();
+    this.verifyStep3();
+    if (this.state.showValidationMessages === false) {
+      this.setState({ showDialogSubmit: true });
+    }
+  };
+
+  isValid(value) {
+    let isValid = false;
+    if (value !== '' && value !== null && value !== undefined) {
+      isValid = true;
+    }
+    return isValid;
+  };
+
+  verifyStep1() {
+    let isTitleInvalid = false, isResearcherInvalid = false,
+      isInvestigatorInvalid = false, isLinkedInInvalid = false,
+      isOrcidInvalid = false, isResearcherGateInvalid = false,
+      showValidationMessages = false;
+
+    if (!this.isValid(this.state.formData.projectTitle)) {
+      isTitleInvalid = true;
+    }
+    if (!this.isValid(this.state.formData.profileName)) {
+      isResearcherInvalid = true;
+    }
+    if (!this.isValid(this.state.formData.investigator)) {
+      isInvestigatorInvalid = true;
+    }
+    if (this.state.formData.checkCollaborator !== true
+      && !this.isValid(this.state.formData.linkedIn)
+      && !this.isValid(this.state.formData.researcherGate)
+      && !this.isValid(this.state.formData.orcid)) {
+      isLinkedInInvalid = true;
+      isOrcidInvalid = true;
+      isResearcherGateInvalid = true;
+    }
+    this.setState(prev => {
+      prev.step1.inputTitle.invalid = isTitleInvalid;
+      prev.step1.inputResearcher.invalid = isResearcherInvalid;
+      prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
+      prev.step1.inputLinkedIn.invalid = isLinkedInInvalid;
+      prev.step1.inputOrcid.invalid = isOrcidInvalid;
+      prev.step1.inputResearcherGate.invalid = isResearcherGateInvalid;
+      if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
+      return prev;
+    });
+  };
+
+  verifyStep2() {
+    let isDatasetsInvalid = false, isRusInvalid = false, isSummaryInvalid = false;
+    if (this.state.datasets.length === 0) {
+      isDatasetsInvalid = true;
+    }
+    if (!this.isValid(this.state.formData.rus)) {
+      isRusInvalid = true;
+    }
+    if (!this.isValid(this.state.formData.non_tech_rus)) {
+      isSummaryInvalid = true;
+    }
+    this.verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid);
+  };
+
+  verifyStep3() {
+    if (!(this.isValid(this.state.formData.forProfit) ||
+      this.isValid(this.state.formData.onegender) ||
+      this.isValid(this.state.formData.pediatric) ||
+      this.isValid(this.state.formData.illegalbehave) ||
+      this.isValid(this.state.formData.addiction) ||
+      this.isValid(this.state.formData.sexualdiseases) ||
+      this.isValid(this.state.formData.stigmatizediseases) ||
+      this.isValid(this.state.formData.vulnerablepop) ||
+      this.isValid(this.state.formData.popmigration) ||
+      this.isValid(this.state.formData.psychtraits) ||
+      this.isValid(this.state.formData.nothealth))) {
+      this.setState(prev => {
+        prev.step3.inputPurposes.invalid = true;
+        return prev;
+      });
+    } else {
+      this.setState(prev => {
+        prev.step3.inputPurposes.invalid = false;
+        return prev;
+      });
+    }
   }
 
-  verifyCheckboxes() {
+  verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
     if (this.state.formData.controls !== true &&
       this.state.formData.population !== true &&
       this.state.formData.diseases !== true &&
       this.state.formData.methods !== true &&
       this.state.formData.hmb !== true &&
       this.state.formData.poa !== true &&
-      this.state.formData.other !== true
-    ) {
+      this.state.formData.other !== true) {
       this.setState(prev => {
         prev.atLeastOneCheckboxChecked = false;
         prev.showValidationMessages = true;
+        prev.step2.inputRUS.invalid = isRusInvalid;
+        prev.step2.inputNonTechRUS.invalid = isSummaryInvalid;
+        prev.step2.inputDatasets.invalid = isDatasetsInvalid;
         return prev;
       });
-      //$scope.atLeastOneCheckboxChecked = false;
     } else {
       this.setState(prev => {
         prev.atLeastOneCheckboxChecked = true;
+        prev.step2.inputRUS.invalid = isRusInvalid;
+        prev.step2.inputNonTechRUS.invalid = isSummaryInvalid;
+        prev.step2.inputDatasets.invalid = isDatasetsInvalid;
         return prev;
       });
     }
-  }
+  };
 
   partialSave = (e) => {
     this.setState({ showDialogSave: true });
-  }
+  };
 
   dialogHandlerSubmit = (answer) => (e) => {
-    this.setState({ showDialogSubmit: false });
+    if (answer === true) {
+      let formData = this.state.formData;
+      let ds = [];
+      this.state.datasets.forEach(dataset => {
+        ds.push(dataset.value);
+      });
+      formData.datasetId = ds;
+      formData.userId = Storage.getCurrentUser().dacUserId;
+      if (formData.dar_code !== undefined && formData.dar_code !== null) {
+        DAR.updateDar(formData, formData.dar_code).then(response => {
+          this.setState({ showDialogSubmit: false });
+          this.props.history.push('researcher_console');
+        });
+      } else {
+        DAR.postDataAccessRequest(formData).then(response => {
+          this.setState({ showDialogSubmit: false });
+          this.props.history.push('researcher_console');
+        });
+      }
+    }
+
   };
 
   setShowDialogSave(value) {
@@ -240,7 +403,7 @@ class DataAccessRequestApplication extends Component {
       prev.showDialogSave = value;
       return prev;
     });
-  }
+  };
 
   dialogHandlerSave = (answer) => (e) => {
     if (answer === true) {
@@ -257,7 +420,7 @@ class DataAccessRequestApplication extends Component {
     } else {
       this.setShowDialogSave(false);
     }
-  }
+  };
 
   savePartial() {
     if (this.state.formData.partial_dar_code === null) {
@@ -271,7 +434,7 @@ class DataAccessRequestApplication extends Component {
         this.props.history.push({ pathname: 'researcher_console' });
       });
     }
-  }
+  };
 
 
   onOntologiesChange = (data, action) => {
@@ -279,14 +442,14 @@ class DataAccessRequestApplication extends Component {
       prev.formData.ontologies = data;
       return prev;
     });
-  }
+  };
 
   onDatasetsChange = (data, action) => {
     this.setState(prev => {
       prev.datasets = data;
       return prev;
-    });
-  }
+    }, () => this.checkValidations());
+  };
 
   searchDataSets(query, callback) {
     DAR.getAutoCompleteDS(query).then(items => {
@@ -319,58 +482,14 @@ class DataAccessRequestApplication extends Component {
 
   redirectToNihLogin() {
     //TODO
-  }
+  };
 
   deleteNihAccount() {
-    //TODO
-  }
+  };
+
   render() {
-    const { showValidationMessages } = this.state;
-    let atLeastOneCheckboxChecked = false;
-    
+    const { showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
     let problemSavingRequest = false;
-
-    let step1 = {
-      inputResearcher: {
-        invalid: false
-      },
-      inputLinkedIn: {
-        invalid: false
-      },
-      inputOrcid: {
-        invalid: false
-      },
-      inputResearcherGate: {
-        invalid: false
-      },
-      inputInvestigator: {
-        invalid: false
-      },
-      inputTitle: {
-        invalid: false
-      }
-    }
-
-    let step2 = {
-      inputDatasets: {
-        invalid: false
-      },
-      inputRUS: {
-        invalid: false
-      },
-      inputNonTechRUS: {
-        invalid: false
-      },
-      inputOther: {
-        invalid: false
-      }
-    }
-
-    let step3 = {
-      inputPurposes: {
-        invalid: false
-      }
-    }
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
@@ -393,7 +512,6 @@ class DataAccessRequestApplication extends Component {
             id: "requestApplication", imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application",
             description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
           }),
-
           hr({ className: "section-separator" }),
 
           div({ className: "row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin" }, [
@@ -475,7 +593,6 @@ class DataAccessRequestApplication extends Component {
                         name: "researcher",
                         id: "inputResearcher",
                         value: this.state.formData.profileName,
-                        onChange: this.handleChange,
                         disabled: true,
                         className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                         required: true
@@ -533,7 +650,7 @@ class DataAccessRequestApplication extends Component {
                             div({ className: "auth-id" }, [this.state.formData.nihUsername])
                           ]),
                         ]),
-                        span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
+                        // span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
                       ]),
 
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
@@ -579,7 +696,8 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputResearcherGate.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        })
+                        }),
+                        span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
                       ])
                     ])
                   ]),
@@ -596,7 +714,6 @@ class DataAccessRequestApplication extends Component {
                         name: "investigator",
                         id: "inputInvestigator",
                         value: this.state.formData.investigator,
-                        onChange: this.handleChange,
                         disabled: true,
                         className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                         required: true

@@ -220,7 +220,7 @@ export const DAR = {
   postDataAccessRequest: async dar => {
     const url = `${await Config.getApiUrl()}/dar`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
-    return await res.json();
+    return await res;
   },
 
   cancelDar: async referenceId => {
@@ -264,7 +264,7 @@ export const DAR = {
   updateDar: async (dar, id) => {
     const url = `${await Config.getApiUrl()}/dar/${id}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'PUT' }]));
-    return await res.json();
+    return await res;
   },
 
   getDarModalSummary: async (darId) => {
