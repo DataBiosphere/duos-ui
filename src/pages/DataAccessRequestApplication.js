@@ -24,6 +24,7 @@ class DataAccessRequestApplication extends Component {
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
     this.state = {
+      disableOkBtn: false,
       showValidationMessages: false,
       datasets: [],
       optionMessage: noOptionMessage,
@@ -396,6 +397,7 @@ class DataAccessRequestApplication extends Component {
       });
       formData.datasetId = ds;
       formData.userId = Storage.getCurrentUser().dacUserId;
+      this.setState(prev =>{prev.disableOkBtn = true; return prev;});
       if (formData.dar_code !== undefined && formData.dar_code !== null) {
         DAR.updateDar(formData, formData.dar_code).then(response => {
           this.setState({ showDialogSubmit: false });
@@ -584,7 +586,7 @@ class DataAccessRequestApplication extends Component {
             div({ id: "form-views" }, [
 
               ConfirmationDialog({
-                title: 'Save changes?', color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
               }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
 
               //------------------ Step 1--------------------------------------
@@ -1229,7 +1231,7 @@ class DataAccessRequestApplication extends Component {
                           a({ onClick: this.attestAndSave, className: "access-background bold" }, ["Attest and Send"]),
                         ]),
                         ConfirmationDialog({
-                          title: 'Data Request Confirmation', color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                          title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
                         }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
                         li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
