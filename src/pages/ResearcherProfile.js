@@ -528,7 +528,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ isRendered: this.state.researcherProfile.isThePI === false, className: "form-group" }, [
+              div({ isRendered: this.state.researcherProfile.isThePI === 'false' || this.state.researcherProfile.isThePI === false, className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   label({
                     className: "control-label ",
@@ -574,7 +574,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ isRendered: this.state.researcherProfile.havePI === 'true', className: "form-group" }, [
+                div({ isRendered: this.state.researcherProfile.havePI === true || this.state.researcherProfile.havePI === 'true', className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                     label({ id: "lbl_profilePIName", className: "control-label" }, ["Principal Investigator Name*"]),
                     input({
