@@ -43,16 +43,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
-    profile.isThePI = profile.isThePI;
-    profile.havePI = profile.havePI;
-    profile.completed = profile.complete;
+    console.log(profile);
+    profile.isThePI = JSON.parse(profile.isThePI);
+    profile.completed = JSON.parse(profile.completed);
     this.setState({
       loading: false,
       researcherProfile: profile,
       formData: {
         nihUsername: 'nihUsername',
         eraExpirationCount: 10,
-      
+
       }
     });
   }
@@ -85,6 +85,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         });
       }
     }
+  }
+
+  validateForm() {
+
   }
 
   handleRadioChange = (e, field, value) => {
@@ -134,6 +138,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   submit(event) {
+    if (this.state.fieldStatus) {
+      console.log(this.state.fieldStatus);
+    }
+
     Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     event.preventDefault();
     this.setState({ showDialogSubmit: true });
@@ -470,7 +478,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, [
                       "Are you the Principal Investigator?* ",
                       span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "", "data-for": "tip_isthePI" }),
-                      h(ReactTooltip, { id: "tip_isthePI", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals."])
+                      h(ReactTooltip, {
+                        id: "tip_isthePI",
+                        effect: 'solid',
+                        multiline: true,
+                        className: 'tooltip-wrapper'
+                      }, ["This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals."])
                     ])
                 ]),
 
@@ -482,7 +495,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         name: "isThePI",
                         type: "radio",
                         onChange: this.handlePIChange,
-                        value: this.state.researcherProfile.isThePI,
+                        value: JSON.parse(this.state.researcherProfile.isThePI),
                         onClick: this.clearNotRelatedPIFields,
                         required: true
                       }),
