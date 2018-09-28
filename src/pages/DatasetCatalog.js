@@ -28,7 +28,8 @@ class DatasetCatalog extends Component {
         showDialogDelete: false,
         showDialogEnable: false,
         showDialogDisable: false,
-      }
+      },
+      translatedUseRestrictionModal: {}
     };
     this.myHandler = this.myHandler.bind(this);
     this.getDatasets = this.getDatasets.bind(this);
@@ -109,12 +110,13 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openTranslatedDUL() {
+  openTranslatedDUL= (translatedUseRestriction) => () => {
     this.setState(prev => {
+      prev.translatedUseRestrictionModal = translatedUseRestriction;
       prev.showTranslatedDULModal = true;
       return prev;
     });
-  }
+  };
 
   closeTranslatedDULModal() {
     this.setState(prev => {
@@ -269,12 +271,12 @@ class DatasetCatalog extends Component {
                               div({ className: "checkbox" }, [
                                 input({
                                   type: "checkbox",
-                                  id: trIndex + "_chkSelect",
+                                  id: trIndex + "_chk_select",
                                   name: "chk_select",
                                   // , value: "checkMod['field_' + pagination.current + $parent.$parent.$index]"
                                   value: "true", className: "checkbox-inline user-checkbox", "add-object-id": "true"
                                 }),
-                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: "chk_select_" + trIndex }),
+                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chk_select" }),
                               ])
                             ])
                           ])
@@ -340,7 +342,7 @@ class DatasetCatalog extends Component {
                         td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL, className: "enabled" }, ["Translated Use Restriction"])
+                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
                         ]),
 
                         td({ isRendered: isAdmin, className: "table-items cell-size" }, [
@@ -374,7 +376,11 @@ class DatasetCatalog extends Component {
             h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
           ]),
           TranslatedDulModal({
-            showModal: this.state.showTranslatedDULModal, onOKRequest: this.okTranslatedDULModal, onCloseRequest: this.closeTranslatedDULModal
+            isRendered: this.state.showTranslatedDULModal,
+            showModal: this.state.showTranslatedDULModal,
+            useRestriction: this.state.translatedUseRestrictionModal,
+            onOKRequest: this.okTranslatedDULModal,
+            onCloseRequest: this.closeTranslatedDULModal
           }),
 
           ConfirmationDialog({

@@ -13,13 +13,9 @@ export const AdminConsoleBox = hh(class AdminConsoleBox extends Component {
       : null;
 
     const iconTag = div({ id: this.props.id + "-icon", className: "admin-box-icon " + this.props.iconName }, []);
-    const titleTag = h2({ id: this.props.id + "-title", className: "admin-box-title " + this.props.color + "-color" }, [this.props.title, badge]);
+    const titleTag = h2({ id: this.props.id + "-title", className: "admin-box-title " + this.props.color + "-color" }, [this.props.title]);
     const descriptionTag = span({ id: this.props.id + "-description", className: "admin-box-description" }, [this.props.description]);
-    const textWrapTag = div({ id: this.props.id + "-text", className: "admin-box-text " + this.props.iconSize }, [titleTag, descriptionTag]);
-
-    // tag = a({ id: this.props.id, href: this.props.url, className: "admin-box-wrapper"}, [
-    //     iconTag, textWrapTag
-    // ]);
+    const textWrapTag = div({ id: this.props.id + "-text", className: "admin-box-text " + this.props.iconSize }, [titleTag, badge, descriptionTag]);
 
 
     if (this.props.url !== undefined && this.props.clickHandler === undefined) {
