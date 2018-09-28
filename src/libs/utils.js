@@ -21,30 +21,3 @@ export const USER_ROLES = {
   all: 'All'
 };
 
-export const rolesHandler = (userRoles) => {
-  let user = {};
-
-  const currentUserRoles = userRoles.map(roles => roles.name);
-  user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
-  user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
-  user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
-  user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-  user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
-  user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-  return user;
-};
-
-// returns the initial page to be redirected when a user logs in
-export const redirect =
-  (roles) => {
-    let page = '/';
-    if (Storage.userIsLogged()) {
-      page = roles.isChairPerson ? 'chair_console' :
-             roles.isMember ? 'member_console' :
-             roles.isAdmin ? 'admin_console' :
-             roles.isResearcher ? 'dataset_catalog' :
-             roles.isDataOwner ? 'data_owner_console' :
-             roles.isAlumni ? 'summary_votes' : '/';
-    }
-    return page
-  };

@@ -48,25 +48,27 @@ class DuosHeader extends Component {
     let isAlumni = false;
 
     let isLogged = Storage.userIsLogged();
+    let currentUser = {};
 
     if (isLogged) {
-      let userRoles = Storage.getCurrentUserRoles();
-      isChairPerson = !!userRoles.isChairPerson ? userRoles.isChairPerson : false;
-      isMember = !!userRoles.isMember ? userRoles.isMember : false;
-      isAdmin = !!userRoles.isAdmin ? userRoles.isAdmin : false;
-      isResearcher = !!userRoles.isResearcher ? userRoles.isResearcher : false;
-      isDataOwner = !!userRoles.isDataOwner ? userRoles.isDataOwner : false;
-      isAlumni = !!userRoles.isAlumni ? userRoles.isAlumni : false;
+      currentUser = Storage.getCurrentUser();
+      isChairPerson = currentUser.isChairPerson;
+      isMember = currentUser.isMember;
+      isAdmin = currentUser.isAdmin;
+      isResearcher = currentUser.isResearcher;
+      isDataOwner = currentUser.isDataOwner;
+      isAlumni = currentUser.isAlumni;
     }
 
-    let currentUser = {};
-    let profile = Storage.getGoogleData();
-    if (isLogged && profile !== null) {
-      currentUser = {
-        displayName: profile.profileObj.name,
-        email: profile.profileObj.email
-      };
-    }
+    // let profile = Storage.getGoogleData();
+    // if (isLogged && profile !== null) {
+    //   currentUser = {
+    //     displayName: profile.profileObj.name,
+    //     email: profile.profileObj.email
+    //   };
+    // }
+
+    console.log(isLogged, currentUser);
 
     return (
 
