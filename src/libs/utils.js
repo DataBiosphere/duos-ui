@@ -1,3 +1,7 @@
+import { Storage } from "./storage";
+import { Researcher } from "./ajax";
+import React from "react";
+
 export const formatDate = (dateval) => {
   let dateFormat = new Date(dateval);
   let year = dateFormat.getFullYear();
@@ -8,11 +12,12 @@ export const formatDate = (dateval) => {
 };
 
 export const USER_ROLES = {
-  admin: 'ADMIN',
-  chairperson: 'CHAIRPERSON',
-  member: 'MEMBER',
-  researcher: 'RESEARCHER',
-  alumni: 'ALUMNI',
-  dataOwner: 'DATAOWNER',
-  all: 'ALL'
+  admin: 'Admin',
+  chairperson: 'Chairperson',
+  member: 'Member',
+  researcher: 'Researcher',
+  alumni: 'Alumni',
+  dataOwner: 'DataOwner',
+  all: 'All'
 };
+
