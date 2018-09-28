@@ -238,7 +238,7 @@ class ResearcherConsole extends Component {
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {
                   return h(Fragment, { key: pdar.partial_dar_code }, [
-                    div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin tableRow" }, [
+                    div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin tableRowPartial" }, [
                       a({
                         id: pdar.partial_dar_code + "_btnDelete", name: "btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
                         onClick: this.deletePartialDar, value: pdar.dataRequestId

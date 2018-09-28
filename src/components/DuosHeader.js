@@ -40,8 +40,6 @@ class DuosHeader extends Component {
 
   render() {
 
-    // let roles = ['chairperson', 'member', 'admin', 'researcher', 'dataOwner', 'alumni'];
-    let roles = ['admin', 'researcher'];
     let isChairPerson = false;
     let isMember = false;
     let isAdmin = false;
@@ -50,37 +48,18 @@ class DuosHeader extends Component {
     let isAlumni = false;
 
     let isLogged = Storage.userIsLogged();
+    let currentUser = {};
 
     if (isLogged) {
-      roles.forEach(role => {
-        if (role === 'chairperson') {
-          isChairPerson = true;
-        }
-        if (role === 'member') {
-          isMember = true;
-        }
-        if (role === 'admin') {
-          isAdmin = true;
-        }
-        if (role === 'researcher') {
-          isResearcher = true;
-        }
-        if (role === 'dataOwner') {
-          isDataOwner = true;
-        }
-        if (role === 'alumni') {
-          isAlumni = true;
-        }
-      });
+      currentUser = Storage.getCurrentUser();
+      isChairPerson = currentUser.isChairPerson;
+      isMember = currentUser.isMember;
+      isAdmin = currentUser.isAdmin;
+      isResearcher = currentUser.isResearcher;
+      isDataOwner = currentUser.isDataOwner;
+      isAlumni = currentUser.isAlumni;
     }
-    let currentUser = {};
-    let profile = Storage.getGoogleData();
-    if (isLogged && profile !== null) {
-      currentUser = {
-        displayName: profile.profileObj.name,
-        email: profile.profileObj.email
-      };
-    }
+
     return (
 
       nav({ className: "navbar top-navigator-bar", role: "navigation" }, [
@@ -195,9 +174,6 @@ class DuosHeader extends Component {
 
   isUserLogged() {
     return this.state.isLogged;
-  }
-
-  notYet() {
   }
 
   toggled() {

@@ -1,31 +1,55 @@
 import { Component } from 'react';
 import { div, hr, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-// import { DataSet } from '../../libs/ajax'
+import { DataSet } from '../../libs/ajax'
 
 // let USER_ID = 5;
 
 export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
-      DatasetId: 'SC-15542',
-      DatasetName: 'Dataset Name',
-      Description: 'This is the description',
-      DataType: 'DNA',
-      Indication: 'Some indication',
-      Species: 'human',
-      nrParticipants: '201',
-      DataDepositor: 'Me',
-      PI: 'Also me',
-      consentName: 'Consent Name',
-      translatedUseRestriction: 'Translated DUL'
-    }
+      loading: true,
+      datasetId: '',
+      datasetName: '',
+      description: '',
+      dataType: '',
+      phenotype: '',
+      species: '',
+      nrParticipants: '',
+      dataDepositor: '',
+      pi: '',
+      consentName: '',
+      translatedUseRestriction: '',
+    };
 
     this.closeHandler = this.closeHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
   };
+
+  componentDidMount() {
+    this.getSummaryInfo();
+  }
+
+  async getSummaryInfo() {
+    const dataSet = await DataSet.getDataSetsByDatasetId(this.props.dataSetId);
+    this.setState(property => {
+      property.datasetName = dataSet.properties[0].propertyValue;
+      property.datasetId = dataSet.properties[1].propertyValue;
+      property.dataType = dataSet.properties[2].propertyValue;
+      property.species = dataSet.properties[3].propertyValue;
+      property.phenotype = dataSet.properties[4].propertyValue;
+      property.nrParticipants = dataSet.properties[5].propertyValue;
+      property.description = dataSet.properties[6].propertyValue;
+      property.dataDepositor = dataSet.properties[8].propertyValue;
+      property.pi = dataSet.properties[9].propertyValue;
+      property.consentName = dataSet.consentId;
+      property.translatedUseRestriction = dataSet.translatedUseRestriction;
+      property.loading = false;
+      return property;
+    });
+  }
 
   handleOverwriteChange(event) {
     this.setState({
@@ -45,18 +69,19 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
   }
 
   OKHandler() {
-    // this is the method for handling OK click
-    // we might do something here, adding a user for instance
-    // or delegate it to the parent....
+    this.props.onOKRequest('datasetSummaryModal');
   }
 
   closeHandler() {
-    // this is the method to handle Cancel click
+    this.props.onCloseRequest('datasetSummaryModal');
   }
 
 
   render() {
-
+    const { loading } = this.state;
+    if (loading) {
+      return null;
+    }
     return (
 
       BaseModal({
@@ -74,32 +99,32 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
           div({ className: "summary" }, [
             div({ className: "row" }, [
               label({ id: "lbl_datasetId", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset ID"]),
-              div({ id: "txt_datasetId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DatasetId]),
+              div({ id: "txt_datasetId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.datasetId]),
             ]),
 
             div({ className: "row" }, [
               label({ id: "lbl_datasetName", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset Name"]),
-              div({ id: "txt_datasetName", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DatasetName]),
+              div({ id: "txt_datasetName", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.datasetName]),
             ]),
 
             div({ className: "row" }, [
               label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Description"]),
-              div({ id: "txt_description", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Description]),
+              div({ id: "txt_description", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.description]),
             ]),
 
             div({ className: "row" }, [
               label({ id: "lbl_dataType", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Data Type"]),
-              div({ id: "txt_dataType", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.DataType]),
+              div({ id: "txt_dataType", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.dataType]),
             ]),
 
             div({ className: "row" }, [
               label({ id: "lbl_phenotype", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Phenotype/Indication"]),
-              div({ id: "txt_phenotype", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Indication]),
+              div({ id: "txt_phenotype", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.phenotype]),
             ]),
 
             div({ className: "row" }, [
               label({ id: "lbl_species", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Species"]),
-              div({ id: "txt_species", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.Species]),
+              div({ id: "txt_species", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.species]),
             ]),
 
             div({ className: "row" }, [
@@ -111,12 +136,12 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
 
             div({ className: "row" }, [
               label({ id: "lbl_depositor", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Data Depositor"]),
-              div({ id: "txt_depositor", className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.DataDepositor]),
+              div({ id: "txt_depositor", className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.dataDepositor]),
             ]),
 
             div({ className: "row" }, [
               label({ id: "lbl_PI", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Principal Investigator"]),
-              div({ id: "txt_PI", className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.PI]),
+              div({ id: "txt_PI", className: "col-lg-3 col-md-3 col-sm-9 col-xs-8 response-label" }, [this.state.pi]),
             ]),
 
             hr({}),

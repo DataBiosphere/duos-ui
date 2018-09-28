@@ -324,9 +324,19 @@ export const DataSet = {
     return await res.json();
   },
 
-  downloadDataSets: async (objectIdList) => {
+  downloadDataSets: async (objectIdList, fileName) => {
     const url = `${await Config.getApiUrl()}/dataset/download`;
-    return getFile(url, 'datasets.tsv');
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(objectIdList), Config.fileOpts(), { method: 'POST' }]));
+
+    fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
+    const responseObj = await res.json();
+
+    let blob = new Blob([responseObj.datasets], {type: 'text/plain'});
+    const urlBlob = window.URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = urlBlob;
+    a.download = fileName;
+    a.click();
   },
 
   deleteDataset: async (datasetObjectId, dacUserId) => {
@@ -338,7 +348,7 @@ export const DataSet = {
   disableDataset: async (datasetObjectId, active) => {
     const url = `${await Config.getApiUrl()}/dataset/disable/${datasetObjectId}/${active}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return await res.json();
+    return res;
   },
 
   reviewDataSet: async (dataSetId, needsApproval) => {
@@ -352,7 +362,7 @@ export const DatasetAssociation = {
 
   createDatasetAssociations: async (objectId, usersIdList) => {
     const url = `${await Config.getApiUrl()}/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: Config.jsonBody(usersIdList) }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList) , { method: 'POST' }]));
     return await res.json();
   },
 
@@ -364,7 +374,7 @@ export const DatasetAssociation = {
 
   updateDatasetAssociations: async (objectId, usersIdList) => {
     const url = `${await Config.getApiUrl()}/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'PUT', body: Config.jsonBody(usersIdList) }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList), { method: 'PUT' }]));
     return res.json();
   }
 
@@ -404,6 +414,9 @@ export const Election = {
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
+    if (res.status === 204) {
+      return {};
+    }
     return await res.json();
   },
 
@@ -457,7 +470,7 @@ export const Election = {
   findReviewedElections: async (electionId) => {
     const url = `${await Config.getApiUrl()}/electionReview/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   },
 
   createDARElection: async (requestId) => {
@@ -946,7 +959,7 @@ export const Votes = {
 
   }
 
-}
+};
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);

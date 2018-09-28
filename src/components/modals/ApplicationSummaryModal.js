@@ -10,30 +10,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     super(props);
     this.state = { summary: {} };
     this.state = {
-      dataRequestId: null,
-      summary: {
-        darCode: '',
-        principalInvestigator: '',
-        researcherName: '',
-        status: '',
-        rationale: '',
-        electionStatus: '',
-        institutionName: '',
-        projectTitle: '',
-        needDOApproval: '',
-        datasetDetail: [
-        ],
-        researchType: [
-        ],
-        thereDiseases: false,
-        diseases: [],
-        therePurposeStatements: false,
-        purposeStatements: [
-        ],
-        sensitivePopulation: false,
-        requiresManualReview: false
-      },
-      calledFromAdmin: false,
+      loading: true
     }
     this.closeHandler = this.closeHandler.bind(this);
     this.downloadDetail = this.downloadDetail.bind(this);
@@ -43,10 +20,9 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     this.props.onCloseRequest('summaryModal');
   }
 
-  static async getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.dataRequestId !== undefined 
-      && (prevState.dataRequestId === undefined || prevState.dataRequestId === null)) {
-      let darDetails = await DAR.getDarModalSummary(nextProps.dataRequestId);
+  async componentDidMount() {
+    if (this.props.dataRequestId !== undefined) {
+      let darDetails = await DAR.getDarModalSummary(this.props.dataRequestId);
       if (darDetails.status === "pending") {
         darDetails.status = "Pending for review";
       } else if (darDetails.status === "rejected") {
@@ -54,30 +30,33 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
       } else {
         darDetails.status = "Bonafide researcher";
       }
+
       if (darDetails.rationale !== null && darDetails.rationale !== '' && darDetails.rationale !== undefined) {
         darDetails.rationaleCheck = true;
       } else {
         darDetails.rationaleCheck = false;
       }
 
-      return {
-        dataRequestId: nextProps.dataRequestId,
+      this.setState({
+        loading: false,
+        dataRequestId: this.props.dataRequestId,
         summary: darDetails,
-        calledFromAdmin: nextProps.calledFromAdmin
-      };
+        calledFromAdmin: this.props.calledFromAdmin
+      });
     }
   }
+
 
   async downloadDetail() {
     Election.downloadDatasetVotesForDARElection(this.state.dataRequestId, "datasetVotesSummary.txt");
   }
 
   render() {
-
-    const { summary } = this.state;
-
+    const { loading, summary } = this.state;
+    if (loading) {
+      return null;
+    }
     return (
-
       BaseModal({
         id: "applicationSummaryModal",
         showModal: this.props.showModal,
@@ -109,11 +88,11 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                   span({ className: "bold" }, ["Status: "]),
                   summary.status
                 ]),
-                div({ id: "txt_comment", isRendered: summary.rationaleCheck && summary.status === "bonafideResearcher" }, [
+                div({ id: "txt_comment", isRendered: summary.rationaleCheck && summary.status === "Bonafide researcher" }, [
                   span({ className: "bold" }, ["Comment: "]),
                   summary.rationale
                 ]),
-                div({ id: "txt_rationale", isRendered: summary.rationaleCheck && summary.status !== "bonafideResearcher" }, [
+                div({ id: "txt_rationale", isRendered: summary.rationaleCheck && summary.status !== "Bonafide researcher" }, [
                   span({ className: "bold" }, ["Rationale: "]),
                   summary.rationale
                 ])
@@ -137,9 +116,10 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   Object.entries(summary.datasetDetail).map((row, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_dataset" + Index }, [b({}, [row[Index]]), " ", row[Index + 1]]),
-                      div({ isRendered: this.state.calledFromAdmin && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
-                      div({ isRendered: this.state.calledFromAdmin && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
+                      li({ id: "txt_dataset_" + Index }, [b({}, [row[Index]]), " ", row[Index + 1]]),
+                      div({ isRendered: this.state.calledFromAdmin === true && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
+                      div({ isRendered: this.state.calledFromAdmin === true && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
+
                         span({ className: "glyphicon glyphicon-download-alt hover-color", style: { "marginRight": "10px" } }),
                         a({ onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
                       ])
@@ -156,7 +136,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   summary.researchType.map((rt, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_typeResearch" + Index }, [b({}, [rt.title]), " ", rt.description]),
+                      li({ id: "txt_typeResearch_" + Index }, [b({}, [rt.title]), " ", rt.description]),
                     ])
                   })
                 ]),
@@ -170,7 +150,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   summary.diseases.map((disease, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_disease" + Index }, [disease])
+                      li({ id: "txt_disease_" + Index }, [disease])
                     ])
                   })
                 ]),
@@ -184,7 +164,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                 ul({}, [
                   summary.purposeStatements.map((rt, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_statement" + Index, className: rt.manualReview ? 'cancel-color' : '' }, [
+                      li({ id: "txt_statement_" + Index, className: rt.manualReview ? 'cancel-color' : '' }, [
                         b({}, [rt.title]), " ", rt.description
                       ])
                     ])
