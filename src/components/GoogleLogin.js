@@ -77,7 +77,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
       page = user.isChairPerson ? 'chair_console' :
         user.isMember ? 'member_console' :
           user.isAdmin ? 'admin_console' :
-            user.isResearcher ? 'dataset_catalog' :
+            user.isResearcher ? 'dataset_catalog?reviewProfile' :
               user.isDataOwner ? 'data_owner_console' :
                 user.isAlumni ? 'summary_votes' : '/';
     }

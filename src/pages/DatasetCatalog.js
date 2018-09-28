@@ -10,14 +10,17 @@ import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { LoadingIndicator } from '../components/LoadingIndicator';
-import { Storage } from "../libs/storage";
 
 class DatasetCatalog extends Component {
 
+  currentUser = {};
+
   USER_ID = Storage.getCurrentUser().dacUserId;
+
 
   constructor(props) {
     super(props);
+
     this.state = {
       isLogged: false
     };
@@ -59,10 +62,14 @@ class DatasetCatalog extends Component {
   }
 
   async getDatasets() {
-    const researcher  = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
-    if (researcher.completed !== 'true') {
-      this.props.history.push('researcher_profile');
+
+    if (this.state.isResearcher && '?reviewProfile' === this.props.location.search) {
+      const researcher = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
+      if (researcher.completed !== 'true') {
+        this.props.history.push('researcher_profile');
+      }
     }
+
     const dictionary = await DataSet.findDictionary();
     const catalog = await DataSet.findDataSets(this.USER_ID);
     catalog.forEach((row, index) => {
@@ -77,15 +84,14 @@ class DatasetCatalog extends Component {
   }
 
   componentDidMount() {
-    Storage.getCurrentUser().roles.forEach(role => {
-      if (role.roleId === 4) {
-        this.setState({isAdmin: true});
-      }
-      if (role.roleId === 5) {
-        this.setState({isResearcher: true});
-      }
+
+    this.currentUser = Storage.getCurrentUser();
+    this.setState({
+      isAdmin: this.currentUser.isAdmin,
+      isResearcher: this.currentUser.isResearcher
+    }, () => {
+      this.getDatasets();
     });
-    this.getDatasets();
   }
 
   handleOpenConnectDatasetModal() {
@@ -117,7 +123,7 @@ class DatasetCatalog extends Component {
 
   exportToRequest = () => {
     const listToExport = this.state.dataSetList.catalog.filter(row => row.checked);
-    this.props.history.push({ pathname: 'dar_application', props: {listToExport} });
+    this.props.history.push({ pathname: 'dar_application', props: { listToExport } });
   };
 
   associate() {
@@ -146,7 +152,7 @@ class DatasetCatalog extends Component {
     }, () => this.getDatasets());
   }
 
-  openTranslatedDUL= (translatedUseRestriction) => () => {
+  openTranslatedDUL = (translatedUseRestriction) => () => {
     this.setState(prev => {
       prev.translatedUseRestrictionModal = translatedUseRestriction;
       prev.showTranslatedDULModal = true;
@@ -198,7 +204,7 @@ class DatasetCatalog extends Component {
 
   dialogHandlerEnable = (answer) => (e) => {
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, true).then(resp =>{
+      DataSet.disableDataset(this.state.datasetId, true).then(resp => {
         this.getDatasets();
       });
     }
@@ -207,7 +213,7 @@ class DatasetCatalog extends Component {
 
   dialogHandlerDisable = (answer) => (e) => {
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, false).then(resp =>{
+      DataSet.disableDataset(this.state.datasetId, false).then(resp => {
         this.getDatasets();
       });
     }
@@ -259,7 +265,7 @@ class DatasetCatalog extends Component {
 
   selectAll = (e) => {
     const checked = e.target.checked;
-    const checkedCatalog = this.state.dataSetList.catalog.map(row => {row.checked = checked; return row;});
+    const checkedCatalog = this.state.dataSetList.catalog.map(row => { row.checked = checked; return row; });
     this.setState(prev => {
       prev.allChecked = checked;
       prev.dataSetList.catalog = checkedCatalog;
@@ -275,7 +281,7 @@ class DatasetCatalog extends Component {
     catalog = [
       ...catalog.slice(0, index),
       ...[catalogElement],
-      ...catalog.slice(index+1)
+      ...catalog.slice(index + 1)
     ];
 
     this.setState(prev => {
@@ -327,7 +333,7 @@ class DatasetCatalog extends Component {
           div({ className: "table-wrap" }, [
             form({ className: "pos-relative" }, [
               div({ className: "checkbox check-all" }, [
-                input({ checked: this.state.allChecked ,type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll", onChange: this.selectAll }),
+                input({ checked: this.state.allChecked, type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll", onChange: this.selectAll }),
                 label({ className: "regular-checkbox", htmlFor: "chk_selectAll" }, []),
               ]),
             ]),
@@ -396,7 +402,8 @@ class DatasetCatalog extends Component {
                                 ]),
                                 h(ReactTooltip, { id: "tip_enable", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Enable dataset"]),
 
-                                a({ id: trIndex + "_btnConnect", name: "btn_connect", onClick: () => this.openConnectDataset(dataSet)
+                                a({
+                                  id: trIndex + "_btnConnect", name: "btn_connect", onClick: () => this.openConnectDataset(dataSet)
                                   // onClick: this.associate(property.propertyValue, dataSet.needsApproval)
                                 }, [
                                     span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "", "data-for": "tip_connect" })
@@ -410,26 +417,26 @@ class DatasetCatalog extends Component {
                         dataSet.properties.map((property, dIndex) => {
                           return h(Fragment, { key: dIndex }, [
                             td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                                p({ isRendered: property.propertyName !== 'dbGAP' }, [
-                                  span({ id: trIndex + "_datasetName", name: "datasetName", isRendered: property.propertyName === 'Dataset Name' }),
-                                  span({ id: trIndex + "_datasetId", name: "datasetId", isRendered: property.propertyName === 'Dataset ID' }),
-                                  span({ id: trIndex + "_dataType", name: "dataType", isRendered: property.propertyName === 'Data Type' }),
-                                  span({ id: trIndex + "_species", name: "species", isRendered: property.propertyName === 'Species' }),
-                                  span({ id: trIndex + "_phenotype", name: "phenotype", isRendered: property.propertyName === 'Phenotype/Indication' }),
-                                  span({ id: trIndex + "_participants", name: "participants", isRendered: property.propertyName === '# of participants' }),
-                                  span({ id: trIndex + "_description", name: "description", isRendered: property.propertyName === 'Description' }),
-                                  property.propertyValue
-                                ]),
+                              p({ isRendered: property.propertyName !== 'dbGAP' }, [
+                                span({ id: trIndex + "_datasetName", name: "datasetName", isRendered: property.propertyName === 'Dataset Name' }),
+                                span({ id: trIndex + "_datasetId", name: "datasetId", isRendered: property.propertyName === 'Dataset ID' }),
+                                span({ id: trIndex + "_dataType", name: "dataType", isRendered: property.propertyName === 'Data Type' }),
+                                span({ id: trIndex + "_species", name: "species", isRendered: property.propertyName === 'Species' }),
+                                span({ id: trIndex + "_phenotype", name: "phenotype", isRendered: property.propertyName === 'Phenotype/Indication' }),
+                                span({ id: trIndex + "_participants", name: "participants", isRendered: property.propertyName === '# of participants' }),
+                                span({ id: trIndex + "_description", name: "description", isRendered: property.propertyName === 'Description' }),
+                                property.propertyValue
+                              ]),
 
-                                a({
-                                  id: trIndex + "_linkdbGap",
-                                  name: "link_dbGap",
-                                  isRendered: property.propertyName === 'dbGAP',
-                                  href: property.propertyValue,
-                                  target: "_blank",
-                                  className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
-                                }, ["Link"]),
-                              ])
+                              a({
+                                id: trIndex + "_linkdbGap",
+                                name: "link_dbGap",
+                                isRendered: property.propertyName === 'dbGAP',
+                                href: property.propertyValue,
+                                target: "_blank",
+                                className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
+                              }, ["Link"]),
+                            ])
                           ])
                         }),
 
