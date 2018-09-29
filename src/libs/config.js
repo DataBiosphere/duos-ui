@@ -6,6 +6,8 @@ export const Config = {
 
   getApiUrl: async () => (await getConfig()).apiUrl,
 
+  getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
+
   authOpts : (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
@@ -25,7 +27,7 @@ export const Config = {
   fileOpts : (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/text'
+      Accept: 'application/json'
     }
   }),
 

@@ -2,52 +2,113 @@ import { Component, Fragment } from 'react';
 import { div, h, form, input, label, select, hh, option } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
+import { DatasetAssociation, DataSet } from '../../libs/ajax';
 
 export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Component {
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       available: [],
       selected: [],
-      availableclients: [
-        { id: '0010', name: 'client 01' },
-        { id: '0020', name: 'client 02' },
-        { id: '0030', name: 'client 03' },
-        { id: '0040', name: 'client 04' },
-        { id: '0050', name: 'client 05' },
-        { id: '0060', name: 'client 06' },
-        { id: '0070', name: 'client 07' },
-        { id: '0080', name: 'client 08' },
-        { id: '0090', name: 'client 09' },
-        { id: '01000', name: 'client 10' },
-        { id: '01100', name: 'client 11' },
-        { id: '01200', name: 'client 12' },
-        { id: '01300', name: 'client 13' },
-        { id: '01400', name: 'client 14' },
-        { id: '01500', name: 'client 15' },
-        { id: '01600', name: 'client 16' },
-        { id: '01700', name: 'client 17' },
-        { id: '01800', name: 'client 18' },
-        { id: '01900', name: 'client 19' },
-      ],
+      availableclients: [],
       selectedclients: [],
-      needsApproval: false
-    }
+      needsApproval: props.dataset.needsApproval,
+      updatedInfoModal: false,
+      needsApprovalModified: false,
+      showError: false,
+      alert: {},
+      isUpdate: false,
+    };
 
     this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
 
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
+    this.handleLSelection  = this.handleLSelection.bind(this);
+    this.handleStateSubmit = this.handleStateSubmit.bind(this);
+    this.moveLItem = this.moveLItem.bind(this);
+    this.moveRItem = this.moveRItem.bind(this);
   };
 
-  OKHandler() {
-    // this is the method for handling OK click
+  componentDidMount() {
+    this.getAvailableDataOwners(this.props.dataset);
   }
 
+  async getAvailableDataOwners(dataset) {
+    let datasetId = '';
+    dataset.properties.forEach(property => {
+      if (property.propertyName === 'Dataset ID') {
+        datasetId = property.propertyValue;
+      }
+    });
+
+    const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetId);
+    const availableClients = clients.not_associated_users.map(user => {
+      return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
+    });
+
+    const selectedClients = clients.associated_users.map(user => {
+      return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
+    });
+
+    this.setState(prev => {
+      prev.availableclients = availableClients;
+      prev.selectedclients = selectedClients;
+      prev.originalDataOwners = selectedClients.slice();
+      prev.datasetId = datasetId;
+      prev.isUpdate = (!(clients.associated_users === undefined || clients.associated_users.length === 0));
+      return prev;
+    });
+  }
+
+  OKHandler() {
+    if (this.state.needsApprovalModified) {
+      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApprovalModified).then(response => {
+        this.createOrUpdateAssociations()
+      }, (error) => {
+        this.setState(prev => {
+          prev.showError = true;
+          return prev;
+        });
+      });
+    } else {
+      this.createOrUpdateAssociations();
+    }
+  }
+
+  createOrUpdateAssociations = () => {
+    const usersId = [];
+    this.state.selectedclients.forEach(user => {
+      usersId.push(JSON.parse(user.id));
+    });
+
+    if (this.state.isUpdate) {
+      DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(response => {
+          this.props.onOKRequest('ConnectDatasetModal');
+        }
+      , (error) => {
+        this.setState(prev => {
+          prev.showError = true;
+          return prev;
+        });
+      });
+    } else {
+      DatasetAssociation.createDatasetAssociations(this.state.datasetId, usersId).then(response => {
+        this.props.onOKRequest('ConnectDatasetModal');
+      }, (error) => {
+        this.setState(prev => {
+          prev.showError = true;
+          return prev;
+        });
+      });
+    }
+
+  };
+
   closeHandler() {
-    // this is the method to handle Cancel click
+    this.props.onCloseRequest();
   }
 
   afterOpenHandler() {
@@ -56,15 +117,20 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   }
 
   handleNeedsApprovalChange(event) {
-    this.setState({
-      needsApproval: event.target.checked
-    });
+    const checked = event.target.checked;
+    this.setState(prev =>{
+      prev.needsApproval = checked;
+      return prev;
+    },
+      () => this.handleStateSubmit() );
   }
 
   moveLItem = (e) => {
 
     let filteredTo = this.state.selectedclients;
-    let filteredFrom = this.state.availableclients.filter(row => {
+    const availableclients = this.state.availableclients.slice();
+
+    let filteredFrom = availableclients.filter(row => {
       if (this.state.available.includes(row.id)) {
         filteredTo.push(row);
         return false;
@@ -73,18 +139,21 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     this.setState(prev => {
-      prev.available = [];
-      prev.available = [];
-      prev.availableclients = filteredFrom;
-      prev.selectedclients = filteredTo;
-      return prev;
-    });
-  }
+        prev.available = [];
+        prev.availableclients = filteredFrom;
+        prev.selectedclients = filteredTo;
+        return prev;
+      },
+      () => this.handleStateSubmit());
+
+  };
 
   moveRItem = (e) => {
 
     let filteredTo = this.state.availableclients;
-    let filteredFrom = this.state.selectedclients.filter(row => {
+    const selectedclients = this.state.selectedclients.slice();
+
+    let filteredFrom = selectedclients.filter(row => {
       if (this.state.selected.includes(row.id)) {
         filteredTo.push(row);
         return false;
@@ -93,25 +162,51 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     this.setState(prev => {
-      prev.available = [];
-      prev.available = [];
-      prev.availableclients = filteredTo;
-      prev.selectedclients = filteredFrom;
-      return prev;
-    });
-  }
+        prev.available = [];
+        prev.availableclients = filteredTo;
+        prev.selectedclients = filteredFrom;
+        return prev;
+      },
+      () => this.handleStateSubmit());
 
+  };
+
+  isSelectedListModified = () => {
+    if (JSON.stringify(this.state.originalDataOwners) === JSON.stringify(this.state.selectedclients)) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  handleStateSubmit = () => {
+    const modifiedList = this.isSelectedListModified();
+
+    if (this.props.dataset.needsApproval !== this.state.needsApproval) {
+      this.setState(prev => {
+        prev.needsApprovalModified = true;
+        return prev;
+      });
+    }
+
+    if (this.props.dataset.needsApproval !== this.state.needsApproval || (this.state.selectedclients.length > 0 && modifiedList)){
+      this.setState({ updatedInfoModal: true });
+    } else {
+      this.setState({ updatedInfoModal: false });
+    }
+
+  };
 
   handleLSelection = (e) => {
     const target = e.target;
     const value = target.value;
     // const options = target.options;
     const selectedOptions = target.selectedOptions;
-    selectedOptions.this.setState(prev => {
+    this.setState(prev => {
         prev.available.push(value);
         return prev;
       });
-  }
+  };
 
   handleRSelection = (e) => {
     const target = e.target;
@@ -122,12 +217,11 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.selected.push(value);
       return prev;
     });
-  }
+  };
 
   render() {
 
-    const { available, selected, availableclients, selectedclients } = this.state;
-    console.log(availableclients, selectedclients);
+    const { available, selected } = this.state;
     return (
 
       BaseModal({
@@ -140,7 +234,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
         iconSize: 'large',
         title: "Connect Dataset with Data Owner",
         description: 'Associate Dataset with Data Owners and check for approval',
-        action: { label: "Submit", handler: this.OKHandler }
+        action: { label: "Submit", handler: this.OKHandler },
+        disableOkBtn: !this.state.updatedInfoModal,
       },
         [
 
@@ -220,8 +315,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
               ]),
             ]),
           ]),
-          div({ isRendered: false }, [
-            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
+          div({ isRendered: this.state.showError}, [
+            Alert({ id: "modal", type: "danger", title: "Server Error", description: "There was an error creating the associations."})
           ]),
         ])
     );
