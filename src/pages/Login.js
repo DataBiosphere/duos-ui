@@ -3,8 +3,9 @@ import { div, a, img, span, h3, h } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
+import { User } from '../libs/ajax';
 
-const clientId="469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com";
+const clientId = "xxxxxx";
 
 class Login extends Component {
   constructor(props) {
@@ -15,29 +16,9 @@ class Login extends Component {
     this.signIn = this.signIn.bind(this);
   }
 
-  componentDidMount() {
-    // console.log("--------------------- A1 -------------");
-    // const data = this.init();
-    //     console.log("--------------------- A1.1 -------------", data);
-    //     this.setState({
-    //       loginButton: data,
-    //       loading: false,
-    //     });
-    // console.log("--------------------- A2 -------------", this.state);
+  async getUser() {
+    return await User.getByEmail(Storage.getGoogleData().profileObj.email);
   }
-
-  init() {
-   // console.log('--------------------- 001 -----------------');
-   //  const googleButton = h(GoogleLogin, {
-   //   className: "btn navbar-duos-button",
-   //   clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
-   //   buttonText: "Sign In",
-   //   onSuccess: this.responseGoogle,
-   //   onFailure: this.forbidden,
-   // });
-   // console.log('--------------------- 002 -----------------', googleButton);
-   // return googleButton;
- }
 
   responseGoogle = async (response) => {
     Storage.setGoogleData(response);
@@ -64,7 +45,7 @@ class Login extends Component {
     Storage.clearStorage();
   };
 
-  loginState(isLogged) {
+  loginState = (isLogged) => {
     this.setState({ isLogged: isLogged }, function () {
       if (isLogged) {
         Storage.setUserIsLogged(isLogged);
@@ -73,9 +54,10 @@ class Login extends Component {
       }
     });
   }
-   signIn() {
+
+  signIn() {
     this.setState({ isLogged: true }, function () {
-      this.props.loginState(this.state.isLogged);
+      this.loginState(this.state.isLogged);
     });
   }
 
@@ -85,30 +67,21 @@ class Login extends Component {
 
   render() {
 
-    console.log('render .............. ' , this.state, clientId);
+    console.log('render .............. ', this.state, clientId);
 
-    // const GoogleLogin, {
-    //   className: "btn navbar-duos-button",
-    //   clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
-    //   'client_id': "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
-    //   buttonText: "Sign In",
-    //   onSuccess: this.responseGoogle,
-    //   onFailure: this.forbidden,
-    // });
-
-    const logBtn =  <GoogleLogin
-      className = "btn navbar-duos-button"
-      clientId = {clientId}
-      buttonText ="Sign In"
-      onSuccess = {this.responseGoogle}
-      onFailure ={this.forbidden}
-      autoLoad = {true}
-      uxMode = "popup"
-      >
+    const logBtn = <GoogleLogin
+      className="btn navbar-duos-button"
+      clientId={clientId}
+      buttonText="Sign In"
+      onSuccess={this.responseGoogle}
+      onFailure={this.forbidden}
+      autoLoad={true}
+      uxMode="popup"
+    >
     </GoogleLogin>;
 
-console.log(logBtn.hasOwnProperty("clientId"));
-console.log(logBtn);
+    console.log(logBtn.hasOwnProperty("clientId"));
+    console.log(logBtn);
 
     return (
       div({ className: "container" }, [
@@ -122,17 +95,9 @@ console.log(logBtn);
               "data-longtitle": "true", "data-onsuccess": "onSignIn", "data-scope": "profile email"
             },
               [a({ id: "link_signIn", onClick: this.signIn }, [
-                // h(GoogleLogin, {
-                //                 //   className: "btn navbar-duos-button",
-                //                 //   clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
-                //                 //   'client_id': "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
-                //                 //   buttonText: "Sign In",
-                //                 //   onSuccess: this.responseGoogle,
-                //                 //   onFailure: this.forbidden,
-                //                 // })
                 logBtn
               ])
-            ]),
+              ]),
             div({ className: "new-sign" }, [span({}, [
               "Don't have a Google Account? Create one",
               a({ href: "https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup", target: "_blank" }, ["here."]),]),]),

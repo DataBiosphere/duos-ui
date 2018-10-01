@@ -52,6 +52,7 @@ class DuosHeader extends Component {
 
     if (isLogged) {
       currentUser = Storage.getCurrentUser();
+      console.log(currentUser);
       isChairPerson = currentUser.isChairPerson;
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
