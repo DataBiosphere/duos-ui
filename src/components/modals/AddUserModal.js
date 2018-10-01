@@ -20,18 +20,19 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props);
     this.initForm();
   }
 
-  initForm() {
+  async initForm() {
     if (this.props.user && this.props.user !== undefined) {
+
+      const user = await User.getByEmail(this.props.user.email);
       this.setState({
         mode: 'Edit',
-        roles: this.props.user.roles.map((role, ix) => role.name),
-        displayName: this.props.user.displayName,
-        email: this.props.user.email,
-        user: this.props.user,
+        roles: user.roles, //this.props.user.roles.map((role, ix) => role.name),
+        displayName: user.displayName, //this.props.user.displayName,
+        email: user.email, // this.props.user.email,
+        user: user, //this.props.user,
         delegateDacUser: {
           needsDelegation: false,
           delegateCandidates: []
@@ -101,8 +102,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         const wasDataOwner = this.userWas(USER_ROLES.dataOwner);
         const wasResearcher = this.userWas(USER_ROLES.researcher);
 
-        console.log(wasChairperson, wasMember, wasDataOwner, wasResearcher);
-
         const editUser = {
           displayName: this.state.displayName,
           email: this.state.email,
@@ -113,7 +112,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           researcher: this.state.user.researcher,
           status: this.state.user.status,
         };
-        User.update(editUser, this.state.user.dacUserId);
+
+        const payload = {
+          updatedUser: editUser
+        }
+        User.update(payload, this.state.user.dacUserId);
         break;
 
       default:
@@ -191,7 +194,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   memberChanged = (e) => {
     const checkState = e.target.checked;
     const role = USER_ROLES.member;
-    console.log(checkState, role);
+
     // need to set the role in roles
     if (this.state.wasMember) {
       if (!checkState) {
@@ -222,7 +225,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   chairpersonChanged = (e) => {
     const checkState = e.target.checked;
     const role = USER_ROLES.chairperson;
-    console.log(checkState, role);
+
     // need to set the role in roles
     if (this.state.wasChairperson) {
       if (!checkState) {
@@ -252,7 +255,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   dataOwnerChanged = (e) => {
     const checkState = e.target.checked;
     const role = USER_ROLES.dataOwner;
-    console.log(checkState, role);
+
     // need to set the role in roles
     if (this.state.wasDataOwner) {
       if (!checkState) {
@@ -281,7 +284,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   researcherChanged = (e) => {
     const checkState = e.target.checked;
     const role = USER_ROLES.researcher;
-    console.log(checkState, role);
+
     // need to set the role in roles
     if (this.state.wasResearcher) {
       if (!checkState) {
@@ -395,7 +398,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         action: { label: this.state.mode === 'Add' ? "Add" : 'Save', handler: this.OKHandler }
       },
         [
-          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
+          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
             div({ className: "form-group first-form-group" }, [
               label({ id: "lbl_name", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Name"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
@@ -405,7 +408,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   id: "txt_name",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "User name",
-                  required: "true",
+                  required: true,
                   value: displayName,
                   onChange: this.handleChange
                 }),
@@ -421,7 +424,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   id: "txt_email",
                   className: "form-control col-lg-12 vote-input",
                   placeholder: "e.g. username@broadinstitute.org",
-                  required: "true",
+                  required: true,
                   value: email,
                   onChange: this.handleChange
                 }),

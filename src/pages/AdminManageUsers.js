@@ -10,7 +10,7 @@ import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AdminManageUsers extends Component {
 
-  limit = 5;
+  // limit = 5;
 
   constructor(props) {
     super(props);
@@ -19,7 +19,7 @@ class AdminManageUsers extends Component {
       searchText: '',
       userList: [],
       showAddUserModal: false,
-      limit: this.limit,
+      limit: 5,
       currentPage: null,
     };
   }
@@ -29,28 +29,28 @@ class AdminManageUsers extends Component {
   }
 
   async getUsers() {
-    User.list().then(users => {
+    const users = await User.list();
 
-      let userList = users.map(user => {
-        user.researcher = false;
-        user.roles.forEach(role => {
-          if (role.name === 'Researcher') {
-            user.status = role.status;
-            user.completed = role.profileCompleted;
-            user.researcher = true;
-          }
-        });
-        user.key = user.id;
-        return user;
+    let userList = users.map(user => {
+      user.researcher = false;
+      user.roles.forEach(role => {
+        if (role.name === 'Researcher') {
+          user.status = role.status;
+          user.completed = role.profileCompleted;
+          user.researcher = true;
+        }
       });
-
-      this.setState(prev => {
-        prev.loading = false;
-        prev.currentPage = 1;
-        prev.userList = userList;
-        return prev;
-      });
+      user.key = user.id;
+      return user;
     });
+
+    this.setState(prev => {
+      prev.loading = false;
+      prev.currentPage = 1;
+      prev.userList = userList;
+      return prev;
+    });
+
   }
 
   search = (e) => {
@@ -88,6 +88,7 @@ class AdminManageUsers extends Component {
 
   editUser = (user) => (e) => {
     this.setState(prev => {
+      prev.userEmail = user.email;
       prev.user = user;
       prev.showAddUserModal = true;
       return prev;
@@ -126,7 +127,7 @@ class AdminManageUsers extends Component {
     if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentPage, searchUserText } = this.state;
-    
+
     return (
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
@@ -153,7 +154,7 @@ class AdminManageUsers extends Component {
               onOKRequest: this.okModal,
               onCloseRequest: this.closeModal,
               onAfterOpen: this.afterModalOpen,
-              user: this.state.user
+              user: this.state.user,
             }),
 
           ])

@@ -1,7 +1,3 @@
-import { Storage } from "./storage";
-import { Researcher } from "./ajax";
-import React from "react";
-
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';

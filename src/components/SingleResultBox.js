@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { div, hh, label, hr, span, input } from 'react-hyperscript-helpers';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
 
 export const SingleResultBox = hh(class SingleResultBox extends Component {
@@ -20,8 +19,8 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
   render() {
 
     //if reminder sent succesfully
-    const dialogTitle = "Email Notification Sent";
-    const dialogColor = this.props.color;
+    // const dialogTitle = "Email Notification Sent";
+    // const dialogColor = this.props.color;
     // const reminderSent = this.props.reminderSent;
 
     //if error sending reminder

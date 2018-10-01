@@ -45,7 +45,7 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-    let isAlumni = false;
+    // let isAlumni = false;
 
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
@@ -57,7 +57,7 @@ class DuosHeader extends Component {
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
-      isAlumni = currentUser.isAlumni;
+      // isAlumni = currentUser.isAlumni;
     }
 
     return (

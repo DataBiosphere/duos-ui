@@ -112,15 +112,6 @@ class DulResultRecords extends Component {
   };
 
   downloadDUL = (e) => {
-    // const consentId = this.state.consentId; //  this.props.match.params.consentId;
-    // console.log(consentId);
-    // Files.getDulFile(consentId).then(
-    //   blob => {
-    //     if (blob.size !== 0) {
-    //       this.createBlobFile(this.state.consentName, blob);
-    //     }
-    //   }
-    // );
     Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
   };
 
@@ -137,8 +128,6 @@ class DulResultRecords extends Component {
     if (this.state.loading) { return LoadingIndicator(); }
 
     const { chartData } = this.state;
-
-    console.log(chartData);
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe", isRendered: this.state.consentGroupName }, [this.state.consentGroupNsame]),
@@ -210,7 +199,6 @@ class DulResultRecords extends Component {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
-                      console.log(vm);
                       return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
                           id: "dulSingleResult_" + vIndex,

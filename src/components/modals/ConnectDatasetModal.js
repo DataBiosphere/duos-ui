@@ -201,7 +201,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     const target = e.target;
     const value = target.value;
     // const options = target.options;
-    const selectedOptions = target.selectedOptions;
+    // const selectedOptions = target.selectedOptions;
     this.setState(prev => {
         prev.available.push(value);
         return prev;

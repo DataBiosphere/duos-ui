@@ -17,13 +17,14 @@ class AccessResultRecords extends Component {
   constructor(props) {
     super(props);
     this.state = this.initialState();
-
   }
 
   async componentDidMount() {
+    const currentUser = await Storage.getCurrentUser();
     this.loadData();
     this.setState({
-      loading: true
+      loading: true,
+      currentUser: currentUser
     });
   }
 
