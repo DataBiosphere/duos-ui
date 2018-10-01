@@ -14,7 +14,6 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
       toDashBoard: false,
       loading: true
     };
-    this.login = props.loginState;
     this.getUser = this.getUser.bind(this);
   }
 
@@ -51,19 +50,16 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     console.log('---- antes ----');
     const googleButton = await h(GoogleLogin, {
       className: "btn navbar-duos-button",
-      clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
+      clientId: "xxxx",
       buttonText: "Sign In",
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden,
     });
-  console.log('--------- despues -----', googleButton);
 
     this.setState( prev => {
       prev.googleButton = googleButton;
       prev.loading = false;
       return prev;
-    }, () => {
-      console.log('--------- en state -----', googleButton);
     })
   }
 
@@ -71,8 +67,8 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     return await User.getByEmail(Storage.getGoogleData().profileObj.email);
   }
 
-  async componentDidMount() {
-    await this.getGoogleConfig();
+  componentDidMount() {
+    this.getGoogleConfig();
   }
 
   render() {
@@ -83,7 +79,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
 
     // const googleButton = h(GoogleLogin, {
     //   className: "btn navbar-duos-button",
-    //   clientId: "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com",
+    //   clientId: "xxxxx",
     //   buttonText: "Sign In",
     //   onSuccess: this.responseGoogle,
     //   onFailure: this.forbidden,

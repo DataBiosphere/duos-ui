@@ -22,7 +22,7 @@ class Login extends Component {
 
   responseGoogle = async (response) => {
     Storage.setGoogleData(response);
-    await this.getUser().then(
+    this.getUser().then(
       user => {
         const currentUserRoles = user.roles.map(roles => roles.name);
         user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
@@ -33,7 +33,7 @@ class Login extends Component {
         user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
 
         Storage.setCurrentUser(user);
-        this.login(true);
+        Storage.setUserIsLogged(true);
         this.props.history.push(this.redirect(user));
       },
       error => {
@@ -53,7 +53,7 @@ class Login extends Component {
         Storage.clearStorage();
       }
     });
-  }
+  };
 
   signIn() {
     this.setState({ isLogged: true }, function () {
@@ -61,27 +61,29 @@ class Login extends Component {
     });
   }
 
-  onRequest = () => {
-    console.log('loading ..... ');
-  }
+  // returns the initial page to be redirected when a user logs in
+  redirect = (user) => {
+    let page = '/';
+    if (Storage.userIsLogged()) {
+      page = user.isChairPerson ? 'chair_console' :
+        user.isMember ? 'member_console' :
+          user.isAdmin ? 'admin_console' :
+            user.isResearcher ? 'dataset_catalog' :
+              user.isDataOwner ? 'data_owner_console' :
+                user.isAlumni ? 'summary_votes' : '/';
+    }
+    return page
+  };
 
   render() {
 
-    console.log('render .............. ', this.state, clientId);
-
-    const logBtn = <GoogleLogin
-      className="btn navbar-duos-button"
-      clientId={clientId}
-      buttonText="Sign In"
-      onSuccess={this.responseGoogle}
-      onFailure={this.forbidden}
-      autoLoad={true}
-      uxMode="popup"
-    >
-    </GoogleLogin>;
-
-    console.log(logBtn.hasOwnProperty("clientId"));
-    console.log(logBtn);
+    const googleLoginButton = h(GoogleLogin, {
+      className:"btn navbar-duos-button",
+      clientId:clientId,
+      buttonText : "Sign In",
+      onSuccess : this.responseGoogle,
+      onFailure : this.forbidden
+    });
 
     return (
       div({ className: "container" }, [
@@ -95,7 +97,7 @@ class Login extends Component {
               "data-longtitle": "true", "data-onsuccess": "onSignIn", "data-scope": "profile email"
             },
               [a({ id: "link_signIn", onClick: this.signIn }, [
-                logBtn
+                googleLoginButton
               ])
               ]),
             div({ className: "new-sign" }, [span({}, [
