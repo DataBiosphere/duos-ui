@@ -164,6 +164,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     }
     this.setState({showDialogSubmit: false});
+    this.props.history.push({ pathname: 'dataset_catalog'});
   };
 
   dialogHandlerSave = (answer) => (e) => {
@@ -176,6 +177,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     }
     this.setState({showDialogSave: false});
+    this.props.history.push({ pathname: 'dataset_catalog'});
   };
 
   render() {
@@ -546,7 +548,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         name: "isThePI",
                         type: "radio",
                         onChange: this.handlePIChange,
-                        checked: !isThePI,
+                        checked: (isThePI === undefined? undefined: !isThePI),
                         onClick: this.clearNotRelatedPIFields,
                         required: true
                       }),
