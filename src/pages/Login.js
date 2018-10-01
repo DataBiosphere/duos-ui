@@ -4,6 +4,7 @@ import GoogleLogin from 'react-google-login';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { User } from '../libs/ajax';
+import './Login.css';
 
 const clientId = "xxxx";
 
@@ -61,12 +62,18 @@ class Login extends Component {
   render() {
 
     const googleLoginButton = h(GoogleLogin, {
-      className:"btn navbar-duos-button",
-      clientId:clientId,
-      buttonText : "Sign In",
-      onSuccess : this.responseGoogle,
-      onFailure : this.forbidden
-    });
+      style: {"border":"1px solid gray"},
+      clientId: clientId,
+      onSuccess: this.responseGoogle,
+      onFailure: this.forbidden
+    }, [
+        div({ id: "gSignInWrapper" }, [
+          div({ id: "customBtn", className: "customBtnWrapper" }, [
+            span({ className: "icon" }),
+            span({ className: "buttonText" }, ["Sign in with Google"])
+          ])
+        ])
+      ]);
 
     return (
       div({ className: "container" }, [
@@ -75,14 +82,9 @@ class Login extends Component {
           div({ className: "landing-box-title" }, [h3({}, ["Broad Data Use Oversight System"]),]),
           div({ className: "landing-box-google-signin" }, [
             div({ className: "new-sign" }, ["Sign in with a google account"]),
-            div({
-              className: "custom-g-signin2 g-signin2", "data-theme": "dark", "data-width": "220", "data-height": "40",
-              "data-longtitle": "true", "data-onsuccess": "onSignIn", "data-scope": "profile email"
-            },
-              [a({ id: "link_signIn", onClick: this.signIn }, [
-                googleLoginButton
-              ])
-              ]),
+            // a({ id: "link_signIn",  onClick: this.signIn }, [ 
+              googleLoginButton,
+            // ]),
             div({ className: "new-sign" }, [span({}, [
               "Don't have a Google Account? Create one",
               a({ href: "https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup", target: "_blank" }, ["here."]),]),]),
