@@ -10,11 +10,8 @@ class DuosHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLogged: props.isLogged,
-      googleButton: props.button,
-      showHelpModal: false,
+      showHelpModal: false
     };
-    this.signIn = this.signIn.bind(this);
     this.signOut = this.signOut.bind(this);
     this.toggleNavBar = this.toggleNavBar.bind(this);
   };
@@ -52,6 +49,7 @@ class DuosHeader extends Component {
 
     if (isLogged) {
       currentUser = Storage.getCurrentUser();
+      console.log(currentUser);
       isChairPerson = currentUser.isChairPerson;
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
@@ -101,7 +99,7 @@ class DuosHeader extends Component {
                 li({}, [a({ id: "link_about", className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }), "About"]),]),
                 li({}, [a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }), "Help"]),]),
                 li({}, [
-                  a({ id: "link_signIn", onClick: this.signIn }, [this.state.googleButton])
+                  a({ className: "navbar-duos-button", href: "/login"},["Sign In"])
                   // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                   // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
@@ -172,24 +170,13 @@ class DuosHeader extends Component {
     );
   }
 
-  isUserLogged() {
-    return this.state.isLogged;
-  }
-
   toggled() {
   }
 
-  signIn() {
-    this.setState({ isLogged: true }, function () {
-      this.props.loginState(this.state.isLogged);
-    });
-  }
-
   signOut() {
-    this.setState({ isLogged: false }, function () {
-      this.props.loginState(this.state.isLogged);
-      window.location.href = "/";
-    });
+    Storage.setUserIsLogged(false);
+    Storage.clearStorage();
+    window.location.href = "/";
   }
 
   toggleNavBar() {

@@ -11,17 +11,16 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     super(props);
     this.state = {
       googleButton: null,
-      toDashBoard: false
+      toDashBoard: false,
+      loading: true
     };
-    this.login = props.loginState;
     this.getUser = this.getUser.bind(this);
   }
 
-  responseGoogle = (response) => {
+  responseGoogle = async (response) => {
     Storage.setGoogleData(response);
-    this.getUser().then(
+    await this.getUser().then(
       user => {
-
         const currentUserRoles = user.roles.map(roles => roles.name);
         user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
         user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
@@ -48,26 +47,47 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   };
 
   async getGoogleConfig() {
-    const googleButton = h(GoogleLogin, {
+    console.log('---- antes ----');
+    const googleButton = await h(GoogleLogin, {
       className: "btn navbar-duos-button",
-      clientId: "complete-clientId",
+      clientId: "xxxx",
       buttonText: "Sign In",
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden,
     });
-    this.setState({ googleButton: googleButton })
+
+    this.setState( prev => {
+      prev.googleButton = googleButton;
+      prev.loading = false;
+      return prev;
+    })
   }
 
   async getUser() {
     return await User.getByEmail(Storage.getGoogleData().profileObj.email);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.getGoogleConfig();
   }
 
   render() {
-    return (this.state.googleButton);
+// if (this.state.loading === true) {
+//   return null;
+// }
+    console.log('--------------------- 003 -----------------');
+
+    // const googleButton = h(GoogleLogin, {
+    //   className: "btn navbar-duos-button",
+    //   clientId: "xxxxx",
+    //   buttonText: "Sign In",
+    //   onSuccess: this.responseGoogle,
+    //   onFailure: this.forbidden,
+    // });
+    // console.log('--------------------- 004 -----------------');
+
+    console.log("RENDERIZA BOTON en googleLogin", this.state.googleButton );
+    return this.state.googleButton;
   }
 
   // returns the initial page to be redirected when a user logs in
@@ -77,7 +97,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
       page = user.isChairPerson ? 'chair_console' :
         user.isMember ? 'member_console' :
           user.isAdmin ? 'admin_console' :
-            user.isResearcher ? 'dataset_catalog' :
+            user.isResearcher ? 'dataset_catalog?reviewProfile' :
               user.isDataOwner ? 'data_owner_console' :
                 user.isAlumni ? 'summary_votes' : '/';
     }

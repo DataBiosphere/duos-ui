@@ -95,25 +95,6 @@
   vertical-align: 50%;
 }
 
-.auth-button.linkedin,
-.auth-button.linkedin:hover {
-    height: 34px;
-    width: 178px;
-    display: block;
-    background-size: cover !important;
-    border: none;
-    border-radius: 3px;
-    transition: all 0.2s ease;
-}
-
-.auth-button.linkedin {
-    background: url(/images/linkedin-sign-in.png) no-repeat;
-}
-
-.auth-button.linkedin:hover {
-    background: url(/images/linkedin-sign-in-hover.png) no-repeat;
-}
-
 .auth-button {
   margin-top: 3px;
 }
@@ -176,5 +157,50 @@
   margin-top: 2px;
 }
 
+fieldset {
+  min-width: 100%;
+}
 
+.select-autocomplete .select__control {
+  border: 1px solid #999999;
+  background: #ffffff;
+}
 
+.select-autocomplete .select__control--is-focused,
+.select-autocomplete .select__control--is-focused:hover {
+  border: 1px solid  rgba(47, 164, 231, 0.75);
+  box-shadow: 0 0 3px rgba(47, 164, 231, 0.5);
+}
+
+.select-autocomplete .select__multi-value {
+  background: rgba(96, 59, 155, 0.2);
+  border-radius: 3px;
+  border: none !important;
+}
+
+.select-autocomplete .select__multi-value__label {
+  font-size: 14px;
+  font-family: "Roboto", sans-serif;
+  height: 26px;
+  line-height: 25px;
+  padding: 1px 10px 0 10px;
+  color: #603B9B;
+  font-weight: 500;
+}
+
+[disabled] .fileUpload.download-pdf,
+[disabled] .fileUpload.download-pdf:hover,
+[disabled] .select-autocomplete .select__control {
+  color: #cccccc !important;
+  pointer-events: none;
+  background: #eeeeee;
+}
+
+[disabled] .fileUpload.download-pdf,
+[disabled] .fileUpload.download-pdf:hover {
+  cursor: default !important;
+}
+
+[disabled] .select-autocomplete {
+  cursor: not-allowed !important;
+}

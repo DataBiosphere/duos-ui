@@ -32,6 +32,7 @@ class ResearcherConsole extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.review = this.review.bind(this);
   }
 
   handleDarPageChange = page => {
@@ -70,22 +71,21 @@ class ResearcherConsole extends Component {
     this.setState({ showModal: false });
   }
 
-  review = (e) => {
+  async review (e) {
     const dataRequestId = e.target.getAttribute('value');
 
-    DAR.getDarFields(dataRequestId, null).then(
-      data => {
-        let formData = data;
-        formData.datasetId = [];
-        formData.datasetDetail.forEach(
-          detail => {
-            let obj = {};
-            obj.id = detail.datasetId;
-            obj.concatenation = detail.datasetId + "  " + detail.name;
-            formData.datasetId.push(obj);
-          });
-        this.props.history({ pathname: 'dar_application', props: formData });
+    let darFields = await DAR.getDarFields(dataRequestId, null);
+    let formData = darFields;
+    formData.datasetId = [];
+    formData.datasetDetail.forEach(
+      detail => {
+        let obj = {};
+        obj.id = detail.datasetId;
+        obj.concatenation = detail.datasetId + "  " + detail.name;
+        formData.datasetId.push(obj);
       });
+    this.props.history.push({ pathname: 'dar_application', props: {formData: formData} });
+
   };
 
   cancelDar = (e) => {
@@ -94,11 +94,12 @@ class ResearcherConsole extends Component {
   };
 
   resume = (e) => {
-    // const dataRequestId = e.target.getAttribute('value');
-    DAR.getPartialDarRequest(this.state.currentUser.dacUserId).then(
+    const dataRequestId = e.target.getAttribute('value');
+    
+    DAR.getPartialDarRequest(dataRequestId).then(
       data => {
         let formData = data;
-        this.props.history({ pathname: 'dar_application', props: formData });
+        this.props.history.push({ pathname: 'dar_application',  props: {formData: formData}});
       });
   };
 
@@ -131,7 +132,7 @@ class ResearcherConsole extends Component {
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
-    
+
     const { currentUser, currentDarPage, darLimit, currentPartialDarPage, partialDarLimit } = this.state;
 
     return (
