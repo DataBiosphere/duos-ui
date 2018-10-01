@@ -41,8 +41,8 @@ export default ( props ) => (
   <Switch>
     <Route exact path='/' component={Home} props={props} />
     <Route exact path='/home' component={Home} props={props} />
-    <Route path='/login' component={() => <Login {...props}/>} />
-    {/*<Route path='/login' component={Login} />*/}
+    {/*<Route path='/login' component={() => <Login {...props}/>} />*/}
+    <Route path='/login' component={Login} props={props} />
     <Route path='/home_help' component={HomeHelp} />
     <Route path='/home_about' component={HomeAbout} />
     <Route path='/home_register' component={HomeRegister} props={props} />
