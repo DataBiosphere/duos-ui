@@ -216,11 +216,17 @@ class DataAccessRequestApplication extends Component {
     const field = e.target.name;
     const value = e.target.checked;
     this.setState(prev => {
-      prev.formData[field] = value; return prev;
+      prev.formData[field] = value; 
+      return prev;
     }, () => this.checkValidations());
   };
 
   handleRadioChange = (e, field, value) => {
+    if(value === 'true') {
+      value = true;
+    } else if(value === 'false') {
+      value = false;
+    }
     this.setState(prev => {
       prev.formData[field] = value; return prev;
     }, () => this.checkValidations());
