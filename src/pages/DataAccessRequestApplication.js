@@ -214,7 +214,7 @@ class DataAccessRequestApplication extends Component {
 
   handleCheckboxChange = (e) => {
     const field = e.target.name;
-    let value = e.target.checked;
+    const value = e.target.checked;
     this.setState(prev => {
       prev.formData[field] = value; 
       return prev;
