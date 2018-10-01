@@ -37,8 +37,7 @@ import Election404 from "./pages/Election404";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import { USER_ROLES } from './libs/utils';
 
-export default ({ props }) => (
-
+export default ( props ) => (
   <Switch>
     <Route exact path='/' component={Home} props={props} />
     <Route exact path='/home' component={Home} props={props} />
