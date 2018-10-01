@@ -5,7 +5,7 @@ import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { User } from '../libs/ajax';
 
-const clientId = "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com";
+const clientId = "xxxx";
 
 class Login extends Component {
   constructor(props) {
