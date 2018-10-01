@@ -5,7 +5,7 @@ import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { User } from '../libs/ajax';
 
-const clientId = "xxxxxx";
+const clientId = "469451274261-mhatdmqbta3boko0nc9s0ltnhe7q8hc7.apps.googleusercontent.com";
 
 class Login extends Component {
   constructor(props) {
@@ -13,7 +13,6 @@ class Login extends Component {
     this.state = {
       loading: true
     };
-    this.signIn = this.signIn.bind(this);
   }
 
   async getUser() {
@@ -44,22 +43,6 @@ class Login extends Component {
   forbidden = (response) => {
     Storage.clearStorage();
   };
-
-  loginState = (isLogged) => {
-    this.setState({ isLogged: isLogged }, function () {
-      if (isLogged) {
-        Storage.setUserIsLogged(isLogged);
-      } else {
-        Storage.clearStorage();
-      }
-    });
-  };
-
-  signIn() {
-    this.setState({ isLogged: true }, function () {
-      this.loginState(this.state.isLogged);
-    });
-  }
 
   // returns the initial page to be redirected when a user logs in
   redirect = (user) => {

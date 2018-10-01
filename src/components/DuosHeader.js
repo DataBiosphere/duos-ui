@@ -174,10 +174,6 @@ class DuosHeader extends Component {
   }
 
   signOut() {
-    // this.setState({ isLogged: false }, function () {
-    //   this.props.loginState(this.state.isLogged);
-    //
-    // });
     Storage.setUserIsLogged(false);
     Storage.clearStorage();
     window.location.href = "/";
