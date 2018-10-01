@@ -37,15 +37,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.getResearcherProfile();
   }
 
-  componentDidUpdate() {
-    // TODO review from here to control form validation
-  }
+  componentDidUpdate() {}
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
     console.log(profile);
-    // profile.isThePI = JSON.parse(profile.isThePI);
-    // profile.completed = JSON.parse(profile.completed);
+
     this.setState({
       loading: false,
       researcherProfile: profile,
@@ -69,7 +66,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let value = event.target.value;
     let researcherProfile = this.state.researcherProfile;
     researcherProfile[field] = value;
-    console.log(field, value);
     this.setState({ researcherProfile: researcherProfile }, () => {});
 
     if (field === 'profileAcademicEmail') {
@@ -87,16 +83,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   }
 
-  validateForm() {
-
-  }
-
   handleRadioChange = (e, field, value) => {
     this.setState(prev => { prev.formData[field] = value; return prev; });
   };
 
   handlePIChange(event) {
-    console.log(event.target.name, event.target.value);
     let researcherProfile = this.state.researcherProfile;
     if (event.target.id === 'rad_isThePI') {
       researcherProfile.isThePI = true;
@@ -108,8 +99,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handlePI2Change(event) {
-    console.log(event.target.name);
-    console.log(event.target.value);
     let researcherProfile = this.state.researcherProfile;
     if (event.target.id === 'rad_doHavePI') {
       researcherProfile.havePI = true;
@@ -121,47 +110,92 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   clearNotRelatedPIFields() {
-
-  }
-
-  clearCommonsFields() {
-
+    this.clearCommonsFields();
+    this.setState(prev => {
+      prev.researcherProfile.havePi = undefined;
+      return prev;
+    }, () => {});
+    this.clearPIData();
   }
 
   clearNoHasPIFields() {
+    this.clearPIData();
+    this.clearCommonsFields();
+  }
 
+  clearCommonsFields() {
+    this.setState(prev => {
+      prev.researcherProfile.eRACommonsID = undefined;
+      prev.researcherProfile.pubmedID = undefined;
+      prev.researcherProfile.scientificURL = undefined;
+      return prev;
+    }, () => {});
+  }
+
+  clearPIData() {
+    this.setState(prev => {
+      prev.researcherProfile.piName = undefined;
+      prev.researcherProfile.piEmail = undefined;
+      return prev;
+    }, () => {});
   }
 
   saveOProfile() {
 
   }
 
-  saveProfile() {
+  saveProfile(event) {
+    event.preventDefault();
     this.setState({ showDialogSave: true });
   }
 
   submit(event) {
-    if (this.state.fieldStatus) {
-      console.log(this.state.fieldStatus);
-    }
-
-    Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     event.preventDefault();
     this.setState({ showDialogSubmit: true });
   }
 
   dialogHandlerSubmit = (answer) => (e) => {
-    this.setState({ showDialogSubmit: false });
+    if (answer === true) {
+      this.setState(prev => {
+        prev.researcherProfile.completed = true;
+        return prev;
+      }, () => {
+      });
+      Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
+    }
+    this.setState({showDialogSubmit: false});
   };
 
   dialogHandlerSave = (answer) => (e) => {
-    this.setState({ showDialogSave: false });
+    if (answer === true) {
+      this.setState(prev => {
+        prev.researcherProfile.completed = false;
+        return prev;
+      }, () => {
+      });
+      Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
+    }
+    this.setState({showDialogSave: false});
   };
 
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
-    
+
+    let completed = this.state.researcherProfile.completed;
+    if (completed !== undefined) {
+      completed = JSON.parse(this.state.researcherProfile.completed);
+    }
+    let isThePI = undefined;
+    if (this.state.researcherProfile.isThePI !== undefined) {
+      isThePI = JSON.parse(this.state.researcherProfile.isThePI);
+    }
+
+    let havePI = undefined;
+    if (this.state.researcherProfile.havePI !== undefined) {
+      havePI = JSON.parse(this.state.researcherProfile.havePI);
+    }
+
     const showValidationMessages = true;
 
     return (
@@ -498,7 +532,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         name: "isThePI",
                         type: "radio",
                         onChange: this.handlePIChange,
-                        checked: JSON.parse(this.state.researcherProfile.isThePI),
+                        checked: isThePI,
                         onClick: this.clearNotRelatedPIFields,
                         required: true
                       }),
@@ -512,7 +546,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         name: "isThePI",
                         type: "radio",
                         onChange: this.handlePIChange,
-                        checked: !JSON.parse(this.state.researcherProfile.isThePI),
+                        checked: !isThePI,
                         onClick: this.clearNotRelatedPIFields,
                         required: true
                       }),
@@ -522,13 +556,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ]),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.isThePI === '' && showValidationMessages)
+                    isRendered: (isThePI === '' && showValidationMessages)
                     // researcherForm.havePI.$invalid && showValidationMessages
                   }, ["Required field"])
                 ])
               ]),
 
-              div({ isRendered: this.state.researcherProfile.isThePI === 'false' || this.state.researcherProfile.isThePI === false, className: "form-group" }, [
+              div({ isRendered: isThePI === false, className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   label({
                     className: "control-label ",
@@ -537,17 +571,18 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  div({ className: "radio-inline", disabled: this.state.researcherProfile.isThePI !== false }, [
+                  div({ className: "radio-inline", disabled: isThePI !== false }, [
                     label({ id: "lbl_doHavePI", htmlFor: "rad_doHavePI", className: "radio-wrapper" }, [
                       input({
                         id: "rad_doHavePI",
                         name: "havePI",
                         type: "radio",
                         onChange: this.handlePI2Change,
-                        value: this.state.researcherProfile.havePI,
+                        value: havePI,
+                        checked: havePI,
                         onClick: this.clearCommonsFields,
-                        disabled: this.state.researcherProfile.isThePI !== false,
-                        required: this.state.researcherProfile.isThePI === false
+                        disabled: isThePI !== false,
+                        required: isThePI === false
                       }),
                       span({ className: "radio-check" }),
                       span({ className: "radio-label" }, ["Yes"])
@@ -559,10 +594,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         name: "havePI",
                         type: "radio",
                         onChange: this.handlePI2Change,
-                        value: this.state.researcherProfile.havePI,
+                        value: havePI,
+                        checked: !havePI,
                         onClick: this.clearNoHasPIFields,
-                        disabled: this.state.researcherProfile.isThePI !== false,
-                        required: this.state.researcherProfile.isThePI === false
+                        disabled: isThePI !== false,
+                        required: isThePI === false
                       }),
                       span({ className: "radio-check" }),
                       span({ className: "radio-label" }, ["No"])
@@ -579,7 +615,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     label({ id: "lbl_profilePIName", className: "control-label" }, ["Principal Investigator Name*"]),
                     input({
                       id: "profilePIName",
-                      name: "pIName",
+                      name: "piName",
                       type: "text",
                       className: "form-control ",
                       //  + (researcherForm.profilePIName.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
@@ -600,7 +636,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }, ["Principal Investigator Email Address*"]),
                     input({
                       id: "profilePIEmail",
-                      name: "pIEmail",
+                      name: "piEmail",
                       type: "email",
                       className: "form-control ",
                       //  + (researcherForm.profilePIEmail.$invalid && showValidationMessages) ? 'form-control required-field-error' : "",                   
@@ -636,8 +672,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       className: "control-label"
                     }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
                     input({
-                      id: "profilePubmedID",
-                      name: "profilePubmedID",
+                      id: "pubmedID",
+                      name: "pubmedID",
                       type: "text",
                       className: "form-control",
                       onChange: this.handleChange,
@@ -662,7 +698,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ isRendered: (this.state.researcherProfile.isThePI === true || this.state.researcherProfile.havePI === false), className: "form-group" }, [
+              div({ isRendered: (isThePI === true || havePI === false), className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                   label({
                     id: "lbl_profilePubmedID",
@@ -701,19 +737,25 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     a({
                       onClick: this.submit, disabled: false, className: "common-background" // revisar disabled
                     }, [
-                        span({ isRendered: this.state.researcherProfile.completed }, ["Submit"]),
-                        span({ isRendered: !this.state.researcherProfile.completed }, ["Update"]),
+                        span({ isRendered: completed }, ["Submit"]),
+                        span({ isRendered: !completed }, ["Update"]),
                       ]),
                   ]),
                   ConfirmationDialog({
-                    title: 'Submit Profile', color: 'common', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                    title: 'Submit Profile',
+                    color: 'common',
+                    showModal: this.state.showDialogSubmit,
+                    action: { label: "Yes", handler: this.dialogHandlerSubmit }
                   }, [div({ className: "dialog-description" }, ["Are you sure you want to submit your Profile information?"]),]),
 
-                  li({ isRendered: !this.state.researcherProfile.completed, className: "f-right multi-step-save" }, [
+                  li({ isRendered: !completed, className: "f-right multi-step-save" }, [
                     a({ onClick: this.saveProfile, className: "common-color" }, ["Continue later"]),
                   ]),
                   ConfirmationDialog({
-                    title: 'Continue later', color: 'common', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                    title: 'Continue later',
+                    color: 'common',
+                    showModal: this.state.showDialogSave,
+                    action: { label: "Yes", handler: this.dialogHandlerSave }
                   }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."]),])
                 ])
               ])
