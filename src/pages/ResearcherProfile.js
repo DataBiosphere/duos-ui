@@ -6,19 +6,14 @@ import { PageHeading } from '../components/PageHeading';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   constructor(props) {
     super(props);
+    this.state = this.initialState();
 
-    this.state = {
-      loading: true,
-      researcherProfile: {},
-      fieldStatus: {},
-      showDialogSubmit: false,
-      showDialogSave: false,
-    };
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handlePIChange = this.handlePIChange.bind(this);
@@ -30,60 +25,82 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.submit = this.submit.bind(this);
     this.deleteNihAccount = this.deleteNihAccount.bind(this);
     this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
-    this.setInitialState();
   }
 
   componentDidMount() {
+
     this.getResearcherProfile();
   }
 
-  setInitialState() {
-    this.setState(prev => {
-      prev.researcherProfile.academicEmail = '';
-      prev.researcherProfile.address1 = '';
-      prev.researcherProfile.address2 = '';
-      prev.researcherProfile.city = '';
-      prev.researcherProfile.country = '';
-      prev.researcherProfile.department = '';
-      prev.researcherProfile.division = '';
-      prev.researcherProfile.institution = '';
-      prev.researcherProfile.profileName = '';
-      prev.researcherProfile.pubmedID = '';
-      prev.researcherProfile.scientificURL = '';
-      prev.researcherProfile.state = '';
-      prev.researcherProfile.zipcode = '';
-      prev.formData.nihUsername = '';
-      // prev.loading = false;
-    }, () => {});
+  initialState() {
+    return {
+      loading: true,
+      fieldStatus: {},
+      showDialogSubmit: false,
+      showDialogSave: false,
+      researcherProfile: {
+        academicEmail: '',
+        address1: '',
+        address2: '',
+        city: '',
+        completed: '',
+        country: '',
+        department: '',
+        division: '',
+        eRACommonsID: '',
+        havePI: 'false',
+        institution: '',
+        isThePI: 'false',
+        linkedIn: '',
+        nihUsername: '',
+        orcid: '',
+        piEmail: '',
+        piName: '',
+        profileName: '',
+        pubmedID: '',
+        researcherGate: '',
+        scientificURL: '',
+        state: '',
+        zipcode: '',
+      }
+    };
   }
-
-  componentDidUpdate() {}
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
-    console.log(profile);
-    this.setState({
-      loading: false,
-      researcherProfile: profile,
-      formData: {
-        nihUsername: 'nihUsername',
-        eraExpirationCount: 10,
+    this.setState(prev => {
+      prev.researcherProfile.zipcode = profile.zipcode;
+      prev.researcherProfile.profileName = profile.profileName;
+      prev.researcherProfile.country = profile.country;
+      prev.researcherProfile.institution = profile.institution;
+      prev.researcherProfile.city = profile.city;
+      prev.researcherProfile.address1 = profile.address1;
+      prev.researcherProfile.academicEmail = profile.academicEmail;
+      prev.researcherProfile.completed = profile.completed;
+      prev.researcherProfile.state = profile.state;
+      prev.researcherProfile.isThePI = profile.isThePI;
+      prev.researcherProfile.department = profile.department;
+      prev.researcherProfile.nihUsername = profile.nihUsername;
+      prev.researcherProfile.eraExpirationCount = 10;
+    }, () => {
+      // let completed = this.state.researcherProfile.completed;
+      if (this.state.researcherProfile.completed !== undefined) {
+        this.state.researcherProfile.completed = JSON.parse(this.state.researcherProfile.completed);
       }
+      // let isThePI = undefined;
+      if (this.state.researcherProfile.isThePI !== undefined) {
+        this.state.researcherProfile.isThePI = JSON.parse(this.state.researcherProfile.isThePI);
+      }
+
+      let havePI = undefined;
+      if (this.state.researcherProfile.havePI !== undefined) {
+        havePI = JSON.parse(this.state.researcherProfile.havePI);
+      }
+
+      this.setState({
+        loading: false
+      })
     });
-
-    // let completed = this.state.researcherProfile.completed;
-    if (this.state.researcherProfile.completed !== undefined) {
-      this.state.researcherProfile.completed = JSON.parse(this.state.researcherProfile.completed);
-    }
-    // let isThePI = undefined;
-    if (this.state.researcherProfile.isThePI !== undefined) {
-      this.state.researcherProfile.isThePI = JSON.parse(this.state.researcherProfile.isThePI);
-    }
-
-    let havePI = undefined;
-    if (this.state.researcherProfile.havePI !== undefined) {
-      havePI = JSON.parse(this.state.researcherProfile.havePI);
-    }
   }
 
   deleteNihAccount() {
@@ -98,7 +115,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let field = event.target.name;
     let value = event.target.value;
 
-    this.setState(prev => { prev.researcherProfile[field] = value; return prev;});
+    this.setState(prev => { prev.researcherProfile[field] = value; return prev; });
 
     if (field === 'profileAcademicEmail') {
       if (value !== '') {
@@ -116,7 +133,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handleRadioChange = (e, field, value) => {
-    this.setState(prev => { prev.formData[field] = value; return prev; });
+    this.setState(prev => { prev.researcherProfile[field] = value; return prev; });
   };
 
   handlePIChange(event) {
@@ -146,8 +163,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState(prev => {
       prev.researcherProfile.havePi = undefined;
       return prev;
-    }, () => {});
-    this.clearPIData();
+    }, () => {
+      this.clearPIData();
+    });
+
   }
 
   clearNoHasPIFields() {
@@ -161,7 +180,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.researcherProfile.pubmedID = undefined;
       prev.researcherProfile.scientificURL = undefined;
       return prev;
-    }, () => {});
+    });
   }
 
   clearPIData() {
@@ -169,7 +188,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.researcherProfile.piName = undefined;
       prev.researcherProfile.piEmail = undefined;
       return prev;
-    }, () => {});
+    });
   }
 
   saveOProfile() {
@@ -195,8 +214,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       });
       Researcher.update(Storage.getCurrentUser().dacUserId, false, this.state.researcherProfile);
     }
-    this.setState({showDialogSubmit: false});
-    this.props.history.push({ pathname: 'dataset_catalog'});
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
   };
 
   dialogHandlerSave = (answer) => (e) => {
@@ -208,8 +227,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       });
       Researcher.update(Storage.getCurrentUser().dacUserId, false, this.state.researcherProfile);
     }
-    this.setState({showDialogSave: false});
-    this.props.history.push({ pathname: 'dataset_catalog'});
+    this.setState({ showDialogSave: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
   };
 
   render() {
@@ -328,7 +347,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       //show when appropriate
                       div({ isRendered: false }, [
                         div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                          div({ className: "auth-id" }, [this.state.formData.nihUsername]),
+                          div({ className: "auth-id" }, [this.state.researcherProfile.nihUsername]),
                           button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
                             span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
                           ]),
@@ -336,11 +355,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         ]),
 
                         div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                          div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
-                          div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                          div({ isRendered: this.state.researcherProfile.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.researcherProfile.eraExpirationCount + " days"]),
+                          div({ isRendered: this.state.researcherProfile.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
                         ]),
-                        div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                          div({ className: "auth-id" }, [this.state.formData.nihUsername])
+                        div({ isRendered: this.state.researcherProfile.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                          div({ className: "auth-id" }, [this.state.researcherProfile.nihUsername])
                         ]),
                       ]),
 
@@ -550,43 +569,55 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  div({ className: "radio-inline" }, [
-                    label({ id: "lbl_isThePI", htmlFor: "rad_isThePI", className: "radio-wrapper" }, [
-                      input({
-                        id: "rad_isThePI",
-                        name: "isThePI",
-                        type: "radio",
-                        onChange: this.handlePIChange,
-                        checked: isThePI,
-                        onClick: this.clearNotRelatedPIFields,
-                        required: true
-                      }),
-                      span({ className: "radio-check" }),
-                      span({ className: "radio-label" }, ["Yes"])
-                    ]),
 
-                    label({ id: "lbl_isNotThePI", htmlFor: "rad_isNotThePI", className: "radio-wrapper" }, [
-                      input({
-                        id: "rad_isNotThePI",
-                        name: "isThePI",
-                        type: "radio",
-                        onChange: this.handlePIChange,
-                        checked: (isThePI === undefined? undefined: !isThePI),
-                        onClick: this.clearNotRelatedPIFields,
-                        required: true
-                      }),
-                      span({ className: "radio-check" }),
-                      span({ className: "radio-label" }, ["No"])
-                    ])
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                    YesNoRadioGroup({
+                      value: this.state.researcherProfile.isThePI, onChange: this.handleRadioChange,
+                      id: 'rad_isThePI', name: 'isThePI', required: true
+                    }),
                   ]),
+
+                  // div({ className: "radio-inline" }, [
+                  //   label({ id: "lbl_isThePI", htmlFor: "rad_isThePI", className: "radio-wrapper" }, [
+                  //     input({
+                  //       id: "rad_isThePI",
+                  //       name: "isThePI",
+                  //       type: "radio",
+                  //       onChange: this.handlePIChange,
+                  //       checked: isThePI,
+                  //       onClick: this.clearNotRelatedPIFields,
+                  //       required: true
+                  //     }),
+                  //     span({ className: "radio-check" }),
+                  //     span({ className: "radio-label" }, ["Yes"])
+                  //   ]),
+
+                  //   label({ id: "lbl_isNotThePI", htmlFor: "rad_isNotThePI", className: "radio-wrapper" }, [
+                  //     input({
+                  //       id: "rad_isNotThePI",
+                  //       name: "isThePI",
+                  //       type: "radio",
+                  //       onChange: this.handlePIChange,
+                  //       checked: (isThePI === undefined ? undefined : !isThePI),
+                  //       onClick: this.clearNotRelatedPIFields,
+                  //       required: true
+                  //     }),
+                  //     span({ className: "radio-check" }),
+                  //     span({ className: "radio-label" }, ["No"])
+                  //   ])
+                  // ]),
                   span({
                     className: "cancel-color required-field-error-span",
                     isRendered: (isThePI === '' && showValidationMessages)
                   }, ["Required field"])
                 ])
+
+
+
               ]),
 
               div({ isRendered: isThePI === false, className: "form-group" }, [
+
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   label({
                     className: "control-label ",
@@ -595,43 +626,52 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  div({ className: "radio-inline", disabled: isThePI !== false }, [
-                    label({ id: "lbl_doHavePI", htmlFor: "rad_doHavePI", className: "radio-wrapper" }, [
-                      input({
-                        id: "rad_doHavePI",
-                        name: "havePI",
-                        type: "radio",
-                        onChange: this.handlePI2Change,
-                        value: havePI,
-                        checked: havePI,
-                        onClick: this.clearCommonsFields,
-                        disabled: isThePI !== false,
-                        required: isThePI === false
-                      }),
-                      span({ className: "radio-check" }),
-                      span({ className: "radio-label" }, ["Yes"])
-                    ]),
 
-                    label({ id: "lbl_doNotHavePI", htmlFor: "rad_doNotHavePI", className: "radio-wrapper" }, [
-                      input({
-                        id: "rad_doNotHavePI",
-                        name: "havePI",
-                        type: "radio",
-                        onChange: this.handlePI2Change,
-                        value: havePI,
-                        checked: (havePI === undefined? undefined: !havePI),
-                        onClick: this.clearNoHasPIFields,
-                        disabled: isThePI !== false,
-                        required: isThePI === false
-                      }),
-                      span({ className: "radio-check" }),
-                      span({ className: "radio-label" }, ["No"])
-                    ]),
-                    span({
-                      className: "cancel-color required-field-error-span",
-                      isRendered: (this.state.researcherProfile.havePI === '' && showValidationMessages)
-                    }, ["Required field"])
-                  ])
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                    YesNoRadioGroup({
+                      value: this.state.researcherProfile.havePI, onChange: this.handleRadioChange,
+                      id: 'rad_havePI', name: 'havePI', required: true
+                    }),
+                  ]),
+
+                  // div({ className: "radio-inline", disabled: isThePI !== false }, [
+                  //   label({ id: "lbl_doHavePI", htmlFor: "rad_doHavePI", className: "radio-wrapper" }, [
+                  //     input({
+                  //       id: "rad_doHavePI",
+                  //       name: "havePI",
+                  //       type: "radio",
+                  //       onChange: this.handlePI2Change,
+                  //       value: havePI,
+                  //       checked: havePI,
+                  //       onClick: this.clearCommonsFields,
+                  //       disabled: isThePI !== false,
+                  //       required: isThePI === false
+                  //     }),
+                  //     span({ className: "radio-check" }),
+                  //     span({ className: "radio-label" }, ["Yes"])
+                  //   ]),
+
+                  //   label({ id: "lbl_doNotHavePI", htmlFor: "rad_doNotHavePI", className: "radio-wrapper" }, [
+                  //     input({
+                  //       id: "rad_doNotHavePI",
+                  //       name: "havePI",
+                  //       type: "radio",
+                  //       onChange: this.handlePI2Change,
+                  //       value: havePI,
+                  //       checked: (havePI === undefined ? undefined : !havePI),
+                  //       onClick: this.clearNoHasPIFields,
+                  //       disabled: isThePI !== false,
+                  //       required: isThePI === false
+                  //     }),
+                  //     span({ className: "radio-check" }),
+                  //     span({ className: "radio-label" }, ["No"])
+                  //   ]),
+                  //   span({
+                  //     className: "cancel-color required-field-error-span",
+                  //     isRendered: (this.state.researcherProfile.havePI === '' && showValidationMessages)
+                  //   }, ["Required field"])
+                  // ])
+
                 ]),
 
                 div({ isRendered: this.state.researcherProfile.havePI === true || this.state.researcherProfile.havePI === 'true', className: "form-group" }, [
