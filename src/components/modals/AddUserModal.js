@@ -27,6 +27,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (this.props.user && this.props.user !== undefined) {
 
       const user = await User.getByEmail(this.props.user.email);
+
       this.setState({
         mode: 'Edit',
         roles: user.roles, //this.props.user.roles.map((role, ix) => role.name),
@@ -51,6 +52,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             wasDataOwner: this.userWas(USER_ROLES.dataOwner),
             wasResearcher: this.userWas(USER_ROLES.researcher),
             loading: false
+          },
+          () => {
+            console.log('----------------------- was ------------------', this.state);
           });
         });
     } else {
@@ -150,7 +154,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   userWas = (rol) => {
     let match = false;
+    console.log('---- rol ---> ', rol);
+
     this.state.user.roles.forEach(role => {
+      console.log("Comparing " + role.name + ' vs ' + rol + " = " + (role.name.toUpperCase() === rol.toUpperCase() ));
       if (role.name.toUpperCase() === rol.toUpperCase()) {
         match = true;
       }
@@ -385,6 +392,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       return LoadingIndicator();
     }
 
+    const currentUserRoles = roles.map(roles => roles.name);
+    const isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
+    const isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
+    const isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
+    const isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
+    const isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
+    const isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+
     return (
       BaseModal({
         id: "addUserModal",
@@ -440,7 +455,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_member",
                       className: "checkbox-inline user-checkbox",
-                      defaultChecked: roles.find(role => role === 'Member'),
+                      defaultChecked: roles.find(role => role.name === 'Member'),
                       onChange: this.memberChanged,
                       disabled: roles.includes('Chairperson') || roles.includes('Alumni') || roles.includes('Researcher')
                     }),
@@ -451,7 +466,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_chairperson",
                       className: "checkbox-inline user-checkbox",
-                      defaultChecked: roles.find(role => role === 'Chairperson'),
+                      defaultChecked: roles.find(role => role.name === 'Chairperson'),
                       onChange: this.chairpersonChanged,
                       disabled: roles.includes('Member') || roles.includes('Alumni') || roles.includes('Researcher')
                     }),
@@ -461,7 +476,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     input({
                       type: "checkbox",
                       id: "chk_alumni",
-                      defaultChecked: roles.find(role => role === 'Alumni'),
+                      defaultChecked: roles.find(role => role.name === 'Alumni'),
                       className: "checkbox-inline user-checkbox",
                       onChange: () => this.toggleState('Alumni'),
                       disabled: roles.includes('Member') || roles.includes('Chairperson'),
@@ -474,7 +489,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     input({
                       type: "checkbox",
                       id: "chk_admin",
-                      defaultChecked: roles.find(role => role === 'Admin'),
+                      defaultChecked: roles.find(role => role.name === 'Admin'),
                       className: "checkbox-inline user-checkbox",
                       onChange: () => this.toggleState('Admin'),
                     }),
@@ -484,7 +499,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     input({
                       type: "checkbox",
                       id: "chk_researcher",
-                      defaultChecked: roles.find(role => role === 'Researcher'),
+                      defaultChecked: roles.find(role => role.name === 'Researcher'),
                       className: "checkbox-inline user-checkbox",
                       onChange: this.researcherChanged,
                       disabled: roles.includes('Member') || roles.includes('Chairperson')
