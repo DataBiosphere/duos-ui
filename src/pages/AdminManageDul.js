@@ -207,6 +207,7 @@ class AdminManageDul extends Component {
 
     let consentId = this.state.createId;
     if (answer) {
+      this.setState({disableOkBtn:true});
       Election.createElection(consentId).then(
         (value) => {
           this.getConsentManage();
@@ -427,6 +428,7 @@ class AdminManageDul extends Component {
                             onClick: this.openDialogArchive(election)
                           }, [
                               span({
+                                // className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
                                 className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
                                 "data-tip": "",
                                 "data-for": "tip_archive"
@@ -441,7 +443,8 @@ class AdminManageDul extends Component {
                         ]),
                       div({
                         className: "display-inline-block",
-                        disabled: (election.electionStatus !== 'un-reviewed')
+                        // disabled: (election.electionStatus !== 'un-reviewed')
+                        disabled: (election.electionStatus !== 'un-reviewed' || election.electionStatus === 'Canceled')
                       }, [
                           button({
                             id: election.consentId + "_btnDeleteDul",

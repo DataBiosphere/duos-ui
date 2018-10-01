@@ -141,6 +141,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
 
     this.setState(prev => {
+      prev.disableOkBtn = true;
       prev.error.title = errorTitle;
       prev.error.show = true;
       prev.error.msg = errMessage;
@@ -153,6 +154,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     const value = changeEvent.target.value;
 
     this.setState(prev => {
+      prev.disableOkBtn = value !== '' ? false : true;
       prev.consent[name] = value;
       return prev;
     });
@@ -171,6 +173,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   isValidJson = (obj, error) => {
     try {
       JSON.parse(obj);
+      this.setState({disableOkBtn:false});
       return true;
     } catch (err) {
       this.handleErrors(error);
@@ -188,7 +191,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
       BaseModal({
         id: "addDulModal",
-        disableOkBtn: this.state.file === '',
+        disableOkBtn: this.state.file === '' || this.state.disableOkBtn,
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
