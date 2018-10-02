@@ -117,7 +117,7 @@ class AccessPreview extends Component {
         }
       });
     } else {
-      Files.getDulFile(this.state.consent.consentId,this.state.consentName);
+      Files.getDulFile(this.state.consent.consentId,this.state.consent.dulName);
     }
   };
 
