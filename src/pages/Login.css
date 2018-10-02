@@ -1,67 +1,52 @@
-cutomBtnWrapper {
-  border: 1px solid transparent;
+.btn_gSignInWrapper {
+  border: 1px solid #4285F4;
+  background: #4285F4;
+  width: auto;
+  padding: 0;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px grey;
+  transition: all 0.3s ease;
+  margin: 10px 0;
+}
+
+.btn_gSignInWrapper:active {
+  border: 1px solid #3367d6;
+  background: #3367d6;
+}
+
+.btn_gSignInWrapper:hover,
+.btn_gSignInWrapper:active {
+  cursor: pointer;
+  box-shadow: 1px 1px 4px #4285F4;
+}
+
+.btn_gSignIn {
+  padding: 0;
+  border: none;
   height: 100%;
   width: 100%;
 }
 
-cutomBtnWrapperContents {
-  font-family: Roboto,arial,sans-serif;
-  letter-spacing: .21px;
-  margin-left: 6px;
-  margin-right: 6px;
-  vertical-align: middle;
-  font-size: 15px !important;
-  font-weight: 500 !important;
-  text-align: center !important;
-}
-
-#customBtn {
-  display: inline-block;
-  background: white;
-  color: #444;
-  width: 190px;
-  border-radius: 5px;
-  border: thin solid #888;
-  box-shadow: 1px 1px 1px grey;
-  white-space: nowrap;
-}
-
-#customBtn:hover {
+.btn_gSignIn:hover,
+.btn_gSignIn:hover label,
+.btn_gSignIn:hover icon {
   cursor: pointer;
 }
 
-span.label {
-  font-family: serif;
-  font-weight: normal;
+.btn_gSignIn label {
+  font-family: 'Roboto', arial, sans-serif;
+  margin: 11px 15px 0 15px;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  color: white;
 }
 
-span.icon {
-  background: url('/images/vector/btn_google_light_normal_ios.svg') transparent 5px 50% no-repeat;
+.btn_gSignIn .icon {
+  background: url('/images/btn_google_light_normal_ios.svg') no-repeat;
   float: left;
   background-color: #fff;
   vertical-align: middle;
   width: 42px;
   height: 42px;
-}
-
-span.buttonText2 {
-  display: inline-block;
-  vertical-align: middle;
-  padding-left: 42px;
-  padding-right: 42px;
-  font-size: 14px;
-  font-weight: bold;
-  /* Use the Roboto font that is loaded in the <head> */
-  font-family: 'Roboto', sans-serif;
-}
-
-span.buttonText {
-font-family: Roboto,arial,sans-serif;
-letter-spacing: .21px;
-margin-left: 6px;
-margin-right: 6px;
-vertical-align: middle;
-font-size: 15px !important;
-font-weight: 500 !important;
-text-align: center !important;
 }
