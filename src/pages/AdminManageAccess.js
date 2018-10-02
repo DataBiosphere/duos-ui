@@ -106,7 +106,7 @@ class AdminManageAccess extends Component {
           }
         });
     } else {
-      this.setState({ showDialogCreate: false });
+      this.setState({ showDialogCreate: false, alertTitle: undefined });
     }
   };
 
@@ -259,6 +259,7 @@ class AdminManageAccess extends Component {
           ConfirmationDialog({
             title: 'Create election?',
             color: 'access',
+            isRendered: this.state.showDialogCreate,
             showModal: this.state.showDialogCreate,
             action: {
               label: "Yes",
@@ -275,6 +276,7 @@ class AdminManageAccess extends Component {
           ConfirmationDialog({
             title: 'Cancel election?',
             color: 'cancel',
+            isRendered: this.state.showDialogCancel,
             showModal: this.state.showDialogCancel,
             action: {
               label: "Yes",

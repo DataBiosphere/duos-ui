@@ -32,7 +32,7 @@ class DataAccessRequestApplication extends Component {
         name: '',
       },
       showModal: false,
-      completed: true,
+      completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
@@ -428,11 +428,13 @@ class DataAccessRequestApplication extends Component {
   setShowDialogSave(value) {
     this.setState(prev => {
       prev.showDialogSave = value;
+      prev.disableOkBtn = false;
       return prev;
     });
   };
 
   dialogHandlerSave = (answer) => (e) => {
+    this.setState(prev =>{prev.disableOkBtn = true; return prev;});
     if (answer === true) {
       let datasets = this.state.datasets.map(function (item) {
         return {

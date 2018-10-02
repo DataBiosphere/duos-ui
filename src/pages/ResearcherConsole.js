@@ -303,12 +303,18 @@ class ResearcherConsole extends Component {
           ]),
         ]),
         ConfirmationDialog({
-          title: 'Cancel saved Request?', color: 'cancel', showModal: this.state.showDialogCancelDAR, disableOkBtn: this.state.buttonDisabled, action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
+          title: 'Cancel saved Request?', 
+          color: 'cancel', 
+          isRendered: this.state.showDialogCancelDAR,  
+          showModal: this.state.showDialogCancelDAR, 
+          disableOkBtn: this.state.buttonDisabled, 
+          action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
         }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
 
         ConfirmationDialog({
           title: 'Delete saved Request?', 
           color: 'cancel', 
+          isRendered: this.state.showDialogDeletePDAR,  
           showModal: this.state.showDialogDeletePDAR,  
           disableOkBtn: this.state.buttonDisabled, 
           action: { label: "Yes", handler: this.dialogHandlerDeletePDAR },
