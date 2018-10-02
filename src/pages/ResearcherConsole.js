@@ -29,6 +29,7 @@ class ResearcherConsole extends Component {
       currentPartialDarPage: 1,
       showDialogCancelDAR: false,
       showDialogDeletePDAR: false,
+      alertTitle: undefined
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -91,7 +92,7 @@ class ResearcherConsole extends Component {
 
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId });
+    this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId, alertTitle: undefined});
   };
 
   resume = (e) => {
@@ -101,12 +102,12 @@ class ResearcherConsole extends Component {
       data => {
         let formData = data;
         this.props.history.push({ pathname: 'dar_application',  props: {formData: formData}});
-      });
+    });
   };
 
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
-    this.setState({ showDialogDeletePDAR: true, dataRequestId: dataRequestId });
+    this.setState({ showDialogDeletePDAR: true, dataRequestId: dataRequestId, alertTitle: undefined});
 
   };
 
@@ -115,10 +116,12 @@ class ResearcherConsole extends Component {
     if(answer === true) {
       DAR.cancelDar(this.state.dataRequestId).then(resp => {
         this.init(this.state.currentUser);
+      }).catch(error => {
+        this.setState({alertTitle: 'Sorry, something went wrong when trying to cancel the request. Please try again.',  buttonDisabled: false });
       });
     } 
     else{
-      this.setState({ showDialogCancelDAR: false,  buttonDisabled: false });
+      this.setState({ showDialogCancelDAR: false,  buttonDisabled: false, alertTitle: undefined });
     }
   };
 
@@ -127,10 +130,12 @@ class ResearcherConsole extends Component {
     if(answer === true) {
       DAR.deletePartialDarRequest(this.state.dataRequestId).then(resp => {
         this.init(this.state.currentUser);
+      }).catch(error => {
+        this.setState({alertTitle: 'Sorry, something went wrong when trying to delete the request. Please try again.',  buttonDisabled: false });
       });
     } 
     else{
-      this.setState({ showDialogDeletePDAR: false,  buttonDisabled: false });
+      this.setState({ showDialogDeletePDAR: false,  buttonDisabled: false, alertTitle: undefined });
     }
   };
 
@@ -149,7 +154,8 @@ class ResearcherConsole extends Component {
       loading: false, 
       showDialogDeletePDAR: false, 
       buttonDisabled: false,
-      showDialogCancelDAR: false
+      showDialogCancelDAR: false,
+      alertTitle: undefined
     });
   }
 
@@ -301,7 +307,12 @@ class ResearcherConsole extends Component {
         }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
 
         ConfirmationDialog({
-          title: 'Delete saved Request?', color: 'cancel', showModal: this.state.showDialogDeletePDAR,  disableOkBtn: this.state.buttonDisabled, action: { label: "Yes", handler: this.dialogHandlerDeletePDAR }
+          title: 'Delete saved Request?', 
+          color: 'cancel', 
+          showModal: this.state.showDialogDeletePDAR,  
+          disableOkBtn: this.state.buttonDisabled, 
+          action: { label: "Yes", handler: this.dialogHandlerDeletePDAR },
+          alertTitle: this.state.alertTitle,
         }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Data Access Request?"]),])
 
       ])
