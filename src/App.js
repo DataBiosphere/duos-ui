@@ -5,46 +5,52 @@ import DuosFooter from './components/DuosFooter';
 import { div, h } from 'react-hyperscript-helpers';
 import './App.css';
 import Routes from "./Routes"
-// import { Storage } from './libs/storage';
+import { Storage } from './libs/storage';
 
 class App extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      // isLogged: false
+      isLogged: false
     };
-    // this.loginState = this.loginState.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     Modal.setAppElement(document.getElementById('modal-root'));
   }
 
-  // loginState(isLogged) {
-  //   this.setState({ isLogged: isLogged }, function () {
-  //     if (isLogged) {
-  //       Storage.setUserIsLogged(isLogged);
-  //     } else {
-  //       Storage.clearStorage();
-  //     }
-  //   });
+  static getDerivedStateFromProps(nextProps, prevState) {
+    console.log('App.js : ', nextProps, prevState);
+    const alreadyLogged = Storage.userIsLogged();
+    if (prevState.isLogged !== alreadyLogged) {
+      return {
+        isLogged: alreadyLogged
+      }
+    }
+    return null;
+  }
+
+  // shouldComponentUpdate(nextProps, nextState, nextContext) {
+  //   console.log('nextProps', nextProps);
+  //   console.log('nextState', nextState);
+  //   console.log('nextContext', nextContext);
+  //   return true;
   // }
 
   render() {
+
+    const { isLogged } = this.state;
 
     return (
       div({ className: "body"}, [
         div({ className: "wrap" }, [
           div({ className: "main" }, [
             h(DuosHeader, {
-              // isLogged: this.state.isLogged,
-              // loginState: this.loginState,
+              isLogged: isLogged
             }),
-
             h(Routes, {
-              // isLogged: Storage.userIsLogged(),
-              // loginState: this.loginState,
+              isLogged: isLogged
             }),
           ])
         ]),

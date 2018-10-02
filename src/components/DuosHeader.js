@@ -10,11 +10,28 @@ class DuosHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showHelpModal: false
+      showHelpModal: false,
+      isLogged: this.props.isLogged
     };
     this.signOut = this.signOut.bind(this);
     this.toggleNavBar = this.toggleNavBar.bind(this);
   };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const alreadyLogged = Storage.userIsLogged();
+    if (prevState.isLogged !== alreadyLogged) {
+      return {
+        isLogged: alreadyLogged
+      }
+    }
+    return null;
+  }
+
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   console.log('nextProps', nextProps);
+  //   console.log('nextState', nextState);
+  //   return true;
+  // }
 
   helpModal = (e) => {
     this.setState(prev => {
@@ -44,12 +61,11 @@ class DuosHeader extends Component {
     let isDataOwner = false;
     // let isAlumni = false;
 
-    let isLogged = Storage.userIsLogged();
+    const { isLogged } = this.state;
     let currentUser = {};
 
     if (isLogged) {
       currentUser = Storage.getCurrentUser();
-      console.log(currentUser);
       isChairPerson = currentUser.isChairPerson;
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
@@ -99,7 +115,7 @@ class DuosHeader extends Component {
                 li({}, [a({ id: "link_about", className: "navbar-duos-link", href: "/home_about" }, [div({ className: "navbar-duos-icon navbar-duos-icon-about" }), "About"]),]),
                 li({}, [a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }), "Help"]),]),
                 li({}, [
-                  a({ className: "navbar-duos-button", href: "/login"},["Sign In"])
+                  a({ className: "navbar-duos-button", href: "/login" }, ["Sign In"])
                   // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
                   // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
