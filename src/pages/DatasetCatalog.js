@@ -199,6 +199,8 @@ class DatasetCatalog extends Component {
     if (answer) {
       DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
         this.getDatasets();
+      }, (err) => {
+        console.log(err);
       });
     }
   };
