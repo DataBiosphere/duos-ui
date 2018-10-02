@@ -193,7 +193,7 @@ export const DAR = {
   deletePartialDarRequest: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return await res.json();
+    return await res;
   },
 
   getPartialDarRequestList: async userId => {
