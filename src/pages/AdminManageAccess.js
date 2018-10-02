@@ -192,10 +192,10 @@ class AdminManageAccess extends Component {
             .map(dar => {
               return h(Fragment, { key: dar.frontEndId }, [
                 div({ id: dar.frontEndId, className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "") }, [
-                  div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
+                  div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [
                     div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
                     h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
-                    span({ className: "list-highlighted-item" }, [dar.frontEndId])
+                    span({ className: "list-highlighted-item", title: dar.frontEndId }, [dar.frontEndId])
                   ]),
 
                   div({ id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
