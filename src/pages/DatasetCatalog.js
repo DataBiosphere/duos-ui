@@ -224,10 +224,12 @@ class DatasetCatalog extends Component {
   download() {
     const listDownload = this.state.dataSetList.catalog.filter(row => row.checked);
     let dataSetsId = [];
-    listDownload[0].properties.forEach(property => {
-      if (property.propertyName === 'Dataset ID') {
-        dataSetsId.push(property.propertyValue);
-      }
+    listDownload.forEach(dataset => {
+      dataset.properties.forEach(property => {
+        if (property.propertyName === 'Dataset ID') {
+          dataSetsId.push(property.propertyValue);
+        }
+      })
     });
 
     DataSet.downloadDataSets(dataSetsId, 'datasets.tsv');
