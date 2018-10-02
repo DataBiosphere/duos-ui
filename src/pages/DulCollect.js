@@ -31,6 +31,7 @@ class DulCollect extends Component {
       prev.dulVoteList = this.chunk(election.reviewVote, 2);
       prev.consentGroupName = election.consent.groupName;
       prev.consentName = election.consent.name;
+      prev.dulName = election.consent.dulName;
       prev.translatedUseRestriction = election.election.translatedUseRestriction;
       prev.projectTitle = election.election.projectTitle;
       prev.finalVote = election.election.finalVote;
@@ -52,6 +53,7 @@ class DulCollect extends Component {
 
   initialState() {
     return {
+      buttonDisabled: false,
       loading: true,
       isFormDisabled: true,
       showConfirmationDialogOK: false,
@@ -79,15 +81,20 @@ class DulCollect extends Component {
 
 
   downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
+    Files.getDulFile(this.props.match.params.consentId, this.state.dulName);
   };
 
 
   handlerReminder = (e) => (voteId) => {
+    this.setState(prev => {
+      prev.buttonDisabled = true;
+      return prev;
+    });
     this.sendReminder(voteId).then(reminder => {
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = true;
+        prev.buttonDisabled = false;
         return prev;
       });
     }).catch(error => {
@@ -264,6 +271,7 @@ class DulCollect extends Component {
                       id: "dulSingleResult_" + vIndex,
                       color: "dul",
                       data: vm,
+                      buttonDisabled: this.state.buttonDisabled,
                       handler: this.handlerReminder
                     })
                   ]);
