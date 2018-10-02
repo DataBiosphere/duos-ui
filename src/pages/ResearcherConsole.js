@@ -17,6 +17,7 @@ class ResearcherConsole extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      buttonDisabled: false,
       loading: true,
       showModal: false,
       currentUser: {},
@@ -89,8 +90,8 @@ class ResearcherConsole extends Component {
   };
 
   cancelDar = (e) => {
-    // const dataRequestId = e.target.getAttribute('value');
-    this.setState({ showDialogCancelDAR: true });
+    const dataRequestId = e.target.getAttribute('value');
+    this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId });
   };
 
   resume = (e) => {
@@ -104,17 +105,33 @@ class ResearcherConsole extends Component {
   };
 
   deletePartialDar = (e) => {
-    // const dataRequestId = e.target.getAttribute('value');
-    this.setState({ showDialogDeletePDAR: true });
+    const dataRequestId = e.target.getAttribute('value');
+    this.setState({ showDialogDeletePDAR: true, dataRequestId: dataRequestId });
 
   };
 
   dialogHandlerCancelDAR = (answer) => (e) => {
-    this.setState({ showDialogCancelDAR: false });
+    this.setState({buttonDisabled: true });
+    if(answer === true) {
+      DAR.cancelDar(this.state.dataRequestId).then(resp => {
+        this.init(this.state.currentUser);
+      });
+    } 
+    else{
+      this.setState({ showDialogCancelDAR: false,  buttonDisabled: false });
+    }
   };
 
   dialogHandlerDeletePDAR = (answer) => (e) => {
-    this.setState({ showDialogDeletePDAR: false });
+    this.setState({buttonDisabled: true });
+    if(answer === true) {
+      DAR.deletePartialDarRequest(this.state.dataRequestId).then(resp => {
+        this.init(this.state.currentUser);
+      });
+    } 
+    else{
+      this.setState({ showDialogDeletePDAR: false,  buttonDisabled: false });
+    }
   };
 
   componentDidMount() {
@@ -126,7 +143,14 @@ class ResearcherConsole extends Component {
   async init(currentUser) {
     let dars = await DAR.getDataAccessManage(currentUser.dacUserId);
     let pdars = await DAR.getPartialDarRequestList(currentUser.dacUserId);
-    this.setState({ dars: dars, partialDars: pdars, loading: false });
+    this.setState({ 
+      dars: dars, 
+      partialDars: pdars, 
+      loading: false, 
+      showDialogDeletePDAR: false, 
+      buttonDisabled: false,
+      showDialogCancelDAR: false
+    });
   }
 
   render() {
@@ -241,7 +265,7 @@ class ResearcherConsole extends Component {
                     div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin tableRowPartial" }, [
                       a({
                         id: pdar.partial_dar_code + "_btnDelete", name: "btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
-                        onClick: this.deletePartialDar, value: pdar.dataRequestId
+                        onClick: this.deletePartialDar, value: pdar.dataRequestId 
                       }, [
                           span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
                         ]),
@@ -273,11 +297,11 @@ class ResearcherConsole extends Component {
           ]),
         ]),
         ConfirmationDialog({
-          title: 'Cancel saved Request?', color: 'cancel', showModal: this.state.showDialogCancelDAR, action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
+          title: 'Cancel saved Request?', color: 'cancel', showModal: this.state.showDialogCancelDAR, disableOkBtn: this.state.buttonDisabled, action: { label: "Yes", handler: this.dialogHandlerCancelDAR }
         }, [div({ className: "dialog-description" }, ["Are you sure you want to cancel this Data Access Request?"]),]),
 
         ConfirmationDialog({
-          title: 'Delete saved Request?', color: 'cancel', showModal: this.state.showDialogDeletePDAR, action: { label: "Yes", handler: this.dialogHandlerDeletePDAR }
+          title: 'Delete saved Request?', color: 'cancel', showModal: this.state.showDialogDeletePDAR,  disableOkBtn: this.state.buttonDisabled, action: { label: "Yes", handler: this.dialogHandlerDeletePDAR }
         }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Data Access Request?"]),])
 
       ])
