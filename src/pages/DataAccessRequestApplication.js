@@ -145,11 +145,11 @@ class DataAccessRequestApplication extends Component {
     formData.zipcode = rpProperties.zipcode;
     formData.country = rpProperties.country;
     formData.state = rpProperties.state;
-    if(formData.dar_code === null) {
+    if (formData.dar_code === null) {
       formData.linkedIn = rpProperties.linkedIn;
       formData.researcherGate = rpProperties.researcherGate;
       formData.orcid = rpProperties.orcid;
-    }    
+    }
     formData.userId = Storage.getCurrentUser().dacUserId;
     let datasets = [];
     if (formData.dar_code !== null || formData.partial_dar_code !== null) {
@@ -219,15 +219,15 @@ class DataAccessRequestApplication extends Component {
     const field = e.target.name;
     const value = e.target.checked;
     this.setState(prev => {
-      prev.formData[field] = value; 
+      prev.formData[field] = value;
       return prev;
     }, () => this.checkValidations());
   };
 
   handleRadioChange = (e, field, value) => {
-    if(value === 'true') {
+    if (value === 'true') {
       value = true;
-    } else if(value === 'false') {
+    } else if (value === 'false') {
       value = false;
     }
     this.setState(prev => {
@@ -319,7 +319,7 @@ class DataAccessRequestApplication extends Component {
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
       return prev;
     });
-    return  showValidationMessages;
+    return showValidationMessages;
   };
 
   verifyStep2() {
@@ -406,7 +406,7 @@ class DataAccessRequestApplication extends Component {
       });
       formData.datasetId = ds;
       formData.userId = Storage.getCurrentUser().dacUserId;
-      this.setState(prev =>{prev.disableOkBtn = true; return prev;});
+      this.setState(prev => { prev.disableOkBtn = true; return prev; });
       if (formData.dar_code !== undefined && formData.dar_code !== null) {
         DAR.updateDar(formData, formData.dar_code).then(response => {
           this.setState({ showDialogSubmit: false });
@@ -775,15 +775,13 @@ class DataAccessRequestApplication extends Component {
                     ])
                   ]),
 
-                  ul({ className: "pager" }, [
-                    div({ className: "row multi-step-pager" }, [
-                      li({ className: "next f-right multi-step-next" }, [
-                        a({ onClick: this.step2, className: "access-background" }, ["Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, []),
-                        ]),
+                  div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                      a({ onClick: this.step2, className: "btn-primary f-right access-background" }, [
+                        "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }),
                       ]),
-                      li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save" }, [
-                        a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                      ])
+
+                      a({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
                     ])
                   ])
                 ])
@@ -994,7 +992,7 @@ class DataAccessRequestApplication extends Component {
                         span({}, ["Choose any number of Disease Ontology ; or none."]),
                       ]),
                     ]),
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group " }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group" }, [
                       h(AsyncSelect, {
                         id: "sel_diseases",
                         isDisabled: this.state.formData.dar_code !== null,
@@ -1008,22 +1006,18 @@ class DataAccessRequestApplication extends Component {
                       }),
                     ]),
                   ]),
-                  ul({ className: "pager" }, [
-                    div({ className: "row multi-step-pager" }, [
-                      li({ className: "previous f-left multi-step-prev" }, [
-                        a({ onClick: this.step1, className: "access-background" }, [
-                          span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }, []), "Previous Step"]),
+
+                  div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                      a({ onClick: this.step1, className: "btn-primary f-left access-background" }, [
+                        span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                       ]),
 
-                      li({ className: "next f-right multi-step-next" }, [
-                        a({ onClick: this.step3, className: "access-background" }, [
-                          "Next Step",
-                          span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])])
+                      a({ onClick: this.step3, className: "btn-primary f-right access-background" }, [
+                        "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
                       ]),
 
-                      li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
-                        a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                      ])
+                      a({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
                     ])
                   ])
                 ])
@@ -1141,23 +1135,17 @@ class DataAccessRequestApplication extends Component {
                     ]),
                   ]),
 
-                  ul({ className: "pager" }, [
-                    div({ className: "row multi-step-pager" }, [
-                      li({ className: "previous f-left multi-step-prev" }, [
-                        a({ onClick: this.step2, className: "access-background" }, [span({
-                          className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true"
-                        }, []), "Previous Step"])
+                  div({ className: "row no-margin" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                      a({ onClick: this.step2, className: "btn-primary f-left access-background" }, [
+                        span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                       ]),
 
-                      li({ className: "next f-right multi-step-next" }, [
-                        a({ onClick: this.step4, className: "access-background" }, [
-                          "Next Step",
-                          span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, []),]),
+                      a({ onClick: this.step4, className: "btn-primary f-right access-background" }, [
+                        "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
                       ]),
 
-                      li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
-                        a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                      ])
+                      a({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"])
                     ])
                   ])
                 ])
@@ -1231,23 +1219,19 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
 
-                    ul({ className: "pager", style: { "marginTop": "0 !important" } }, [
-                      div({ className: "row multi-step-pager" }, [
-                        li({ className: "previous f-left multi-step-prev" }, [
-                          a({ onClick: this.step3, className: "access-background" }, [
-                            span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"]),
+                    div({ className: "row no-margin" }, [
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                        a({ onClick: this.step3, className: "f-left btn-primary access-background" }, [
+                          span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                         ]),
 
-                        li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-next" }, [
-                          a({ onClick: this.attestAndSave, className: "access-background bold" }, ["Attest and Send"]),
-                        ]),
+                        a({ isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
+
                         ConfirmationDialog({
                           title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
                         }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
-                        li({ isRendered: this.state.formData.dar_code === null, className: "next f-right multi-step-save access-color" }, [
-                          a({ onClick: this.partialSave }, [span({ className: "access-color" }, ["Save"]),]),
-                        ])
+                        a({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"]),
                       ])
                     ])
                   ])

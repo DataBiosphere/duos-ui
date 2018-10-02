@@ -283,7 +283,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   span({
                     className: "cancel-color required-field-error-span",
                     isRendered: (this.state.researcherProfile.profileName === '' && showValidationMessages)
-                  }, ["Full Name is required"]),
+                  }, ["Full Name is required"])
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
@@ -307,24 +307,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ["Email Address is empty or has invalid format"]),
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  label({ id: "lbl_profileInstitution", className: "control-label" }, ["Institution Name*"]),
-                  input({
-                    id: "profileInstitution",
-                    name: "institution",
-                    type: "text",
-                    className: "form-control ",
-                    onChange: this.handleChange,
-                    value: this.state.researcherProfile.institution,
-                    required: true
-                  }),
-                  span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.institution === '' && showValidationMessages)
-                  }, ["Institution Name is required"]),
-                ]),
-
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '20px' } }, [
                   label({ className: "control-label rp-title-question default-color" }, [
                     "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
                     span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
@@ -360,7 +343,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         ]),
                         div({ isRendered: this.state.researcherProfile.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
                           div({ className: "auth-id" }, [this.state.researcherProfile.nihUsername])
-                        ]),
+                        ])
                       ]),
 
                     ]),
@@ -374,8 +357,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.linkedIn
                       })
-                    ]),
-                  ]),
+                    ])
+                  ])
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
@@ -402,10 +385,25 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         value: this.state.researcherProfile.researcherGate
                       })
                     ])
-                  ]),
-                  hr({ className: "section-separator", style: { 'margin': '10px 15px' } }),
+                  ])
                 ]),
 
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '20px' } }, [
+                  label({ id: "lbl_profileInstitution", className: "control-label" }, ["Institution Name*"]),
+                  input({
+                    id: "profileInstitution",
+                    name: "institution",
+                    type: "text",
+                    className: "form-control ",
+                    onChange: this.handleChange,
+                    value: this.state.researcherProfile.institution,
+                    required: true
+                  }),
+                  span({
+                    className: "cancel-color required-field-error-span",
+                    isRendered: (this.state.researcherProfile.institution === '' && showValidationMessages)
+                  }, ["Institution Name is required"]),
+                ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -438,8 +436,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.division
                       })
-                    ]),
-                  ]),
+                    ])
+                  ])
                 ]),
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -471,9 +469,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         className: "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.address2
-                      }),
-                    ]),
-                  ]),
+                      })
+                    ])
+                  ])
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
@@ -508,14 +506,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       span({
                         className: "cancel-color required-field-error-span",
                         isRendered: (this.state.researcherProfile.state === '' && showValidationMessages)
-                      }, ["State is required"]),
-                    ]),
-                  ]),
+                      }, ["State is required"])
+                    ])
+                  ])
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group" }, [
                       label({ id: "lbl_profileZip", className: "control-label" }, ["Zip/Postal Code*"]),
                       input({
                         id: "profileZip",
@@ -531,7 +529,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         isRendered: (this.state.researcherProfile.zipcode === '' && showValidationMessages)
                       }, ["Zip/Postal Code is required"]),
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group" }, [
                       label({ id: "lbl_profileCountry", className: "control-label" }, ["Country*"]),
                       input({
                         id: "profileCountry",
@@ -552,7 +550,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               ]),
 
               div({ className: "form-group" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '15px' } }, [
                   label({
                     id: "lbl_isThePI",
                     className: "control-label ",
@@ -569,110 +567,101 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                  YesNoRadioGroup({
+                    value: this.state.researcherProfile.isThePI, onChange: this.handleRadioChange,
+                    id: 'rad_isThePI', name: 'isThePI', required: true
+                  })
+                ]),
 
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({
-                      value: this.state.researcherProfile.isThePI, onChange: this.handleRadioChange,
-                      id: 'rad_isThePI', name: 'isThePI', required: true
-                    }),
-                  ]),
+                // div({ className: "radio-inline" }, [
+                //   label({ id: "lbl_isThePI", htmlFor: "rad_isThePI", className: "radio-wrapper" }, [
+                //     input({
+                //       id: "rad_isThePI",
+                //       name: "isThePI",
+                //       type: "radio",
+                //       onChange: this.handlePIChange,
+                //       checked: isThePI,
+                //       onClick: this.clearNotRelatedPIFields,
+                //       required: true
+                //     }),
+                //     span({ className: "radio-check" }),
+                //     span({ className: "radio-label" }, ["Yes"])
+                //   ]),
 
-                  // div({ className: "radio-inline" }, [
-                  //   label({ id: "lbl_isThePI", htmlFor: "rad_isThePI", className: "radio-wrapper" }, [
-                  //     input({
-                  //       id: "rad_isThePI",
-                  //       name: "isThePI",
-                  //       type: "radio",
-                  //       onChange: this.handlePIChange,
-                  //       checked: isThePI,
-                  //       onClick: this.clearNotRelatedPIFields,
-                  //       required: true
-                  //     }),
-                  //     span({ className: "radio-check" }),
-                  //     span({ className: "radio-label" }, ["Yes"])
-                  //   ]),
-
-                  //   label({ id: "lbl_isNotThePI", htmlFor: "rad_isNotThePI", className: "radio-wrapper" }, [
-                  //     input({
-                  //       id: "rad_isNotThePI",
-                  //       name: "isThePI",
-                  //       type: "radio",
-                  //       onChange: this.handlePIChange,
-                  //       checked: (isThePI === undefined ? undefined : !isThePI),
-                  //       onClick: this.clearNotRelatedPIFields,
-                  //       required: true
-                  //     }),
-                  //     span({ className: "radio-check" }),
-                  //     span({ className: "radio-label" }, ["No"])
-                  //   ])
-                  // ]),
-                  span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: (isThePI === '' && showValidationMessages)
-                  }, ["Required field"])
-                ])
-
-
-
+                //   label({ id: "lbl_isNotThePI", htmlFor: "rad_isNotThePI", className: "radio-wrapper" }, [
+                //     input({
+                //       id: "rad_isNotThePI",
+                //       name: "isThePI",
+                //       type: "radio",
+                //       onChange: this.handlePIChange,
+                //       checked: (isThePI === undefined ? undefined : !isThePI),
+                //       onClick: this.clearNotRelatedPIFields,
+                //       required: true
+                //     }),
+                //     span({ className: "radio-check" }),
+                //     span({ className: "radio-label" }, ["No"])
+                //   ])
+                // ]),
+                span({
+                  className: "cancel-color required-field-error-span",
+                  isRendered: (isThePI === '' && showValidationMessages)
+                }, ["Required field"])
               ]),
 
               div({ isRendered: isThePI === false, className: "form-group" }, [
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                   label({
                     className: "control-label ",
                     //  + (researcherForm.havePI.$invalid && showValidationMessages) ? 'cancel-color' : ''
-                  }, ["Do you have a Principal Investigator?*"]),
+                  }, ["Do you have a Principal Investigator?*"])
                 ]),
+
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                    YesNoRadioGroup({
-                      value: this.state.researcherProfile.havePI, onChange: this.handleRadioChange,
-                      id: 'rad_havePI', name: 'havePI', required: true
-                    }),
-                  ]),
-
-                  // div({ className: "radio-inline", disabled: isThePI !== false }, [
-                  //   label({ id: "lbl_doHavePI", htmlFor: "rad_doHavePI", className: "radio-wrapper" }, [
-                  //     input({
-                  //       id: "rad_doHavePI",
-                  //       name: "havePI",
-                  //       type: "radio",
-                  //       onChange: this.handlePI2Change,
-                  //       value: havePI,
-                  //       checked: havePI,
-                  //       onClick: this.clearCommonsFields,
-                  //       disabled: isThePI !== false,
-                  //       required: isThePI === false
-                  //     }),
-                  //     span({ className: "radio-check" }),
-                  //     span({ className: "radio-label" }, ["Yes"])
-                  //   ]),
-
-                  //   label({ id: "lbl_doNotHavePI", htmlFor: "rad_doNotHavePI", className: "radio-wrapper" }, [
-                  //     input({
-                  //       id: "rad_doNotHavePI",
-                  //       name: "havePI",
-                  //       type: "radio",
-                  //       onChange: this.handlePI2Change,
-                  //       value: havePI,
-                  //       checked: (havePI === undefined ? undefined : !havePI),
-                  //       onClick: this.clearNoHasPIFields,
-                  //       disabled: isThePI !== false,
-                  //       required: isThePI === false
-                  //     }),
-                  //     span({ className: "radio-check" }),
-                  //     span({ className: "radio-label" }, ["No"])
-                  //   ]),
-                  //   span({
-                  //     className: "cancel-color required-field-error-span",
-                  //     isRendered: (this.state.researcherProfile.havePI === '' && showValidationMessages)
-                  //   }, ["Required field"])
-                  // ])
-
+                  YesNoRadioGroup({
+                    value: this.state.researcherProfile.havePI, onChange: this.handleRadioChange,
+                    id: 'rad_havePI', name: 'havePI', required: true
+                  })
                 ]),
+
+                // div({ className: "radio-inline", disabled: isThePI !== false }, [
+                //   label({ id: "lbl_doHavePI", htmlFor: "rad_doHavePI", className: "radio-wrapper" }, [
+                //     input({
+                //       id: "rad_doHavePI",
+                //       name: "havePI",
+                //       type: "radio",
+                //       onChange: this.handlePI2Change,
+                //       value: havePI,
+                //       checked: havePI,
+                //       onClick: this.clearCommonsFields,
+                //       disabled: isThePI !== false,
+                //       required: isThePI === false
+                //     }),
+                //     span({ className: "radio-check" }),
+                //     span({ className: "radio-label" }, ["Yes"])
+                //   ]),
+
+                //   label({ id: "lbl_doNotHavePI", htmlFor: "rad_doNotHavePI", className: "radio-wrapper" }, [
+                //     input({
+                //       id: "rad_doNotHavePI",
+                //       name: "havePI",
+                //       type: "radio",
+                //       onChange: this.handlePI2Change,
+                //       value: havePI,
+                //       checked: (havePI === undefined ? undefined : !havePI),
+                //       onClick: this.clearNoHasPIFields,
+                //       disabled: isThePI !== false,
+                //       required: isThePI === false
+                //     }),
+                //     span({ className: "radio-check" }),
+                //     span({ className: "radio-label" }, ["No"])
+                //   ]),
+                //   span({
+                //     className: "cancel-color required-field-error-span",
+                //     isRendered: (this.state.researcherProfile.havePI === '' && showValidationMessages)
+                //   }, ["Required field"])
+                // ])
 
                 div({ isRendered: this.state.researcherProfile.havePI === true || this.state.researcherProfile.havePI === 'true', className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
@@ -775,7 +764,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   })
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group" }, [
                   label({
                     id: "lbl_profileScientificURL",
                     className: "control-label"
@@ -791,35 +780,33 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              ul({ className: "no-style-list" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 multi-step-pager" }, [
-                  li({ className: "italic default-color" }, ["*Required field"]),
-                  li({ className: "f-right multi-step-next" }, [
-                    a({
-                      onClick: this.submit, disabled: false, className: "common-background" // revisar disabled
-                    }, [
-                        span({ isRendered: completed }, ["Submit"]),
-                        span({ isRendered: !completed }, ["Update"]),
-                      ]),
-                  ]),
-                  ConfirmationDialog({
-                    title: 'Submit Profile',
-                    color: 'common',
-                    showModal: this.state.showDialogSubmit,
-                    action: { label: "Yes", handler: this.dialogHandlerSubmit }
-                  }, [div({ className: "dialog-description" }, ["Are you sure you want to submit your Profile information?"]),]),
+              div({ className: "row no-margin" }, [
+              div({ className: "col-lg-4 col-md-6 col-sm-6 col-xs-6" }, [
+                div({ className: "italic default-color" }, ["*Required field"])
+              ]),
 
-                  li({ isRendered: !completed, className: "f-right multi-step-save" }, [
-                    a({ onClick: this.saveProfile, className: "common-color" }, ["Continue later"]),
-                  ]),
-                  ConfirmationDialog({
-                    title: 'Continue later',
-                    color: 'common',
-                    showModal: this.state.showDialogSave,
-                    action: { label: "Yes", handler: this.dialogHandlerSave }
-                  }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."]),])
-                ])
+              div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
+                a({ onClick: this.submit, className: "f-right btn-primary common-background" }, [
+                  span({ isRendered: !completed }, ["Submit"]),
+                  span({ isRendered: completed }, ["Update"]),
+                ]),
+                ConfirmationDialog({
+                  title: 'Submit Profile',
+                  color: 'common',
+                  showModal: this.state.showDialogSubmit,
+                  action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                }, [div({ className: "dialog-description" }, ["Are you sure you want to submit your Profile information?"]),]),
+
+                a({ isRendered: !completed, onClick: this.saveProfile, className: "f-right btn-secondary common-color" }, ["Continue later"]),
+
+                ConfirmationDialog({
+                  title: 'Continue later',
+                  color: 'common',
+                  showModal: this.state.showDialogSave,
+                  action: { label: "Yes", handler: this.dialogHandlerSave }
+                }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."]),])
               ])
+            ])
             ])
           ])
         ])
