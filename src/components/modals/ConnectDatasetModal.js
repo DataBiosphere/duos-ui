@@ -65,7 +65,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   OKHandler() {
     if (this.state.needsApprovalModified) {
-      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApprovalModified).then(response => {
+      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(response => {
         this.createOrUpdateAssociations()
       }, (error) => {
         this.setState(prev => {
@@ -189,7 +189,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       });
     }
 
-    if (this.props.dataset.needsApproval !== this.state.needsApproval || (this.state.selectedclients.length > 0 && modifiedList)){
+    if ((this.props.dataset.needsApproval !== this.state.needsApproval) || modifiedList){
       this.setState({ updatedInfoModal: true });
     } else {
       this.setState({ updatedInfoModal: false });

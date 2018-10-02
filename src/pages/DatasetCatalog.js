@@ -17,7 +17,6 @@ class DatasetCatalog extends Component {
 
   USER_ID = Storage.getCurrentUser().dacUserId;
 
-
   constructor(props) {
     super(props);
 
@@ -198,7 +197,9 @@ class DatasetCatalog extends Component {
   dialogHandlerDelete = (answer) => (e) => {
     this.setState({ showDialogDelete: false });
     if (answer) {
-      DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then();
+      DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
+        this.getDatasets();
+      });
     }
   };
 
@@ -358,7 +359,6 @@ class DatasetCatalog extends Component {
 
                 tbody({}, [
                   this.state.dataSetList.catalog.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((dataSet, trIndex) => {
-                    // this.state.dataSetList.catalog.map((dataSet, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
 
                       tr({ className: "tableRow" }, [
@@ -443,7 +443,7 @@ class DatasetCatalog extends Component {
                         td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
 
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: "enabled" }, ["Translated Use Restriction"])
+                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: (!dataSet.active ? 'dataset-disabled' : '') }, ["Translated Use Restriction"])
                         ]),
 
                         td({ isRendered: this.state.isAdmin, className: "table-items cell-size" }, [
@@ -469,12 +469,17 @@ class DatasetCatalog extends Component {
           div({ className: "f-right" }, [
             button({
               isRendered: this.state.isResearcher,
-              disabled: this.state.dataSetList.catalog.filter(row => row.checked).length > 0,
-              onClick: this.exportToRequest,
+              disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
+              onClick: () => this.exportToRequest(),
               className: "download-button dataset-background apply-dataset",
               "data-tip": "", "data-for": "tip_requestAccess"
             }, ["Apply for Access"]),
-            h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),
+            h(ReactTooltip, {
+              id: "tip_requestAccess",
+              effect: 'solid',
+              multiline: true,
+              className: 'tooltip-wrapper'
+            }, ["Request Access for selected Datasets"]),
           ]),
           TranslatedDulModal({
             isRendered: this.state.showTranslatedDULModal,

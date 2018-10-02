@@ -342,7 +342,7 @@ export const DataSet = {
   deleteDataset: async (datasetObjectId, dacUserId) => {
     const url = `${await Config.getApiUrl()}/dataset/${datasetObjectId}/${dacUserId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return await res.json();
+    return await res;
   },
 
   disableDataset: async (datasetObjectId, active) => {
