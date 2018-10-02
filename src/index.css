@@ -920,6 +920,16 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
 
 /***************************************************Buttons, Radios & Checkboxes*/
 
+.checkbox-disabled input {
+   cursor: not-allowed;
+}
+
+.checkbox-disabled label {
+  cursor: not-allowed;
+  font-weight: normal !important;
+  color: rgb(200, 200, 200) !important;
+}
+
 .radio-inline {
   padding: 5px 0 0 0 !important;
 }

@@ -24,16 +24,35 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   }
 
   async initForm() {
+
+    let rolesState = {}
+    rolesState[USER_ROLES.admin] = false;
+    rolesState[USER_ROLES.alumni] = false;
+    rolesState[USER_ROLES.chairperson] = false;
+    rolesState[USER_ROLES.dataOwner] = false;
+    rolesState[USER_ROLES.member] = false;
+    rolesState[USER_ROLES.researcher] = false;
+
     if (this.props.user && this.props.user !== undefined) {
 
       const user = await User.getByEmail(this.props.user.email);
 
+      console.log(JSON.stringify(user, null, 2));
+
+      user.roles.forEach(role => {
+        rolesState[role.name] = true;
+      });
+
       this.setState({
         mode: 'Edit',
-        roles: user.roles, //this.props.user.roles.map((role, ix) => role.name),
-        displayName: user.displayName, //this.props.user.displayName,
-        email: user.email, // this.props.user.email,
-        user: user, //this.props.user,
+        roles: user.roles.map(role => role.name),
+        displayName: user.displayName,
+        email: user.email,
+        user: user,
+        rolesState: Object.assign({}, rolesState),
+        originalRolesState: Object.assign({}, rolesState),
+        originalRoles: user.roles.slice(),
+        emailPreference: false,
         delegateDacUser: {
           needsDelegation: false,
           delegateCandidates: []
@@ -47,15 +66,15 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       },
         () => {
           this.setState({
-            wasChairperson: this.userWas(USER_ROLES.chairperson),
-            wasMember: this.userWas(USER_ROLES.member),
-            wasDataOwner: this.userWas(USER_ROLES.dataOwner),
-            wasResearcher: this.userWas(USER_ROLES.researcher),
+            wasChairperson: rolesState[USER_ROLES.chairperson],
+            wasMember: rolesState[USER_ROLES.member],
+            wasDataOwner: rolesState[USER_ROLES.dataOwner],
+            wasResearcher: rolesState[USER_ROLES.researcher],
             loading: false
           },
-          () => {
-            console.log('----------------------- was ------------------', this.state);
-          });
+            () => {
+              console.log('----------------------- STATE ------------------', this.state);
+            });
         });
     } else {
       this.setState({
@@ -63,6 +82,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         roles: [],
         displayName: '',
         email: '',
+        rolesState: Object.assign({}, rolesState),
+        originalRolesState: Object.assign({}, rolesState),
+        emailPreference: false,
         delegateDacUser: {
           needsDelegation: false,
           delegateCandidates: []
@@ -85,8 +107,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   OKHandler = (event) => {
 
     let roles = this.state.roles.slice();
-    const rolesName = roles.map(
-      role => { return { name: role } }
+    console.log('roles in state .... ', roles);
+    const rolesName = roles.map(role => { return { name: role.name } }
     );
 
     switch (this.state.mode) {
@@ -101,15 +123,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
       case 'Edit':
 
-        const wasChairperson = this.userWas(USER_ROLES.chairperson);
-        const wasMember = this.userWas(USER_ROLES.member);
-        const wasDataOwner = this.userWas(USER_ROLES.dataOwner);
-        const wasResearcher = this.userWas(USER_ROLES.researcher);
+        const { wasChairperson, wasMember, wasDataOwner, wasResearcher } = this.state;
 
         const editUser = {
           displayName: this.state.displayName,
           email: this.state.email,
-          roles: rolesName,
+          roles: roles,
           completed: this.state.user.completed,
           createDate: this.state.user.createDate,
           dacUserId: this.state.user.dacUserId,
@@ -120,6 +139,29 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         const payload = {
           updatedUser: editUser
         }
+
+
+        // var map = {};
+        // var roles = user.roles;
+        // for (var i = 0; i < roles.length; i++) {
+        //   if (roles[i].name === USER_ROLES.admin ) {
+        //     roles[i].emailPreference =  !$scope.emailPreference;
+        //     break;
+        //   }
+        // }
+
+        // map.updatedUser = user;
+        // if($scope.delegateDacUser.needsDelegation){
+        //     map.userToDelegate = JSON.parse($scope.alternativeDACMemberUser);
+        // }
+        // if($scope.delegateDataOwner.needsDelegation){
+        //     map.alternativeDataOwnerUser = JSON.parse($scope.alternativeDataOwnerUser);
+        // }
+
+
+
+
+
         User.update(payload, this.state.user.dacUserId);
         break;
 
@@ -140,16 +182,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     this.props.onAfterOpen('addUser');
   }
 
-  toggleState(role) {
-    const existingRole = this.state.roles.find(stRole => stRole === role);
-    let roleList = this.state.roles;
-    if (!existingRole) {
-      roleList.push(role);
-      this.setState({ roles: roleList });
-    } else {
-      roleList.splice(this.state.roles.indexOf(role), 1);
-      this.setState({ roles: roleList });
-    }
+  toggleState(roleName) {
+    let rs = Object.assign({}, this.state.rolesState);
+    rs[roleName] = !rs[roleName];
+    this.setState({
+      rolesState: Object.assign({}, rs)
+    });
   }
 
   userWas = (rol) => {
@@ -157,7 +195,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     console.log('---- rol ---> ', rol);
 
     this.state.user.roles.forEach(role => {
-      console.log("Comparing " + role.name + ' vs ' + rol + " = " + (role.name.toUpperCase() === rol.toUpperCase() ));
+      console.log("Comparing " + role.name + ' vs ' + rol + " = " + (role.name.toUpperCase() === rol.toUpperCase()));
       if (role.name.toUpperCase() === rol.toUpperCase()) {
         match = true;
       }
@@ -198,9 +236,17 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     return valid;
   };
 
+  emailPreferenceChanged = (e) => {
+    const checkState = e.target.checked;
+    this.setState({
+      emailPreference: checkState
+    })
+  };
+
   memberChanged = (e) => {
     const checkState = e.target.checked;
     const role = USER_ROLES.member;
+    console.log(checkState, role, this.state.wasMember);
 
     // need to set the role in roles
     if (this.state.wasMember) {
@@ -227,6 +273,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     }
+    this.toggleState(USER_ROLES.member);
   };
 
   chairpersonChanged = (e) => {
@@ -257,6 +304,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     }
+    this.toggleState(USER_ROLES.chairperson);
   };
 
   dataOwnerChanged = (e) => {
@@ -286,6 +334,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     }
+    this.toggleState(USER_ROLES.dataOwner);
   };
 
   researcherChanged = (e) => {
@@ -301,7 +350,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         this.closeAlert(3);
       }
     }
+    this.toggleState(USER_ROLES.researcher);
   };
+
+  alumniChanged = (e) => {
+    const checkState = e.target.checked;
+    const role = USER_ROLES.alumni;
+    this.toggleState(role);
+  }
+
+  adminChanged = (e) => {
+    const checkState = e.target.checked;
+    const role = USER_ROLES.admin;
+    this.toggleState(role);
+  }
 
   //--------------------------------------
 
@@ -386,19 +448,23 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   render() {
 
-    const { loading, displayName, email, roles } = this.state;
+    const { loading, displayName, email, roles, rolesState, emailPreference } = this.state;
 
     if (loading) {
       return LoadingIndicator();
     }
 
-    const currentUserRoles = roles.map(roles => roles.name);
-    const isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
-    const isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
-    const isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
-    const isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-    const isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
-    const isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+    const isChairPerson = rolesState[USER_ROLES.chairperson];
+    const isMember = rolesState[USER_ROLES.member];
+    const isAdmin = rolesState[USER_ROLES.admin];
+    const isResearcher = rolesState[USER_ROLES.researcher];
+    const isDataOwner = rolesState[USER_ROLES.dataOwner];
+    const isAlumni = rolesState[USER_ROLES.alumni];
+
+    const isResearcherDisabled = isMember || isChairPerson;
+    const isMemberDisabled = isChairPerson || isAlumni || isResearcher;
+    const isChairPersonDisabled = isMember || isAlumni || isResearcher;
+    const isAlumniDisabled = isMember || isChairPerson;
 
     return (
       BaseModal({
@@ -450,72 +516,81 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Roles"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                  div({ className: "checkbox" }, [
+
+                  div({ className: isMemberDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
                     input({
                       type: "checkbox",
                       id: "chk_member",
                       className: "checkbox-inline user-checkbox",
-                      defaultChecked: roles.find(role => role.name === 'Member'),
+                      defaultChecked: isMember,
                       onChange: this.memberChanged,
-                      disabled: roles.includes('Chairperson') || roles.includes('Alumni') || roles.includes('Researcher')
+                      disabled: isMemberDisabled,
                     }),
                     label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"]),
                   ]),
-                  div({ className: "checkbox" }, [
+
+                  div({ className: isChairPersonDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
                     input({
                       type: "checkbox",
                       id: "chk_chairperson",
                       className: "checkbox-inline user-checkbox",
-                      defaultChecked: roles.find(role => role.name === 'Chairperson'),
+                      defaultChecked: isChairPerson,
                       onChange: this.chairpersonChanged,
-                      disabled: roles.includes('Member') || roles.includes('Alumni') || roles.includes('Researcher')
+                      disabled: isChairPersonDisabled
                     }),
                     label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"]),
                   ]),
-                  div({ className: "checkbox" }, [
+
+                  div({ className: isAlumniDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
                     input({
                       type: "checkbox",
                       id: "chk_alumni",
-                      defaultChecked: roles.find(role => role.name === 'Alumni'),
+                      defaultChecked: isAlumni,
                       className: "checkbox-inline user-checkbox",
-                      onChange: () => this.toggleState('Alumni'),
-                      disabled: roles.includes('Member') || roles.includes('Chairperson'),
+                      onChange: this.alumniChanged,
+                      disabled: isAlumniDisabled,
                     }),
                     label({ id: "lbl_alumni", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_alumni" }, ["Alumni"]),
                   ]),
+
                 ]),
+
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
                       id: "chk_admin",
-                      defaultChecked: roles.find(role => role.name === 'Admin'),
+                      defaultChecked: isAdmin,
                       className: "checkbox-inline user-checkbox",
-                      onChange: () => this.toggleState('Admin'),
+                      onChange: this.adminChanged,
                     }),
                     label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"]),
                   ]),
-                  div({ className: "checkbox" }, [
+
+                  div({ className: isResearcherDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
                     input({
                       type: "checkbox",
                       id: "chk_researcher",
-                      defaultChecked: roles.find(role => role.name === 'Researcher'),
+                      defaultChecked: isResearcher,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.researcherChanged,
-                      disabled: roles.includes('Member') || roles.includes('Chairperson')
+                      disabled: isResearcherDisabled
                     }),
                     label({ id: "lbl_researcher", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_researcher" }, ["Researcher"]),
                   ]),
+
                   div({ className: "checkbox" }, [
                     input({
                       type: "checkbox",
                       id: "chk_dataOwner",
-                      defaultChecked: roles.find(role => role === 'DataOwner'),
+                      defaultChecked: isDataOwner,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.dataOwnerChanged,
                     }),
                     label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"]),
                   ]),
+
                 ]),
               ]),
             ]),
@@ -530,8 +605,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       id: "chk_emailPreference",
                       type: "checkbox",
                       className: "checkbox-inline user-checkbox",
+                      defaultChecked: emailPreference,
+                      onChange: this.emailPreferenceChanged,
                     }),
-                    label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "emailPreference" }, ["Disable Admin email notifications"]),
+                    label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "chk_emailPreference" }, ["Disable Admin email notifications"]),
                   ])
                 ]),
             ]),
@@ -573,7 +650,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
             ]),
           ]),
-
 
           div({ isRendered: this.state.delegateDataOwner.needsDelegation, className: "form-group" }, [
             div({ className: "row f-left" }, [
