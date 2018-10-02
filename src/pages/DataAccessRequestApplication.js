@@ -161,7 +161,10 @@ class DataAccessRequestApplication extends Component {
       });
     }
     let completed = false;
-    if (rpProperties.completed !== undefined) {
+    if(formData.dar_code !== null) {
+      completed = '';
+    } 
+    else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
