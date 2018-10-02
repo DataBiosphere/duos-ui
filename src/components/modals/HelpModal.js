@@ -32,7 +32,6 @@ export const HelpModal = hh(class HelpModal extends Component {
       prev.description = '';
       return prev;
     });
-    // this.props.history.push('help_reports');
   }
 
   closeHandler() {
