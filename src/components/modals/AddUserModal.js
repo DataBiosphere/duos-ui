@@ -517,7 +517,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
 
-                  div({ className: isMemberDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
+                  div({ className: "checkbox", disabled: isMemberDisabled }, [
                     input({
                       type: "checkbox",
                       id: "chk_member",
@@ -529,7 +529,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"]),
                   ]),
 
-                  div({ className: isChairPersonDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
+                  div({ className: "checkbox", disabled: isChairPersonDisabled }, [
                     input({
                       type: "checkbox",
                       id: "chk_chairperson",
@@ -541,7 +541,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"]),
                   ]),
 
-                  div({ className: isAlumniDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
+                  div({ className: "checkbox", disabled: isAlumniDisabled  }, [
                     input({
                       type: "checkbox",
                       id: "chk_alumni",
@@ -568,7 +568,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"]),
                   ]),
 
-                  div({ className: isResearcherDisabled ? "checkbox checkbox-disabled" : "checkbox" }, [
+                  div({ className: "checkbox", disabled: isResearcherDisabled }, [
                     input({
                       type: "checkbox",
                       id: "chk_researcher",

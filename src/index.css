@@ -920,16 +920,6 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
 
 /***************************************************Buttons, Radios & Checkboxes*/
 
-.checkbox-disabled input {
-   cursor: not-allowed;
-}
-
-.checkbox-disabled label {
-  cursor: not-allowed;
-  font-weight: normal !important;
-  color: rgb(200, 200, 200) !important;
-}
-
 .radio-inline {
   padding: 5px 0 0 0 !important;
 }
@@ -997,6 +987,16 @@ input[type=checkbox]:checked+label:before {
   border: 1px solid #2FA4E7;
   text-align: center;
   line-height: 15px;
+}
+
+.checkbox[disabled] .regular-checkbox {
+  cursor: not-allowed !important;
+  color: #cccccc;
+}
+
+.checkbox[disabled] .regular-checkbox:before  {
+  background-color: #eee;
+  border: 1px solid #ccc;
 }
 
 .check-all {
