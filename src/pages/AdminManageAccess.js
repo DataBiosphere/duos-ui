@@ -217,7 +217,7 @@ class AdminManageAccess extends Component {
                       a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled", onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
                     ]),
                     span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                      a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed", onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
+                      a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed", onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, [!dar.electionVote ? 'Denied' : 'Approved' ]),
                     ]),
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
