@@ -82,7 +82,7 @@ class DulReview extends Component {
   };
 
   downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
+    Files.getDulFile(this.props.match.params.consentId, this.state.election.dulName);
   };
 
   confirmationHandlerOK = (answer) => (e) => {
