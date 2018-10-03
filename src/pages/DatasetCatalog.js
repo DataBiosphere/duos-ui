@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet, Researcher, Files } from "../libs/ajax";
+import { DataSet, Researcher, Files, DAR } from "../libs/ajax";
 import { Storage } from "../libs/storage";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
@@ -120,9 +120,19 @@ class DatasetCatalog extends Component {
     Files.getApprovedUsersFile(dataSetId + '-ApprovedRequestors.tsv', dataSetId);
   }
 
-  exportToRequest = () => {
-    const listToExport = this.state.dataSetList.catalog.filter(row => row.checked);
-    this.props.history.push({ pathname: 'dar_application', props: { listToExport } });
+  async exportToRequest() {
+    let listToExport = [];
+    this.state.dataSetList.catalog.filter(row => row.checked).forEach(dataset => {
+      dataset.properties.forEach(property => {
+        if (property.propertyName === 'Dataset ID') {
+          listToExport.push(property.propertyValue);
+        }
+      });
+    });
+
+    const formData  = await DAR.partialDarFromCatalogPost(this.USER_ID, listToExport);
+    console.log(formData);
+    this.props.history.push({ pathname: 'dar_application', props: { formData: formData} });
   };
 
   associate() {
