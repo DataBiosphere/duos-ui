@@ -106,7 +106,7 @@ class AdminManageAccess extends Component {
           }
         });
     } else {
-      this.setState({ showDialogCreate: false });
+      this.setState({ showDialogCreate: false, alertTitle: undefined });
     }
   };
 
@@ -192,10 +192,10 @@ class AdminManageAccess extends Component {
             .map(dar => {
               return h(Fragment, { key: dar.frontEndId }, [
                 div({ id: dar.frontEndId, className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "") }, [
-                  div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: dar.frontEndId }, [
+                  div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [
                     div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
                     h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
-                    span({ className: "list-highlighted-item" }, [dar.frontEndId])
+                    span({ className: "list-highlighted-item", title: dar.frontEndId }, [dar.frontEndId])
                   ]),
 
                   div({ id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text", title: dar.projectTitle }, [dar.projectTitle]),
@@ -217,7 +217,7 @@ class AdminManageAccess extends Component {
                       a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled", onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId) }, ["Canceled"]),
                     ]),
                     span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                      a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed", onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, ["Reviewed"]),
+                      a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed", onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId) }, [!dar.electionVote ? 'Denied' : 'Approved' ]),
                     ]),
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
@@ -259,6 +259,7 @@ class AdminManageAccess extends Component {
           ConfirmationDialog({
             title: 'Create election?',
             color: 'access',
+            isRendered: this.state.showDialogCreate,
             showModal: this.state.showDialogCreate,
             action: {
               label: "Yes",
@@ -275,6 +276,7 @@ class AdminManageAccess extends Component {
           ConfirmationDialog({
             title: 'Cancel election?',
             color: 'cancel',
+            isRendered: this.state.showDialogCancel,
             showModal: this.state.showDialogCancel,
             action: {
               label: "Yes",
