@@ -468,6 +468,7 @@ class DatasetCatalog extends Component {
 
           div({ className: "f-right" }, [
             button({
+              id: "btn_applyAccess",
               isRendered: this.state.isResearcher,
               disabled: this.state.dataSetList.catalog.filter(row => row.checked).length > 0,
               onClick: this.exportToRequest,

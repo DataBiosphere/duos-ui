@@ -786,7 +786,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               ]),
 
               div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
-                button({ onClick: this.submit, className: "f-right btn-primary common-background" }, [
+                button({ id: "btn_submit", onClick: this.submit, className: "f-right btn-primary common-background" }, [
                   span({ isRendered: !completed }, ["Submit"]),
                   span({ isRendered: completed }, ["Update"]),
                 ]),

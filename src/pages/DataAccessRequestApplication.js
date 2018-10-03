@@ -777,7 +777,7 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      button({ onClick: this.step2, className: "btn-primary f-right access-background" }, [
+                      button({ id: "btn_next", onClick: this.step2, className: "btn-primary f-right access-background" }, [
                         "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }),
                       ]),
 
@@ -1009,15 +1009,15 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      button({ onClick: this.step1, className: "btn-primary f-left access-background" }, [
+                      button({ id: "btn_prev", onClick: this.step1, className: "btn-primary f-left access-background" }, [
                         span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                       ]),
 
-                      button({ onClick: this.step3, className: "btn-primary f-right access-background" }, [
+                      button({ id: "btn_next", onClick: this.step3, className: "btn-primary f-right access-background" }, [
                         "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
                       ]),
 
-                      button({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
+                      button({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
                     ])
                   ])
                 ])
@@ -1137,15 +1137,15 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "row no-margin" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                      button({ onClick: this.step2, className: "btn-primary f-left access-background" }, [
+                      button({ id: "btn_prev", onClick: this.step2, className: "btn-primary f-left access-background" }, [
                         span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                       ]),
 
-                      button({ onClick: this.step4, className: "btn-primary f-right access-background" }, [
+                      button({ id: "btn_next", onClick: this.step4, className: "btn-primary f-right access-background" }, [
                         "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
                       ]),
 
-                      button({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"])
+                      button({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"])
                     ])
                   ])
                 ])
@@ -1221,11 +1221,11 @@ class DataAccessRequestApplication extends Component {
 
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                        button({ onClick: this.step3, className: "f-left btn-primary access-background" }, [
+                        button({ id: "btn_prev", onClick: this.step3, className: "f-left btn-primary access-background" }, [
                           span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                         ]),
 
-                        button({ isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
+                        button({ id: "btn_submit", isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
 
                         ConfirmationDialog({
                           title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
