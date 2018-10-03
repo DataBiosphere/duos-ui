@@ -25,8 +25,8 @@ export const HelpModal = hh(class HelpModal extends Component {
     report.description = this.state.description;
     report.subject = this.state.subject;
     report.userId = Storage.getCurrentUser().dacUserId;
-    await Help.createHelpMeReport(report);
     this.props.onOKRequest('help');
+    await Help.createHelpMeReport(report);
     this.setState(prev => {
       prev.subject = '';
       prev.description = '';

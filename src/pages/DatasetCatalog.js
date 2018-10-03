@@ -198,6 +198,7 @@ class DatasetCatalog extends Component {
     if (answer) {
       DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
         this.getDatasets();
+        this.setState({ showDialogDelete: false });
       }).catch(error => {
         this.setState(prev => {
           prev.showDialogDelete = true;
