@@ -1,8 +1,7 @@
 import { Component } from 'react';
-import { div, hr, br, h, small, h3, a, span, form, ol, ul, li, label, button, input, textarea, p, fieldset } from 'react-hyperscript-helpers';
+import { div, hr, br, h, small, h3, a, span, form, ol, li, label, button, input, textarea, p, fieldset } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 import AsyncSelect from 'react-select/lib/Async';
 
