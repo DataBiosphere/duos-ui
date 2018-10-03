@@ -40,7 +40,7 @@ class DulPreview extends Component {
   }
 
   downloadDUL = () => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentPreview.name);
+    Files.getDulFile(this.props.match.params.consentId, this.state.consentPreview.dulName);
   };
 
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { div, a, img, span, h3, h } from 'react-hyperscript-helpers';
+import { div, a, img, span, h3, h, label } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
@@ -62,16 +62,15 @@ class Login extends Component {
   render() {
 
     const googleLoginButton = h(GoogleLogin, {
-      style: {"border":"1px solid gray"},
+      id: "btn_gSignIn",
+      className: "btn_gSignInWrapper",
       clientId: clientId,
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden
     }, [
-        div({ id: "gSignInWrapper" }, [
-          div({ id: "customBtn", className: "customBtnWrapper" }, [
-            span({ className: "icon" }),
-            span({ className: "buttonText" }, ["Sign in with Google"])
-          ])
+        div({ className: "btn_gSignIn" }, [
+          span({ className: "icon" }),
+          label({}, ["Sign in with Google"])
         ])
       ]);
 
@@ -82,7 +81,7 @@ class Login extends Component {
           div({ className: "landing-box-title" }, [h3({}, ["Broad Data Use Oversight System"]),]),
           div({ className: "landing-box-google-signin" }, [
             div({ className: "new-sign" }, ["Sign in with a google account"]),
-              googleLoginButton,
+            googleLoginButton,
             div({ className: "new-sign" }, [span({}, [
               "Don't have a Google Account? Create one",
               a({ href: "https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup", target: "_blank" }, ["here."]),]),]),

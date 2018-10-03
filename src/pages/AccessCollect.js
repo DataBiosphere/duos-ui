@@ -28,6 +28,7 @@ class AccessCollect extends Component {
 
   initialState() {
     return {
+      buttonDisabled: false,
       dialogTitle: 'Email Notification Sent.',
       showDialogReminder: false,
       isReminderSent: false,
@@ -104,16 +105,22 @@ class AccessCollect extends Component {
   };
 
   handlerReminder = (e) => (voteId) => {
+    this.setState(prev => {
+      prev.buttonDisabled = true;
+      return prev;
+    });
     this.sendReminder(voteId).then(reminder => {
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = true;
+        prev.buttonDisabled = false;
         return prev;
       });
     }).catch(error => {
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = false;
+        prev.buttonDisabled = false;
         prev.dialogTitle = 'Email Notification Error.';
         return prev;
       });
@@ -135,7 +142,7 @@ class AccessCollect extends Component {
       election.finalVote = this.state.accessVote;
       election.finalRationale = this.state.accessRationale;
       this.updateElection(election);
-      if (this.state.rpAlreadyVote) {
+      if (this.state.showRPaccordion === false || (this.state.showRPaccordion && this.state.rpAlreadyVote)) {
         this.props.history.goBack();
       } else {
         this.setState(prev => {
@@ -293,7 +300,6 @@ class AccessCollect extends Component {
       });
     }
     this.setState(prev => {
-      prev.buttonDisabled = false;
       prev.openAccordion = true;
       return prev;
     });
@@ -587,6 +593,7 @@ class AccessCollect extends Component {
                           id: "accessSingleResult_" + vIndex,
                           color: "access",
                           data: vm,
+                          buttonDisabled: this.state.buttonDisabled,
                           handler: this.handlerReminder
                         })
                       ]);
@@ -676,6 +683,7 @@ class AccessCollect extends Component {
                           id: "rpSingleResult_" + vIndex,
                           color: "access",
                           data: vm,
+                          buttonDisabled: this.state.buttonDisabled,
                           handler: this.handlerReminder
                         })
                       ]);

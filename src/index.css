@@ -1273,11 +1273,7 @@ a .editable:hover, a .enabled:hover {
   vertical-align: middle;
 }
 
-.multi-step-pager {
-  margin: 20px 5px 0 5px;
-}
-/*****************************************************************************************REVIEW THESE*/
-.multi-step-pager li a, .multi-step-pager li button, .download-button, .admin-add-button {
+.download-button, .admin-add-button {
   border-radius: 5px !important;
   box-shadow: 3px 3px 0 #cccccc;
   color: #ffffff;
@@ -1292,11 +1288,7 @@ a .editable:hover, a .enabled:hover {
   margin-top: 25px;
 }
 
-.multi-step-pager li button {
-  padding: 8px 15px 7px 15px !important;
-}
-
-.multi-step-pager li a:hover, .download-button:hover, .admin-add-button:hover, .upload-button:hover {
+ .download-button:hover, .admin-add-button:hover, .upload-button:hover {
   background: #2FA4E7 !important;
   color: #ffffff !important;
 }
@@ -1335,57 +1327,58 @@ a .editable:hover, a .enabled:hover {
   margin-left: -8px !important;
 }
 
-.multi-step-pager .disabled {
-  padding: 0 !important;
-  margin-top: 0 !important;
+.btn-primary,
+.btn-secondary {
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 5px;
+  box-shadow: 3px 3px 0 #cccccc;
+  border: none;
+  height: 40px;
+  padding: 10px 15px 0 15px;
+  transition: background 0.3s ease;
+  cursor: pointer;
 }
 
-.multi-step-pager .disabled a, .multi-step-pager .disabled a:hover {
+.btn-primary[disabled],
+.btn-secondary[disabled] {
   background: #eeeeee !important;
   color: #cccccc !important;
-  border: none !important;
-  padding: 10px 15px 7px 15px !important;
+  box-shadow: 3px 3px 0 #cccccc;
+  cursor: not-allowed;
 }
 
-.multi-step-prev, .multi-step-next, .multi-step-save {
-  color: #777777;
-  font-size: 15px;
+.btn-primary.f-left {
+  margin-right: 20px;
 }
 
-.multi-step-save {
-  margin-right: 20px!important;
+.btn-primary.f-left .glyphicon {
+  font-size: 13px;
+  margin-right: 5px;
 }
 
-.multi-step-prev {
-  float: left;
-  text-align: left;
+.btn-primary.f-right {
+  margin-left: 20px;
 }
 
-.multi-step-prev span {
-  padding: 2px 5px 0 0;
+.btn-primary.f-right .glyphicon {
+  font-size: 13px;
+  margin-left: 5px;
 }
 
-.multi-step-next, .multi-step-save {
-  float: right;
-  text-align: right;
-}
-
-.multi-step-next button:hover, .multi-step-save button:hover {
+.btn-primary:hover,
+.btn-secondary:hover {
   background: #2FA4E7 !important;
+  color: white !important;
 }
 
-.multi-step-next span {
-  padding: 2px 0 0 5px;
-}
-
-.multi-step-save a {
+.btn-secondary {
   background: #eeeeee !important;
   padding-top: 11px!important;
 }
 
-.multi-step-save span {
+.btn-secondary span {
   padding: 0 15px 0 15px !important;
-  font-weight: 500;
 }
 
 .rp-group {

@@ -122,7 +122,7 @@ class ResearcherReview extends Component {
               id: "researcherReview",
               color: "common",
               title: "Your Vote",
-              isDisabled: "isFormDisabled",
+              isDisabled: false,
               voteStatus: voteStatus,
               rationale: rationale,
               showAlert: false,
