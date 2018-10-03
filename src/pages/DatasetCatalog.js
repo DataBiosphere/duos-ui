@@ -544,7 +544,6 @@ class DatasetCatalog extends Component {
             showModal: this.state.showDialogDisable,
             alertMessage: this.state.errorMessage,
             alertTitle: this.state.alertTitle,
-            showError: true,
             action: { label: "Yes", handler: this.dialogHandlerDisable }
           }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
 
