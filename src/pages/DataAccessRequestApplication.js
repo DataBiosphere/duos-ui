@@ -10,6 +10,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
 import { Researcher, DAR } from '../libs/ajax';
 import { Storage } from "../libs/storage";
+import { LoadingIndicator } from '../components/LoadingIndicator';
 
 import './DataAccessRequestApplication.css';
 
@@ -23,7 +24,9 @@ class DataAccessRequestApplication extends Component {
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
+
     this.state = {
+      loading: true,
       disableOkBtn: false,
       showValidationMessages: false,
       datasets: [],
@@ -37,7 +40,7 @@ class DataAccessRequestApplication extends Component {
       showDialogSave: false,
       step: 1,
       formData: {
-        dar_code: '',
+        dar_code: null,
         checkCollaborator: '',
         rus: '',
         non_tech_rus: '',
@@ -123,7 +126,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
-    let formData = this.props.location.props !== undefined && this.props.location.props.formData !== undefined ? this.props.location.props.formData : {};
+    let formData = this.props.location.props !== undefined && this.props.location.props.formData !== undefined ? this.props.location.props.formData : this.state.formData;
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
@@ -146,9 +149,9 @@ class DataAccessRequestApplication extends Component {
     formData.country = rpProperties.country;
     formData.state = rpProperties.state;
     if (formData.dar_code === null) {
-      formData.linkedIn = rpProperties.linkedIn;
-      formData.researcherGate = rpProperties.researcherGate;
-      formData.orcid = rpProperties.orcid;
+      formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
+      formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
+      formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
     let datasets = [];
@@ -168,6 +171,7 @@ class DataAccessRequestApplication extends Component {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
+      prev.loading = false;
       prev.completed = completed;
       prev.formData = formData;
       prev.datasets = datasets;
@@ -235,6 +239,11 @@ class DataAccessRequestApplication extends Component {
     }, () => this.checkValidations());
   };
 
+  handleGenderChange = (e, value) => {
+    this.setState(prev => {
+      prev.formData.gender = value; return prev;
+    }, () => this.checkValidations());
+  };
   step1 = (e) => {
     this.setState(prev => {
       prev.step = 1;
@@ -337,21 +346,30 @@ class DataAccessRequestApplication extends Component {
     return isDatasetsInvalid || isRusInvalid || isSummaryInvalid || isCheckboxesInvalid;
   };
 
+  isGenderValid(gender, onegender) {
+    let isValidGender = false;
+    if(onegender === false || (onegender === true && this.isValid(gender))) {
+      isValidGender = true;
+    }
+    return isValidGender;
+  }
   verifyStep3() {
     let invalid = false;
-    if (!(this.isValid(this.state.formData.forProfit) ||
-      this.isValid(this.state.formData.onegender) ||
-      this.isValid(this.state.formData.pediatric) ||
-      this.isValid(this.state.formData.illegalbehave) ||
-      this.isValid(this.state.formData.addiction) ||
-      this.isValid(this.state.formData.sexualdiseases) ||
-      this.isValid(this.state.formData.stigmatizediseases) ||
-      this.isValid(this.state.formData.vulnerablepop) ||
-      this.isValid(this.state.formData.popmigration) ||
-      this.isValid(this.state.formData.psychtraits) ||
+    if (!(this.isValid(this.state.formData.forProfit) &&
+      this.isValid(this.state.formData.onegender) && 
+      this.isGenderValid(this.state.formData.gender, this.state.formData.onegender) &&
+      this.isValid(this.state.formData.pediatric) &&
+      this.isValid(this.state.formData.illegalbehave) &&
+      this.isValid(this.state.formData.addiction) &&
+      this.isValid(this.state.formData.sexualdiseases) &&
+      this.isValid(this.state.formData.stigmatizediseases) &&
+      this.isValid(this.state.formData.vulnerablepop) &&
+      this.isValid(this.state.formData.popmigration) &&
+      this.isValid(this.state.formData.psychtraits) &&
       this.isValid(this.state.formData.nothealth))) {
       this.setState(prev => {
         prev.step3.inputPurposes.invalid = true;
+        prev.showValidationMessages = true;
         return prev;
       });
       invalid = true;
@@ -520,7 +538,13 @@ class DataAccessRequestApplication extends Component {
   };
 
   render() {
-    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
+    const { loading, problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
+    const genderLabels = ['Female', "Male"];
+    const genderValues = ['F', 'M'];
+
+    if (loading) {
+      return LoadingIndicator();
+    }
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
@@ -597,7 +621,7 @@ class DataAccessRequestApplication extends Component {
             div({ id: "form-views" }, [
 
               ConfirmationDialog({
-                title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+                title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
               }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
 
               //------------------ Step 1--------------------------------------
@@ -1060,13 +1084,28 @@ class DataAccessRequestApplication extends Component {
                         className: "multi-step-fields", disabled: (this.state.formData.dar_code !== null)
                       }, [
                           span({}, ["Please specify"]),
-                          OptionsRadioGroup({
-                            value: this.state.formData.gender,
-                            optionLabels: ['Female', "Male"],
-                            optionValues: ['F', 'M'],
-                            name: 'rad_gender',
-                            onChange: this.handleRadioChange
-                          })
+                          div({ className: 'radio-inline' }, [
+                            genderLabels.map((option, ix) => {
+                              return (
+                              label({
+                                  key: 'gender' + ix,
+                                  onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
+                                  id: "lbl_gender_" + ix,
+                                  htmlFor: "rad_gender_" + ix,
+                                  className: "radio-wrapper"
+                                }, [
+                                    input({
+                                      type: "radio",
+                                      id: "rad_gender_" + ix,
+                                      name: this.state.name,
+                                      checked: this.state.formData.gender === genderValues[ix],
+                                    }),
+                                    span({ className: "radio-check" }),
+                                    span({ className: "radio-label" }, [genderLabels[ix]])
+                                  ])
+                              )
+                            })
+                          ])
                         ])
                     ]),
 
@@ -1228,7 +1267,7 @@ class DataAccessRequestApplication extends Component {
                         a({ isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
 
                         ConfirmationDialog({
-                          title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                          title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
                         }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
                         a({ isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"]),
