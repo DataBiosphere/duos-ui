@@ -199,9 +199,11 @@ class DatasetCatalog extends Component {
     if (answer) {
       DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
         this.getDatasets();
-      }, (err) => {
-        console.log(err);
+      }).catch(error => {
+        this.setState({ alertMessage: error.message, alertTitle: 'Something went wrong'});
       });
+    } else {
+      this.setState({ showDialogDelete: false,  alertMessage: undefined, alertTitle: undefined });
     }
   };
 
@@ -209,18 +211,31 @@ class DatasetCatalog extends Component {
     if (answer) {
       DataSet.disableDataset(this.state.datasetId, true).then(resp => {
         this.getDatasets();
+        this.setState({ showDialogEnable: false });
+      }).catch(error => {
+        this.setState(prev => {
+          prev.alertMessage = error.message;
+          prev.alertTitle = 'Something went wrong';
+          return prev;
+        });
       });
     }
-    this.setState({ showDialogEnable: false });
   };
 
   dialogHandlerDisable = (answer) => (e) => {
     if (answer) {
       DataSet.disableDataset(this.state.datasetId, false).then(resp => {
         this.getDatasets();
+        this.setState({ showDialogDisable: false });
+      }).catch(error => {
+        this.setState(prev => {
+          prev.alertMessage = error.message;
+          prev.alertTitle = 'Something went wrong';
+          this.setState({ showDialogDisable: true});
+          return prev;
+        });
       });
     }
-    this.setState({ showDialogDisable: false });
   };
 
   download() {
@@ -497,6 +512,8 @@ class DatasetCatalog extends Component {
             title: 'Delete Dataset Confirmation?',
             color: 'cancel',
             showModal: this.state.showDialogDelete,
+            alertMessage: this.state.errorMessage,
+            alertTitle: this.state.alertTitle,
             action: { label: "Yes", handler: this.dialogHandlerDelete }
           }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
 
@@ -504,11 +521,19 @@ class DatasetCatalog extends Component {
             title: 'Disable Dataset Confirmation?',
             color: 'dataset',
             showModal: this.state.showDialogDisable,
+            alertMessage: this.state.errorMessage,
+            alertTitle: this.state.alertTitle,
+            showError: true,
             action: { label: "Yes", handler: this.dialogHandlerDisable }
           }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
 
           ConfirmationDialog({
-            title: 'Enable Dataset Confirmation?', color: 'dataset', showModal: this.state.showDialogEnable, action: { label: "Yes", handler: this.dialogHandlerEnable }
+            title: 'Enable Dataset Confirmation?',
+            color: 'dataset',
+            alertMessage: this.state.errorMessage,
+            alertTitle: this.state.alertTitle,
+            showModal: this.state.showDialogEnable,
+            action: { label: "Yes", handler: this.dialogHandlerEnable }
           }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
 
           ConnectDatasetModal({
@@ -516,7 +541,7 @@ class DatasetCatalog extends Component {
             showModal: this.state.showConnectDatasetModal,
             onOKRequest: this.okConnectDatasetModal,
             onCloseRequest: this.closeConnectDatasetModal,
-            dataset: this.state.datasetConnect
+            dataset: this.state.datasetConnect,
           }),
         ])
       ])
