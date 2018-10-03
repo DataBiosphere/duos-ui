@@ -195,12 +195,16 @@ class DatasetCatalog extends Component {
   };
 
   dialogHandlerDelete = (answer) => (e) => {
-    this.setState({ showDialogDelete: false });
     if (answer) {
       DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
         this.getDatasets();
       }).catch(error => {
-        this.setState({ alertMessage: error.message, alertTitle: 'Something went wrong'});
+        this.setState(prev => {
+          prev.showDialogDelete = true;
+          prev.alertMessage = 'Please try again later.';
+          prev.alertTitle ='Something went wrong';
+          return prev;
+        });
       });
     } else {
       this.setState({ showDialogDelete: false,  alertMessage: undefined, alertTitle: undefined });
@@ -214,12 +218,16 @@ class DatasetCatalog extends Component {
         this.setState({ showDialogEnable: false });
       }).catch(error => {
         this.setState(prev => {
-          prev.alertMessage = error.message;
+          prev.showDialogEnable = true;
+          prev.alertMessage = 'Please try again later.';
           prev.alertTitle = 'Something went wrong';
           return prev;
         });
       });
+    } else {
+      this.setState({ showDialogEnagle: false,  alertMessage: undefined, alertTitle: undefined });
     }
+
   };
 
   dialogHandlerDisable = (answer) => (e) => {
@@ -229,12 +237,14 @@ class DatasetCatalog extends Component {
         this.setState({ showDialogDisable: false });
       }).catch(error => {
         this.setState(prev => {
-          prev.alertMessage = error.message;
+          prev.alertMessage = 'Please try again later.';
           prev.alertTitle = 'Something went wrong';
           this.setState({ showDialogDisable: true});
           return prev;
         });
       });
+    } else {
+      this.setState({ showDialogDisable: false,  alertMessage: undefined, alertTitle: undefined });
     }
   };
 
