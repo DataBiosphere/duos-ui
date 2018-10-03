@@ -42,7 +42,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
               value: "Send a reminder",
               disabled: this.props.buttonDisabled,
               onClick: this.openDialogReminder,
-              className: "btn btn-primary vote-reminder f-right " + (this.props.color) + "-color"
+              className: "btn vote-reminder f-right " + (this.props.color) + "-color"
             })
           ])
         ]),

@@ -152,7 +152,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   id: "btn_submit_" + this.props.id,
                   disabled: voteStatus === null || !enableVoteButton,
                   onClick: this.logVote,
-                  className: "btn btn-primary col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
+                  className: "btn col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
                 }, [this.props.action.label]),
               ]),
             ]),

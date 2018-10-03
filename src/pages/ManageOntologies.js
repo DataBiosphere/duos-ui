@@ -154,7 +154,7 @@ class ManageOntologies extends Component {
 
             a({
               id: 'btn_addOntologies',
-              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
               onClick: this.addOntologiesModal
             }, [
                 div({ className: "all-icons add-ontologies-white" }),

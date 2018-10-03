@@ -321,10 +321,10 @@ class DatasetCatalog extends Component {
                 download: "",
                 disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
                 onClick: this.download,
-                className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 download-button dataset-background"
+                className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background"
               }, [
-                  span({ className: "glyphicon glyphicon-download", "aria-hidden": "true", style: { 'marginRight': '5px' } }),
-                  "Download selection"
+                  "Download selection",
+                  span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px'}, "aria-hidden": "true" })
                 ]),
             ]),
           ]),
@@ -471,7 +471,7 @@ class DatasetCatalog extends Component {
               isRendered: this.state.isResearcher,
               disabled: this.state.dataSetList.catalog.filter(row => row.checked).length > 0,
               onClick: this.exportToRequest,
-              className: "download-button dataset-background apply-dataset",
+              className: "btn-primary dataset-background search-wrapper",
               "data-tip": "", "data-for": "tip_requestAccess"
             }, ["Apply for Access"]),
             h(ReactTooltip, { id: "tip_requestAccess", effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Request Access for selected Datasets"]),

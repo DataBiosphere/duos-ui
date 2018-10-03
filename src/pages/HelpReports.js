@@ -113,7 +113,7 @@ class HelpReports extends Component {
 
             a({
               id: 'btn_requestHelp',
-              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 admin-add-button common-background no-margin",
+              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
               onClick: this.helpModal
             }, [
                 div({ className: "all-icons add-help_white" }),
