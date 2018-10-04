@@ -178,8 +178,9 @@ class AdminManageDul extends Component {
       electionUpdate.archived = true;
       await Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
+    } else {
+      this.setState({showDialogArchiveOpen: false, showDialogArchiveClosed: false});
     }
-    this.setState({ showDialogArchiveOpen : false, showDialogArchiveClosed : false });
   };
 
   dialogHandlerCancel = (answer) => async (e) => {
@@ -194,6 +195,8 @@ class AdminManageDul extends Component {
       };
       await Election.updateElection(election.electionId, electionUpdated);
       this.getConsentManage();
+    } else {
+      this.setState({ showDialogCancel: false });
     }
   };
 
@@ -245,6 +248,8 @@ class AdminManageDul extends Component {
           this.removeDul(consentId);
         }
       });
+    } else {
+      this.setState({showDialogDelete: false});
     }
   };
 
