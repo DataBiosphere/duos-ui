@@ -9,6 +9,7 @@ import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Storage } from "../libs/storage";
 
 class AccessCollect extends Component {
 
