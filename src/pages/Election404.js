@@ -32,7 +32,7 @@ class Election404 extends Component {
           ]),
           a({ 
             id: "btn_back",
-            className: "btn vote-button vote-button-back vote-button-bigger f-left " + (this.state.isAccessElection ? 'access-background' : this.state.isDataUseLimitations ? 'dul-background' : ''),
+            className: "btn-primary btn-back f-left " + (this.state.isAccessElection ? 'access-background' : this.state.isDataUseLimitations ? 'dul-background' : ''),
             style: { 'marginTop': '15px' },
             onClick: this.goToConsole }, ["Back to Your Console"]),
         ])
