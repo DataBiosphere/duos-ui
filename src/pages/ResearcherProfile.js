@@ -51,9 +51,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         havePI: 'false',
         institution: '',
         isThePI: 'false',
-        linkedIn: '',
-        nihUsername: '',
-        orcid: '',
+        // linkedIn: '',
+        // nihUsername: '',
+        // orcid: '',
         piEmail: '',
         piName: '',
         profileName: '',
@@ -62,6 +62,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         scientificURL: '',
         state: '',
         zipcode: '',
+      },
+      errors: {},
+      showRequired: false,
+      requiredFields: {
+        profileName: true,
+        academicEmail: true,
+        institution: true,
+        department: true,
+        address1: true,
+        city: true,
+        state: true,
+        zipcode: true,
+        havePI: true,
+        isThePI: true,
       }
     };
   }
@@ -116,6 +130,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let value = event.target.value;
 
     this.setState(prev => { prev.researcherProfile[field] = value; return prev; });
+    if (value === '' && event.target.required) {
+      this.setState(prev => {prev.errors[field] = true; return prev;});
+      console.log(this.state.errors);
+    } else if (value !== '' && event.target.required) {
+      this.setState(prev => {prev.errors[field] = false; return prev;});
+      console.log(this.state.errors);
+    }
 
     if (field === 'profileAcademicEmail') {
       if (value !== '') {
@@ -282,7 +303,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.profileName === '' && showValidationMessages)
+                    isRendered: (this.state.researcherProfile.profileName === '' && showValidationMessages) || this.state.requiredFields.profileName
                   }, ["Full Name is required"])
                 ]),
 
@@ -354,8 +375,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         name: "linkedIn",
                         type: "text",
                         className: "form-control",
-                        onChange: this.handleChange,
-                        value: this.state.researcherProfile.linkedIn
+                        // onChange: this.handleChange,
+                        // value: this.state.researcherProfile.linkedIn
                       })
                     ])
                   ])
@@ -787,8 +808,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
               div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
                 a({ onClick: this.submit, className: "f-right btn-primary common-background" }, [
-                  span({ isRendered: !completed }, ["Submit"]),
-                  span({ isRendered: completed }, ["Update"]),
+                  span({ isRendered: (!completed || completed === undefined)}, ["Submit"]),
+                  span({ isRendered: (completed === true) }, ["Update"]),
                 ]),
                 ConfirmationDialog({
                   title: 'Submit Profile',
