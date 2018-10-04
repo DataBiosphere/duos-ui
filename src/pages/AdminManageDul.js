@@ -32,6 +32,8 @@ class AdminManageDul extends Component {
       showDialogCancel: false,
       showDialogCreate: false,
       showDialogDelete: false,
+      showDialogArchiveOpen: false,
+      showDialogArchiveClosed: false,
       archiveCheck: true,
       alertMessage: undefined,
       alertTitle: undefined,
@@ -142,9 +144,11 @@ class AdminManageDul extends Component {
   }
 
   openDialogArchive = (election) => (e) => {
+    console.log("archivar!");
     if (election.electionStatus === 'Open') {
       this.setState({ showDialogArchiveOpen: true, payload: election });
-    } else if (election.electionStatus === 'Closed') {
+    } else {
+      // if (election.electionStatus === 'Closed') {
       this.setState({ showDialogArchiveClosed: true, payload: election });
     }
 
@@ -173,8 +177,7 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerArchive = (answer) => async (e) => {
-    this.setState({ showDialogArchiveOpen: false });
-    this.setState({ showDialogArchiveClose: false });
+    this.setState({ showDialogArchiveOpen: false, showDialogArchiveClosed: false });
     if (answer) {
       let electionUpdate = {};
       let election = this.state.payload;
@@ -428,7 +431,6 @@ class AdminManageDul extends Component {
                             onClick: this.openDialogArchive(election)
                           }, [
                               span({
-                                // className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
                                 className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
                                 "data-tip": "",
                                 "data-for": "tip_archive"
