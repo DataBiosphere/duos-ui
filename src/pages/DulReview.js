@@ -21,8 +21,13 @@ class DulReview extends Component {
       election: {},
       vote: {vote: '', rational: ''}
     };
+    this.back = this.back.bind(this);
     this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
+  }
+
+  back() {
+    this.props.history.goBack();
   }
 
   componentDidMount() {
@@ -99,11 +104,6 @@ class DulReview extends Component {
       this.state.consent.name
     ]);
 
-    let userRoles = {
-      member: 'MEMBER',
-      chairperson: "CHAIRPERSON"
-    };
-
     return (
 
       div({ className: "container container-wide" }, [
@@ -113,20 +113,13 @@ class DulReview extends Component {
           ]),
 
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map(rol => {
-              return (
-                a({ id: "btn_back", key: rol, href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
-            this.state.currentUser.roles.map(rol => {
-              return (
-                a({ id: "btn_back", key: rol, href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
+            a({
+              id: "btn_back",
+              onClick: this.back,
+              className: "btn vote-button vote-button-back vote-button-bigger"
+            }, [
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 
