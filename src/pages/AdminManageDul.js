@@ -194,9 +194,7 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerCreate = (answer) => async (e) => {
-console.log('The election was created but the participants couldn\'t be notified by Email.');
-
-      this.setState({ disableOkBtn: answer });
+    this.setState({ disableOkBtn: answer });
     if (answer) {
       let consentId = this.state.createId;
       Election.createElection(consentId).then(
