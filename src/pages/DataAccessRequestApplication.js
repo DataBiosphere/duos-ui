@@ -125,7 +125,16 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
-    let formData = this.props.location.props !== undefined && this.props.location.props.formData !== undefined ? this.props.location.props.formData : this.state.formData;
+    let formData = this.state.formData;
+    let datasets = [];
+    if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
+      if (this.props.location.props.formData.dar_code !== undefined) {
+        formData = this.props.location.props.formData;
+      } else if (this.props.location.props.formData.datasetId !== undefined) {
+        // set datasets sent by data set catalog
+        datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+      }
+    }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
@@ -151,21 +160,17 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+      formData.controls = undefined;
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
-    let datasets = [];
-    if (formData.dar_code !== null || formData.partial_dar_code !== null || formData.datasetId !== undefined) {
-      datasets = formData.datasetId.map(function (item) {
-        return {
-          value: item.id,
-          label: item.concatenation
-        }
-      });
+
+    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
+      datasets = this.processDataSet(formData.datasetId);
     }
     let completed = false;
-    if(formData.dar_code !== null) {
+    if (formData.dar_code !== null) {
       completed = '';
-    } 
+    }
     else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
     }
@@ -179,7 +184,14 @@ class DataAccessRequestApplication extends Component {
 
   };
 
-
+  processDataSet(datasetIdList) {
+    return datasetIdList.map(function (item) {
+      return {
+        value: item.id,
+        label: item.concatenation
+      }
+    });
+  }
   handleFileChange(event) {
     if (event.target.files !== undefined && event.target.files[0]) {
       let file = event.target.files[0];
@@ -347,7 +359,7 @@ class DataAccessRequestApplication extends Component {
 
   isGenderValid(gender, onegender) {
     let isValidGender = false;
-    if(onegender === false || (onegender === true && this.isValid(gender))) {
+    if (onegender === false || (onegender === true && this.isValid(gender))) {
       isValidGender = true;
     }
     return isValidGender;
@@ -355,7 +367,7 @@ class DataAccessRequestApplication extends Component {
   verifyStep3() {
     let invalid = false;
     if (!(this.isValid(this.state.formData.forProfit) &&
-      this.isValid(this.state.formData.onegender) && 
+      this.isValid(this.state.formData.onegender) &&
       this.isGenderValid(this.state.formData.gender, this.state.formData.onegender) &&
       this.isValid(this.state.formData.pediatric) &&
       this.isValid(this.state.formData.illegalbehave) &&
@@ -414,8 +426,20 @@ class DataAccessRequestApplication extends Component {
     this.setState({ showDialogSave: true });
   };
 
+  removeUncheckedFields() {
+    this.setState(prev => {
+      for (var key in prev.formData) {
+        if (prev.formData[key] === '') {
+          prev.formData[key] = undefined;
+        }
+      }
+      return prev;
+    });
+  };
+
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
+      this.removeUncheckedFields();
       let formData = this.state.formData;
       let ds = [];
       this.state.datasets.forEach(dataset => {
@@ -424,6 +448,7 @@ class DataAccessRequestApplication extends Component {
       formData.datasetId = ds;
       formData.userId = Storage.getCurrentUser().dacUserId;
       this.setState(prev => { prev.disableOkBtn = true; return prev; });
+
       if (formData.dar_code !== undefined && formData.dar_code !== null) {
         DAR.updateDar(formData, formData.dar_code).then(response => {
           this.setState({ showDialogSubmit: false });
@@ -439,6 +464,7 @@ class DataAccessRequestApplication extends Component {
             return prev;
           }));
       }
+
     } else {
       this.setState({ showDialogSubmit: false });
     }
@@ -454,7 +480,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   dialogHandlerSave = (answer) => (e) => {
-    this.setState(prev =>{prev.disableOkBtn = true; return prev;});
+    this.setState(prev => { prev.disableOkBtn = true; return prev; });
     if (answer === true) {
       let datasets = this.state.datasets.map(function (item) {
         return {
@@ -1086,7 +1112,7 @@ class DataAccessRequestApplication extends Component {
                           div({ className: 'radio-inline' }, [
                             genderLabels.map((option, ix) => {
                               return (
-                              label({
+                                label({
                                   key: 'gender' + ix,
                                   onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
                                   id: "lbl_gender_" + ix,

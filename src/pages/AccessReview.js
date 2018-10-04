@@ -69,7 +69,7 @@ class AccessReview extends Component {
     vote.vote = voteStatus;
     vote.rationale = rationale;
 
-    if (this.state.rpVote.createDate === null) {
+    if (this.state.vote.createDate === null) {
       Votes.postDarVote(this.state.election.referenceId, vote).then(
         data => {
           this.setState(prev => {
@@ -135,9 +135,9 @@ class AccessReview extends Component {
     const consent = await DAR.getDarConsent(this.props.match.params.darId);
     const election = await Election.findElectionByDarId(this.props.match.params.darId);
     const vote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.voteId);
-    const rpVote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId);
     const request = await DAR.getDarFields(this.props.match.params.darId, 'projectTitle');
     const darInfo = await DAR.describeDar(this.props.match.params.darId);
+    const rpVote = this.props.match.params.rpVoteId !== 'null' ?  await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId) : null;
 
     this.setState(prev => {
       prev.consentName = consent.name;
@@ -151,7 +151,7 @@ class AccessReview extends Component {
       if (!darInfo.hasPurposeStatements) {
         prev.darInfo.purposeStatements = [];
       }
-      if (election.useRestriction !== null) {
+      if (election.useRestriction !== null && rpVote !== null) {
         prev.hasUseRestriction = true;
       } else {
         prev.hasUseRestriction = false;
@@ -179,7 +179,7 @@ class AccessReview extends Component {
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialogOK: false });
 
-    if (!this.state.alertRPVote && !this.state.alertVote) {
+    if (!this.state.alertRPVote && (!this.state.alertVote || this.state.vote.vote !== null)) {
       this.props.history.goBack();
     }
   };
@@ -189,14 +189,17 @@ class AccessReview extends Component {
       loading: true,
       showConfirmationDialogOK: false,
       alertMessage: "Your vote has been successfully logged!",
-      hasUseRestriction: '',
+      hasUseRestriction: false,
       projectTitle: '',
       consentName: '',
       consentId: '',
       dulName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
-      rpVote: {},
+      rpVote: {
+        vote: '',
+        rational: ''
+      },
       election: {},
       vote: {},
       alertVote: false,
@@ -440,8 +443,8 @@ class AccessReview extends Component {
                       title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                         : "Should data access be granted to this applicant?",
                       disabled: false,
-                      voteStatus: this.state.vote.vote,
-                      rationale: this.state.vote.rationale,
+                      voteStatus: this.state.vote.vote !== null ? this.state.vote.vote : undefined,
+                      rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
                       action: { label: "Vote", handler: this.submitVote },
                       showAlert: this.state.alertRPVote,
                       alertMessage: 'Remember to log a vote on: 2. Was the research purpose accurately converted to a structured format?'
@@ -494,8 +497,8 @@ class AccessReview extends Component {
                       color: "access",
                       title: "Q2. Was the research purpose accurately converted to a structured format?",
                       disabled: false,
-                      voteStatus: this.state.rpVote.vote,
-                      rationale: this.state.rpVote.rationale,
+                      voteStatus: this.state.rpVote !== null && this.state.rpVote.vote !== null ? this.state.rpVote.vote : undefined,
+                      rationale: this.state.rpVote !== null && this.state.rpVote.rationale !== null ? this.state.rpVote.rationale : '',
                       action: { label: "Vote", handler: this.submitRpVote },
                       showAlert: this.state.alertVote,
                       alertMessage: 'Remember to log a vote on: 1. Should data access be granted to this applicant?'
