@@ -36,6 +36,7 @@ class DatasetCatalog extends Component {
         showDialogEnable: false,
         showDialogDisable: false,
       },
+      disableOkButton: false,
       translatedUseRestrictionModal: {},
       isAdmin: null,
       isResearcher: null,
@@ -205,10 +206,11 @@ class DatasetCatalog extends Component {
   };
 
   dialogHandlerDelete = (answer) => (e) => {
+    this.setState({disableOkButton: true});
     if (answer) {
       DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
         this.getDatasets();
-        this.setState({ showDialogDelete: false });
+        this.setState({ showDialogDelete: false, disableOkButton: false });
       }).catch(error => {
         this.setState(prev => {
           prev.showDialogDelete = true;
@@ -218,15 +220,16 @@ class DatasetCatalog extends Component {
         });
       });
     } else {
-      this.setState({ showDialogDelete: false,  alertMessage: undefined, alertTitle: undefined });
+      this.setState({ showDialogDelete: false,  alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
   };
 
   dialogHandlerEnable = (answer) => (e) => {
+    this.setState({disableOkButton: true});
     if (answer) {
       DataSet.disableDataset(this.state.datasetId, true).then(resp => {
         this.getDatasets();
-        this.setState({ showDialogEnable: false });
+        this.setState({ showDialogEnable: false, disableOkButton: false });
       }).catch(error => {
         this.setState(prev => {
           prev.showDialogEnable = true;
@@ -236,16 +239,17 @@ class DatasetCatalog extends Component {
         });
       });
     } else {
-      this.setState({ showDialogEnagle: false,  alertMessage: undefined, alertTitle: undefined });
+      this.setState({ showDialogEnagle: false,  alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
 
   };
 
   dialogHandlerDisable = (answer) => (e) => {
+    this.setState({disableOkButton: true});
     if (answer) {
       DataSet.disableDataset(this.state.datasetId, false).then(resp => {
         this.getDatasets();
-        this.setState({ showDialogDisable: false });
+        this.setState({ showDialogDisable: false, disableOkButton: false});
       }).catch(error => {
         this.setState(prev => {
           prev.alertMessage = 'Please try again later.';
@@ -535,6 +539,7 @@ class DatasetCatalog extends Component {
             showModal: this.state.showDialogDelete,
             alertMessage: this.state.errorMessage,
             alertTitle: this.state.alertTitle,
+            disableOkBtn: this.state.disableOkButton,
             action: { label: "Yes", handler: this.dialogHandlerDelete }
           }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
 
@@ -543,6 +548,7 @@ class DatasetCatalog extends Component {
             color: 'dataset',
             showModal: this.state.showDialogDisable,
             alertMessage: this.state.errorMessage,
+            disableOkBtn: this.state.disableOkButton,
             alertTitle: this.state.alertTitle,
             action: { label: "Yes", handler: this.dialogHandlerDisable }
           }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
@@ -553,6 +559,7 @@ class DatasetCatalog extends Component {
             alertMessage: this.state.errorMessage,
             alertTitle: this.state.alertTitle,
             showModal: this.state.showDialogEnable,
+            disableOkBtn: this.state.disableOkButton,
             action: { label: "Yes", handler: this.dialogHandlerEnable }
           }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
 
