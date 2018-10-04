@@ -90,8 +90,9 @@ class AdminConsole extends Component {
   okModal = (name) => {
 
     switch (name) {
-      case 'addDul':
+      case 'editDul':
         this.setState({showAddDulModal: false});
+        this.props.history.push(`admin_manage_dul`);
         break;
       case 'addUser':
         this.setState({showAddUserModal: false});
