@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, hh, span, a, h3 } from 'react-hyperscript-helpers';
+import { div, hr, hh, span, a, h3, button } from 'react-hyperscript-helpers';
 import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
@@ -119,9 +119,9 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             }),
           ]),
 
-          a({
+          button({
             id: "btn_downloadStatsDul",
-            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper download-button dul-background",
+            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper btn-primary dul-background",
             onClick: () => this.getFile("TranslateDUL"),
             isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
           }, [
@@ -159,9 +159,9 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             }),
           ]),
 
-          a({
+          button({
             id: "btn_downloadStatsAccess",
-            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper download-button access-background",
+            className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper btn-primary access-background",
             onClick: () => this.getFile("DataAccess"),
             isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
           }, [
@@ -170,7 +170,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             ]),
         ]),
 
-        h3({ className: "statsSubtitle access-color" }, ["1. Should data access be granted to this applicant ?"]),
+        h3({ className: "stats-box-title access-color" }, ["1. Should data access be granted to this applicant ?"]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
           StatsBox({

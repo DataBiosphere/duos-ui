@@ -133,7 +133,7 @@ class DulReview extends Component {
               h4({}, ["Data Use Limitations"]),
             ]),
             div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
             ])
           ]),
 

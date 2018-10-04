@@ -291,7 +291,7 @@ class DataOwnerReview extends Component {
             ]),
             div({id: "dul", className: "panel-body cm-boxbody"}, [
               button({
-                className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn vote-reminder hover-color",
+                className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn-secondary btn-reminder hover-color",
                 onClick: this.downloadDUL
               }, ["Download Data Use Letter"]),
             ])
