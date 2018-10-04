@@ -179,6 +179,7 @@ class AdminManageDul extends Component {
       await Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     }
+    this.setState({ showDialogArchiveOpen : false, showDialogArchiveClosed : false });
   };
 
   dialogHandlerCancel = (answer) => async (e) => {
