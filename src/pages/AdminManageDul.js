@@ -295,7 +295,7 @@ class AdminManageDul extends Component {
 
             a({
               id: 'btn_addDUL',
-              className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
+              className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 btn-primary btn-add dul-background",
               onClick: this.addDul
             }, [
                 div({ className: "all-icons add-dul_white" }),

@@ -62,13 +62,12 @@ class Login extends Component {
   render() {
 
     const googleLoginButton = h(GoogleLogin, {
-      id: "btn_gSignIn",
       className: "btn_gSignInWrapper",
       clientId: clientId,
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden
     }, [
-        div({ className: "btn_gSignIn" }, [
+        div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
           span({ className: "icon" }),
           label({}, ["Sign in with Google"])
         ])

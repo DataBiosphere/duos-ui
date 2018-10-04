@@ -391,7 +391,7 @@ class FinalAccessReview extends Component {
             PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", href: "/chair_console", className: "btn vote-button vote-button-back vote-button-bigger" }, [
+            a({ id: "btn_back", href: "/chair_console", className: "btn-primary btn-back" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),
@@ -512,7 +512,7 @@ class FinalAccessReview extends Component {
                   label({ className: "control-label access-color" }, ["Country: "]),
                   span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country]),
                 ]),
-                button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
               ]),
             ]),
           ]),
@@ -524,7 +524,7 @@ class FinalAccessReview extends Component {
             ]),
             div({ id: "dul", className: "panel-body cm-boxbody" }, [
               div({ className: "row no-margin" }, [
-                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
               ]),
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label dul-color" }, ["Structured Limitations"]),
