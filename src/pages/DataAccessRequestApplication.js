@@ -426,49 +426,44 @@ class DataAccessRequestApplication extends Component {
     this.setState({ showDialogSave: true });
   };
 
-  removeUncheckedFields() {
-    this.setState(prev => {
-      for (var key in prev.formData) {
-        if (prev.formData[key] === '') {
-          prev.formData[key] = undefined;
-        }
-      }
-      return prev;
-    });
-  };
-
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
-      this.removeUncheckedFields();
-      let formData = this.state.formData;
-      let ds = [];
-      this.state.datasets.forEach(dataset => {
-        ds.push(dataset.value);
-      });
-      formData.datasetId = ds;
-      formData.userId = Storage.getCurrentUser().dacUserId;
-      this.setState(prev => { prev.disableOkBtn = true; return prev; });
-
-      if (formData.dar_code !== undefined && formData.dar_code !== null) {
-        DAR.updateDar(formData, formData.dar_code).then(response => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.push('researcher_console');
+      this.setState(prev => {
+        for (var key in prev.formData) {
+          if (prev.formData[key] === '') {
+            prev.formData[key] = undefined;
+          }
+        }
+        return prev;
+      }, () => {
+        let formData = this.state.formData;
+        let ds = [];
+        this.state.datasets.forEach(dataset => {
+          ds.push(dataset.value);
         });
-      } else {
-        DAR.postDataAccessRequest(formData).then(response => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.push('researcher_console');
-        }).catch(e =>
-          this.setState(prev => {
-            prev.problemSavingRequest = true;
-            return prev;
-          }));
-      }
+        formData.datasetId = ds;
+        formData.userId = Storage.getCurrentUser().dacUserId;
+        this.setState(prev => { prev.disableOkBtn = true; return prev; });
 
+        if (formData.dar_code !== undefined && formData.dar_code !== null) {
+          DAR.updateDar(formData, formData.dar_code).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          });
+        } else {
+          DAR.postDataAccessRequest(formData).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          }).catch(e =>
+            this.setState(prev => {
+              prev.problemSavingRequest = true;
+              return prev;
+            }));
+        }
+      });
     } else {
       this.setState({ showDialogSubmit: false });
     }
-
   };
 
   setShowDialogSave(value) {
@@ -1116,7 +1111,7 @@ class DataAccessRequestApplication extends Component {
                           div({ className: 'radio-inline' }, [
                             genderLabels.map((option, ix) => {
                               return (
-                                label({
+                              label({
                                   key: 'gender' + ix,
                                   onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
                                   id: "lbl_gender_" + ix,
@@ -1297,7 +1292,7 @@ class DataAccessRequestApplication extends Component {
                       span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                     ]),
 
-                    button({ id: "btn_submit", isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
+                    a({id: "btn_submit", isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
 
                         ConfirmationDialog({
                           title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
@@ -1316,4 +1311,3 @@ class DataAccessRequestApplication extends Component {
 }
 
 export default DataAccessRequestApplication;
-
