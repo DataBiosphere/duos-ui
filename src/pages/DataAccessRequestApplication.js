@@ -152,7 +152,7 @@ class DataAccessRequestApplication extends Component {
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
     let datasets = [];
-    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
+    if (formData.dar_code !== null || formData.partial_dar_code !== null || formData.datasetId !== undefined) {
       datasets = formData.datasetId.map(function (item) {
         return {
           value: item.id,
