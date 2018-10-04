@@ -786,7 +786,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               ]),
 
               div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
-                a({ onClick: this.submit, className: "f-right btn-primary common-background" }, [
+                button({ id: "btn_submit", onClick: this.submit, className: "f-right btn-primary common-background" }, [
                   span({ isRendered: !completed }, ["Submit"]),
                   span({ isRendered: completed }, ["Update"]),
                 ]),
@@ -797,7 +797,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   action: { label: "Yes", handler: this.dialogHandlerSubmit }
                 }, [div({ className: "dialog-description" }, ["Are you sure you want to submit your Profile information?"]),]),
 
-                a({ isRendered: !completed, onClick: this.saveProfile, className: "f-right btn-secondary common-color" }, ["Continue later"]),
+                button({ id: "btn_continueLater", isRendered: !completed, onClick: this.saveProfile, className: "f-right btn-secondary common-color" }, ["Continue later"]),
 
                 ConfirmationDialog({
                   title: 'Continue later',

@@ -126,39 +126,24 @@
   display: block;
 }
 
-.download-pdf {
+.btn-download-pdf {
   height: 35px;
+  line-height: 18px;
 }
 
-.download-pdf .glyphicon {
+.btn-download-pdf .glyphicon {
   margin-right: 10px;
   font-size: 16px;
 }
 
-.fileUpload.download-pdf {
-  height: 35px;
-  padding-top: 6px;
+.fileUpload.btn-download-pdf {
   margin-bottom: 10px;
-  -webkit-transition: background 0.3s ease;
-  -o-transition: background 0.3s ease;
-  transition: background 0.3s ease;
 }
 
-.fileUpload.download-pdf:hover {
+.btn-download-pdf:not([disabled]):hover,
+fieldset:not([disabled]) .btn-download-pdf:hover {
   background: #2FA4E7 !important;
   color: #ffffff !important;
-}
-
-.fileUpload.download-pdf .fileName {
-  padding-top: 10px;
-}
-
-.fileUpload.download-pdf .glyphicon {
-  margin-top: 2px;
-}
-
-fieldset {
-  min-width: 100%;
 }
 
 .select-autocomplete .select__control {
@@ -188,19 +173,22 @@ fieldset {
   font-weight: 500;
 }
 
-[disabled] .fileUpload.download-pdf,
-[disabled] .fileUpload.download-pdf:hover,
-[disabled] .select-autocomplete .select__control {
-  color: #cccccc !important;
+fieldset {
+  min-width: 100%;
+}
+
+fieldset[disabled] .btn-download-pdf,
+fieldset[disabled] .select-autocomplete {
+  cursor: default;
   pointer-events: none;
+}
+
+fieldset[disabled] .select-autocomplete .select__control {
+  color: #cccccc !important;
   background: #eeeeee;
 }
 
-[disabled] .fileUpload.download-pdf,
-[disabled] .fileUpload.download-pdf:hover {
-  cursor: default !important;
-}
-
-[disabled] .select-autocomplete {
+fieldset[disabled] .regular-checkbox:before {
   cursor: not-allowed !important;
+  opacity: 0.65;
 }

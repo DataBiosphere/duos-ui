@@ -115,14 +115,14 @@ class DulReview extends Component {
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             this.state.currentUser.roles.map(rol => {
               return (
-                a({ id: "btn_back", key: rol, href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", key: rol, href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn-primary btn-back" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
             }),
             this.state.currentUser.roles.map(rol => {
               return (
-                a({ id: "btn_back", key: rol, href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", key: rol, href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
@@ -140,7 +140,7 @@ class DulReview extends Component {
               h4({}, ["Data Use Limitations"]),
             ]),
             div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
             ])
           ]),
 
