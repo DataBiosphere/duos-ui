@@ -114,7 +114,7 @@ export const StatsBox = hh(class StatsBox extends Component {
 
     if (this.props.clickHandler !== undefined) {
       buttonTag = div({ className: "no-padding f-right display-inline-block" }, [
-        button({ id: this.props.id + "_btnDownload", onClick: this.props.clickHandler, className: "btn vote-reminder " + this.props.options + "-color" }, [this.props.buttonLabel]),
+        button({ id: this.props.id + "_btnDownload", onClick: this.props.clickHandler, className: "btn-secondary btn-reminder " + this.props.options + "-color" }, [this.props.buttonLabel]),
       ])
     }
 

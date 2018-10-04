@@ -38,7 +38,6 @@ class AdminManageDul extends Component {
       disableOkBtn: false
     };
 
-    this.myHandler = this.myHandler.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
     this.addDul = this.addDul.bind(this);
@@ -53,6 +52,10 @@ class AdminManageDul extends Component {
       prev.loading = false;
       prev.currentPage = 1;
       prev.electionsList.dul = duls;
+      prev.disableOkBtn = false;
+      prev.showDialogArchiveOpen = false;
+      prev.showDialogArchiveClosed = false;
+      prev.showDialogCancel = false;
       return prev;
     });
   }
@@ -66,6 +69,8 @@ class AdminManageDul extends Component {
     this.setState(prev => {
       prev.currentPage = 1;
       prev.electionsList.dul = updatedDul;
+      prev.disableOkBtn = false;
+      prev.showDialogDelete = false;
       return prev;
     });
   };
@@ -85,17 +90,10 @@ class AdminManageDul extends Component {
     });
   };
 
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
-
   handleCloseModal() {
     this.setState({ showModal: false });
   }
 
-  myHandler(event) {
-    // TBD
-  }
 
   open(electionId, page, action, status) {
     this.props.history.push(`${page}/${electionId}`)
@@ -121,7 +119,6 @@ class AdminManageDul extends Component {
   }
 
   closeAddDulModal() {
-    // this state change close AddDul modal
     this.setState(prev => {
       prev.showModal = false;
       return prev;
@@ -129,7 +126,6 @@ class AdminManageDul extends Component {
   }
 
   async okAddDulModal() {
-    // this state change close AddDul modal
     await this.getConsentManage();
     this.setState(prev => {
       prev.showModal = false;
@@ -138,13 +134,12 @@ class AdminManageDul extends Component {
   }
 
   afterAddDulModalOpen() {
-    // not sure when to use this
   }
 
   openDialogArchive = (election) => (e) => {
     if (election.electionStatus === 'Open') {
       this.setState({ showDialogArchiveOpen: true, payload: election });
-    } else if (election.electionStatus === 'Closed') {
+    } else {
       this.setState({ showDialogArchiveClosed: true, payload: election });
     }
 
@@ -173,8 +168,7 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerArchive = (answer) => async (e) => {
-    this.setState({ showDialogArchiveOpen: false });
-    this.setState({ showDialogArchiveClose: false });
+    this.setState({ disableOkBtn: answer });
     if (answer) {
       let electionUpdate = {};
       let election = this.state.payload;
@@ -184,13 +178,15 @@ class AdminManageDul extends Component {
       electionUpdate.archived = true;
       await Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
+    } else {
+      this.setState({showDialogArchiveOpen: false, showDialogArchiveClosed: false});
     }
   };
 
   dialogHandlerCancel = (answer) => async (e) => {
-    this.setState({ showDialogCancel: false });
-    let election = this.state.payload;
+    this.setState({ disableOkBtn: answer, archiveCheck: true });
     if (answer) {
+      let election = this.state.payload;
       let electionUpdated = {
         status: 'Canceled',
         referenceId: election.consentId,
@@ -198,37 +194,35 @@ class AdminManageDul extends Component {
         archived: this.state.archiveCheck
       };
       await Election.updateElection(election.electionId, electionUpdated);
-      this.setState({ archiveCheck: true });
       this.getConsentManage();
+    } else {
+      this.setState({ showDialogCancel: false });
     }
   };
 
   dialogHandlerCreate = (answer) => async (e) => {
-
-    let consentId = this.state.createId;
+    this.setState({ disableOkBtn: answer });
     if (answer) {
+      let consentId = this.state.createId;
       Election.createElection(consentId).then(
         (value) => {
-          this.getConsentManage();
           this.setState({
             showDialogCreate: false,
             alertTitle: undefined,
-            alertMessage: undefined,
-            disableOkBtn: false
+            alertMessage: undefined
           });
+          this.getConsentManage();
         }).catch(errorResponse => {
           if (errorResponse.status === 500) {
             this.setState({
               alertTitle: 'Email Service Error!',
-              alertMessage: 'The election was created but the participants couldnt be notified by Email.',
-              disableOkBtn: true
+              alertMessage: 'The election was created but the participants couldn\'t be notified by Email.',
             });
           } else {
             errorResponse.json().then(error =>
               this.setState({
                 alertTitle: 'Election cannot be created!',
                 alertMessage: error.message,
-                disableOkBtn: true
               })
             );
           }
@@ -246,14 +240,16 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerDelete = (answer) => (e) => {
-    this.setState({ showDialogDelete: false });
-    let consentId = this.state.deleteId;
+    this.setState({ disableOkBtn: answer });
     if (answer) {
+      let consentId = this.state.deleteId;
       Consent.deleteConsent(consentId).then(data => {
         if (data.ok) {
           this.removeDul(consentId);
         }
       });
+    } else {
+      this.setState({showDialogDelete: false});
     }
   };
 
@@ -299,7 +295,7 @@ class AdminManageDul extends Component {
 
             a({
               id: 'btn_addDUL',
-              className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 admin-add-button dul-background no-margin",
+              className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 btn-primary btn-add dul-background",
               onClick: this.addDul
             }, [
                 div({ className: "all-icons add-dul_white" }),
@@ -389,7 +385,7 @@ class AdminManageDul extends Component {
                       span({ isRendered: election.electionStatus === 'Canceled' }, [
                         a({ id: election.consentId + "_linkCanceled", name: "link_canceled", onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Canceled"]),]),
                       span({ isRendered: election.electionStatus === 'Closed' }, [
-                        a({ id: election.consentId + "_linkReviewed", name: "link_reviewed", onClick: () => this.open(null, 'dul_results_record', election.electionId, false) }, [election.vote]),]),
+                        a({ id: election.consentId + "_linkReviewed", name: "link_reviewed", onClick: () => this.open(election.electionId, 'dul_results_record', election.electionId, false) }, [election.vote]),]),
                     ]),
                     div({
                       isRendered: election.electionStatus !== 'Open',
@@ -441,7 +437,7 @@ class AdminManageDul extends Component {
                         ]),
                       div({
                         className: "display-inline-block",
-                        disabled: (election.electionStatus !== 'un-reviewed')
+                        disabled: (election.electionStatus !== 'un-reviewed' || election.electionStatus === 'Canceled')
                       }, [
                           button({
                             id: election.consentId + "_btnDeleteDul",
@@ -491,6 +487,8 @@ class AdminManageDul extends Component {
         ConfirmationDialog({
           isRendered: this.state.showDialogArchiveOpen,
           showModal: this.state.showDialogArchiveOpen,
+          disableOkBtn: this.state.disableOkBtn,
+          disableNoBtn: this.state.disableOkBtn,
           title: 'Archive election?',
           color: 'dul',
           payload: this.state.payload,
@@ -505,6 +503,8 @@ class AdminManageDul extends Component {
         ConfirmationDialog({
           isRendered: this.state.showDialogArchiveClosed,
           showModal: this.state.showDialogArchiveClosed,
+          disableOkBtn: this.state.disableOkBtn,
+          disableNoBtn: this.state.disableOkBtn,
           title: 'Archive election?',
           color: 'dul',
           payload: this.state.payload,
@@ -519,6 +519,8 @@ class AdminManageDul extends Component {
         ConfirmationDialog({
           isRendered: this.state.showDialogCancel,
           showModal: this.state.showDialogCancel,
+          disableOkBtn: this.state.disableOkBtn,
+          disableNoBtn: this.state.disableOkBtn,
           title: 'Cancel election?',
           color: 'cancel',
           payload: this.state.payload,
@@ -555,6 +557,7 @@ class AdminManageDul extends Component {
           title: 'Create election?',
           color: 'dul',
           disableOkBtn: this.state.disableOkBtn,
+          disableNoBtn: this.state.disableOkBtn,
           action: { label: "Yes", handler: this.dialogHandlerCreate },
           alertMessage: this.state.alertMessage,
           alertTitle: this.state.alertTitle
@@ -572,6 +575,8 @@ class AdminManageDul extends Component {
         ConfirmationDialog({
           isRendered: this.state.showDialogDelete,
           showModal: this.state.showDialogDelete,
+          disableOkBtn: this.state.disableOkBtn,
+          disableNoBtn: this.state.disableOkBtn,
           title: 'Delete Consent?',
           color: 'cancel',
           action: { label: "Yes", handler: this.dialogHandlerDelete }

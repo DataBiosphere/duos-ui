@@ -15,11 +15,11 @@ class DulReview extends Component {
       showConfirmationDialog: false,
       loading: true,
       value: '',
-      currentUser: {},
+      currentUser: Storage.getCurrentUser(),
       enableVoteButton: false,
       consent: {},
       election: {},
-      vote: {vote: '', rational: null}
+      vote: {vote: '', rational: ''}
     };
     this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
@@ -83,7 +83,7 @@ class DulReview extends Component {
   };
 
   downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
+    Files.getDulFile(this.props.match.params.consentId, this.state.election.dulName);
   };
 
   confirmationHandlerOK = (answer) => (e) => {
@@ -116,14 +116,14 @@ class DulReview extends Component {
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             this.state.currentUser.roles.map(rol => {
               return (
-                a({ id: "btn_back", key: rol, href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", key: rol, href: "/user_console", isRendered: rol.name === userRoles.member, className: "btn-primary btn-back" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
             }),
             this.state.currentUser.roles.map(rol => {
               return (
-                a({ id: "btn_back", key: rol, href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+                a({ id: "btn_back", key: rol, href: "/chair_console", isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
@@ -141,7 +141,7 @@ class DulReview extends Component {
               h4({}, ["Data Use Limitations"]),
             ]),
             div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
             ])
           ]),
 
@@ -159,8 +159,8 @@ class DulReview extends Component {
               id: "dulReview",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-              voteStatus: this.state.vote.vote,
-              rationale: this.state.vote.rationale,
+              voteStatus: this.state.vote.vote === null ? undefined : this.state.vote.vote,
+              rationale: this.state.vote.rationale === null ? '' : this.state.vote.rationale,
               action: { label: "Vote", handler: this.logVote }
             })
           ]),

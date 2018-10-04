@@ -166,7 +166,11 @@ class AccessResultRecords extends Component {
               title: "Data Access - Results Record", description: consentData
             }),
           ]),
-          backButton,
+          div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
+            a({ id: "btn_back", href: "/chair_console", className: "btn-primary btn-back" }, [
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
+          ]),
         ]),
 
         div({ className: "accordion-title access-color" }, [
@@ -175,8 +179,135 @@ class AccessResultRecords extends Component {
         hr({ className: "section-separator" }),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          this.renderApplicationSummary(darInfo, dar, this.state.sDAR, this.state.mrDAR),
-          this.renderDataUseLimitation(this.state.sDUL, this.state.mrDUL)
+
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+            div({ className: "panel-heading cm-boxhead access-color" }, [
+              h4({}, ["Application Summary"]),
+            ]),
+            div({ id: "rp", className: "panel-body" }, [
+              div({ className: "row dar-summary" }, [
+                div({ className: "control-label access-color" }, ["Research Purpose"]),
+                div({ className: "response-label" }, [dar.rus]),
+              ]),
+
+              div({ className: "row dar-summary" }, [
+                div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
+                div({ className: "response-label" }, [darInfo.sDar]),
+                a({
+                  isRendered: this.state.hasUseRestriction, onClick: this.downloadSDAR,
+                  filename: 'machine-readable-DAR.json',
+                  value: "mrDAR", className: "italic hover-color"
+                }, ["Download DAR machine-readable format"]),
+              ]),
+
+              div({ isRendered: darInfo.hasPurposeStatements && darInfo.purposeStatements !== undefined, className: "row dar-summary" }, [
+                div({ className: "control-label access-color" }, ["Purpose Statement"]),
+                div({ className: "response-label" }, [
+                  ul({}, [
+                    darInfo.purposeStatements.map((purpose, rIndex) => {
+                      return h(Fragment, {}, [
+                        li({ className: purpose.manualReview ? 'cancel-color' : '' }, [
+                          b({}, [purpose.title]), purpose.description
+                        ])
+                      ]);
+                    })
+                  ]),
+                  div({ isRendered: darInfo.purposeManualReview && !darInfo.researchTypeManualReview, className: "dar-summary" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
+                      "This research involves studying a sensitive population and requires manual review."
+                    ]),
+                  ]),
+                ]),
+
+                div({ className: "row dar-summary" }, [
+                  div({ className: "control-label access-color" }, ["Type of Research"]),
+                  div({ className: "response-label" }, [
+                    ul({}, [
+                      darInfo.researchType.map((type, rIndex) => {
+                        return h(Fragment, {}, [
+                          li({ className: type.manualReview ? 'cancel-color' : '' }, [
+                            b({}, [type.title]), type.description
+                          ]),
+                        ]);
+                      })
+                    ]),
+                  ]),
+                ]),
+                div({ isRendered: darInfo.researchTypeManualReview, className: "row dar-summary" }, [
+                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
+                    "This research requires manual review."
+                  ]),
+                ]),
+
+                div({ isRendered: darInfo.hasDiseases, className: "row dar-summary" }, [
+                  div({ className: "control-label access-color" }, ["Disease area(s)"]),
+                  div({ className: "response-label" }, [
+                    ul({}, [
+                      darInfo.diseases.map((disease, rIndex) => {
+                        return h(Fragment, {}, [
+                          li({}, [
+                            disease
+                          ]),
+                        ]);
+                      })
+                    ]),
+                  ]),
+                ]),
+                div({ isRendered: darInfo.havePI, className: "row no-margin" }, [
+                  label({ className: "control-label access-color" }, ["Principal Investigator: "]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.pi]),
+                ]),
+                div({ className: "row no-margin" }, [
+                  label({ className: "control-label access-color" }, ["Researcher: "]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.profileName]),
+                  div({ className: "row no-margin" }, [
+                    label({ className: "control-label no-padding" }, ["Status: "]),
+                    span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.status]),
+                    span({ isRendered: darInfo.hasAdminComment }, [
+                      label({ className: "control-label no-padding" }, [" - Comment: "]),
+                      span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.adminComment]),
+                    ]),
+                  ]),
+                ]),
+                div({ className: "row no-margin" }, [
+                  label({ className: "control-label access-color" }, ["Institution: "]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.institution]),
+                ]),
+                div({ className: "row no-margin" }, [
+                  label({ className: "control-label access-color" }, ["Department: "]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.department]),
+                ]),
+                div({ className: "row no-margin" }, [
+                  label({ className: "control-label access-color" }, ["City: "]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.city]),
+                ]),
+                div({ className: "row no-margin" }, [
+                  label({ className: "control-label access-color" }, ["Country: "]),
+                  span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.country]),
+                ]),
+                button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+              ]),
+            ]),
+          ]),
+          //---------------------------------
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+
+            div({ className: "panel-heading cm-boxhead dul-color" }, [
+              h4({}, ["Data Use Limitations"]),
+            ]),
+            div({ id: "dul", className: "panel-body cm-boxbody" }, [
+              div({ className: "row no-margin" }, [
+                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+              ]),
+              div({ className: "row dar-summary" }, [
+                div({ className: "control-label dul-color" }, ["Structured Limitations"]),
+                div({ className: "response-label" }, ["sDul"]),
+                a({ id: "btn_downloadSDul", onClick: this.downloadSDUL, filename: 'machine-readable-DUL.json', value: "mrDUL", className: "italic hover-color" }, ["Download DUL machine-readable format"]),
+              ]),
+            ]),
+          ]),
+          //-------------------------------
+
         ]),
 
         hr({ className: "section-separator" }),

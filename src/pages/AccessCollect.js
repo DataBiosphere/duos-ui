@@ -9,6 +9,7 @@ import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Storage } from "../libs/storage";
 
 class AccessCollect extends Component {
 
@@ -394,7 +395,7 @@ class AccessCollect extends Component {
             PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", onClick: this.back, className: "btn vote-button vote-button-back vote-button-bigger" }, [
+            a({ id: "btn_back", onClick: this.back, className: "btn-primary btn-back" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),
@@ -457,7 +458,7 @@ class AccessCollect extends Component {
                         label({ className: "control-label access-color" }, ["Country: "]),
                         span({ id: "lbl_country", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country]),
                       ]),
-                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
+                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                     ]),
 
                     div({ className: "col-lg-8 col-md-7 col-sm-7 col-xs-12" }, [
@@ -532,7 +533,7 @@ class AccessCollect extends Component {
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
+                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
                     ]),
                   ]),
                 ]),
@@ -556,7 +557,7 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: this.state.access.isFormDisabled,
+                    isDisabled: this.state.access.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.darOriginalFinalVote,
                     action: { label: "Vote", handler: this.accessCollectVote },
                     rationale: this.state.darOriginalFinalRationale,
@@ -633,7 +634,7 @@ class AccessCollect extends Component {
                   ]),
                   div({ id: "panel_researchPurpose", className: "panel-body cm-boxbody" }, [
                     div({ style: { 'marginBottom': '10px' } }, [this.state.rus]),
-                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
+                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                   ])
                 ]),
 
@@ -662,7 +663,7 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: this.state.rp.isFormDisabled,
+                    isDisabled: this.state.rp.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.rpOriginalFinalVote,
                     action: { label: "Vote", handler: this.rpCollectVote },
                     rationale: this.state.rpOriginalFinalRationale,

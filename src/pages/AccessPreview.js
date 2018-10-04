@@ -37,11 +37,7 @@ class AccessPreview extends Component {
         prev.darInfo.rus = data1.rus;
         prev.projectTitle = data3.projectTitle;
         prev.consent = consent;
-        if(consent.requiresManualReview) {
-          prev.rp = "This includes sensitive research objectives that requires manual review.";
-        } else {
-          prev.rp = data2.translated_restriction;
-        }
+        prev.rp = data2.translated_restriction;
         if(useRestriction.hasUseRestriction === true) {
           prev.hasUseRestriction = true;
         }
@@ -156,7 +152,7 @@ class AccessPreview extends Component {
             PageHeading({ id: "previewAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Preview", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", onClick: () => this.back(), className: "btn vote-button vote-button-back vote-button-bigger" }, [
+            a({ id: "btn_back", onClick: () => this.back(), className: "btn-primary btn-back" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),
@@ -217,7 +213,7 @@ class AccessPreview extends Component {
                         label({ className: "control-label access-color" }, ["Country: "]),
                         span({ id: "lbl_country", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country]),
                       ]),
-                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                      button({ id: "btn_downloadFullApplication", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
                     ]),
 
                     div({ className: "col-lg-8 col-md-7 col-sm-7 col-xs-12" }, [
@@ -290,7 +286,7 @@ class AccessPreview extends Component {
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: () =>  this.downloadDUL() }, ["Download Data Use Letter"]),
+                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () =>  this.downloadDUL() }, ["Download Data Use Letter"]),
                     ])
                   ])
                 ])
@@ -315,7 +311,7 @@ class AccessPreview extends Component {
                   ]),
                   div({ id: "panel_researchPurpose", className: "panel-body cm-boxbody" }, [
                     div({ style: { 'marginBottom': '10px' } }, [this.state.darInfo.rus]),
-                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
+                    button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"]),
                   ])
                 ]),
 

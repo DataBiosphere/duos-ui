@@ -7,7 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files, Email } from '../libs/ajax';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-
+import { Storage } from '../libs/storage';
 
 class DulCollect extends Component {
 
@@ -190,7 +190,7 @@ class DulCollect extends Component {
               PageHeading({ id: "collectDul", imgSrc: "/images/icon_dul.png", iconSize: "medium", color: "dul", title: "Collect votes for Data Use Limitations Congruence Review", description: consentData }),
             ]),
             div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-              a({ id: "btn_back", onClick: () => this.back(), className: "btn vote-button vote-button-back vote-button-bigger" }, [
+              a({ id: "btn_back", onClick: () => this.back(), className: "btn-primary btn-back" }, [
                 i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
               ])
             ]),
@@ -215,7 +215,7 @@ class DulCollect extends Component {
                 h4({}, ["Data Use Limitations"]),
               ]),
               div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
               ])
             ]),
 
@@ -244,7 +244,7 @@ class DulCollect extends Component {
                 id: "dulCollect",
                 color: "dul",
                 title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-                isDisabled: this.state.isFormDisabled,
+                isDisabled: this.state.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                 voteStatus: this.state.finalVote,
                 rationale: this.state.finalRationale,
                 action: { label: "Vote", handler: this.dulCollect }

@@ -65,7 +65,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   OKHandler() {
     if (this.state.needsApprovalModified) {
-      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApprovalModified).then(response => {
+      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(response => {
         this.createOrUpdateAssociations()
       }, (error) => {
         this.setState(prev => {
@@ -189,7 +189,9 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       });
     }
 
-    if (this.props.dataset.needsApproval !== this.state.needsApproval || (this.state.selectedclients.length > 0 && modifiedList)){
+    if ((this.props.dataset.needsApproval !== this.state.needsApproval && this.state.selectedclients.length > 0) ||
+      (modifiedList && this.state.selectedclients.length > 0) ||
+      (modifiedList && this.state.needsApproval === false && this.state.selectedclients.length === 0) ) {
       this.setState({ updatedInfoModal: true });
     } else {
       this.setState({ updatedInfoModal: false });
@@ -200,8 +202,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   handleLSelection = (e) => {
     const target = e.target;
     const value = target.value;
-    // const options = target.options;
-    // const selectedOptions = target.selectedOptions;
     this.setState(prev => {
         prev.available.push(value);
         return prev;
@@ -305,7 +305,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
                 checked: this.state.needsApproval,
                 type: "checkbox",
                 className: "checkbox-inline",
-                name: "needsApproval" 
+                name: "needsApproval"
               }),
                 label({ 
                   id: "lbl_needsApproval",
