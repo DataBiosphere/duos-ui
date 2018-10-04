@@ -37,11 +37,7 @@ class AccessPreview extends Component {
         prev.darInfo.rus = data1.rus;
         prev.projectTitle = data3.projectTitle;
         prev.consent = consent;
-        if(consent.requiresManualReview) {
-          prev.rp = "This includes sensitive research objectives that requires manual review.";
-        } else {
-          prev.rp = data2.translated_restriction;
-        }
+        prev.rp = data2.translated_restriction;
         if(useRestriction.hasUseRestriction === true) {
           prev.hasUseRestriction = true;
         }
