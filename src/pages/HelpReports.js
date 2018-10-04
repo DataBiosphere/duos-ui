@@ -16,7 +16,7 @@ class HelpReports extends Component {
     this.state = {
       loading: true,
       value: '',
-      limit: 10,
+      limit: 5,
       currentPage: 1,
       reports: [],
       showHelpModal: false,
@@ -47,11 +47,12 @@ class HelpReports extends Component {
     });
   };
 
-  okModal= () => {
+  okModal = () => {
     this.getReportsList();
     this.setState(prev => {
       prev.showHelpModal = false;
-      return prev; });
+      return prev;
+    });
   };
 
   closeModal = () => {
@@ -108,7 +109,7 @@ class HelpReports extends Component {
 
           div({ className: "col-lg-6 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({ id: 'helpReports', searchHandler: this.handleSearchDul, color: 'common' })
+              h(SearchBox, { id: 'helpReports', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'common' })
             ]),
 
             a({

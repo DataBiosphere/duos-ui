@@ -10,7 +10,6 @@ import './SearchBox.css';
   constructor(props) {
     super(props);
     this.myRef = React.createRef();
-    console.log(props);
   }
 
   changeHandler = (e) => {

@@ -172,7 +172,7 @@ class AdminManageAccess extends Component {
           ]),
 
           div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-wrapper no-padding" }, [
-            SearchBox({ id: 'manageAccess', searchHandler: this.handleSearchDar, color: 'access' })
+            h(SearchBox, { id: 'manageAccess', searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange, color: 'access' })
           ]),
         ]),
 
