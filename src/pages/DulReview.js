@@ -15,11 +15,11 @@ class DulReview extends Component {
       showConfirmationDialog: false,
       loading: true,
       value: '',
-      currentUser: {},
+      currentUser: Storage.getCurrentUser(),
       enableVoteButton: false,
       consent: {},
       election: {},
-      vote: {vote: '', rational: null}
+      vote: {vote: '', rational: ''}
     };
     this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
@@ -82,7 +82,7 @@ class DulReview extends Component {
   };
 
   downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
+    Files.getDulFile(this.props.match.params.consentId, this.state.election.dulName);
   };
 
   confirmationHandlerOK = (answer) => (e) => {
@@ -158,8 +158,8 @@ class DulReview extends Component {
               id: "dulReview",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-              voteStatus: this.state.vote.vote,
-              rationale: this.state.vote.rationale,
+              voteStatus: this.state.vote.vote === null ? undefined : this.state.vote.vote,
+              rationale: this.state.vote.rationale === null ? '' : this.state.vote.rationale,
               action: { label: "Vote", handler: this.logVote }
             })
           ]),
