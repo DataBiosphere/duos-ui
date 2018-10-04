@@ -53,6 +53,9 @@ class AdminManageDul extends Component {
       prev.currentPage = 1;
       prev.electionsList.dul = duls;
       prev.disableOkBtn = false;
+      prev.showDialogArchiveOpen = false;
+      prev.showDialogArchiveClosed = false;
+      prev.showDialogCancel = false;
       return prev;
     });
   }
@@ -67,6 +70,7 @@ class AdminManageDul extends Component {
       prev.currentPage = 1;
       prev.electionsList.dul = updatedDul;
       prev.disableOkBtn = false;
+      prev.showDialogDelete = false;
       return prev;
     });
   };
@@ -164,7 +168,7 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerArchive = (answer) => async (e) => {
-    this.setState({ showDialogArchiveOpen: false, showDialogArchiveClosed: false, disableOkBtn: answer });
+    this.setState({ disableOkBtn: answer });
     if (answer) {
       let electionUpdate = {};
       let election = this.state.payload;
@@ -178,7 +182,7 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerCancel = (answer) => async (e) => {
-    this.setState({ showDialogCancel: false, disableOkBtn: answer  });
+    this.setState({ disableOkBtn: answer, archiveCheck: true });
     if (answer) {
       let election = this.state.payload;
       let electionUpdated = {
@@ -188,7 +192,6 @@ class AdminManageDul extends Component {
         archived: this.state.archiveCheck
       };
       await Election.updateElection(election.electionId, electionUpdated);
-      this.setState({ archiveCheck: true });
       this.getConsentManage();
     }
   };
@@ -233,9 +236,9 @@ class AdminManageDul extends Component {
   };
 
   dialogHandlerDelete = (answer) => (e) => {
-    this.setState({ showDialogDelete: false, disableOkBtn: answer });
-    let consentId = this.state.deleteId;
+    this.setState({ disableOkBtn: answer });
     if (answer) {
+      let consentId = this.state.deleteId;
       Consent.deleteConsent(consentId).then(data => {
         if (data.ok) {
           this.removeDul(consentId);

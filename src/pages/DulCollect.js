@@ -7,7 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files, Email } from '../libs/ajax';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-
+import { Storage } from '../libs/storage';
 
 class DulCollect extends Component {
 
@@ -244,7 +244,7 @@ class DulCollect extends Component {
                 id: "dulCollect",
                 color: "dul",
                 title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-                isDisabled: this.state.isFormDisabled,
+                isDisabled: this.state.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                 voteStatus: this.state.finalVote,
                 rationale: this.state.finalRationale,
                 action: { label: "Vote", handler: this.dulCollect }
