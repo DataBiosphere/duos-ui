@@ -154,7 +154,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     const value = changeEvent.target.value;
 
     this.setState(prev => {
-      prev.disableOkBtn = value !== '' ? false : true;
+      prev.disableOkBtn = value === '';
       prev.consent[name] = value;
       return prev;
     });
