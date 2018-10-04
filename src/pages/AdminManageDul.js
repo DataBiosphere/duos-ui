@@ -379,7 +379,7 @@ class AdminManageDul extends Component {
                       span({ isRendered: election.electionStatus === 'Canceled' }, [
                         a({ id: election.consentId + "_linkCanceled", name: "link_canceled", onClick: () => this.open(election.consentId, 'dul_preview', null, false) }, ["Canceled"]),]),
                       span({ isRendered: election.electionStatus === 'Closed' }, [
-                        a({ id: election.consentId + "_linkReviewed", name: "link_reviewed", onClick: () => this.open(null, 'dul_results_record', election.electionId, false) }, [election.vote]),]),
+                        a({ id: election.consentId + "_linkReviewed", name: "link_reviewed", onClick: () => this.open(election.electionId, 'dul_results_record', election.electionId, false) }, [election.vote]),]),
                     ]),
                     div({
                       isRendered: election.electionStatus !== 'Open',
