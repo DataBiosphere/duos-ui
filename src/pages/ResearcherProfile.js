@@ -48,9 +48,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         department: '',
         division: '',
         eRACommonsID: '',
-        havePI: 'false',
+        havePI: null,
         institution: '',
-        isThePI: 'false',
+        isThePI: null,
         // linkedIn: '',
         // nihUsername: '',
         // orcid: '',
@@ -58,7 +58,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         piName: '',
         profileName: '',
         pubmedID: '',
-        researcherGate: '',
+        // researcherGate: '',
         scientificURL: '',
         state: '',
         zipcode: '',
@@ -84,9 +84,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
+    const displayName = Storage.getCurrentUser().displayName;
+    console.log(displayName);
     this.setState(prev => {
       prev.researcherProfile.zipcode = profile.zipcode;
-      prev.researcherProfile.profileName = profile.profileName;
+      prev.researcherProfile.profileName = displayName;
       prev.researcherProfile.country = profile.country;
       prev.researcherProfile.institution = profile.institution;
       prev.researcherProfile.city = profile.city;
@@ -97,7 +99,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.researcherProfile.isThePI = profile.isThePI;
       prev.researcherProfile.department = profile.department;
       prev.researcherProfile.nihUsername = profile.nihUsername;
-      prev.researcherProfile.eraExpirationCount = 10;
+      // prev.researcherProfile.eraExpirationCount = 10;
     }, () => {
       // let completed = this.state.researcherProfile.completed;
       if (this.state.researcherProfile.completed !== undefined) {
@@ -200,7 +202,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.researcherProfile.havePI)) {
+    //
+    if (!this.isValid(this.state.researcherProfile.havePI) && !this.isValid(this.state.researcherProfile.isThePI)) {
+      console.log(havePI);
       havePI = true;
       showValidationMessages = true;
     }
@@ -224,12 +228,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.invalidFields.country = country;
       prev.showValidationMessages = showValidationMessages;
       return prev;
-    }, () => {console.log(this.state.invalidFields)});
+    });
+    return showValidationMessages;
   }
 
   isValid(value) {
     let isValid = false;
-    console.log(value);
     if (value !== '' && value !== null && value !== undefined) {
       isValid = true;
     }
@@ -240,11 +244,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState({validateFields: true});
 
     event.preventDefault();
-    this.fieldsValidation();
-    // this.setState({ showDialogSubmit: true });
-    console.log(this.state.showValidationMessages);
-    if (this.state.showValidationMessages) {
-      this.setState({ showDialogSubmit: true });
+    const errorsShowed = this.fieldsValidation();
+    if (errorsShowed === false) {
+      this.setState(prev => {
+        prev.showDialogSubmit = true;
+        return prev;
+      });
     }
   }
 
@@ -275,6 +280,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   clearNotRelatedPIFields() {
+    console.log('clearNotRelatedPIFields');
     this.clearCommonsFields();
     this.setState(prev => {
       prev.researcherProfile.havePi = undefined;
@@ -286,11 +292,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   clearNoHasPIFields() {
+    console.log('clearNoHasPIFields');
     this.clearPIData();
     this.clearCommonsFields();
   }
 
   clearCommonsFields() {
+    console.log('clearCommonsFields');
     this.setState(prev => {
       prev.researcherProfile.eRACommonsID = undefined;
       prev.researcherProfile.pubmedID = undefined;
@@ -300,6 +308,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   clearPIData() {
+    console.log('clearPIData');
     this.setState(prev => {
       prev.researcherProfile.piName = undefined;
       prev.researcherProfile.piEmail = undefined;
@@ -323,7 +332,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         return prev;
       }, () => {
       });
-      Researcher.update(Storage.getCurrentUser().dacUserId, false, this.state.researcherProfile);
+      Researcher.update(Storage.getCurrentUser().dacUserId, true, this.state.researcherProfile);
     }
     this.setState({ showDialogSubmit: false });
     this.props.history.push({ pathname: 'dataset_catalog' });
@@ -715,7 +724,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 // ]),
                 span({
                   className: "cancel-color required-field-error-span",
-                  isRendered: (isThePI === '' && showValidationMessages)
+                  isRendered: (isThePI === null || this.state.invalidFields.isThePI) && showValidationMessages
                 }, ["Required field"])
               ]),
 
@@ -731,9 +740,17 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   YesNoRadioGroup({
-                    value: this.state.researcherProfile.havePI, onChange: this.handleRadioChange,
-                    id: 'rad_havePI', name: 'havePI', required: true
-                  })
+                    value: this.state.researcherProfile.havePI,
+                    onChange: this.handleRadioChange,
+                    id: 'rad_havePI',
+                    name: 'havePI',
+                    onClick: () => this.clearCommonsFields(),
+                    required: true
+                  }),
+                    span({
+                      className: "cancel-color required-field-error-span",
+                      isRendered: ( this.state.invalidFields.havePI) && showValidationMessages
+                    }, ["Required field"])
                 ]),
 
                 // div({ className: "radio-inline", disabled: isThePI !== false }, [
