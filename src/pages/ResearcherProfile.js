@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h, hh, form, label, input, span, hr, ul, li, a, button } from 'react-hyperscript-helpers';
+import { div, h, hh, form, label, input, span, hr, a, button } from 'react-hyperscript-helpers';
 import { Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
@@ -63,20 +63,22 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         state: '',
         zipcode: '',
       },
-      errors: {},
       showRequired: false,
-      requiredFields: {
-        profileName: true,
-        academicEmail: true,
-        institution: true,
-        department: true,
-        address1: true,
-        city: true,
-        state: true,
-        zipcode: true,
-        havePI: true,
-        isThePI: true,
-      }
+      invalidFields: {
+        profileName: false,
+        academicEmail: false,
+        institution: false,
+        department: false,
+        address1: false,
+        city: false,
+        state: false,
+        country: false,
+        zipcode: false,
+        havePI: false,
+        isThePI: false,
+      },
+      showValidationMessages: false,
+      validateFields: false,
     };
   }
 
@@ -129,27 +131,120 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let field = event.target.name;
     let value = event.target.value;
 
-    this.setState(prev => { prev.researcherProfile[field] = value; return prev; });
-    if (value === '' && event.target.required) {
-      this.setState(prev => {prev.errors[field] = true; return prev;});
-      console.log(this.state.errors);
-    } else if (value !== '' && event.target.required) {
-      this.setState(prev => {prev.errors[field] = false; return prev;});
-      console.log(this.state.errors);
+    this.setState(prev => {
+      prev.researcherProfile[field] = value;
+      return prev;
+    });
+
+    if (this.state.validateFields) {
+      this.fieldsValidation();
+    }
+  }
+
+  fieldsValidation() {
+    let profileName = false,
+      academicEmail = false,
+      institution = false,
+      department = false,
+      address1 = false,
+      city = false,
+      state = false,
+      country = false,
+      zipcode = false,
+      havePI = false,
+      isThePI  = false,
+      showValidationMessages = false;
+
+    if (!this.isValid(this.state.researcherProfile.profileName)) {
+      profileName = true;
+      showValidationMessages = true;
     }
 
-    if (field === 'profileAcademicEmail') {
-      if (value !== '') {
-        this.setState(prev => {
-          prev.fieldStatus.email = 'error';
-          return prev;
-        });
-      } else {
-        this.setState(prev => {
-          prev.fieldStatus.email = '';
-          return prev;
-        });
-      }
+    if (!this.isValid(this.state.researcherProfile.academicEmail)) {
+      academicEmail = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.institution)) {
+      institution = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.department)) {
+      department = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.address1)) {
+      address1 = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.city)) {
+      city = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.state)) {
+      state = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.country)) {
+      country = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.zipcode)) {
+      zipcode = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.havePI)) {
+      havePI = true;
+      showValidationMessages = true;
+    }
+
+    if (!this.isValid(this.state.researcherProfile.isThePI)) {
+      isThePI = true;
+      showValidationMessages = true;
+    }
+
+    this.setState(prev => {
+      prev.invalidFields.profileName = profileName;
+      prev.invalidFields.academicEmail = academicEmail;
+      prev.invalidFields.address1 = address1;
+      prev.invalidFields.institution = institution;
+      prev.invalidFields.department = department;
+      prev.invalidFields.city = city;
+      prev.invalidFields.state = state;
+      prev.invalidFields.zipcode = zipcode;
+      prev.invalidFields.havePI = havePI;
+      prev.invalidFields.isThePI = isThePI;
+      prev.invalidFields.country = country;
+      prev.showValidationMessages = showValidationMessages;
+      return prev;
+    }, () => {console.log(this.state.invalidFields)});
+  }
+
+  isValid(value) {
+    let isValid = false;
+    console.log(value);
+    if (value !== '' && value !== null && value !== undefined) {
+      isValid = true;
+    }
+    return isValid;
+  };
+
+  submit(event) {
+    this.setState({validateFields: true});
+
+    event.preventDefault();
+    this.fieldsValidation();
+    // this.setState({ showDialogSubmit: true });
+    console.log(this.state.showValidationMessages);
+    if (this.state.showValidationMessages) {
+      this.setState({ showDialogSubmit: true });
     }
   }
 
@@ -221,11 +316,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState({ showDialogSave: true });
   }
 
-  submit(event) {
-    event.preventDefault();
-    this.setState({ showDialogSubmit: true });
-  }
-
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       this.setState(prev => {
@@ -270,7 +360,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       havePI = JSON.parse(this.state.researcherProfile.havePI);
     }
 
-    const showValidationMessages = true;
+    const showValidationMessages = this.state.showValidationMessages;
 
     return (
 
@@ -303,7 +393,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.profileName === '' && showValidationMessages) || this.state.requiredFields.profileName
+                    isRendered: this.state.invalidFields.profileName && showValidationMessages
                   }, ["Full Name is required"])
                 ]),
 
@@ -324,7 +414,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: this.state.researcherProfile.academicEmail === ''
+                    isRendered: (this.state.invalidFields.academicEmail) && showValidationMessages
                   }, ["Email Address is empty or has invalid format"]),
                 ]),
 
@@ -422,7 +512,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.researcherProfile.institution === '' && showValidationMessages)
+                    isRendered: this.state.invalidFields.institution && showValidationMessages
                   }, ["Institution Name is required"]),
                 ]),
 
@@ -441,7 +531,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.department === '' && showValidationMessages)
+                        isRendered: this.state.invalidFields.department && showValidationMessages
                       }, ["Department is required"]),
                     ]),
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -475,7 +565,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.address1 === '' && showValidationMessages)
+                        isRendered: (this.state.researcherProfile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages
                       }, ["Street Address is required"]),
                     ]),
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -510,7 +600,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.city === '' && showValidationMessages)
+                        isRendered: this.state.invalidFields.city && showValidationMessages
                       }, ["City is required"]),
                     ]),
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
@@ -526,7 +616,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.state === '' && showValidationMessages)
+                        isRendered: this.state.invalidFields.state && showValidationMessages
                       }, ["State is required"])
                     ])
                   ])
@@ -547,7 +637,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.zipcode === '' && showValidationMessages)
+                        isRendered: this.state.invalidFields.zipcode && showValidationMessages
                       }, ["Zip/Postal Code is required"]),
                     ]),
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group" }, [
@@ -563,7 +653,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }),
                       span({
                         className: "cancel-color required-field-error-span",
-                        isRendered: (this.state.researcherProfile.country === '' && showValidationMessages)
+                        isRendered: this.state.invalidFields.country && showValidationMessages
                       }, ["Country is required"]),
                     ]),
                   ]),
