@@ -9,6 +9,7 @@ import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Storage } from "../libs/storage";
 
 class AccessCollect extends Component {
 
@@ -556,7 +557,7 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: this.state.access.isFormDisabled,
+                    isDisabled: this.state.access.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.darOriginalFinalVote,
                     action: { label: "Vote", handler: this.accessCollectVote },
                     rationale: this.state.darOriginalFinalRationale,
@@ -662,7 +663,7 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: this.state.rp.isFormDisabled,
+                    isDisabled: this.state.rp.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.rpOriginalFinalVote,
                     action: { label: "Vote", handler: this.rpCollectVote },
                     rationale: this.state.rpOriginalFinalRationale,
