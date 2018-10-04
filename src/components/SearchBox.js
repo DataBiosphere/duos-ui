@@ -4,7 +4,8 @@ import { div, hh, h, input, i, a } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
-export const SearchBox = hh(class SearchBox extends Component {
+// export const SearchBox = hh(
+  export class SearchBox extends Component {
 
   constructor(props) {
     super(props);
@@ -36,7 +37,6 @@ export const SearchBox = hh(class SearchBox extends Component {
     );
   }
 }
-);
 
 SearchBox.propTypes = {
   searchHandler: PropTypes.func,
@@ -44,7 +44,12 @@ SearchBox.propTypes = {
 }
 
 SearchBox.defaultProps = {
-  searchHandler: (query) => (console.log('search: ' + query)),
+  searchHandler: (query) => {console.log('search: ' + query)},
   pageHandler: (page) => { console.log('go to page ' + page); }
 }
+
+
+// );
+
+
 

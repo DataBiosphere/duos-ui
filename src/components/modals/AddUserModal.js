@@ -8,12 +8,13 @@ import { LoadingIndicator } from '../LoadingIndicator';
 
 export const AddUserModal = hh(class AddUserModal extends Component {
 
-  alerts = [];
+
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true
+      loading: true,
+      alerts: []
     };
     this.toggleState = this.toggleState.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -123,6 +124,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
       case 'Edit':
 
+        let payload = {};
+
+        console.log(JSON.stringify(this.state, null, 2));
+
         const { wasChairperson, wasMember, wasDataOwner, wasResearcher } = this.state;
 
         const editUser = {
@@ -135,9 +140,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           researcher: this.state.user.researcher,
           status: this.state.user.status,
         };
+        payload.updatedUser = editUser;
 
-        const payload = {
-          updatedUser: editUser
+        if (this.state.delegateDacUser.needsDelegation) {
+          payload.userToDelegate = JSON.parse(this.state.alternativeDACMemberUser);
+        }
+
+        if (this.state.delegateDataOwner.needsDelegation) {
+          payload.alternativeDataOwnerUser = JSON.parse(this.state.alternativeDataOwnerUser);
         }
 
 
@@ -157,10 +167,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         // if($scope.delegateDataOwner.needsDelegation){
         //     map.alternativeDataOwnerUser = JSON.parse($scope.alternativeDataOwnerUser);
         // }
-
-
-
-
+        console.log(JSON.stringify(payload, null, 2));
 
         User.update(payload, this.state.user.dacUserId);
         break;
@@ -184,10 +191,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   toggleState(roleName) {
     let rs = Object.assign({}, this.state.rolesState);
+    console.log('rolesStates before toggle: ', this.state.rolesState);
     rs[roleName] = !rs[roleName];
     this.setState({
       rolesState: Object.assign({}, rs)
-    });
+    },
+      () => {
+        console.log('rolesStates after  toggle: ', this.state.rolesState);
+      });
   }
 
   userWas = (rol) => {
@@ -243,88 +254,111 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     })
   };
 
-  memberChanged = (e) => {
+  memberChanged = async (e) => {
     const checkState = e.target.checked;
-    const role = USER_ROLES.member;
-    console.log(checkState, role, this.state.wasMember);
 
     // need to set the role in roles
     if (this.state.wasMember) {
+      console.log('was member ....................');
       if (!checkState) {
-        this.searchDACUsers(USER_ROLES.member).then(
-          (result) => {
-            if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, role)) {
-              this.setState(prev => {
-                prev.delegateMemberRequired = role === USER_ROLES.member ? result.needsDelegation : false;
-                prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
-                prev.delegateDacUser.needsDelegation = result.needsDelegation;
-                return prev;
-              });
-              return;
-            }
+        // removing member role, need to verify if needs to add another user as member 
+        console.log('removing member role, need to verify if needs to add another user as member');
+        const result = await this.searchDACUsers(USER_ROLES.member)
+        if (result.needsDelegation) console.log("delegation is required ....");
+        else console.log("delegation is NOT required ....");
+        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.member)) {
+          this.setState(prev => {
+            prev.delegateMemberRequired = result.needsDelegation;
+            prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
+            prev.delegateDacUser.needsDelegation = result.needsDelegation;
+            return prev;
           });
+          // return;
+        }
       } else {
-        this.closeNoAvailableCandidatesAlert(role);
+        // adding member role to an already member, no need to do anything else
+        console.log('adding member role to an already member, no need to do anything else');
+        this.closeNoAvailableCandidatesAlert(USER_ROLES.member);
         this.setState(prev => {
+          prev.delegateMemberRequired = false;
           prev.delegateDacUser.delegateCandidates = [];
           prev.delegateDacUser.needsDelegation = false;
-          prev.delegateMemberRequired = false;
           return prev;
         });
       }
+    } else {
+      console.log("was NOT member .......");
     }
     this.toggleState(USER_ROLES.member);
   };
 
-  chairpersonChanged = (e) => {
+  chairpersonChanged = async (e) => {
     const checkState = e.target.checked;
-    const role = USER_ROLES.chairperson;
 
     // need to set the role in roles
     if (this.state.wasChairperson) {
+      console.log("was chairperson ................");
       if (!checkState) {
-        this.searchDACUsers(role).then(
-          (result) => {
-            if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, role)) {
-              this.setState(prev => {
-                prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
-                prev.delegateDacUser.needsDelegation = result.needsDelegation;;
-                return prev;
-              });
-              return;
-            }
+        console.log("removing chairperson role ... should verify is needs delegation");
+        const result = await this.searchDACUsers(USER_ROLES.chairperson);
+        if (result.needsDelegation) console.log("delegation is required ....");
+        else console.log("delegation is NOT required ....");
+        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.chairperson)) {
+          this.setState(prev => {
+            prev.delegateMemberRequired = false;
+            prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
+            prev.delegateDacUser.needsDelegation = result.needsDelegation;;
+            return prev;
           });
+          // return;
+        }
       } else {
-        this.closeNoAvailableCandidatesAlert(role);
+        console.log("adding chairperson role ...");
+        this.closeNoAvailableCandidatesAlert(USER_ROLES.chairperson);
         this.setState(prev => {
+          prev.delegateMemberRequired = false;
           prev.delegateDacUser.delegateCandidates = [];
           prev.delegateDacUser.needsDelegation = false;
-          prev.delegateMemberRequired = false;
           return prev;
         });
       }
+    } else {
+      if (checkState) {
+        this.changeChairpersonRoleAlert();
+      }
+      else {
+        this.closeAlert('1');
+      }
+      console.log("was NOT chairperson ................");
     }
     this.toggleState(USER_ROLES.chairperson);
   };
 
-  dataOwnerChanged = (e) => {
+  dataOwnerChanged = async (e) => {
     const checkState = e.target.checked;
-    const role = USER_ROLES.dataOwner;
 
     // need to set the role in roles
     if (this.state.wasDataOwner) {
+      console.log("was dataOwner ................");
       if (!checkState) {
-        this.searchDACUsers(USER_ROLES.dataOwner).then(
-          (result) => {
-            if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.dataOwner)) {
-              this.setState(prev => {
-                prev.delegateDataOwner.delegateCandidates = result.delegateCandidates;
-                prev.delegateDataOwner.needsDelegation = result.needsDelegation;
-                return prev;
-              });
-              return;
+        console.log("removing dataOwner role ... should verify is needs delegation");
+        const result = await this.searchDACUsers(USER_ROLES.dataOwner);
+        if (result.needsDelegation) console.log("delegation is required ....");
+        else console.log("delegation is NOT required ....");
+        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.dataOwner)) {
+          this.setState(prev => {
+            prev.delegateDataOwner.delegateCandidates = result.delegateCandidates;
+            prev.delegateDataOwner.needsDelegation = result.needsDelegation;
+            return prev;
+          }, () => {
+            if (this.state.delegateDataOwner.delegateCandidates.length === 1) {
+              this.setState({
+                alternativeDataOwnerUser : this.state.delegateDataOwner.delegateCandidates[0]
+              })
             }
           });
+          // return;
+        }
       } else {
         this.closeNoAvailableCandidatesAlert(USER_ROLES.dataOwner);
         this.setState(prev => {
@@ -333,13 +367,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           return prev;
         });
       }
+    } else {
+      console.log("was NOT dataOwner ................");
     }
     this.toggleState(USER_ROLES.dataOwner);
   };
 
   researcherChanged = (e) => {
     const checkState = e.target.checked;
-    const role = USER_ROLES.researcher;
 
     // need to set the role in roles
     if (this.state.wasResearcher) {
@@ -347,7 +382,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         this.changeResearcherRoleAlert();
       }
       else {
-        this.closeAlert(3);
+        this.closeAlert('3');
       }
     }
     this.toggleState(USER_ROLES.researcher);
@@ -369,25 +404,28 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   /*****ALERTS*****/
 
-  // this.alerts = [];
-
   changeChairpersonRoleAlert = (index) => {
-    this.alerts.splice(index, 1);
-    this.alerts.push({
-      type: 'danger',
-      title: 'Warning!',
-      msg: 'In order to have only one Chairperson in the system, the current Chairperson is going to become an Alumni.',
-      alertType: 1
+    this.setState(prev => {
+      prev.alerts.push({
+        type: 'danger',
+        title: 'Warning!',
+        msg: 'In order to have only one Chairperson in the system, the current Chairperson is going to become an Alumni.',
+        alertType: '1'
+      });
+      return prev;
     });
   };
 
   changeResearcherRoleAlert = (index) => {
-    this.alerts.splice(index, 1);
-    this.alerts.push({
-      type: 'danger',
-      title: 'Warning!',
-      msg: 'By removing the researcher role, the user Data Access Requests will be canceled, and all the elections related to them.',
-      alertType: 3
+    console.log('adding reseacher alert .... ');
+    this.setState(prev => {
+      prev.alerts.push({
+        type: 'danger',
+        title: 'Warning!',
+        msg: 'By removing the researcher role, the user Data Access Requests will be canceled, and all the elections related to them.',
+        alertType: '3'
+      });
+      return prev;
     });
   };
 
@@ -407,36 +445,42 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       type: 'danger',
       title: "Edition can't be made!",
       msg: index,
-      alertType: 2
+      alertType: '2'
     });
   };
 
   closeAlert = (alertType) => {
-    var l = this.alerts.length;
-    var i = 0;
-    while (i < l) {
-      if (this.alerts[i].alertType === alertType) {
-        this.alerts.splice(i, 1);
-        return;
-      }
-      i++;
-    }
+    console.log("removing alert " + alertType);
+    console.log("alerts ... beforer ", this.state.alerts);
+    const alerts = this.state.alerts.filter(alert => {
+      console.log(alert.alertType, alertType, alert.alertType === alertType);
+      return alert.alertType !== alertType
+    });
+    console.log("alerts ... after   ", alerts);
+    this.setState({
+      alerts: alerts
+    });
   };
 
   closeNoAvailableCandidatesAlert = (role) => {
-    var l = this.alerts.length;
-    var i = 0;
-    while (i < l) {
-      if (this.alerts[i].alertType === role) {
-        // this.alerts.splice(i, 1);
-        this.setState(prev => {
-          prev.newAlternativeUserNeeded[role] = false;
-          return prev;
-        });
-        return;
-      }
-      i++;
-    }
+    // const alerts = this.state.alerts.filter(alert => alert.alertType !== alertType);
+    // this.setState({
+    //   alerts: alerts
+    // });
+
+    // var l = this.alerts.length;
+    // var i = 0;
+    // while (i < l) {
+    //   if (this.alerts[i].alertType === role) {
+    //     // this.alerts.splice(i, 1);
+    //     this.setState(prev => {
+    //       prev.newAlternativeUserNeeded[role] = false;
+    //       return prev;
+    //     });
+    //     return;
+    //   }
+    //   i++;
+    // }
   };
   //-----------------------------------------
 
@@ -446,6 +490,26 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     this.setState({ [value]: event.target.value });
   }
 
+  selectAlternativeDACMemberUser = (e) => {
+    const target = e.target;
+    const value = target.value;
+
+    this.setState(prev => {
+      prev.alternativeDACMemberUser = value;
+      return prev;
+    });
+  }
+
+  selectAlternativeDataOwnerUser = (e) => {
+    const target = e.target;
+    const value = target.value;
+
+    this.setState(prev => {
+      prev.alternativeDataOwnerUser = value;
+      return prev;
+    });
+  }
+
   render() {
 
     const { loading, displayName, email, roles, rolesState, emailPreference } = this.state;
@@ -453,6 +517,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (loading) {
       return LoadingIndicator();
     }
+
+    console.log("render: ", this.state);
 
     const isChairPerson = rolesState[USER_ROLES.chairperson];
     const isMember = rolesState[USER_ROLES.member];
@@ -541,7 +607,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"]),
                   ]),
 
-                  div({ className: "checkbox", disabled: isAlumniDisabled  }, [
+                  div({ className: "checkbox", disabled: isAlumniDisabled }, [
                     input({
                       type: "checkbox",
                       id: "chk_alumni",
@@ -590,7 +656,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     }),
                     label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"]),
                   ]),
-
                 ]),
               ]),
             ]),
@@ -631,6 +696,16 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           //      ]),
           //  ]),
 
+          div({ isRendered: this.state.alerts.length > 0 }, [
+            this.state.alerts.map((alert, ix) => {
+              return (
+                h(Fragment, { key: "alert_" + ix}, [
+                  Alert({ id: "modal_" + ix, type: alert.type, title: alert.title, description: alert.msg })
+                ])
+              );
+            })
+          ]),
+
           div({ isRendered: this.state.delegateDacUser.needsDelegation, className: "form-group" }, [
             div({ className: "row f-left" }, [
               div({ className: "default-color", style: { "padding": "0 40px 15px 40px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
@@ -639,15 +714,16 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             label({ id: "lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
             div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
 
-              select({ id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser, required: this.state.delegateDacUser.needsDelegation }, [
-
-                this.state.delegateDacUser.delegateCandidates.map(user => {
-                  return h(Fragment, {}, [
-                    option({ value: user }, [user.displayName])
-                  ]);
-                })
-              ]),
-
+              select({
+                id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser,
+                required: this.state.delegateDacUser.needsDelegation, onChange: this.selectAlternativeDACMemberUser
+              }, [
+                  this.state.delegateDacUser.delegateCandidates.map((user, uIndex) => {
+                    return h(Fragment, { key: uIndex }, [
+                      option({ value: user }, [user.displayName])
+                    ]);
+                  })
+                ]),
             ]),
           ]),
 
@@ -659,40 +735,42 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             label({ id: "lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
             div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
 
-              select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser, required: this.state.delegateDataOwner.needsDelegation }, [
-
-                this.state.delegateDataOwner.delegateCandidates.map(user => {
-                  return h(Fragment, {}, [
-                    option({ value: user }, [user.displayName])
-                  ]);
-                })
-              ]),
-
+              select({
+                id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser,
+                required: this.state.delegateDataOwner.needsDelegation, onChange: this.selectAlternativeDataOwnerUser, placeholder: "Select an alternative Data Owner"
+              }, [
+                  this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
+                    return h(Fragment, { key: uIndex }, [
+                      option({ value: user }, [user.displayName])
+                    ]);
+                  })
+                ]),
             ]),
           ]),
-
-          // div({ isRendered: "delegateDataOwner.needsDelegation", className: "form-group" }, [
-          //     div({ className: "row f-left" }, [
-          //         div({ className: "default-color", style: {padding: '0 40px 15px 40px'} }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
-          //     ]),
-
-          //     label({ id:"lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
-          //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
-
-          //         select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", "ng-model": "$parent.alternativeDataOwnerUser", required: "delegateDataOwner.needsDelegation" }, [
-          //             option({ "ng-repeat": "dataOwner in delegateDataOwner.delegateCandidates", value: "{{dataOwner}}" }, [this.dataOwner.displayName] )
-          //         ]),
-
-          //     ]),
-          // ]),
-
-
-
-
-          div({ isRendered: false }, [
-            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
-          ])
         ])
+
+      // div({ isRendered: "delegateDataOwner.needsDelegation", className: "form-group" }, [
+      //     div({ className: "row f-left" }, [
+      //         div({ className: "default-color", style: {padding: '0 40px 15px 40px'} }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
+      //     ]),
+
+      //     label({ id:"lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
+      //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
+
+      //         select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", "ng-model": "$parent.alternativeDataOwnerUser", required: "delegateDataOwner.needsDelegation" }, [
+      //             option({ "ng-repeat": "dataOwner in delegateDataOwner.delegateCandidates", value: "{{dataOwner}}" }, [this.dataOwner.displayName] )
+      //         ]),
+
+      //     ]),
+      // ]),
+
+
+
+
+      // div({ isRendered: false }, [
+      //   Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
+      // ])
+      // ])
     );
   }
 });
