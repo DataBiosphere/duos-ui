@@ -49,11 +49,10 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
       DataSet.postDatasetFile(this.state.file, this.state.overwrite, this.USER_ID)
         .then(() => {
           this.setState({ errors: false });
+          // this.props.history.push(`dul_results_record/${electionId}`);
           this.props.onOKRequest('addDataset');
-        }).then(() => {
-          this.setState({ errors: false });
-          this.props.onOKRequest('addDataset')
-        }).catch(errorResponse => {
+        })
+        .catch(errorResponse => {
           this.setState({ errors: true });
           errorResponse.json().then(errors => this.generateFileAndUrl(errors));
         });

@@ -90,9 +90,17 @@ class AdminConsole extends Component {
   okModal = (name) => {
 
     switch (name) {
-      case 'addDul': this.setState({ showAddDulModal: false }); break;
-      case 'addUser': this.setState({ showAddUserModal: false }); break;
-      case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
+      case 'addDul':
+        this.setState({showAddDulModal: false});
+        break;
+      case 'addUser':
+        this.setState({showAddUserModal: false});
+        break;
+      case 'addDataset': {
+        this.setState({showAddDatasetModal: false});
+        this.props.history.push(`dataset_catalog`);
+        break;
+      }
       case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
