@@ -140,7 +140,7 @@ class HelpReports extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.reports.filter(this.searchTable(searchDulText)).slice((this.state.currentPage - 1) * this.state.limit, this.state.currentPage * this.state.limit).map((report, ix) => {
+          this.state.reports.filter(this.searchTable(searchDulText)).reverse().slice((this.state.currentPage - 1) * this.state.limit, this.state.currentPage * this.state.limit).map((report, ix) => {
             return h(Fragment, { key: ix }, [
               div({ className: "row no-margin tableRow" }, [
                 div({ id: report.reportId + "_reportId", name: "reportId", className: "cell-body text " + (this.state.isAdmin ? "col-lg-1 col-md-1 col-sm-2 col-xs-2" : !this.state.isAdmin ? "col-lg-2 col-md-2 col-sm-2 col-xs-2" : "") }, [report.reportId]),

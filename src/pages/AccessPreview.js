@@ -31,69 +31,50 @@ class AccessPreview extends Component {
     const data3 = await DAR.getDarFields(this.props.match.params.referenceId, 'projectTitle');
     const consent = await DAR.getDarConsent(this.props.match.params.referenceId);
     const data5 = await DAR.describeDar(this.props.match.params.referenceId);
+    const useRestriction = await DAR.hasUseRestriction(this.props.match.params.referenceId);
 
-    // dar: gerDarFields referenceID rus
-    if (this.props.match.params.referenceId !== undefined) {
       this.setState(prev => {
         prev.darInfo.rus = data1.rus;
-        return prev;
-      });
-    }
-
-    // rp: gerDarFields referenceID translated_restriction
-    if (this.props.match.params.referenceId !== undefined) {
-      this.setState(prev => {
-        prev.rp = data2;
-        return prev;
-      });
-    }
-
-    // request: gerDarFields referenceID projectTitle
-    if (this.props.match.params.referenceId !== undefined) {
-      this.setState(prev => {
         prev.projectTitle = data3.projectTitle;
-        return prev;
-      });
-    }
-
-    // consent: getDarConsent referenceID
-    if (this.props.match.params.referenceId !== undefined) {
-      this.setState(prev => {
         prev.consent = consent;
+        if(consent.requiresManualReview) {
+          prev.rp = "This includes sensitive research objectives that requires manual review.";
+        } else {
+          prev.rp = data2.translated_restriction;
+        }
+        if(useRestriction.hasUseRestriction === true) {
+          prev.hasUseRestriction = true;
+        }
         prev.consentName = consent.name;
+        prev.darInfo.havePI = data5.havePI;
+        prev.darInfo.pi = data5.pi;
+        prev.darInfo.city = data5.city;
+        prev.darInfo.department = data5.department;
+        prev.darInfo.country = data5.country;
+        prev.darInfo.diseases = data5.diseases;
+        prev.darInfo.hasDiseases = data5.hasDiseases;
+        prev.darInfo.institution = data5.institution;
+        prev.darInfo.researchTypeManualReview = data5.researchTypeManualReview;
+        prev.darInfo.purposeManualReview = data5.purposeManualReview;
+        prev.darInfo.hasPurposeStatements = data5.hasPurposeStatements;
+        prev.darInfo.hasAdminComment = data5.hasAdminComment;
+        prev.darInfo.adminComment = data5.adminComment;
+        prev.darInfo.profileName = data5.profileName;
+        prev.darInfo.status = data5.status;
+        if (data5.hasPurposeStatements) {
+          prev.darInfo.purposeStatements = data5.purposeStatements;
+        }
+        prev.darInfo.researchType = data5.researchType;
+        prev.loading = false;
         return prev;
-      });
-    }
-
-    this.setState(prev => {
-      prev.darInfo.havePI = data5.havePI;
-      prev.darInfo.pi = data5.pi;
-      prev.darInfo.city = data5.city;
-      prev.darInfo.department = data5.department;
-      prev.darInfo.country = data5.country;
-      prev.darInfo.diseases = data5.diseases;
-      prev.darInfo.hasDiseases = data5.hasDiseases;
-      prev.darInfo.institution = data5.institution;
-      prev.darInfo.researchTypeManualReview = data5.researchTypeManualReview;
-      prev.darInfo.purposeManualReview = data5.purposeManualReview;
-      prev.darInfo.hasPurposeStatements = data5.hasPurposeStatements;
-      if (data5.hasPurposeStatements) {
-        prev.darInfo.purposeStatements = data5.purposeStatements;
-      }
-      prev.darInfo.researchType = data5.researchType;
-      return prev;
     });
-
-    this.setState({
-      loading: false
-    });
-    
+   
   };
 
   initialState() {
     return {
       loading: true,
-      hasUseRestriction: true,
+      hasUseRestriction: false,
       projectTitle: '',
       consentName: '',
       isQ1Expanded: true,
@@ -105,7 +86,7 @@ class AccessPreview extends Component {
         pi: '',
         profileName: '',
         status: '',
-        hasAdminComment: true,
+        hasAdminComment: '',
         adminComment: '',
         institution: '',
         department: '',
@@ -136,7 +117,7 @@ class AccessPreview extends Component {
         }
       });
     } else {
-      Files.getDulFile(this.state.consent.consentId,this.state.consentName);
+      Files.getDulFile(this.state.consent.consentId,this.state.consent.dulName);
     }
   };
 
@@ -342,7 +323,7 @@ class AccessPreview extends Component {
                   div({ className: "panel-heading cm-boxhead access-color" }, [
                     h4({}, ["Structured Research Purpose"]),
                   ]),
-                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction" }, [this.state.darInfo.sDar])
+                  div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.rp } }, [])
                 ]),
               ]),
             ])

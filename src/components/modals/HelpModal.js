@@ -25,8 +25,13 @@ export const HelpModal = hh(class HelpModal extends Component {
     report.description = this.state.description;
     report.subject = this.state.subject;
     report.userId = Storage.getCurrentUser().dacUserId;
-    await Help.createHelpMeReport(report);
     this.props.onOKRequest('help');
+    await Help.createHelpMeReport(report);
+    this.setState(prev => {
+      prev.subject = '';
+      prev.description = '';
+      return prev;
+    });
   }
 
   closeHandler() {
@@ -78,7 +83,7 @@ export const HelpModal = hh(class HelpModal extends Component {
         color: "common",
         title: "Request Help",
         description: "Leave a comment, suggestion or report a bug",
-        action: { label: "Submit", handler: this.OKHandler }
+        action: { label: "Submit", handler: this.OKHandler },
       },
 
         [
