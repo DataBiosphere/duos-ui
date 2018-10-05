@@ -776,7 +776,7 @@ export const Researcher = {
   createResearcherProperties: async (userId, validate, researcherProperties) => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
-    return await res.json();
+    return await res;
   },
 
   update: async (userId, validate, researcherProperties) => {
