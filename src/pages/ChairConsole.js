@@ -13,9 +13,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
-  searchDulCases = '';
-  searchAccessCases = '';
-
   constructor(props) {
     super(props);
     this.state = {
@@ -92,23 +89,23 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   openDULReview = (voteId, referenceId) => (e) => {
     this.props.history.push(`dul_review/${voteId}/${referenceId}`);
-  }
+  };
 
   openDulCollect = (consentId) => (e) => {
     this.props.history.push(`dul_collect/${consentId}`);
-  }
+  };
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
     this.props.history.push({ pathname: 'final_access_review', props: { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
-  }
+  };
 
-  openAccessReview = (darId, voteId, rpVoteId) => (e) => {
-    this.props.history.push({ pathname: 'access_review', props: { darId: darId, voteId: voteId, rpVoteId: rpVoteId } });
-  }
+  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
+    this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
+  };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
     this.props.history.push({ pathname: 'access_collect', props: { referenceId: referenceId, electionId: electionId } });
-  }
+  };
 
   handleOpenModal() {
     this.setState({ showModal: true });
@@ -251,7 +248,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     button({
                       id: pendingCase.frontEndId + "_btnVote",
                       name: "btn_voteAccess",
-                      onClick: this.openAccessReview(pendingCase.darId, pendingCase.voteId, pendingCase.rpVoteId),
+                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId, pendingCase),
                       className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
                     }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ["Vote"]),
