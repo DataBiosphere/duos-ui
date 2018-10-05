@@ -88,16 +88,13 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
   render() {
 
     const alertMessage = span({}, [
-      "Some errors occurred, Datasets weren't uploaded.",
-      div({}, [
-        "Please, ",
-        a({
-          download: "errorsFile.txt",
-          className: "hover-color bold",
-          href: this.state.url,
-        }, ["download this file"]),
-        " with the mistakes found."
-      ]),
+      "Some errors occurred, Datasets weren't uploaded. Please, ",
+      a({
+        download: "errorsFile.txt",
+        className: "hover-color bold",
+        href: this.state.url,
+      }, ["download this file"]),
+      " with the mistakes found."
     ]);
 
     return (
@@ -141,7 +138,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
           div({ isRendered: this.state.errors }, [
             Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
           ]),
-          div({ className: "row download-link" }, ["Click here to download a ", a({ className: "hover-color", href: "/DataSetSample.tsv" }, ["Dataset Spreadsheet Modal"])]),
+          div({ className: "row no-margin download-link" }, ["Click here to download a ", a({ className: "hover-color", href: "/DataSetSample.tsv" }, ["Dataset Spreadsheet Modal"])]),
         ])
     );
   }

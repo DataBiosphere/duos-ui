@@ -2,6 +2,7 @@
   position: relative;
   width: 100%;
   padding: 15px 20px;
+  margin: 10px auto;
 }
 
 .alert-wrapper.danger {
@@ -36,10 +37,6 @@
 
 .rp-alert {
   margin: 15px 10px;
-}
-
-.dialog-alert {
-  margin-top: 10px;
 }
 
 .vote-box-alert .alert-title,
