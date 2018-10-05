@@ -91,7 +91,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       for (key in profile) {
           prev.researcherProfile[key] = profile[key];
       }
-      prev.researcherProfile.profileName = displayName;
       return prev;
     }, () => {
       if (this.state.researcherProfile.completed !== undefined && this.state.researcherProfile.completed !== "") {
