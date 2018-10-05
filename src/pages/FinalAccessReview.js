@@ -6,6 +6,7 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Alert } from '../components/Alert';
 
 class FinalAccessReview extends Component {
 
@@ -439,11 +440,9 @@ class FinalAccessReview extends Component {
                       ]);
                     })
                   ]),
-                  div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "dar-summary" }, [
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                      "This research involves studying a sensitive population and requires manual review."
-                    ]),
-                  ]),
+                  div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                    Alert({ id: "purposeStatementManualReview", type: "danger", title: "This research involves studying a sensitive population and requires manual review." })
+                  ])
                 ]),
 
                 div({ className: "row dar-summary" }, [
@@ -457,13 +456,11 @@ class FinalAccessReview extends Component {
                           ]),
                         ]);
                       })
-                    ]),
-                  ]),
+                    ])
+                  ])
                 ]),
-                div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "row dar-summary" }, [
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                    "This research requires manual review."
-                  ]),
+                div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                  Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
                 ]),
 
                 div({ isRendered: this.state.darInfo.hasDiseases, className: "row dar-summary" }, [
