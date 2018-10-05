@@ -20,7 +20,7 @@ class HelpReports extends Component {
       currentPage: 1,
       reports: [],
       showHelpModal: false,
-      isAdmin: false
+      isAdmin: Storage.getCurrentUser().isAdmin
     };
 
     this.myHandler = this.myHandler.bind(this);

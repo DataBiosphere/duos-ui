@@ -9,6 +9,7 @@ import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
+import { Alert } from '../components/Alert';
 
 class AccessResultRecords extends Component {
 
@@ -212,11 +213,9 @@ class AccessResultRecords extends Component {
                       ]);
                     })
                   ]),
-                  div({ isRendered: darInfo.purposeManualReview && !darInfo.researchTypeManualReview, className: "dar-summary" }, [
-                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                      "This research involves studying a sensitive population and requires manual review."
-                    ]),
-                  ]),
+                  div({ isRendered: darInfo.purposeManualReview && !darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                    Alert({ id: "purposeStatementManualReview", type: "danger", title: "This research involves studying a sensitive population and requires manual review." })
+                  ])
                 ]),
 
                 div({ className: "row dar-summary" }, [
@@ -230,13 +229,11 @@ class AccessResultRecords extends Component {
                           ]),
                         ]);
                       })
-                    ]),
-                  ]),
+                    ])
+                  ])
                 ]),
-                div({ isRendered: darInfo.researchTypeManualReview, className: "row dar-summary" }, [
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                    "This research requires manual review."
-                  ]),
+                div({ isRendered: darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                  Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
                 ]),
 
                 div({ isRendered: darInfo.hasDiseases, className: "row dar-summary" }, [
