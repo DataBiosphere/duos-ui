@@ -126,6 +126,11 @@
   display: block;
 }
 
+a.btn-primary,
+a.btn-secondary {
+  padding-top: 10px;
+}
+
 .btn-download-pdf {
   height: 35px;
   line-height: 18px;
