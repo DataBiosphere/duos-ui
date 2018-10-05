@@ -74,6 +74,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         zipcode: false,
         havePI: false,
         isThePI: false,
+        piName: false,
+        piEmail: false,
       },
       showValidationMessages: false,
       validateFields: false,
@@ -136,6 +138,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       zipcode = false,
       havePI = false,
       isThePI = false,
+      piEmail = false,
+      piName = false,
       showValidationMessages = false;
 
     if (!this.isValid(this.state.researcherProfile.profileName)) {
@@ -183,14 +187,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.researcherProfile.havePI) && !this.isValid(this.state.researcherProfile.isThePI)) {
-      havePI = true;
-      showValidationMessages = true;
-    }
-
-    if (!this.isValid(this.state.researcherProfile.isThePI)) {
-      isThePI = true;
-      showValidationMessages = true;
+    if (this.state.researcherProfile.havePI === 'true' && this.state.researcherProfile.isThePI === 'false') {
+      // havePI = true;
+      // showValidationMessages = true;
+      if (!this.isValid(this.state.researcherProfile.piEmail)) {
+        console.log('piEmail incompleted');
+        piEmail = true;
+        showValidationMessages = true;
+      }
+      if (!this.isValid(this.state.researcherProfile.piName)) {
+        console.log('piName incompleted');
+        piName = true;
+        showValidationMessages = true;
+      }
     }
 
     this.setState(prev => {
@@ -205,6 +214,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.invalidFields.havePI = havePI;
       prev.invalidFields.isThePI = isThePI;
       prev.invalidFields.country = country;
+      prev.invalidFields.piName = piName;
+      prev.invalidFields.piEmail = piEmail;
       prev.showValidationMessages = showValidationMessages;
       return prev;
     });
@@ -703,7 +714,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }),
                     span({
                       className: "cancel-color required-field-error-span",
-                      isRendered: (this.state.researcherProfile.piName === '' && showValidationMessages)
+                      isRendered: (this.state.researcherProfile.piName === '' || this.state.invalidFields.piName) && showValidationMessages
                     }, ["Principal Investigator is required"]),
                   ]),
 
