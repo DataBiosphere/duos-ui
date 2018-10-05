@@ -674,7 +674,7 @@ class DataAccessRequestApplication extends Component {
                       ])
                     ]),
 
-                    span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following is required"]),
+                    span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following fields is required"]),
 
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
@@ -702,9 +702,8 @@ class DataAccessRequestApplication extends Component {
                           ]),
                           div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername])
-                          ]),
-                        ]),
-                        // span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
+                          ])
+                        ])
                       ]),
 
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
@@ -718,8 +717,7 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        }),
-                        span({ isRendered: (step1.inputLinkedIn.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                        })
                       ])
                     ]),
 
@@ -735,8 +733,7 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputOrcid.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        }),
-                        span({ isRendered: (step1.inputOrcid.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                        })
                       ]),
 
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
@@ -750,8 +747,7 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputResearcherGate.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        }),
-                        span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                        })
                       ])
                     ])
                   ]),
@@ -838,7 +834,8 @@ class DataAccessRequestApplication extends Component {
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: "select",
                         placeholder: "Dataset Name, Sample Collection ID, or PI",
-                        className: "select-autocomplete"
+                        className: step2.inputDatasets.invalid && showValidationMessages ? ' required-select-error select-autocomplete' : 'select-autocomplete',
+
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputDatasets.invalid && showValidationMessages }, ["Required field"]),
                     ]),
@@ -905,7 +902,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     div({ className: "row no-margin" }, [
-                      span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: { 'marginLeft': '15px' } }, ["At least one of the fields is required"]),
+                      span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: { 'marginLeft': '15px' } }, ["At least one of the following fields is required"]),
                     ]),
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [

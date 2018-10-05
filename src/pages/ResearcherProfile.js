@@ -378,7 +378,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     name: "profileName",
                     type: "text",
                     onChange: this.handleChange,
-                    className: "form-control ",
+                    className: (this.state.invalidFields.profileName && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                     value: this.state.researcherProfile.profileName,
                     required: true
                   }),
@@ -399,7 +399,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     type: "email",
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.academicEmail,
-                    className: "form-control ",
+                    className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                     required: true
                   }),
                   span({
@@ -413,7 +413,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
                     span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
                   ]),
-                  //properly handle validations, at least one is required
                   span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: false }, ["At least one of the following is required"]),
                 ]),
 
@@ -493,7 +492,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: "profileInstitution",
                     name: "institution",
                     type: "text",
-                    className: "form-control ",
+                    className: (this.state.invalidFields.institution && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                     onChange: this.handleChange,
                     value: this.state.researcherProfile.institution,
                     required: true
@@ -512,7 +511,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileDepartment",
                         name: "department",
                         type: "text",
-                        className: "form-control ",
+                        className: (this.state.invalidFields.department && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.department,
                         required: true
@@ -546,7 +545,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileAddress1",
                         name: "address1",
                         type: "text",
-                        className: "form-control ",
+                        className: ((this.state.researcherProfile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.address1,
                         required: true
@@ -581,7 +580,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileCity",
                         name: "city",
                         type: "text",
-                        className: "form-control ",
+                        className: (this.state.invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.city,
                         required: true
@@ -597,7 +596,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileState",
                         name: "state",
                         type: "text",
-                        className: "form-control ",
+                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.state,
                         required: true
@@ -618,7 +617,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileZip",
                         name: "zipcode",
                         type: "text",
-                        className: "form-control ",
+                        className: (this.state.invalidFields.zipcode && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.zipcode,
                         required: true
@@ -634,7 +633,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileCountry",
                         name: "country",
                         type: "text",
-                        className: "form-control ",
+                        className: (this.state.invalidFields.country && showValidationMessages) ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.country,
                         required: true
@@ -674,9 +673,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     required: true
                   })
                 ]),
-
                 span({
                   className: "cancel-color required-field-error-span",
+                  style: { 'marginLeft': '15px' },
                   isRendered: (this.state.researcherProfile.isThePI === null || this.state.invalidFields.isThePI) && showValidationMessages
                 }, ["Required field"])
               ]),
@@ -696,12 +695,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: 'rad_havePI',
                     name: 'havePI',
                     required: true
-                  }),
-                  span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.invalidFields.havePI === 'true' || this.state.invalidFields.havePI) && showValidationMessages
-                  }, ["Required field"])
+                  })
                 ]),
+                span({
+                  className: "cancel-color required-field-error-span",
+                  style: { 'marginLeft': '15px' },
+                  isRendered: (this.state.invalidFields.havePI === 'true' || this.state.invalidFields.havePI) && showValidationMessages
+                }, ["Required field"]),
 
                 div({ isRendered: this.state.researcherProfile.havePI === true || this.state.researcherProfile.havePI === 'true', className: "form-group" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
@@ -753,38 +753,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       className: "form-control",
                       onChange: this.handleChange,
                       value: this.state.researcherProfile.eRACommonsID
-                    }),
-                  ]),
-
-                  // div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  //   label({
-                  //     id: "lbl_profilePubmedID",
-                  //     className: "control-label"
-                  //   }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
-                  //   input({
-                  //     id: "pubmedID",
-                  //     name: "pubmedID",
-                  //     type: "text",
-                  //     className: "form-control",
-                  //     onChange: this.handleChange,
-                  //     value: this.state.researcherProfile.pubmedID
-                  //   }),
-                  // ]),
-
-                  // div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  //   label({
-                  //     id: "lbl_profileScientificURL",
-                  //     className: "control-label"
-                  //   }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
-                  //   input({
-                  //     id: "profileScientificURL",
-                  //     name: "scientificURL",
-                  //     type: "text",
-                  //     className: "form-control",
-                  //     onChange: this.handleChange,
-                  //     value: this.state.researcherProfile.scientificURL
-                  //   })
-                  // ])
+                    })
+                  ])
                 ])
               ]),
 
