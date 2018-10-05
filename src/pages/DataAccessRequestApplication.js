@@ -260,6 +260,7 @@ class DataAccessRequestApplication extends Component {
       prev.step = 1;
       return prev;
     });
+    window.scrollTo(0, 0);
   };
 
   step2 = (e) => {
@@ -267,6 +268,7 @@ class DataAccessRequestApplication extends Component {
       prev.step = 2;
       return prev;
     });
+    window.scrollTo(0, 0);
   };
 
   step3 = (e) => {
