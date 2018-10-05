@@ -88,7 +88,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState(prev => {
       let key;
       for (key in profile) {
-          prev.researcherProfile[key] = profile[key];
+        prev.researcherProfile[key] = profile[key];
       }
       return prev;
     }, () => {
@@ -145,7 +145,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.researcherProfile.academicEmail) || this.state.researcherProfile.academicEmail.indexOf('@')  === -1) {
+    if (!this.isValid(this.state.researcherProfile.academicEmail) || this.state.researcherProfile.academicEmail.indexOf('@') === -1) {
       academicEmail = true;
       showValidationMessages = true;
     }
@@ -185,7 +185,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (this.state.researcherProfile.havePI === 'true' && this.state.researcherProfile.isThePI === 'false') {
+    if (this.state.researcherProfile.isThePI === null) {
+      isThePI = true;
+      showValidationMessages = true;
+    }
+
+    if (this.state.researcherProfile.isThePI === 'false' && this.state.researcherProfile.havePI === 'true') {
       if (!this.isValid(this.state.researcherProfile.piEmail)) {
         piEmail = true;
         showValidationMessages = true;
@@ -245,16 +250,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   handleRadioChange = (e, field, value) => {
 
-    if (field === 'isThePI') {
-      this.clearNotRelatedPIFields();
-    }
+    this.setState(prev => { prev.researcherProfile[field] = value; return prev; },
+      () => {
+        if (field === 'isThePI') {
+          this.clearNotRelatedPIFields();
+        }
 
-    if (field === 'havePI' && value === true) {
-      this.clearCommonsFields();
-    } else if (field === 'havePI' && value === false) {
-      this.clearNoHasPIFields();
-    }
-    this.setState(prev => { prev.researcherProfile[field] = value; return prev; });
+        if (field === 'havePI' && (value === true || value === 'true')) {
+          this.clearCommonsFields();
+        } else if (field === 'havePI' && (value === false || value === 'false')) {
+          this.clearNoHasPIFields();
+        }
+        if (this.state.validateFields) {
+          this.fieldsValidation();
+        }
+      });
   };
 
   clearNotRelatedPIFields() {
@@ -407,7 +417,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.invalidFields.academicEmail && this.state.researcherProfile.academicEmail.indexOf('@')  === -1) && showValidationMessages
+                    isRendered: (this.state.invalidFields.academicEmail && this.state.researcherProfile.academicEmail.indexOf('@') === -1) && showValidationMessages
                   }, ["Email Address is empty or has invalid format"]),
                 ]),
 
