@@ -9,6 +9,8 @@ import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Storage } from "../libs/storage";
+import { Alert } from '../components/Alert';
 
 class AccessCollect extends Component {
 
@@ -479,12 +481,10 @@ class AccessCollect extends Component {
                               ]);
                             })
                           ]),
-                          div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "dar-summary" }, [
-                            div({ id: "lbl_purposeStatementManualReview", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                              "This research involves studying a sensitive population and requires manual review."
-                            ]),
-                          ]),
-                        ]),
+                          div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                            Alert({ id: "purposeStatementManualReview", type: "danger", title: "This research involves studying a sensitive population and requires manual review." })
+                          ])
+                        ])
                       ]),
 
                       div({ className: "row dar-summary" }, [
@@ -498,13 +498,11 @@ class AccessCollect extends Component {
                                 ]),
                               ]);
                             })
-                          ]),
-                        ]),
+                          ])
+                        ])
                       ]),
-                      div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "row dar-summary" }, [
-                        div({ id: "lbl_researchTypeManualReview", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                          "This research requires manual review."
-                        ]),
+                      div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                        Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
                       ]),
 
                       div({ isRendered: this.state.darInfo.hasDiseases, className: "row dar-summary" }, [
@@ -556,7 +554,7 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: this.state.access.isFormDisabled,
+                    isDisabled: this.state.access.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.darOriginalFinalVote,
                     action: { label: "Vote", handler: this.accessCollectVote },
                     rationale: this.state.darOriginalFinalRationale,
@@ -662,7 +660,7 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: this.state.rp.isFormDisabled,
+                    isDisabled: this.state.rp.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.rpOriginalFinalVote,
                     action: { label: "Vote", handler: this.rpCollectVote },
                     rationale: this.state.rpOriginalFinalRationale,

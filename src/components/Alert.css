@@ -45,3 +45,8 @@
   line-height: 20px;
 }
 
+.summary-alert .alert-title {
+  font-size: 15px;
+  text-align: center;
+}
+
