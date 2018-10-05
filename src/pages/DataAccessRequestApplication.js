@@ -140,7 +140,7 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
     formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-    formData.profileName = rpProperties.profileName;
+    formData.researcher = rpProperties.profileName;
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
@@ -334,7 +334,7 @@ class DataAccessRequestApplication extends Component {
       isTitleInvalid = true;
       showValidationMessages = true;
     }
-    if (!this.isValid(this.state.formData.profileName)) {
+    if (!this.isValid(this.state.formData.researcher)) {
       isResearcherInvalid = true;
       showValidationMessages = true;
     }
@@ -706,7 +706,7 @@ class DataAccessRequestApplication extends Component {
                         type: "text",
                         name: "researcher",
                         id: "inputResearcher",
-                        value: this.state.formData.profileName,
+                        value: this.state.formData.researcher,
                         disabled: true,
                         className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                         required: true
