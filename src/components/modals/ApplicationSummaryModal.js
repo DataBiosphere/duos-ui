@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DAR, Election } from '../../libs/ajax'
+import { Alert } from '../Alert';
 
 
 export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends Component {
@@ -96,7 +97,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                   span({ className: "bold" }, ["Rationale: "]),
                   summary.rationale
                 ])
-              ]),
+              ])
             ]),
 
             div({ className: "row" }, [
@@ -139,8 +140,8 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                       li({ id: "txt_typeResearch_" + Index }, [b({}, [rt.title]), " ", rt.description]),
                     ])
                   })
-                ]),
-              ]),
+                ])
+              ])
             ]),
 
             div({ isRendered: summary.thereDiseases === true, className: "row" }, [
@@ -153,8 +154,8 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                       li({ id: "txt_disease_" + Index }, [disease])
                     ])
                   })
-                ]),
-              ]),
+                ])
+              ])
             ]),
 
             div({ isRendered: summary.therePurposeStatements === true, className: "row" }, [
@@ -169,16 +170,16 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                       ])
                     ])
                   })
-                ]),
-              ]),
+                ])
+              ])
             ]),
 
-            div({ id: "txt_sensitivePopulation", isRendered: summary.sensitivePopulation === true, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-              "This research involves studying a sensitive population and requires manual review."
+            div({ isRendered: summary.sensitivePopulation === true, className: "summary-alert" }, [
+              Alert({ id: "purposeStatementManualReview", type: "danger", title: "This research involves studying a sensitive population and requires manual review." })
             ]),
 
-            div({ id: "txt_manualReview", isRendered: summary.requiresManualReview === true && summary.sensitivePopulation === false, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-              "This research requires manual review."
+            div({ isRendered: summary.requiresManualReview === true && summary.sensitivePopulation === false, className: "summary-alert" }, [
+                Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
             ])
           ])
         ])
