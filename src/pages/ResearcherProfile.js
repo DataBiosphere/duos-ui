@@ -198,7 +198,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       }
     }
 
-    console.log(this.state.researcherProfile.havePI);
     if (this.state.researcherProfile.isThePI === 'false' && this.state.researcherProfile.havePI === '') {
       havePI = true;
       showValidationMessages = true;
@@ -306,11 +305,17 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (answer === true) {
       let profile = this.profileCopy(this.state.researcherProfile);
       profile.completed = true;
-      Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
-        // TODO : check status of PUT ? and show any error messages ?
-      });
-
+      if (this.state.researcherProfile.completed === undefined) {
+        Researcher.createResearcherProperties(Storage.getCurrentUser().dacUserId, false, profile).then(resp => {
+          // TODO : check status of PUT ? and show any error messages ?
+        });
+      } else {
+        Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
+          // TODO : check status of PUT ? and show any error messages ?
+        });
+      }
     }
+
     this.setState({ showDialogSubmit: false });
     this.props.history.push({ pathname: 'dataset_catalog' });
   };
