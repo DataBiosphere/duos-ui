@@ -84,7 +84,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
-    const displayName = Storage.getCurrentUser().displayName;
 
     this.setState(prev => {
       let key;
