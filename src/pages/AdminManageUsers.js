@@ -30,11 +30,10 @@ class AdminManageUsers extends Component {
 
   async getUsers() {
     const users = await User.list();
-
     let userList = users.map(user => {
       user.researcher = false;
       user.roles.forEach(role => {
-        if (role.name === 'Researcher') {
+        if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
           user.status = role.status;
           user.completed = role.profileCompleted;
           user.researcher = true;
@@ -98,8 +97,11 @@ class AdminManageUsers extends Component {
   openResearcherReview = (userId) => {
     this.props.history.push(`researcher_review/${userId}`);
   }
-  okModal = (name) => {
+
+  okModal = async (name) => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
+    this.setState({loading: true});
+    await this.getUsers();
   }
 
   closeModal = (name) => {

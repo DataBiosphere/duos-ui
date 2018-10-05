@@ -3,12 +3,10 @@ import { div, form, input, label, hh, h, select, option } from 'react-hyperscrip
 import { BaseModal } from '../BaseModal';
 import { User } from "../../libs/ajax";
 import { Alert } from '../Alert';
-import { USER_ROLES } from '../../libs/utils';
+import { USER_ROLES_UPPER } from '../../libs/utils';
 import { LoadingIndicator } from '../LoadingIndicator';
 
 export const AddUserModal = hh(class AddUserModal extends Component {
-
-
 
   constructor(props) {
     super(props);
@@ -27,26 +25,24 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   async initForm() {
 
     let rolesState = {}
-    rolesState[USER_ROLES.admin] = false;
-    rolesState[USER_ROLES.alumni] = false;
-    rolesState[USER_ROLES.chairperson] = false;
-    rolesState[USER_ROLES.dataOwner] = false;
-    rolesState[USER_ROLES.member] = false;
-    rolesState[USER_ROLES.researcher] = false;
+    rolesState[USER_ROLES_UPPER.admin] = false;
+    rolesState[USER_ROLES_UPPER.alumni] = false;
+    rolesState[USER_ROLES_UPPER.chairperson] = false;
+    rolesState[USER_ROLES_UPPER.dataOwner] = false;
+    rolesState[USER_ROLES_UPPER.member] = false;
+    rolesState[USER_ROLES_UPPER.researcher] = false;
 
     if (this.props.user && this.props.user !== undefined) {
 
       const user = await User.getByEmail(this.props.user.email);
 
-      console.log(JSON.stringify(user, null, 2));
-
       user.roles.forEach(role => {
-        rolesState[role.name] = true;
+        rolesState[role.name.toUpperCase()] = true;
       });
 
       this.setState({
         mode: 'Edit',
-        roles: user.roles.map(role => role.name),
+        roles: user.roles.map(role => role.name.toUpperCase()),
         displayName: user.displayName,
         email: user.email,
         user: user,
@@ -67,15 +63,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       },
         () => {
           this.setState({
-            wasChairperson: rolesState[USER_ROLES.chairperson],
-            wasMember: rolesState[USER_ROLES.member],
-            wasDataOwner: rolesState[USER_ROLES.dataOwner],
-            wasResearcher: rolesState[USER_ROLES.researcher],
+            wasChairperson: rolesState[USER_ROLES_UPPER.chairperson],
+            wasMember: rolesState[USER_ROLES_UPPER.member],
+            wasDataOwner: rolesState[USER_ROLES_UPPER.dataOwner],
+            wasResearcher: rolesState[USER_ROLES_UPPER.researcher],
             loading: false
-          },
-            () => {
-              console.log('----------------------- STATE ------------------', this.state);
-            });
+          });
         });
     } else {
       this.setState({
@@ -107,38 +100,46 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   OKHandler = (event) => {
 
-    let roles = this.state.roles.slice();
-    console.log('roles in state .... ', roles);
-    const rolesName = roles.map(role => { return { name: role.name } }
-    );
+    let key;
+    let updatedRoles = [];
+    for (key in this.state.rolesState) {
+
+      if (this.state.rolesState[key] === true) {
+        if (key === USER_ROLES_UPPER.admin) {
+          updatedRoles.push({
+            name: key,
+            emailPreference: this.state.emailPreference
+          });
+        } else updatedRoles.push({
+          name: key
+        });
+      }
+    }
 
     switch (this.state.mode) {
+
       case 'Add':
         const newUser = {
           displayName: this.state.displayName,
           email: this.state.email,
-          roles: rolesName
+          roles: updatedRoles
         };
         User.create(newUser);
         break;
 
       case 'Edit':
-
         let payload = {};
-
-        console.log(JSON.stringify(this.state, null, 2));
-
-        const { wasChairperson, wasMember, wasDataOwner, wasResearcher } = this.state;
+        // const { wasChairperson, wasMember, wasDataOwner, wasResearcher } = this.state;
 
         const editUser = {
           displayName: this.state.displayName,
           email: this.state.email,
-          roles: roles,
           completed: this.state.user.completed,
           createDate: this.state.user.createDate,
           dacUserId: this.state.user.dacUserId,
           researcher: this.state.user.researcher,
           status: this.state.user.status,
+          roles: updatedRoles,
         };
         payload.updatedUser = editUser;
 
@@ -149,26 +150,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         if (this.state.delegateDataOwner.needsDelegation) {
           payload.alternativeDataOwnerUser = JSON.parse(this.state.alternativeDataOwnerUser);
         }
-
-
-        // var map = {};
-        // var roles = user.roles;
-        // for (var i = 0; i < roles.length; i++) {
-        //   if (roles[i].name === USER_ROLES.admin ) {
-        //     roles[i].emailPreference =  !$scope.emailPreference;
-        //     break;
-        //   }
-        // }
-
-        // map.updatedUser = user;
-        // if($scope.delegateDacUser.needsDelegation){
-        //     map.userToDelegate = JSON.parse($scope.alternativeDACMemberUser);
-        // }
-        // if($scope.delegateDataOwner.needsDelegation){
-        //     map.alternativeDataOwnerUser = JSON.parse($scope.alternativeDataOwnerUser);
-        // }
-        console.log(JSON.stringify(payload, null, 2));
-
         User.update(payload, this.state.user.dacUserId);
         break;
 
@@ -191,40 +172,21 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   toggleState(roleName) {
     let rs = Object.assign({}, this.state.rolesState);
-    console.log('rolesStates before toggle: ', this.state.rolesState);
     rs[roleName] = !rs[roleName];
     this.setState({
       rolesState: Object.assign({}, rs)
-    },
-      () => {
-        console.log('rolesStates after  toggle: ', this.state.rolesState);
-      });
+    });
   }
 
   userWas = (rol) => {
     let match = false;
-    console.log('---- rol ---> ', rol);
-
     this.state.user.roles.forEach(role => {
-      console.log("Comparing " + role.name + ' vs ' + rol + " = " + (role.name.toUpperCase() === rol.toUpperCase()));
       if (role.name.toUpperCase() === rol.toUpperCase()) {
         match = true;
       }
     });
     return match;
   };
-
-  //---------------------------------------
-  // $scope.$on("changeChairpersonRoleAlert", function (event, arg) {
-  //   $scope.$apply(function () {
-  //       if (arg.alert) {
-  //           $scope.changeChairpersonRoleAlert();
-  //       } else {
-  //           $scope.closeAlert(1);
-  //       }
-  //   });
-  // });
-
 
   async searchDACUsers(role) {
     let user = {
@@ -259,14 +221,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     // need to set the role in roles
     if (this.state.wasMember) {
-      console.log('was member ....................');
       if (!checkState) {
         // removing member role, need to verify if needs to add another user as member 
-        console.log('removing member role, need to verify if needs to add another user as member');
-        const result = await this.searchDACUsers(USER_ROLES.member)
-        if (result.needsDelegation) console.log("delegation is required ....");
-        else console.log("delegation is NOT required ....");
-        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.member)) {
+        const result = await this.searchDACUsers(USER_ROLES_UPPER.member)
+        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES_UPPER.member)) {
           this.setState(prev => {
             prev.delegateMemberRequired = result.needsDelegation;
             prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
@@ -277,8 +235,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         }
       } else {
         // adding member role to an already member, no need to do anything else
-        console.log('adding member role to an already member, no need to do anything else');
-        this.closeNoAvailableCandidatesAlert(USER_ROLES.member);
+        this.closeNoAvailableCandidatesAlert(USER_ROLES_UPPER.member);
         this.setState(prev => {
           prev.delegateMemberRequired = false;
           prev.delegateDacUser.delegateCandidates = [];
@@ -287,9 +244,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
-      console.log("was NOT member .......");
     }
-    this.toggleState(USER_ROLES.member);
+    this.toggleState(USER_ROLES_UPPER.member);
   };
 
   chairpersonChanged = async (e) => {
@@ -297,13 +253,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     // need to set the role in roles
     if (this.state.wasChairperson) {
-      console.log("was chairperson ................");
       if (!checkState) {
-        console.log("removing chairperson role ... should verify is needs delegation");
-        const result = await this.searchDACUsers(USER_ROLES.chairperson);
-        if (result.needsDelegation) console.log("delegation is required ....");
-        else console.log("delegation is NOT required ....");
-        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.chairperson)) {
+        const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
+        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES_UPPER.chairperson)) {
           this.setState(prev => {
             prev.delegateMemberRequired = false;
             prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
@@ -313,8 +265,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           // return;
         }
       } else {
-        console.log("adding chairperson role ...");
-        this.closeNoAvailableCandidatesAlert(USER_ROLES.chairperson);
+        this.closeNoAvailableCandidatesAlert(USER_ROLES_UPPER.chairperson);
         this.setState(prev => {
           prev.delegateMemberRequired = false;
           prev.delegateDacUser.delegateCandidates = [];
@@ -329,9 +280,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       else {
         this.closeAlert('1');
       }
-      console.log("was NOT chairperson ................");
+
     }
-    this.toggleState(USER_ROLES.chairperson);
+    this.toggleState(USER_ROLES_UPPER.chairperson);
   };
 
   dataOwnerChanged = async (e) => {
@@ -339,13 +290,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     // need to set the role in roles
     if (this.state.wasDataOwner) {
-      console.log("was dataOwner ................");
       if (!checkState) {
-        console.log("removing dataOwner role ... should verify is needs delegation");
-        const result = await this.searchDACUsers(USER_ROLES.dataOwner);
-        if (result.needsDelegation) console.log("delegation is required ....");
-        else console.log("delegation is NOT required ....");
-        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES.dataOwner)) {
+        const result = await this.searchDACUsers(USER_ROLES_UPPER.dataOwner);
+        if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES_UPPER.dataOwner)) {
           this.setState(prev => {
             prev.delegateDataOwner.delegateCandidates = result.delegateCandidates;
             prev.delegateDataOwner.needsDelegation = result.needsDelegation;
@@ -353,14 +300,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           }, () => {
             if (this.state.delegateDataOwner.delegateCandidates.length === 1) {
               this.setState({
-                alternativeDataOwnerUser : this.state.delegateDataOwner.delegateCandidates[0]
+                alternativeDataOwnerUser: this.state.delegateDataOwner.delegateCandidates[0]
               })
             }
           });
           // return;
         }
       } else {
-        this.closeNoAvailableCandidatesAlert(USER_ROLES.dataOwner);
+        this.closeNoAvailableCandidatesAlert(USER_ROLES_UPPER.dataOwner);
         this.setState(prev => {
           prev.delegateDataOwner.delegateCandidates = [];
           prev.delegateDataOwner.needsDelegation = false;
@@ -368,9 +315,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
-      console.log("was NOT dataOwner ................");
     }
-    this.toggleState(USER_ROLES.dataOwner);
+    this.toggleState(USER_ROLES_UPPER.dataOwner);
   };
 
   researcherChanged = (e) => {
@@ -385,18 +331,18 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         this.closeAlert('3');
       }
     }
-    this.toggleState(USER_ROLES.researcher);
+    this.toggleState(USER_ROLES_UPPER.researcher);
   };
 
   alumniChanged = (e) => {
     const checkState = e.target.checked;
-    const role = USER_ROLES.alumni;
+    const role = USER_ROLES_UPPER.alumni;
     this.toggleState(role);
   }
 
   adminChanged = (e) => {
     const checkState = e.target.checked;
-    const role = USER_ROLES.admin;
+    const role = USER_ROLES_UPPER.admin;
     this.toggleState(role);
   }
 
@@ -417,7 +363,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   changeResearcherRoleAlert = (index) => {
-    console.log('adding reseacher alert .... ');
     this.setState(prev => {
       prev.alerts.push({
         type: 'danger',
@@ -450,13 +395,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   closeAlert = (alertType) => {
-    console.log("removing alert " + alertType);
-    console.log("alerts ... beforer ", this.state.alerts);
     const alerts = this.state.alerts.filter(alert => {
-      console.log(alert.alertType, alertType, alert.alertType === alertType);
       return alert.alertType !== alertType
     });
-    console.log("alerts ... after   ", alerts);
     this.setState({
       alerts: alerts
     });
@@ -482,8 +423,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     //   i++;
     // }
   };
-  //-----------------------------------------
-
 
   handleChange(event) {
     const value = event.target.name;
@@ -518,14 +457,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       return LoadingIndicator();
     }
 
-    console.log("render: ", this.state);
-
-    const isChairPerson = rolesState[USER_ROLES.chairperson];
-    const isMember = rolesState[USER_ROLES.member];
-    const isAdmin = rolesState[USER_ROLES.admin];
-    const isResearcher = rolesState[USER_ROLES.researcher];
-    const isDataOwner = rolesState[USER_ROLES.dataOwner];
-    const isAlumni = rolesState[USER_ROLES.alumni];
+    const isChairPerson = rolesState[USER_ROLES_UPPER.chairperson];
+    const isMember = rolesState[USER_ROLES_UPPER.member];
+    const isAdmin = rolesState[USER_ROLES_UPPER.admin];
+    const isResearcher = rolesState[USER_ROLES_UPPER.researcher];
+    const isDataOwner = rolesState[USER_ROLES_UPPER.dataOwner];
+    const isAlumni = rolesState[USER_ROLES_UPPER.alumni];
 
     const isResearcherDisabled = isMember || isChairPerson;
     const isMemberDisabled = isChairPerson || isAlumni || isResearcher;
@@ -679,27 +616,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
           ]),
 
-          // div({ isRendered: alerts.lenght > 0, className: "form-group alert-form-group" }, [
-          //     div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4", style:"paddingLeft: 26px" }, [
-          //         div({ isRendered: checkModel.ADMIN, className: "checkbox" }, [
-          //              input({ id: "emailPreference", type:"checkbox", className: "checkbox-inline user-checkbox", "set-mail-preference": true, "ng-model":"emailPreference" }),
-          //              label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "emailPreference"}, ["Disable Admin email notifications"]),
-          //          ])
-          //      ]),
-
-          //      div({ className: "admin-alerts" }, [
-          //          alert({ "ng-repeat": "alert in alerts", type: "{{alert.type}}", className: "alert-title cancel-color" }, [
-          //              h4({}, [alert.title]),
-          //              span({}, [alert.msg]),
-          //              div({ className: "warning" }, [alert.warning]),
-          //          ])
-          //      ]),
-          //  ]),
-
           div({ isRendered: this.state.alerts.length > 0 }, [
             this.state.alerts.map((alert, ix) => {
               return (
-                h(Fragment, { key: "alert_" + ix}, [
+                h(Fragment, { key: "alert_" + ix }, [
                   Alert({ id: "modal_" + ix, type: alert.type, title: alert.title, description: alert.msg })
                 ])
               );
@@ -748,29 +668,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
           ]),
         ])
-
-      // div({ isRendered: "delegateDataOwner.needsDelegation", className: "form-group" }, [
-      //     div({ className: "row f-left" }, [
-      //         div({ className: "default-color", style: {padding: '0 40px 15px 40px'} }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
-      //     ]),
-
-      //     label({ id:"lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
-      //     div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
-
-      //         select({ id: "sel_alternativeDataOwner", className: "form-control col-lg-12", "ng-model": "$parent.alternativeDataOwnerUser", required: "delegateDataOwner.needsDelegation" }, [
-      //             option({ "ng-repeat": "dataOwner in delegateDataOwner.delegateCandidates", value: "{{dataOwner}}" }, [this.dataOwner.displayName] )
-      //         ]),
-
-      //     ]),
-      // ]),
-
-
-
-
-      // div({ isRendered: false }, [
-      //   Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
-      // ])
-      // ])
     );
   }
 });
