@@ -6,6 +6,7 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Alert } from '../components/Alert';
 
 class AccessReview extends Component {
 
@@ -370,12 +371,10 @@ class AccessReview extends Component {
                               ]);
                             })
                           ]),
-                          div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "dar-summary" }, [
-                            div({ id: "lbl_purposeStatementManualReview", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                              "This research involves studying a sensitive population and requires manual review."
-                            ]),
-                          ]),
-                        ]),
+                          div({ isRendered: this.state.darInfo.purposeManualReview && !this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                            Alert({ id: "purposeStatementManualReview", type: "danger", title: "This research involves studying a sensitive population and requires manual review." })
+                          ])
+                        ])
                       ]),
 
                       div({ className: "row dar-summary" }, [
@@ -389,13 +388,11 @@ class AccessReview extends Component {
                                 ]),
                               ]);
                             })
-                          ]),
-                        ]),
+                          ])
+                        ])
                       ]),
-                      div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "row dar-summary" }, [
-                        div({ id: "lbl_researchTypeManualReview", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 alert-danger cancel-color" }, [
-                          "This research requires manual review."
-                        ]),
+                      div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
+                        Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
                       ]),
 
                       div({ isRendered: this.state.darInfo.hasDiseases, className: "row dar-summary" }, [
@@ -508,7 +505,7 @@ class AccessReview extends Component {
         ConfirmationDialog({
           isRendered: this.state.showConfirmationDialogOK,
           title: "Vote confirmation",
-          color: "common",
+          color: "access",
           type: "informative",
           showModal: true,
           action: { label: "Ok", handler: this.confirmationHandlerOK }
