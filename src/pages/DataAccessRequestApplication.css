@@ -156,6 +156,11 @@ fieldset:not([disabled]) .btn-download-pdf:hover {
   background: #ffffff;
 }
 
+.required-select-error .select__control {
+  outline: none;
+  border: solid 1px #D13B07;
+}
+
 .select-autocomplete .select__control--is-focused,
 .select-autocomplete .select__control--is-focused:hover {
   border: 1px solid  rgba(47, 164, 231, 0.75);
