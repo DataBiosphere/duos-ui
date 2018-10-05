@@ -931,8 +931,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.diseases, onClick: this.handleCheckboxChange, name: 'diseases', id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.diseases, onClick: this.handleCheckboxChange, name: 'diseases', 
+                          id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkDiseases" }, [
                           span({}, ["2.4.1 Disease-related studies: "]),
@@ -944,8 +946,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.methods, onClick: this.handleCheckboxChange, id: "checkMethods", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                          className: "checkbox-inline rp-checkbox", name: "methods"
+                          checked: this.state.formData.methods, onClick: this.handleCheckboxChange, 
+                          id: "checkMethods", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                          className: "checkbox-inline rp-checkbox", name: "methods",
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkMethods" }, [
                           span({}, ["2.4.2 Methods development and validation studies: "]),
@@ -957,8 +961,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.controls, onClick: this.handleCheckboxChange, id: "checkControls", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                          className: "checkbox-inline rp-checkbox", name: "controls"
+                          checked: this.state.formData.controls, onClick: this.handleCheckboxChange, 
+                          id: "checkControls", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                          className: "checkbox-inline rp-checkbox", name: "controls",
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkControls" }, [
                           span({}, ["2.4.3 Controls: "]),
@@ -970,8 +976,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.population, onClick: this.handleCheckboxChange, id: "checkPopulation", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                          className: "checkbox-inline rp-checkbox", name: "population"
+                          checked: this.state.formData.population, onClick: this.handleCheckboxChange, 
+                          id: "checkPopulation", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                          className: "checkbox-inline rp-checkbox", name: "population",
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkPopulation" }, [
                           span({}, ["2.4.4 Population structure or normal variation studies: "]),
@@ -983,8 +991,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.hmb, onClick: this.handleCheckboxChange, id: "checkHmb", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          name: "hmb", disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.hmb, onClick: this.handleCheckboxChange, 
+                          id: "checkHmb", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          name: "hmb", disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkHmb" }, [
                           span({}, ["2.4.5 Health/medical/biomedical research: "]),
@@ -996,8 +1006,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.poa, onClick: this.handleCheckboxChange, id: "checkPoa", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          name: "poa", disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.poa, onClick: this.handleCheckboxChange, 
+                          id: "checkPoa", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          name: "poa", disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkPoa" }, [
                           span({}, ["2.4.6 Population origins or ancestry research: "]),
@@ -1009,8 +1021,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.other, onClick: this.handleCheckboxChange, id: "checkOther", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          name: "other", disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.other, onClick: this.handleCheckboxChange, 
+                          id: "checkOther", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          name: "other", disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => {}
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkOther" }, [span({}, ["2.4.7 Other:"]),]),
                       ]),
@@ -1123,6 +1137,7 @@ class DataAccessRequestApplication extends Component {
                                       id: "rad_gender_" + ix,
                                       name: this.state.name,
                                       checked: this.state.formData.gender === genderValues[ix],
+                                      onChange: () => {}
                                     }),
                                     span({ className: "radio-check" }),
                                     span({ className: "radio-label" }, [genderLabels[ix]])
