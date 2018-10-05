@@ -753,39 +753,39 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }),
                   ]),
 
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({
-                      id: "lbl_profilePubmedID",
-                      className: "control-label"
-                    }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
-                    input({
-                      id: "pubmedID",
-                      name: "pubmedID",
-                      type: "text",
-                      className: "form-control",
-                      onChange: this.handleChange,
-                      value: this.state.researcherProfile.pubmedID
-                    }),
-                  ]),
+                  // div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  //   label({
+                  //     id: "lbl_profilePubmedID",
+                  //     className: "control-label"
+                  //   }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
+                  //   input({
+                  //     id: "pubmedID",
+                  //     name: "pubmedID",
+                  //     type: "text",
+                  //     className: "form-control",
+                  //     onChange: this.handleChange,
+                  //     value: this.state.researcherProfile.pubmedID
+                  //   }),
+                  // ]),
 
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({
-                      id: "lbl_profileScientificURL",
-                      className: "control-label"
-                    }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
-                    input({
-                      id: "profileScientificURL",
-                      name: "scientificURL",
-                      type: "text",
-                      className: "form-control",
-                      onChange: this.handleChange,
-                      value: this.state.researcherProfile.scientificURL
-                    })
-                  ])
+                  // div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  //   label({
+                  //     id: "lbl_profileScientificURL",
+                  //     className: "control-label"
+                  //   }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
+                  //   input({
+                  //     id: "profileScientificURL",
+                  //     name: "scientificURL",
+                  //     type: "text",
+                  //     className: "form-control",
+                  //     onChange: this.handleChange,
+                  //     value: this.state.researcherProfile.scientificURL
+                  //   })
+                  // ])
                 ])
               ]),
 
-              div({ isRendered: (this.state.researcherProfile.isThePI === 'true' || this.state.researcherProfile.havePI === 'false'), className: "form-group" }, [
+              div({ className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                   label({
                     id: "lbl_profilePubmedID",
