@@ -213,7 +213,6 @@ class AdminManageUsers extends Component {
                       }, ["Review"]),
                     ]),
 
-
                     a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),
                     ]),

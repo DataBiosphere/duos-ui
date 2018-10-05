@@ -83,7 +83,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     //   dialogLabel = "Ok"
     // }
 
-    const { voteStatus, rationale = '', enableVoteButton } = this.state;
+    const { voteStatus, rationale, enableVoteButton } = this.state;
 
     console.log(this.state);
 
