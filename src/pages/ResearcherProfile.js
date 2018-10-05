@@ -923,8 +923,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 div({ className: "italic default-color" }, ["*Required field"])
               ]),
 
-              div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
-                a({ onClick: this.submit, className: "f-right btn-primary common-background" }, [
+                div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
+                  button({ id: "btn_submit", onClick: this.submit, className: "f-right btn-primary common-background" }, [
                   span({ isRendered: (!completed || completed === undefined)}, ["Submit"]),
                   span({ isRendered: (completed === true) }, ["Update"]),
                 ]),
