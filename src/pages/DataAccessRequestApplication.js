@@ -160,7 +160,6 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      formData.controls = undefined;
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -1266,7 +1265,7 @@ class DataAccessRequestApplication extends Component {
                         button({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                           span({ className: "glyphicon glyphicon-upload" }),
                           "Upload Signed Agreement",
-                          input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
+                          input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true }),
                         ]),
                         p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name])
                       ])
