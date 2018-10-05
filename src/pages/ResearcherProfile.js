@@ -147,7 +147,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.researcherProfile.academicEmail)) {
+    if (!this.isValid(this.state.researcherProfile.academicEmail) || this.state.researcherProfile.academicEmail.indexOf('@')  === -1) {
       academicEmail = true;
       showValidationMessages = true;
     }
@@ -188,18 +188,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     if (this.state.researcherProfile.havePI === 'true' && this.state.researcherProfile.isThePI === 'false') {
-      // havePI = true;
-      // showValidationMessages = true;
       if (!this.isValid(this.state.researcherProfile.piEmail)) {
-        console.log('piEmail incompleted');
         piEmail = true;
         showValidationMessages = true;
       }
       if (!this.isValid(this.state.researcherProfile.piName)) {
-        console.log('piName incompleted');
         piName = true;
         showValidationMessages = true;
       }
+    }
+
+    console.log(this.state.researcherProfile.havePI);
+    if (this.state.researcherProfile.isThePI === 'false' && this.state.researcherProfile.havePI === '') {
+      havePI = true;
+      showValidationMessages = true;
     }
 
     this.setState(prev => {
@@ -216,6 +218,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.invalidFields.country = country;
       prev.invalidFields.piName = piName;
       prev.invalidFields.piEmail = piEmail;
+      prev.invalidFields.havePI = havePI;
       prev.showValidationMessages = showValidationMessages;
       return prev;
     });
@@ -401,7 +404,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.invalidFields.academicEmail) && showValidationMessages
+                    isRendered: (this.state.invalidFields.academicEmail && this.state.researcherProfile.academicEmail.indexOf('@')  === -1) && showValidationMessages
                   }, ["Email Address is empty or has invalid format"]),
                 ]),
 
@@ -696,7 +699,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }),
                   span({
                     className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.invalidFields.havePI === 'true') && showValidationMessages
+                    isRendered: (this.state.invalidFields.havePI === 'true' || this.state.invalidFields.havePI) && showValidationMessages
                   }, ["Required field"])
                 ]),
 
