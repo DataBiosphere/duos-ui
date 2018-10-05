@@ -778,18 +778,6 @@ small {
   padding-top: 5px;
 }
 
-.dar-summary .alert-danger {
-  padding: 15px 20px;
-  margin-top: 10px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.alert-danger {
-  background-color: rgba(209, 59, 7, 0.1);
-  border: none;
-}
-
 .vote-update {
   display: inline-block;
   font-size: 14px;
