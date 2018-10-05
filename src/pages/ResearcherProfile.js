@@ -85,7 +85,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
     const displayName = Storage.getCurrentUser().displayName;
-    console.log(displayName);
     this.setState(prev => {
       prev.researcherProfile.zipcode = profile.zipcode;
       prev.researcherProfile.profileName = displayName;
@@ -130,6 +129,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handleChange(event) {
+    console.log(event.name);
     let field = event.target.name;
     let value = event.target.value;
 
@@ -202,7 +202,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    //
     if (!this.isValid(this.state.researcherProfile.havePI) && !this.isValid(this.state.researcherProfile.isThePI)) {
       console.log(havePI);
       havePI = true;
@@ -254,6 +253,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   handleRadioChange = (e, field, value) => {
+    console.log(field, value);
+    if (field === 'isThePI') {
+      this.clearNotRelatedPIFields();
+    }
+    if (field === 'havePI' && value === true) {
+      this.clearCommonsFields();
+    } else if (field === 'havePI' && value === false) {
+      this.clearNoHasPIFields();
+    }
     this.setState(prev => { prev.researcherProfile[field] = value; return prev; });
   };
 
@@ -688,8 +696,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   YesNoRadioGroup({
-                    value: this.state.researcherProfile.isThePI, onChange: this.handleRadioChange,
-                    id: 'rad_isThePI', name: 'isThePI', required: true
+                    value: this.state.researcherProfile.isThePI,
+                    onChange: this.handleRadioChange,
+                    id: 'rad_isThePI',
+                    name: 'isThePI',
+                    required: true
                   })
                 ]),
 
@@ -744,7 +755,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     onChange: this.handleRadioChange,
                     id: 'rad_havePI',
                     name: 'havePI',
-                    onClick: () => this.clearCommonsFields(),
                     required: true
                   }),
                     span({
