@@ -17,6 +17,7 @@ class AdminManageAccess extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      disableBtn: false,
       loading: true,
       showModal: false,
       value: '',
@@ -75,6 +76,7 @@ class AdminManageAccess extends Component {
   };
 
   dialogHandlerCancel = (answer) => (e) => {
+    this.setState({ disableBtn: true });
     if (answer === true) {
       let electionToUpdate = {};
       electionToUpdate.status = 'Canceled';
@@ -82,31 +84,32 @@ class AdminManageAccess extends Component {
       electionToUpdate.electionId = this.state.electionId;
       Election.updateElection(this.state.electionId, electionToUpdate).then(response => {
         this.getElectionDarList();
-        this.setState({ showDialogCancel: false });
+        this.setState({ showDialogCancel: false, disableBtn: false });
       });
     } else {
-      this.setState({ showDialogCancel: false });
+      this.setState({ showDialogCancel: false, disableBtn: false });
     }
   };
 
   dialogHandlerCreate = (answer) => (e) => {
+    this.setState({ disableBtn: true });
     if (answer === true) {
       Election.createDARElection(this.state.dataRequestId)
         .then(value => {
           this.getElectionDarList();
-          this.setState({ showDialogCreate: false });
+          this.setState({ showDialogCreate: false, disableBtn: false});
         })
         .catch(errorResponse => {
           if (errorResponse.status === 500) {
-            this.setState({ alertTitle: 'Email Service Error!', alertMessage: 'The election was created but the participants couldnt be notified by Email.' });
+            this.setState({ alertTitle: 'Email Service Error!', alertMessage: 'The election was created but the participants couldnt be notified by Email.', disableBtn: false });
           } else {
             errorResponse.json().then(error =>
-              this.setState({ alertTitle: 'Election cannot be created!', alertMessage: error.message })
+              this.setState({ alertTitle: 'Election cannot be created!', alertMessage: error.message, disableBtn: false})
             );
           }
         });
     } else {
-      this.setState({ showDialogCreate: false, alertTitle: undefined });
+      this.setState({ showDialogCreate: false, alertTitle: undefined, disableBtn: false});
     }
   };
 
@@ -261,6 +264,8 @@ class AdminManageAccess extends Component {
             color: 'access',
             isRendered: this.state.showDialogCreate,
             showModal: this.state.showDialogCreate,
+            disableOkBtn: this.state.disableBtn,
+            disableNoBtn: this.state.disableBtn,
             action: {
               label: "Yes",
               handler: this.dialogHandlerCreate
@@ -276,6 +281,8 @@ class AdminManageAccess extends Component {
           ConfirmationDialog({
             title: 'Cancel election?',
             color: 'cancel',
+            disableOkBtn: this.state.disableBtn,
+            disableNoBtn: this.state.disableBtn,
             isRendered: this.state.showDialogCancel,
             showModal: this.state.showDialogCancel,
             action: {

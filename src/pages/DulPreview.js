@@ -71,7 +71,7 @@ class DulPreview extends Component {
             a({
               id: "btn_back",
               onClick: this.back,
-              className: "btn vote-button vote-button-back vote-button-bigger"
+              className: "btn-primary btn-back"
             }, [
                 i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
               ])
@@ -93,7 +93,7 @@ class DulPreview extends Component {
             }, [
                 button({
                   id: "btn_downloadDataUseLetter",
-                  className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn download-pdf hover-color",
+                  className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
                   onClick: () => this.downloadDUL()
                 }, ["Download Data Use Letter"]),
               ])

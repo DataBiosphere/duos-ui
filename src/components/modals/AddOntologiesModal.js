@@ -170,12 +170,9 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
                 }, ["Ontology File"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
-                  div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 common-color upload-button" }, [
-                    span({}, ["Upload file"]),
-                    span({
-                      className: "cm-icon-button glyphicon glyphicon-upload caret-margin",
-                      "aria-hidden": "true"
-                    }, []),
+                  div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-secondary btn-upload common-color" }, [
+                    span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
+                    "Upload file",
                     input({
                       id: "btn_uploadFile",
                       type: "file",
@@ -187,7 +184,6 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
                   p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
                 ]),
               ]),
-
 
               div({ className: "form-group" }, [
                 label({

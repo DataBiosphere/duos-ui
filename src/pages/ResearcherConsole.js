@@ -192,7 +192,7 @@ class ResearcherConsole extends Component {
 
               a({
                 id: "btn_createRequest",
-                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 admin-add-button access-background search-wrapper", href: "/dar_application"
+                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", href: "/dar_application"
               }, [
                   div({ className: "all-icons add-access_white" }, []),
                   span({}, ["Create Data Access Request"]),

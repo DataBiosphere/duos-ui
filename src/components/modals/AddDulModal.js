@@ -141,6 +141,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     }
 
     this.setState(prev => {
+      prev.disableOkBtn = true;
       prev.error.title = errorTitle;
       prev.error.show = true;
       prev.error.msg = errMessage;
@@ -153,6 +154,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
     const value = changeEvent.target.value;
 
     this.setState(prev => {
+      prev.disableOkBtn = value === '';
       prev.consent[name] = value;
       return prev;
     });
@@ -171,6 +173,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   isValidJson = (obj, error) => {
     try {
       JSON.parse(obj);
+      this.setState({disableOkBtn:true});
       return true;
     } catch (err) {
       this.handleErrors(error);
@@ -188,7 +191,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
 
       BaseModal({
         id: "addDulModal",
-        disableOkBtn: this.state.file === '',
+        disableOkBtn: this.state.file === '' || this.state.disableOkBtn,
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
@@ -254,12 +257,9 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
                 }, ["Data Use Limitations File"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
-                  div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 upload-button" }, [
-                    span({}, ["Upload file"]),
-                    span({
-                      className: "cm-icon-button glyphicon glyphicon-upload caret-margin",
-                      "aria-hidden": "true"
-                    }, []),
+                  div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-secondary btn-upload dul-color" }, [
+                    span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
+                    "Upload file",
                     input({
                       id: "btn_uploadFile",
                       type: "file",

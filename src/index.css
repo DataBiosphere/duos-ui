@@ -551,7 +551,7 @@ small {
   margin: 10px 15px 10px 15px;
 }
 
-.panel-body .download-pdf {
+.panel-body .btn-download-pdf {
   margin: 10px 0;
 }
 
@@ -989,6 +989,15 @@ input[type=checkbox]:checked+label:before {
   line-height: 15px;
 }
 
+.checkbox[disabled] .regular-checkbox {
+  cursor: not-allowed !important;
+  opacity: 0.65;
+}
+ .checkbox[disabled] .regular-checkbox:before  {
+  background-color: #eee;
+  border: 1px solid #ccc;
+}
+
 .check-all {
   margin: 0!important;
   padding: 0 !important;
@@ -996,49 +1005,6 @@ input[type=checkbox]:checked+label:before {
   position: absolute;
   left: 28px;
   top: 21px;
-}
-
-.vote-button, .vote-reminder, .download-pdf {
-  border: 0 !important;
-  transition: background 0.3s ease;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.vote-button {
-  background: #00609f;
-  float: right;
-  box-shadow: 2px 2px rgb(204, 204, 204) !important;
-}
-
-.vote-button-back {
-  color: white;
-  background: #777777;
-}
-
-.vote-button-back .glyphicon {
-  font-size: 12px;
-  margin-right: 5px;
-}
-
-.vote-button-bigger {
-  margin-top: 10px;
-  padding: 12px 20px 10px 17px;
-}
-
-.vote-reminder, .download-pdf {
-  height: 28px;
-  line-height: 13px;
-  margin-bottom: 4px;
-  background: rgba(204, 204, 204, 0.3) !important;
-  box-shadow: 2px 2px rgb(204, 204, 204) !important;
-}
-
-.vote-button:hover:enabled, .vote-reminder:hover:enabled, .download-pdf:hover:enabled {
-  background: #2FA4E7 !important;
-  border: 0 !important;
-  color: #ffffff !important;
 }
 
 .radio-button-text {
@@ -1273,59 +1239,8 @@ a .editable:hover, a .enabled:hover {
   vertical-align: middle;
 }
 
-.download-button, .admin-add-button {
-  border-radius: 5px !important;
-  box-shadow: 3px 3px 0 #cccccc;
-  color: #ffffff;
-  border: none;
-  height: 40px;
-  padding: 9px 15px 7px 15px !important;
-  transition: background 0.3s ease;
-  cursor: pointer !important;
-}
 
-.apply-dataset {
-  margin-top: 25px;
-}
-
- .download-button:hover, .admin-add-button:hover, .upload-button:hover {
-  background: #2FA4E7 !important;
-  color: #ffffff !important;
-}
-
-.download-button, .admin-add-button {
-  float: right;
-  font-size: 15px;
-  padding: 8px auto 0 auto;
-  text-align: center;
-}
-
-.upload-button {
-  height: 34px !important;
-  border-radius: 5px !important;
-  box-shadow: 3px 3px 0 #cccccc;
-  background: rgba(204, 204, 204, 0.3) !important;
-  color: #C16B0C;
-  border: none;
-  padding: 6px 15px 0 15px !important;
-  width: auto;
-  transition: background 0.3s ease;
-}
-
-.upload-button .cm-icon-button {
-  padding-left: 0 !important;
-}
-
-.download-button span, .download-button span:hover, .upload-button span:hover {
-  color: #ffffff !important;
-}
-
-.admin-add-button span {
-  color: #ffffff;
-  font-size: 15px;
-  vertical-align: 65%;
-  margin-left: -8px !important;
-}
+/*///////////////////////////////////////////////////////BUTTONS*/
 
 .btn-primary,
 .btn-secondary {
@@ -1335,24 +1250,30 @@ a .editable:hover, a .enabled:hover {
   box-shadow: 3px 3px 0 #cccccc;
   border: none;
   height: 40px;
-  padding: 10px 15px 0 15px;
+  padding: 0 15px;
   transition: background 0.3s ease;
   cursor: pointer;
+  text-align: center;
 }
 
 .btn-primary[disabled],
 .btn-secondary[disabled] {
-  background: #eeeeee !important;
-  color: #cccccc !important;
-  box-shadow: 3px 3px 0 #cccccc;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-primary:not([disabled]):hover,
+.btn-secondary:not([disabled]):hover {
+  background: #2FA4E7 !important;
+  color: white !important;
 }
 
 .btn-primary.f-left {
   margin-right: 20px;
 }
 
-.btn-primary.f-left .glyphicon {
+.btn-primary.f-left .glyphicon,
+.btn-upload .glyphicon {
   font-size: 13px;
   margin-right: 5px;
 }
@@ -1366,19 +1287,60 @@ a .editable:hover, a .enabled:hover {
   margin-left: 5px;
 }
 
-.btn-primary:hover,
-.btn-secondary:hover {
-  background: #2FA4E7 !important;
-  color: white !important;
-}
-
 .btn-secondary {
-  background: #eeeeee !important;
-  padding-top: 11px!important;
+  background: #eeeeee;
 }
 
-.btn-secondary span {
-  padding: 0 15px 0 15px !important;
+.btn-add {
+  padding: 8px 15px 0 15px;
+}
+
+.btn-add span {
+  vertical-align: 65%;
+  margin-left: -8px !important;
+}
+
+.btn-vote,
+.btn-vote:hover {
+  height: 34px;
+  box-shadow: none;
+  padding: auto;
+}
+
+.btn-upload {
+  height: 34px;
+  padding-top: 8px;
+  font-size: 14px;
+}
+
+.btn-back, 
+.btn-reminder,
+.btn-download-pdf {
+  font-size: 14px;
+  box-shadow: 2px 2px 0 #cccccc;
+}
+
+.btn-back {
+  height: auto;
+  float: right;
+  color: white;
+  background: #777777;
+  box-shadow: 2px 2px rgb(204, 204, 204);
+  margin-top: 10px;
+  padding: 12px 20px 10px 17px !important;
+}
+
+.btn-back .glyphicon {
+  font-size: 12px;
+  margin-right: 5px;
+}
+
+.btn-reminder,
+.btn-download-pdf {
+  height: 28px;
+  line-height: 13px;
+  margin-bottom: 4px;
+  background: rgba(204, 204, 204, 0.3);
 }
 
 .rp-group {
