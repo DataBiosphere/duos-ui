@@ -14,7 +14,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
       showDialogSubmit: false,
-      rationale: this.props.rationale
+      rationale: this.props.rationale !== null ? this.props.rationale : ''
     }
   }
 
@@ -83,7 +83,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     //   dialogLabel = "Ok"
     // }
 
-    const { voteStatus, rationale, enableVoteButton } = this.state;
+    const { voteStatus, rationale = '', enableVoteButton } = this.state;
+
+    console.log(this.state);
 
     return (
 
