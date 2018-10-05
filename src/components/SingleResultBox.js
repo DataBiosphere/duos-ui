@@ -18,16 +18,6 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
 
   render() {
 
-    //if reminder sent succesfully
-    // const dialogTitle = "Email Notification Sent";
-    // const dialogColor = this.props.color;
-    // const reminderSent = this.props.reminderSent;
-
-    //if error sending reminder
-    // const dialogTitle = "Email Notification Error";
-    // const dialogColor = "cancel";
-    // const reminderSent = false;
-
     return (
       div({ id: this.props.id, className: "jumbotron box-vote-singleresults col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
         div({ className: "row" }, [

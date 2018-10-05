@@ -103,7 +103,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   }
 
   openAccessReview = (darId, voteId, rpVoteId) => (e) => {
-    this.props.history.push({ pathname: 'access_review', props: { darId: darId, voteId: voteId, rpVoteId: rpVoteId } });
+    this.props.history.push(`access_review/${darId}/${voteId}/${rpVoteId}`);
   }
 
   openAccessCollect = (referenceId, electionId) => (e) => {
@@ -251,7 +251,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     button({
                       id: pendingCase.frontEndId + "_btnVote",
                       name: "btn_voteAccess",
-                      onClick: this.openAccessReview(pendingCase.darId, pendingCase.voteId, pendingCase.rpVoteId),
+                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
                       className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
                     }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ["Vote"]),
