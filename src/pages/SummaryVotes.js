@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, hh, span, a, h3, button } from 'react-hyperscript-helpers';
+import { div, hr, hh, span, h3, button } from 'react-hyperscript-helpers';
 import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';

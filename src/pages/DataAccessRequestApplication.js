@@ -125,12 +125,22 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
-    let formData = this.props.location.props !== undefined && this.props.location.props.formData !== undefined ? this.props.location.props.formData : this.state.formData;
+    let formData = this.state.formData;
+    let datasets = [];
+    if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
+      if (this.props.location.props.formData.dar_code !== undefined) {
+        formData = this.props.location.props.formData;
+        formData.ontologies = this.getOntologies(formData);
+      } else if (this.props.location.props.formData.datasetId !== undefined) {
+        // set datasets sent by data set catalog
+        datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+      }
+    }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
     formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-    formData.profileName = rpProperties.profileName;
+    formData.researcher = rpProperties.profileName;
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
@@ -153,14 +163,9 @@ class DataAccessRequestApplication extends Component {
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
-    let datasets = [];
-    if (formData.dar_code !== null || formData.partial_dar_code !== null || formData.datasetId !== undefined) {
-      datasets = formData.datasetId.map(function (item) {
-        return {
-          value: item.id,
-          label: item.concatenation
-        }
-      });
+
+    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
+      datasets = this.processDataSet(formData.datasetId);
     }
     let completed = false;
     if (formData.dar_code !== null) {
@@ -179,7 +184,28 @@ class DataAccessRequestApplication extends Component {
 
   };
 
-
+  getOntologies(formData) {
+    let ontologies = {};
+    if (formData.ontologies !== undefined && formData.ontologies !== null) {
+      ontologies = formData.ontologies.map(function (item) {
+        return {
+          key: item.id,
+          value: item.id,
+          label: item.label,
+          item: item
+        }
+      });
+    }
+    return ontologies;
+  }
+  processDataSet(datasetIdList) {
+    return datasetIdList.map(function (item) {
+      return {
+        value: item.id,
+        label: item.concatenation
+      }
+    });
+  }
   handleFileChange(event) {
     if (event.target.files !== undefined && event.target.files[0]) {
       let file = event.target.files[0];
@@ -222,6 +248,9 @@ class DataAccessRequestApplication extends Component {
     const field = e.target.name;
     const value = e.target.checked;
     this.setState(prev => {
+      if (field === 'other' && value === false) {
+        prev.formData.othertext = '';
+      }
       prev.formData[field] = value;
       return prev;
     }, () => this.checkValidations());
@@ -234,6 +263,9 @@ class DataAccessRequestApplication extends Component {
       value = false;
     }
     this.setState(prev => {
+      if (field === 'onegender' && value === false) {
+        prev.formData.gender = '';
+      }
       prev.formData[field] = value; return prev;
     }, () => this.checkValidations());
   };
@@ -248,6 +280,7 @@ class DataAccessRequestApplication extends Component {
       prev.step = 1;
       return prev;
     });
+    window.scrollTo(0, 0);
   };
 
   step2 = (e) => {
@@ -255,6 +288,7 @@ class DataAccessRequestApplication extends Component {
       prev.step = 2;
       return prev;
     });
+    window.scrollTo(0, 0);
   };
 
   step3 = (e) => {
@@ -300,7 +334,7 @@ class DataAccessRequestApplication extends Component {
       isTitleInvalid = true;
       showValidationMessages = true;
     }
-    if (!this.isValid(this.state.formData.profileName)) {
+    if (!this.isValid(this.state.formData.researcher)) {
       isResearcherInvalid = true;
       showValidationMessages = true;
     }
@@ -347,7 +381,7 @@ class DataAccessRequestApplication extends Component {
 
   isGenderValid(gender, onegender) {
     let isValidGender = false;
-    if(onegender === false || (onegender === true && this.isValid(gender))) {
+    if (onegender === false || (onegender === true && this.isValid(gender))) {
       isValidGender = true;
     }
     return isValidGender;
@@ -355,7 +389,7 @@ class DataAccessRequestApplication extends Component {
   verifyStep3() {
     let invalid = false;
     if (!(this.isValid(this.state.formData.forProfit) &&
-      this.isValid(this.state.formData.onegender) && 
+      this.isValid(this.state.formData.onegender) &&
       this.isGenderValid(this.state.formData.gender, this.state.formData.onegender) &&
       this.isValid(this.state.formData.pediatric) &&
       this.isValid(this.state.formData.illegalbehave) &&
@@ -404,6 +438,9 @@ class DataAccessRequestApplication extends Component {
         prev.step2.inputRUS.invalid = isRusInvalid;
         prev.step2.inputNonTechRUS.invalid = isSummaryInvalid;
         prev.step2.inputDatasets.invalid = isDatasetsInvalid;
+        if(prev.showValidationMessages === false) {
+          prev.showValidationMessages = isRusInvalid || isSummaryInvalid || isDatasetsInvalid;
+        } 
         return prev;
       });
       return false;
@@ -416,33 +453,50 @@ class DataAccessRequestApplication extends Component {
 
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
-      let formData = this.state.formData;
-      let ds = [];
-      this.state.datasets.forEach(dataset => {
-        ds.push(dataset.value);
-      });
-      formData.datasetId = ds;
-      formData.userId = Storage.getCurrentUser().dacUserId;
-      this.setState(prev => { prev.disableOkBtn = true; return prev; });
-      if (formData.dar_code !== undefined && formData.dar_code !== null) {
-        DAR.updateDar(formData, formData.dar_code).then(response => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.push('researcher_console');
+      let ontologies = [];
+      for (let ontology of this.state.formData.ontologies) {
+        ontologies.push(ontology.item);
+      };
+      this.setState(prev => {
+        if (ontologies.length > 0) {
+          prev.formData.ontologies = ontologies;
+        }
+        for (var key in prev.formData) {
+          if (prev.formData[key] === '') {
+            prev.formData[key] = undefined;
+          }
+
+        }
+        return prev;
+      }, () => {
+        let formData = this.state.formData;
+        let ds = [];
+        this.state.datasets.forEach(dataset => {
+          ds.push(dataset.value);
         });
-      } else {
-        DAR.postDataAccessRequest(formData).then(response => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.push('researcher_console');
-        }).catch(e =>
-          this.setState(prev => {
-            prev.problemSavingRequest = true;
-            return prev;
-          }));
-      }
+        formData.datasetId = ds;
+        formData.userId = Storage.getCurrentUser().dacUserId;
+        this.setState(prev => { prev.disableOkBtn = true; return prev; });
+
+        if (formData.dar_code !== undefined && formData.dar_code !== null) {
+          DAR.updateDar(formData, formData.dar_code).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          });
+        } else {
+          DAR.postDataAccessRequest(formData).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          }).catch(e =>
+            this.setState(prev => {
+              prev.problemSavingRequest = true;
+              return prev;
+            }));
+        }
+      });
     } else {
       this.setState({ showDialogSubmit: false });
     }
-
   };
 
   setShowDialogSave(value) {
@@ -456,6 +510,10 @@ class DataAccessRequestApplication extends Component {
   dialogHandlerSave = (answer) => (e) => {
     this.setState(prev => { prev.disableOkBtn = true; return prev; });
     if (answer === true) {
+      let ontologies = [];
+      for (let ontology of this.state.formData.ontologies) {
+        ontologies.push(ontology.item);
+      };
       let datasets = this.state.datasets.map(function (item) {
         return {
           id: item.value,
@@ -464,6 +522,7 @@ class DataAccessRequestApplication extends Component {
       });
       this.setState(prev => {
         prev.formData.datasetId = datasets;
+        prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
     } else {
@@ -522,7 +581,8 @@ class DataAccessRequestApplication extends Component {
           return {
             key: item.id,
             value: item.id,
-            label: item.label
+            label: item.label,
+            item: item
           };
         });
         callback(options);
@@ -618,9 +678,9 @@ class DataAccessRequestApplication extends Component {
         form({ name: "form", "noValidate": true }, [
           div({ id: "form-views" }, [
 
-              ConfirmationDialog({
-                title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
-              }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
+            ConfirmationDialog({
+              title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
+            }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
 
             //------------------ Step 1--------------------------------------
             div({ isRendered: this.state.step === 1 }, [
@@ -646,7 +706,7 @@ class DataAccessRequestApplication extends Component {
                         type: "text",
                         name: "researcher",
                         id: "inputResearcher",
-                        value: this.state.formData.profileName,
+                        value: this.state.formData.researcher,
                         disabled: true,
                         className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                         required: true
@@ -674,7 +734,7 @@ class DataAccessRequestApplication extends Component {
                       ])
                     ]),
 
-                    span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following is required"]),
+                    span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following fields is required"]),
 
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
@@ -702,9 +762,8 @@ class DataAccessRequestApplication extends Component {
                           ]),
                           div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername])
-                          ]),
-                        ]),
-                        // span({ isRendered: (this.state.formData.eraAuthorized !== true) && showValidationMessages, className: "cancel-color required-field-error-span" }, ["Required field"])
+                          ])
+                        ])
                       ]),
 
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
@@ -718,8 +777,7 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        }),
-                        span({ isRendered: (step1.inputLinkedIn.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                        })
                       ])
                     ]),
 
@@ -735,8 +793,7 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputOrcid.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        }),
-                        span({ isRendered: (step1.inputOrcid.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                        })
                       ]),
 
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
@@ -750,8 +807,7 @@ class DataAccessRequestApplication extends Component {
                           disabled: false,
                           className: step1.inputResearcherGate.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                           required: true
-                        }),
-                        span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "cancel-color required-field-error-span" }, ["Required field"]),
+                        })
                       ])
                     ])
                   ]),
@@ -801,11 +857,11 @@ class DataAccessRequestApplication extends Component {
 
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    button({ id: "btn_next", onClick: this.step2, className: "btn-primary f-right access-background" }, [
+                    a({ id: "btn_next", onClick: this.step2, className: "btn-primary f-right access-background" }, [
                       "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }),
                     ]),
 
-                    button({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
+                    a({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
                   ])
                 ])
               ])
@@ -838,7 +894,8 @@ class DataAccessRequestApplication extends Component {
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: "select",
                         placeholder: "Dataset Name, Sample Collection ID, or PI",
-                        className: "select-autocomplete"
+                        className: step2.inputDatasets.invalid && showValidationMessages ? ' required-select-error select-autocomplete' : 'select-autocomplete',
+
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputDatasets.invalid && showValidationMessages }, ["Required field"]),
                     ]),
@@ -905,13 +962,15 @@ class DataAccessRequestApplication extends Component {
                       ]),
                     ]),
                     div({ className: "row no-margin" }, [
-                      span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: { 'marginLeft': '15px' } }, ["At least one of the fields is required"]),
+                      span({ className: "cancel-color required-field-error-span", isRendered: !atLeastOneCheckboxChecked && showValidationMessages, style: { 'marginLeft': '15px' } }, ["At least one of the following fields is required"]),
                     ]),
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.diseases, onClick: this.handleCheckboxChange, name: 'diseases', id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.diseases, onClick: this.handleCheckboxChange, name: 'diseases',
+                          id: "checkDiseases", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkDiseases" }, [
                           span({}, ["2.4.1 Disease-related studies: "]),
@@ -923,8 +982,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.methods, onClick: this.handleCheckboxChange, id: "checkMethods", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                          className: "checkbox-inline rp-checkbox", name: "methods"
+                          checked: this.state.formData.methods, onClick: this.handleCheckboxChange,
+                          id: "checkMethods", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                          className: "checkbox-inline rp-checkbox", name: "methods",
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkMethods" }, [
                           span({}, ["2.4.2 Methods development and validation studies: "]),
@@ -936,8 +997,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.controls, onClick: this.handleCheckboxChange, id: "checkControls", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                          className: "checkbox-inline rp-checkbox", name: "controls"
+                          checked: this.state.formData.controls, onClick: this.handleCheckboxChange,
+                          id: "checkControls", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                          className: "checkbox-inline rp-checkbox", name: "controls",
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkControls" }, [
                           span({}, ["2.4.3 Controls: "]),
@@ -949,8 +1012,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.population, onClick: this.handleCheckboxChange, id: "checkPopulation", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
-                          className: "checkbox-inline rp-checkbox", name: "population"
+                          checked: this.state.formData.population, onClick: this.handleCheckboxChange,
+                          id: "checkPopulation", type: "checkbox", disabled: (this.state.formData.dar_code !== null),
+                          className: "checkbox-inline rp-checkbox", name: "population",
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkPopulation" }, [
                           span({}, ["2.4.4 Population structure or normal variation studies: "]),
@@ -962,8 +1027,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.hmb, onClick: this.handleCheckboxChange, id: "checkHmb", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          name: "hmb", disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.hmb, onClick: this.handleCheckboxChange,
+                          id: "checkHmb", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          name: "hmb", disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkHmb" }, [
                           span({}, ["2.4.5 Health/medical/biomedical research: "]),
@@ -975,8 +1042,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.poa, onClick: this.handleCheckboxChange, id: "checkPoa", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          name: "poa", disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.poa, onClick: this.handleCheckboxChange,
+                          id: "checkPoa", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          name: "poa", disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkPoa" }, [
                           span({}, ["2.4.6 Population origins or ancestry research: "]),
@@ -988,8 +1057,10 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       div({ className: "checkbox" }, [
                         input({
-                          checked: this.state.formData.other, onClick: this.handleCheckboxChange, id: "checkOther", type: "checkbox", className: "checkbox-inline rp-checkbox",
-                          name: "other", disabled: (this.state.formData.dar_code !== null)
+                          checked: this.state.formData.other, onClick: this.handleCheckboxChange,
+                          id: "checkOther", type: "checkbox", className: "checkbox-inline rp-checkbox",
+                          name: "other", disabled: (this.state.formData.dar_code !== null),
+                          onChange: () => { }
                         }),
                         label({ className: "regular-checkbox rp-choice-questions", htmlFor: "checkOther" }, [span({}, ["2.4.7 Other:"]),]),
                       ]),
@@ -1035,15 +1106,15 @@ class DataAccessRequestApplication extends Component {
 
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    button({ id: "btn_prev", onClick: this.step1, className: "btn-primary f-left access-background" }, [
+                    a({ id: "btn_prev", onClick: this.step1, className: "btn-primary f-left access-background" }, [
                       span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                     ]),
 
-                    button({ id: "btn_next", onClick: this.step3, className: "btn-primary f-right access-background" }, [
+                    a({ id: "btn_next", onClick: this.step3, className: "btn-primary f-right access-background" }, [
                       "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
                     ]),
 
-                    button({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
+                    a({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "btn-secondary f-right access-color" }, ["Save"])
                   ])
                 ])
               ])
@@ -1090,7 +1161,7 @@ class DataAccessRequestApplication extends Component {
                           div({ className: 'radio-inline' }, [
                             genderLabels.map((option, ix) => {
                               return (
-                              label({
+                                label({
                                   key: 'gender' + ix,
                                   onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
                                   id: "lbl_gender_" + ix,
@@ -1102,6 +1173,7 @@ class DataAccessRequestApplication extends Component {
                                       id: "rad_gender_" + ix,
                                       name: this.state.name,
                                       checked: this.state.formData.gender === genderValues[ix],
+                                      onChange: () => { }
                                     }),
                                     span({ className: "radio-check" }),
                                     span({ className: "radio-label" }, [genderLabels[ix]])
@@ -1180,15 +1252,15 @@ class DataAccessRequestApplication extends Component {
 
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    button({ id: "btn_prev", onClick: this.step2, className: "btn-primary f-left access-background" }, [
+                    a({ id: "btn_prev", onClick: this.step2, className: "btn-primary f-left access-background" }, [
                       span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                     ]),
 
-                    button({ id: "btn_next", onClick: this.step4, className: "btn-primary f-right access-background" }, [
+                    a({ id: "btn_next", onClick: this.step4, className: "btn-primary f-right access-background" }, [
                       "Next Step", span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" })
                     ]),
 
-                    button({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"])
+                    a({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"])
                   ])
                 ])
               ])
@@ -1228,7 +1300,7 @@ class DataAccessRequestApplication extends Component {
                         button({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                           span({ className: "glyphicon glyphicon-upload" }),
                           "Upload Signed Agreement",
-                          input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
+                          input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true }),
                         ]),
                         p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name])
                       ])
@@ -1267,17 +1339,17 @@ class DataAccessRequestApplication extends Component {
 
                 div({ className: "row no-margin" }, [
                   div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    button({ id: "btn_prev", onClick: this.step3, className: "f-left btn-primary access-background" }, [
+                    a({ id: "btn_prev", onClick: this.step3, className: "f-left btn-primary access-background" }, [
                       span({ className: "glyphicon glyphicon-chevron-left", "aria-hidden": "true" }), "Previous Step"
                     ]),
 
-                    button({ id: "btn_submit", isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
+                    a({ id: "btn_submit", isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave, className: "f-right btn-primary access-background bold" }, ["Attest and Send"]),
 
-                        ConfirmationDialog({
-                          title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
-                        }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
+                    ConfirmationDialog({
+                      title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
+                    }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
 
-                    button({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"]),
+                    a({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"]),
                   ])
                 ])
               ])
@@ -1290,4 +1362,3 @@ class DataAccessRequestApplication extends Component {
 }
 
 export default DataAccessRequestApplication;
-

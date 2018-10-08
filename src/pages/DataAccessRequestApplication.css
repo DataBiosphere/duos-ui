@@ -126,6 +126,11 @@
   display: block;
 }
 
+a.btn-primary,
+a.btn-secondary {
+  padding-top: 10px;
+}
+
 .btn-download-pdf {
   height: 35px;
   line-height: 18px;
@@ -149,6 +154,11 @@ fieldset:not([disabled]) .btn-download-pdf:hover {
 .select-autocomplete .select__control {
   border: 1px solid #999999;
   background: #ffffff;
+}
+
+.required-select-error .select__control {
+  outline: none;
+  border: solid 1px #D13B07;
 }
 
 .select-autocomplete .select__control--is-focused,
