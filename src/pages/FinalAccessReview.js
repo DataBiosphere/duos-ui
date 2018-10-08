@@ -7,300 +7,141 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Alert } from '../components/Alert';
+import { Storage } from '../libs/storage';
+import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
+import { Config } from '../libs/config';
+import * as Utils from '../libs/utils';
 
 class FinalAccessReview extends Component {
 
   constructor(props) {
     super(props);
+    console.log('PROPS 1: ', this.props);
     this.state = this.initialState();
   }
 
   componentDidMount() {
-    this.mockState();
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
+    console.log('PROPS 2: ', this.props);
+    const currentUser = Storage.getCurrentUser();
+    this.setState({
+      loading: true,
+      currentUser: currentUser,
+      referenceId: this.props.match.params.referenceId,
+      electionId: this.props.match.params.electionId,
+    }, () => {
+      this.loadData();
     });
   }
 
-  mockState() {
-    this.setState(prev => {
-      prev.loading = false;
-      prev.createDate = '2018-08-30';
-      prev.enableFinalButton = true;
-      prev.enableAgreementButton = true;
-      prev.hasUseRestriction = true;
-      prev.projectTitle = 'My Project 01';
-      prev.consentName = 'ORSP-124';
-      prev.isQ1Expanded = false;
-      prev.isQ2Expanded = false;
-      prev.isDulExpanded = false;
-      prev.match = '-1';
-      prev.election = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionAccess = {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.electionRP = {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      };
-      prev.voteAgreement = {
-        vote: '0',
-        rationale: '',
-      };
-      prev.darInfo = {
-        havePI: true,
-        pi: 'PI name goes here....',
-        rus: "something",
-        sDar: "something else",
-        profileName: 'My Profile name',
-        status: 'OK',
-        hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
+  async loadData() {
+    console.log('STATE: ', this.state);
+    const hasUseRestrictionResp = await DAR.hasUseRestriction(this.state.referenceId);
+    let darInfo = await DAR.describeDar(this.state.referenceId);
+    if (!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
 
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
-      }
-      return prev;
+    this.setState({
+      path: 'final-access-review',
+      hasUseRestrictionResp: hasUseRestrictionResp,
+      vote: {},
+      voteAgreement: {},
+      electionType: null,
+      alertOn: null,
+      alertsDAR: [],
+      alertsAgree: [],
+      darInfo: darInfo
+    }, () => {
+      this.init();
     });
+
+
+
+    // reminderDARAlert = function (index) {
+    //       $scope.alertsDAR.splice(index, 1);
+    //       $scope.alertsDAR.push({
+    //           title: 'Please log a vote on Decision Agreement.'
+    //       });
+    //   };
+
+    // reminderAgreeAlert = function (index) {
+    //       $scope.alertOn = true;
+    //       $scope.alertsAgree.splice(index, 1);
+    //       $scope.alertsAgree.push({
+    //           title: 'Please log a vote on Final Access Decision'
+    //       });
+    //   };
+
+    // closeAlert = function (index) {
+    //       $scope.alerts.splice(index, 1);
+    //   };
+
+    // downloadDAR = function() {
+    //       cmFilesService.getDARFile(referenceId);
+    //   };
+
+
+
   }
 
   initialState() {
     return {
       loading: true,
-      voteStatus: '1',
-      createDate: '2018-08-30',
-      enableFinalButton: false,
-      enableAgreementButton: false,
-      hasUseRestriction: true,
-      projectTitle: 'My Project 01',
-      consentName: 'ORSP-124',
-      isQ1Expanded: false,
-      isQ2Expanded: false,
-      isDulExpanded: false,
-      match: true,
-      election: {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      },
-      electionAccess: {
-        finalVote: '0',
-        finalRationale: 'lalala',
-        finalVoteDate: '2018-08-31'
-      },
-      electionRP: {
-        finalVote: '0',
-        finalRationale: '',
-        finalVoteDate: '2018-08-30'
-      },
-      voteAgreement: {
-        vote: '0',
-        rationale: '',
-      },
-      voteList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Tadeo Riveros", vote: {
-              vote: '0',
-              rationale: 'lalala',
-              createDate: '',
-              updateDate: ''
-            }
-          }
-        ]
-      ],
-      voteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ]
-      ],
-      rpVoteAccessList: [
-        [
-          {
-            displayName: "Diego Gil", vote: {
-              vote: '0',
-              rationale: 'por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ... por que si ...por que si ...',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-          {
-            displayName: "Nadya Lopez Zalba", vote: {
-              vote: '0',
-              rationale: '',
-              createDate: '',
-              updateDate: '',
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Walter Lo Forte", vote: {
-              vote: '0',
-              rationale: 'lala',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-          {
-            displayName: "Leo Forconesi", vote: {
-              vote: '1',
-              rationale: '',
-              createDate: '',
-              updateDate: ''
-            }
-          },
-        ],
-        [
-          {
-            displayName: "Tadeo Riveros", vote: {
-              vote: '0',
-              rationale: 'lalala',
-              createDate: '',
-              updateDate: ''
-            }
-          }
-        ]
-      ],
+      // voteStatus: '1',
+      // createDate: '2018-08-30',
+      // enableFinalButton: false,
+      // enableAgreementButton: false,
+      // hasUseRestriction: true,
+      // projectTitle: 'My Project 01',
+      // consentName: 'ORSP-124',
+      // isQ1Expanded: false,
+      // isQ2Expanded: false,
+      // isDulExpanded: false,
+      // match: true,
+      // election: {
+      //   finalVote: '0',
+      //   finalRationale: '',
+      //   finalVoteDate: '2018-08-30'
+      // },
+      // electionAccess: {
+      //   finalVote: '0',
+      //   finalRationale: 'lalala',
+      //   finalVoteDate: '2018-08-31'
+      // },
+      // electionRP: {
+      //   finalVote: '0',
+      //   finalRationale: '',
+      //   finalVoteDate: '2018-08-30'
+      // },
+      // voteAgreement: {
+      //   vote: '0',
+      //   rationale: '',
+      // },
+      // voteList: [],
+      // voteAccessList: [
+      // ],
+      // rpVoteAccessList: [
+      // ],
 
-      darInfo: {
-        havePI: true,
-        pi: 'PI name goes here....',
-        profileName: 'My Profile name',
-        status: 'OK',
-        hasAdminComment: true,
-        adminComment: 'This is an admin comment',
-        institution: 'Institution',
-        department: 'Department',
-        city: 'City',
-        country: 'Country',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
-        purposeStatements: [
-          { title: "Purpose Title 1", description: "Purpose Description 1", manualReview: true },
-          { title: "Purpose Title 2", description: "Purpose Description 2", manualReview: false },
-          { title: "Purpose Title 3", description: "Purpose Description 3", manualReview: true },
-          { title: "Purpose Title 4", description: "Purpose Description 4", manualReview: false },
-        ],
-        researchType: [
-          { title: "Research Type Title 1", description: "Research Type Description 1", manualReview: true },
-          { title: "Research Type Title 2", description: "Research Type Description 2", manualReview: false },
-          { title: "Research Type Title 3", description: "Research Type Description 3", manualReview: true },
-          { title: "Research Type Title 4", description: "Research Type Description 4", manualReview: false },
-        ],
-        diseases: [
-          'disease 0',
-          'disease 1',
-          'disease 2',
-          'disease 3',
-        ]
-      }
+      // darInfo: {
+      //   havePI: true,
+      //   pi: 'PI name goes here....',
+      //   profileName: 'My Profile name',
+      //   status: 'OK',
+      //   hasAdminComment: true,
+      //   adminComment: 'This is an admin comment',
+      //   institution: 'Institution',
+      //   department: 'Department',
+      //   city: 'City',
+      //   country: 'Country',
+      //   purposeManualReview: true,
+      //   researchTypeManualReview: true,
+      //   hasDiseases: true,
+      //   purposeStatements: [
+      //   ],
+      //   researchType: [
+      //   ],
+      //   diseases: [
+      //   ]
+      // }
     };
   }
 
@@ -347,24 +188,11 @@ class FinalAccessReview extends Component {
 
   render() {
 
-    // let vote = {
-    //   vote: null,
-    //   rationale: ''
-    // }
-
-    // let alertsDAR = [
-    //   { title: "Alert 01" },
-    //   { title: "Alert 02" },
-    // ];
-
-    // let alertsAgree = [
-    //   { title: "Alert Agree 01" },
-    //   { title: "Alert Agree 02" },
-    // ];
-
-    // let alertOn = null;
-
     if (this.state.loading) { return LoadingIndicator(); }
+
+    let finalVote = null;
+    if (this.state.electionAccess.finalVote === '1' || this.state.electionAccess.finalVote === true || this.state.electionAccess.finalVote === 'true') finalVote = true;
+    if (this.state.electionAccess.finalVote === '0' || this.state.electionAccess.finalVote === false || this.state.electionAccess.finalVote === 'false') finalVote = false;
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -373,17 +201,18 @@ class FinalAccessReview extends Component {
 
     const agreementData = div({ className: "agreement-data" }, [
       label({}, ["DAC Decision: "]),
-      span({ className: "access-color", isRendered: this.state.electionAccess.finalVote === '1', style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
-      span({ className: "access-color", isRendered: this.state.electionAccess.finalVote === '0', style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
-      span({ className: "access-color", isRendered: this.state.electionAccess.finalVote === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
+      span({ className: "access-color", isRendered: finalVote === true, style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
+      span({ className: "access-color", isRendered: finalVote === false, style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
+      span({ className: "access-color", isRendered: finalVote === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
       label({}, ["DUOS Matching Algorithm Decision: "]),
       span({ className: "access-color", isRendered: this.state.match === '1', style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
       span({ className: "access-color", isRendered: this.state.match === '0', style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
       span({ className: "access-color", isRendered: this.state.match === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
       span({ className: "cancel-color", isRendered: this.state.match === '-1', style: { 'marginLeft': '5px' } }, [
         "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"]),
-    ])
+    ]);
 
+    console.log('render ....', this.state);
     return (
 
       div({ className: "container container-wide" }, [
@@ -403,8 +232,8 @@ class FinalAccessReview extends Component {
         ]),
         hr({ className: "section-separator" }),
 
-        h4({ className: "hint", isRendered: this.state.hasUseRestriction }, ["Please review the Application Summary and Data Use Limitations to answer the two questions below. br(), You may review other DAC votes related to this data access request below the questions on this page."]),
-        h4({ className: "hint", isRendered: !this.state.hasUseRestriction }, ["Please review the Application Summary and Data Use Limitations to answer the question below. br(), You may review other DAC votes related to this data access request below the question on this page."]),
+        h4({ className: "hint", isRendered: this.state.hasUseRestriction === true }, ["Please review the Application Summary and Data Use Limitations to answer the two questions below. br(), You may review other DAC votes related to this data access request below the questions on this page."]),
+        h4({ className: "hint", isRendered: !this.state.hasUseRestriction === true }, ["Please review the Application Summary and Data Use Limitations to answer the question below. br(), You may review other DAC votes related to this data access request below the question on this page."]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
 
@@ -415,12 +244,12 @@ class FinalAccessReview extends Component {
             div({ id: "rp", className: "panel-body" }, [
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Research Purpose"]),
-                div({ className: "response-label" }, [this.state.darInfo.rus]),
+                div({ className: "response-label" }, [this.state.dar.rus]),
               ]),
 
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
-                div({ className: "response-label", "ng-bind html": "sDar" }, [this.state.darInfo.sDar]),
+                div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.darInfo.sDar } }, []),
                 a({
                   isRendered: this.state.hasUseRestriction, onClick: this.download,
                   filename: 'machine-readable-DAR.json',
@@ -428,7 +257,7 @@ class FinalAccessReview extends Component {
                 }, ["Download DAR machine-readable format"]),
               ]),
 
-              div({ isRendered: this.state.darInfo.hasPurposeStatements, className: "row dar-summary" }, [
+              div({ isRendered: this.state.darInfo.hasPurposeStatements === true, className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Purpose Statement"]),
                 div({ className: "response-label" }, [
                   ul({}, [
@@ -463,7 +292,7 @@ class FinalAccessReview extends Component {
                   Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
                 ]),
 
-                div({ isRendered: this.state.darInfo.hasDiseases, className: "row dar-summary" }, [
+                div({ isRendered: this.state.darInfo.hasDiseases === true, className: "row dar-summary" }, [
                   div({ className: "control-label access-color" }, ["Disease area(s)"]),
                   div({ className: "response-label" }, [
                     ul({}, [
@@ -477,7 +306,7 @@ class FinalAccessReview extends Component {
                     ]),
                   ]),
                 ]),
-                div({ isRendered: this.state.darInfo.havePI, className: "row no-margin" }, [
+                div({ isRendered: this.state.darInfo.havePI === true, className: "row no-margin" }, [
                   label({ className: "control-label access-color" }, ["Principal Investigator: "]),
                   span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.pi]),
                 ]),
@@ -487,7 +316,7 @@ class FinalAccessReview extends Component {
                   div({ className: "row no-margin" }, [
                     label({ className: "control-label no-padding" }, ["Status: "]),
                     span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.status]),
-                    span({ isRendered: this.state.darInfo.hasAdminComment }, [
+                    span({ isRendered: this.state.darInfo.hasAdminComment === true }, [
                       label({ className: "control-label no-padding" }, [" - Comment: "]),
                       span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
                     ]),
@@ -513,7 +342,9 @@ class FinalAccessReview extends Component {
               ]),
             ]),
           ]),
+
           //---------------------------------
+
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
 
             div({ className: "panel-heading cm-boxhead dul-color" }, [
@@ -521,44 +352,60 @@ class FinalAccessReview extends Component {
             ]),
             div({ id: "dul", className: "panel-body cm-boxbody" }, [
               div({ className: "row no-margin" }, [
-                button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+                button({
+                  id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
+                  onClick: this.downloadDUL
+                }, ["Download Data Use Letter"]),
               ]),
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-                div({ className: "response-label", "ng-bind-html": "sDul" }, ["sDul"]),
+                div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.darInfo.sDul } }, []),
                 a({ id: "btn_downloadSDul", onClick: this.download, filename: 'machine-readable-DUL.json', value: "mrDUL", className: "italic hover-color" }, ["Download DUL machine-readable format"]),
               ]),
             ]),
           ]),
-          //-------------------------------
 
         ]),
+
         hr({ className: "section-separator" }),
 
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "jumbotron box-vote-results access-background-lighter " + (this.state.hasUseRestriction ? 'col-lg-6 col-md-6 col-sm-12 col-xs-12' : 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1 col-xs-12 center-margin') }, [
-            SubmitVoteBox({
-              id: "finalAccess",
-              color: "access",
-              title: this.state.hasUseRestriction ? "Q1. Does the DAC grant this researcher permission to access the data?"
-                : "Does the DAC grant this researcher permission to access the data?",
-              isDisabled: "isFormDisabled",
-              voteStatus: this.state.voteStatus,
-              action: { label: "Vote", handler: this.submit }
-            }),
-          ]),
+        //-------------------------------
 
-          div({ isRendered: this.state.hasUseRestriction, className: "jumbotron box-vote-results access-background-lighter col-lg-6 col-md-6 col-sm-12 col-xs-12" }, [
-            SubmitVoteBox({
-              id: "agreement",
-              color: "access",
-              title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
-              isDisabled: "isFormDisabled",
-              agreementData: agreementData,
-              voteStatus: this.state.voteStatus,
-              action: { label: "Vote", handler: this.submit }
-            }),
-          ]),
+
+        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+
+          div({
+            className: "jumbotron box-vote-results access-background-lighter " + (this.state.hasUseRestriction ? 'col-lg-6 col-md-6 col-sm-12 col-xs-12'
+              : 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-10 col-sm-offset-1 col-xs-12 center-margin')
+          }, [
+
+              SubmitVoteBox({
+                id: "finalAccess",
+                color: "access",
+                title: this.state.hasUseRestriction === true ? "Q1. Does the DAC grant this researcher permission to access the data?"
+                  : "Does the DAC grant this researcher permission to access the data?",
+                isDisabled: this.state.isFormDisabled,
+                voteStatus: this.state.voteStatus,
+                action: { label: "Vote", handler: this.submit }
+              }),
+            ]),
+
+
+          div({
+            isRendered: this.state.hasUseRestriction === true, className: "jumbotron box-vote-results access-background-lighter col-lg-6 col-md-6 col-sm-12 col-xs-12"
+          }, [
+
+              SubmitVoteBox({
+                id: "agreement",
+                color: "access",
+                title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
+                isDisabled: this.state.isFormDisabled,
+                agreementData: agreementData,
+                voteStatus: this.state.voteStatus,
+                action: { label: "Vote", handler: this.submit }
+              }),
+            ]),
+
         ]),
 
         //---------------------------------------------------------/
@@ -566,6 +413,7 @@ class FinalAccessReview extends Component {
         h3({ className: "cm-subtitle" }, ["Data Access Committee Voting Results"]),
 
         div({ className: "row no-margin" }, [
+
           CollapsiblePanel({
             id: "accessCollectVotes",
             onClick: this.toggleQ1,
@@ -576,6 +424,7 @@ class FinalAccessReview extends Component {
           }, [
 
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+
                 CollectResultBox({
                   id: "accessCollectResult",
                   title: "DAC Decision",
@@ -584,11 +433,7 @@ class FinalAccessReview extends Component {
                   vote: this.state.electionAccess.finalVote,
                   voteDate: this.state.electionAccess.finalVoteDate,
                   rationale: this.state.electionAccess.finalRationale,
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.chartDataAccess.Total
                 }),
 
                 div({
@@ -638,7 +483,7 @@ class FinalAccessReview extends Component {
           //---------------------------------------------------------/
 
           CollapsiblePanel({
-            isRendered: "showRPaccordion",
+            isRendered: this.state.showRPaccordion,
             id: "rpCollectVotes",
             onClick: this.toggleQ2,
             color: 'access',
@@ -655,11 +500,7 @@ class FinalAccessReview extends Component {
                   vote: this.state.electionRP.finalVote,
                   voteDate: this.state.electionRP.finalVoteDate,
                   rationale: this.state.electionRP.finalRationale,
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.chartRP.Total
                 })
               ]),
 
@@ -699,11 +540,7 @@ class FinalAccessReview extends Component {
                   vote: this.state.election.finalVote,
                   voteDate: this.state.election.finalVoteDate,
                   rationale: this.state.election.finalRationale,
-                  chartData: [
-                    ['Results', 'Votes'],
-                    ['Yes', 90],
-                    ['No', 110]
-                  ]
+                  chartData: this.state.chartDataDUL.Total
                 })
               ]),
 
@@ -728,6 +565,226 @@ class FinalAccessReview extends Component {
       ])
     );
   }
+
+
+
+  init = async () => {
+
+    const vote = await Votes.getDarFinalAccessVote(this.state.electionId);
+    if (vote.vote !== null) {
+      this.setState({
+        alreadyVote: true,
+        originalVote: vote.vote,
+        originalRationale: vote.rationale
+      });
+    }
+
+    const data1 = await Election.findDataAccessElectionReview(this.state.electionId, false);
+    await this.showAccessData(data1);
+    const data2 = await Election.findRPElectionReview(this.state.electionId, false);
+
+    if (data2.election !== undefined) {
+      console.log("electionRP ---> ", data2);
+      this.setState({
+        electionRP: data2.election
+      });
+
+      if (data2.election.finalRationale === null) {
+        this.setState(prev => {
+          prev.electionRP.finalRationale = '';
+          return prev;
+        })
+      }
+
+      this.setState({
+        statusRP: data2.election.status,
+        rpVoteAccessList: this.chunk(data2.reviewVote, 2),
+        chartRP: this.getGraphData(data2.reviewVote),
+        showRPaccordion: true
+      });
+    } else {
+      this.setState({
+        electionRP: {},
+        rpVoteAccessList: [],
+        chartRP: { 'Total': [] },
+        showRPaccordion: false
+      })
+    }
+
+
+    this.setState({
+      consentName: data1.associatedConsent.name
+    });
+
+    const data3 = await Election.findElectionReviewById(data1.associatedConsent.electionId, data1.associatedConsent.consentId);
+    this.setState({
+      electionReview: data3
+    });
+
+    await this.showDULData(data3);
+    await this.vaultVote(data3.consent.consentId);
+
+    this.setState({
+      loading: false
+    });
+  }
+
+  showAccessData = async (electionReview) => {
+    if (Boolean(electionReview.voteAgreement)) {
+      this.setState({
+        originalAgreementVote: electionReview.voteAgreement.vote,
+        originalAgreementRationale: electionReview.voteAgreement.rationale
+      });
+    }
+
+    const dar = await DAR.getDarFields(electionReview.election.referenceId, "rus");
+    this.setState({
+      dar: dar
+    });
+
+    const ptitle = await DAR.getDarFields(electionReview.election.referenceId, "projectTitle");
+    this.setState({
+      projectTitle: ptitle.projectTitle
+    });
+
+    this.setState({
+      electionAccess: electionReview.election
+    });
+
+    if (electionReview.election.finalRationale === null) {
+      this.setState(prev => {
+        prev.electionAccess.finalRationale = '';
+        return prev;
+      });
+    }
+
+    this.setState({
+      sDar: electionReview.election.translatedUseRestriction,
+      mrDAR: JSON.stringify(electionReview.election.useRestriction, null, 2),
+      status: electionReview.election.status,
+      voteAccessList: this.chunk(electionReview.reviewVote, 2),
+      chartDataAccess: this.getGraphData(electionReview.reviewVote),
+      voteAgreement: electionReview.voteAgreement
+    });
+
+    if (Boolean(electionReview.voteAgreement) && electionReview.voteAgreement.vote !== null) {
+      this.setState({
+        agreementAlreadyVote: true
+      });
+    }
+  }
+
+  showDULData = async (electionReview) => {
+    this.setState({
+      election: electionReview.election
+    });
+
+    if (electionReview.election.finalRationale === null) {
+      this.setState(prev => {
+        prev.election.finalRationale = '';
+        return prev;
+      });
+    }
+
+    this.setState({
+      sDul: electionReview.election.translatedUseRestriction,
+      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2),
+      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
+      dulName: electionReview.election.dulName,
+      status: electionReview.election.status,
+      voteList: this.chunk(electionReview.reviewVote, 2),
+      chartDataDUL: this.getGraphData(electionReview.reviewVote),
+    });
+
+  }
+
+  vaultVote = async (consentId) => {
+    console.log('Match: ', consentId, this.state.referenceId); //this.state.electionAccess.referenceId);
+    const data = await Match.findMatch(consentId, this.state.referenceId);
+    console.log("after match call ...............................................", data);
+    if (data.failed !== null && data.failed !== undefined && data.failed) {
+      this.setState({
+        hideMatch: false,
+        match: "-1",
+        createDate: data.createDate
+      });
+    } else if (data.match !== null && data.match !== undefined) {
+      this.setState({
+        hideMatch: false,
+        match: data.match,
+        createDate: data.createDate
+      });
+    } else {
+      this.setState({
+        hideMatch: true
+      });
+    }
+  }
+
+  chunk = (arr, size) => {
+    var newArr = [];
+    for (var i = 0; i < arr.length; i += size) {
+      newArr.push(arr.slice(i, i + size));
+    }
+    return newArr;
+  }
+
+
+  getGraphData = (reviewVote) => {
+    var yes = 0, no = 0, empty = 0;
+    for (var i = 0; i < reviewVote.length; i++) {
+      if (reviewVote[i].vote.type === 'DAC') {
+        switch (reviewVote[i].vote.vote) {
+          case true:
+            yes++;
+            break;
+          case false:
+            no++;
+            break;
+          default:
+            empty++;
+            break;
+        }
+      }
+    }
+    var chartData = {
+      'Total': [
+        ['Results', 'Votes'],
+        ['YES', yes],
+        ['NO', no],
+        ['Pending', empty]
+      ]
+    };
+    return chartData;
+  }
+
+  // $scope.positiveVote = function () {
+  //   $scope.vote.rationale = null;
+  //   $scope.setEnableFinalButton();
+  // };
+
+  // $scope.positiveAgreementVote = function () {
+  //   $scope.voteAgreement.rationale = null;
+  //   $scope.enableAgreementButton();
+  // };
+
+
+  // $scope.setEnableAgreementButton = function () {
+  //   if (Boolean($scope.voteAgreement) && $scope.voteAgreement.vote === $scope.originalAgreementVote && $scope.voteAgreement.rationale === $scope.originalAgreementRationale) {
+  //     $scope.enableAgreementButton = false;
+  //   } else {
+  //     $scope.enableAgreementButton = true;
+  //   }
+  // };
+
+  // $scope.setEnableFinalButton = function () {
+  //   if ($scope.vote.vote === $scope.originalVote && $scope.vote.rationale === $scope.originalRationale) {
+  //     $scope.enableFinalButton = false;
+  //   } else {
+  //     $scope.enableFinalButton = true;
+  //   }
+  // };
+
 }
 
 export default FinalAccessReview;

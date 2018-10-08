@@ -99,7 +99,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   }
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push({ pathname: 'final_access_review', props: { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
+    console.log('openFinalAccessReview', referenceId, electionId, rpElectionId)
+    // this.props.history.push({ pathname: `final_access_review/${referenceId}/${electionId}`, props: { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
+    this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
   }
 
   openAccessReview = (darId, voteId, rpVoteId) => (e) => {
