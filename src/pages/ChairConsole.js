@@ -104,7 +104,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
-    this.props.history.push(`access_collect/${referenceId}/${electionId}`);
+    this.props.history.push(`access_collect/${electionId}/${referenceId}`);
   };
 
 
