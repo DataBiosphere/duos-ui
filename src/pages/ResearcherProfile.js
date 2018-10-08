@@ -76,6 +76,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         isThePI: false,
         piName: false,
         piEmail: false,
+        invalidIdentification: false
       },
       showValidationMessages: false,
       validateFields: false,
@@ -138,8 +139,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       isThePI = false,
       piEmail = false,
       piName = false,
+      invalidIdentification = false,
       showValidationMessages = false;
 
+    if(!(this.isValid(this.state.researcherProfile.linkedIn) || this.isValid(this.state.researcherProfile.orcid) || this.isValid(this.state.researcherProfile.researcherGate))){
+      invalidIdentification = true;
+      showValidationMessages = true;
+    }
     if (!this.isValid(this.state.researcherProfile.profileName)) {
       profileName = true;
       showValidationMessages = true;
@@ -222,6 +228,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.invalidFields.piEmail = piEmail;
       prev.invalidFields.havePI = havePI;
       prev.showValidationMessages = showValidationMessages;
+      prev.invalidFields.invalidIdentification = invalidIdentification;
       return prev;
     });
     return showValidationMessages;
@@ -348,7 +355,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let key;
 
     for (key in fullProfile) {
-      if (key !== 'linkedIn' && key !== 'nihUsername' && key !== 'orcid' && key !== 'researcherGate') {
+      if (key !== 'nihUsername') {
         profile[key] = fullProfile[key];
       }
     }
@@ -426,8 +433,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
                     span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
                   ]),
-                  span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: false }, ["At least one of the following is required"]),
+                  span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages }, ["At least one of the following is required"]),
                 ]),
+
+                // span({ isRendered: true, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following fields is required"]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -464,7 +473,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileLinkedIn",
                         name: "linkedIn",
                         type: "text",
-                        className: "form-control",
+                        className: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.linkedIn
                       })
@@ -480,7 +489,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileOrcid",
                         name: "orcid",
                         type: "text",
-                        className: "form-control",
+                        className: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.orcid
                       })
@@ -491,7 +500,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileResearcherGate",
                         name: "researcherGate",
                         type: "text",
-                        className: "form-control",
+                        className: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages ? 'form-control required-field-error' : "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.researcherGate
                       })
