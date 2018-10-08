@@ -85,6 +85,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
 
+    if (profile.profileName === undefined) {
+      profile.profileName = Storage.getCurrentUser().displayName;
+    }
+
     this.setState(prev => {
       let key;
       for (key in profile) {
@@ -337,6 +341,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       });
 
       let profile = this.profileCopy(this.state.researcherProfile);
+      profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
     }
     this.setState({ showDialogSave: false });
