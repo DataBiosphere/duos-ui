@@ -100,8 +100,10 @@ class AdminManageUsers extends Component {
 
   okModal = async (name) => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
-    this.setState({loading: true});
-    await this.getUsers();
+    this.setState({ loading: true },
+      async () => {
+        await this.getUsers();
+      });
   }
 
   closeModal = (name) => {
@@ -129,7 +131,7 @@ class AdminManageUsers extends Component {
     if (this.state.loading) { return LoadingIndicator(); }
 
     console.log("render : ", this.state.userList);
-    
+
     const { currentPage, searchUserText } = this.state;
 
     return (
@@ -203,15 +205,17 @@ class AdminManageUsers extends Component {
                   div({ className: "row no-margin" }, [
 
 
-                    a({ id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId), 
-                    isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                      div({
-                        className:
-                          ( (user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
-                            : user.researcher === true && user.completed === true  && user.status !== 'pending' ? 'editable'
-                              : user.researcher === false || !user.completed ? 'disabled' : ''
-                      }, ["Review"]),
-                    ]),
+                    a({
+                      id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
+                      isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
+                    }, [
+                        div({
+                          className:
+                            ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
+                              : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
+                                : user.researcher === false || !user.completed ? 'disabled' : ''
+                        }, ["Review"]),
+                      ]),
 
                     a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),
