@@ -116,7 +116,7 @@ class DulReview extends Component {
             a({
               id: "btn_back",
               onClick: this.back,
-              className: "btn vote-button vote-button-back vote-button-bigger"
+              className: "btn-primary btn-back"
             }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
