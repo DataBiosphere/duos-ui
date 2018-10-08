@@ -436,8 +436,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages }, ["At least one of the following is required"]),
                 ]),
 
-                // span({ isRendered: true, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following fields is required"]),
-
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
