@@ -490,6 +490,7 @@ small {
 .user-dropdown li {
   margin: 0!important;
   padding: 0!important;
+  display: block !important;
 }
 
 .user-dropdown li a {
@@ -499,6 +500,7 @@ small {
   font-weight: normal !important;
   font-size: 15px;
   cursor: pointer;
+  display: block;
 }
 
 .user-dropdown li:hover a {
@@ -741,6 +743,10 @@ small {
   text-align: right;
   font-weight: 500;
   margin-bottom: 0;
+}
+
+.control-label .italic {
+  font-weight: normal;
 }
 
 .control-data {
