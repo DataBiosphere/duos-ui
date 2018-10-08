@@ -248,7 +248,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     button({
                       id: pendingCase.frontEndId + "_btnVote",
                       name: "btn_voteAccess",
-                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId, pendingCase),
+                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
                       className: "cell-button " + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
                     }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ["Vote"]),
