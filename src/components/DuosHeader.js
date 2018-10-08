@@ -50,7 +50,6 @@ class DuosHeader extends Component {
 
     if (isLogged) {
       currentUser = Storage.getCurrentUser();
-      console.log(currentUser);
       isChairPerson = currentUser.isChairPerson;
       isMember = currentUser.isMember;
       isAdmin = currentUser.isAdmin;
@@ -101,8 +100,6 @@ class DuosHeader extends Component {
                 li({}, [a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [div({ className: "navbar-duos-icon navbar-duos-icon-help" }), "Help"]),]),
                 li({}, [
                   a({ className: "navbar-duos-button", href: "/login"},["Sign In"])
-                  // a({ className: "navbar-duos-button", href: '/login' }, ["Sign In"])
-                  // a({ className: "navbar-duos-button", onClick: this.signIn }, ["Sign In"])
                 ]),
                 li({}, [a({ id: "link_join", className: "navbar-duos-link-join", href: "/home_register" }, ["Join DUOS"]),]),
               ])
