@@ -102,6 +102,11 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
   };
 
   render() {
+
+    let vote = null;
+    if (this.props.vote === true || this.props.vote === 'true' || this.props.vote === '1') vote = true;
+    if (this.props.vote === false || this.props.vote === 'false' || this.props.vote === '0') vote = false;
+
     return (
       div({ className: "jumbotron box-vote-results " + this.props.class }, [
 
@@ -112,19 +117,19 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
             div({ className: "row results-box" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Vote: "]),
               div({ id: "lbl_result" + this.props.id, className: "col-lg-3 col-md-3 col-sm-8 col-xs-8 vote-label bold" }, [
-                span({ isRendered: this.props.vote === true || this.props.vote === 'true' || this.props.vote === '1' }, ["YES"]),
-                span({ isRendered: this.props.vote === false || this.props.vote === 'false' || this.props.vote === '0' }, ["NO"]),
-                span({ isRendered: this.props.vote === null }, []),
+                span({ isRendered: vote === true }, ["YES"]),
+                span({ isRendered: vote === false }, ["NO"]),
+                span({ isRendered: vote === null }, []),
               ]),
               label({ className: "col-lg-2 col-md-2 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Date: "]),
 
               div({ id: "lbl_date" + this.props.id, className: "col-lg-4 col-md-4 col-sm-8 col-xs-8 vote-label" }, [
                 Utils.formatDate(this.props.voteDate)
               ]),
-              span({ isRendered: this.props.vote === true || this.props.vote === 'true' || this.props.vote === '1' }, [
+              span({ isRendered: vote === true }, [
                 label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
               ]),
-              span({ isRendered: this.props.vote === false || this.props.vote === 'false' || this.props.vote === '0' || this.props.vote === null }, [
+              span({ isRendered: vote === false || vote === null }, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Rationale:"]),
               ]),
               div({ className: "col-lg-9 col-md-9 col-sm-8 col-xs-8 vote-label" }, [
@@ -165,21 +170,21 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Vote: "]),
               div({ id: "lbl_result" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 vote-label bold" }, [
-                span({ isRendered: this.props.vote === '1' }, ["YES"]),
-                span({ isRendered: this.props.vote === '0' }, ["NO"]),
-                span({ isRendered: this.props.vote === null }, []),
+                span({ isRendered: vote === true }, ["YES"]),
+                span({ isRendered: vote === false }, ["NO"]),
+                span({ isRendered: vote === null }, []),
               ]),
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Date: "]),
 
               div({ id: "lbl_date" + this.props.id, className: "col-lg-4 col-md-4 col-sm-8 col-xs-8 vote-label" }, [
-                this.props.voteDate /*| date: dateFormat */
+                Utils.formatDate(this.props.voteDate)
               ]),
             ]),
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-9 vote-label" }, [
-                span({ isRendered: this.props.vote !== null }, [this.props.rationale]),
-                span({ isRendered: this.props.vote === null }, ["---"]),
+                span({ isRendered: vote !== null }, [this.props.rationale]),
+                span({ isRendered: vote === null }, ["---"]),
               ]),
             ]),
           ]),
