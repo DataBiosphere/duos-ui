@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { nav, button, ul, li, img, small, hr, div, span, a } from 'react-hyperscript-helpers';
 import { HelpModal } from '../components/modals/HelpModal';
 import { Storage } from '../libs/storage';
+import { withRouter } from "react-router-dom";
 
 class DuosHeader extends Component {
 
@@ -174,7 +175,7 @@ class DuosHeader extends Component {
   signOut() {
     Storage.setUserIsLogged(false);
     Storage.clearStorage();
-    window.location.href = "/";
+    this.props.history.push('login');
   }
 
   toggleNavBar() {
@@ -187,4 +188,4 @@ class DuosHeader extends Component {
 
 }
 
-export default DuosHeader;
+export default withRouter(DuosHeader);

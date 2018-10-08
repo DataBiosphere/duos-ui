@@ -38,6 +38,7 @@ class Login extends Component {
       },
       error => {
         Storage.clearStorage();
+        alert(response.w3.U3 + ' is not a registered user.');
       });
   };
 
