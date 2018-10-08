@@ -193,10 +193,12 @@ class AdminManageAccess extends Component {
             .filter(this.searchTable(searchDarText))
             .slice((currentPage - 1) * limit, currentPage * limit)
             .map(dar => {
+              if (!dar.isCanceled)
               return h(Fragment, { key: dar.frontEndId }, [
                 div({ id: dar.frontEndId, className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "") }, [
                   div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [
-                    div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.needsApproval ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
+                    console.log("DAR ", dar),
+                    div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.dataSetElectionResult === 'Needs Approval' ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
                     h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
                     span({ className: "list-highlighted-item", title: dar.frontEndId }, [dar.frontEndId])
                   ]),
@@ -225,7 +227,7 @@ class AdminManageAccess extends Component {
                   ]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
                     div({ className: "row no-margin" }, [
-                      div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final') && (dar.electionStatus !== 'PendingApproval'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
+                      div({ isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center", disabled: dar.electionStatus === 'PendingApproval' }, [
                         button({ id: dar.frontEndId + "_btnCreate", name: "btn_create", onClick: () => this.openDialogCreate(dar.dataRequestId), className: "cell-button hover-color" }, ["Create"]),
                       ]),
                       div({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'), className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center" }, [
