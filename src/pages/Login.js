@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { div, a, img, span, h3, h, label } from 'react-hyperscript-helpers';
 import GoogleLogin from 'react-google-login';
 import { Storage } from '../libs/storage';

@@ -104,8 +104,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
-    this.props.history.push({ pathname: 'access_collect', props: { referenceId: referenceId, electionId: electionId } });
+    this.props.history.push(`access_collect/${referenceId}/${electionId}`);
   };
+
 
   handleOpenModal() {
     this.setState({ showModal: true });
@@ -117,11 +118,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   handleSearchDar = (query) => {
     this.setState({ searchDarText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -129,7 +130,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
 
   render() {
 
