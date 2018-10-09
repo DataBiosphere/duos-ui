@@ -100,7 +100,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
-    console.log('openAccessReview', rpVoteId);
     if (rpVoteId !== null) {
       this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
     } else {
