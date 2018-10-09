@@ -13,7 +13,7 @@ class ManageOntologies extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading:true,
+      loading: true,
       value: '',
       limit: 5,
       currentPage: 1,
@@ -136,7 +136,7 @@ class ManageOntologies extends Component {
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
-    
+
     const { currentPage, searchDulText } = this.state;
 
     return (
@@ -149,7 +149,7 @@ class ManageOntologies extends Component {
 
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-              SearchBox({ id: 'manageOntologies', searchHandler: this.handleSearchDul, color: 'common' })
+              h(SearchBox, { id: 'manageOntologies', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'common' })
             ]),
 
             a({
