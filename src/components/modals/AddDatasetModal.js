@@ -112,14 +112,14 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
       },
         [
 
-          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: "true", encType: "multipart/form-data" }, [
+          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
             div({ className: "form-group first-form-group" }, [
               label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 dataset-color btn-secondary btn-upload" }, [
                   span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
                   "Upload file",
-                  input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: "true" }),
+                  input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true }),
                 ]),
                 p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
               ]),

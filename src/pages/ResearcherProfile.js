@@ -85,6 +85,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async getResearcherProfile() {
     const profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
 
+    if (profile.profileName === undefined) {
+      profile.profileName = Storage.getCurrentUser().displayName;
+    }
+
     this.setState(prev => {
       let key;
       for (key in profile) {
@@ -330,15 +334,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   dialogHandlerSave = (answer) => (e) => {
     if (answer === true) {
-      this.setState(prev => {
-        prev.researcherProfile.completed = false;
-        return prev;
-      }, () => {
-      });
-
       let profile = this.profileCopy(this.state.researcherProfile);
+      profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
     }
+
     this.setState({ showDialogSave: false });
     this.props.history.push({ pathname: 'dataset_catalog' });
   };
