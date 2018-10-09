@@ -290,7 +290,7 @@ class AdminManageDul extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-              SearchBox({ id: 'manageDul', searchHandler: this.handleSearchDul, color: 'dul' })
+              h(SearchBox, { id: 'manageDul', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dul' })
             ]),
 
             a({

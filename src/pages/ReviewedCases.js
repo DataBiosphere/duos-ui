@@ -78,6 +78,36 @@ class ReviewedCases extends Component {
     this.props.history.push(`access_result_records/${referenceId}/${electionId}`);
   };
 
+  handleDulPageChange = page => {
+    this.setState(prev => {
+      prev.currentDulPage = page;
+      return prev;
+    });
+  };
+
+  handleDulSizeChange = size => {
+    this.setState(prev => {
+      prev.dulLimit = size;
+      prev.currentDulPage = 1;
+      return prev;
+    });
+  };
+
+  handleDarPageChange = page => {
+    this.setState(prev => {
+      prev.currentDarPage = page;
+      return prev;
+    });
+  };
+
+  handleDarSizeChange = size => {
+    this.setState(prev => {
+      prev.darLimit = size;
+      prev.currentDarPage = 1;
+      return prev;
+    });
+  };
+
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
@@ -112,7 +142,7 @@ class ReviewedCases extends Component {
             }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-            SearchBox({ id: 'reviewedCasesDul', searchHandler: this.handleSearchDul, color: 'dul' })
+            h(SearchBox, { id: 'reviewedCasesDul', searchHandler: this.handleSearchDul, pageHandler: this.handleDulPageChange, color: 'dul' })
           ])
         ]),
 
@@ -178,21 +208,22 @@ class ReviewedCases extends Component {
             limit: this.state.dulLimit,
             pageCount: this.dulPageCount,
             currentPage: this.state.currentDulPage,
-
-            onPageChange: (page) => {
-              this.setState(prev => {
-                prev.currentDulPage = page;
-                return prev;
-              });
-            },
-            changeHandler: (size) => {
-              this.setState(prev => {
-                prev.dulLimit = size;
-                prev.currentDulPage = 1;
-                return prev;
-              },
-              )
-            },
+            onPageChange: this.handleDulPageChange,
+            changeHandler: this.handleDulSizeChange
+            // onPageChange: (page) => {
+            //   this.setState(prev => {
+            //     prev.currentDulPage = page;
+            //     return prev;
+            //   });
+            // },
+            // changeHandler: (size) => {
+            //   this.setState(prev => {
+            //     prev.dulLimit = size;
+            //     prev.currentDulPage = 1;
+            //     return prev;
+            //   },
+            //   )
+            // },
           }),
         ]),
 
@@ -207,7 +238,7 @@ class ReviewedCases extends Component {
             }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-            SearchBox({ id: 'reviewedCasesAccess', searchHandler: this.handleSearchDar, color: 'access' })
+            h(SearchBox, { id: 'reviewedCasesAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleDarPageChange, color: 'access' })
           ])
         ]),
 
@@ -252,21 +283,22 @@ class ReviewedCases extends Component {
             limit: this.state.accessLimit,
             pageCount: this.accessPageCount,
             currentPage: this.state.currentAccessPage,
+            onPageChange: this.handleDarPageChange,
+            changeHandler: this.handleDarSizeChange
+            // onPageChange: (page) => {
+            //   this.setState(prev => {
+            //     prev.currentAccessPage = page;
+            //     return prev;
+            //   });
+            // },
 
-            onPageChange: (page) => {
-              this.setState(prev => {
-                prev.currentAccessPage = page;
-                return prev;
-              });
-            },
-
-            changeHandler: (size) => {
-              this.setState(prev => {
-                prev.accessLimit = size;
-                prev.currentAccessPage = 1;
-                return prev;
-              });
-            },
+            // changeHandler: (size) => {
+            //   this.setState(prev => {
+            //     prev.accessLimit = size;
+            //     prev.currentAccessPage = 1;
+            //     return prev;
+            //   });
+            // },
           }),
         ]),
       ])

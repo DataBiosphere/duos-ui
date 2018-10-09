@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { div, hh, h, input, i, a } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
-export const SearchBox = hh(class SearchBox extends Component {
+  export class SearchBox extends Component {
 
   constructor(props) {
     super(props);
@@ -13,6 +14,7 @@ export const SearchBox = hh(class SearchBox extends Component {
   changeHandler = (e) => {
     let value = e.target.value;
     this.props.searchHandler(value);
+    this.props.pageHandler(1);
   }
 
   reset = (e) => {
@@ -32,4 +34,18 @@ export const SearchBox = hh(class SearchBox extends Component {
       ])
     );
   }
-});
+}
+
+SearchBox.propTypes = {
+  searchHandler: PropTypes.func,
+  pageHandler: PropTypes.func,
+}
+
+SearchBox.defaultProps = {
+  searchHandler: (query) => {console.log('search: ' + query)},
+  pageHandler: (page) => { console.log('go to page ' + page); }
+}
+
+
+
+
