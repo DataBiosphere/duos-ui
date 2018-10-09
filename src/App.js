@@ -21,7 +21,7 @@ class App extends React.Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    console.log('App.js : ', nextProps, prevState);
+    // console.log('App.js : ', nextProps, prevState);
     const alreadyLogged = Storage.userIsLogged();
     if (prevState.isLogged !== alreadyLogged) {
       return {
