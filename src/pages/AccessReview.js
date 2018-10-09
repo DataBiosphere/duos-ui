@@ -139,7 +139,14 @@ class AccessReview extends Component {
     const vote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.voteId);
     const request = await DAR.getDarFields(this.props.match.params.darId, 'projectTitle');
     const darInfo = await DAR.describeDar(this.props.match.params.darId);
-    const rpVote = (this.props.match.params.rpVoteId !== 'null' || this.props.match.params.rpVoteId !== undefined) ?  await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId) : null;
+
+    let rpVote;
+
+    if (this.props.match.params.rpVoteId !== undefined) {
+      rpVote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId)
+    } else {
+      rpVote = null;
+    }
 
     this.setState(prev => {
       prev.consentName = consent.name;
