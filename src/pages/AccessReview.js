@@ -32,7 +32,7 @@ class AccessReview extends Component {
 
   submitRpVote = (voteStatus, rationale) => {
     let vote = this.state.rpVote;
-
+    this.setState({disableQ2Btn: true});
     vote.vote = voteStatus;
     vote.rationale = rationale;
 
@@ -41,7 +41,7 @@ class AccessReview extends Component {
         data => {
           this.alertVoteRemember();
           this.setState(prev => {
-            prev.alertrpVote = false;
+            prev.alertRPVote = false;
             prev.showConfirmationDialogOK = true;
             return prev;
           });
@@ -53,7 +53,7 @@ class AccessReview extends Component {
         data => {
           this.alertVoteRemember();
           this.setState(prev => {
-            prev.alertrpVote = false;
+            prev.alertRPVote = false;
             prev.showConfirmationDialogOK = true;
             return prev;
           });
@@ -66,7 +66,7 @@ class AccessReview extends Component {
 
   submitVote(voteStatus, rationale) {
     let vote = this.state.vote;
-
+    this.setState({disableQ1Btn: true});
     vote.vote = voteStatus;
     vote.rationale = rationale;
 
@@ -196,7 +196,9 @@ class AccessReview extends Component {
       consentId: '',
       dulName: '',
       isQ1Expanded: true,
+      disableQ1Btn: false,
       isQ2Expanded: false,
+      disableQ2Btn: false,
       rpVote: {
         vote: '',
         rational: ''
@@ -439,7 +441,7 @@ class AccessReview extends Component {
                       color: "access",
                       title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                         : "Should data access be granted to this applicant?",
-                      disabled: false,
+                      disabled: this.state.disableQ1Btn,
                       voteStatus: this.state.vote.vote !== null ? this.state.vote.vote : undefined,
                       rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
                       action: { label: "Vote", handler: this.submitVote },
@@ -493,7 +495,7 @@ class AccessReview extends Component {
                       id: "rpReview",
                       color: "access",
                       title: "Q2. Was the research purpose accurately converted to a structured format?",
-                      disabled: false,
+                      disabled: this.state.disableQ2Btn,
                       voteStatus: this.state.rpVote !== null && this.state.rpVote.vote !== null ? this.state.rpVote.vote : undefined,
                       rationale: this.state.rpVote !== null && this.state.rpVote.rationale !== null ? this.state.rpVote.rationale : '',
                       action: { label: "Vote", handler: this.submitRpVote },
