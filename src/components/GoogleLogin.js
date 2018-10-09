@@ -5,6 +5,7 @@ import { User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { withRouter } from 'react-router-dom';
+import './DuosHeader.css';
 
 const LoginButton = hh(class GoogleLoginButton extends Component {
   constructor(props) {
