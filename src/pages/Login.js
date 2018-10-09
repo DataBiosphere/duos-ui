@@ -34,6 +34,7 @@ class Login extends Component {
 
         Storage.setCurrentUser(user);
         Storage.setUserIsLogged(true);
+        console.log("PATH EN LOGIN ->> ", this.props.match.path);
         this.props.history.push(this.redirect(user));
       },
       error => {
@@ -66,7 +67,8 @@ class Login extends Component {
       className: "btn_gSignInWrapper",
       clientId: clientId,
       onSuccess: this.responseGoogle,
-      onFailure: this.forbidden
+      onFailure: this.forbidden,
+      isSignedIn: true
     }, [
         div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
           span({ className: "icon" }),
