@@ -13,6 +13,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
+  searchDulCases = '';
+  searchAccessCases = '';
+
   constructor(props) {
     super(props);
     this.state = {
@@ -96,8 +99,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push({ pathname: 'final_access_review', props: { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
-  };
+    this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
+  }
 
   openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
     this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
