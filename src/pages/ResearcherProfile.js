@@ -346,7 +346,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   dialogHandlerSave = (answer) => (e) => {
     if (answer === true) {
-      console.log('answer', answer);
       let profile = this.profileCopy(this.state.researcherProfile);
       profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
