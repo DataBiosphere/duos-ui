@@ -186,7 +186,7 @@ class DuosHeader extends Component {
   signOut() {
     Storage.setUserIsLogged(false);
     Storage.clearStorage();
-    this.props.history.push('login');
+    this.props.history.push('/login');
   }
 
   toggleNavBar() {

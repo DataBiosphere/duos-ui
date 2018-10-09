@@ -94,8 +94,8 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
-    this.props.history.push({ pathname: 'access_review', props: { darId: referenceId, voteId: voteId, rpVoteId: rpVoteId } })
+  openAccessReview = (referenceId, voteId, rpVoteId, pendingcase) => (e) => {
+    this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
   };
 
   openDULReview = (consentId, voteId) => (e) => {
