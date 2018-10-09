@@ -67,7 +67,7 @@ export default ( props ) => (
     <AuthenticatedRoute path='/dul_results_record/:electionId' component={DulResultRecords} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <AuthenticatedRoute path='/access_review/:darId/:voteId/:rpVoteId' component={AccessReview} props={props} rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path='/access_preview/:referenceId?/:electionId?' component={AccessPreview} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
-    <AuthenticatedRoute path='/access_collect/:referenceId/:electionId' component={AccessCollect} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
+    <AuthenticatedRoute path='/access_collect/:electionId/:referenceId' component={AccessCollect} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
     <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />

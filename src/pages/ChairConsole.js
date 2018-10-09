@@ -13,9 +13,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
-  searchDulCases = '';
-  searchAccessCases = '';
-
   constructor(props) {
     super(props);
     this.state = {
@@ -92,23 +89,24 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   openDULReview = (voteId, referenceId) => (e) => {
     this.props.history.push(`dul_review/${voteId}/${referenceId}`);
-  }
+  };
 
   openDulCollect = (consentId) => (e) => {
     this.props.history.push(`dul_collect/${consentId}`);
-  }
+  };
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
     this.props.history.push({ pathname: 'final_access_review', props: { referenceId: referenceId, electionId: electionId, rpElectionId: rpElectionId } });
-  }
+  };
 
-  openAccessReview = (darId, voteId, rpVoteId) => (e) => {
-    this.props.history.push(`access_review/${darId}/${voteId}/${rpVoteId}`);
-  }
+  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
+    this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
+  };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
-    this.props.history.push({ pathname: 'access_collect', props: { referenceId: referenceId, electionId: electionId } });
-  }
+    this.props.history.push(`access_collect/${electionId}/${referenceId}`);
+  };
+
 
   handleOpenModal() {
     this.setState({ showModal: true });
@@ -120,11 +118,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
-  }
+  };
 
   handleSearchDar = (query) => {
     this.setState({ searchDarText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -132,7 +130,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       return text.includes(query);
     }
     return true;
-  }
+  };
 
   render() {
 
