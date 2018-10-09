@@ -14,7 +14,7 @@
 .navbar-duos li {
   display: inline-block;
   margin: 0 20px 0 0;
-  padding: 24px 0 0 0;
+  padding: 24px 0 18px 0;
   text-decoration: none;
 }
 
@@ -41,11 +41,8 @@
 }
 
 .navbar-brand {
-  position: absolute;
-  top: 0;
-  left: 40px;
   padding: 0;
-}
+} 
 
 .navbar-brand img {
   margin-top: 20px;
@@ -189,6 +186,11 @@
 }
 
 @media (max-width: 767px) {
+  .navbar-brand {
+    position: absolute;
+    top: 0; 
+    left: 30px;
+  } 
   .dropdown.user-li {
     position: absolute;
     top: 65px;

@@ -16,7 +16,6 @@ class DuosHeader extends Component {
       showHelpModal: false
     };
     this.signOut = this.signOut.bind(this);
-    this.toggleNavBar = this.toggleNavBar.bind(this);
   };
 
   helpModal = (e) => {
@@ -75,6 +74,20 @@ class DuosHeader extends Component {
             menu:
               div({}, [
                 ul({ isRendered: isLogged, className: "navbar-logged" }, [
+                  li({ className: "dropdown user-li" }, [
+                    a({ id: "sel_dacUser", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
+                      div({ id: "dacUser" }, [
+                        currentUser.displayName,
+                        span({ className: "caret caret-margin" })
+                      ]),
+                      small({ id: "dacUserMail" }, [currentUser.email]),
+                    ]),
+                    ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
+                      li({ isRendered: isResearcher }, [a({ id: "link_profile", href: "/researcher_profile" }, ["Your Profile"]),]),
+                      li({}, [a({ id: "link_signOut", onClick: this.signOut }, ["Sign out"]),]),
+                    ])
+                  ]),
+                  
                   li({ isRendered: isChairPerson }, [
                     a({ id: "link_chairConsole", href: "/chair_console" }, ["DAC Console"]),
                   ]),
@@ -99,7 +112,7 @@ class DuosHeader extends Component {
                     a({ id: "link_requestApplication", href: "/dar_application" }, ["Request Application"]),
                   ]),
 
-                  li({ className: "dropdown", onToggle: this.toggled, isRendered: isLogged }, [
+                  li({ className: "dropdown", isRendered: isLogged }, [
                     a({ id: "sel_statistics", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
                       div({}, ["Statistics", span({ className: "caret caret-margin" }, []),]),
                     ]),
@@ -112,7 +125,7 @@ class DuosHeader extends Component {
 
                   li({}, [a({ id: "link_datasetCatalog", isRendered: isLogged, href: "/dataset_catalog" }, ["Dataset Catalog"]),]),
 
-                  li({ className: "dropdown", onToggle: this.toggled }, [
+                  li({ className: "dropdown" }, [
                     a({ id: "sel_requestHelp", isRendered: isLogged, role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
                       div({}, ["Request Help", span({ className: "caret caret-margin" })])
                     ]),
@@ -128,20 +141,6 @@ class DuosHeader extends Component {
                       ]),
                       hr({}),
                       li({}, [a({ id: "link_reportList", href: "/help_reports", className: "f-left" }, ["List of Reports"])]),
-                    ])
-                  ]),
-
-                  li({ className: "dropdown user-li" }, [
-                    a({ id: "sel_dacUser", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
-                      div({ id: "dacUser" }, [
-                        currentUser.displayName,
-                        span({ className: "caret caret-margin" })
-                      ]),
-                      small({ id: "dacUserMail" }, [currentUser.email]),
-                    ]),
-                    ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                      li({ isRendered: isResearcher }, [a({ id: "link_profile", href: "/researcher_profile" }, ["Your Profile"]),]),
-                      li({}, [a({ id: "link_signOut", onClick: this.signOut }, ["Sign out"]),]),
                     ])
                   ])
                 ]),
@@ -171,17 +170,10 @@ class DuosHeader extends Component {
     );
   }
 
-  toggled() {
-  }
-
   signOut() {
     Storage.setUserIsLogged(false);
     Storage.clearStorage();
     this.props.history.push('/login');
-  }
-
-  toggleNavBar() {
-    this.navBarCollapsed = !this.navBarCollapsed;
   }
 
   goToRP() {
