@@ -197,7 +197,6 @@ class AdminManageAccess extends Component {
               return h(Fragment, { key: dar.frontEndId }, [
                 div({ id: dar.frontEndId, className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "") }, [
                   div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [
-                    console.log("DAR ", dar),
                     div({ id: dar.frontEndId + "_flagDarId", name: "flag_darId", isRendered: dar.needsApproval, className: "glyphicon glyphicon-exclamation-sign " + (dar.dataSetElectionResult === 'Needs Approval' ? "access-color" : dar.dataSetElectionResult === 'Denied' ? "cancel-color" : dar.dataSetElectionResult === 'Approved' ? "dataset-color" : ""), "data-tip": "", "data-for": "tip_flag" }, []),
                     h(ReactTooltip, { id: "tip_flag", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, [dar.dataSetElectionResult]),
                     span({ className: "list-highlighted-item", title: dar.frontEndId }, [dar.frontEndId])
