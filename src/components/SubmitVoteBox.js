@@ -8,14 +8,15 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   constructor(props) {
     super(props);
+
     this.state = {
-      //      value: '',
+      loading: true,
       currentUser: {},
       enableVoteButton: false,
       voteStatus: this.props.voteStatus,
       showDialogSubmit: false,
-      rationale: this.props.rationale
-    }
+      rationale: this.props.rationale === null ? '' : this.props.rationale
+    };
   }
 
   logVote = (e) => {
@@ -26,7 +27,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     if (prevState.flag === false || prevState.flag === undefined) {
       return {
         flag: true,
-        rationale: nextProps.rationale,
+        rationale: nextProps.rationale === null ? '' : nextProps.rationale,
         voteStatus: nextProps.voteStatus
       };
     }
@@ -83,7 +84,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     //   dialogLabel = "Ok"
     // }
 
-    const { voteStatus, rationale, enableVoteButton } = this.state;
+    const { voteStatus, rationale = '', enableVoteButton } = this.state;
 
     return (
 
