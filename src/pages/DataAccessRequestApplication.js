@@ -729,8 +729,10 @@ class DataAccessRequestApplication extends Component {
 
                     div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12" }, [
                       label({ className: "control-label rp-title-question" }, [
-                        "1.2 Researcher Identification*",
-                        span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
+                      "1.2 Researcher Identification",
+                      div({ isRendered: this.state.formData.checkCollaborator !== true, className: "display-inline" }, ["*"]),
+                      div({ isRendered: this.state.formData.checkCollaborator === true, className: "display-inline italic" }, [" (optional)"]),
+                      span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
                       ])
                     ]),
 
