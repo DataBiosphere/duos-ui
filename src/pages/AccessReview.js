@@ -41,7 +41,7 @@ class AccessReview extends Component {
         data => {
           this.alertVoteRemember();
           this.setState(prev => {
-            prev.alertrpVote = false;
+            prev.alertRPVote = false;
             prev.showConfirmationDialogOK = true;
             return prev;
           });
@@ -53,7 +53,7 @@ class AccessReview extends Component {
         data => {
           this.alertVoteRemember();
           this.setState(prev => {
-            prev.alertrpVote = false;
+            prev.alertRPVote = false;
             prev.showConfirmationDialogOK = true;
             return prev;
           });
