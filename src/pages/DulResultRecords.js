@@ -153,7 +153,7 @@ class DulResultRecords extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.sDul])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
           ]),
         ]),
 
