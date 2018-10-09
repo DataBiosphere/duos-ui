@@ -121,15 +121,15 @@ class AdminManageAccess extends Component {
     this.setState({ showModal: false });
   };
 
-  open(page, electionId, dataRequestId) {
+  open = (page, electionId, dataRequestId) => {
     this.props.history.push(`${page}/${dataRequestId}/?electionId=${electionId}`);
   }
 
-  openAccessCollect(page, electionId, dataRequestId) {
+  openAccessCollect = (page, electionId, dataRequestId) => {
     this.props.history.push(`${page}/${dataRequestId}/${electionId}`)
   }
 
-  openAccessResultRecord(page, electionId, dataRequestId) {
+  openAccessResultRecord = (page, electionId, dataRequestId) => {
     this.props.history.push(`${page}/${dataRequestId}/${electionId}`)
   }
 
