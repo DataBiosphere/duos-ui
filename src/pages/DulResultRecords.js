@@ -4,7 +4,9 @@ import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { Election, Files } from '../libs/ajax';
+import { Election, Files, Votes } from '../libs/ajax';
+import { Storage } from '../libs/storage';
+import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 
@@ -25,15 +27,14 @@ class DulResultRecords extends Component {
   }
 
   componentDidMount() {
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
+    const currentUser = Storage.getCurrentUser();
+    this.setState({
+      loading: true,
+      currentUser: currentUser,
+      electionId: this.props.match.params.electionId,
+    }, () => {
+      this.voteInfo();
     });
-    this.voteInfo();
   }
 
   back() {
@@ -41,24 +42,36 @@ class DulResultRecords extends Component {
   }
 
   async voteInfo() {
-    Election.findReviewedElections(this.props.match.params.electionId).then(
-      data => {
-        this.setState({ chartData: this.getGraphData(data.reviewVote) },
-          () => {
-            this.setState({
-              loading: false,
-              consentId: data.election.referenceId,
-              dulVoteList: this.chunk(data.reviewVote, 2),
-              consentGroupName: data.consent.groupName,
-              consentName: data.consent.name,
-              sDul: data.election.translatedUseRestriction,
-              projectTitle: data.election.projectTitle,
-              finalVote: data.election.finalVote,
-              finalRationale: data.election.finalRationale,
-              finalVoteDate: Utils.formatDate(data.election.finalVoteDate),
-            });
-          });
+    let electionReview = await Election.findReviewedElections(this.state.electionId);
+    if (typeof electionReview === 'undefined') {
+      this.props.history.push('/reviewd_cases');
+    }
+    
+    if (electionReview.election.finalRationale === 'null') {
+      electionReview.election.finalRationale = '';
+    }
+
+    this.setState({
+      electionReview: electionReview,
+      consentName: electionReview.consent.name,
+      election: electionReview.election,
+      dul: electionReview.election.dataUseLetter,
+      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
+      dulName: electionReview.election.dulName,
+      sDul: electionReview.election.translatedUseRestriction,
+      finalRationale: electionReview.election.finalRationale,
+
+      status: electionReview.election.status,
+      finalVote: electionReview.election.finalVote,
+      dulVoteList: this.chunk(electionReview.reviewVote, 2),
+      chartData: this.getGraphData(electionReview.reviewVote),
+      consentGroupName: electionReview.consent.groupName,
+      consentId: electionReview.election.referenceId,
+    }, () => {
+      this.setState({
+        loading: false,
       });
+    });
   }
 
   getGraphData(reviewVote) {
@@ -90,46 +103,11 @@ class DulResultRecords extends Component {
   initialState() {
     return {
       loading: true,
-      voteStatus: '',
-      createDate: '',
-      hasUseRestriction: true,
-      projectTitle: '',
-      consentName: '',
-      sDul: '',
-      dulElection: {
-        finalVote: '',
-        finalRationale: '',
-        finalVoteDate: ''
-      },
-      dulVoteList: [[], []],
     };
   }
 
-
-  download = (e) => {
-    // const filename = e.target.getAttribute('filename');
-    // const value = e.target.getAttribute('value');
-  };
-
   downloadDUL = (e) => {
-    // const consentId = this.state.consentId; //  this.props.match.params.consentId;
-    // console.log(consentId);
-    // Files.getDulFile(consentId).then(
-    //   blob => {
-    //     if (blob.size !== 0) {
-    //       this.createBlobFile(this.state.consentName, blob);
-    //     }
-    //   }
-    // );
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentName);
-  };
-
-  positiveVote = (e) => {
-
-  };
-
-  logVote = (e) => {
-
+    Files.getDulFileByElectionId(this.state.electionReview.election.referenceId, this.state.electionReview.election.electionId, this.state.electionReview.election.dulName);
   };
 
   render() {
@@ -138,10 +116,8 @@ class DulResultRecords extends Component {
 
     const { chartData } = this.state;
 
-    console.log(chartData);
-
     const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe", isRendered: this.state.consentGroupName }, [this.state.consentGroupNsame]),
+      b({ className: "pipe", isRendered: this.state.consentGroupName }, [this.state.consentGroupName]),
       this.state.consentName
     ]);
 
@@ -177,7 +153,7 @@ class DulResultRecords extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction" }, [this.state.sDul])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
           ]),
         ]),
 
@@ -190,12 +166,13 @@ class DulResultRecords extends Component {
               title: "Final DAC Decision",
               color: "dul",
               class: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
-              vote: this.state.finalVote,
-              voteDate: this.state.finalVoteDate,
-              rationale: this.state.finalRationale,
+              vote: this.state.election.finalVote,
+              voteDate: this.state.election.finalVoteDate,
+              rationale: this.state.election.finalRationale,
               chartData: chartData
             }),
           ]),
+
         ]),
 
         div({ className: "row no-margin" }, [
@@ -210,7 +187,6 @@ class DulResultRecords extends Component {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
-                      console.log(vm);
                       return h(Fragment, { key: vIndex }, [
                         SingleResultBox({
                           id: "dulSingleResult_" + vIndex,

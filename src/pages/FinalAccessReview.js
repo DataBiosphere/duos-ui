@@ -382,7 +382,7 @@ class FinalAccessReview extends Component {
       span({ className: "access-color", isRendered: this.state.match === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
       span({ className: "cancel-color", isRendered: this.state.match === '-1', style: { 'marginLeft': '5px' } }, [
         "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"]),
-    ])
+    ]);
 
     return (
 
@@ -433,7 +433,7 @@ class FinalAccessReview extends Component {
                 div({ className: "response-label" }, [
                   ul({}, [
                     this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                      return h(Fragment, {}, [
+                      return h(Fragment, { key: 'ps_' + rIndex }, [
                         li({ className: purpose.manualReview ? 'cancel-color' : '' }, [
                           b({}, [purpose.title]), purpose.description
                         ])
@@ -709,10 +709,10 @@ class FinalAccessReview extends Component {
 
 
               this.state.voteList.map((row, rIndex) => {
-                return h(Fragment, {}, [
+                return h(Fragment, { key: 'vl_' + rIndex }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                     row.map((vm, vIndex) => {
-                      return h(Fragment, {}, [
+                      return h(Fragment, { key: 'rvl_' + vIndex }, [
                         SingleResultBox({
                           id: "dulSingleResult_" + vIndex,
                           color: "dul",

@@ -320,10 +320,22 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState({ showDialogSave: true });
   }
 
+  cleanObject = (obj) => {
+    for (let key in obj) {
+      if (obj[key] === "") {
+        delete obj[key];
+      }
+    }
+    return obj;
+  };
+
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       let profile = this.profileCopy(this.state.researcherProfile);
+
+      profile = this.cleanObject(profile);
       profile.completed = true;
+
       if (this.state.researcherProfile.completed === undefined) {
         Researcher.createResearcherProperties(Storage.getCurrentUser().dacUserId, false, profile).then(resp => {
           // TODO : check status of PUT ? and show any error messages ?
@@ -333,10 +345,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
           // TODO : check status of PUT ? and show any error messages ?
         });
       }
+      this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
     this.setState({ showDialogSubmit: false });
-    this.props.history.push({ pathname: 'dataset_catalog' });
   };
 
   dialogHandlerSave = (answer) => (e) => {
@@ -344,10 +356,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       let profile = this.profileCopy(this.state.researcherProfile);
       profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
+      this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
     this.setState({ showDialogSave: false });
-    this.props.history.push({ pathname: 'dataset_catalog' });
   };
 
   profileCopy = (fullProfile) => {
@@ -673,15 +685,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: "lbl_isThePI",
                     className: "control-label ",
                   }, [
-                      "Are you the Principal Investigator?* ",
-                      span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "", "data-for": "tip_isthePI" }),
-                      h(ReactTooltip, {
-                        id: "tip_isthePI",
-                        effect: 'solid',
-                        multiline: true,
-                        className: 'tooltip-wrapper'
-                      }, ["This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals."])
-                    ])
+                    "Are you the Principal Investigator?* ",
+                    span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "", "data-for": "tip_isthePI" }),
+                    h(ReactTooltip, {
+                      id: "tip_isthePI",
+                      effect: 'solid',
+                      multiline: true,
+                      className: 'tooltip-wrapper'
+                    }, ["This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals."])
+                  ])
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [

@@ -114,7 +114,7 @@ class DataOwnerConsole extends Component {
               ]),
 
               div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-wrapper no-padding" }, [
-                SearchBox({ id: 'dataOwnerConsole', searchHandler: this.handleSearchDul, color: 'dataset' })
+                h(SearchBox, { id: 'dataOwnerConsole', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
               ])
             ]),
 

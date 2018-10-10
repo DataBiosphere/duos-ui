@@ -199,22 +199,37 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   };
 
-  handleLSelection = (e) => {
+  handleSelectionL = (e) => {
     const target = e.target;
     const value = target.value;
+    const available = [];
+    available.push(value);
+
     this.setState(prev => {
-        prev.available.push(value);
-        return prev;
-      });
+      prev.available = available;
+      return prev;
+    });
   };
+
+  handleLSelection = (e) => {};
 
   handleRSelection = (e) => {
     const target = e.target;
     const value = target.value;
-    // const options = target.options;
-    // const selectedOptions = target.selectedOptions;
     this.setState(prev => {
       prev.selected.push(value);
+      return prev;
+    });
+  };
+
+  handleSelectionR = (e) => {
+    const target = e.target;
+    const value = target.value;
+    const available = [];
+    available.push(value);
+
+    this.setState(prev => {
+      prev.selected = available;
       return prev;
     });
   };
@@ -250,7 +265,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
                   size: "5",
                   multiple: true,
                   value: available,
-                  onChange: this.handleLSelection
+                  onChange: this.handleLSelection,
+                  onClick: this.handleSelectionL,
                 }, [
                     this.state.availableclients.map((client, index) => {
                       return h(Fragment, { key: index }, [
@@ -286,7 +302,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
                   size: "5",
                   multiple: true,
                   value: selected,
-                  onChange: this.handleRSelection
+                  onChange: this.handleRSelection,
+                  onClick: this.handleSelectionR
                 }, [
                     this.state.selectedclients.map((client, index) => {
                       return h(Fragment, { key: index }, [
