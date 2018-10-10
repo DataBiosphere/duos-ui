@@ -19,6 +19,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   }
 
   logVote = (e) => {
+    this.setState({enableVoteButton: false});
     this.props.action.handler(this.state.voteStatus, this.state.rationale);
   };
 

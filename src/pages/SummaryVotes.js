@@ -241,9 +241,9 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
   getFile(fileName) {
     const URI = `/consent/cases/summary/file?fileType=${fileName}`;
     if (fileName === 'TranslateDUL') {
-      Summary.getFile(URI, 'summary.txt');
+      Summary.getFile(URI, 'DUL_summary.tsv');
     } else {
-      Summary.getFile(URI, 'DAR_summary.txt');
+      Summary.getFile(URI, 'DAR_summary.tsv');
     }
   }
 
