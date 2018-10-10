@@ -13,10 +13,21 @@ class DuosHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showHelpModal: false
+      showHelpModal: false,
+      isLogged: this.props.isLogged
     };
     this.signOut = this.signOut.bind(this);
   };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const alreadyLogged = Storage.userIsLogged();
+    if (prevState.isLogged !== alreadyLogged) {
+      return {
+        isLogged: alreadyLogged
+      }
+    }
+    return null;
+  }
 
   helpModal = (e) => {
     this.setState(prev => {
@@ -45,9 +56,9 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-    let isAlumni = false;
+    // let isAlumni = false;
 
-    let isLogged = Storage.userIsLogged();
+    const { isLogged } = this.state;
     let currentUser = {};
 
     if (isLogged) {
@@ -57,7 +68,7 @@ class DuosHeader extends Component {
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
-      isAlumni = currentUser.isAlumni;
+      // isAlumni = currentUser.isAlumni;
     }
 
     return (

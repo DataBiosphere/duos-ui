@@ -14,16 +14,28 @@ export const Config = {
       Accept: 'application/json'
     }
   }),
+
+  authOpts2 : (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      ContentType: 'application/json',
+      mode: 'no-cors'
+    }
+  }),
+
   fileOpts : (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json'
     }
   }),
+
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: { 'Content-Type': 'application/json' }
   }),
+
   fileBody: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,

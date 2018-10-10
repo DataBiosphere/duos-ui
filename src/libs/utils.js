@@ -1,4 +1,8 @@
 export const formatDate = (dateval) => {
+  if (dateval === null || dateval === undefined) {
+    return '---';
+  }
+  
   let dateFormat = new Date(dateval);
   let year = dateFormat.getFullYear();
   let month = ('0' + dateFormat.getMonth()).slice(-2);
@@ -17,3 +21,12 @@ export const USER_ROLES = {
   all: 'All'
 };
 
+export const USER_ROLES_UPPER = {
+  admin: 'ADMIN',
+  chairperson: 'CHAIRPERSON',
+  member: 'MEMBER',
+  researcher: 'RESEARCHER',
+  alumni: 'ALUMNI',
+  dataOwner: 'DATAOWNER',
+  all: 'ALL'
+};

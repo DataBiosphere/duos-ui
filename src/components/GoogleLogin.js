@@ -44,7 +44,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   };
 
   logout = () => {
-    console.log('logout');
+
   };
 
   async getGoogleConfig() {

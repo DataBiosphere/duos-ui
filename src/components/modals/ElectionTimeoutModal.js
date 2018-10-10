@@ -84,7 +84,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
   }
 
   render() {
-    const { amountOfDays, createDate, displayName, id, updateDate, userId } = this.state.timeOut;
+    const { amountOfDays, createDate, displayName, updateDate } = this.state.timeOut;
 
     return (
 
