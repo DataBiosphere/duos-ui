@@ -43,7 +43,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   };
 
   changeRationale = (e) => {
-    this.setState({ rationale: e.target.value, enableVoteButton: true });
+    if (this.state.voteStatus !== undefined) {
+      this.setState({ rationale: e.target.value, enableVoteButton: true });
+    }
   };
 
   render() {
