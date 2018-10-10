@@ -4,7 +4,6 @@ import { div, hh, h, input, i, a } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
-// export const SearchBox = hh(
   export class SearchBox extends Component {
 
   constructor(props) {
@@ -47,8 +46,6 @@ SearchBox.defaultProps = {
   pageHandler: (page) => { console.log('go to page ' + page); }
 }
 
-
-// );
 
 
 
