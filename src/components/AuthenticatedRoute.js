@@ -17,7 +17,7 @@ export default ({ component: Component, props: componentProps, ...rest, rolesAll
 
   // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
 const verifyUser = (allowedComponentRoles, usrRoles) => {
-  if (Storage.userIsLogged() && usrRoles) {
+  if (Storage.userIsLogged() && usrRoles !== undefined) {
     const currentUserRoles = usrRoles.roles.map(roles => roles.name);
     return allowedComponentRoles.some(
       componentRole => (currentUserRoles.indexOf(componentRole) >= 0 || componentRole === Utils.USER_ROLES.all)

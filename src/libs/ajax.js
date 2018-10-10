@@ -210,9 +210,9 @@ export const DAR = {
 
   getDarFields: async (id, fields) => {
     let url = `${await Config.getApiUrl()}/dar/find/${id}`;
-    if(fields !== null) {
+    if (fields !== null) {
       url = url + `?fields=${fields}`;
-    }    
+    }
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -247,7 +247,7 @@ export const DAR = {
     const res = await fetchOk(url, Config.authOpts());
     let dars = await res.json();
     dars.map(dar => {
-      if(dar.ownerUser !== null) {
+      if (dar.ownerUser !== null) {
         dar.ownerUser.roles.map(role => {
           if (role.name === 'Researcher') {
             dar.status = role.status;
@@ -255,7 +255,7 @@ export const DAR = {
           }
           return dar;
         });
-      }      
+      }
       return dar;
     });
     return dars;
@@ -278,7 +278,7 @@ export const DAR = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
-  
+
   findDataAccessInvalidUseRestriction: async () => {
     const url = `${await Config.getApiUrl()}/dar/invalid`;
     const res = await fetchOk(url, Config.authOpts());
@@ -331,7 +331,7 @@ export const DataSet = {
     fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
     const responseObj = await res.json();
 
-    let blob = new Blob([responseObj.datasets], {type: 'text/plain'});
+    let blob = new Blob([responseObj.datasets], { type: 'text/plain' });
     const urlBlob = window.URL.createObjectURL(blob);
     let a = document.createElement('a');
     a.href = urlBlob;
@@ -362,7 +362,7 @@ export const DatasetAssociation = {
 
   createDatasetAssociations: async (objectId, usersIdList) => {
     const url = `${await Config.getApiUrl()}/datasetAssociation/${objectId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList) , { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(usersIdList), { method: 'POST' }]));
     return await res.json();
   },
 
@@ -471,7 +471,7 @@ export const Election = {
     const url = `${await Config.getApiUrl()}/electionReview/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
-  },
+   },
 
   createDARElection: async (requestId) => {
     var election = {};
@@ -963,6 +963,9 @@ export const Votes = {
 
 const fetchOk = async (...args) => {
   const res = await fetch(...args);
+  if (!res.ok && res.status === 401) {
+    window.location.href = '/login';
+  }
   return res.ok ? res : Promise.reject(res);
 };
 

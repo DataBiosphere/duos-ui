@@ -359,7 +359,7 @@ class DatasetCatalog extends Component {
 
             div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
               div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-                SearchBox({ id: 'datasetCatalog', searchHandler: this.handleSearchDul, color: 'dataset' })
+                h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
               ]),
               button({
                 id: "btn_downloadSelection",
