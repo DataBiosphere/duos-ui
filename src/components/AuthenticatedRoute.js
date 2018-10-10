@@ -4,31 +4,19 @@ import { Storage } from "../libs/storage";
 import * as Utils from "../libs/utils";
 import Login from '../pages/Login';
 
-export default ({ component: Component, props: componentProps, ...rest, rolesAllowed, path }) =>
+export default ({ component: Component, props: componentProps, ...rest, rolesAllowed }) =>
   <Route
     {...rest}
     render={
       props =>
-        verifyUser(rolesAllowed, Storage.getCurrentUser(), path)
+        verifyUser(rolesAllowed, Storage.getCurrentUser())
           ? <Component {...props} {...componentProps} />
-          : <Login {...props} {...componentProps}
-            re={path}
+          : <Login {...props} {...componentProps} roles={rolesAllowed}
           />}
   />;
 
-  /*
-  <Login props={props}
-            re={path}
-          />
-  * */
-
-
-//     <Route path='/login' component={() => <Login {...props}/>} />
-// to={{pathname: '/login', props:Component}}
-
-// Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
-const verifyUser = (allowedComponentRoles, usrRoles, component) => {
-  console.log(component);
+  // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
+const verifyUser = (allowedComponentRoles, usrRoles) => {
   if (Storage.userIsLogged() && usrRoles) {
     const currentUserRoles = usrRoles.roles.map(roles => roles.name);
     return allowedComponentRoles.some(
