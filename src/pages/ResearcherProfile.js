@@ -76,7 +76,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         isThePI: false,
         piName: false,
         piEmail: false,
-      },
+       },
       showValidationMessages: false,
       validateFields: false,
     };
@@ -360,7 +360,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let key;
 
     for (key in fullProfile) {
-      if (key !== 'linkedIn' && key !== 'nihUsername' && key !== 'orcid' && key !== 'researcherGate') {
+      if (key !== 'nihUsername') {
         profile[key] = fullProfile[key];
       }
     }
@@ -438,7 +438,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
                     span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
                   ]),
-                  span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: false }, ["At least one of the following is required"]),
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
