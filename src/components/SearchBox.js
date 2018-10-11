@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { div, hh, h, input, i, a } from 'react-hyperscript-helpers';
+import { div, h, input, i, a } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
@@ -42,8 +42,8 @@ SearchBox.propTypes = {
 }
 
 SearchBox.defaultProps = {
-  searchHandler: (query) => {console.log('search: ' + query)},
-  pageHandler: (page) => { console.log('go to page ' + page); }
+  searchHandler: (query) => {},
+  pageHandler: (page) => {}
 }
 
 
