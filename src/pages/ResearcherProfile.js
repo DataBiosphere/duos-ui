@@ -76,7 +76,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         isThePI: false,
         piName: false,
         piEmail: false,
-      },
+       },
       showValidationMessages: false,
       validateFields: false,
     };
@@ -360,7 +360,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let key;
 
     for (key in fullProfile) {
-      if (key !== 'linkedIn' && key !== 'nihUsername' && key !== 'orcid' && key !== 'researcherGate') {
+      if (key !== 'nihUsername') {
         profile[key] = fullProfile[key];
       }
     }
@@ -438,7 +438,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
                     span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
                   ]),
-                  span({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding cancel-color required-field-error-span", isRendered: false }, ["At least one of the following is required"]),
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
@@ -455,9 +454,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                           div({ className: "auth-id" }, [this.state.researcherProfile.nihUsername]),
                           button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
-                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
+                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "Clear account", "data-for": "tip_clearNihAccount" })
                           ]),
-                          h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
+
                         ]),
 
                         div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
@@ -679,13 +678,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     className: "control-label ",
                   }, [
                     "Are you the Principal Investigator?* ",
-                    span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "", "data-for": "tip_isthePI" }),
-                    h(ReactTooltip, {
-                      id: "tip_isthePI",
-                      effect: 'solid',
-                      multiline: true,
-                      className: 'tooltip-wrapper'
-                    }, ["This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals."])
+                    span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.", "data-for": "tip_isthePI" })
                   ])
                 ]),
 
@@ -839,7 +832,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     color: 'common',
                     showModal: this.state.showDialogSave,
                     action: { label: "Yes", handler: this.dialogHandlerSave }
-                  }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."]),])
+                  }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."])]
+                  ),
+                  h(ReactTooltip, {
+                    id: "tip_clearNihAccount",
+                    place: 'right',
+                    effect: 'solid',
+                    multiline: true,
+                    className: 'tooltip-wrapper'
+                  }),
+                  h(ReactTooltip, {
+                    id: "tip_isthePI",
+                    effect: 'solid',
+                    multiline: true,
+                    className: 'tooltip-wrapper'
+                  })
                 ])
               ])
             ])

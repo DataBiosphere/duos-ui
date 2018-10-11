@@ -729,8 +729,10 @@ class DataAccessRequestApplication extends Component {
 
                     div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12" }, [
                       label({ className: "control-label rp-title-question" }, [
-                        "1.2 Researcher Identification*",
-                        span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
+                      "1.2 Researcher Identification",
+                      div({ isRendered: this.state.formData.checkCollaborator !== true, className: "display-inline" }, ["*"]),
+                      div({ isRendered: this.state.formData.checkCollaborator === true, className: "display-inline italic" }, [" (optional)"]),
+                      span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
                       ])
                     ]),
 
@@ -751,9 +753,8 @@ class DataAccessRequestApplication extends Component {
                           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername]),
                             button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
-                              span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
-                            ]),
-                            h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Clear account"]),
+                              span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "Clear account", "data-for": "tip_clearNihAccount" })
+                            ])
                           ]),
 
                           div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
@@ -1348,6 +1349,7 @@ class DataAccessRequestApplication extends Component {
                     ConfirmationDialog({
                       title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSubmit, action: { label: "Yes", handler: this.dialogHandlerSubmit }
                     }, [div({ className: "dialog-description" }, ["Are you sure you want to send this Data Access Request Application?"]),]),
+                    h(ReactTooltip, { id: "tip_clearNihAccount", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
 
                     a({ id: "btn_save", isRendered: this.state.formData.dar_code === null, onClick: this.partialSave, className: "f-right btn-secondary access-color" }, ["Save"]),
                   ])

@@ -94,8 +94,12 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId, rpVoteId, pendingcase) => (e) => {
-    this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
+  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
+    if (rpVoteId !== null) {
+      this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
+    } else {
+      this.props.history.push(`access_review/${referenceId}/${voteId}`);
+    }
   };
 
   openDULReview = (consentId, voteId) => (e) => {
