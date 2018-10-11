@@ -12,7 +12,8 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true
+      loading: true,
+      origin: this.props.match.path
     };
   }
 
@@ -31,10 +32,9 @@ class Login extends Component {
         user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
         user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
         user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-
         Storage.setCurrentUser(user);
         Storage.setUserIsLogged(true);
-        this.props.history.push(this.redirect(user));
+        this.redirect(user, this.state.origin)
       },
       error => {
         Storage.clearStorage();
@@ -47,17 +47,31 @@ class Login extends Component {
   };
 
   // returns the initial page to be redirected when a user logs in
+  // for external re-directions, the method will first check if the usr has permission to access,
+  // if this is true, and user is not logged, it will be auto-logged and redirected to the url.
   redirect = (user) => {
-    let page = '/';
-    if (Storage.userIsLogged()) {
-      page = user.isChairPerson ? 'chair_console' :
-        user.isMember ? 'member_console' :
-          user.isAdmin ? 'admin_console' :
-            user.isResearcher ? 'dataset_catalog?reviewProfile' :
-              user.isDataOwner ? 'data_owner_console' :
-                user.isAlumni ? 'summary_votes' : '/';
+  let page = '/home';
+  if (this.props.componentRoles !== undefined && this.verifyUserRoles(this.props.componentRoles, Storage.getCurrentUser())){
+      page = this.state.origin;
+  } else {
+    page = user.isChairPerson ? 'chair_console' :
+      user.isMember ? 'member_console' :
+        user.isAdmin ? 'admin_console' :
+          user.isResearcher ? 'dataset_catalog?reviewProfile' :
+            user.isDataOwner ? 'data_owner_console' :
+              user.isAlumni ? 'summary_votes' : '/';
+  }
+    this.props.history.push(page);
+  };
+
+  verifyUserRoles = (allowedComponentRoles, usrRoles) => {
+    if (usrRoles) {
+      return allowedComponentRoles.some(
+        componentRole => (usrRoles.roles.map(roles =>roles.name)
+          .indexOf(componentRole) >= 0 || componentRole === USER_ROLES.all)
+      );
     }
-    return page
+    return false;
   };
 
   render() {
@@ -66,7 +80,8 @@ class Login extends Component {
       className: "btn_gSignInWrapper",
       clientId: clientId,
       onSuccess: this.responseGoogle,
-      onFailure: this.forbidden
+      onFailure: this.forbidden,
+      isSignedIn: this.state.origin !== '/login'
     }, [
         div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
           span({ className: "icon" }),
