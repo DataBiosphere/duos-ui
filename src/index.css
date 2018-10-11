@@ -527,6 +527,10 @@ small {
   margin-bottom: 0;
 }
 
+.control-label .italic {
+  font-weight: normal;
+}
+
 .control-data {
   font-size: 16px;
   height: 30px;
