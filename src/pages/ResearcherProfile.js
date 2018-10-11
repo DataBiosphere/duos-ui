@@ -76,8 +76,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         isThePI: false,
         piName: false,
         piEmail: false,
-        invalidIdentification: false
-      },
+       },
       showValidationMessages: false,
       validateFields: false,
     };
@@ -143,7 +142,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       isThePI = false,
       piEmail = false,
       piName = false,
-      invalidIdentification = false,
       showValidationMessages = false;
 
     if (!this.isValid(this.state.researcherProfile.profileName)) {
@@ -477,7 +475,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileLinkedIn",
                         name: "linkedIn",
                         type: "text",
-                        className: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages ? 'form-control required-field-error' : "form-control",
+                        className: "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.linkedIn
                       })
@@ -493,7 +491,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileOrcid",
                         name: "orcid",
                         type: "text",
-                        className: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages ? 'form-control required-field-error' : "form-control",
+                        className: "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.orcid
                       })
@@ -504,7 +502,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: "profileResearcherGate",
                         name: "researcherGate",
                         type: "text",
-                        className: this.state.invalidFields.invalidIdentification && this.state.showValidationMessages ? 'form-control required-field-error' : "form-control",
+                        className: "form-control",
                         onChange: this.handleChange,
                         value: this.state.researcherProfile.researcherGate
                       })
