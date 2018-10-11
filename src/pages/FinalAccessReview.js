@@ -82,6 +82,7 @@ class FinalAccessReview extends Component {
     });
   };
 
+
   logVote(answer, rationale) {
     this.setState(prev => {
       prev.tmpVote = answer;
@@ -102,6 +103,12 @@ class FinalAccessReview extends Component {
       vote.rationale = this.state.tmpRationale;
 
       await Votes.updateFinalAccessDarVote(this.state.referenceId, vote);
+      await this.setState(prev => {
+        prev.electionAccess.status = 'Closed';
+        return prev;
+      });
+
+      await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
 
       this.setState({
         alreadyVote: true,
