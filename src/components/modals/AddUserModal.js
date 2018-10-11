@@ -450,23 +450,29 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   errorNoAvailableCandidates = (role) => {
-    this.setState(prev => { prev.newAlternativeUserNeeded[role] = true; return prev });
-    this.alerts[0] = {
-      type: 'danger',
-      title: "Edition can't be made!",
-      msg: "There are no available users to delegate " + role.toLowerCase() + " responsibilities, please add a new User.",
-      alertType: role
-    };
+    this.setState(prev => {
+      prev.newAlternativeUserNeeded[role] = true;
+      prev.alerts[0] = {
+        type: 'danger',
+        title: "Edition can't be made!",
+        msg: "There are no available users to delegate " + role.toLowerCase() + " responsibilities, please add a new User.",
+        alertType: role
+      };
+      return prev;
+    });
+
   };
 
   errorOnEdition = (index) => {
-    this.alerts.splice(index, 1);
-    this.alerts[0] = {
-      type: 'danger',
-      title: "Edition can't be made!",
-      msg: index,
-      alertType: '2'
-    };
+    this.setState(prev => {
+      prev.alerts[0] = {
+        type: 'danger',
+        title: "Edition can't be made!",
+        msg: index,
+        alertType: '2'
+      };
+      return prev;
+    });
   };
 
   closeAlert = (alertType) => {
