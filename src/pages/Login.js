@@ -32,13 +32,9 @@ class Login extends Component {
         user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
         user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
         user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-        // if (this.verifyUser(this.props.roles, user) || this.origin === '/login') {
-        // console.log("PROPS EN LOGIN ->> ", this.props);
         Storage.setCurrentUser(user);
         Storage.setUserIsLogged(true);
         this.redirect(user, this.state.origin)
-        // this.props.history.push(this.redirect(user, this.state.origin));
-        // }
       },
       error => {
         Storage.clearStorage();
@@ -50,36 +46,32 @@ class Login extends Component {
     Storage.clearStorage();
   };
 
-  verifyUser = (allowedComponentRoles, usrRoles) => {
-    if (usrRoles) {
-      const currentUserRoles = usrRoles.roles.map(roles => roles.name);
-      return allowedComponentRoles.some(
-        componentRole => (currentUserRoles.indexOf(componentRole) >= 0 || componentRole === USER_ROLES.all)
-      );
-    }
-    // User is not Logged
-    return false;
+  // returns the initial page to be redirected when a user logs in
+  // for external re-directions, the method will first check if the usr has permission to access,
+  // if this is true, and user is not logged, it will be auto-logged and redirected to the url.
+  redirect = (user) => {
+  let page = '/home';
+  if (this.props.componentRoles !== undefined && this.verifyUserRoles(this.props.componentRoles, Storage.getCurrentUser())){
+      page = this.state.origin;
+  } else {
+    page = user.isChairPerson ? 'chair_console' :
+      user.isMember ? 'member_console' :
+        user.isAdmin ? 'admin_console' :
+          user.isResearcher ? 'dataset_catalog?reviewProfile' :
+            user.isDataOwner ? 'data_owner_console' :
+              user.isAlumni ? 'summary_votes' : '/';
+  }
+    this.props.history.push(page);
   };
 
-  // returns the initial page to be redirected when a user logs in
-  redirect = (user) => {
-    let page = '/';
-    if (Storage.userIsLogged()) {
-      if (this.state.origin === '/login') {
-        page = user.isChairPerson ? 'chair_console' :
-          user.isMember ? 'member_console' :
-            user.isAdmin ? 'admin_console' :
-              user.isResearcher ? 'dataset_catalog?reviewProfile' :
-                user.isDataOwner ? 'data_owner_console' :
-                  user.isAlumni ? 'summary_votes' : '/';
-      } else if (this.verifyUser(this.props.roles, Storage.getCurrentUser())){
-        page = this.state.origin;
-      } else {
-        // Storage.clearStorage();
-        page = 'login';
-      }
+  verifyUserRoles = (allowedComponentRoles, usrRoles) => {
+    if (usrRoles) {
+      return allowedComponentRoles.some(
+        componentRole => (usrRoles.roles.map(roles =>roles.name)
+          .indexOf(componentRole) >= 0 || componentRole === USER_ROLES.all)
+      );
     }
-    this.props.history.push(page);
+    return false;
   };
 
   render() {

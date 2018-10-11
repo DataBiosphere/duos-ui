@@ -9,10 +9,12 @@ export default ({ component: Component, props: componentProps, ...rest, rolesAll
     {...rest}
     render={
       props =>
-        verifyUser(rolesAllowed, Storage.getCurrentUser())
+        verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps, ...rest)
           ? <Component {...props} {...componentProps} />
-          : <Login {...props} {...componentProps} roles={rolesAllowed}
-          />}
+          : !Storage.userIsLogged() ? <Login {...props} {...componentProps} componentRoles={rolesAllowed}/>
+          : <Redirect to={'/'}/>
+      }
+
   />;
 
   // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
