@@ -13,10 +13,10 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       loading: true,
       currentUser: {},
       enableVoteButton: false,
-      voteStatus: this.props.voteStatus,
+      voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
       showDialogSubmit: false,
-      rationale: this.props.rationale === null ? '' : this.props.rationale
-    };
+      rationale: this.props.rationale != null ? this.props.rationale : ''
+    }
   }
 
   logVote = (e) => {
@@ -28,7 +28,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     if (prevState.flag === false || prevState.flag === undefined) {
       return {
         flag: true,
-        rationale: nextProps.rationale === null ? '' : nextProps.rationale,
+        rationale: nextProps.rationale != null ? nextProps.rationale : '',
         voteStatus: nextProps.voteStatus
       };
     }
