@@ -20,6 +20,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   initialState() {
     let initialValue;
+
     let rolesState = {}
     rolesState[USER_ROLES_UPPER.admin] = false;
     rolesState[USER_ROLES_UPPER.alumni] = false;
@@ -309,6 +310,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
             prev.delegateDacUser.needsDelegation = result.needsDelegation;
             return prev;
+          }, () => {
+            if (this.state.delegateDacUser.delegateCandidates.length === 1) {
+              this.setState({
+                alternativeDACMemberUser: JSON.stringify(this.state.delegateDacUser.delegateCandidates[0])
+              })
+            }
           });
           // return;
         }
@@ -340,6 +347,12 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
             prev.delegateDacUser.needsDelegation = result.needsDelegation;;
             return prev;
+          }, () => {
+            if (this.state.delegateDacUser.delegateCandidates.length === 1) {
+              this.setState({
+                alternativeDACMemberUser: JSON.stringify(this.state.delegateDacUser.delegateCandidates[0])
+              })
+            }
           });
           // return;
         }
@@ -379,7 +392,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           }, () => {
             if (this.state.delegateDataOwner.delegateCandidates.length === 1) {
               this.setState({
-                alternativeDataOwnerUser: this.state.delegateDataOwner.delegateCandidates[0]
+                alternativeDataOwnerUser: JSON.stringify(this.state.delegateDataOwner.delegateCandidates[0])
               })
             }
           });
@@ -394,6 +407,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
+
     }
     this.toggleState(USER_ROLES_UPPER.dataOwner);
   };
@@ -485,6 +499,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   closeNoAvailableCandidatesAlert = (role) => {
+    this.setState(prev => {
+      prev.alerts = [];
+      return prev;
+    });
     // const alerts = this.state.alerts.filter(alert => alert.alertType !== alertType);
     // this.setState({
     //   alerts: alerts
