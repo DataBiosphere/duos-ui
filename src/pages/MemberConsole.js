@@ -94,8 +94,12 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId, rpVoteId, pendingcase) => (e) => {
-    this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
+  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
+    if (rpVoteId !== null) {
+      this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
+    } else {
+      this.props.history.push(`access_review/${referenceId}/${voteId}`);
+    }
   };
 
   openDULReview = (consentId, voteId) => (e) => {
@@ -121,7 +125,7 @@ class MemberConsole extends Component {
   render() {
 
     if (this.state.loading) { return LoadingIndicator(); }
-    
+
     const { currentUser, currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
 
     return (
@@ -136,7 +140,7 @@ class MemberConsole extends Component {
               PageSubHeading({ id: "memberConsoleDul", imgSrc: "/images/icon_dul.png", color: "dul", title: "Data Use Limitations Review", description: "Were data use limitations accurately converted to a structured format?" }),
             ]),
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding" }, [
-              SearchBox({ id: 'memberConsoleDul', searchHandler: this.handleSearchDul, color: 'dul' })
+              h(SearchBox, { id: 'memberConsoleDul', searchHandler: this.handleSearchDul, pageHandler: this.handleDulPageChange, color: 'dul' })
             ]),
           ]),
 
@@ -197,7 +201,7 @@ class MemberConsole extends Component {
             ]),
 
             div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding" }, [
-              SearchBox({ id: 'memberConsoleAccess', searchHandler: this.handleSearchDar, color: 'access' })
+              h(SearchBox, { id: 'memberConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' })
             ]),
           ]),
           div({ className: "jumbotron table-box" }, [

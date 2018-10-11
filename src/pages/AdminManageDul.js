@@ -290,7 +290,7 @@ class AdminManageDul extends Component {
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-6 col-md-6 col-sm-7 col-xs-7" }, [
-              SearchBox({ id: 'manageDul', searchHandler: this.handleSearchDul, color: 'dul' })
+              h(SearchBox, { id: 'manageDul', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dul' })
             ]),
 
             a({
@@ -321,28 +321,23 @@ class AdminManageDul extends Component {
               h(Fragment, { key: election.consentId }, [
                 div({
                   id: election.consentId, className: "grid-9-row pushed-2 tableRow " + (election.updateStatus === true ? " list-highlighted" : "")
-                }, [
+                },
+                  [
                     div({
                       id: election.consentId + "_consentId",
                       name: "consentId",
                       className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""),
                       title: election.consentName
-                    }, [
+                    },
+                      [
                         span({
                           id: election.consentId + "_flagConsentId",
                           name: "flag_consentId",
                           isRendered: election.updateStatus,
                           className: "glyphicon glyphicon-exclamation-sign list-highlighted-item dul-color",
-                          "data-tip": "",
+                          "data-tip": "Consent has been updated",
                           "data-for": "tip_flag"
                         }, []),
-                        h(ReactTooltip, {
-                          id: "tip_flag",
-                          place: 'right',
-                          effect: 'solid',
-                          multiline: true,
-                          className: 'tooltip-wrapper'
-                        }, ["Consent has been updated"]),
                         a({
                           id: election.consentId + "_linkConsentName",
                           name: "link_consentName",
@@ -368,7 +363,8 @@ class AdminManageDul extends Component {
                     div({
                       className: "col-1 cell-body f-center",
                       disabled: (election.electionStatus !== 'un-reviewed' || !election.editable)
-                    }, [
+                    },
+                      [
                         button({
                           id: election.consentId + "_btnEditDUL",
                           name: "btn_editDul",
@@ -391,7 +387,8 @@ class AdminManageDul extends Component {
                       isRendered: election.electionStatus !== 'Open',
                       className: "col-1 cell-body f-center",
                       disabled: !election.editable
-                    }, [
+                    },
+                      [
                         button({
                           id: election.consentId + "_btnCreate",
                           name: "btn_create",
@@ -403,7 +400,8 @@ class AdminManageDul extends Component {
                     div({
                       isRendered: election.electionStatus === 'Open',
                       className: "col-1 cell-body f-center"
-                    }, [
+                    },
+                      [
                         button({
                           id: election.consentId + "_btnCancel",
                           name: "btn_cancel",
@@ -417,46 +415,34 @@ class AdminManageDul extends Component {
                         className: "display-inline-block",
                         disabled: (election.electionStatus === 'un-reviewed' || election.archived === true)
                       }, [
-                          button({
-                            id: election.consentId + "_btnArchiveElection",
-                            name: "btn_archiveElection",
-                            onClick: this.openDialogArchive(election)
-                          }, [
-                              span({
-                                className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
-                                "data-tip": "",
-                                "data-for": "tip_archive"
-                              })
-                            ]),
-                          h(ReactTooltip, {
-                            id: "tip_archive",
-                            effect: 'solid',
-                            multiline: true,
-                            className: 'tooltip-wrapper'
-                          }, ["Archive election"]),
-                        ]),
+                        button({
+                          id: election.consentId + "_btnArchiveElection",
+                          name: "btn_archiveElection",
+                          onClick: this.openDialogArchive(election)
+                        }, [
+                          span({
+                            className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
+                            "data-tip": "Archive election",
+                            "data-for": "tip_archive"
+                          })
+                        ])
+                      ]),
                       div({
                         className: "display-inline-block",
                         disabled: (election.electionStatus !== 'un-reviewed' || election.electionStatus === 'Canceled')
                       }, [
-                          button({
-                            id: election.consentId + "_btnDeleteDul",
-                            name: "btn_deleteDul",
-                            onClick: this.openDialogDelete(election)
-                          }, [
-                              span({
-                                className: "glyphicon caret-margin glyphicon-trash",
-                                "data-tip": "",
-                                "data-for": "tip_delete"
-                              })
-                            ]),
-                          h(ReactTooltip, {
-                            id: "tip_delete",
-                            effect: 'solid',
-                            multiline: true,
-                            className: 'tooltip-wrapper'
-                          }, ["Delete record"])
+                        button({
+                          id: election.consentId + "_btnDeleteDul",
+                          name: "btn_deleteDul",
+                          onClick: this.openDialogDelete(election)
+                        }, [
+                          span({
+                            className: "glyphicon caret-margin glyphicon-trash",
+                            "data-tip": "Delete record",
+                            "data-for": "tip_delete"
+                          })
                         ])
+                      ])
                     ])
                   ]),
                 hr({ className: "table-body-separator" })
@@ -584,10 +570,27 @@ class AdminManageDul extends Component {
             div({ className: "dialog-description" }, [
               span({}, ["Are you sure you want to delete this Consent?"]),
             ]),
-          ])
-
+          ]),
+        h(ReactTooltip, {
+          id: "tip_archive",
+          effect: 'solid',
+          multiline: true,
+          className: 'tooltip-wrapper'
+        }),
+        h(ReactTooltip, {
+          id: "tip_delete",
+          effect: 'solid',
+          multiline: true,
+          className: 'tooltip-wrapper'
+        }),
+        h(ReactTooltip, {
+          id: "tip_flag",
+          place: 'right',
+          effect: 'solid',
+          multiline: true,
+          className: 'tooltip-wrapper'
+        }),
       ])
-
     );
   }
 }
