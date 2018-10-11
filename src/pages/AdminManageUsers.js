@@ -222,14 +222,11 @@ class AdminManageUsers extends Component {
                     ]),
 
                     div({ id: user.dacUserId + "_flagBonafide", name: "flag_bonafide", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon" }, [
-                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, "data-tip": "", "data-for": "tip_bonafide" }),
-                      h(ReactTooltip, { id: "tip_bonafide", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Bonafide researcher"]),
+                      span({ className: "glyphicon glyphicon-thumbs-up dataset-color", isRendered: user.status === 'approved' && user.completed, "data-tip": "Bonafide researcher", "data-for": "tip_bonafide" }),
 
-                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "", "data-for": "tip_nonBonafide" }),
-                      h(ReactTooltip, { id: "tip_nonBonafide", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Non-Bonafide researcher"]),
+                      span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
 
-                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, "data-tip": "", "data-for": "tip_pendingReview" }),
-                      h(ReactTooltip, { id: "tip_pendingReview", place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }, ["Researcher review pending"]),
+                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
 
                       span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                     ]),
@@ -248,7 +245,28 @@ class AdminManageUsers extends Component {
             currentPage: this.state.currentPage,
             onPageChange: this.handlePageChange,
             changeHandler: this.handleSizeChange,
-          })
+          }),
+          h(ReactTooltip, {
+            id: "tip_bonafide",
+            place: 'right',
+            effect: 'solid',
+            multiline: true,
+            className: 'tooltip-wrapper'
+          }),
+          h(ReactTooltip, {
+            id: "tip_nonBonafide",
+            place: 'right',
+            effect: 'solid',
+            multiline: true,
+            className: 'tooltip-wrapper'
+          }),
+          h(ReactTooltip, {
+            id: "tip_pendingReview",
+            place: 'right',
+            effect: 'solid',
+            multiline: true,
+            className: 'tooltip-wrapper'
+          }),
         ])
       ])
     );

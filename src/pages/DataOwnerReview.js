@@ -111,9 +111,9 @@ class DataOwnerReview extends Component {
       this.setState(prev => {
         prev.vote.dacUserId = pendingCaseReview.dacUserId;
         prev.vote.voteId = pendingCaseReview.voteId;
-        prev.vote.vote = pendingCaseReview.vote;
+        prev.vote.vote = pendingCaseReview.vote === null ? undefined : pendingCaseReview.vote;
         prev.vote.hasConcerns = pendingCaseReview.hasConcerns;
-        prev.vote.rationale = pendingCaseReview.rationale;
+        prev.vote.rationale = pendingCaseReview.rationale === null ? '' : pendingCaseReview.rationale;
         prev.vote.createDate = pendingCaseReview.createDate;
         prev.pendingCase.referenceId = this.props.match.params.referenceId;
         return prev;
