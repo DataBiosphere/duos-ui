@@ -597,7 +597,8 @@ export const Match = {
   findMatch: async (consentId, purposeId) => {
     const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
     const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
+    return res;
+//    return await res.json();
   }
 
 };
