@@ -29,27 +29,25 @@ class AdminManageUsers extends Component {
   }
 
   async getUsers() {
-    User.list().then(users => {
-
-      let userList = users.map(user => {
-        user.researcher = false;
-        user.roles.forEach(role => {
-          if (role.name === 'Researcher') {
-            user.status = role.status;
-            user.completed = role.profileCompleted;
-            user.researcher = true;
-          }
-        });
-        user.key = user.id;
-        return user;
+    const users = await User.list();
+    let userList = users.map(user => {
+      user.researcher = false;
+      user.roles.forEach(role => {
+        if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
+          user.status = role.status;
+          user.completed = role.profileCompleted;
+          user.researcher = true;
+        }
       });
+      user.key = user.id;
+      return user;
+    });
 
-      this.setState(prev => {
-        prev.loading = false;
-        prev.currentPage = 1;
-        prev.userList = userList;
-        return prev;
-      });
+    this.setState(prev => {
+      prev.loading = false;
+      prev.currentPage = 1;
+      prev.userList = userList;
+      return prev;
     });
 
   }
@@ -89,6 +87,7 @@ class AdminManageUsers extends Component {
 
   editUser = (user) => (e) => {
     this.setState(prev => {
+      prev.userEmail = user.email;
       prev.user = user;
       prev.showAddUserModal = true;
       return prev;
@@ -98,8 +97,15 @@ class AdminManageUsers extends Component {
   openResearcherReview = (userId) => {
     this.props.history.push(`researcher_review/${userId}`);
   }
-  okModal = (name) => {
-    this.setState(prev => { prev.showAddUserModal = false; return prev; });
+
+  okModal = async (name) => {
+    this.setState(prev => { 
+      prev.showAddUserModal = false; 
+      prev.loading = true;
+      return prev; 
+    }, () => {
+      this.getUsers();
+    });
   }
 
   closeModal = (name) => {
@@ -154,7 +160,7 @@ class AdminManageUsers extends Component {
               onOKRequest: this.okModal,
               onCloseRequest: this.closeModal,
               onAfterOpen: this.afterModalOpen,
-              user: this.state.user
+              user: this.state.user,
             }),
 
           ])
@@ -197,15 +203,21 @@ class AdminManageUsers extends Component {
                 ]),
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                   div({ className: "row no-margin" }, [
-                    a({ id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId), isRendered: user.researcher !== false && user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
-                      div({
-                        className:
-                          ((user.researcher && user.completed && user.status === 'pending') || user.status === null) ? 'enabled'
-                            : user.researcher && user.completed && user.status !== 'pending' ? 'editable'
-                              : user.researcher === false || !user.completed ? 'disabled' : ''
-                      }, ["Review"]),
-                    ]),
-                    a({ isRendered: user.researcher === false || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
+
+
+                    a({
+                      id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
+                      isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
+                    }, [
+                        div({
+                          className:
+                            ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
+                              : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
+                                : user.researcher === false || !user.completed ? 'disabled' : ''
+                        }, ["Review"]),
+                      ]),
+
+                    a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),
                     ]),
 

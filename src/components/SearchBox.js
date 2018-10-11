@@ -42,9 +42,9 @@ SearchBox.propTypes = {
 };
 
 SearchBox.defaultProps = {
-  searchHandler: (query) => {console.log('search: ' + query)},
-  pageHandler: (page) => { console.log('go to page ' + page); }
-};
+  searchHandler: (query) => {},
+  pageHandler: (page) => {}
+}
 
 
 
