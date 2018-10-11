@@ -44,11 +44,10 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   };
 
   logout = () => {
-    console.log('logout');
+
   };
 
   async getGoogleConfig() {
-    console.log('---- antes ----');
     const googleButton = await h(GoogleLogin, {
       className: "btn navbar-duos-button",
       clientId: "xxxx",
@@ -76,7 +75,6 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
 // if (this.state.loading === true) {
 //   return null;
 // }
-    console.log('--------------------- 003 -----------------');
 
     // const googleButton = h(GoogleLogin, {
     //   className: "btn navbar-duos-button",
@@ -85,9 +83,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     //   onSuccess: this.responseGoogle,
     //   onFailure: this.forbidden,
     // });
-    // console.log('--------------------- 004 -----------------');
 
-    console.log("RENDERIZA BOTON en googleLogin", this.state.googleButton );
     return this.state.googleButton;
   }
 

@@ -132,7 +132,6 @@ class DatasetCatalog extends Component {
     });
 
     const formData  = await DAR.partialDarFromCatalogPost(this.USER_ID, listToExport);
-    console.log(formData);
     this.props.history.push({ pathname: 'dar_application', props: { formData: formData} });
   };
 
