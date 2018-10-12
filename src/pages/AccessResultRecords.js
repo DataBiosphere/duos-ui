@@ -531,7 +531,7 @@ class AccessResultRecords extends Component {
             class: "col-lg-12 col-md-12 col-sm-12 col-xs-12",
             vote: voteAgreement.vote,
             voteDate: voteAgreement.createDate,
-            rationale: voteAgreement.finalRationale
+            rationale: voteAgreement.rationale
           }),
         ])
     );
