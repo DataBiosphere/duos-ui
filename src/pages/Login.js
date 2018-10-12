@@ -5,16 +5,27 @@ import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { User } from '../libs/ajax';
 import './Login.css';
-
-const clientId = "xxxx";
+import { Config } from '../libs/config';
+import { LoadingIndicator } from "../components/LoadingIndicator";
 
 class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
       loading: true,
-      origin: this.props.match.path
+      redirectUrl: this.props.match.path,
+      clientId: ''
     };
+    this.getGoogleClientId();
+  }
+
+  async getGoogleClientId() {
+    const clientKey = `${await Config.getGoogleClientId()}`;
+    this.setState(prev => {
+      prev.clientId = clientKey;
+      prev.loading = false;
+      return prev;
+    });
   }
 
   async getUser() {
@@ -34,7 +45,7 @@ class Login extends Component {
         user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
         Storage.setCurrentUser(user);
         Storage.setUserIsLogged(true);
-        this.redirect(user, this.state.origin)
+        this.redirect(user, this.state.redirectUrl)
       },
       error => {
         Storage.clearStorage();
@@ -46,13 +57,13 @@ class Login extends Component {
     Storage.clearStorage();
   };
 
-  // returns the initial page to be redirected when a user logs in
+  // redirect() returns the initial page to be redirected when a user logs in
   // for external re-directions, the method will first check if the usr has permission to access,
   // if this is true, and user is not logged, it will be auto-logged and redirected to the url.
-  redirect = (user) => {
+  redirect = (user, redirectUrl) => {
   let page = '/home';
   if (this.props.componentRoles !== undefined && this.verifyUserRoles(this.props.componentRoles, Storage.getCurrentUser())){
-      page = this.state.origin;
+      page = redirectUrl;
   } else {
     page = user.isChairPerson ? 'chair_console' :
       user.isMember ? 'member_console' :
@@ -67,7 +78,7 @@ class Login extends Component {
   verifyUserRoles = (allowedComponentRoles, usrRoles) => {
     if (usrRoles) {
       return allowedComponentRoles.some(
-        componentRole => (usrRoles.roles.map(roles =>roles.name)
+        componentRole => (usrRoles.roles.map(roles => roles.name)
           .indexOf(componentRole) >= 0 || componentRole === USER_ROLES.all)
       );
     }
@@ -75,13 +86,14 @@ class Login extends Component {
   };
 
   render() {
+    if (this.state.loading) { return LoadingIndicator(); }
 
     const googleLoginButton = h(GoogleLogin, {
       className: "btn_gSignInWrapper",
-      clientId: clientId,
+      clientId: this.state.clientId,
       onSuccess: this.responseGoogle,
       onFailure: this.forbidden,
-      isSignedIn: this.state.origin !== '/login'
+      isSignedIn: this.state.redirectUrl !== '/login'
     }, [
         div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
           span({ className: "icon" }),

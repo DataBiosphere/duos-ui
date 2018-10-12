@@ -98,7 +98,7 @@ small {
 }
 
 .f-center {
-  text-align: center;
+  text-align: center !important;
 }
 
 .bold {
@@ -1070,7 +1070,7 @@ a .editable:hover, a .enabled:hover {
 }
 
 .btn-add span {
-  vertical-align: 65%;
+  vertical-align: 70%;
   margin-left: -8px !important;
 }
 
