@@ -8,6 +8,8 @@ export const Config = {
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
+  getGoogleClientId: async () => (await getConfig()).clientId,
+
   authOpts : (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,

@@ -647,7 +647,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       onChange: this.memberChanged,
                       disabled: isMemberDisabled,
                     }),
-                    label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"]),
+                    label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"])
                   ]),
 
                   div({ className: "checkbox", disabled: isChairPersonDisabled }, [
@@ -660,7 +660,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       onChange: this.chairpersonChanged,
                       disabled: isChairPersonDisabled
                     }),
-                    label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"]),
+                    label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"])
                   ]),
 
                   div({ className: "checkbox", disabled: isAlumniDisabled }, [
@@ -673,7 +673,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       onChange: this.alumniChanged,
                       disabled: isAlumniDisabled,
                     }),
-                    label({ id: "lbl_alumni", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_alumni" }, ["Alumni"]),
+                    label({ id: "lbl_alumni", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_alumni" }, ["Alumni"])
                   ]),
 
                 ]),
@@ -689,7 +689,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       className: "checkbox-inline user-checkbox",
                       onChange: this.adminChanged,
                     }),
-                    label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"]),
+                    label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"])
                   ]),
 
                   div({ className: "checkbox", disabled: isResearcherDisabled }, [
@@ -702,7 +702,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       onChange: this.researcherChanged,
                       disabled: isResearcherDisabled
                     }),
-                    label({ id: "lbl_researcher", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_researcher" }, ["Researcher"]),
+                    label({ id: "lbl_researcher", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_researcher" }, ["Researcher"])
                   ]),
 
                   div({ className: "checkbox" }, [
@@ -714,10 +714,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       className: "checkbox-inline user-checkbox",
                       onChange: this.dataOwnerChanged,
                     }),
-                    label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"]),
-                  ]),
-                ]),
-              ]),
+                    label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"])
+                  ])
+                ])
+              ])
             ]),
             div({ className: "form-group" }, [
               div({
@@ -734,10 +734,10 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       // defaultChecked: emailPreference,
                       onChange: this.emailPreferenceChanged,
                     }),
-                    label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "chk_emailPreference" }, ["Disable Admin email notifications"]),
+                    label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "chk_emailPreference" }, ["Disable Admin email notifications"])
                   ])
-                ]),
-            ]),
+                ])
+            ])
           ]),
 
           div({ isRendered: this.state.nameValid === false && this.state.submitted === true }, [
@@ -758,46 +758,44 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             })
           ]),
 
-          div({ isRendered: this.state.delegateDacUser.needsDelegation, className: "form-group" }, [
-            div({ className: "row f-left" }, [
-              div({ className: "default-color", style: { "padding": "0 40px 15px 40px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
-            ]),
+          div({ isRendered: this.state.delegateDacUser.needsDelegation, className: "form-group rp-last-group" }, [
+            div({ className: "row no-margin f-center" }, [
+              div({ className: "control-label default-color f-center", style: { "paddingBottom": "10px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
 
-            label({ id: "lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
-            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
-
-              select({
-                id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser,
-                required: this.state.delegateDacUser.needsDelegation, onChange: this.selectAlternativeDACMemberUser
-              }, [
-                  this.state.delegateDacUser.delegateCandidates.map((user, uIndex) => {
-                    return h(Fragment, { key: uIndex }, [
-                      option({ value: JSON.stringify(user) }, [user.displayName])
-                    ]);
-                  })
-                ]),
-            ]),
+              label({ id: "lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
+                select({
+                  id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser,
+                  required: this.state.delegateDacUser.needsDelegation, onChange: this.selectAlternativeDACMemberUser
+                }, [
+                    this.state.delegateDacUser.delegateCandidates.map((user, uIndex) => {
+                      return h(Fragment, { key: uIndex }, [
+                        option({ value: JSON.stringify(user) }, [user.displayName])
+                      ]);
+                    })
+                  ])
+              ])
+            ])
           ]),
 
-          div({ isRendered: this.state.delegateDataOwner.needsDelegation, className: "form-group" }, [
-            div({ className: "row f-left" }, [
-              div({ className: "default-color", style: { "padding": "0 40px 15px 40px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
-            ]),
+          div({ isRendered: this.state.delegateDataOwner.needsDelegation, className: "form-group rp-last-group" }, [
+            div({ className: "row no-margin f-center" }, [
+              div({ className: "control-label default-color f-center", style: { "paddingBottom": "10px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
 
-            label({ id: "lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
-            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
-
-              select({
-                id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser,
-                required: this.state.delegateDataOwner.needsDelegation, onChange: this.selectAlternativeDataOwnerUser, placeholder: "Select an alternative Data Owner"
-              }, [
-                  this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
-                    return h(Fragment, { key: uIndex }, [
-                      option({ value: JSON.stringify(user) }, [user.displayName])
-                    ]);
-                  })
-                ]),
-            ]),
+              label({ id: "lbl_alternativeDataOwner", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative DataOwner"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
+                select({
+                  id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser,
+                  required: this.state.delegateDataOwner.needsDelegation, onChange: this.selectAlternativeDataOwnerUser, placeholder: "Select an alternative Data Owner"
+                }, [
+                    this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
+                      return h(Fragment, { key: uIndex }, [
+                        option({ value: JSON.stringify(user) }, [user.displayName])
+                      ]);
+                    })
+                  ])
+              ])
+            ])
           ]),
 
           div({ isRendered: false }, [
