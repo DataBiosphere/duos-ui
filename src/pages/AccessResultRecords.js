@@ -241,9 +241,10 @@ class AccessResultRecords extends Component {
 
   renderDACDecision() {
 
-    console.log('this.state.hasUseRestriction', this.state.hasUseRestriction);
-    console.log('this.state.match', this.state.match);
-    console.log('this.state.createDate', this.state.createDate);
+    let voteIsYes = this.state.match === '1' || this.state.match === 'true' || this.state.match === true;
+    let voteIsNo = this.state.match === '0' || this.state.match === 'false' || this.state.match === false;
+    let voteFailed = this.state.match === '-1';
+    let voteIsNull = this.state.match == null;
 
     return (
       div({
@@ -257,10 +258,10 @@ class AccessResultRecords extends Component {
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Vote: "]),
               div({ id: "lbl_resultMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label bold" }, [
-                span({ isRendered: this.state.match === '1' }, ["YES"]),
-                span({ isRendered: this.state.match === '0' }, ["NO"]),
-                span({ isRendered: this.state.match === null }, ['---']),
-                span({ className: "cancel-color", isRendered: this.state.match === '-1' }, [
+                span({ isRendered: voteIsYes  }, ["YES"]),
+                span({ isRendered: voteIsNo   }, ["NO"]),
+                span({ isRendered: voteIsNull }, ['---']),
+                span({ className: "cancel-color", isRendered: voteFailed }, [
                   "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"
                 ]),
               ]),
@@ -322,7 +323,6 @@ class AccessResultRecords extends Component {
       })
     );
   }
-
 
   renderVoteList(voteList) {
     if (voteList === null || voteList === undefined) {
@@ -712,10 +712,6 @@ class AccessResultRecords extends Component {
 
   async vaultVote(consentId) {
     const data = await Match.findMatch(consentId, this.state.electionAccess.referenceId);
-    console.log(' data            : ', data);
-    console.log(' data.failed     : ', data.failed);
-    console.log(' data.createDate : ', data.createDate);
-    console.log(' data.match      : ', data.match);
 
     if (data.failed !== null && data.failed !== undefined && data.failed) {
       this.setState({
