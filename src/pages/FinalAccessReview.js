@@ -675,8 +675,8 @@ class FinalAccessReview extends Component {
                       div({ className: "row" }, [
                         label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Vote: "]),
                         div({ id: "lbl_resultMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label bold" }, [
-                          span({ isRendered: this.state.match === '1' }, ["YES"]),
-                          span({ isRendered: this.state.match === '0' }, ["NO"]),
+                          span({ isRendered: this.state.match === '1' || this.state.match === true || this.state.match === 'true' }, ["YES"]),
+                          span({ isRendered: this.state.match === '0' || this.state.match === false || this.state.match === 'false' }, ["NO"]),
                           span({ isRendered: this.state.match === null }, []),
                           span({ className: "cancel-color", isRendered: this.state.match === '-1' }, [
                             "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"
