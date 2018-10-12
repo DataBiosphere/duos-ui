@@ -1,6 +1,5 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 # Ignore config
-/public/config.json
 
 # ides
 .idea/
@@ -27,3 +26,4 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+public/config.json
