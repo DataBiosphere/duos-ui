@@ -655,7 +655,7 @@ class AccessResultRecords extends Component {
       electionReview: data3
     })
     await this.showDULData(data3);
-    this.vaultVote(data3.consent.consentId);
+    await this.vaultVote(data3.consent.consentId);
   }
 
   async showDarData(electionReview) {
@@ -711,7 +711,11 @@ class AccessResultRecords extends Component {
   }
 
   async vaultVote(consentId) {
-    const data = await Match.findMatch(consentId, this.state.electionAccess.referenceId)
+    const data = await Match.findMatch(consentId, this.state.electionAccess.referenceId);
+    console.log(' data            : ', data);
+    console.log(' data.failed     : ', data.failed);
+    console.log(' data.createDate : ', data.createDate);
+    console.log(' data.match      : ', data.match);
 
     if (data.failed !== null && data.failed !== undefined && data.failed) {
       this.setState({
@@ -719,7 +723,7 @@ class AccessResultRecords extends Component {
         match: "-1",
         createDate: data.createDate,
         loading: false
-      })
+      });
     } else if (data.match !== null && data.match !== undefined) {
       this.setState({
         hideMatch: false,
