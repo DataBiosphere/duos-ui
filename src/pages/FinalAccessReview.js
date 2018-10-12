@@ -685,7 +685,7 @@ class FinalAccessReview extends Component {
                       ]),
                       div({ className: "row" }, [
                         label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Date: "]),
-                        div({ id: "lbl_dateMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label" }, [this.state.createDate /* | date:dateFormat */]),
+                        div({ id: "lbl_dateMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label" }, [Utils.formatDate(this.state.createDate)]),
                       ]),
                     ]),
                   ]),
