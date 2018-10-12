@@ -240,32 +240,39 @@ class AccessResultRecords extends Component {
   }
 
   renderDACDecision() {
-    div({
-      isRendered: this.state.hasUseRestriction,
-      className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 jumbotron box-vote-results no-padding"
-    }, [
-        h4({ className: "box-vote-title access-color" }, ["DUOS Matching Algorithm Decision"]),
-        hr({ className: "box-separator" }),
-        div({ className: "results-box" }, [
 
-          div({ className: "row" }, [
-            label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Vote: "]),
-            div({ id: "lbl_resultMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label bold" }, [
-              span({ isRendered: this.state.match === '1' }, ["YES"]),
-              span({ isRendered: this.state.match === '0' }, ["NO"]),
-              span({ isRendered: this.state.match === null }, ['---']),
-              span({ className: "cancel-color", isRendered: this.state.match === '-1' }, [
-                "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"
+    console.log('this.state.hasUseRestriction', this.state.hasUseRestriction);
+    console.log('this.state.match', this.state.match);
+    console.log('this.state.createDate', this.state.createDate);
+
+    return (
+      div({
+        isRendered: this.state.hasUseRestriction,
+        className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 jumbotron box-vote-results no-padding"
+      }, [
+          h4({ className: "box-vote-title access-color" }, ["DUOS Matching Algorithm Decision"]),
+          hr({ className: "box-separator" }),
+          div({ className: "results-box" }, [
+
+            div({ className: "row" }, [
+              label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Vote: "]),
+              div({ id: "lbl_resultMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label bold" }, [
+                span({ isRendered: this.state.match === '1' }, ["YES"]),
+                span({ isRendered: this.state.match === '0' }, ["NO"]),
+                span({ isRendered: this.state.match === null }, ['---']),
+                span({ className: "cancel-color", isRendered: this.state.match === '-1' }, [
+                  "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"
+                ]),
               ]),
             ]),
-          ]),
 
-          div({ className: "row" }, [
-            label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Date: "]),
-            div({ id: "lbl_dateMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label" }, [Utils.formatDate(this.state.createDate)]),
+            div({ className: "row" }, [
+              label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Date: "]),
+              div({ id: "lbl_dateMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label" }, [Utils.formatDate(this.state.createDate)]),
+            ]),
           ]),
-        ]),
-      ]);
+        ])
+    );
   }
 
   renderVotes(voteAccessList) {
@@ -447,7 +454,7 @@ class AccessResultRecords extends Component {
             label({ className: "control-label access-color" }, ["Country: "]),
             span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.country])
           ]),
-          button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"])                
+          button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDAR }, ["Download Full Application"])
         ])
       ])
     );
@@ -463,7 +470,7 @@ class AccessResultRecords extends Component {
         ]),
         div({ id: "dul", className: "panel-body cm-boxbody" }, [
           div({ className: "row no-margin" }, [
-            button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),	
+            button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
           ]),
           div({ className: "row dar-summary" }, [
             div({ className: "control-label dul-color" }, ["Structured Limitations"]),
