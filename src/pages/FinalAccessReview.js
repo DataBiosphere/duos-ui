@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, span, b, a, i, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
+import { div, button, span, b, br, a, i, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
@@ -452,8 +452,17 @@ class FinalAccessReview extends Component {
         ]),
         hr({ className: "section-separator" }),
 
-        h4({ className: "hint", isRendered: this.state.hasUseRestriction === true }, ["Please review the Application Summary and Data Use Limitations to answer the two questions below. br(), You may review other DAC votes related to this data access request below the questions on this page."]),
-        h4({ className: "hint", isRendered: !this.state.hasUseRestriction === true }, ["Please review the Application Summary and Data Use Limitations to answer the question below. br(), You may review other DAC votes related to this data access request below the question on this page."]),
+        h4({ className: "hint", isRendered: this.state.hasUseRestriction === true }, [
+          "Please review the Application Summary and Data Use Limitations to answer the two questions below.",
+          br(),
+          "You may review other DAC votes related to this data access request below the questions on this page."
+        ]),
+
+        h4({ className: "hint", isRendered: !this.state.hasUseRestriction === true }, [
+          "Please review the Application Summary and Data Use Limitations to answer the question below.",
+          br(),
+          "You may review other DAC votes related to this data access request below the question on this page."
+        ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
 
@@ -471,7 +480,7 @@ class FinalAccessReview extends Component {
                 div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
                 div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.sDar } }, []),
                 a({
-                  isRendered: this.state.hasUseRestriction === true, onClick: () => this.download('machine-readable-DAR.json', this.state.mrDar),
+                  isRendered: this.state.hasUseRestriction === true, onClick: () => this.download('machine-readable-DAR.json', this.state.mrDAR),
                   className: "italic hover-color"
                 }, ["Download DAR machine-readable format"]),
               ]),
@@ -578,7 +587,7 @@ class FinalAccessReview extends Component {
                 div({ className: "control-label dul-color" }, ["Structured Limitations"]),
                 div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.sDul } }, []),
                 a({
-                  id: "btn_downloadSDul", onClick: () => this.download('machine-readable-DUL.json', this.state.mrDul),
+                  id: "btn_downloadSDul", onClick: () => this.download('machine-readable-DUL.json', this.state.mrDUL),
                   className: "italic hover-color"
                 }, ["Download DUL machine-readable format"]),
               ]),
