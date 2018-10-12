@@ -675,8 +675,6 @@ class AccessResultRecords extends Component {
     const chartDataAccess = this.getGraphData(electionReview.reviewVote);
     const voteAgreement = electionReview.voteAgreement;
 
-    console.log('voteAgrrement: ', voteAgreement);
-
     // this data is used to construct structured_ files
     const mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
     const sDAR = electionReview.election.translatedUseRestriction;

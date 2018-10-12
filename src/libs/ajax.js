@@ -596,13 +596,11 @@ export const Match = {
 
   findMatch: async (consentId, purposeId) => {
     const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
-    console.log(url);
     const res = await fetchOk(url, Config.authOpts());
     let answer = {};
     try {
       answer = await res.json();
     } catch (error) {
-      console.log(error);
       answer = {};
     } finally {
       return answer;
