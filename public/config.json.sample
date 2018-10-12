@@ -1,0 +1,6 @@
+{
+  "apiUrl": "http://localhost:8180/api",
+  "ontologyApiUrl": "",
+  "clientId": "",
+  "gwasUrl": ""
+}
