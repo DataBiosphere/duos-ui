@@ -426,8 +426,8 @@ class FinalAccessReview extends Component {
       span({ className: "access-color", isRendered: finalVote === false, style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
       span({ className: "access-color", isRendered: finalVote === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
       label({}, ["DUOS Matching Algorithm Decision: "]),
-      span({ className: "access-color", isRendered: this.state.match === '1', style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
-      span({ className: "access-color", isRendered: this.state.match === '0', style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
+      span({ className: "access-color", isRendered: this.state.match === '1' || this.state.match === true || this.state === 'true', style: { 'marginLeft': '5px' } }, [b({}, ["YES"])]),
+      span({ className: "access-color", isRendered: this.state.match === '0' || this.state.match === false || this.state === 'false', style: { 'marginLeft': '5px' } }, [b({}, ["NO"])]),
       span({ className: "access-color", isRendered: this.state.match === null, style: { 'marginLeft': '5px' } }, [b({}, ["---"])]),
       span({ className: "cancel-color", isRendered: this.state.match === '-1', style: { 'marginLeft': '5px' } }, [
         "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"]),
