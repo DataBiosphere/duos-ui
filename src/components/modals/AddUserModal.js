@@ -100,6 +100,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         },
         delegateMemberRequired: false,
         newAlternativeUserNeeded: {},
+        newUserNeeded: false,
       },
         () => {
           let r1 = this.nameRef.current;
@@ -138,6 +139,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         wasMember: false,
         wasDataOwner: false,
         wasResearcher: false,
+        newUserNeeded: false,
         loading: false
       },
         () => {
@@ -286,7 +288,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (!valid) {
       this.errorNoAvailableCandidates(role);
     }
-    return valid;
+    this.setState({
+      newUserNeeded: this.validateNoNewUserIsNeeded()
+    }, () => {
+      return valid;
+    });
+  };
+
+  validateNoNewUserIsNeeded = () => {
+    for (var key in this.state.newAlternativeUserNeeded) {
+      if (this.state.newAlternativeUserNeeded[key] === true) {
+        return true;
+      }
+    }
+    return false;
   };
 
   emailPreferenceChanged = (e) => {
@@ -465,6 +480,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   errorNoAvailableCandidates = (role) => {
     this.setState(prev => {
+      prev.newUserNeeded = true;
       prev.newAlternativeUserNeeded[role] = true;
       prev.alerts[0] = {
         type: 'danger',
@@ -503,24 +519,17 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       prev.alerts = [];
       return prev;
     });
-    // const alerts = this.state.alerts.filter(alert => alert.alertType !== alertType);
-    // this.setState({
-    //   alerts: alerts
-    // });
 
-    // var l = this.alerts.length;
-    // var i = 0;
-    // while (i < l) {
-    //   if (this.alerts[i].alertType === role) {
-    //     // this.alerts.splice(i, 1);
-    //     this.setState(prev => {
-    //       prev.newAlternativeUserNeeded[role] = false;
-    //       return prev;
-    //     });
-    //     return;
-    //   }
-    //   i++;
-    // }
+     this.setState(prev => {
+      prev.newAlternativeUserNeeded[role] = false;
+      return prev;
+    },
+    () => {
+      this.setState({
+        newUserNeeded : this.validateNoNewUserIsNeeded()
+      });
+    });
+
   };
 
   handleChange(event) {
@@ -564,7 +573,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   render() {
 
-    const { displayName, email, roles, rolesState, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
+    const { displayName, email, roles, rolesState, newUserNeeded, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
 
     // if (loading) {  return LoadingIndicator();   }
 
@@ -586,7 +595,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       BaseModal({
         id: "addUserModal",
         showModal: this.props.showModal,
-        disableOkBtn: !validForm, //this.state.invalidForm === true || this.state.roleValid === false,
+        disableOkBtn: !validForm || newUserNeeded, //this.state.invalidForm === true || this.state.roleValid === false,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
         imgSrc: this.state.mode === 'Add' ? "/images/icon_add_user.png" : "/images/icon_edit_user.png",
