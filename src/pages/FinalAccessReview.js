@@ -54,26 +54,19 @@ class FinalAccessReview extends Component {
   }
 
   reminderDARAlert = (index) => {
-    let alertsDAR = this.state.alertsDAR.splice(index, 1);
-    alertsDAR.push({
-      title: 'Please log a vote on Decision Agreement.'
-    });
     this.setState({
-      alertsDAR: alertsDAR
-    })
+      showAlert2: true,
+      alertMessage2: 'Please log a vote on Decision Agreement.'
+    });
   };
 
   reminderAgreeAlert = (index) => {
-    let alertOn = true;
-    const alertsAgree = this.state.alertsAgree.splice(index, 1);
-    alertsAgree.push({
-      title: 'Please log a vote on Final Access Decision'
-    });
     this.setState({
-      alertOn: alertOn,
-      alertsAgree: alertsAgree
-    })
+      showAlert1: true,
+      alertMessage1: 'Please log a vote on Final Access Decision.'
+    });
   };
+
 
   closeAlert = (index) => {
     const alerts = this.state.alerts.splice(index, 1);
@@ -153,7 +146,7 @@ class FinalAccessReview extends Component {
 
       this.setState({
         agreementAlreadyVote: true,
-        showConfirmDialog: false
+        showConfirmAgreementDialog: false
       }, () => {
         if (this.state.alreadyVote) {
           this.props.history.push('/chair_console');
@@ -163,7 +156,7 @@ class FinalAccessReview extends Component {
       });
     } else {
       this.setState(prev => {
-        prev.showConfirmDialog = false;
+        prev.showConfirmAgreementDialog = false;
         return prev;
       });
     }
@@ -184,7 +177,7 @@ class FinalAccessReview extends Component {
     const url = window.URL.createObjectURL(blob);
     let a = document.createElement('a');
     a.href = url;
-    a.download = fileName + '-restriction';
+    a.download = fileName;
     a.click();
   };
 
@@ -229,6 +222,10 @@ class FinalAccessReview extends Component {
         alreadyVote: true,
         originalVote: vote.vote,
         originalRationale: vote.rationale
+      });
+    } else {
+      this.setState({
+        alreadyVote: false,
       });
     }
 
@@ -611,8 +608,10 @@ class FinalAccessReview extends Component {
                 title: this.state.hasUseRestriction === true ? "Q1. Does the DAC grant this researcher permission to access the data?"
                   : "Does the DAC grant this researcher permission to access the data?",
                 isDisabled: false,
-                voteStatus: this.state.voteStatus,
+                voteStatus: this.state.vote.vote,
                 rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
+                showAlert: this.state.showAlert1,
+                alertMessage: this.state.alertMessage1,
                 action: { label: "Vote", handler: this.logVote }
               }),
             ]),
@@ -627,8 +626,10 @@ class FinalAccessReview extends Component {
                 title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
                 isDisabled: false,
                 agreementData: agreementData,
-                voteStatus: this.state.voteStatus,
-                rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
+                voteStatus: this.state.voteAgreement.vote,
+                rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
+                showAlert: this.state.showAlert2,
+                alertMessage: this.state.alertMessage2,
                 action: { label: "Vote", handler: this.logVoteAgreement }
               }),
             ]),
@@ -641,6 +642,20 @@ class FinalAccessReview extends Component {
           action: {
             label: "Yes",
             handler: this.confirmationHandlerOK
+          }
+        }, [
+            div({ className: "dialog-description" }, [
+              span({}, ["Are you sure you want to post this Final Access Decision?"]),
+            ])
+          ]),
+
+        ConfirmationDialog({
+          title: 'Post Final Access Decision?',
+          color: 'access',
+          showModal: this.state.showConfirmAgreementDialog,
+          action: {
+            label: "Yes",
+            handler: this.confirmationAgreementHandlerOK
           }
         }, [
             div({ className: "dialog-description" }, [
