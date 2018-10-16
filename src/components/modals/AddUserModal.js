@@ -21,7 +21,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   initialState() {
     let initialValue;
 
-    let rolesState = {}
+    let rolesState = {};
     rolesState[USER_ROLES_UPPER.admin] = false;
     rolesState[USER_ROLES_UPPER.alumni] = false;
     rolesState[USER_ROLES_UPPER.chairperson] = false;
@@ -30,7 +30,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     rolesState[USER_ROLES_UPPER.researcher] = false;
 
     initialValue = {
-      loading: false,
+      loading: true,
       displayName: '',
       email: '',
       displayNameValid: false,
