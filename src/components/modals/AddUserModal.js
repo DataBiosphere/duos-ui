@@ -592,11 +592,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const isChairPersonDisabled = isMember || isAlumni || isResearcher;
     const isAlumniDisabled = isMember || isChairPerson;
 
+    const needsDoDelegation = (this.state.delegateDacUser.needsDelegation && this.state.alternativeDACMemberUser === '');
+    const needsDacDelegation = (this.state.delegateDataOwner.needsDelegation && this.state.alternativeDataOwnerUser ==='');
+
     return (
       BaseModal({
         id: "addUserModal",
         showModal: this.props.showModal,
-        disableOkBtn: !validForm || (this.state.mode !== 'Add' && (newUserNeeded || this.state.alternativeDACMemberUser === '')),
+        disableOkBtn: !validForm || needsDacDelegation || needsDoDelegation || newUserNeeded,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
         imgSrc: this.state.mode === 'Add' ? "/images/icon_add_user.png" : "/images/icon_edit_user.png",
@@ -784,8 +787,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               ])
             ])
           ]),
-
-          div({ isRendered: this.state.delegateDataOwner.needsDelegation, className: "form-group rp-last-group" }, [
+          div({ isRendered: (this.state.delegateDataOwner.needsDelegation && this.state.delegateDataOwner.delegateCandidates.length > 0), className: "form-group rp-last-group" }, [
             div({ className: "row no-margin f-center" }, [
               div({ className: "control-label default-color f-center", style: { "paddingBottom": "10px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
 
@@ -795,7 +797,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser,
                   required: this.state.delegateDataOwner.needsDelegation, onChange: this.selectAlternativeDataOwnerUser, placeholder: "Select an alternative Data Owner"
                 }, [
-                    this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
+                  option({ value: '' }, [""]),
+                  this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
                       return h(Fragment, { key: uIndex }, [
                         option({ value: JSON.stringify(user) }, [user.displayName])
                       ]);
