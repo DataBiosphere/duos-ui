@@ -106,9 +106,12 @@ class FinalAccessReview extends Component {
         await Votes.updateFinalAccessDarVote(this.state.referenceId, vote);
       } catch (e) {
         this.setState({
-          showQ1Alert: true,
-          alertQ1Message: "Error while updating final access vote.",
+          q1AlertTitle: "Error while updating final access vote.",
+          q1AlertMessage: "Please try again later",
+          q1OkBtnDisabled: true,
+          q1NoBtnDisabled: false,
         });
+        return;
       }
 
       if (this.state.agreementAlreadyVote || this.state.hideMatch) {
@@ -145,7 +148,6 @@ class FinalAccessReview extends Component {
       prev.q2NoBtnDisabled = false;
       return prev;
     });
-
   }
 
   confirmationAgreementHandlerOK = (answer) => async (e) => {
@@ -168,9 +170,12 @@ class FinalAccessReview extends Component {
         await Votes.updateFinalAccessDarVote(this.state.referenceId, voteAgreement);
       } catch (e) {
         this.setState({
-          showQ2Alert: true,
-          alertQ2Message: "Error while updating final access vote.",
+          q2AlertTitle: "Error while updating final access vote.",
+          q2AlertMessage: "Please try again later",
+          q2OkBtnDisabled: true,
+          q2NoBtnDisabled: false,
         });
+        return;
       }
 
       if (this.state.alreadyVote) {
@@ -205,18 +210,24 @@ class FinalAccessReview extends Component {
       // update election
       await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
     } catch (e) {
+
       if (q === 1) {
         this.setState({
-          showQ1Alert: true,
-          alertQ1Message: "Error while updating final access vote.",
+          q1AlertTitle: "Error while updating final access vote.",
+          q1AlertMessage: "Please try again later",
+          q1OkBtnDisabled: true,
+          q1NoBtnDisabled: false,
         });
       } else {
         this.setState({
-          showQ2Alert: true,
-          alertQ2Message: "Error while updating final access vote.",
+          q2AlertTitle: "Error while updating final access vote.",
+          q2AlertMessage: "Please try again later",
+          q2OkBtnDisabled: true,
+          q2NoBtnDisabled: false,
         });
 
       }
+      return;
     }
   };
 
@@ -229,8 +240,12 @@ class FinalAccessReview extends Component {
       voteAgreement: {},
       q1OkBtnDisabled: false,
       q1NoBtnDisabled: false,
+      q1AlertTitle: undefined,
+      q1AlertMessage: '',
       q2OkBtnDisabled: false,
-      q2NoBtnDisabled: false
+      q2NoBtnDisabled: false,
+      q2AlertTitle: undefined,
+      q2AlertMessage: '',
     };
   };
 
@@ -690,6 +705,8 @@ class FinalAccessReview extends Component {
           showModal: this.state.showConfirmDialog,
           disableNoBtn: this.state.q1NoBtnDisabled,
           disableOkBtn: this.state.q1OkBtnDisabled,
+          alertTitle: this.state.q1AlertTitle,
+          alertMessage: this.state.q1AlertMessage,
           action: {
             label: "Yes",
             handler: this.confirmationHandlerOK
@@ -706,6 +723,8 @@ class FinalAccessReview extends Component {
           showModal: this.state.showConfirmAgreementDialog,
           disableNoBtn: this.state.q2NoBtnDisabled,
           disableOkBtn: this.state.q2OkBtnDisabled,
+          alertTitle: this.state.q2AlertTitle,
+          alertMessage: this.state.q2AlertMessage,
           action: {
             label: "Yes",
             handler: this.confirmationAgreementHandlerOK
