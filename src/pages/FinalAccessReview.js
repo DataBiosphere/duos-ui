@@ -68,14 +68,12 @@ class FinalAccessReview extends Component {
     });
   };
 
-
   closeAlert = (index) => {
     const alerts = this.state.alerts.splice(index, 1);
     this.setState({
       alerts: alerts
     });
   };
-
 
   logVote(answer, rationale) {
     this.setState(prev => {
@@ -96,11 +94,18 @@ class FinalAccessReview extends Component {
       vote.vote = this.state.tmpVote;
       vote.rationale = this.state.tmpRationale;
 
-      // vote 
-      await Votes.updateFinalAccessDarVote(this.state.referenceId, vote);
+      try {
+        // vote 
+        await Votes.updateFinalAccessDarVote(this.state.referenceId, vote);
+      } catch (e) {
+        this.setState({
+          showQ1Alert: true,
+          alertQ1Message: "Error while updating final access vote.",
+        });
+      }
 
       if (this.state.agreementAlreadyVote || this.state.hideMatch) {
-        await this.closeElection();
+        await this.closeElection(1);
       }
 
       await this.setState({
@@ -145,10 +150,17 @@ class FinalAccessReview extends Component {
       voteAgreement.rationale = this.state.tmpAgreementRationale;
 
       // vote
-      await Votes.updateFinalAccessDarVote(this.state.referenceId, voteAgreement);
+      try {
+        await Votes.updateFinalAccessDarVote(this.state.referenceId, voteAgreement);
+      } catch (e) {
+        this.setState({
+          showQ2Alert: true,
+          alertQ2Message: "Error while updating final access vote.",
+        });
+      }
 
       if (this.state.alreadyVote) {
-        await this.closeElection();
+        await this.closeElection(2);
       }
 
       await this.setState({
@@ -170,15 +182,29 @@ class FinalAccessReview extends Component {
     }
   };
 
-  closeElection = async () => {
+  closeElection = async (q) => {
 
-    // change election status 
-    await this.setState(prev => { prev.electionAccess.status = 'Closed'; });
+    try {
+      // change election status 
+      await this.setState(prev => { prev.electionAccess.status = 'Closed'; });
 
-    // update election
-    await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
+      // update election
+      await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
+    } catch (e) {
+      if (q === 1) {
+        this.setState({
+          showQ1Alert: true,
+          alertQ1Message: "Error while updating final access vote.",
+        });
+      } else {
+        this.setState({
+          showQ2Alert: true,
+          alertQ2Message: "Error while updating final access vote.",
+        });
+
+      }
+    }
   };
-
 
   initialState = () => {
     return {
@@ -189,7 +215,6 @@ class FinalAccessReview extends Component {
       voteAgreement: {}
     };
   };
-
 
   download = (fileName, text) => {
     const break_line = '\r\n \r\n';
