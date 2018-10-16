@@ -30,7 +30,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     rolesState[USER_ROLES_UPPER.researcher] = false;
 
     initialValue = {
-      loading: true,
+      loading: false,
       displayName: '',
       email: '',
       displayNameValid: false,
@@ -48,7 +48,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       delegateDataOwner: {
         needsDelegation: false,
         delegateCandidates: []
-      }
+      },
+      alternativeDACMemberUser: '',
+      alternativeDataOwnerUser: ''
     };
 
     return initialValue;
@@ -283,16 +285,16 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     return await User.validateDelegation(role, user);
   };
 
-  checkNoEmptyDelegateCandidates = (needsDelegation, delegateCandidates, role) => {
+  checkNoEmptyDelegateCandidates = async (needsDelegation, delegateCandidates, role) => {
     const valid = needsDelegation === true && delegateCandidates.length === 0 ? false : true;
     if (!valid) {
       this.errorNoAvailableCandidates(role);
     }
-    this.setState({
-      newUserNeeded: this.validateNoNewUserIsNeeded()
-    }, () => {
-      return valid;
+     await this.setState((prev) => {
+      prev.newUserNeeded = this.validateNoNewUserIsNeeded();
+      return prev;
     });
+    return valid;
   };
 
   validateNoNewUserIsNeeded = () => {
@@ -360,7 +362,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           this.setState(prev => {
             prev.delegateMemberRequired = false;
             prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
-            prev.delegateDacUser.needsDelegation = result.needsDelegation;;
+            prev.delegateDacUser.needsDelegation = result.needsDelegation;
             return prev;
           }, () => {
             if (this.state.delegateDacUser.delegateCandidates.length === 1) {
@@ -369,7 +371,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               })
             }
           });
-          // return;
         }
       } else {
         this.closeNoAvailableCandidatesAlert(USER_ROLES_UPPER.chairperson);
@@ -573,7 +574,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   render() {
 
-    const { displayName, email, roles, rolesState, newUserNeeded, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
+    const { displayName, email, rolesState, newUserNeeded, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
 
     // if (loading) {  return LoadingIndicator();   }
 
@@ -595,7 +596,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       BaseModal({
         id: "addUserModal",
         showModal: this.props.showModal,
-        disableOkBtn: !validForm || newUserNeeded, //this.state.invalidForm === true || this.state.roleValid === false,
+        disableOkBtn: !validForm || (this.state.mode !== 'Add' && (newUserNeeded || this.state.alternativeDACMemberUser === '')),
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
         imgSrc: this.state.mode === 'Add' ? "/images/icon_add_user.png" : "/images/icon_edit_user.png",
@@ -652,7 +653,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       id: "chk_member",
                       className: "checkbox-inline user-checkbox",
                       checked: isMember,
-                      // defaultChecked: isMember,
                       onChange: this.memberChanged,
                       disabled: isMemberDisabled,
                     }),
@@ -665,7 +665,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       id: "chk_chairperson",
                       className: "checkbox-inline user-checkbox",
                       checked: isChairPerson,
-                      // defaultChecked: isChairPerson,
                       onChange: this.chairpersonChanged,
                       disabled: isChairPersonDisabled
                     }),
@@ -677,7 +676,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_alumni",
                       checked: isAlumni,
-                      // defaultChecked: isAlumni,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.alumniChanged,
                       disabled: isAlumniDisabled,
@@ -694,7 +692,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_admin",
                       checked: isAdmin,
-                      // defaultChecked: isAdmin,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.adminChanged,
                     }),
@@ -706,7 +703,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_researcher",
                       checked: isResearcher,
-                      // defaultChecked: isResearcher,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.researcherChanged,
                       disabled: isResearcherDisabled
@@ -719,7 +715,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_dataOwner",
                       checked: isDataOwner,
-                      // defaultChecked: isDataOwner,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.dataOwnerChanged,
                     }),
@@ -730,9 +725,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
             div({ className: "form-group" }, [
               div({
-                isRendered: roles.includes('Admin'),
+                isRendered: this.state.rolesState.ADMIN,
                 className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4",
-                style: { 'paddingLeft': '26px' }
+                style: { 'paddingLeft': '30px' }
               }, [
                   div({ className: "checkbox" }, [
                     input({
@@ -740,7 +735,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       className: "checkbox-inline user-checkbox",
                       checked: emailPreference,
-                      // defaultChecked: emailPreference,
                       onChange: this.emailPreferenceChanged,
                     }),
                     label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "chk_emailPreference" }, ["Disable Admin email notifications"])
@@ -774,9 +768,13 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               label({ id: "lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
                 select({
-                  id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser,
-                  required: this.state.delegateDacUser.needsDelegation, onChange: this.selectAlternativeDACMemberUser
+                  id: "sel_alternativeUser",
+                  className: "form-control col-lg-12",
+                  value: this.state.alternativeDACMemberUser,
+                  required: this.state.delegateDacUser.needsDelegation,
+                  onChange: this.selectAlternativeDACMemberUser,
                 }, [
+                    option({ value: '' }, [""]),
                     this.state.delegateDacUser.delegateCandidates.map((user, uIndex) => {
                       return h(Fragment, { key: uIndex }, [
                         option({ value: JSON.stringify(user) }, [user.displayName])
