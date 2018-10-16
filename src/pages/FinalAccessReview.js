@@ -637,23 +637,24 @@ class FinalAccessReview extends Component {
               }),
             ]),
 
-          div({
-            isRendered: this.state.hasUseRestriction === true, className: "jumbotron box-vote-results access-background-lighter col-lg-6 col-md-6 col-sm-12 col-xs-12"
-          }, [
+          this.q2VoteBox(agreementData)
+          // div({
+          //   isRendered: this.state.hasUseRestriction === true, className: "jumbotron box-vote-results access-background-lighter col-lg-6 col-md-6 col-sm-12 col-xs-12"
+          // }, [
 
-              SubmitVoteBox({
-                id: "agreement",
-                color: "access",
-                title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
-                isDisabled: false,
-                agreementData: agreementData,
-                voteStatus: this.state.voteAgreement.vote,
-                rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
-                showAlert: this.state.showQ2Alert,
-                alertMessage: this.state.alertQ2Message,
-                action: { label: "Vote", handler: this.logVoteAgreement }
-              }),
-            ]),
+          //     SubmitVoteBox({
+          //       id: "agreement",
+          //       color: "access",
+          //       title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
+          //       isDisabled: false,
+          //       agreementData: agreementData,
+          //       voteStatus: this.state.voteAgreement.vote,
+          //       rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
+          //       showAlert: this.state.showQ2Alert,
+          //       alertMessage: this.state.alertQ2Message,
+          //       action: { label: "Vote", handler: this.logVoteAgreement }
+          //     }),
+          //   ]),
         ]),
 
         ConfirmationDialog({
@@ -834,6 +835,32 @@ class FinalAccessReview extends Component {
       ])
     );
   }
+
+  q2VoteBox = (agreementData) => {
+    let box = null;
+    if (this.state.hasUseRestriction === true) {
+
+      box = div({
+        isRendered: this.state.hasUseRestriction === true, className: "jumbotron box-vote-results access-background-lighter col-lg-6 col-md-6 col-sm-12 col-xs-12"
+      }, [
+
+          SubmitVoteBox({
+            id: "agreement",
+            color: "access",
+            title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
+            isDisabled: false,
+            agreementData: agreementData,
+            voteStatus: this.state.voteAgreement.vote,
+            rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
+            showAlert: this.state.showQ2Alert,
+            alertMessage: this.state.alertQ2Message,
+            action: { label: "Vote", handler: this.logVoteAgreement }
+          }),
+        ]);
+    }
+    return box;
+  }
+
 }
 
 export default FinalAccessReview;
