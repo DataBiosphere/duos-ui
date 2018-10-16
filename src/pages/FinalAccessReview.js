@@ -55,15 +55,16 @@ class FinalAccessReview extends Component {
 
   reminderDARAlert = (index) => {
     this.setState({
-      showAlert2: true,
-      alertMessage2: 'Please log a vote on Decision Agreement.'
+      showQ1Alert: true,
+      alertQ1Message: 'Please log a vote on Decision Agreement.'
+
     });
   };
 
   reminderAgreeAlert = (index) => {
     this.setState({
-      showAlert1: true,
-      alertMessage1: 'Please log a vote on Final Access Decision.'
+      showQ2Alert: true,
+      alertQ2Message: 'Please log a vote on Final Access Decision.'
     });
   };
 
@@ -95,26 +96,26 @@ class FinalAccessReview extends Component {
       vote.vote = this.state.tmpVote;
       vote.rationale = this.state.tmpRationale;
 
+      // vote 
       await Votes.updateFinalAccessDarVote(this.state.referenceId, vote);
-      await this.setState(prev => {
-        prev.electionAccess.status = 'Closed';
-        return prev;
-      });
 
-      await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
+      if (this.state.agreementAlreadyVote || this.state.hideMatch) {
+        await this.closeElection();
+      }
 
-      this.setState({
+      await this.setState({
         alreadyVote: true,
         showConfirmDialog: false
-      }, () => {
-        if (this.state.agreementAlreadyVote || this.state.hideMatch) {
-          this.props.history.push('/chair_console');
-        } else {
-          this.reminderDARAlert();
-        }
       });
 
+      if (this.state.agreementAlreadyVote || this.state.hideMatch) {
+        this.props.history.push('/chair_console');
+      } else {
+        this.reminderDARAlert();
+      }
+
     } else {
+      // vote cancelled 
       this.setState(prev => {
         prev.showConfirmDialog = false;
         return prev;
@@ -142,19 +143,26 @@ class FinalAccessReview extends Component {
       voteAgreement.finalRationale = this.state.tmpAgreementRationale;
       voteAgreement.vote = this.state.tmpAgreementVote;
       voteAgreement.rationale = this.state.tmpAgreementRationale;
+
+      // vote
       await Votes.updateFinalAccessDarVote(this.state.referenceId, voteAgreement);
 
-      this.setState({
+      if (this.state.alreadyVote) {
+        await this.closeElection();
+      }
+
+      await this.setState({
         agreementAlreadyVote: true,
         showConfirmAgreementDialog: false
-      }, () => {
-        if (this.state.alreadyVote) {
-          this.props.history.push('/chair_console');
-        } else {
-          this.reminderAgreeAlert();
-        }
       });
+
+      if (this.state.alreadyVote) {
+        this.props.history.push('/chair_console');
+      } else {
+        this.reminderAgreeAlert();
+      }
     } else {
+      // vote cancelled
       this.setState(prev => {
         prev.showConfirmAgreementDialog = false;
         return prev;
@@ -162,13 +170,26 @@ class FinalAccessReview extends Component {
     }
   };
 
-  initialState() {
+  closeElection = async () => {
+
+    // change election status 
+    await this.setState(prev => { prev.electionAccess.status = 'Closed'; });
+
+    // update election
+    await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
+  };
+
+
+  initialState = () => {
     return {
       loading: true,
+      alreadyVote: false,
+      agreementAlreadyVote: false,
       vote: {},
       voteAgreement: {}
     };
-  }
+  };
+
 
   download = (fileName, text) => {
     const break_line = '\r\n \r\n';
@@ -610,8 +631,8 @@ class FinalAccessReview extends Component {
                 isDisabled: false,
                 voteStatus: this.state.vote.vote,
                 rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
-                showAlert: this.state.showAlert2,
-                alertMessage: this.state.alertMessage2,
+                showAlert: this.state.showQ1Alert,
+                alertMessage: this.state.alertQ1Message,
                 action: { label: "Vote", handler: this.logVote }
               }),
             ]),
@@ -628,8 +649,8 @@ class FinalAccessReview extends Component {
                 agreementData: agreementData,
                 voteStatus: this.state.voteAgreement.vote,
                 rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
-                showAlert: this.state.showAlert1,
-                alertMessage: this.state.alertMessage1,
+                showAlert: this.state.showQ2Alert,
+                alertMessage: this.state.alertQ2Message,
                 action: { label: "Vote", handler: this.logVoteAgreement }
               }),
             ]),
@@ -650,7 +671,7 @@ class FinalAccessReview extends Component {
           ]),
 
         ConfirmationDialog({
-          title: 'Post Final Access Decision?',
+          title: 'Post Decision Agreement?',
           color: 'access',
           showModal: this.state.showConfirmAgreementDialog,
           action: {
@@ -659,7 +680,7 @@ class FinalAccessReview extends Component {
           }
         }, [
             div({ className: "dialog-description" }, [
-              span({}, ["Are you sure you want to post this Final Access Decision?"]),
+              span({}, ["Are you sure you want to post this Decision Agreement?"]),
             ])
           ]),
 
