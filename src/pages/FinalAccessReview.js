@@ -80,11 +80,18 @@ class FinalAccessReview extends Component {
       prev.tmpVote = answer;
       prev.tmpRationale = rationale;
       prev.showConfirmDialog = true;
+      prev.q1OkBtnDisabled = false;
+      prev.q1NoBtnDisabled = false;
       return prev;
     });
   }
 
   confirmationHandlerOK = (answer) => async (e) => {
+
+    this.setState({
+      q1OkBtnDisabled: true,
+      q1NoBtnDisabled: true,
+    });
 
     if (answer === true) {
 
@@ -134,12 +141,19 @@ class FinalAccessReview extends Component {
       prev.tmpAgreementVote = answer;
       prev.tmpAgreementRationale = rationale;
       prev.showConfirmAgreementDialog = true;
+      prev.q2OkBtnDisabled = false;
+      prev.q2NoBtnDisabled = false;
       return prev;
     });
 
   }
 
   confirmationAgreementHandlerOK = (answer) => async (e) => {
+
+    this.setState({
+      q2OkBtnDisabled: true,
+      q2NoBtnDisabled: true,
+    });
 
     if (answer === true) {
 
@@ -212,7 +226,11 @@ class FinalAccessReview extends Component {
       alreadyVote: false,
       agreementAlreadyVote: false,
       vote: {},
-      voteAgreement: {}
+      voteAgreement: {},
+      q1OkBtnDisabled: false,
+      q1NoBtnDisabled: false,
+      q2OkBtnDisabled: false,
+      q2NoBtnDisabled: false
     };
   };
 
@@ -663,29 +681,15 @@ class FinalAccessReview extends Component {
             ]),
 
           this.q2VoteBox(agreementData)
-          // div({
-          //   isRendered: this.state.hasUseRestriction === true, className: "jumbotron box-vote-results access-background-lighter col-lg-6 col-md-6 col-sm-12 col-xs-12"
-          // }, [
 
-          //     SubmitVoteBox({
-          //       id: "agreement",
-          //       color: "access",
-          //       title: "Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?",
-          //       isDisabled: false,
-          //       agreementData: agreementData,
-          //       voteStatus: this.state.voteAgreement.vote,
-          //       rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
-          //       showAlert: this.state.showQ2Alert,
-          //       alertMessage: this.state.alertQ2Message,
-          //       action: { label: "Vote", handler: this.logVoteAgreement }
-          //     }),
-          //   ]),
         ]),
 
         ConfirmationDialog({
           title: 'Post Final Access Decision?',
           color: 'access',
           showModal: this.state.showConfirmDialog,
+          disableNoBtn: this.state.q1NoBtnDisabled,
+          disableOkBtn: this.state.q1OkBtnDisabled,
           action: {
             label: "Yes",
             handler: this.confirmationHandlerOK
@@ -700,6 +704,8 @@ class FinalAccessReview extends Component {
           title: 'Post Decision Agreement?',
           color: 'access',
           showModal: this.state.showConfirmAgreementDialog,
+          disableNoBtn: this.state.q2NoBtnDisabled,
+          disableOkBtn: this.state.q2OkBtnDisabled,
           action: {
             label: "Yes",
             handler: this.confirmationAgreementHandlerOK
