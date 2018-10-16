@@ -610,8 +610,8 @@ class FinalAccessReview extends Component {
                 isDisabled: false,
                 voteStatus: this.state.vote.vote,
                 rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
-                showAlert: this.state.showAlert1,
-                alertMessage: this.state.alertMessage1,
+                showAlert: this.state.showAlert2,
+                alertMessage: this.state.alertMessage2,
                 action: { label: "Vote", handler: this.logVote }
               }),
             ]),
@@ -628,8 +628,8 @@ class FinalAccessReview extends Component {
                 agreementData: agreementData,
                 voteStatus: this.state.voteAgreement.vote,
                 rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
-                showAlert: this.state.showAlert2,
-                alertMessage: this.state.alertMessage2,
+                showAlert: this.state.showAlert1,
+                alertMessage: this.state.alertMessage1,
                 action: { label: "Vote", handler: this.logVoteAgreement }
               }),
             ]),
