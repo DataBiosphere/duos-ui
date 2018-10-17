@@ -13,6 +13,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   dulPageCount = 5;
   accessPageCount = 5;
 
+  searchDulCases = '';
+  searchAccessCases = '';
+
   constructor(props) {
     super(props);
     this.state = {
