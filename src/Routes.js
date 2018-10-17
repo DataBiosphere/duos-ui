@@ -71,7 +71,7 @@ export default ( props ) => (
     <AuthenticatedRoute path='/dul_review/:voteId/:consentId' component={DulReview} props={props} rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path='/dul_preview/:consentId' component={DulPreview} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path='/dul_collect/:consentId' component={DulCollect} props={props} rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
-    <AuthenticatedRoute path='/final_access_review' component={FinalAccessReview} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
+    <AuthenticatedRoute path='/final_access_review/:referenceId/:electionId' component={FinalAccessReview} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path='/reviewed_cases' component={ReviewedCases} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <Route path='*' component={NotFound} />
   </Switch>
