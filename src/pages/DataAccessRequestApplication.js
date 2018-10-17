@@ -798,7 +798,7 @@ class DataAccessRequestApplication extends Component {
                       ]),
 
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                        label({ className: "control-label" }, ["Researcher Gate ID"]),
+                        label({ className: "control-label" }, ["ResearchGate ID"]),
                         input({
                           type: "text",
                           name: "researcherGate",

@@ -340,7 +340,7 @@ class AccessReview extends Component {
                       ]),
                       div({ isRendered: this.state.darInfo.hasAdminComment, className: "row no-margin" }, [
                         span({}, [
-                          label({ className: "control-label no-padding" }, ["Comment: "]),
+                          label({ className: "control-label no-padding" }, ["Comments: "]),
                           span({ id: "lbl_adminComment", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
                         ]),
                       ]),
