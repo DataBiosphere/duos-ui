@@ -7,6 +7,7 @@ import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
 import * as Utils from "../libs/utils";
 import { LoadingIndicator } from '../components/LoadingIndicator';
+import _ from 'lodash/fp'
 
 class ReviewedCases extends Component {
 
@@ -48,7 +49,27 @@ class ReviewedCases extends Component {
 
   }
 
-  sort = (val) => {
+  sort = (sortKey) => (event) => {
+    const data = this.state.electionsList.dul;
+    console.log("data ", data);
+    // data.sort(function(a, b){
+    //   return a.version-b.version
+    // })
+    const prueba = _.sort(data, "displayId");
+    console.log("prueba", prueba);
+
+    // data.reverse();
+    // data.reverse((a,b) => {
+    //   console.log("aa! ", a);
+    //   a.displayId.localeCompare(b.displayId);
+    // });
+
+    // console.log("SORTED ", _.sortBy(data, sortKey));
+    // console.log("data2 ", data2);
+    this.setState(prev => {
+      prev.electionsList.dul= data;
+      return prev;
+    })
     // const filename = val.target;
   };
 
@@ -142,7 +163,10 @@ class ReviewedCases extends Component {
             }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-            h(SearchBox, { id: 'reviewedCasesDul', searchHandler: this.handleSearchDul, pageHandler: this.handleDulPageChange, color: 'dul' })
+            h(SearchBox, { id: 'reviewedCasesDul',
+              searchHandler: this.handleSearchDul,
+              pageHandler: this.handleDulPageChange,
+              color: 'dul' })
           ])
         ]),
 
