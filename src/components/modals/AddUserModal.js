@@ -5,6 +5,8 @@ import { User } from "../../libs/ajax";
 import { Alert } from '../Alert';
 import { USER_ROLES_UPPER } from '../../libs/utils';
 
+const ADMIN_ROLE_ID = 4;
+
 export const AddUserModal = hh(class AddUserModal extends Component {
 
   constructor(props) {
@@ -66,7 +68,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       return;
     }
 
-    let rolesState = {}
+    let rolesState = {};
     rolesState[USER_ROLES_UPPER.admin] = false;
     rolesState[USER_ROLES_UPPER.alumni] = false;
     rolesState[USER_ROLES_UPPER.chairperson] = false;
@@ -77,9 +79,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (this.props.user && this.props.user !== undefined) {
 
       const user = await User.getByEmail(this.props.user.email);
+      let adminEmailPreference = false;
 
       user.roles.forEach(role => {
         rolesState[role.name.toUpperCase()] = true;
+        if (role.name === 'Admin') adminEmailPreference = role.emailPreference;
       });
 
       this.setState({
@@ -91,7 +95,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         rolesState: Object.assign({}, rolesState),
         originalRolesState: Object.assign({}, rolesState),
         originalRoles: user.roles.slice(),
-        emailPreference: false,
+        emailPreference: adminEmailPreference,
         delegateDacUser: {
           needsDelegation: false,
           delegateCandidates: []
@@ -178,7 +182,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         if (key === USER_ROLES_UPPER.admin) {
           updatedRoles.push({
             name: key,
-            emailPreference: this.state.emailPreference
+            emailPreference: this.state.emailPreference,
+            roleId: ADMIN_ROLE_ID
           });
         } else updatedRoles.push({
           name: key
