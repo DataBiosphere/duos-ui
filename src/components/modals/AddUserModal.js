@@ -360,9 +360,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const checkState = e.target.checked;
 
     // need to set the role in roles
+    const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
     if (this.state.wasChairperson) {
       if (!checkState) {
-        const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
         if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES_UPPER.chairperson)) {
           this.setState(prev => {
             prev.delegateMemberRequired = false;
@@ -387,7 +387,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
-      if (checkState) {
+      // const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
+      if (checkState && result.needsDelegation) {
         this.changeChairpersonRoleAlert();
       }
       else {
