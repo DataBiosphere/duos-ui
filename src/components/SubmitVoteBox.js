@@ -21,7 +21,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   }
 
   logVote = (e) => {
-    if (this.state.voteStatus !== undefined) {
+    if (this.state.voteStatus != null) {
       this.setState({
         enableVoteButton: false,
         requiredMessage: false
@@ -47,11 +47,11 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   // TODO el botón debe estar siempre habilitado
   yesNoChange = (e, name, value) => {
-    this.setState({ voteStatus: value });
+    this.setState({ voteStatus: value, requiredMessage: false });
   };
 
   optionsChange = (e, name, value) => {
-    this.setState({ voteStatus: value });
+    this.setState({ voteStatus: value, requiredMessage: false });
   };
 
   changeRationale = (e) => {
@@ -129,11 +129,10 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   name: "rad_" + this.props.id,
                   onChange: this.optionsChange
                 }),
+                div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
+                  Alert({ id: "required", type: "danger", title: "Required Field" })
+                ]),
               ]),
-              span({
-                isRendered: this.state.requiredMessage,
-                className: "no-padding col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span"
-              }, ["Required field"]),
             ]),
 
             div({ className: "form-group" }, [
