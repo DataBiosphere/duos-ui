@@ -9,18 +9,25 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      //      value: '',
       currentUser: {},
-      enableVoteButton: false,
+      enableVoteButton: true,
       voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
       showDialogSubmit: false,
-      rationale: this.props.rationale != null ? this.props.rationale : ''
+      rationale: this.props.rationale != null ? this.props.rationale : '',
+      requiredMessage: false
     }
   }
 
   logVote = (e) => {
-    this.setState({enableVoteButton: false});
-    this.props.action.handler(this.state.voteStatus, this.state.rationale);
+    if (this.state.voteStatus !== undefined) {
+      this.setState({
+        enableVoteButton: false,
+        requiredMessage: false
+      });
+      this.props.action.handler(this.state.voteStatus, this.state.rationale);
+    } else {
+      this.setState({requiredMessage: true});
+    }
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -28,25 +35,25 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       return {
         flag: true,
         rationale: nextProps.rationale != null ? nextProps.rationale : '',
-        voteStatus: nextProps.voteStatus
+        voteStatus: nextProps.voteStatus,
+        enableVoteButton: true
       };
+    } else {
+      return {enableVoteButton: true};
     }
-    return null;
   }
 
+  // TODO el botón debe estar siempre habilitado
   yesNoChange = (e, name, value) => {
-    this.setState({ voteStatus: value, enableVoteButton: true });
+    this.setState({ voteStatus: value });
   };
 
   optionsChange = (e, name, value) => {
-    this.setState({ voteStatus: value, enableVoteButton: true });
+    this.setState({ voteStatus: value });
   };
 
   changeRationale = (e) => {
     this.setState({ rationale: e.target.value });
-    if (this.state.voteStatus !== undefined) {
-       this.setState({ enableVoteButton: true });
-    }
   };
 
   render() {
@@ -121,6 +128,10 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   onChange: this.optionsChange
                 }),
               ]),
+              span({
+                isRendered: this.state.requiredMessage,
+                className: "no-padding col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span"
+              }, ["Required field"]),
             ]),
 
             div({ className: "form-group" }, [
@@ -154,7 +165,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                 button({
                   type: 'button',
                   id: "btn_submit_" + this.props.id,
-                  disabled: voteStatus === null || !enableVoteButton || this.props.disabled === true,
+                  disabled: !enableVoteButton || this.props.disabled === true,
                   onClick: this.logVote,
                   className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
                 }, [this.props.action.label]),
