@@ -91,6 +91,8 @@ class FinalAccessReview extends Component {
     this.setState({
       q1OkBtnDisabled: true,
       q1NoBtnDisabled: true,
+      q1AlertTitle: undefined,
+      q1AlertMessage: '',
     });
 
     if (answer === true) {
@@ -146,6 +148,8 @@ class FinalAccessReview extends Component {
       prev.showConfirmAgreementDialog = true;
       prev.q2OkBtnDisabled = false;
       prev.q2NoBtnDisabled = false;
+      prev.q2AlertTitle = undefined;
+      prev.q2AlertMessage = '';
       return prev;
     });
   }
