@@ -8,7 +8,6 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
 import { SearchBox } from '../components/SearchBox';
 import ReactTooltip from 'react-tooltip';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 const limit = 10;
 
@@ -17,7 +16,6 @@ class AdminManageDul extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       currentPage: 1,
       showModal: false,
       value: '',
@@ -49,7 +47,6 @@ class AdminManageDul extends Component {
   async getConsentManage() {
     const duls = await Consent.findConsentManage();
     this.setState(prev => {
-      prev.loading = false;
       prev.currentPage = 1;
       prev.electionsList.dul = duls;
       prev.disableOkBtn = false;
@@ -61,6 +58,7 @@ class AdminManageDul extends Component {
   }
 
   componentDidMount() {
+    console.log('did mount ............');
     this.getConsentManage();
   }
 
@@ -270,8 +268,6 @@ class AdminManageDul extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentPage, limit, searchDulText } = this.state;
 

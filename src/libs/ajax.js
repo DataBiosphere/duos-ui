@@ -1,5 +1,6 @@
 import _ from 'lodash/fp'
 import { Config } from './config';
+import { spinnerService } from './spinner-service';
 
 const dataTemplate = {
   accessTotal: [
@@ -968,7 +969,9 @@ export const Votes = {
 };
 
 const fetchOk = async (...args) => {
+  spinnerService.showAll();
   const res = await fetch(...args);
+  spinnerService.hideAll();
   if (!res.ok && res.status === 401) {
     window.location.href = '/login';
   }

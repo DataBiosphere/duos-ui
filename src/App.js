@@ -5,51 +5,55 @@ import DuosFooter from './components/DuosFooter';
 import { div, h } from 'react-hyperscript-helpers';
 import './App.css';
 import Routes from "./Routes"
-// import { Storage } from './libs/storage';
+
+import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
 
 class App extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      // isLogged: false
+      loading: false
     };
-    // this.loginState = this.loginState.bind(this);
+  }
+
+  showSpinner = () => {
+    this.setState({
+      loading: true
+    });
+  }
+
+  hideSpinner = () => {
+    this.setState({
+      loading: false
+    });
   }
 
   componentWillMount() {
     Modal.setAppElement(document.getElementById('modal-root'));
   }
 
-  // loginState(isLogged) {
-  //   this.setState({ isLogged: isLogged }, function () {
-  //     if (isLogged) {
-  //       Storage.setUserIsLogged(isLogged);
-  //     } else {
-  //       Storage.clearStorage();
-  //     }
-  //   });
-  // }
-
   render() {
 
+    const { loading } = this.state;
+
     return (
-      div({ className: "body"}, [
+      div({ className: "body" }, [
         div({ className: "wrap" }, [
           div({ className: "main" }, [
             h(DuosHeader, {
-              // isLogged: this.state.isLogged,
-              // loginState: this.loginState,
             }),
-
+            h(Spinner, {
+              name: "mainSpinner", group: "duos", loadingImage: "/images/loading-indicator.svg"
+            }),
             h(Routes, {
-              // isLogged: Storage.userIsLogged(),
-              // loginState: this.loginState,
+              isRendered: !loading
             }),
           ])
         ]),
         h(DuosFooter, {})
       ])
+
     );
   }
 }

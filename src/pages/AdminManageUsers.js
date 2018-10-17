@@ -6,7 +6,6 @@ import { User } from "../libs/ajax";
 import { PaginatorBar } from '../components/PaginatorBar';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AdminManageUsers extends Component {
 
@@ -15,7 +14,6 @@ class AdminManageUsers extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       searchText: '',
       userList: [],
       showAddUserModal: false,
@@ -44,7 +42,6 @@ class AdminManageUsers extends Component {
     });
 
     this.setState(prev => {
-      prev.loading = false;
       prev.currentPage = 1;
       prev.userList = userList;
       return prev;
@@ -101,7 +98,6 @@ class AdminManageUsers extends Component {
   okModal = async (name) => {
     this.setState(prev => { 
       prev.showAddUserModal = false; 
-      prev.loading = true;
       return prev; 
     }, () => {
       this.getUsers();
@@ -129,8 +125,6 @@ class AdminManageUsers extends Component {
   }
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentPage, searchUserText } = this.state;
 

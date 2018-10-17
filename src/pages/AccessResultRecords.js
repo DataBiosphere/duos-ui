@@ -6,7 +6,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
-import { LoadingIndicator } from '../components/LoadingIndicator';
+
 import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
 import { Alert } from '../components/Alert';
@@ -22,18 +22,68 @@ class AccessResultRecords extends Component {
     const currentUser = await Storage.getCurrentUser();
     this.loadData();
     this.setState({
-      loading: true,
       currentUser: currentUser
     });
   }
 
   initialState() {
     return {
-      loading: true,
+      createDate: null,
+      enableFinalButton: true,
+      enableAgreementButton: true,
+      hasUseRestriction: true,
+      projectTitle: '',
+      darCode: '',
       isQ1Expanded: false,
       isQ2Expanded: false,
       isDulExpanded: false,
-    };
+      match: '-1',
+      election: {
+        // finalVote: '0',
+        // finalRationale: '',
+        // finalVoteDate: '2018-08-30'
+      },
+      electionAccess: {
+        // finalVote: '0',
+        // finalRationale: 'lalala',
+        // finalVoteDate: '2018-08-30'
+      },
+      electionRP: {
+        // finalVote: '0',
+        // finalRationale: '',
+        // finalVoteDate: '2018-08-30'
+      },
+      voteAgreement: {
+        // vote: '0',
+        // rationale: '',
+      },
+      dar: {
+        rus: "",
+      },
+      darInfo: {
+        havePI: false,
+        pi: '.',
+        rus: "",
+        sDar: "",
+        profileName: '',
+        status: '',
+        hasAdminComment: false,
+        adminComment: '',
+        institution: '',
+        department: '',
+        city: '',
+        country: '',
+        purposeManualReview: false,
+        researchTypeManualReview: false,
+        hasDiseases: true,
+        purposeStatements: [
+        ],
+        researchType: [
+        ],
+        diseases: [
+        ]
+      }
+    }
   }
 
   chunk(arr, size) {
@@ -133,8 +183,6 @@ class AccessResultRecords extends Component {
   }
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { projectTitle, darCode, dar, darInfo, hasUseRestriction, sDAR, mrDAR, sDUL, mrDUL, showRPaccordion } = this.state;
 
@@ -258,8 +306,8 @@ class AccessResultRecords extends Component {
             div({ className: "row" }, [
               label({ className: "col-lg-3 col-md-3 col-sm-2 col-xs-4 control-label vote-label access-color" }, ["Vote: "]),
               div({ id: "lbl_resultMatch", className: "col-lg-9 col-md-9 col-sm-3 col-xs-3 vote-label bold" }, [
-                span({ isRendered: voteIsYes  }, ["YES"]),
-                span({ isRendered: voteIsNo   }, ["NO"]),
+                span({ isRendered: voteIsYes }, ["YES"]),
+                span({ isRendered: voteIsNo }, ["NO"]),
                 span({ isRendered: voteIsNull }, ['---']),
                 span({ className: "cancel-color", isRendered: voteFailed }, [
                   "Automated Vote System Failure. Please report this issue via the \"Request Help\" link"
@@ -330,7 +378,7 @@ class AccessResultRecords extends Component {
     }
 
     return (
-      this.state.voteList.map((row, rIndex) => {
+      voteList.map((row, rIndex) => {
         return h(Fragment, { key: 'votel_' + rIndex }, [
           div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
             row.map((vm, vIndex) => {
@@ -610,27 +658,65 @@ class AccessResultRecords extends Component {
   async loadData() {
     const referenceId = this.props.match.params.referenceId;
     const electionId = this.props.match.params.electionId;
+
     const darElection = await Election.findElectionById(electionId);
-    const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
-    const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
-    const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
     const darInfo = await DAR.describeDar(darElection.referenceId);
     if (darInfo.purposeStatements === undefined) {
       darInfo.purposeStatements = [];
     }
 
     this.setState({
-      loading: true,
       electionId: electionId,
       referenceId: referenceId,
-      hasUseRestriction,
-      finalDACVote: finalDACVote,
+      darElection: darElection,
       darInfo: darInfo,
-      darElection: darElection
     });
 
-    const data = await Election.findDataAccessElectionReview(electionId, false);
-    await this.showDarData(data);
+    const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
+    const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
+    this.setState({
+      // electionId: electionId,
+      // referenceId: referenceId,
+      hasUseRestriction,
+      // finalDACVote: finalDACVote,
+      // darInfo: darInfo,
+      // darElection: darElection
+    });
+
+    // const finalDACVote = await 
+    Votes.getDarFinalAccessVote(electionId).then(
+      data => {
+        this.setState({
+          finalDACVote: data
+        });
+      }
+    );
+
+    // this.setState({
+    //   // electionId: electionId,
+    //   // referenceId: referenceId,
+    //   hasUseRestriction,
+    //   // finalDACVote: finalDACVote,
+    //   // darInfo: darInfo,
+    //   // darElection: darElection
+    // });
+
+    //const data = await 
+    Election.findDataAccessElectionReview(electionId, false).then(
+      data => {
+        // await
+        this.showDarData(data);
+        // const data3 = await 
+        Election.findElectionReviewById(data.associatedConsent.electionId, data.associatedConsent.consentId).then(
+          data3 => {
+            this.setState({
+              electionReview: data3
+            });
+            this.showDULData(data3);
+            this.vaultVote(data3.consent.consentId);
+          });
+      });
+
     const data2 = await Election.findRPElectionReview(electionId, false);
     if (data2.election !== undefined) {
       let electionRP = data2.election;
@@ -650,21 +736,39 @@ class AccessResultRecords extends Component {
       });
     }
 
-    const data3 = await Election.findElectionReviewById(data.associatedConsent.electionId, data.associatedConsent.consentId)
-    this.setState({
-      electionReview: data3
-    })
-    await this.showDULData(data3);
-    await this.vaultVote(data3.consent.consentId);
+
   }
 
   async showDarData(electionReview) {
-    const dar = await DAR.getDarFields(electionReview.election.referenceId, "rus")
-    let tmp = await DAR.getDarFields(electionReview.election.referenceId, "dar_code");
-    const darCode = tmp.dar_code;
+    // const dar = await
+    DAR.getDarFields(electionReview.election.referenceId, "rus").then(
+      data => {
+        this.setState({
+          dar: data
+        });
+      }
+    );
 
-    tmp = await DAR.getDarFields(electionReview.election.referenceId, "projectTitle");
-    const projectTitle = tmp.projectTitle;
+    // let tmp = await 
+    DAR.getDarFields(electionReview.election.referenceId, "dar_code").then(
+      data => {
+        this.setState({
+          darCode: data.dar_code
+        });
+      }
+    );
+
+    // const darCode = tmp.dar_code;
+
+    // tmp = await 
+    DAR.getDarFields(electionReview.election.referenceId, "projectTitle").then(
+      data => {
+        this.setState({
+          projectTitle: data.projectTitle
+        });
+      }
+    );
+    // const projectTitle = tmp.projectTitle;
 
     let electionAccess = electionReview.election;
     if (electionReview.election.finalRationale === null) {
@@ -680,9 +784,9 @@ class AccessResultRecords extends Component {
     const sDAR = electionReview.election.translatedUseRestriction;
 
     this.setState({
-      dar: dar,
-      darCode: darCode,
-      projectTitle: projectTitle,
+      // dar: dar,
+      // darCode: darCode,
+      // projectTitle: projectTitle,
       electionAccess: electionAccess,
       status: status,
       voteAccessList: voteAccessList,
@@ -718,19 +822,16 @@ class AccessResultRecords extends Component {
         hideMatch: false,
         match: "-1",
         createDate: data.createDate,
-        loading: false
       });
     } else if (data.match !== null && data.match !== undefined) {
       this.setState({
         hideMatch: false,
         match: data.match,
         createDate: data.createDate,
-        loading: false
       });
     } else {
       this.setState({
         hideMatch: true,
-        loading: false
       });
     }
   }

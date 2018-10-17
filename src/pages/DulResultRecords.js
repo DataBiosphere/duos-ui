@@ -4,10 +4,9 @@ import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { Election, Files, Votes } from '../libs/ajax';
+import { Election, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Config } from '../libs/config';
-import * as Utils from '../libs/utils';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulResultRecords extends Component {

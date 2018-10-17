@@ -30,7 +30,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     rolesState[USER_ROLES_UPPER.researcher] = false;
 
     initialValue = {
-      loading: true,
       displayName: '',
       email: '',
       displayNameValid: false,
@@ -112,7 +111,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             wasResearcher: rolesState[USER_ROLES_UPPER.researcher],
             displayNameValid: r1.validity.valid,
             emailValid: r2.validity.valid,
-            loading: false
           });
         });
     } else {
@@ -138,7 +136,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         wasMember: false,
         wasDataOwner: false,
         wasResearcher: false,
-        loading: false
       },
         () => {
           let r1 = this.nameRef.current;
@@ -503,24 +500,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       prev.alerts = [];
       return prev;
     });
-    // const alerts = this.state.alerts.filter(alert => alert.alertType !== alertType);
-    // this.setState({
-    //   alerts: alerts
-    // });
-
-    // var l = this.alerts.length;
-    // var i = 0;
-    // while (i < l) {
-    //   if (this.alerts[i].alertType === role) {
-    //     // this.alerts.splice(i, 1);
-    //     this.setState(prev => {
-    //       prev.newAlternativeUserNeeded[role] = false;
-    //       return prev;
-    //     });
-    //     return;
-    //   }
-    //   i++;
-    // }
   };
 
   handleChange(event) {
@@ -566,8 +545,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     const { displayName, email, roles, rolesState, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
 
-    // if (loading) {  return LoadingIndicator();   }
-
     const validForm = displayNameValid && emailValid && roleValid;
 
     const isChairPerson = rolesState[USER_ROLES_UPPER.chairperson];
@@ -586,7 +563,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       BaseModal({
         id: "addUserModal",
         showModal: this.props.showModal,
-        disableOkBtn: !validForm, //this.state.invalidForm === true || this.state.roleValid === false,
+        disableOkBtn: !validForm, 
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
         imgSrc: this.state.mode === 'Add' ? "/images/icon_add_user.png" : "/images/icon_edit_user.png",

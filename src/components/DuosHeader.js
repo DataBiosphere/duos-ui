@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { nav, button, ul, li, img, small, hr, div, span, a, h } from 'react-hyperscript-helpers';
+import { nav, ul, li, img, small, hr, div, span, a, h } from 'react-hyperscript-helpers';
 import { HelpModal } from '../components/modals/HelpModal';
 import { Storage } from '../libs/storage';
 import { withRouter } from "react-router-dom";
@@ -45,7 +45,6 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-    let isAlumni = false;
 
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
@@ -57,7 +56,6 @@ class DuosHeader extends Component {
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
-      isAlumni = currentUser.isAlumni;
     }
 
     return (
