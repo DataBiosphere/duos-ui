@@ -7,7 +7,6 @@ import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
 import * as Utils from "../libs/utils";
 import { LoadingIndicator } from '../components/LoadingIndicator';
-import _ from 'lodash/fp'
 
 class ReviewedCases extends Component {
 
@@ -172,10 +171,7 @@ class ReviewedCases extends Component {
             }),
           ]),
           div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
-            h(SearchBox, { id: 'reviewedCasesDul',
-              searchHandler: this.handleSearchDul,
-              pageHandler: this.handleDulPageChange,
-              color: 'dul' })
+            h(SearchBox, { id: 'reviewedCasesDul', searchHandler: this.handleSearchDul, pageHandler: this.handleDulPageChange, color: 'dul' })
           ])
         ]),
 
