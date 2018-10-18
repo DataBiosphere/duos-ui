@@ -128,11 +128,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   optionValues: this.props.radioValues,
                   name: "rad_" + this.props.id,
                   onChange: this.optionsChange
-                }),
-                div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
-                  Alert({ id: "required", type: "danger", title: "Required Field" })
-                ]),
-              ]),
+                })
+              ])
             ]),
 
             div({ className: "form-group" }, [
@@ -152,8 +149,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   placeholder: "Optional: describe your rationale or add comments here (please be as specific as possible)",
                   value: rationale,
                   onChange: this.changeRationale
-                }),
-              ]),
+                })
+              ])
             ]),
 
             div({ className: "form-group form-group-bottom" }, [
@@ -161,6 +158,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                 div({ isRendered: this.props.showAlert === true, className: "vote-box-alert" }, [
                   Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
                 ]),
+                div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
+                  Alert({ id: "required", type: "danger", title: "Please, complete all required fields." })
+                ])
               ]),
               div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
                 button({
@@ -170,8 +170,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   onClick: this.logVote,
                   className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
                 }, [this.props.action.label]),
-              ]),
-            ]),
+              ])
+            ])
           ])
         ])
       ])
