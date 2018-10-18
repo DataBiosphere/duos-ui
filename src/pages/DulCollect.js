@@ -133,12 +133,12 @@ class DulCollect extends Component {
       election.finalVote = this.state.finalVote;
       election.finalRationale = this.state.finalRationale;
       this.updateElection(election);
-      this.setState(prev => {
-        prev.showConfirmationDialogOK = false;
-        return prev;
-      });
       this.props.history.goBack();
     }
+    this.setState(prev => {
+      prev.showConfirmationDialogOK = false;
+      return prev;
+    });
   };
 
     async updateElection(election) {
@@ -251,7 +251,9 @@ class DulCollect extends Component {
               }),
             ]),
             ConfirmationDialog({
-              title: "Post Final Vote?", color: 'dul', showModal: this.state.showConfirmationDialogOK,
+              title: "Post Final Vote?",
+              color: 'dul',
+              showModal: this.state.showConfirmationDialogOK,
               action: { label: "Yes", handler: this.confirmationHandlerOK }
             }, [
                 div({ className: "dialog-description" }, [
