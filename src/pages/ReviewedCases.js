@@ -21,7 +21,7 @@ class ReviewedCases extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };

@@ -96,9 +96,9 @@ class AdminManageUsers extends Component {
   }
 
   okModal = async (name) => {
-    this.setState(prev => { 
-      prev.showAddUserModal = false; 
-      return prev; 
+    this.setState(prev => {
+      prev.showAddUserModal = false;
+      return prev;
     }, () => {
       this.getUsers();
     });
@@ -119,7 +119,7 @@ class AdminManageUsers extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   }

@@ -71,7 +71,7 @@ class HelpReports extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
