@@ -9,7 +9,6 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
 import { Researcher, DAR } from '../libs/ajax';
 import { Storage } from "../libs/storage";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 import './DataAccessRequestApplication.css';
 
@@ -25,7 +24,6 @@ class DataAccessRequestApplication extends Component {
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
 
     this.state = {
-      loading: true,
       disableOkBtn: false,
       showValidationMessages: false,
       datasets: [],
@@ -175,7 +173,6 @@ class DataAccessRequestApplication extends Component {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
-      prev.loading = false;
       prev.completed = completed;
       prev.formData = formData;
       prev.datasets = datasets;
@@ -438,9 +435,9 @@ class DataAccessRequestApplication extends Component {
         prev.step2.inputRUS.invalid = isRusInvalid;
         prev.step2.inputNonTechRUS.invalid = isSummaryInvalid;
         prev.step2.inputDatasets.invalid = isDatasetsInvalid;
-        if(prev.showValidationMessages === false) {
+        if (prev.showValidationMessages === false) {
           prev.showValidationMessages = isRusInvalid || isSummaryInvalid || isDatasetsInvalid;
-        } 
+        }
         return prev;
       });
       return false;
@@ -597,13 +594,9 @@ class DataAccessRequestApplication extends Component {
   };
 
   render() {
-    const { loading, problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
+    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
     const genderLabels = ['Female', "Male"];
     const genderValues = ['F', 'M'];
-
-    if (loading) {
-      return LoadingIndicator();
-    }
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
@@ -729,10 +722,10 @@ class DataAccessRequestApplication extends Component {
 
                     div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12" }, [
                       label({ className: "control-label rp-title-question" }, [
-                      "1.2 Researcher Identification",
-                      div({ isRendered: this.state.formData.checkCollaborator !== true, className: "display-inline" }, ["*"]),
-                      div({ isRendered: this.state.formData.checkCollaborator === true, className: "display-inline italic" }, [" (optional)"]),
-                      span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
+                        "1.2 Researcher Identification",
+                        div({ isRendered: this.state.formData.checkCollaborator !== true, className: "display-inline" }, ["*"]),
+                        div({ isRendered: this.state.formData.checkCollaborator === true, className: "display-inline italic" }, [" (optional)"]),
+                        span({ className: "default-color" }, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"]),
                       ])
                     ]),
 

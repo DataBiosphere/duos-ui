@@ -7,14 +7,12 @@ import { SearchBox } from '../components/SearchBox';
 import { Help } from "../libs/ajax";
 import { Storage } from '../libs/storage';
 import * as Utils from "../libs/utils";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class HelpReports extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       value: '',
       limit: 5,
       currentPage: 1,
@@ -29,7 +27,6 @@ class HelpReports extends Component {
   async getReportsList() {
     const reports = await Help.findHelpMeReports(Storage.getCurrentUser().dacUserId);
     this.setState(prev => {
-      prev.loading = false;
       prev.currentPage = 1;
       prev.reports = reports;
       return prev;
@@ -95,8 +92,6 @@ class HelpReports extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { searchDulText } = this.state;
 

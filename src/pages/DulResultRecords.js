@@ -7,7 +7,6 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Config } from '../libs/config';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulResultRecords extends Component {
 
