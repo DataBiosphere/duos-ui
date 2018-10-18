@@ -1031,10 +1031,14 @@ a .editable:hover, a .enabled:hover {
   text-align: center;
 }
 
-.btn-primary[disabled],
-.btn-secondary[disabled] {
+.btn-primary[disabled] {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-primary[disabled],
+.btn-primary[disabled] .glyphicon {
+  color: white !important;
 }
 
 .btn-primary:not([disabled]):hover,
@@ -1062,7 +1066,8 @@ a .editable:hover, a .enabled:hover {
   margin-left: 5px;
 }
 
-.btn-secondary {
+.btn-secondary,
+.btn-secondary[disabled] {
   background: #eeeeee;
 }
 
@@ -1088,7 +1093,7 @@ a .editable:hover, a .enabled:hover {
   font-size: 14px;
 }
 
-.btn-back, 
+.btn-back,
 .btn-reminder,
 .btn-download-pdf {
   font-size: 14px;

@@ -481,7 +481,7 @@ class AccessResultRecords extends Component {
               label({ className: "control-label no-padding" }, ["Status: "]),
               span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.status]),
               span({ isRendered: darInfo.hasAdminComment }, [
-                label({ className: "control-label no-padding" }, [" - Comment: "]),
+                label({ className: "control-label no-padding" }, [" - Comments: "]),
                 span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.adminComment]),
               ])
             ])

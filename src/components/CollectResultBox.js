@@ -127,7 +127,7 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
                 Utils.formatDate(this.props.voteDate)
               ]),
               span({ isRendered: vote === true }, [
-                label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
+                label({ className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Comments:"]),
               ]),
               span({ isRendered: vote === false || vote === null }, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-3 col-md-3 col-sm-4 col-xs-4 control-label vote-label " + this.props.color + "-color" }, ["Rationale:"]),
@@ -181,7 +181,7 @@ export const CollectResultBox = hh(class CollectResultBox extends Component {
               ]),
             ]),
             div({ className: "row" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comment:"]),
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments:"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-9 vote-label" }, [
                 span({ isRendered: vote !== null }, [this.props.rationale]),
                 span({ isRendered: vote === null }, ["---"]),

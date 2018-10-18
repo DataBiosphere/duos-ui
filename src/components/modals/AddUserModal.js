@@ -5,6 +5,8 @@ import { User } from "../../libs/ajax";
 import { Alert } from '../Alert';
 import { USER_ROLES_UPPER } from '../../libs/utils';
 
+const ADMIN_ROLE_ID = 4;
+
 export const AddUserModal = hh(class AddUserModal extends Component {
 
   constructor(props) {
@@ -21,7 +23,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   initialState() {
     let initialValue;
 
-    let rolesState = {}
+    let rolesState = {};
     rolesState[USER_ROLES_UPPER.admin] = false;
     rolesState[USER_ROLES_UPPER.alumni] = false;
     rolesState[USER_ROLES_UPPER.chairperson] = false;
@@ -47,7 +49,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       delegateDataOwner: {
         needsDelegation: false,
         delegateCandidates: []
-      }
+      },
+      alternativeDACMemberUser: '',
+      alternativeDataOwnerUser: ''
     };
 
     return initialValue;
@@ -63,7 +67,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       return;
     }
 
-    let rolesState = {}
+    let rolesState = {};
     rolesState[USER_ROLES_UPPER.admin] = false;
     rolesState[USER_ROLES_UPPER.alumni] = false;
     rolesState[USER_ROLES_UPPER.chairperson] = false;
@@ -74,9 +78,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (this.props.user && this.props.user !== undefined) {
 
       const user = await User.getByEmail(this.props.user.email);
+      let adminEmailPreference = false;
 
       user.roles.forEach(role => {
         rolesState[role.name.toUpperCase()] = true;
+        if (role.name === 'Admin') adminEmailPreference = role.emailPreference;
       });
 
       this.setState({
@@ -88,7 +94,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         rolesState: Object.assign({}, rolesState),
         originalRolesState: Object.assign({}, rolesState),
         originalRoles: user.roles.slice(),
-        emailPreference: false,
+        emailPreference: adminEmailPreference,
         delegateDacUser: {
           needsDelegation: false,
           delegateCandidates: []
@@ -99,6 +105,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         },
         delegateMemberRequired: false,
         newAlternativeUserNeeded: {},
+        newUserNeeded: false,
       },
         () => {
           let r1 = this.nameRef.current;
@@ -136,6 +143,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         wasMember: false,
         wasDataOwner: false,
         wasResearcher: false,
+        newUserNeeded: false,
       },
         () => {
           let r1 = this.nameRef.current;
@@ -171,7 +179,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         if (key === USER_ROLES_UPPER.admin) {
           updatedRoles.push({
             name: key,
-            emailPreference: this.state.emailPreference
+            emailPreference: this.state.emailPreference,
+            roleId: ADMIN_ROLE_ID
           });
         } else updatedRoles.push({
           name: key
@@ -278,12 +287,25 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     return await User.validateDelegation(role, user);
   };
 
-  checkNoEmptyDelegateCandidates = (needsDelegation, delegateCandidates, role) => {
+  checkNoEmptyDelegateCandidates = async (needsDelegation, delegateCandidates, role) => {
     const valid = needsDelegation === true && delegateCandidates.length === 0 ? false : true;
     if (!valid) {
       this.errorNoAvailableCandidates(role);
     }
+     await this.setState((prev) => {
+      prev.newUserNeeded = this.validateNoNewUserIsNeeded();
+      return prev;
+    });
     return valid;
+  };
+
+  validateNoNewUserIsNeeded = () => {
+    for (var key in this.state.newAlternativeUserNeeded) {
+      if (this.state.newAlternativeUserNeeded[key] === true) {
+        return true;
+      }
+    }
+    return false;
   };
 
   emailPreferenceChanged = (e) => {
@@ -335,14 +357,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const checkState = e.target.checked;
 
     // need to set the role in roles
+    const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
     if (this.state.wasChairperson) {
       if (!checkState) {
-        const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
         if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES_UPPER.chairperson)) {
           this.setState(prev => {
             prev.delegateMemberRequired = false;
             prev.delegateDacUser.delegateCandidates = result.delegateCandidates;
-            prev.delegateDacUser.needsDelegation = result.needsDelegation;;
+            prev.delegateDacUser.needsDelegation = result.needsDelegation;
             return prev;
           }, () => {
             if (this.state.delegateDacUser.delegateCandidates.length === 1) {
@@ -351,7 +373,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               })
             }
           });
-          // return;
         }
       } else {
         this.closeNoAvailableCandidatesAlert(USER_ROLES_UPPER.chairperson);
@@ -363,7 +384,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
-      if (checkState) {
+      // const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
+      if (checkState && result.needsDelegation) {
         this.changeChairpersonRoleAlert();
       }
       else {
@@ -462,6 +484,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   errorNoAvailableCandidates = (role) => {
     this.setState(prev => {
+      prev.newUserNeeded = true;
       prev.newAlternativeUserNeeded[role] = true;
       prev.alerts[0] = {
         type: 'danger',
@@ -496,10 +519,18 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   closeNoAvailableCandidatesAlert = (role) => {
+
     this.setState(prev => {
       prev.alerts = [];
+      prev.newAlternativeUserNeeded[role] = false;
       return prev;
+    },
+    () => {
+      this.setState({
+        newUserNeeded : this.validateNoNewUserIsNeeded()
+      });
     });
+
   };
 
   handleChange(event) {
@@ -543,7 +574,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   render() {
 
-    const { displayName, email, roles, rolesState, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
+    const { displayName, email, rolesState, newUserNeeded, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
 
     const validForm = displayNameValid && emailValid && roleValid;
 
@@ -559,11 +590,14 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const isChairPersonDisabled = isMember || isAlumni || isResearcher;
     const isAlumniDisabled = isMember || isChairPerson;
 
+    const needsDoDelegation = (this.state.delegateDacUser.needsDelegation && this.state.alternativeDACMemberUser === '');
+    const needsDacDelegation = (this.state.delegateDataOwner.needsDelegation && this.state.alternativeDataOwnerUser ==='');
+
     return (
       BaseModal({
         id: "addUserModal",
         showModal: this.props.showModal,
-        disableOkBtn: !validForm, 
+        disableOkBtn: !validForm || needsDacDelegation || needsDoDelegation || newUserNeeded,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
         imgSrc: this.state.mode === 'Add' ? "/images/icon_add_user.png" : "/images/icon_edit_user.png",
@@ -620,7 +654,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       id: "chk_member",
                       className: "checkbox-inline user-checkbox",
                       checked: isMember,
-                      // defaultChecked: isMember,
                       onChange: this.memberChanged,
                       disabled: isMemberDisabled,
                     }),
@@ -633,7 +666,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       id: "chk_chairperson",
                       className: "checkbox-inline user-checkbox",
                       checked: isChairPerson,
-                      // defaultChecked: isChairPerson,
                       onChange: this.chairpersonChanged,
                       disabled: isChairPersonDisabled
                     }),
@@ -645,7 +677,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_alumni",
                       checked: isAlumni,
-                      // defaultChecked: isAlumni,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.alumniChanged,
                       disabled: isAlumniDisabled,
@@ -662,7 +693,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_admin",
                       checked: isAdmin,
-                      // defaultChecked: isAdmin,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.adminChanged,
                     }),
@@ -674,7 +704,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_researcher",
                       checked: isResearcher,
-                      // defaultChecked: isResearcher,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.researcherChanged,
                       disabled: isResearcherDisabled
@@ -687,7 +716,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       id: "chk_dataOwner",
                       checked: isDataOwner,
-                      // defaultChecked: isDataOwner,
                       className: "checkbox-inline user-checkbox",
                       onChange: this.dataOwnerChanged,
                     }),
@@ -698,9 +726,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
             div({ className: "form-group" }, [
               div({
-                isRendered: roles.includes('Admin'),
+                isRendered: this.state.rolesState.ADMIN,
                 className: "col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4",
-                style: { 'paddingLeft': '26px' }
+                style: { 'paddingLeft': '30px' }
               }, [
                   div({ className: "checkbox" }, [
                     input({
@@ -708,7 +736,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                       type: "checkbox",
                       className: "checkbox-inline user-checkbox",
                       checked: emailPreference,
-                      // defaultChecked: emailPreference,
                       onChange: this.emailPreferenceChanged,
                     }),
                     label({ className: "regular-checkbox rp-choice-questions bold", htmlFor: "chk_emailPreference" }, ["Disable Admin email notifications"])
@@ -742,9 +769,13 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               label({ id: "lbl_alternativeUser", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Alternative User"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 " }, [
                 select({
-                  id: "sel_alternativeUser", className: "form-control col-lg-12", value: this.state.alternativeDACMemberUser,
-                  required: this.state.delegateDacUser.needsDelegation, onChange: this.selectAlternativeDACMemberUser
+                  id: "sel_alternativeUser",
+                  className: "form-control col-lg-12",
+                  value: this.state.alternativeDACMemberUser,
+                  required: this.state.delegateDacUser.needsDelegation,
+                  onChange: this.selectAlternativeDACMemberUser,
                 }, [
+                    option({ value: '' }, [""]),
                     this.state.delegateDacUser.delegateCandidates.map((user, uIndex) => {
                       return h(Fragment, { key: uIndex }, [
                         option({ value: JSON.stringify(user) }, [user.displayName])
@@ -754,8 +785,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
               ])
             ])
           ]),
-
-          div({ isRendered: this.state.delegateDataOwner.needsDelegation, className: "form-group rp-last-group" }, [
+          div({ isRendered: (this.state.delegateDataOwner.needsDelegation && this.state.delegateDataOwner.delegateCandidates.length > 0), className: "form-group rp-last-group" }, [
             div({ className: "row no-margin f-center" }, [
               div({ className: "control-label default-color f-center", style: { "paddingBottom": "10px" } }, ["Member responsabilities must be delegated to a different user, please select one from below:"]),
 
@@ -765,7 +795,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                   id: "sel_alternativeDataOwner", className: "form-control col-lg-12", value: this.state.alternativeDataOwnerUser,
                   required: this.state.delegateDataOwner.needsDelegation, onChange: this.selectAlternativeDataOwnerUser, placeholder: "Select an alternative Data Owner"
                 }, [
-                    this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
+                  option({ value: '' }, [""]),
+                  this.state.delegateDataOwner.delegateCandidates.map((user, uIndex) => {
                       return h(Fragment, { key: uIndex }, [
                         option({ value: JSON.stringify(user) }, [user.displayName])
                       ]);

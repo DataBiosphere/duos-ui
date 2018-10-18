@@ -187,6 +187,10 @@ fieldset {
   min-width: 100%;
 }
 
+fieldset[disabled] .btn-download-pdf {
+  background: #eeeeee;
+}
+
 fieldset[disabled] .btn-download-pdf,
 fieldset[disabled] .select-autocomplete {
   cursor: default;

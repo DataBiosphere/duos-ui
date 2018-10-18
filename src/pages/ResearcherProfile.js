@@ -497,7 +497,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       })
                     ]),
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                      label({ id: "lbl_profileResearcherGate", className: "control-label" }, ["Researcher Gate ID"]),
+                      label({ id: "lbl_profileResearcherGate", className: "control-label" }, ["ResearchGate ID"]),
                       input({
                         id: "profileResearcherGate",
                         name: "researcherGate",

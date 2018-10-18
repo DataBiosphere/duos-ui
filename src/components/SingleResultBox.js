@@ -69,10 +69,10 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
           ]),
 
           div({ className: "row" }, [
-            span({ isRendered: this.props.data.vote.vote === '1' }, [
+            span({ isRendered: this.props.data.vote.vote === '1' || this.props.data.vote.vote === true || this.props.data.vote.vote === 'true' }, [
               label({ className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments:"]),
             ]),
-            span({ isRendered: this.props.data.vote.vote !== '1' }, [
+            span({ isRendered: this.props.data.vote.vote === null || this.props.data.vote.vote === '0' || this.props.data.vote.vote === false || this.props.data.vote.vote === 'false' }, [
               label({ className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale:"]),
             ]),
             div({ id: "lbl_rationale_" + this.props.id, className: "inputRationale col-lg-10 col-md-10 col-sm-9 col-xs-9 vote-label" }, [

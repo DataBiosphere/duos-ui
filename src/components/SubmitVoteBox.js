@@ -12,16 +12,24 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     this.state = {
       loading: true,
       currentUser: {},
-      enableVoteButton: false,
+      enableVoteButton: true,
       voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
       showDialogSubmit: false,
-      rationale: this.props.rationale != null ? this.props.rationale : ''
+      rationale: this.props.rationale != null ? this.props.rationale : '',
+      requiredMessage: false
     }
   }
 
   logVote = (e) => {
-    this.setState({enableVoteButton: false});
-    this.props.action.handler(this.state.voteStatus, this.state.rationale);
+    if (this.state.voteStatus != null) {
+      this.setState({
+        enableVoteButton: false,
+        requiredMessage: false
+      });
+      this.props.action.handler(this.state.voteStatus, this.state.rationale);
+    } else {
+      this.setState({requiredMessage: true});
+    }
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -29,64 +37,27 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       return {
         flag: true,
         rationale: nextProps.rationale != null ? nextProps.rationale : '',
-        voteStatus: nextProps.voteStatus
+        voteStatus: nextProps.voteStatus,
+        enableVoteButton: true
       };
+    } else {
+      return {enableVoteButton: true};
     }
-    return null;
   }
 
   yesNoChange = (e, name, value) => {
-    this.setState({ voteStatus: value, enableVoteButton: true });
+    this.setState({ voteStatus: value, requiredMessage: false });
   };
 
   optionsChange = (e, name, value) => {
-    this.setState({ voteStatus: value, enableVoteButton: true });
+    this.setState({ voteStatus: value, requiredMessage: false });
   };
 
   changeRationale = (e) => {
     this.setState({ rationale: e.target.value });
-    if (this.state.voteStatus !== undefined) {
-       this.setState({ enableVoteButton: true });
-    }
   };
 
   render() {
-    // let dialogTitle = "";
-    // let dialogMessage = "";
-    // let dialogType = "";
-    // let dialogLabel = "";
-
-    // //if agreement election
-    // if (this.props.id === "agreement") {
-    //   dialogTitle = "Post Decision Agreement?";
-    //   dialogMessage = "Are you sure you want to post this Decision Agreement?";
-    //   dialogType = "";
-    //   dialogLabel = "Yes"
-    // }
-
-    // //if final election
-    // if (this.props.id === "finalAccess") {
-    //   dialogTitle = "Post Final Access Decision?";
-    //   dialogMessage = "Are you sure you want to post this Final Access Decision?";
-    //   dialogType = "";
-    //   dialogLabel = "Yes"
-    // }
-
-    // //if collect election 
-    // if (this.props.id === "accessCollect" || this.props.id === "rpCollect" || this.props.id === "dulCollect") {
-    //   dialogTitle = "Post Final Vote?";
-    //   dialogMessage = "If you post this vote the Election will be closed with current results.";
-    //   dialogType = "";
-    //   dialogLabel = "Yes"
-    // }
-
-    // //if review election
-    // if (this.props.id === "accessReview" || this.props.id === "rpReview" || this.props.id === "dulReview" || this.props.id === "dataOwnerReview" || this.props.id === "researcherReview") {
-    //   dialogTitle = "Vote confirmation";
-    //   dialogMessage = "Your vote has been successfully logged!";
-    //   dialogType = "informative";
-    //   dialogLabel = "Ok"
-    // }
 
     const { voteStatus, rationale = '', enableVoteButton } = this.state;
 
@@ -120,8 +91,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   optionValues: this.props.radioValues,
                   name: "rad_" + this.props.id,
                   onChange: this.optionsChange
-                }),
-              ]),
+                })
+              ])
             ]),
 
             div({ className: "form-group" }, [
@@ -141,8 +112,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                   placeholder: "Optional: describe your rationale or add comments here (please be as specific as possible)",
                   value: rationale,
                   onChange: this.changeRationale
-                }),
-              ]),
+                })
+              ])
             ]),
 
             div({ className: "form-group form-group-bottom" }, [
@@ -150,17 +121,20 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                 div({ isRendered: this.props.showAlert === true, className: "vote-box-alert" }, [
                   Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
                 ]),
+                div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
+                  Alert({ id: "required", type: "danger", title: "Please, complete all required fields." })
+                ])
               ]),
               div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
                 button({
                   type: 'button',
                   id: "btn_submit_" + this.props.id,
-                  disabled: voteStatus === null || !enableVoteButton || this.props.disabled === true,
+                  disabled: !enableVoteButton || this.props.disabled === true,
                   onClick: this.logVote,
                   className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
                 }, [this.props.action.label]),
-              ]),
-            ]),
+              ])
+            ])
           ])
         ])
       ])

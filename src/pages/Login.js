@@ -11,7 +11,12 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
+<<<<<<< HEAD
       redirectUrl: this.props.match.path,
+=======
+      loading: true,
+      redirectUrl: this.props.match.url,
+>>>>>>> migration-playground
       clientId: ''
     };
     this.getGoogleClientId();
