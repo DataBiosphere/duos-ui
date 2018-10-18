@@ -626,7 +626,7 @@ class FinalAccessReview extends Component {
                   label({ className: "control-label no-padding" }, ["Status: "]),
                   span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.status]),
                   span({ isRendered: this.state.darInfo.hasAdminComment === true }, [
-                    label({ className: "control-label no-padding" }, [" - Comment: "]),
+                    label({ className: "control-label no-padding" }, [" - Comments: "]),
                     span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
                   ]),
                 ]),
