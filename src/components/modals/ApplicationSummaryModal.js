@@ -90,7 +90,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                   summary.status
                 ]),
                 div({ id: "txt_comment", isRendered: summary.rationaleCheck && summary.status === "Bonafide researcher" }, [
-                  span({ className: "bold" }, ["Comment: "]),
+                  span({ className: "bold" }, ["Comments: "]),
                   summary.rationale
                 ]),
                 div({ id: "txt_rationale", isRendered: summary.rationaleCheck && summary.status !== "Bonafide researcher" }, [

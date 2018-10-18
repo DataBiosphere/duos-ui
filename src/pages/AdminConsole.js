@@ -210,6 +210,7 @@ class AdminConsole extends Component {
                   iconSize: 'default',
                 }),
                 AddUserModal({
+                  isRendered: this.state.showAddUserModal,
                   showModal: this.state.showAddUserModal,
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
