@@ -36,7 +36,7 @@ class ReviewedCases extends Component {
       accessLimit: 5,
       currentDulPage: 1,
       currentAccessPage: 1,
-
+      descendantOrder: false,
       electionsList: {
         dul: [],
         access: [],
@@ -48,8 +48,37 @@ class ReviewedCases extends Component {
 
   }
 
-  sort = (val) => {
-    // const filename = val.target;
+  sort = (sortKey, descendantOrder=false) => (event) => {
+
+    let data = this.state.electionsList.dul;
+    let sortedData = data.sort(function(a, b){
+
+      if(!a.hasOwnProperty(sortKey) || !b.hasOwnProperty(sortKey)) {
+        // property doesn't exist on either object
+        return 0;
+      }
+
+      const varA = (typeof a[sortKey] === 'string') ?
+        a[sortKey].toLowerCase() : a[sortKey];
+
+      const varB = (typeof b[sortKey] === 'string') ?
+        b[sortKey].toLowerCase() : b[sortKey];
+
+      let comparison = 0;
+
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+      return (descendantOrder) ? (comparison * -1) : comparison
+    });
+
+    this.setState(prev => {
+      prev.electionsList.dul= sortedData;
+      prev.descendantOrder = !prev.descendantOrder;
+      return prev;
+    });
   };
 
   componentDidMount() {
@@ -148,15 +177,15 @@ class ReviewedCases extends Component {
 
         div({ className: "jumbotron table-box" }, [
           div({ className: "grid-row" }, [
-            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('displayId') }, [
+            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('displayId', this.state.descendantOrder) }, [
               "Consent id",
               span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
-            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('election.consentGroupName') }, [
+            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('consentGroupName', this.state.descendantOrder) }, [
               "Consent Group Name",
               span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
-            div({ className: "col-1 cell-header cell-sort dul-color", onClick: this.sort('version') }, [
+            div({ className: "col-1 cell-header cell-sort dul-color", onClick: this.sort('version', this.state.descendantOrder) }, [
               "Election N°",
               span({ className: "glyphicon sort-icon glyphicon-sort" }),
             ]),
@@ -186,8 +215,8 @@ class ReviewedCases extends Component {
                   div({ id: election.displayId + "_electionVersion", name: "electionVersion", className: "col-1 cell-body text" }, [election.version < 10 ? '0' + election.version : election.version]),
                   div({ id: election.displayId + "_resultDateDul", name: "resultDateDul", className: "col-1 cell-body text" }, [Utils.formatDate(election.finalVoteDate)]),
                   div({ id: election.displayId + "_finalResultDul", name: "finalResulDul", className: "col-1 cell-body text f-center bold" }, [
-                    span({ isRendered: election.finalVoteString === 'Yes', className: "dul-color" }, ["YES"]),
-                    span({ isRendered: election.finalVoteString === 'No' }, ["NO"]),
+                    span({ isRendered: election.finalVote, className: "dul-color" }, ["YES"]),
+                    span({ isRendered: !election.finalVote }, ["NO"]),
                   ]),
                   div({ className: "col-1 cell-body f-center" }, [
                     button({
@@ -210,20 +239,6 @@ class ReviewedCases extends Component {
             currentPage: this.state.currentDulPage,
             onPageChange: this.handleDulPageChange,
             changeHandler: this.handleDulSizeChange
-            // onPageChange: (page) => {
-            //   this.setState(prev => {
-            //     prev.currentDulPage = page;
-            //     return prev;
-            //   });
-            // },
-            // changeHandler: (size) => {
-            //   this.setState(prev => {
-            //     prev.dulLimit = size;
-            //     prev.currentDulPage = 1;
-            //     return prev;
-            //   },
-            //   )
-            // },
           }),
         ]),
 
@@ -285,20 +300,6 @@ class ReviewedCases extends Component {
             currentPage: this.state.currentAccessPage,
             onPageChange: this.handleDarPageChange,
             changeHandler: this.handleDarSizeChange
-            // onPageChange: (page) => {
-            //   this.setState(prev => {
-            //     prev.currentAccessPage = page;
-            //     return prev;
-            //   });
-            // },
-
-            // changeHandler: (size) => {
-            //   this.setState(prev => {
-            //     prev.accessLimit = size;
-            //     prev.currentAccessPage = 1;
-            //     return prev;
-            //   });
-            // },
           }),
         ]),
       ])
