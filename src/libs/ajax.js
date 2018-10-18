@@ -621,6 +621,9 @@ export const Ontology = {
 
     const url = `${await Config.getApiUrl()}/ontology`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
+    if (res.status === 204) {
+      return [];
+    }
     return await res.json();
   },
 
