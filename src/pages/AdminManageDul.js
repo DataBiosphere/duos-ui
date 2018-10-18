@@ -60,7 +60,6 @@ class AdminManageDul extends Component {
   }
 
   componentDidMount() {
-    console.log('did mount ............');
     this.getConsentManage();
   }
 
