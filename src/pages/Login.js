@@ -6,13 +6,11 @@ import { USER_ROLES } from '../libs/utils';
 import { User } from '../libs/ajax';
 import './Login.css';
 import { Config } from '../libs/config';
-import { LoadingIndicator } from "../components/LoadingIndicator";
 
 class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       redirectUrl: this.props.match.path,
       clientId: ''
     };
@@ -23,7 +21,6 @@ class Login extends Component {
     const clientKey = `${await Config.getGoogleClientId()}`;
     this.setState(prev => {
       prev.clientId = clientKey;
-      prev.loading = false;
       return prev;
     });
   }
@@ -61,17 +58,17 @@ class Login extends Component {
   // for external re-directions, the method will first check if the usr has permission to access,
   // if this is true, and user is not logged, it will be auto-logged and redirected to the url.
   redirect = (user, redirectUrl) => {
-  let page = '/home';
-  if (this.props.componentRoles !== undefined && this.verifyUserRoles(this.props.componentRoles, Storage.getCurrentUser())){
+    let page = '/home';
+    if (this.props.componentRoles !== undefined && this.verifyUserRoles(this.props.componentRoles, Storage.getCurrentUser())) {
       page = redirectUrl;
-  } else {
-    page = user.isChairPerson ? 'chair_console' :
-      user.isMember ? 'member_console' :
-        user.isAdmin ? 'admin_console' :
-          user.isResearcher ? 'dataset_catalog?reviewProfile' :
-            user.isDataOwner ? 'data_owner_console' :
-              user.isAlumni ? 'summary_votes' : '/';
-  }
+    } else {
+      page = user.isChairPerson ? 'chair_console' :
+        user.isMember ? 'member_console' :
+          user.isAdmin ? 'admin_console' :
+            user.isResearcher ? 'dataset_catalog?reviewProfile' :
+              user.isDataOwner ? 'data_owner_console' :
+                user.isAlumni ? 'summary_votes' : '/';
+    }
     this.props.history.push(page);
   };
 
@@ -86,20 +83,27 @@ class Login extends Component {
   };
 
   render() {
-    if (this.state.loading) { return LoadingIndicator(); }
 
-    const googleLoginButton = h(GoogleLogin, {
-      className: "btn_gSignInWrapper",
-      clientId: this.state.clientId,
-      onSuccess: this.responseGoogle,
-      onFailure: this.forbidden,
-      isSignedIn: this.state.redirectUrl !== '/login'
-    }, [
-        div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
-          span({ className: "icon" }),
-          label({}, ["Sign in with Google"])
-        ])
+     let googleLoginButton;
+
+    if (this.state.clientId === '') {
+      googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
+        img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]);
+    } else {
+      googleLoginButton = h(GoogleLogin, {
+        className: "btn_gSignInWrapper",
+        clientId: this.state.clientId,
+        onSuccess: this.responseGoogle,
+        onFailure: this.forbidden,
+        isSignedIn: this.state.redirectUrl !== '/login'
+      }, [
+          div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
+            span({ className: "icon" }),
+            label({}, ["Sign in with Google"])
+          ])
+        ]);
+    }
 
     return (
       div({ className: "container" }, [

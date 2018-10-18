@@ -32,7 +32,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   initialState() {
     return {
-      loading: true,
+      loading: false,
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
