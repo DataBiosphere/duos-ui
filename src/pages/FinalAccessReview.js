@@ -24,7 +24,7 @@ class FinalAccessReview extends Component {
     const currentUser = Storage.getCurrentUser();
     this.setState({
       loading: false,
-      vote:{},
+      vote: {},
       voteAgreement: {},
       currentUser: currentUser,
       referenceId: this.props.match.params.referenceId,
@@ -320,7 +320,7 @@ class FinalAccessReview extends Component {
     a.click();
   };
 
-   downloadDAR = async (e) => {
+  downloadDAR = async (e) => {
     this.setState({
       loading: true
     })
@@ -357,25 +357,47 @@ class FinalAccessReview extends Component {
 
   init = async () => {
 
-    const vote = await Votes.getDarFinalAccessVote(this.state.electionId);
-    this.setState({
-      vote: vote
-    });
+    // const vote = await 
+    Votes.getDarFinalAccessVote(this.state.electionId).then(
+      vote => {
 
-    if (vote.vote !== null) {
-      this.setState({
-        alreadyVote: true,
-        originalVote: vote.vote,
-        originalRationale: vote.rationale
-      });
-    } else {
-      this.setState({
-        alreadyVote: false,
-      });
-    }
+        this.setState({
+          vote: vote
+        });
 
-    const data1 = await Election.findDataAccessElectionReview(this.state.electionId, false);
-    await this.showAccessData(data1);
+        if (vote.vote !== null) {
+          this.setState({
+            alreadyVote: true,
+            originalVote: vote.vote,
+            originalRationale: vote.rationale
+          });
+        } else {
+          this.setState({
+            alreadyVote: false,
+          });
+        }
+      }
+    );
+
+    // const data1 = await 
+    Election.findDataAccessElectionReview(this.state.electionId, false).then(
+      async data1 => {
+
+        await this.showAccessData(data1);
+        this.setState({
+          consentName: data1.associatedConsent.name
+        });
+
+        const data3 = await Election.findElectionReviewById(data1.associatedConsent.electionId, data1.associatedConsent.consentId);
+        this.setState({
+          electionReview: data3
+        });
+
+        await this.showDULData(data3);
+        await this.vaultVote(data3.consent.consentId);
+
+      });
+
     const data2 = await Election.findRPElectionReview(this.state.electionId, false);
 
     if (data2.election !== undefined) {
@@ -404,18 +426,6 @@ class FinalAccessReview extends Component {
         showRPaccordion: false
       })
     }
-
-    this.setState({
-      consentName: data1.associatedConsent.name
-    });
-
-    const data3 = await Election.findElectionReviewById(data1.associatedConsent.electionId, data1.associatedConsent.consentId);
-    this.setState({
-      electionReview: data3
-    });
-
-    await this.showDULData(data3);
-    await this.vaultVote(data3.consent.consentId);
 
     this.setState({
       loading: false

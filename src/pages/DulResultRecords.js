@@ -28,7 +28,6 @@ class DulResultRecords extends Component {
   componentDidMount() {
     const currentUser = Storage.getCurrentUser();
     this.setState({
-      loading: true,
       currentUser: currentUser,
       electionId: this.props.match.params.electionId,
     }, () => {
@@ -45,7 +44,7 @@ class DulResultRecords extends Component {
     if (typeof electionReview === 'undefined') {
       this.props.history.push('/reviewd_cases');
     }
-    
+
     if (electionReview.election.finalRationale === 'null') {
       electionReview.election.finalRationale = '';
     }
@@ -66,10 +65,6 @@ class DulResultRecords extends Component {
       chartData: this.getGraphData(electionReview.reviewVote),
       consentGroupName: electionReview.consent.groupName,
       consentId: electionReview.election.referenceId,
-    }, () => {
-      this.setState({
-        loading: false,
-      });
     });
   }
 
@@ -101,7 +96,23 @@ class DulResultRecords extends Component {
 
   initialState() {
     return {
-      loading: true,
+      voteStatus: '',
+      createDate: '',
+      hasUseRestriction: true,
+      projectTitle: '',
+      consentName: '',
+      sDul: '',
+      dulElection: {
+        finalVote: '',
+        finalRationale: '',
+        finalVoteDate: ''
+      },
+      election: {
+        finalVote: '',
+        finalRationale: '',
+        finalVoteDate: ''
+      },
+      dulVoteList: [[], []],
     };
   }
 
@@ -110,8 +121,6 @@ class DulResultRecords extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { chartData } = this.state;
 
@@ -152,7 +161,7 @@ class DulResultRecords extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
           ]),
         ]),
 

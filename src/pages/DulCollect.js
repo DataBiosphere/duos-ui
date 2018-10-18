@@ -5,7 +5,6 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files, Email } from '../libs/ajax';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from '../libs/storage';
 
@@ -27,7 +26,6 @@ class DulCollect extends Component {
     let election = await Election.electionReviewResource(consentId, 'TranslateDUL');
     this.setGraphData(election.reviewVote);
     this.setState(prev => {
-      prev.loading = false;
       prev.dulVoteList = this.chunk(election.reviewVote, 2);
       prev.consentGroupName = election.consent.groupName;
       prev.consentName = election.consent.name;
@@ -54,7 +52,6 @@ class DulCollect extends Component {
   initialState() {
     return {
       buttonDisabled: false,
-      loading: true,
       isFormDisabled: true,
       showConfirmationDialogOK: false,
       dialogTitle: 'Email Notification Sent.',
@@ -174,8 +171,6 @@ class DulCollect extends Component {
 
 
     render() {
-
-      if (this.state.loading) { return LoadingIndicator(); }
 
       const consentData = span({ className: "consent-data" }, [
         b({ isRendered: this.state.consentGroupName, className: "pipe", dangerouslySetInnerHTML: { __html: this.state.consentGroupName } }, []),
