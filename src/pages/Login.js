@@ -13,7 +13,7 @@ class Login extends Component {
     super(props);
     this.state = {
       loading: true,
-      redirectUrl: this.props.match.path,
+      redirectUrl: this.props.match.url,
       clientId: ''
     };
     this.getGoogleClientId();
