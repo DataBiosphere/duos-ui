@@ -135,6 +135,11 @@ class DulCollect extends Component {
         return prev;
       });
       this.props.history.goBack();
+    } else {
+      this.setState(prev => {
+        prev.showConfirmationDialogOK = false;
+        return prev;
+      });
     }
   };
 
