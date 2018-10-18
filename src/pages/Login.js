@@ -11,12 +11,7 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-<<<<<<< HEAD
-      redirectUrl: this.props.match.path,
-=======
-      loading: true,
       redirectUrl: this.props.match.url,
->>>>>>> migration-playground
       clientId: ''
     };
     this.getGoogleClientId();
@@ -89,7 +84,7 @@ class Login extends Component {
 
   render() {
 
-     let googleLoginButton;
+    let googleLoginButton;
 
     if (this.state.clientId === '') {
       googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
