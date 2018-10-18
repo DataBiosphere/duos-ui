@@ -153,7 +153,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
 
             div({ className: "row" }, [
               label({ id: "lbl_structured", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Structured Limitations"]),
-              div({ id: "txt_structured", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label translated-restriction" }, [this.state.translatedUseRestriction]),
+              div({ id: "txt_structured", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label translated-restriction", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, []),
             ])
           ])
         ])

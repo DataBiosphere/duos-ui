@@ -45,6 +45,10 @@
   line-height: 20px;
 }
 
+.vote-box-alert .alert-wrapper {
+  margin-top: 0;
+}
+
 .summary-alert .alert-title {
   font-size: 15px;
   text-align: center;
