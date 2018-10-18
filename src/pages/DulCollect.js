@@ -256,9 +256,7 @@ class DulCollect extends Component {
               }),
             ]),
             ConfirmationDialog({
-              title: "Post Final Vote?",
-              color: 'dul',
-              showModal: this.state.showConfirmationDialogOK,
+              title: "Post Final Vote?", color: 'dul', showModal: this.state.showConfirmationDialogOK,
               action: { label: "Yes", handler: this.confirmationHandlerOK }
             }, [
                 div({ className: "dialog-description" }, [
