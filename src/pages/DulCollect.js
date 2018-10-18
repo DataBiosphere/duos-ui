@@ -133,12 +133,17 @@ class DulCollect extends Component {
       election.finalVote = this.state.finalVote;
       election.finalRationale = this.state.finalRationale;
       this.updateElection(election);
+      this.setState(prev => {
+        prev.showConfirmationDialogOK = false;
+        return prev;
+      });
       this.props.history.goBack();
+    } else {
+      this.setState(prev => {
+        prev.showConfirmationDialogOK = false;
+        return prev;
+      });
     }
-    this.setState(prev => {
-      prev.showConfirmationDialogOK = false;
-      return prev;
-    });
   };
 
     async updateElection(election) {
