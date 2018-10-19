@@ -4,8 +4,8 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Alert } from '../components/Alert';
 
 class AccessReview extends Component {
@@ -16,15 +16,6 @@ class AccessReview extends Component {
   }
 
   componentDidMount() {
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
-    });
     this.darReviewAccess();
     this.submitRpVote = this.submitRpVote.bind(this);
     this.submitVote = this.submitVote.bind(this);
@@ -175,13 +166,6 @@ class AccessReview extends Component {
         this.setState({dulName: consent.dulName});
       }
     });
-
-
-    this.setState({
-      loading: false
-    });
-    
-    
   }
 
   confirmationHandlerOK = (answer) => (e) => {
@@ -193,10 +177,12 @@ class AccessReview extends Component {
   };
 
   initialState() {
+    let currentUser = Storage.getCurrentUser();
+
     return {
-      loading: true,
+      currentUser: currentUser,
       showConfirmationDialogOK: false,
-      alertMessage: "Your vote has been successfully logged!",
+      alertMessage: 'Your vote has been successfully logged!',
       hasUseRestriction: false,
       projectTitle: '',
       consentName: '',
@@ -216,19 +202,19 @@ class AccessReview extends Component {
       alertRPVote: false,
 
       darInfo: {
-        havePI: true,
+        havePI: false,
         pi: '',
         profileName: '',
         status: '',
-        hasAdminComment: true,
+        hasAdminComment: false,
         adminComment: '',
         institution: '',
         department: '',
         city: '',
         country: '',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
+        purposeManualReview: false,
+        researchTypeManualReview: false,
+        hasDiseases: false,
         purposeStatements: [],
         researchType: [],
         diseases: [],
@@ -262,12 +248,6 @@ class AccessReview extends Component {
   };
 
   render() {
-
-    const { loading } = this.state;
-
-    if (loading) {
-      return LoadingIndicator();
-    }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),

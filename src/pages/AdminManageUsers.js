@@ -45,6 +45,8 @@ class AdminManageUsers extends Component {
       prev.currentPage = 1;
       prev.userList = userList;
       return prev;
+    }, () => {
+      ReactTooltip.rebuild();
     });
 
   }
@@ -245,7 +247,7 @@ class AdminManageUsers extends Component {
             place: 'right',
             effect: 'solid',
             multiline: true,
-            className: 'tooltip-wrapper'
+            className: 'tooltip-wrapper',
           }),
           h(ReactTooltip, {
             id: "tip_nonBonafide",

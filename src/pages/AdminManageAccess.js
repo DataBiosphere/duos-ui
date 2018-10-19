@@ -33,21 +33,23 @@ class AdminManageAccess extends Component {
 
   async getElectionDarList() {
     let darElection = [];
+
     const elections = await DAR.getDataAccessManage();
     elections.map(dar => {
       darElection.push(dar);
       return dar;
     });
 
-    this.setState(prev => {
+    await this.setState(prev => {
       prev.currentPage = 1;
       prev.darElectionList = darElection;
       return prev;
     });
   };
 
-  componentDidMount() {
-    this.getElectionDarList().then(data => { return data });
+  async componentDidMount() {
+    await this.getElectionDarList();
+    ReactTooltip.rebuild();
   };
 
   handlePageChange = page => {
@@ -90,24 +92,24 @@ class AdminManageAccess extends Component {
   };
 
   dialogHandlerCreate = (answer) => (e) => {
-    this.setState({ disableBtn: answer, disableCancelBtn:answer });
+    this.setState({ disableBtn: answer, disableCancelBtn: answer });
     if (answer === true) {
       Election.createDARElection(this.state.dataRequestId)
         .then(value => {
           this.getElectionDarList();
-          this.setState({ showDialogCreate: false, disableBtn: false, disableCancelBtn: false});
+          this.setState({ showDialogCreate: false, disableBtn: false, disableCancelBtn: false });
         })
         .catch(errorResponse => {
           if (errorResponse.status === 500) {
             this.setState({ alertTitle: 'Email Service Error!', alertMessage: 'The election was created but the participants couldnt be notified by Email.', disableCancelBtn: false });
           } else {
             errorResponse.json().then(error =>
-              this.setState({ alertTitle: 'Election cannot be created!', alertMessage: error.message, disableCancelBtn: false})
+              this.setState({ alertTitle: 'Election cannot be created!', alertMessage: error.message, disableCancelBtn: false })
             );
           }
         });
     } else {
-      this.setState({ showDialogCreate: false, alertTitle: undefined,  alertMessage: undefined});
+      this.setState({ showDialogCreate: false, alertTitle: undefined, alertMessage: undefined });
     }
   };
 
@@ -124,7 +126,7 @@ class AdminManageAccess extends Component {
   };
 
   openAccessCollect = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${dataRequestId}/${electionId}`)
+    this.props.history.push(`${page}/${electionId}/${dataRequestId}/`)
   };
 
   openAccessResultRecord = (page, electionId, dataRequestId) => {

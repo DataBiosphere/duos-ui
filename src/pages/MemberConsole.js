@@ -6,7 +6,6 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { Storage } from '../libs/storage';
 import { PendingCases } from '../libs/ajax';
 import { SearchBox } from '../components/SearchBox';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class MemberConsole extends Component {
 
@@ -15,8 +14,11 @@ class MemberConsole extends Component {
 
   constructor(props) {
     super(props);
+
+    let currentUser = Storage.getCurrentUser();
+
     this.state = {
-      loading: true,
+      currentUser: currentUser,
       showModal: false,
       dulLimit: 5,
       accessLimit: 5,
@@ -84,7 +86,6 @@ class MemberConsole extends Component {
 
     this.setState(prev => {
       prev.currentUser = currentUser;
-      prev.loading = false;
       prev.totalDulPendingVotes = duls.totalDulPendingVotes;
       prev.electionsList.dul = duls.dul;
       prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
@@ -123,8 +124,6 @@ class MemberConsole extends Component {
   }
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
 

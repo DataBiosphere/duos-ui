@@ -120,7 +120,8 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentDidMount() {
-    this.init();
+    await this.init();
+    ReactTooltip.rebuild();
   }
 
   async init() {

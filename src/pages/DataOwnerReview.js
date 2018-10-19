@@ -6,7 +6,6 @@ import { ApplicationSummaryModal } from '../components/modals/ApplicationSummary
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
 import { DAR, Files, DataSet, Consent, Votes } from '../libs/ajax';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { LoadingIndicator } from "../components/LoadingIndicator";
 
 const APPROVE = "1";
 const DISAPPROVE = "0";
@@ -16,7 +15,6 @@ class DataOwnerReview extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       showConfirmDialog: false,
       pendingCase: {
         voteId: '',
@@ -71,9 +69,6 @@ class DataOwnerReview extends Component {
      await this.getVote();
      await this.getDataSetInfo();
      await this.getConsentInfo();
-     this.setState({
-       loading: false
-     });
   }
 
   async getDarInfo() {
@@ -243,8 +238,6 @@ class DataOwnerReview extends Component {
   };
 
   render() {
-
-    if (this.state.loading) return LoadingIndicator();
 
     return (
 

@@ -89,8 +89,9 @@ class DatasetCatalog extends Component {
     this.setState({
       isAdmin: this.currentUser.isAdmin,
       isResearcher: this.currentUser.isResearcher
-    }, () => {
-      this.getDatasets();
+    }, async () => {
+      await this.getDatasets();
+      ReactTooltip.rebuild();
     });
   }
 

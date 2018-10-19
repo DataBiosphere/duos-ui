@@ -56,6 +56,8 @@ class AdminManageDul extends Component {
       prev.showDialogArchiveClosed = false;
       prev.showDialogCancel = false;
       return prev;
+    }, async () => {
+      ReactTooltip.rebuild();
     });
   }
 
@@ -179,7 +181,7 @@ class AdminManageDul extends Component {
       await Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     } else {
-      this.setState({showDialogArchiveOpen: false, showDialogArchiveClosed: false});
+      this.setState({ showDialogArchiveOpen: false, showDialogArchiveClosed: false });
     }
   };
 
@@ -229,7 +231,7 @@ class AdminManageDul extends Component {
             );
           }
         }
-      );
+        );
     } else {
       this.setState({
         showDialogCreate: false,
@@ -252,7 +254,7 @@ class AdminManageDul extends Component {
         }
       });
     } else {
-      this.setState({showDialogDelete: false});
+      this.setState({ showDialogDelete: false });
     }
   };
 
@@ -416,34 +418,34 @@ class AdminManageDul extends Component {
                         className: "display-inline-block",
                         disabled: (election.electionStatus === 'un-reviewed' || election.archived === true)
                       }, [
-                        button({
-                          id: election.consentId + "_btnArchiveElection",
-                          name: "btn_archiveElection",
-                          onClick: this.openDialogArchive(election)
-                        }, [
-                          span({
-                            className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
-                            "data-tip": "Archive election",
-                            "data-for": "tip_archive"
-                          })
-                        ])
-                      ]),
+                          button({
+                            id: election.consentId + "_btnArchiveElection",
+                            name: "btn_archiveElection",
+                            onClick: this.openDialogArchive(election)
+                          }, [
+                              span({
+                                className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
+                                "data-tip": "Archive election",
+                                "data-for": "tip_archive"
+                              })
+                            ])
+                        ]),
                       div({
                         className: "display-inline-block",
                         disabled: (election.electionStatus !== 'un-reviewed' || election.electionStatus === 'Canceled')
                       }, [
-                        button({
-                          id: election.consentId + "_btnDeleteDul",
-                          name: "btn_deleteDul",
-                          onClick: this.openDialogDelete(election)
-                        }, [
-                          span({
-                            className: "glyphicon caret-margin glyphicon-trash",
-                            "data-tip": "Delete record",
-                            "data-for": "tip_delete"
-                          })
+                          button({
+                            id: election.consentId + "_btnDeleteDul",
+                            name: "btn_deleteDul",
+                            onClick: this.openDialogDelete(election)
+                          }, [
+                              span({
+                                className: "glyphicon caret-margin glyphicon-trash",
+                                "data-tip": "Delete record",
+                                "data-for": "tip_delete"
+                              })
+                            ])
                         ])
-                      ])
                     ])
                   ]),
                 hr({ className: "table-body-separator" })

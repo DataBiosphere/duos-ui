@@ -658,29 +658,36 @@ class AccessResultRecords extends Component {
   async loadData() {
     const referenceId = this.props.match.params.referenceId;
     const electionId = this.props.match.params.electionId;
-
-    const darElection = await Election.findElectionById(electionId);
-    const darInfo = await DAR.describeDar(darElection.referenceId);
-    if (darInfo.purposeStatements === undefined) {
-      darInfo.purposeStatements = [];
-    }
-
     this.setState({
       electionId: electionId,
       referenceId: referenceId,
-      darElection: darElection,
-      darInfo: darInfo,
     });
+
+    // const darElection = await 
+    Election.findElectionById(electionId).then(
+      darElection => {
+        this.setState({
+          darElection: darElection,
+        });
+      }
+    );
+
+    // const darInfo = await 
+    DAR.describeDar(referenceId).then(
+      darInfo => {
+        if (darInfo.purposeStatements === undefined) {
+          darInfo.purposeStatements = [];
+        }
+        this.setState({
+          darInfo: darInfo,
+        });
+      }
+    );
 
     const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
     const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
     this.setState({
-      // electionId: electionId,
-      // referenceId: referenceId,
       hasUseRestriction,
-      // finalDACVote: finalDACVote,
-      // darInfo: darInfo,
-      // darElection: darElection
     });
 
     // const finalDACVote = await 
@@ -691,15 +698,6 @@ class AccessResultRecords extends Component {
         });
       }
     );
-
-    // this.setState({
-    //   // electionId: electionId,
-    //   // referenceId: referenceId,
-    //   hasUseRestriction,
-    //   // finalDACVote: finalDACVote,
-    //   // darInfo: darInfo,
-    //   // darElection: darElection
-    // });
 
     //const data = await 
     Election.findDataAccessElectionReview(electionId, false).then(
