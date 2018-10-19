@@ -64,32 +64,32 @@ class HomeRegister extends Component {
   };
 
   myHandler(event) {
+  let displayName = event.target.value;
     this.setState(prev => {
-      prev.displayName = event.target.value;
+      prev.displayName = displayName;
       return prev;
     });
   }
 
   render() {
     let googleLoginButton;
-
     if (this.state.clientId === '') {
       googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
         // img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
         'loading...'
       ]);
     } else {
+      console.log("clientID !!!!!!!!!!!!!!!!!!!!!!", this.state.clientId);
       googleLoginButton = h(GoogleLogin, {
-        className: "btn_gSignInWrapper",
+        // className: "btn_gSignInWrapper",
         clientId: this.state.clientId,
         onSuccess: this.responseGoogle,
         onFailure: this.forbidden,
-        isSignedIn: this.state.redirectUrl !== '/login'
       }, [
-        div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
-          span({ className: "icon" }),
-          label({}, ["Sign in with Google"])
-        ])
+        // div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
+        //   span({ className: "icon" }),
+        //   label({}, ["Sign in with Google"])
+        // ])
       ]);
     }
 
