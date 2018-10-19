@@ -278,6 +278,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   async searchDACUsers(role) {
+  if (this.state.mode === 'Edit') {
     let user = {
       roles: this.props.user.roles.map(
         (role, ix) => {
@@ -288,6 +289,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       email: this.props.user.email,
     };
     return await User.validateDelegation(role, user);
+  } else if (this.state.mode === 'Add') {
+    return { needsDelegation: true };
+  }
   };
 
   checkNoEmptyDelegateCandidates = async (needsDelegation, delegateCandidates, role) => {
@@ -387,7 +391,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
-      // const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
       if (checkState && result.needsDelegation) {
         this.changeChairpersonRoleAlert();
       }
