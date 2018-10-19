@@ -9,13 +9,13 @@
   margin: 10px 0;
 }
 
-.btn_gSignInWrapper:active {
+.btn_gSignInWrapper:not([disabled]):active {
   border: 1px solid #3367d6;
   background: #3367d6;
 }
 
-.btn_gSignInWrapper:hover,
-.btn_gSignInWrapper:active {
+.btn_gSignInWrapper:not([disabled]):hover,
+.btn_gSignInWrapper:not([disabled]):active {
   cursor: pointer;
   box-shadow: 1px 1px 4px #4285F4;
 }
@@ -27,9 +27,9 @@
   width: 100%;
 }
 
-.btn_gSignIn:hover,
-.btn_gSignIn:hover label,
-.btn_gSignIn:hover icon {
+.btn_gSignIn:not([disabled]):hover,
+.btn_gSignIn:not([disabled]):hover label,
+.btn_gSignIn:not([disabled]):hover icon {
   cursor: pointer;
 }
 

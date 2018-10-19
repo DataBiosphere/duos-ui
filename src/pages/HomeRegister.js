@@ -127,13 +127,14 @@ class HomeRegister extends Component {
       }, [
         div({id: "btn_gSignIn", className: "btn_gSignIn"}, [
           span({className: "icon"}),
-          label({}, ["Sign in with Google"])
+          label({}, ["Register with Google"])
         ])
       ]);
     }
 
     return (
-      div({ className: "container" }, [
+
+      div({ className: "row home" }, [
         div({ className: "col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           h1({ className: "home-title" }, ["Join DUOS"]),
           div({ className: "home-title-description" }, ["Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests."]),
@@ -141,10 +142,10 @@ class HomeRegister extends Component {
           div({ className: "row" }, [
             div({ className: "col-lg-6 col-md-8 col-sm-12 col-xs-12" }, [
             label({ className: "home-control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" }, ["Full Name"]),
-            input({ className: "form-control col-lg-12 col-md-12 col-sm-12 col-xs-12", type: "text", onChange: this.myHandler }),
-            ]),
+            input({ className: "form-control col-lg-12 col-md-12 col-sm-12 col-xs-12", type: "text", onChange: this.myHandler })
+            ])
           ]),
-          div({ className: "landing-box-google-signin" }, [googleLoginButton])
+          div({}, [googleLoginButton])
         ])
       ])
     );
