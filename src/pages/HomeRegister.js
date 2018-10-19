@@ -52,7 +52,7 @@ class HomeRegister extends Component {
         this.props.history.push('dataset_catalog?reviewProfile');
       },
       error => {
-        if (error.status === 400 && this.state.displayName !== '') {
+        if (error.status === 409 && this.state.displayName !== '') {
           alert("User already exists.");
           this.getUser().then(
             user => {
@@ -69,7 +69,7 @@ class HomeRegister extends Component {
   };
 
 
-  static setRoles(user){
+  setRoles(user){
     const currentUserRoles = user.roles.map(roles => roles.name);
     let roles = {};
     roles.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
@@ -81,7 +81,7 @@ class HomeRegister extends Component {
     return roles;
   }
 
-  static setStorage(user) {
+  setStorage(user) {
     Storage.setCurrentUser(user);
     Storage.setUserIsLogged(true);
   }
