@@ -116,7 +116,6 @@ class HomeRegister extends Component {
     if (this.state.clientId === '') {
       googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
         // img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
-        'loading...'
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {
