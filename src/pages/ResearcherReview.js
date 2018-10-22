@@ -4,14 +4,12 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Researcher } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       showConfirmationDialogOK: false,
       alertMessage: "Your vote has been successfully logged!",
       value: '',
@@ -71,14 +69,12 @@ class ResearcherReview extends Component {
     }
 
     this.setState(prev => {
-      prev.loading = false; 
       prev.formData = researcher;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
       return prev;
     });
   };
-
 
   submitVote = (voteStatus, rationale) => {
     let status = "pending";
@@ -103,8 +99,6 @@ class ResearcherReview extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { formData, rationale, voteStatus } = this.state;
     

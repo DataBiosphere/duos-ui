@@ -3,7 +3,6 @@ import { div, b, span, a, h4, hr, i, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
 
@@ -13,13 +12,12 @@ class DulReview extends Component {
     super(props);
     this.state = {
       showConfirmationDialog: false,
-      loading: true,
       value: '',
       currentUser: Storage.getCurrentUser(),
       enableVoteButton: false,
       consent: {},
       election: {},
-      vote: {vote: '', rational: ''}
+      vote: { vote: '', rational: '' }
     };
     this.back = this.back.bind(this);
     this.logVote = this.logVote.bind(this);
@@ -42,10 +40,9 @@ class DulReview extends Component {
     let vote = await Votes.find(this.props.match.params.consentId, this.props.match.params.voteId);
     let election = await Election.findElectionByVoteId(this.props.match.params.voteId);
     let consent = await Consent.findConsentById(this.props.match.params.consentId);
-    this.setState(prev => { 
-      prev.vote = vote; 
-      prev.loading = false;
-      prev.election = election; 
+    this.setState(prev => {
+      prev.vote = vote;
+      prev.election = election;
       prev.consent = consent;
       prev.consentName = consent.dulName
       return prev;
@@ -67,22 +64,22 @@ class DulReview extends Component {
   };
 
   async processVote(vote) {
-    if(vote.createDate === null){
-      Votes.postVote(this.state.consent.consentId, vote).then( 
+    if (vote.createDate === null) {
+      Votes.postVote(this.state.consent.consentId, vote).then(
         data => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully logged!" });
         }
       ).catch(error => {
-          this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       })
 
-    } else  {
-      Votes.updateVote(this.state.consent.consentId, vote).then( 
+    } else {
+      Votes.updateVote(this.state.consent.consentId, vote).then(
         data => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully edited!" });
         }
       ).catch(error => {
-          this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       })
     }
   };
@@ -97,8 +94,6 @@ class DulReview extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
       b({ isRendered: this.state.consent.groupName, className: "pipe", "ng-bind-html": "consentGroupName", dangerouslySetInnerHTML: { __html: this.state.consent.groupName } }, []),
@@ -119,8 +114,8 @@ class DulReview extends Component {
               onClick: this.back,
               className: "btn-primary btn-back"
             }, [
-              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-            ])
+                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+              ])
           ]),
         ]),
 
@@ -142,7 +137,7 @@ class DulReview extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction }}, [])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction } }, [])
           ]),
         ]),
 
@@ -157,15 +152,15 @@ class DulReview extends Component {
               action: { label: "Vote", handler: this.logVote }
             })
           ]),
-        
-            ConfirmationDialog({
-              isRendered: this.state.showConfirmationDialog,
-              showModal: this.state.showConfirmationDialog,
-              title: "Vote confirmation",
-              color: "dul",
-              type: "informative",
-              action: { label: "Ok", handler: this.confirmationHandlerOK }
-            }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
+
+          ConfirmationDialog({
+            isRendered: this.state.showConfirmationDialog,
+            showModal: this.state.showConfirmationDialog,
+            title: "Vote confirmation",
+            color: "dul",
+            type: "informative",
+            action: { label: "Ok", handler: this.confirmationHandlerOK }
+          }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
         ]),
       ])
     );

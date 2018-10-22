@@ -6,7 +6,6 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Alert } from '../components/Alert';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
@@ -24,10 +23,38 @@ class FinalAccessReview extends Component {
   componentDidMount() {
     const currentUser = Storage.getCurrentUser();
     this.setState({
-      loading: true,
+      loading: false,
+      vote: {},
+      voteAgreement: {},
       currentUser: currentUser,
       referenceId: this.props.match.params.referenceId,
       electionId: this.props.match.params.electionId,
+      electionAccess: {
+        finalVote: null
+      },
+      dar: {
+        rus: ''
+      },
+      darInfo: {
+        hasPurposeStatements: false,
+        purposeStatements: [],
+        researchType: [],
+        diseases: []
+      },
+      voteAccessList: [],
+      rpVoteAccessList: [],
+      voteList: [],
+      chartDataAccess: {
+        Total: []
+      },
+      electionRP: {},
+      chartRP: {
+        Total: []
+      },
+      election: {},
+      chartDataDUL: {
+        Total: []
+      },
     }, () => {
       this.loadData();
     });
@@ -250,6 +277,35 @@ class FinalAccessReview extends Component {
       q2NoBtnDisabled: false,
       q2AlertTitle: undefined,
       q2AlertMessage: '',
+
+      referenceId: this.props.match.params.referenceId,
+      electionId: this.props.match.params.electionId,
+      electionAccess: {
+        finalVote: null
+      },
+      dar: {
+        rus: ''
+      },
+      darInfo: {
+        hasPurposeStatements: false,
+        purposeStatements: [],
+        researchType: [],
+        diseases: []
+      },
+      voteAccessList: [],
+      rpVoteAccessList: [],
+      voteList: [],
+      chartDataAccess: {
+        Total: []
+      },
+      electionRP: {},
+      chartRP: {
+        Total: []
+      },
+      election: {},
+      chartDataDUL: {
+        Total: []
+      },
     };
   };
 
@@ -264,8 +320,14 @@ class FinalAccessReview extends Component {
     a.click();
   };
 
-  downloadDAR = (e) => {
-    Files.getDARFile(this.state.referenceId);
+  downloadDAR = async (e) => {
+    this.setState({
+      loading: true
+    })
+    await Files.getDARFile(this.state.referenceId);
+    this.setState({
+      loading: false
+    })
   }
 
   downloadDUL = (e) => {
@@ -295,25 +357,47 @@ class FinalAccessReview extends Component {
 
   init = async () => {
 
-    const vote = await Votes.getDarFinalAccessVote(this.state.electionId);
-    this.setState({
-      vote: vote
-    });
+    // const vote = await 
+    Votes.getDarFinalAccessVote(this.state.electionId).then(
+      vote => {
 
-    if (vote.vote !== null) {
-      this.setState({
-        alreadyVote: true,
-        originalVote: vote.vote,
-        originalRationale: vote.rationale
-      });
-    } else {
-      this.setState({
-        alreadyVote: false,
-      });
-    }
+        this.setState({
+          vote: vote
+        });
 
-    const data1 = await Election.findDataAccessElectionReview(this.state.electionId, false);
-    await this.showAccessData(data1);
+        if (vote.vote !== null) {
+          this.setState({
+            alreadyVote: true,
+            originalVote: vote.vote,
+            originalRationale: vote.rationale
+          });
+        } else {
+          this.setState({
+            alreadyVote: false,
+          });
+        }
+      }
+    );
+
+    // const data1 = await 
+    Election.findDataAccessElectionReview(this.state.electionId, false).then(
+      async data1 => {
+
+        await this.showAccessData(data1);
+        this.setState({
+          consentName: data1.associatedConsent.name
+        });
+
+        const data3 = await Election.findElectionReviewById(data1.associatedConsent.electionId, data1.associatedConsent.consentId);
+        this.setState({
+          electionReview: data3
+        });
+
+        await this.showDULData(data3);
+        await this.vaultVote(data3.consent.consentId);
+
+      });
+
     const data2 = await Election.findRPElectionReview(this.state.electionId, false);
 
     if (data2.election !== undefined) {
@@ -342,18 +426,6 @@ class FinalAccessReview extends Component {
         showRPaccordion: false
       })
     }
-
-    this.setState({
-      consentName: data1.associatedConsent.name
-    });
-
-    const data3 = await Election.findElectionReviewById(data1.associatedConsent.electionId, data1.associatedConsent.consentId);
-    this.setState({
-      electionReview: data3
-    });
-
-    await this.showDULData(data3);
-    await this.vaultVote(data3.consent.consentId);
 
     this.setState({
       loading: false
@@ -486,10 +558,7 @@ class FinalAccessReview extends Component {
     return chartData;
   }
 
-
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     let finalVote = null;
     if (this.state.electionAccess.finalVote === '1' || this.state.electionAccess.finalVote === true || this.state.electionAccess.finalVote === 'true') finalVote = true;

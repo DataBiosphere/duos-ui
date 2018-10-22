@@ -1,5 +1,6 @@
 import _ from 'lodash/fp'
 import { Config } from './config';
+import { spinnerService } from './spinner-service';
 
 const dataTemplate = {
   accessTotal: [
@@ -620,6 +621,9 @@ export const Ontology = {
 
     const url = `${await Config.getApiUrl()}/ontology`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
+    if (res.status === 204) {
+      return [];
+    }
     return await res.json();
   },
 
@@ -968,7 +972,9 @@ export const Votes = {
 };
 
 const fetchOk = async (...args) => {
+  spinnerService.showAll();
   const res = await fetch(...args);
+  spinnerService.hideAll();
   if (!res.ok && res.status === 401) {
     window.location.href = '/login';
   }

@@ -6,7 +6,6 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
 import * as Utils from "../libs/utils";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ReviewedCases extends Component {
 
@@ -22,7 +21,7 @@ class ReviewedCases extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
@@ -30,7 +29,6 @@ class ReviewedCases extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       showModal: false,
       dulLimit: 5,
       accessLimit: 5,
@@ -90,7 +88,6 @@ class ReviewedCases extends Component {
     const access = await Election.findReviewedDRs();
 
     this.setState(prev => {
-      prev.loading = false;
       prev.electionsList = {
         dul: dul,
         access: access,
@@ -139,8 +136,6 @@ class ReviewedCases extends Component {
 
   render() {
 
-    if (this.state.loading) { return LoadingIndicator(); }
-    
     const { currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
 
     return (

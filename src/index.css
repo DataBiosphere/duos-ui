@@ -16,6 +16,7 @@ html, body, .body, #root {
 }
 
 .main {
+  position: relative;
   overflow-x: hidden;
   min-width: 100%;
   padding-bottom: 100px;

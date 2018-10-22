@@ -32,7 +32,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     rolesState[USER_ROLES_UPPER.researcher] = false;
 
     initialValue = {
-      loading: true,
       displayName: '',
       email: '',
       displayNameValid: false,
@@ -119,7 +118,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             wasResearcher: rolesState[USER_ROLES_UPPER.researcher],
             displayNameValid: r1.validity.valid,
             emailValid: r2.validity.valid,
-            loading: false
           });
         });
     } else {
@@ -146,7 +144,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         wasDataOwner: false,
         wasResearcher: false,
         newUserNeeded: false,
-        loading: false
       },
         () => {
           let r1 = this.nameRef.current;
@@ -522,12 +519,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   closeNoAvailableCandidatesAlert = (role) => {
+
     this.setState(prev => {
       prev.alerts = [];
-      return prev;
-    });
-
-     this.setState(prev => {
       prev.newAlternativeUserNeeded[role] = false;
       return prev;
     },
@@ -581,8 +575,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   render() {
 
     const { displayName, email, rolesState, newUserNeeded, emailPreference, displayNameValid, emailValid, roleValid } = this.state;
-
-    // if (loading) {  return LoadingIndicator();   }
 
     const validForm = displayNameValid && emailValid && roleValid;
 

@@ -3,7 +3,6 @@ import { div, form, input, label, span, hh, p, select, h, option } from 'react-h
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
 import { Ontology } from "../../libs/ajax";
-import { LoadingIndicator } from '../LoadingIndicator';
 
 export const AddOntologiesModal = hh(class AddOntologiesModal extends Component {
 
@@ -18,7 +17,6 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       ontologyTypes: [],
       file: {
         name: ''
@@ -52,7 +50,6 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
     }
 
     this.setState(prev => {
-      prev.loading = false;
       prev.ontologyTypes = ontologyTypes;
       prev.ontology.type = ontologyTypes[0];
       return prev;
@@ -92,20 +89,10 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
   }
 
   closeHandler() {
-    // this is the method to handle Cancel click
-    // could do some cleaning here 
-    // or delegate it to the parent
-    // we need to use it to close the
-    // DO SOMETHING HERE ...
-
-    // and call parent's close handler
     this.props.onCloseRequest('addOntologies');
   }
 
   afterOpenHandler() {
-    // DO SOMETHING HERE ...
-
-    // and call parent's after open handler
     this.props.onAfterOpen('addOntologies');
   }
 
@@ -135,12 +122,6 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
   }
 
   render() {
-
-    const { loading } = this.state;
-
-    if (loading) {
-      return LoadingIndicator();
-    }
 
     return (
 

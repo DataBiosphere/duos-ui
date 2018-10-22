@@ -8,7 +8,6 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
 import { SearchBox } from '../components/SearchBox';
 import ReactTooltip from 'react-tooltip';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 const limit = 10;
 
@@ -17,7 +16,6 @@ class AdminManageDul extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       currentPage: 1,
       showModal: false,
       value: '',
@@ -50,7 +48,6 @@ class AdminManageDul extends Component {
   async getConsentManage() {
     const duls = await Consent.findConsentManage();
     this.setState(prev => {
-      prev.loading = false;
       prev.currentPage = 1;
       prev.electionsList.dul = duls;
       prev.disableOkBtn = false;
@@ -59,6 +56,8 @@ class AdminManageDul extends Component {
       prev.showDialogArchiveClosed = false;
       prev.showDialogCancel = false;
       return prev;
+    }, async () => {
+      ReactTooltip.rebuild();
     });
   }
 
@@ -182,7 +181,7 @@ class AdminManageDul extends Component {
       await Election.updateElection(electionUpdate.electionId, electionUpdate);
       this.getConsentManage();
     } else {
-      this.setState({showDialogArchiveOpen: false, showDialogArchiveClosed: false});
+      this.setState({ showDialogArchiveOpen: false, showDialogArchiveClosed: false });
     }
   };
 
@@ -232,7 +231,7 @@ class AdminManageDul extends Component {
             );
           }
         }
-      );
+        );
     } else {
       this.setState({
         showDialogCreate: false,
@@ -255,7 +254,7 @@ class AdminManageDul extends Component {
         }
       });
     } else {
-      this.setState({showDialogDelete: false});
+      this.setState({ showDialogDelete: false });
     }
   };
 
@@ -270,14 +269,12 @@ class AdminManageDul extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentPage, limit, searchDulText } = this.state;
 
@@ -421,34 +418,34 @@ class AdminManageDul extends Component {
                         className: "display-inline-block",
                         disabled: (election.electionStatus === 'un-reviewed' || election.archived === true)
                       }, [
-                        button({
-                          id: election.consentId + "_btnArchiveElection",
-                          name: "btn_archiveElection",
-                          onClick: this.openDialogArchive(election)
-                        }, [
-                          span({
-                            className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
-                            "data-tip": "Archive election",
-                            "data-for": "tip_archive"
-                          })
-                        ])
-                      ]),
+                          button({
+                            id: election.consentId + "_btnArchiveElection",
+                            name: "btn_archiveElection",
+                            onClick: this.openDialogArchive(election)
+                          }, [
+                              span({
+                                className: "glyphicon caret-margin glyphicon-inbox " + (election.archived === true ? "activated" : ""),
+                                "data-tip": "Archive election",
+                                "data-for": "tip_archive"
+                              })
+                            ])
+                        ]),
                       div({
                         className: "display-inline-block",
                         disabled: (election.electionStatus !== 'un-reviewed' || election.electionStatus === 'Canceled')
                       }, [
-                        button({
-                          id: election.consentId + "_btnDeleteDul",
-                          name: "btn_deleteDul",
-                          onClick: this.openDialogDelete(election)
-                        }, [
-                          span({
-                            className: "glyphicon caret-margin glyphicon-trash",
-                            "data-tip": "Delete record",
-                            "data-for": "tip_delete"
-                          })
+                          button({
+                            id: election.consentId + "_btnDeleteDul",
+                            name: "btn_deleteDul",
+                            onClick: this.openDialogDelete(election)
+                          }, [
+                              span({
+                                className: "glyphicon caret-margin glyphicon-trash",
+                                "data-tip": "Delete record",
+                                "data-for": "tip_delete"
+                              })
+                            ])
                         ])
-                      ])
                     ])
                   ]),
                 hr({ className: "table-body-separator" })

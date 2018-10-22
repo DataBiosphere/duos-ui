@@ -2,14 +2,12 @@ import { Component } from 'react';
 import { div, button, i, span, b, a, h4, hr } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Consent, Election, Files } from '../libs/ajax';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulPreview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       consentPreview: {}
     };
 
@@ -27,10 +25,14 @@ class DulPreview extends Component {
     let consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
 
     if (consent.election !== undefined) {
-      this.setState({ consentPreview: consent.consent, loading: false });
+      this.setState({
+        consentPreview: consent.consent
+      });
     } else {
       Consent.findConsentById(consentId).then(resp => {
-        this.setState({ consentPreview: resp, loading: false });
+        this.setState({
+          consentPreview: resp
+        });
       });
     }
   }
@@ -45,8 +47,6 @@ class DulPreview extends Component {
 
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe", isRendered: this.state.consentPreview.groupName }, [this.state.consentPreview.groupName]),
