@@ -123,13 +123,13 @@ class DulCollect extends Component {
     );
   };
 
-  confirmationHandlerOK = (answer) => (e) => {
+  confirmationHandlerOK = (answer) => async (e) => {
     if (answer === true) {
       let election = this.state.election;
       election.status = 'Closed';
       election.finalVote = this.state.finalVote;
       election.finalRationale = this.state.finalRationale;
-      this.updateElection(election);
+      await Election.updateElection(election.electionId, election);
       this.setState(prev => {
         prev.showConfirmationDialogOK = false;
         return prev;
@@ -142,10 +142,6 @@ class DulCollect extends Component {
       });
     }
   };
-
-    async updateElection(election) {
-      return await Election.updateElection(election.electionId, election);
-    };
 
     setGraphData(votes) {
       var yes = 0, no = 0, empty = 0;

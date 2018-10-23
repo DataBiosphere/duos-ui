@@ -838,14 +838,26 @@ export const User = {
 
   create: async user => {
     const url = `${await Config.getApiUrl()}/dacuser`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
-    return res.json();
+    try {
+      const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
+      if (res.ok) {
+        return res.json;
+      }
+    } catch (err) {
+      return false;
+    }
   },
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
-    return res.json();
+    try {
+      const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
+      if (res.ok) {
+        return res.json();
+      }
+    } catch (err) {
+      return false;
+    }
   },
 
   updateName: async (body, userId) => {

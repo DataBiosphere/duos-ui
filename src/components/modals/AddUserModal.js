@@ -196,7 +196,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           email: this.state.email,
           roles: updatedRoles
         };
-        await User.create(newUser);
+        const createdUser = await User.create(newUser);
+        this.setState({ emailValid: createdUser });
         break;
 
       case 'Edit':
@@ -222,7 +223,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           payload.alternativeDataOwnerUser = JSON.parse(this.state.alternativeDataOwnerUser);
         }
 
-        await User.update(payload, this.state.user.dacUserId);
+        const updatedUser = await User.update(payload, this.state.user.dacUserId);
+        this.setState({ emailValid: updatedUser});
         break;
 
       default:
@@ -230,17 +232,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     }
 
     event.preventDefault();
-    this.props.onOKRequest('addUser');
 
-  }
+    if (this.state.emailValid !== false) {
+      this.props.onOKRequest('addUser');
+    }
+
+  };
 
   closeHandler = () => {
     this.props.onCloseRequest('addUser');
-  }
+  };
 
   afterOpenHandler = () => {
     this.props.onAfterOpen('addUser');
-  }
+  };
 
   toggleState(roleName) {
     let rs = Object.assign({}, this.state.rolesState);
@@ -275,6 +280,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   };
 
   async searchDACUsers(role) {
+  if (this.state.mode === 'Edit') {
     let user = {
       roles: this.props.user.roles.map(
         (role, ix) => {
@@ -285,6 +291,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       email: this.props.user.email,
     };
     return await User.validateDelegation(role, user);
+  } else if (this.state.mode === 'Add') {
+    return { needsDelegation: true };
+  }
   };
 
   checkNoEmptyDelegateCandidates = async (needsDelegation, delegateCandidates, role) => {
@@ -384,7 +393,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         });
       }
     } else {
-      // const result = await this.searchDACUsers(USER_ROLES_UPPER.chairperson);
       if (checkState && result.needsDelegation) {
         this.changeChairpersonRoleAlert();
       }
@@ -552,7 +560,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       prev.alternativeDACMemberUser = value;
       return prev;
     });
-  }
+  };
 
   selectAlternativeDataOwnerUser = (e) => {
     const target = e.target;
@@ -562,7 +570,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       prev.alternativeDataOwnerUser = value;
       return prev;
     });
-  }
+  };
 
   formChange = (e) => {
     this.setState(prev => {
@@ -570,7 +578,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       prev.invalidForm = (prev.roleValid && prev.displayNameValid && prev.emailValid);
       return prev;
     })
-  }
+  };
 
   render() {
 
@@ -744,12 +752,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ])
           ]),
 
-          div({ isRendered: this.state.nameValid === false && this.state.submitted === true }, [
-            Alert({ id: "nameAlertl", type: 'danger', title: 'Invalid Name!', description: 'Please provide a valid Name' })
-          ]),
-
           div({ isRendered: this.state.emailValid === false && this.state.submitted === true }, [
-            Alert({ id: "emailAlert", type: 'danger', title: 'Invalid Email!', description: 'Please provide a valid email address' })
+            Alert({ id: "emailUsed", type: 'danger', title: 'Conflicts to resolve!', description: 'There is a user already registered with this google account.' })
           ]),
 
           div({ isRendered: this.state.alerts.length > 0 }, [

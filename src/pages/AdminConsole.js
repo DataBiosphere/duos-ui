@@ -109,7 +109,8 @@ class AdminConsole extends Component {
         this.props.history.push(`admin_manage_dul`);
         break;
       case 'addUser':
-        this.setState({ showAddUserModal: false });
+        this.setState({showAddUserModal: false});
+        this.props.history.push(`admin_manage_users`);
         break;
       case 'addDataset': {
         this.setState({ showAddDatasetModal: false });
