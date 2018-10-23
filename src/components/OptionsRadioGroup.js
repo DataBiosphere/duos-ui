@@ -20,11 +20,11 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    let newValue = nextProps.voteStatus === false ? '0' :
-    nextProps.voteStatus === true ? '1' : '2';
+    let newValue = nextProps.value === false ? '0' :
+    nextProps.value === true ? '1' : '2';
       return {
         rationale: nextProps.rationale,
-        voteStatus: newValue
+        value: newValue
       };
     }
 
