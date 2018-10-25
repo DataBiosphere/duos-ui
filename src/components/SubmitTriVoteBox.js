@@ -15,7 +15,8 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
       voteStatus: this.props.voteStatus, // != null ? this.props.voteStatus : '',
       showDialogSubmit: false,
       rationale: this.props.rationale != null ? this.props.rationale : '',
-      requiredMessage: false
+      requiredMessage: false,
+      modifiedVote: false
     }
   }
 
@@ -46,8 +47,8 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
 
   optionsChange = (e, name, value) => {
-    console.log(name, value);
-    this.setState({ voteStatus: e.target.value , requiredMessage: false });
+    console.log(value, name);
+    this.setState({ voteStatus: value , requiredMessage: false, modifiedVote: true});
   };
 
   changeRationale = (e) => {
@@ -56,7 +57,9 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
   render() {
 
-    let { voteStatus = '', rationale = '', enableVoteButton } = this.props;
+    let { voteStatus = '', rationale = '' }  = this.props;
+    const { enableVoteButton } = this.state;
+    if (this.state.modifiedVote) voteStatus = this.state.voteStatus;
     if (voteStatus === undefined) voteStatus = '';
    console.log(this.props);
 

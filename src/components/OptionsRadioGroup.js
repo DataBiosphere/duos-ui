@@ -35,7 +35,7 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
     //   return prev;
     // }, () => {
     console.log(value, e.target.value);
-      this.props.onChange(e, this.props.name, e.target.value);
+      this.props.onChange(e, this.props.name, value);
     // });
   };
 
