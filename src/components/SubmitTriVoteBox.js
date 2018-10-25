@@ -1,10 +1,9 @@
 import { Component } from 'react';
 import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'react-hyperscript-helpers';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 
-export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
+export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
   constructor(props) {
     super(props);
@@ -13,7 +12,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       loading: true,
       currentUser: {},
       enableVoteButton: true,
-      voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
+      voteStatus: this.props.voteStatus, // != null ? this.props.voteStatus : '',
       showDialogSubmit: false,
       rationale: this.props.rationale != null ? this.props.rationale : '',
       requiredMessage: false
@@ -45,7 +44,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   //   }
   // }
 
-  yesNoChange = (e, name, value) => {
+
+  optionsChange = (e, name, value) => {
     this.setState({ voteStatus: value, requiredMessage: false });
   };
 
@@ -71,12 +71,14 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
               label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
 
-                YesNoRadioGroup({
+                OptionsRadioGroup({
                   id: this.props.id,
                   value: voteStatus,
+                  optionLabels: this.props.radioLabels,
+                  optionValues: this.props.radioValues,
                   name: "rad_" + this.props.id,
-                  onChange: this.yesNoChange
-                }),
+                  onChange: this.optionsChange
+                })
               ])
             ]),
 
