@@ -4,15 +4,15 @@ import PropTypes from 'prop-types';
 
 export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: this.props.name,
-      value: this.props.value, //this.fixValue(this.props.value),
-      optionLabels: this.props.optionLabels,
-      optionValues: this.props.optionValues
-    }
-  }
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     name: this.props.name,
+  //     value: this.props.value, //this.fixValue(this.props.value),
+  //     optionLabels: this.props.optionLabels,
+  //     optionValues: this.props.optionValues
+  //   }
+  // }
 
   // fixValue(value) {
   //   if (value === false) return '0';
@@ -30,20 +30,21 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
   //   }
 
   selectOption = (e, value) => {
-    this.setState(prev => {
-      prev.value = value;
-      return prev;
-    }, () => {
-      this.props.onChange(e, this.state.name, value);
-    });
+    // this.setState(prev => {
+    //   prev.value = value;
+    //   return prev;
+    // }, () => {
+    console.log(value, e.target.value);
+      this.props.onChange(e, this.props.name, e.target.value);
+    // });
   };
 
   render() {
-
+    console.log(this.props);
     return (
 
       div({ className: 'radio-inline' }, [
-        this.state.optionLabels.map((option, ix) => {
+        this.props.optionLabels.map((option, ix) => {
           return (
 
             label({
@@ -56,9 +57,9 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
                 input({
                   type: "radio",
                   id: "rad_" + this.props.id + "_" + ix,
-                  name: this.state.name,
+                  name: this.props.name,
                   // value: this.state.optionValues[ix],
-                  checked: this.state.value === this.props.optionValues[ix] ,
+                  checked: this.props.value === this.props.optionValues[ix] ,
                 }),
                 span({ className: "radio-check" }),
                 span({ className: "radio-label" }, [this.props.optionLabels[ix]])

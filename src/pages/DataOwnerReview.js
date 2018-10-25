@@ -104,6 +104,7 @@ class DataOwnerReview extends Component {
   async getVote() {
     if (this.props.match.params.voteId !== null && Boolean(this.props.match.params.referenceId)) {
       const pendingCaseReview = await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
+      console.log(pendingCaseReview.hasConcerns);
       this.setState(prev => {
         prev.vote.dacUserId = pendingCaseReview.dacUserId;
         prev.vote.voteId = pendingCaseReview.voteId;
@@ -241,7 +242,7 @@ class DataOwnerReview extends Component {
   };
 
   fixValue = (value) => {
-    let newValue = null;
+    let newValue = undefined;
 
     if (value === true) {
       newValue = '1';
@@ -251,12 +252,12 @@ class DataOwnerReview extends Component {
       newValue = '0';
     }
 
-    if (value === null && this.state.hasConcers) {
+    if (value === undefined && this.state.vote.hasConcerns) {
       newValue = '2';
     }
+    console.log(newValue);
 
     return newValue;
-
   };
 
   render() {
@@ -328,7 +329,6 @@ class DataOwnerReview extends Component {
               alertMessage: "Error updating vote.",
               rationale: this.state.vote.rationale,
               action: { label: "Vote", handler: this.submitVote },
-              hasConcerns: this.state.hasConcerns
             }),
           ]),
         ]),

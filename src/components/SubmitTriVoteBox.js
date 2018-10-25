@@ -46,7 +46,8 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
 
   optionsChange = (e, name, value) => {
-    this.setState({ voteStatus: value, requiredMessage: false });
+    console.log(name, value);
+    this.setState({ voteStatus: e.target.value , requiredMessage: false });
   };
 
   changeRationale = (e) => {
@@ -55,7 +56,9 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
   render() {
 
-    const { voteStatus, rationale = '', enableVoteButton } = this.state;
+    let { voteStatus = '', rationale = '', enableVoteButton } = this.props;
+    if (voteStatus === undefined) voteStatus = '';
+   console.log(this.props);
 
     return (
 

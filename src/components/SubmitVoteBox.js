@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'react-hyperscript-helpers';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
+// import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 
 export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
@@ -46,7 +46,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   // }
 
   yesNoChange = (e, name, value) => {
-    this.setState({ voteStatus: value, requiredMessage: false });
+    this.setState({ voteStatus: e.target.value , requiredMessage: false });
   };
 
   changeRationale = (e) => {
