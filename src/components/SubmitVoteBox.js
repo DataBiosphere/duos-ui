@@ -37,8 +37,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     if (nextProps.rationale !== prevState.prevRationale
       || nextProps.voteStatus !== prevState.prevVoteStatus) {
       return {
-        rationale : nextProps.rationale,
-        prevRationale : nextProps.rationale,
+        rationale : nextProps.rationale != null ? nextProps.rationale : '',
+        prevRationale : nextProps.rationale != null ? nextProps.rationale : '',
         voteStatus : nextProps.voteStatus,
         prevVoteStatus: nextProps.voteStatus
       }
