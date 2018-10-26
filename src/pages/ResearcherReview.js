@@ -247,8 +247,8 @@ class ResearcherReview extends Component {
 
               div({ className: "row no-margin" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                  label({ className: "control-label" }, ["URL of a scientific publication"]),
-                  div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                  label({ className: "control-label" }, ["ORCID iD"]),
+                  div({ id: "lbl_profileCountry", className: "control-data", name: "profileCountry" }, [formData.orcid]),
                 ]),
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                   label({ className: "control-label" }, ["ResearchGate ID"]),
@@ -261,8 +261,8 @@ class ResearcherReview extends Component {
                   div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.linkedIn]),
                 ]),
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                  label({ className: "control-label" }, ["ORCID iD"]),
-                  div({ id: "lbl_profileCountry", className: "control-data", name: "profileCountry" }, [formData.orcid]),
+                  label({ className: "control-label" }, ["URL of a scientific publication"]),
+                  div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
                 ]),
               ]),
             ]),
