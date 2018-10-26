@@ -146,6 +146,28 @@ class ResearcherReview extends Component {
             ]),
 
             div({ className: "row no-margin" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["NIH User Name"]),
+                div({ id: "lbl_profileNihUsername", className: "control-data", name: "profileNihUsername" }, [formData.nihUsername]),
+              ]),
+
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["LinkedIn Profile"]),
+                div({ id: "lbl_profileLinkedIn", className: "control-data", name: "profileLinkedIn" }, [formData.linkedIn]),
+              ]),
+            ]),
+
+            div({ className: "row no-margin" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["ORCID iD"]),
+                div({ id: "lbl_profileOrcid", className: "control-data", name: "profileOrcid" }, [formData.orcid]),
+              ]),
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["ResearchGate ID"]),
+                div({ id: "lbl_profileResearcherGate", className: "control-data", name: "profileResearcherGate" }, [formData.researcherGate]),
+              ]),
+            ]),
+            div({ className: "row no-margin" }, [
               div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
                 div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution" }, [formData.institution]),
@@ -244,17 +266,6 @@ class ResearcherReview extends Component {
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                   label({ className: "control-label" }, ["LinkedIn Profile"]),
                   div({ id: "lbl_profileLinkedIn", className: "control-data", name: "profileLinkedIn" }, [formData.linkedIn]),
-                ]),
-              ]),
-
-              div({ className: "row no-margin" }, [
-                div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                  label({ className: "control-label" }, ["ORCID iD"]),
-                  div({ id: "lbl_profileOrcid", className: "control-data", name: "profileOrcid" }, [formData.orcid]),
-                ]),
-                div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                  label({ className: "control-label" }, ["ResearchGate ID"]),
-                  div({ id: "lbl_profileCountry", className: "control-data", name: "profileCountry" }, [formData.researcherGate]),
                 ]),
               ]),
 
