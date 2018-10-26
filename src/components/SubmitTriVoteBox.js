@@ -5,6 +5,7 @@ import { Alert } from '../components/Alert';
 
 export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
+
   constructor(props) {
     super(props);
 
@@ -12,9 +13,11 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
       loading: true,
       currentUser: {},
       enableVoteButton: true,
-      voteStatus: this.props.voteStatus, // != null ? this.props.voteStatus : '',
+      voteStatus: this.props.voteStatus,
+      prevVoteStatus: this.props.voteStatus,
       showDialogSubmit: false,
       rationale: this.props.rationale != null ? this.props.rationale : '',
+      prevRationale: this.props.rationale != null ? this.props.rationale : '',
       requiredMessage: false,
       modifiedVote: false
     }
@@ -32,57 +35,59 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
     }
   };
 
-  // static getDerivedStateFromProps(nextProps, prevState) {
-  //   if (prevState.flag === false || prevState.flag === undefined) {
-  //     return {
-  //       flag: true,
-  //       rationale: nextProps.rationale != null ? nextProps.rationale : '',
-  //       voteStatus: nextProps.voteStatus,
-  //       enableVoteButton: true
-  //     };
-  //   } else {
-  //     return {enableVoteButton: true};
-  //   }
-  // }
-
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.rationale !== prevState.prevRationale
+      || nextProps.voteStatus !== prevState.prevVoteStatus) {
+      return {
+        rationale : nextProps.rationale,
+        prevRationale : nextProps.rationale,
+        voteStatus : nextProps.voteStatus,
+        prevVoteStatus: nextProps.voteStatus
+      }
+    }
+    return null;
+  }
 
   optionsChange = (e, name, value) => {
-    console.log(value, name);
-    this.setState({ voteStatus: value , requiredMessage: false, modifiedVote: true});
+    this.setState({
+      voteStatus: value,
+      requiredMessage: false,
+      modifiedVote: true
+    });
   };
 
-  changeRationale = (e) => {
-    this.setState({ rationale: e.target.value });
+  changeRationale = async (e) => {
+    e.preventDefault();
+    await this.setState({
+      rationale: e.target.value
+    });
   };
 
   render() {
 
-    let { voteStatus = '', rationale = '' }  = this.props;
-    const { enableVoteButton } = this.state;
-    if (this.state.modifiedVote) voteStatus = this.state.voteStatus;
-    if (voteStatus === undefined) voteStatus = '';
-   console.log(this.props);
+    const { id, isDisabled, title, color, agreementData, radioLabels, radioValues, showAlert, alertMessage } = this.props;
+    const { enableVoteButton, voteStatus = '', rationale = '' } = this.state;
 
     return (
 
-      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : "" }, [
-        h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
+      div({ id: "box_" + id, className: isDisabled === true ? "box-vote-disabled" : "" }, [
+        h3({ className: "box-vote-title italic " + color + "-color" }, [title]),
         hr({ className: "box-separator" }),
 
-        div({ isRendered: this.props.agreementData !== undefined }, [this.props.agreementData]),
+        div({ isRendered: agreementData !== undefined }, [agreementData]),
 
         form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
-          fieldset({ disabled: this.props.isDisabled }, [
+          fieldset({ disabled: isDisabled }, [
             div({ className: "form-group first-form-group" }, [
-              label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
+              label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
 
                 OptionsRadioGroup({
-                  id: this.props.id,
+                  id: id,
                   value: voteStatus,
-                  optionLabels: this.props.radioLabels,
-                  optionValues: this.props.radioValues,
-                  name: "rad_" + this.props.id,
+                  optionLabels: radioLabels,
+                  optionValues: radioValues,
+                  name: "rad_" + id,
                   onChange: this.optionsChange
                 })
               ])
@@ -90,15 +95,15 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
             div({ className: "form-group" }, [
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
-                label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
+                label({ id: "lbl_comments" + id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === undefined }, [
-                label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
+              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '' }, [
+                label({ id: "lbl_rationale" + id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                 input({
-                  id: "txt_rationale" + this.props.id,
-                  name: "inputRationale" + this.props.id,
+                  id: "txt_rationale" + id,
+                  name: "inputRationale" + id,
                   type: "text",
                   className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
                   title: "Optional: describe your rationale or add comments here (please be as specific as possible)",
@@ -111,8 +116,8 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
 
             div({ className: "form-group form-group-bottom" }, [
               div({ className: "col-lg-9 col-md-9 col-sm-6 col-xs-12" }, [
-                div({ isRendered: this.props.showAlert === true, className: "vote-box-alert" }, [
-                  Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
+                div({ isRendered: showAlert === true, className: "vote-box-alert" }, [
+                  Alert({ id: "submitVote", type: "danger", title: alertMessage })
                 ]),
                 div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
                   Alert({ id: "required", type: "danger", title: "Please, complete all required fields." })
@@ -121,10 +126,10 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
               div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
                 button({
                   type: 'button',
-                  id: "btn_submit_" + this.props.id,
-                  disabled: !enableVoteButton || this.props.disabled === true,
+                  id: "btn_submit_" + id,
+                  disabled: !enableVoteButton || isDisabled === true,
                   onClick: this.logVote,
-                  className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
+                  className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + color + "-background"
                 }, [this.props.action.label]),
               ])
             ])

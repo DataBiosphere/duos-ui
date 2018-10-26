@@ -104,7 +104,6 @@ class DataOwnerReview extends Component {
   async getVote() {
     if (this.props.match.params.voteId !== null && Boolean(this.props.match.params.referenceId)) {
       const pendingCaseReview = await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
-      console.log(pendingCaseReview.hasConcerns);
       this.setState(prev => {
         prev.vote.dacUserId = pendingCaseReview.dacUserId;
         prev.vote.voteId = pendingCaseReview.voteId;
@@ -255,7 +254,6 @@ class DataOwnerReview extends Component {
     if (value === undefined && this.state.vote.hasConcerns) {
       newValue = '2';
     }
-    console.log(newValue);
 
     return newValue;
   };

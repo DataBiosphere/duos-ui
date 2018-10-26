@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'react-hyperscript-helpers';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-// import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 
 export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
@@ -14,8 +13,10 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       currentUser: {},
       enableVoteButton: true,
       voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
+      prevVoteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
       showDialogSubmit: false,
       rationale: this.props.rationale != null ? this.props.rationale : '',
+      prevRationale: this.props.rationale != null ? this.props.rationale : '',
       requiredMessage: false
     }
   }
@@ -32,18 +33,18 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     }
   };
 
-  // static getDerivedStateFromProps(nextProps, prevState) {
-  //   if (prevState.flag === false || prevState.flag === undefined) {
-  //     return {
-  //       flag: true,
-  //       rationale: nextProps.rationale != null ? nextProps.rationale : '',
-  //       voteStatus: nextProps.voteStatus,
-  //       enableVoteButton: true
-  //     };
-  //   } else {
-  //     return {enableVoteButton: true};
-  //   }
-  // }
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.rationale !== prevState.prevRationale
+      || nextProps.voteStatus !== prevState.prevVoteStatus) {
+      return {
+        rationale : nextProps.rationale,
+        prevRationale : nextProps.rationale,
+        voteStatus : nextProps.voteStatus,
+        prevVoteStatus: nextProps.voteStatus
+      }
+    }
+    return null;
+  }
 
   yesNoChange = (e, name, value) => {
     this.setState({ voteStatus: e.target.value , requiredMessage: false });
@@ -55,7 +56,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
-    const { voteStatus, rationale = '', enableVoteButton } = this.state;
+    const { voteStatus = '', rationale = '', enableVoteButton } = this.state;
 
     return (
 
@@ -84,7 +85,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
                 label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === undefined }, [
+              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '' }, [
                 label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
