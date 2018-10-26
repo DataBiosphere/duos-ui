@@ -371,7 +371,7 @@ class AdminManageAccess extends Component {
               ]),
             ]),
           PaginatorBar({
-            total: this.state.darElectionList.filter(this.searchTable(searchDarText)).length,
+            total: this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length,
             limit: limit,
             pageCount: this.pageCount,
             currentPage: currentPage,
