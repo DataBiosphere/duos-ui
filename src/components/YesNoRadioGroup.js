@@ -23,7 +23,6 @@ export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    console.log('componentDidUpdate: ', prevProps.value, prevState.selectedValue)
     if (prevProps.value !== prevState.selectedValue) {
       this.setState({
         selectedValue: prevProps.value,
