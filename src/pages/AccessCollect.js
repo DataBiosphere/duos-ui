@@ -70,9 +70,9 @@ class AccessCollect extends Component {
       isQ1Expanded: true,
       isQ2Expanded: false,
       electionAccess: {
-        finalVote: '',
-        finalRationale: '',
-        finalVoteDate: ''
+        finalVote: null,
+        finalRationale: null,
+        finalVoteDate: null
       },
       electionRP: {
         finalVote: '',

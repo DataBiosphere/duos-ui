@@ -9,7 +9,6 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     super(props);
 
     this.state = {
-      loading: true,
       currentUser: {},
       enableVoteButton: true,
       voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
@@ -37,45 +36,54 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     if (nextProps.rationale !== prevState.prevRationale
       || nextProps.voteStatus !== prevState.prevVoteStatus) {
       return {
-        rationale : nextProps.rationale != null ? nextProps.rationale : '',
-        prevRationale : nextProps.rationale != null ? nextProps.rationale : '',
-        voteStatus : nextProps.voteStatus,
+        rationale: nextProps.rationale,
+        prevRationale: nextProps.rationale,
+        voteStatus: nextProps.voteStatus,
         prevVoteStatus: nextProps.voteStatus
       }
     }
-    return null;
+    return {
+      enableVoteButton: true
+    };
   }
 
   yesNoChange = (e, name, value) => {
-    this.setState({ voteStatus: e.target.value , requiredMessage: false });
+    this.setState({
+      voteStatus: value,
+      requiredMessage: false
+    });
   };
 
-  changeRationale = (e) => {
-    this.setState({ rationale: e.target.value });
+  changeRationale = async (e) => {
+    e.preventDefault();
+    await this.setState({
+      rationale: e.target.value
+    });
   };
 
   render() {
 
-    const { voteStatus = '', rationale = '', enableVoteButton } = this.state;
+    const { id, isDisabled, title, agreementData, color, showAlert, alertMessage } = this.props;
+    const { enableVoteButton, voteStatus = '', rationale = '', requiredMessage } = this.state;
 
     return (
 
-      div({ id: "box_" + this.props.id, className: this.props.isDisabled === true ? "box-vote-disabled" : "" }, [
-        h3({ className: "box-vote-title italic " + this.props.color + "-color" }, [this.props.title]),
+      div({ id: "box_" + id, className: isDisabled === true ? "box-vote-disabled" : "" }, [
+        h3({ className: "box-vote-title italic " + color + "-color" }, [title]),
         hr({ className: "box-separator" }),
 
-        div({ isRendered: this.props.agreementData !== undefined }, [this.props.agreementData]),
+        div({ isRendered: agreementData !== undefined }, [agreementData]),
 
-        form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
-          fieldset({ disabled: this.props.isDisabled }, [
+        form({ id: "form_" + id, className: "form-horizontal" }, [
+          fieldset({ disabled: isDisabled }, [
             div({ className: "form-group first-form-group" }, [
-              label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Your vote*"]),
+              label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
 
                 YesNoRadioGroup({
-                  id: this.props.id,
+                  id: id,
                   value: voteStatus,
-                  name: "rad_" + this.props.id,
+                  name: "rad_" + id,
                   onChange: this.yesNoChange
                 }),
               ])
@@ -83,15 +91,15 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group" }, [
               span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
-                label({ id: "lbl_comments" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Comments"]),
+                label({ id: "lbl_comments" + id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Comments"]),
               ]),
               span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '' }, [
-                label({ id: "lbl_rationale" + this.props.id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + this.props.color + "-color" }, ["Rationale"]),
+                label({ id: "lbl_rationale" + id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                 input({
-                  id: "txt_rationale" + this.props.id,
-                  name: "inputRationale" + this.props.id,
+                  id: "txt_rationale" + id,
+                  name: "inputRationale" + id,
                   type: "text",
                   className: "form-control col-lg-10 col-md-8 col-sm-6 col-xs-6 vote-input",
                   title: "Optional: describe your rationale or add comments here (please be as specific as possible)",
@@ -104,20 +112,20 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
             div({ className: "form-group form-group-bottom" }, [
               div({ className: "col-lg-9 col-md-9 col-sm-6 col-xs-12" }, [
-                div({ isRendered: this.props.showAlert === true, className: "vote-box-alert" }, [
-                  Alert({ id: "submitVote", type: "danger", title: this.props.alertMessage })
+                div({ isRendered: showAlert === true, className: "vote-box-alert" }, [
+                  Alert({ id: "submitVote", type: "danger", title: alertMessage })
                 ]),
-                div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
+                div({ isRendered: requiredMessage === true, className: "vote-box-alert" }, [
                   Alert({ id: "required", type: "danger", title: "Please, complete all required fields." })
                 ])
               ]),
               div({ className: "col-lg-3 col-md-3 col-sm-6 col-xs-12" }, [
                 button({
                   type: 'button',
-                  id: "btn_submit_" + this.props.id,
-                  disabled: !enableVoteButton || this.props.disabled === true,
+                  id: "btn_submit_" + id,
+                  disabled: !enableVoteButton || isDisabled === true,
                   onClick: this.logVote,
-                  className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + this.props.color + "-background"
+                  className: "btn-primary btn-vote col-lg-12 col-md-12 col-sm-12 col-xs-12 " + color + "-background"
                 }, [this.props.action.label]),
               ])
             ])
