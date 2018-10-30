@@ -9,7 +9,7 @@ export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
     super(props);
     this.state = {
       selectedValue: this.props.value,
-    }
+    };
   }
 
   selectOption = (e, value) => {

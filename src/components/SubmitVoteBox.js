@@ -17,7 +17,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       rationale: this.props.rationale != null ? this.props.rationale : '',
       prevRationale: this.props.rationale != null ? this.props.rationale : '',
       requiredMessage: false
-    }
+    };
   }
 
   logVote = (e) => {
@@ -39,8 +39,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
         rationale: nextProps.rationale,
         prevRationale: nextProps.rationale,
         voteStatus: nextProps.voteStatus,
-        prevVoteStatus: nextProps.voteStatus
-      }
+        prevVoteStatus: nextProps.voteStatus,
+        enableVoteButton: true
+      };
     }
     return {
       enableVoteButton: true

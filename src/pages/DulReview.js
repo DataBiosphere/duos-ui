@@ -10,18 +10,19 @@ class DulReview extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
+    this.state = this.initialState();
+  }
+
+  initialState() {
+    let currentUser = Storage.getCurrentUser();
+    return {
+      currentUser: currentUser,
       showConfirmationDialog: false,
-      value: '',
-      currentUser: Storage.getCurrentUser(),
       enableVoteButton: false,
       consent: {},
       election: {},
-      vote: { vote: '', rational: '' }
+      vote: {},
     };
-    this.back = this.back.bind(this);
-    this.logVote = this.logVote.bind(this);
-    this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
   back() {
@@ -29,24 +30,40 @@ class DulReview extends Component {
   }
 
   componentDidMount() {
-    this.setState(prev => {
-      prev.currentUser = Storage.getCurrentUser();
-      return prev;
-    });
     this.voteInfo();
+    this.back = this.back.bind(this);
+    this.logVote = this.logVote.bind(this);
+    this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
   async voteInfo() {
-    let vote = await Votes.find(this.props.match.params.consentId, this.props.match.params.voteId);
-    let election = await Election.findElectionByVoteId(this.props.match.params.voteId);
-    let consent = await Consent.findConsentById(this.props.match.params.consentId);
-    this.setState(prev => {
-      prev.vote = vote;
-      prev.election = election;
-      prev.consent = consent;
-      prev.consentName = consent.dulName
-      return prev;
-    });
+    const voteId = this.props.match.params.voteId;
+    const consentId = this.props.match.params.consentId;
+
+    Votes.find(consentId, voteId).then(
+      vote => {
+        this.setState({
+          vote: vote
+        });
+      }
+    );
+
+    Election.findElectionByVoteId(voteId).then(
+      election => {
+        this.setState({
+          election: election
+        });
+      }
+    );
+
+    Consent.findConsentById(consentId).then(
+      consent => {
+        this.setState({
+          consent: consent,
+          consentName: consent.dulName
+        });
+      }
+    );
   };
 
   setEnableVoteButton() {
@@ -147,8 +164,8 @@ class DulReview extends Component {
               id: "dulReview",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-              voteStatus: this.state.vote.vote === null ? undefined : this.state.vote.vote,
-              rationale: this.state.vote.rationale === null ? '' : this.state.vote.rationale,
+              voteStatus: this.state.vote.vote != null ? this.state.vote.vote : null,
+              rationale: this.state.vote.rationale == null ? '' : this.state.vote.rationale,
               action: { label: "Vote", handler: this.logVote }
             })
           ]),
