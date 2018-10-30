@@ -80,6 +80,10 @@ small {
   margin: 0 !important;
 }
 
+.margin-top-20 {
+  margin: 20px 0 0 0;
+}
+
 .pos-relative {
   position: relative;
 }
