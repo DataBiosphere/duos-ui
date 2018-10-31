@@ -3,8 +3,6 @@ import { div, hr, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DataSet } from '../../libs/ajax'
 
-// let USER_ID = 5;
-
 export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Component {
 
   constructor(props) {
@@ -36,7 +34,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
     const dataSet = await DataSet.getDataSetsByDatasetId(this.props.dataSetId);
     this.setState(property => {
       property.datasetName = dataSet.properties[0].propertyValue;
-      property.datasetId = dataSet.properties[1].propertyValue;
+      property.datasetId = dataSet.alias;
       property.dataType = dataSet.properties[2].propertyValue;
       property.species = dataSet.properties[3].propertyValue;
       property.phenotype = dataSet.properties[4].propertyValue;

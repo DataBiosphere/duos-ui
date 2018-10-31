@@ -75,7 +75,7 @@ class ResearcherConsole extends Component {
 
   async review (e) {
     const dataRequestId = e.target.getAttribute('value');
-
+    const SEPARATOR = '|';
     let darFields = await DAR.getDarFields(dataRequestId, null);
     let formData = darFields;
     formData.datasetId = [];
@@ -83,7 +83,11 @@ class ResearcherConsole extends Component {
       detail => {
         let obj = {};
         obj.id = detail.datasetId;
-        obj.concatenation = detail.datasetId + "  " + detail.name;
+        if (detail.objectId !== undefined && detail.objectId !== null) {
+          obj.concatenation = detail.objectId.concat(SEPARATOR, detail.name, SEPARATOR, formData.investigator);
+        } else {
+          obj.concatenation = detail.name.concat(SEPARATOR, formData.investigator);
+        }       
         formData.datasetId.push(obj);
       });
     this.props.history.push({ pathname: 'dar_application', props: {formData: formData} });
