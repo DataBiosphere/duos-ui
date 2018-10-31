@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, hr, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataSet } from '../../libs/ajax'
+import { DataSet, Consent } from '../../libs/ajax'
 
 export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Component {
 
@@ -32,6 +32,8 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
 
   async getSummaryInfo() {
     const dataSet = await DataSet.getDataSetsByDatasetId(this.props.dataSetId);
+    const consent = await Consent.findConsentById(dataSet.consentId);
+
     this.setState(property => {
       property.datasetName = dataSet.properties[0].propertyValue;
       property.datasetId = dataSet.alias;
@@ -42,7 +44,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
       property.description = dataSet.properties[6].propertyValue;
       property.dataDepositor = dataSet.properties[8].propertyValue;
       property.pi = dataSet.properties[9].propertyValue;
-      property.consentName = dataSet.consentId;
+      property.consentName = consent.name;
       property.translatedUseRestriction = dataSet.translatedUseRestriction;
       property.loading = false;
       return property;
