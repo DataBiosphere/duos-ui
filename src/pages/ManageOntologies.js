@@ -6,14 +6,12 @@ import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { SearchBox } from '../components/SearchBox';
 import { Ontology, Files } from "../libs/ajax";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ManageOntologies extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       value: '',
       limit: 5,
       currentPage: 1,
@@ -31,7 +29,6 @@ class ManageOntologies extends Component {
   async getOntologiesManage() {
     const ontologies = await Ontology.retrieveIndexedFiles();
     this.setState(prev => {
-      prev.loading = false;
       prev.currentPage = 1;
       prev.indexedFiles = ontologies;
       return prev;
@@ -128,14 +125,12 @@ class ManageOntologies extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentPage, searchDulText } = this.state;
 

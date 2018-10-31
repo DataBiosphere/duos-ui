@@ -4,7 +4,6 @@ import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PendingCases, StatFiles, Summary } from '../libs/ajax'
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 export const SummaryVotes = hh(class SummaryVotes extends Component {
 
@@ -13,7 +12,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
     super(props);
     this.state = {
       showModal: false,
-      loading: true,
       chartData: this.initialState()
     };
 
@@ -71,10 +69,9 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
   }
 
   getSummaryInfo() {
-    PendingCases.findSummary({}, {}).then( summaryData => {
+    PendingCases.findSummary({}, {}).then(summaryData => {
       this.setState(prev => {
         prev.chartData = summaryData;
-        prev.loading = false;
         return prev;
       });
     });
@@ -89,8 +86,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
   }
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     return (
       div({ className: "container" }, [

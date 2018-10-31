@@ -1,8 +1,8 @@
 import { Component } from 'react';
-import { nav, button, ul, li, img, small, hr, div, span, a, h } from 'react-hyperscript-helpers';
+import { nav, ul, li, img, small, hr, div, span, a, h } from 'react-hyperscript-helpers';
 import { HelpModal } from '../components/modals/HelpModal';
 import { Storage } from '../libs/storage';
-import { withRouter } from "react-router-dom";
+import { withRouter, Link } from "react-router-dom";
 import ResponsiveMenu from 'react-responsive-navbar';
 import './DuosHeader.css';
 
@@ -45,7 +45,6 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-    let isAlumni = false;
 
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
@@ -57,14 +56,13 @@ class DuosHeader extends Component {
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
-      isAlumni = currentUser.isAlumni;
     }
 
     return (
 
       nav({ className: "navbar-duos", role: "navigation" }, [
         div({ className: "row no-margin" }, [
-          a({ id: "link_logo", href: "/home", className: "navbar-brand" }, [
+          h(Link, { id: "link_logo", to: "/home", className: "navbar-brand" }, [
             img({ src: "/images/duos_logo.svg", alt: "DUOS Logo" }),
           ]),
           h(ResponsiveMenu, {
@@ -83,47 +81,51 @@ class DuosHeader extends Component {
                       small({ id: "dacUserMail" }, [currentUser.email]),
                     ]),
                     ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                      li({ isRendered: isResearcher }, [a({ id: "link_profile", href: "/researcher_profile" }, ["Your Profile"]),]),
+                      li({ isRendered: isResearcher }, [
+                        h(Link, { id: "link_profile", to: "/researcher_profile" }, ["Your Profile"]),]),
                       li({}, [a({ id: "link_signOut", onClick: this.signOut }, ["Sign out"]),]),
                     ])
                   ]),
-                  
+
                   li({ isRendered: isChairPerson }, [
-                    a({ id: "link_chairConsole", href: "/chair_console" }, ["DAC Console"]),
+                    h(Link, { id: "link_chairConsole", to: "/chair_console" }, ["DAC Console"]),
                   ]),
 
                   li({ isRendered: isMember }, [
-                    a({ id: "link_memberConsole", href: "/member_console" }, ["DAC Console"]),
+                    h(Link, { id: "link_memberConsole", to: "/member_console" }, ["DAC Console"]),
                   ]),
 
                   li({ isRendered: isAdmin }, [
-                    a({ id: "link_adminConsole", href: "/admin_console" }, ["Admin Console"]),
+                    h(Link, { id: "link_adminConsole", to: "/admin_console" }, ["Admin Console"]),
                   ]),
 
                   li({ isRendered: isResearcher }, [
-                    a({ id: "link_researcherConsole", href: "/researcher_console" }, ["Researcher Console"]),
+                    h(Link, { id: "link_researcherConsole", to: "/researcher_console" }, ["Researcher Console"]),
                   ]),
 
                   li({ isRendered: isDataOwner }, [
-                    a({ id: "link_dataOwnerConsole", href: "/data_owner_console" }, ["Data Owner Console"]),
+                    h(Link, { id: "link_dataOwnerConsole", to: "/data_owner_console" }, ["Data Owner Console"]),
                   ]),
 
                   li({ isRendered: isResearcher }, [
-                    a({ id: "link_requestApplication", href: "/dar_application" }, ["Request Application"]),
+                    h(Link, { id: "link_requestApplication", to: "/dar_application" }, ["Request Application"]),
                   ]),
 
                   li({ className: "dropdown", isRendered: isLogged }, [
                     a({ id: "sel_statistics", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
                       div({}, ["Statistics", span({ className: "caret caret-margin" }, []),]),
                     ]),
-                    ul({ className: "dropdown-menu user-dropdown", role: "menu"}, [
-                      li({}, [a({ id: "link_statistics", href: "/summary_votes", className: "f-left" }, ["Votes Statistics"]),]),
+                    ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
+                      li({}, [
+                        h(Link, { id: "link_statistics", to: "/summary_votes", className: "f-left" }, ["Votes Statistics"]),]),
                       hr({}),
-                      li({}, [a({ id: "link_reviewedCases", href: "/reviewed_cases", className: "f-left", isRendered: !(isDataOwner || isResearcher) }, ["Reviewed Cases Record"]),]),
+                      li({}, [
+                        h(Link, { id: "link_reviewedCases", to: "/reviewed_cases", className: "f-left", isRendered: !(isDataOwner || isResearcher) || isAdmin }, ["Reviewed Cases Record"]),]),
                     ]),
                   ]),
 
-                  li({}, [a({ id: "link_datasetCatalog", isRendered: isLogged, href: "/dataset_catalog" }, ["Dataset Catalog"]),]),
+                  li({}, [
+                    h(Link, { id: "link_datasetCatalog", isRendered: isLogged, to: "/dataset_catalog" }, ["Dataset Catalog"]),]),
 
                   li({ className: "dropdown" }, [
                     a({ id: "sel_requestHelp", isRendered: isLogged, role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
@@ -140,28 +142,30 @@ class DuosHeader extends Component {
                       }),
                       ]),
                       hr({}),
-                      li({}, [a({ id: "link_reportList", href: "/help_reports", className: "f-left" }, ["List of Reports"])]),
+                      li({}, [
+                        h(Link, { id: "link_reportList", to: "/help_reports", className: "f-left" }, ["List of Reports"])]),
                     ])
                   ])
                 ]),
 
                 ul({ isRendered: !isLogged, className: "navbar-public" }, [
                   li({}, [
-                    a({ id: "link_about", className: "navbar-duos-link", href: "/home_about" }, [
+                    h(Link, { id: "link_about", className: "navbar-duos-link", to: '/home_about' }, [
                       div({ className: "navbar-duos-icon navbar-duos-icon-about" }),
                       span({ className: "navbar-duos-text" }, ["About"])
                     ])
                   ]),
                   li({}, [
-                    a({ id: "link_help", className: "navbar-duos-link", href: "/home_help" }, [
+                    h(Link, { id: "link_help", className: "navbar-duos-link", to: "/home_help" }, [
                       div({ className: "navbar-duos-icon navbar-duos-icon-help" }),
                       span({ className: "navbar-duos-text" }, ["Help"])
                     ])
                   ]),
                   li({}, [
-                    a({ id: "link_signIn", className: "navbar-duos-button", href: "/login" }, ["Sign In"])
+                    h(Link, { id: "link_signIn", className: "navbar-duos-button", to: "/login" }, ["Sign In"])
                   ]),
-                  li({}, [a({ id: "link_join", className: "navbar-join", href: "/home_register" }, ["Join DUOS"])]),
+                  li({}, [
+                    h(Link, { id: "link_join", className: "navbar-join", to: "/home_register" }, ["Join DUOS"])]),
                 ])
               ])
           })

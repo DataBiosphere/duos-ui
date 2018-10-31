@@ -4,14 +4,12 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Researcher } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class ResearcherReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       showConfirmationDialogOK: false,
       alertMessage: "Your vote has been successfully logged!",
       value: '',
@@ -71,14 +69,12 @@ class ResearcherReview extends Component {
     }
 
     this.setState(prev => {
-      prev.loading = false; 
       prev.formData = researcher;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
       return prev;
     });
   };
-
 
   submitVote = (voteStatus, rationale) => {
     let status = "pending";
@@ -104,15 +100,13 @@ class ResearcherReview extends Component {
 
   render() {
 
-    if (this.state.loading) { return LoadingIndicator(); }
-
     const { formData, rationale, voteStatus } = this.state;
     
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
           PageHeading({ id: "researcherReview", color: "common", title: "Researcher Review", description: "Should this user be classified as Bonafide Researcher?" }),
-          hr({ className: "section-separator" }),
+          hr({ className: "section-separator" })
         ]),
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
@@ -128,24 +122,53 @@ class ResearcherReview extends Component {
               showAlert: false,
               alertMessage: "something!",
               action: { label: "Vote", handler: this.submitVote }
-            }),
-          ]),
+            })
+          ])
         ]),
 
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
           form({ name: "researcherForm", noValidate: true }, [
-            div({ className: "row no-margin form-group" }, [
+            div({ className: "row form-group margin-top-20" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Full Name"]),
-                div({ id: "lbl_profileName", className: "control-data", name: "profileName" }, [formData.profileName]),
+                div({ id: "lbl_profileName", className: "control-data", name: "profileName" }, [formData.profileName])
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Academic/Business Email Address"]),
                 div({ id: "lbl_profileAcademicEmail", className: "control-data", name: "profileAcademicEmail" }, [formData.academicEmail]),
-              ]),
+              ])
+            ]),
+
+            div({ className: "row margin-top-20" }, [
+              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                label({ className: "control-label rp-title-question default-color" }, ["Researcher Identification"])
+              ])
             ]),
 
             div({ className: "row no-margin" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["NIH User Name"]),
+                div({ id: "lbl_profileNihUsername", className: "control-data", name: "profileNihUsername" }, [formData.nihUsername]),
+              ]),
+
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["LinkedIn Profile"]),
+                div({ id: "lbl_profileLinkedIn", className: "control-data", name: "profileLinkedIn" }, [formData.linkedIn]),
+              ])
+            ]),
+
+            div({ className: "row no-margin" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["ORCID iD"]),
+                div({ id: "lbl_profileOrcid", className: "control-data", name: "profileOrcid" }, [formData.orcid]),
+              ]),
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
+                label({ className: "control-label" }, ["ResearchGate ID"]),
+                div({ id: "lbl_profileResearcherGate", className: "control-data", name: "profileResearcherGate" }, [formData.researcherGate]),
+              ])
+            ]),
+
+            div({ className: "row margin-top-20" }, [
               div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
                 div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution" }, [formData.institution]),
@@ -157,7 +180,7 @@ class ResearcherReview extends Component {
               div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
                 label({ className: "control-label" }, ["Division"]),
                 div({ id: "lbl_profileDivision", className: "control-data", name: "profileDivision" }, [formData.division]),
-              ]),
+              ])
             ]),
 
             div({ className: "row no-margin" }, [
@@ -168,7 +191,7 @@ class ResearcherReview extends Component {
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Street Address 2"]),
                 div({ id: "lbl_profileAddress2", className: "control-data", name: "profileAddress2" }, [formData.address2]),
-              ]),
+              ])
             ]),
 
             div({ className: "row no-margin" }, [
@@ -179,7 +202,7 @@ class ResearcherReview extends Component {
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["State"]),
                 div({ id: "lbl_profileState", className: "control-data", name: "profileState" }, [formData.state]),
-              ]),
+              ])
             ]),
 
             div({ className: "row no-margin" }, [
@@ -190,10 +213,10 @@ class ResearcherReview extends Component {
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Country"]),
                 div({ id: "lbl_profileCountry", className: "control-data", name: "profileCountry" }, [formData.country]),
-              ]),
+              ])
             ]),
 
-            div({ className: "row no-margin" }, [
+            div({ className: "row margin-top-20" }, [
               div({ className: "col-xs-12 " + (formData.isThePI === true ? 'col-lg-12 col-md-12 col-sm-12' : 'col-lg-6 col-md-6 col-sm-6') }, [
                 label({ className: "control-label" }, ["Is this researcher the Principal Investigator?"]),
                 div({ id: "lbl_researcherIsPI", className: "control-data" }, [formData.piValue]),
@@ -203,8 +226,8 @@ class ResearcherReview extends Component {
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                   label({ className: "control-label" }, ["Does the resercher have a Principal Investigator?"]),
                   div({ id: "lbl_researcherhavePI", className: "control-data" }, [formData.havePIValue]),
-                ]),
-              ]),
+                ])
+              ])
             ]),
 
             div({ className: "row no-margin", isRendered: formData.havePI === true }, [
@@ -231,7 +254,7 @@ class ResearcherReview extends Component {
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
                 div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
-              ]),
+              ])
             ]),
 
             div({ className: "row no-margin", isRendered: formData.isThePI === true || formData.havePI === false }, [
@@ -248,9 +271,9 @@ class ResearcherReview extends Component {
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
                 div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
-              ]),
-            ]),
-          ]),
+              ])
+            ])
+          ])
         ]),
         ConfirmationDialog({
           isRendered: this.state.showConfirmationDialogOK,

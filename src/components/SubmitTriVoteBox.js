@@ -1,23 +1,26 @@
 import { Component } from 'react';
 import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'react-hyperscript-helpers';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
+import { OptionsRadioGroup } from '../components/OptionsRadioGroup';
 import { Alert } from '../components/Alert';
 
-export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
+export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends Component {
+
 
   constructor(props) {
     super(props);
 
     this.state = {
+      loading: true,
       currentUser: {},
       enableVoteButton: true,
-      voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
-      prevVoteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
+      voteStatus: this.props.voteStatus,
+      prevVoteStatus: this.props.voteStatus,
       showDialogSubmit: false,
       rationale: this.props.rationale != null ? this.props.rationale : '',
       prevRationale: this.props.rationale != null ? this.props.rationale : '',
-      requiredMessage: false
-    };
+      requiredMessage: false,
+      modifiedVote: false
+    }
   }
 
   logVote = (e) => {
@@ -36,22 +39,20 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
     if (nextProps.rationale !== prevState.prevRationale
       || nextProps.voteStatus !== prevState.prevVoteStatus) {
       return {
-        rationale: nextProps.rationale,
-        prevRationale: nextProps.rationale,
-        voteStatus: nextProps.voteStatus,
-        prevVoteStatus: nextProps.voteStatus,
-        enableVoteButton: true
-      };
+        rationale : nextProps.rationale,
+        prevRationale : nextProps.rationale,
+        voteStatus : nextProps.voteStatus,
+        prevVoteStatus: nextProps.voteStatus
+      }
     }
-    return {
-      enableVoteButton: true
-    };
+    return null;
   }
 
-  yesNoChange = (e, name, value) => {
+  optionsChange = (e, name, value) => {
     this.setState({
       voteStatus: value,
-      requiredMessage: false
+      requiredMessage: false,
+      modifiedVote: true
     });
   };
 
@@ -64,8 +65,8 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
   render() {
 
-    const { id, isDisabled, title, agreementData, color, showAlert, alertMessage } = this.props;
-    const { enableVoteButton, voteStatus = '', rationale = '', requiredMessage } = this.state;
+    const { id, isDisabled, title, color, agreementData, radioLabels, radioValues, showAlert, alertMessage } = this.props;
+    const { enableVoteButton, voteStatus = '', rationale = '' } = this.state;
 
     return (
 
@@ -75,18 +76,20 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
 
         div({ isRendered: agreementData !== undefined }, [agreementData]),
 
-        form({ id: "form_" + id, className: "form-horizontal" }, [
+        form({ id: "form_" + this.props.id, className: "form-horizontal" }, [
           fieldset({ disabled: isDisabled }, [
             div({ className: "form-group first-form-group" }, [
               label({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Your vote*"]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
 
-                YesNoRadioGroup({
+                OptionsRadioGroup({
                   id: id,
                   value: voteStatus,
+                  optionLabels: radioLabels,
+                  optionValues: radioValues,
                   name: "rad_" + id,
-                  onChange: this.yesNoChange
-                }),
+                  onChange: this.optionsChange
+                })
               ])
             ]),
 
@@ -116,7 +119,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
                 div({ isRendered: showAlert === true, className: "vote-box-alert" }, [
                   Alert({ id: "submitVote", type: "danger", title: alertMessage })
                 ]),
-                div({ isRendered: requiredMessage === true, className: "vote-box-alert" }, [
+                div({ isRendered: this.state.requiredMessage === true, className: "vote-box-alert" }, [
                   Alert({ id: "required", type: "danger", title: "Please, complete all required fields." })
                 ])
               ]),

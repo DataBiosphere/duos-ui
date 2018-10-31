@@ -6,18 +6,20 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { SearchBox } from '../components/SearchBox';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DataOwnerConsole extends Component {
 
   constructor(props) {
     super(props);
+    let currentUser = Storage.getCurrentUser();
+
     this.state = {
-      loading: true,
+      currentUser: currentUser,
       dataOwnerUnreviewedCases: [],
       limit: 5,
       currentPage: 1
     };
+
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.voteReview = this.voteReview.bind(this);
@@ -45,7 +47,6 @@ class DataOwnerConsole extends Component {
         dars => {
           this.setState({
             dataOwnerUnreviewedCases: dars,
-            loading: false
           });
         }
       )
@@ -62,7 +63,6 @@ class DataOwnerConsole extends Component {
 
   editReview = (e) => {
     // const data = e.target.getAttribute('data');
-
   }
 
   voteReview = (pendingCase) => {
@@ -76,14 +76,12 @@ class DataOwnerConsole extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, currentPage, limit, searchDulText } = this.state;
 

@@ -5,7 +5,6 @@ import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
@@ -26,13 +25,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   componentDidMount() {
-
     this.getResearcherProfile();
   }
 
   initialState() {
     return {
-      loading: true,
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
@@ -76,7 +73,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         isThePI: false,
         piName: false,
         piEmail: false,
-       },
+      },
       showValidationMessages: false,
       validateFields: false,
     };
@@ -99,10 +96,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       if (this.state.researcherProfile.completed !== undefined && this.state.researcherProfile.completed !== "") {
         this.state.researcherProfile.completed = JSON.parse(this.state.researcherProfile.completed);
       }
-
-      this.setState({
-        loading: false
-      })
+      ReactTooltip.rebuild();
     });
   }
 
@@ -368,8 +362,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     let completed = this.state.researcherProfile.completed;
     if (completed !== undefined && completed !== "") {
@@ -677,9 +669,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: "lbl_isThePI",
                     className: "control-label ",
                   }, [
-                    "Are you the Principal Investigator?* ",
-                    span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.", "data-for": "tip_isthePI" })
-                  ])
+                      "Are you the Principal Investigator?* ",
+                      span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.", "data-for": "tip_isthePI" })
+                    ])
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [

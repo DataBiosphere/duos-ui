@@ -7,7 +7,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { DAR } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { LoadingIndicator } from '../components/LoadingIndicator';
+import { Link } from 'react-router-dom';
 
 class ResearcherConsole extends Component {
 
@@ -18,7 +18,6 @@ class ResearcherConsole extends Component {
     super(props);
     this.state = {
       buttonDisabled: false,
-      loading: true,
       showModal: false,
       currentUser: {},
       dars: [],
@@ -149,23 +148,34 @@ class ResearcherConsole extends Component {
     this.init(currentUser);
   }
 
-  async init(currentUser) {
-    let dars = await DAR.getDataAccessManage(currentUser.dacUserId);
-    let pdars = await DAR.getPartialDarRequestList(currentUser.dacUserId);
-    this.setState({ 
-      dars: dars, 
-      partialDars: pdars, 
-      loading: false, 
-      showDialogDeletePDAR: false, 
-      buttonDisabled: false,
-      showDialogCancelDAR: false,
-      alertTitle: undefined
-    });
+  init(currentUser) {
+
+    DAR.getDataAccessManage(currentUser.dacUserId).then(
+      dars => {
+        this.setState({ 
+          dars: dars, 
+          showDialogDeletePDAR: false, 
+          buttonDisabled: false,
+          showDialogCancelDAR: false,
+          alertTitle: undefined
+        });
+      }
+    );
+
+    DAR.getPartialDarRequestList(currentUser.dacUserId).then(
+      pdars => {
+        this.setState({ 
+          partialDars: pdars, 
+          showDialogDeletePDAR: false, 
+          buttonDisabled: false,
+          showDialogCancelDAR: false,
+          alertTitle: undefined
+        });
+      }
+    );
   }
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, currentDarPage, darLimit, currentPartialDarPage, partialDarLimit } = this.state;
 
@@ -194,9 +204,9 @@ class ResearcherConsole extends Component {
                 }),
               ]),
 
-              a({
+              h(Link, {
                 id: "btn_createRequest",
-                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", href: "/dar_application"
+                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", to: "/dar_application"
               }, [
                   div({ className: "all-icons add-access_white" }, []),
                   span({}, ["Create Data Access Request"]),

@@ -9,7 +9,6 @@ import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 import { PaginatorBar } from "../components/PaginatorBar";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DatasetCatalog extends Component {
 
@@ -21,10 +20,6 @@ class DatasetCatalog extends Component {
     super(props);
 
     this.state = {
-      isLogged: false
-    };
-    this.state = {
-      loading: true,
       showConnectDatasetModal: false,
       limit: 5,
       currentPage: null,
@@ -74,11 +69,16 @@ class DatasetCatalog extends Component {
       row.checked = false;
       row.ix = index;
     });
+
     const data = {
       catalog: catalog,
       dictionary: dictionary
     };
-    this.setState({ dataSetList: data, currentPage: 1, loading: false });
+
+    this.setState({
+      dataSetList: data,
+      currentPage: 1
+    });
   }
 
   componentDidMount() {
@@ -87,8 +87,9 @@ class DatasetCatalog extends Component {
     this.setState({
       isAdmin: this.currentUser.isAdmin,
       isResearcher: this.currentUser.isResearcher
-    }, () => {
-      this.getDatasets();
+    }, async () => {
+      await this.getDatasets();
+      ReactTooltip.rebuild();
     });
   }
 
@@ -122,8 +123,8 @@ class DatasetCatalog extends Component {
       });
     });
 
-    const formData  = await DAR.partialDarFromCatalogPost(this.USER_ID, listToExport);
-    this.props.history.push({ pathname: 'dar_application', props: { formData: formData} });
+    const formData = await DAR.partialDarFromCatalogPost(this.USER_ID, listToExport);
+    this.props.history.push({ pathname: 'dar_application', props: { formData: formData } });
   };
 
   associate() {
@@ -196,7 +197,7 @@ class DatasetCatalog extends Component {
   };
 
   dialogHandlerDelete = (answer) => (e) => {
-    this.setState({disableOkButton: true});
+    this.setState({ disableOkButton: true });
     if (answer) {
       DataSet.deleteDataset(this.state.datasetId, this.USER_ID).then(resp => {
         this.getDatasets();
@@ -205,17 +206,17 @@ class DatasetCatalog extends Component {
         this.setState(prev => {
           prev.showDialogDelete = true;
           prev.alertMessage = 'Please try again later.';
-          prev.alertTitle ='Something went wrong';
+          prev.alertTitle = 'Something went wrong';
           return prev;
         });
       });
     } else {
-      this.setState({ showDialogDelete: false,  alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
+      this.setState({ showDialogDelete: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
   };
 
   dialogHandlerEnable = (answer) => (e) => {
-    this.setState({disableOkButton: true});
+    this.setState({ disableOkButton: true });
     if (answer) {
       DataSet.disableDataset(this.state.datasetId, true).then(resp => {
         this.getDatasets();
@@ -229,27 +230,27 @@ class DatasetCatalog extends Component {
         });
       });
     } else {
-      this.setState({ showDialogEnagle: false,  alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
+      this.setState({ showDialogEnagle: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
 
   };
 
   dialogHandlerDisable = (answer) => (e) => {
-    this.setState({disableOkButton: true});
+    this.setState({ disableOkButton: true });
     if (answer) {
       DataSet.disableDataset(this.state.datasetId, false).then(resp => {
         this.getDatasets();
-        this.setState({ showDialogDisable: false, disableOkButton: false});
+        this.setState({ showDialogDisable: false, disableOkButton: false });
       }).catch(error => {
         this.setState(prev => {
           prev.alertMessage = 'Please try again later.';
           prev.alertTitle = 'Something went wrong';
-          this.setState({ showDialogDisable: true});
+          this.setState({ showDialogDisable: true });
           return prev;
         });
       });
     } else {
-      this.setState({ showDialogDisable: false,  alertMessage: undefined, alertTitle: undefined });
+      this.setState({ showDialogDisable: false, alertMessage: undefined, alertTitle: undefined });
     }
   };
 
@@ -284,7 +285,7 @@ class DatasetCatalog extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
@@ -318,8 +319,6 @@ class DatasetCatalog extends Component {
 
   render() {
 
-    if (this.state.loading) { return LoadingIndicator(); }
-
     const { searchDulText, currentPage, limit } = this.state;
 
     return (
@@ -350,7 +349,7 @@ class DatasetCatalog extends Component {
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background"
               }, [
                   "Download selection",
-                  span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px'}, "aria-hidden": "true" })
+                  span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
                 ]),
             ]),
           ]),
