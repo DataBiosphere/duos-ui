@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h1, form, label, input, hr, span, h, img, h3, a } from 'react-hyperscript-helpers';
+import { div, h1, label, input, hr, span, h  } from 'react-hyperscript-helpers';
 import { Config } from "../libs/config";
 import { USER_ROLES } from '../libs/utils';
 import GoogleLogin from 'react-google-login';
