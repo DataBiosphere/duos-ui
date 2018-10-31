@@ -116,11 +116,7 @@ class DatasetCatalog extends Component {
   async exportToRequest() {
     let listToExport = [];
     this.state.dataSetList.catalog.filter(row => row.checked).forEach(dataset => {
-      dataset.properties.forEach(property => {
-        if (property.propertyName === 'Dataset ID') {
-          listToExport.push(property.propertyValue);
-        }
-      });
+      listToExport.push(dataset.dataSetId);
     });
 
     const formData = await DAR.partialDarFromCatalogPost(this.USER_ID, listToExport);
