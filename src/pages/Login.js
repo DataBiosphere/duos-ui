@@ -113,12 +113,15 @@ class Login extends Component {
           div({ className: "landing-box-google-signin" }, [
             div({ className: "new-sign" }, ["Sign in with a google account"]),
             googleLoginButton,
-            div({ className: "new-sign" }, [span({}, [
-              "Don't have a Google Account? Create one",
-              a({ href: "https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup", target: "_blank" }, ["here."]),]),]),
-          ]),
-          ]),
-        ]),
+              div({ className: "new-sign" }, [
+                span({}, [
+                  "Don't have a Google Account? Create one ",
+                  a({ href: "https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup", target: "_blank" }, ["here."])
+                ])
+              ])
+            ])
+          ])
+        ])
       ])
     );
   }

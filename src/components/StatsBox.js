@@ -123,10 +123,11 @@ export const StatsBox = hh(class StatsBox extends Component {
         h4({ id: this.props.id + "_title", className: "cm-results-subtitle" }, [this.props.subtitle]),
         buttonTag,
         hr({ className: "box-separator-white" }),
-        div({ className: "row", style: { 'marginTop': '10px' } }, [
+        div({ className: "row no-margin", style: { 'marginTop': '10px' } }, [
           h(Chart, {
             chartType: "PieChart",
             data: data,
+            loader: "Loading...",
             options: this.chartOptions[options],
           })
         ]),
