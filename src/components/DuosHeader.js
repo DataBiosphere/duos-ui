@@ -119,7 +119,7 @@ class DuosHeader extends Component {
                     ul({ className: "dropdown-menu user-dropdown", role: "menu"}, [
                       li({}, [a({ id: "link_statistics", href: "/summary_votes", className: "f-left" }, ["Votes Statistics"]),]),
                       hr({}),
-                      li({}, [a({ id: "link_reviewedCases", href: "/reviewed_cases", className: "f-left", isRendered: !(isDataOwner || isResearcher) }, ["Reviewed Cases Record"]),]),
+                      li({}, [a({ id: "link_reviewedCases", href: "/reviewed_cases", className: "f-left", isRendered: !(isDataOwner || isResearcher) || isAdmin }, ["Reviewed Cases Record"]),]),
                     ]),
                   ]),
 
