@@ -4,11 +4,9 @@ import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { Election, Files, Votes } from '../libs/ajax';
+import { Election, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Config } from '../libs/config';
-import * as Utils from '../libs/utils';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class DulResultRecords extends Component {
 
@@ -29,7 +27,6 @@ class DulResultRecords extends Component {
   componentDidMount() {
     const currentUser = Storage.getCurrentUser();
     this.setState({
-      loading: true,
       currentUser: currentUser,
       electionId: this.props.match.params.electionId,
     }, () => {
@@ -46,7 +43,7 @@ class DulResultRecords extends Component {
     if (typeof electionReview === 'undefined') {
       this.props.history.push('/reviewd_cases');
     }
-    
+
     if (electionReview.election.finalRationale === 'null') {
       electionReview.election.finalRationale = '';
     }
@@ -67,10 +64,6 @@ class DulResultRecords extends Component {
       chartData: this.getGraphData(electionReview.reviewVote),
       consentGroupName: electionReview.consent.groupName,
       consentId: electionReview.election.referenceId,
-    }, () => {
-      this.setState({
-        loading: false,
-      });
     });
   }
 
@@ -102,7 +95,26 @@ class DulResultRecords extends Component {
 
   initialState() {
     return {
-      loading: true,
+      voteStatus: '',
+      createDate: '',
+      hasUseRestriction: true,
+      projectTitle: '',
+      consentName: '',
+      sDul: '',
+      dulElection: {
+        finalVote: '',
+        finalRationale: '',
+        finalVoteDate: null
+      },
+      election: {
+      },
+      dulVoteList: [[], []],
+      chartData : [
+        ['Results', 'Votes'],
+        ['YES', 0],
+        ['NO', 0],
+        ['Pending', 0]
+      ]
     };
   }
 
@@ -112,9 +124,7 @@ class DulResultRecords extends Component {
 
   render() {
 
-    if (this.state.loading) { return LoadingIndicator(); }
-
-    const { chartData } = this.state;
+    const { chartData = {} } = this.state;
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe", isRendered: this.state.consentGroupName }, [this.state.consentGroupName]),
@@ -153,7 +163,7 @@ class DulResultRecords extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
           ]),
         ]),
 

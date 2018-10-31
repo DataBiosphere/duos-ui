@@ -9,14 +9,16 @@ import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal'
 import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AdminConsole extends Component {
 
   constructor(props) {
     super(props);
+
+    let currentUser = Storage.getCurrentUser();
+
     this.state = {
-      loading: true,
+      currentUser: currentUser,
       showModal: false,
       showAddDulModal: false,
       showAddUserModal: false,
@@ -32,19 +34,31 @@ class AdminConsole extends Component {
   }
 
   componentDidMount() {
-    this.init();
+    let currentUser = Storage.getCurrentUser();
+    this.setState({
+      currentUser: currentUser
+    }, () => {
+      this.init();
+    });
   }
 
   async init() {
-    const currentUser = Storage.getCurrentUser();
-    const duls = await PendingCases.findConsentUnReviewed();
-    const dars = await PendingCases.findDARUnReviewed();
-    this.setState({
-      currentUser: currentUser,
-      dulUnreviewedCases: duls.dulUnReviewedCases,
-      darUnreviewedCases: dars.darUnReviewedCases,
-      loading: false
-    });
+
+    PendingCases.findConsentUnReviewed().then(
+      duls => {
+        this.setState({
+          dulUnreviewedCases: duls.dulUnReviewedCases,
+        });
+      }
+    );
+
+    PendingCases.findDARUnReviewed().then(
+      dars => {
+        this.setState({
+          darUnreviewedCases: dars.darUnReviewedCases,
+        });
+      }
+    );
   }
 
   addDul = (e) => {
@@ -75,7 +89,7 @@ class AdminConsole extends Component {
     });
   };
 
-  async electionTimeout (e) {
+  async electionTimeout(e) {
     const timeOut = await ElectionTimeout.findApprovalExpirationTime();
     const isDataSetElection = await Election.isDataSetElectionOpen();
 
@@ -91,7 +105,7 @@ class AdminConsole extends Component {
 
     switch (name) {
       case 'editDul':
-        this.setState({showAddDulModal: false});
+        this.setState({ showAddDulModal: false });
         this.props.history.push(`admin_manage_dul`);
         break;
       case 'addUser':
@@ -99,7 +113,7 @@ class AdminConsole extends Component {
         this.props.history.push(`admin_manage_users`);
         break;
       case 'addDataset': {
-        this.setState({showAddDatasetModal: false});
+        this.setState({ showAddDatasetModal: false });
         this.props.history.push(`dataset_catalog`);
         break;
       }
@@ -132,8 +146,6 @@ class AdminConsole extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
 

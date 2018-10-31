@@ -1,22 +1,21 @@
 import { Component } from 'react';
 import { div, button, hr, h4, a, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { SubmitTriVoteBox } from '../components/SubmitTriVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
 import { DAR, Files, DataSet, Consent, Votes } from '../libs/ajax';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { LoadingIndicator } from "../components/LoadingIndicator";
 
 const APPROVE = "1";
 const DISAPPROVE = "0";
 const HAS_CONCERNS = "2";
+
 class DataOwnerReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       showConfirmDialog: false,
       pendingCase: {
         voteId: '',
@@ -67,14 +66,11 @@ class DataOwnerReview extends Component {
     this.getVote = this.getVote.bind(this);
   }
 
-  async componentDidMount () {
-     await this.getDarInfo();
-     await this.getVote();
-     await this.getDataSetInfo();
-     await this.getConsentInfo();
-     this.setState({
-       loading: false
-     });
+  async componentDidMount() {
+    await this.getDarInfo();
+    await this.getVote();
+    await this.getDataSetInfo();
+    await this.getConsentInfo();
   }
 
   async getDarInfo() {
@@ -89,7 +85,7 @@ class DataOwnerReview extends Component {
   }
 
   async getDataSetInfo() {
-    const dataSet = await  DataSet.getDataSetsByDatasetId(this.state.pendingCase.dataSetId);
+    const dataSet = await DataSet.getDataSetsByDatasetId(this.state.pendingCase.dataSetId);
     this.setState(prev => {
       prev.dataSet.id = dataSet.consentId;
       prev.dataSet.data = dataSet;
@@ -108,7 +104,7 @@ class DataOwnerReview extends Component {
 
   async getVote() {
     if (this.props.match.params.voteId !== null && Boolean(this.props.match.params.referenceId)) {
-      const pendingCaseReview =  await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
+      const pendingCaseReview = await Votes.getDarVote(this.props.match.params.referenceId, this.props.match.params.voteId);
       this.setState(prev => {
         prev.vote.dacUserId = pendingCaseReview.dacUserId;
         prev.vote.voteId = pendingCaseReview.voteId;
@@ -127,19 +123,19 @@ class DataOwnerReview extends Component {
   }
 
   handleOpenApplicationModal() {
-    this.setState({showApplicationSummaryModal: true});
+    this.setState({ showApplicationSummaryModal: true });
   }
 
   handleOpenDatasetModal() {
-    this.setState({showDatasetSummaryModal: true});
+    this.setState({ showDatasetSummaryModal: true });
   }
 
   handleCloseApplicationModal() {
-    this.setState({showApplicationSummaryModal: false});
+    this.setState({ showApplicationSummaryModal: false });
   }
 
   handleCloseDatasetModal() {
-    this.setState({showDatasetSummaryModal: false});
+    this.setState({ showDatasetSummaryModal: false });
   }
 
   openApplication = (e) => {
@@ -185,17 +181,18 @@ class DataOwnerReview extends Component {
   }
   dialogHandlerCreate = () => (e) => {
     this.setState(prev => {
-      prev.showConfirmDialog=false;
-      return prev;}
-      );
+      prev.showConfirmDialog = false;
+      return prev;
+    }
+    );
     this.props.history.goBack();
   };
-  downloadDUL = () =>  (e) => {
+  downloadDUL = () => (e) => {
     Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
   };
 
-  async submitVote (answer, rationale) {
-    let  updatedVote = {};
+  async submitVote(answer, rationale) {
+    let updatedVote = {};
     let result;
 
     switch (answer) {
@@ -244,9 +241,25 @@ class DataOwnerReview extends Component {
     }
   };
 
-  render() {
+  fixValue = (value) => {
+    let newValue = undefined;
 
-    if (this.state.loading) return LoadingIndicator();
+    if (value === true) {
+      newValue = '1';
+    }
+
+    if (value === false) {
+      newValue = '0';
+    }
+
+    if (value === undefined && this.state.vote.hasConcerns) {
+      newValue = '2';
+    }
+
+    return newValue;
+  };
+
+  render() {
 
     return (
 
@@ -256,12 +269,12 @@ class DataOwnerReview extends Component {
             PageHeading({ id: "dataOwnerReview", imgSrc: "/images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
           ]),
         ]),
-        hr({className: "section-separator"}),
+        hr({ className: "section-separator" }),
 
-        div({className: "row fsi-row-lg-level fsi-row-md-level no-margin"}, [
+        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
 
-          div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes"}, [
-            div({className: "panel-heading cm-boxhead dataset-color"}, [
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+            div({ className: "panel-heading cm-boxhead dataset-color" }, [
               h4({}, ["Research Purpose",
                 a({
                   className: "enabled hover-color application-link",
@@ -275,13 +288,13 @@ class DataOwnerReview extends Component {
                 onCloseRequest: this.closeApplicationSummaryModal
               }),
             ]),
-            div({id: "rp", className: "panel-body cm-boxbody"}, [this.state.darFields.rus]),
+            div({ id: "rp", className: "panel-body cm-boxbody" }, [this.state.darFields.rus]),
           ]),
 
-          div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes"}, [
-            div({className: "panel-heading cm-boxhead dataset-color"}, [
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+            div({ className: "panel-heading cm-boxhead dataset-color" }, [
               h4({}, ["Data Use Limitations",
-                a({className: "enabled hover-color application-link", onClick: this.openDataset}, ["Dataset summary"]),
+                a({ className: "enabled hover-color application-link", onClick: this.openDataset }, ["Dataset summary"]),
               ]),
               DatasetSummaryModal({
                 isRendered: this.state.showDatasetSummaryModal,
@@ -291,7 +304,7 @@ class DataOwnerReview extends Component {
                 onCloseRequest: this.closeDatasetSummaryModal
               }),
             ]),
-            div({id: "dul", className: "panel-body cm-boxbody"}, [
+            div({ id: "dul", className: "panel-body cm-boxbody" }, [
               button({
                 className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn-secondary btn-reminder hover-color",
                 onClick: this.downloadDUL
@@ -300,22 +313,21 @@ class DataOwnerReview extends Component {
           ]),
         ]),
 
-        div({className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12"}, [
-          div({className: "jumbotron box-vote"}, [
-            SubmitVoteBox({
+        div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
+          div({ className: "jumbotron box-vote" }, [
+            SubmitTriVoteBox({
               id: "dataOwnerReview",
               color: "dataset",
               title: "Your Vote",
               isDisabled: this.state.isFormDisabled,
-              voteStatus: this.state.vote.vote,
+              voteStatus: this.fixValue(this.state.vote.vote),
               radioType: "multiple",
               radioLabels: ['Approve', "Disapprove", "Raise a concern"],
               radioValues: ['1', '0', '2'],
               showAlert: this.state.showError,
               alertMessage: "Error updating vote.",
               rationale: this.state.vote.rationale,
-              action: {label: "Vote", handler: this.submitVote,
-              }
+              action: { label: "Vote", handler: this.submitVote },
             }),
           ]),
         ]),

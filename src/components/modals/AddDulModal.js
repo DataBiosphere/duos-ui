@@ -173,7 +173,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
   isValidJson = (obj, error) => {
     try {
       JSON.parse(obj);
-      this.setState({disableOkBtn:true});
+      this.setState({ disableOkBtn: true });
       return true;
     } catch (err) {
       this.handleErrors(error);

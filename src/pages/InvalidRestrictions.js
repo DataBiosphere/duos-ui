@@ -5,14 +5,12 @@ import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Consent, DAR } from '../libs/ajax';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class InvalidRestrictions extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       value: '',
       searchDulCases: '',
       searchDarCases: '',
@@ -44,15 +42,21 @@ class InvalidRestrictions extends Component {
   }
 
   async loadAsyncData() {
-    const invalidConsents = await Consent.findInvalidConsentRestriction();
-    const invalidDars = await DAR.findDataAccessInvalidUseRestriction();
-    this.setState(prev => {
-      prev.loading = false;
-      prev.InvalidRestrictions.dulList = invalidConsents;
-      prev.InvalidRestrictions.darList = invalidDars;
-      return prev;
+    Consent.findInvalidConsentRestriction().then(invalidConsents => {
+      this.setState(prev => {
+        prev.InvalidRestrictions.dulList = invalidConsents;
+        return prev;
+      });
+
     });
 
+    DAR.findDataAccessInvalidUseRestriction().then(invalidDars => {
+      this.setState(prev => {
+        prev.InvalidRestrictions.darList = invalidDars;
+        return prev;
+      });
+
+    });
 
   };
 
@@ -87,8 +91,8 @@ class InvalidRestrictions extends Component {
   };
 
   download = (fileName, text) => {
-    const break_line =  '\r\n \r\n';
-    text = break_line+ text;
+    const break_line = '\r\n \r\n';
+    text = break_line + text;
     let blob = new Blob([text], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     let a = document.createElement('a');
@@ -108,14 +112,12 @@ class InvalidRestrictions extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentDulPage, currentDarPage, dulLimit, darLimit, searchDulText, searchDarText } = this.state;
 

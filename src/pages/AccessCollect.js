@@ -8,7 +8,6 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Storage } from "../libs/storage";
 import { Alert } from '../components/Alert';
 
@@ -34,7 +33,6 @@ class AccessCollect extends Component {
       dialogTitle: 'Email Notification Sent.',
       showDialogReminder: false,
       isReminderSent: false,
-      loading: true,
       alertAccessMessage: '',
       showAlertAccess: false,
       showAlertRP: false,
@@ -72,9 +70,9 @@ class AccessCollect extends Component {
       isQ1Expanded: true,
       isQ2Expanded: false,
       electionAccess: {
-        finalVote: '',
-        finalRationale: '',
-        finalVoteDate: ''
+        finalVote: null,
+        finalRationale: null,
+        finalVoteDate: null
       },
       electionRP: {
         finalVote: '',
@@ -249,9 +247,6 @@ class AccessCollect extends Component {
     await this.findDataAccessElectionReview();
     await this.findRPElectionReview();
     await this.findDarFields();
-    this.setState({
-      loading: false
-    });
   }
 
   async findDataAccessElectionReview() {
@@ -377,12 +372,6 @@ class AccessCollect extends Component {
   }
 
   render() {
-
-    const { loading } = this.state;
-
-    if (loading) {
-      return LoadingIndicator();
-    }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
