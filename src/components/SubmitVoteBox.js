@@ -46,30 +46,20 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends PureComponent {
 
   render() {
 
-    let newState = {}
-
-    if (this.props.voteStatus !== this.state.voteStatus) {
-      if (this.state.voteEdited === false) {
-        newState.voteStatus = this.props.voteStatus;
-      } 
-    }
-
-    if (this.props.rationale !== this.state.rationale) {
-      if (this.state.rationaleEdited === false) {
-        newState.rationale = this.props.rationale === undefined ? null : this.props.rationale;
-      }
-    }
-
-    if (newState !== {}) {
-      this.setState(newState);
-    }
-
     const { id, isDisabled, title, agreementData, color, showAlert, alertMessage } = this.props;
-    const { enableVoteButton, requiredMessage, voteStatus = '', rationale = '' } = this.state;
+    let { enableVoteButton, requiredMessage, voteStatus = '', rationale = '' } = this.state;
+
+    if (this.props.voteStatus !== this.state.voteStatus && this.state.voteEdited === false) {
+      voteStatus = this.props.voteStatus;
+    }
+
+    if (this.props.rationale !== this.state.rationale && this.state.rationaleEdited === false) {
+      rationale = this.props.rationale === undefined ? null : this.props.rationale;
+    }
 
     const showComments = voteStatus === '1' || voteStatus === 'true' || voteStatus === true;
     const showRationale = voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '';
- 
+
     return (
 
       div({ id: "box_" + id, className: isDisabled === true ? "box-vote-disabled" : "" }, [
