@@ -1,6 +1,7 @@
 import { Component } from 'react';
-import { div, a } from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
+import { Link } from 'react-router-dom';
 
 class NotFound extends Component {
 
@@ -12,7 +13,7 @@ class NotFound extends Component {
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({ id: "notFound", color: "common", title: "Sorry, the page you were looking for was not found." }),
           ]),
-          a({ id: "btn_back", className: "btn-primary btn-back f-left", style: { 'marginTop': '15px' }, href: "/home" }, ["Back to Home"]),
+          h(Link, { id: "btn_back", className: "btn-primary btn-back f-left", style: { 'marginTop': '15px' }, to: "/home" }, ["Back to Home"]),
         ])
       ])
     );

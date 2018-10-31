@@ -3,7 +3,6 @@ import { div, button, i, span, b, a, h4, ul, li, label, h } from 'react-hyperscr
 import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files } from "../libs/ajax";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Alert } from '../components/Alert';
 
 class AccessPreview extends Component {
@@ -23,54 +22,83 @@ class AccessPreview extends Component {
 
   async darReviewInfo() {
 
+    let referenceId = this.props.match.params.referenceId;
+
     this.setState(prev => {
       prev.dar_id = this.props.match.params.referenceId
     });
 
-    const data1 = await DAR.getDarFields(this.props.match.params.referenceId, 'rus');
-    const data2 = await DAR.getDarFields(this.props.match.params.referenceId, 'translated_restriction');
-    const data3 = await DAR.getDarFields(this.props.match.params.referenceId, 'projectTitle');
-    const consent = await DAR.getDarConsent(this.props.match.params.referenceId);
-    const data5 = await DAR.describeDar(this.props.match.params.referenceId);
-    const useRestriction = await DAR.hasUseRestriction(this.props.match.params.referenceId);
+    DAR.getDarFields(referenceId, 'rus').then(
+      data => {
+        this.setState(prev => {
+          prev.darInfo.rus = data.rus;
+        });
+      }
+    );
 
-      this.setState(prev => {
-        prev.darInfo.rus = data1.rus;
-        prev.projectTitle = data3.projectTitle;
-        prev.consent = consent;
-        prev.rp = data2.translated_restriction;
-        if(useRestriction.hasUseRestriction === true) {
-          prev.hasUseRestriction = true;
+    DAR.getDarFields(referenceId, 'translated_restriction').then(
+      data => {
+        this.setState(prev => {
+          prev.rp = data.translated_restriction;
+        });
+      }
+    );
+
+    DAR.getDarFields(referenceId, 'projectTitle').then(
+      data => {
+        this.setState(prev => {
+          prev.projectTitle = data.projectTitle;
+        });
+      }
+    );
+
+    DAR.getDarConsent(referenceId).then(
+      consent => {
+        this.setState(prev => {
+          prev.consent = consent;
+          prev.consentName = consent.name;
+        });
+      }
+    );
+
+    DAR.hasUseRestriction(referenceId).then(
+      useRestriction => {
+        if (useRestriction.hasUseRestriction === true) {
+          this.setState(prev => {
+            prev.hasUseRestriction = true;
+          });
         }
-        prev.consentName = consent.name;
-        prev.darInfo.havePI = data5.havePI;
-        prev.darInfo.pi = data5.pi;
-        prev.darInfo.city = data5.city;
-        prev.darInfo.department = data5.department;
-        prev.darInfo.country = data5.country;
-        prev.darInfo.diseases = data5.diseases;
-        prev.darInfo.hasDiseases = data5.hasDiseases;
-        prev.darInfo.institution = data5.institution;
-        prev.darInfo.researchTypeManualReview = data5.researchTypeManualReview;
-        prev.darInfo.purposeManualReview = data5.purposeManualReview;
-        prev.darInfo.hasPurposeStatements = data5.hasPurposeStatements;
-        prev.darInfo.hasAdminComment = data5.hasAdminComment;
-        prev.darInfo.adminComment = data5.adminComment;
-        prev.darInfo.profileName = data5.profileName;
-        prev.darInfo.status = data5.status;
-        if (data5.hasPurposeStatements) {
-          prev.darInfo.purposeStatements = data5.purposeStatements;
-        }
-        prev.darInfo.researchType = data5.researchType;
-        prev.loading = false;
-        return prev;
+      }
+    );
+
+    const data5 = await DAR.describeDar(referenceId);
+    this.setState(prev => {
+      prev.darInfo.havePI = data5.havePI;
+      prev.darInfo.pi = data5.pi;
+      prev.darInfo.city = data5.city;
+      prev.darInfo.department = data5.department;
+      prev.darInfo.country = data5.country;
+      prev.darInfo.diseases = data5.diseases;
+      prev.darInfo.hasDiseases = data5.hasDiseases;
+      prev.darInfo.institution = data5.institution;
+      prev.darInfo.researchTypeManualReview = data5.researchTypeManualReview;
+      prev.darInfo.purposeManualReview = data5.purposeManualReview;
+      prev.darInfo.hasPurposeStatements = data5.hasPurposeStatements;
+      prev.darInfo.hasAdminComment = data5.hasAdminComment;
+      prev.darInfo.adminComment = data5.adminComment;
+      prev.darInfo.profileName = data5.profileName;
+      prev.darInfo.status = data5.status;
+      if (data5.hasPurposeStatements) {
+        prev.darInfo.purposeStatements = data5.purposeStatements;
+      }
+      prev.darInfo.researchType = data5.researchType;
+      return prev;
     });
-   
+
   };
 
   initialState() {
     return {
-      loading: true,
       hasUseRestriction: false,
       projectTitle: '',
       consentName: '',
@@ -78,7 +106,7 @@ class AccessPreview extends Component {
       isQ2Expanded: false,
 
       darInfo: {
-        rus:'empty rus',
+        rus: '',
         havePI: true,
         pi: '',
         profileName: '',
@@ -114,7 +142,7 @@ class AccessPreview extends Component {
         }
       });
     } else {
-      Files.getDulFile(this.state.consent.consentId,this.state.consent.dulName);
+      Files.getDulFile(this.state.consent.consentId, this.state.consent.dulName);
     }
   };
 
@@ -133,12 +161,6 @@ class AccessPreview extends Component {
   };
 
   render() {
-    
-    const { loading } = this.state;
-
-    if (loading) {
-      return LoadingIndicator();
-    }
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
@@ -228,7 +250,7 @@ class AccessPreview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                              return h(Fragment, {key: rIndex}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_purposeStatement_" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
@@ -246,7 +268,7 @@ class AccessPreview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
-                              return h(Fragment, {key: rIndex}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_researchType_" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
@@ -258,13 +280,13 @@ class AccessPreview extends Component {
                       div({ isRendered: this.state.darInfo.researchTypeManualReview, className: "summary-alert" }, [
                         Alert({ id: "researchTypeManualReview", type: "danger", title: "This research requires manual review." })
                       ]),
-                      
+
                       div({ isRendered: this.state.darInfo.hasDiseases, className: "row dar-summary" }, [
                         div({ className: "control-label access-color" }, ["Disease area(s)"]),
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
-                              return h(Fragment, {key: rIndex}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_disease_" + rIndex }, [
                                   disease
                                 ]),
@@ -283,7 +305,7 @@ class AccessPreview extends Component {
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () =>  this.downloadDUL() }, ["Download Data Use Letter"]),
+                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
                     ])
                   ])
                 ])

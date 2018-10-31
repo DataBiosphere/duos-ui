@@ -7,60 +7,56 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: this.props.name,
-      value: this.fixValue(this.props.value),
-      optionLabels: this.props.optionLabels,
-      optionValues: this.props.optionValues
+      selectedValue: this.props.value,
     }
-  }
-  fixValue(value) {
-    if (value === false) return '0';
-    if (value === true) return '1';
-    if (value === null) return '2';
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    let newValue = nextProps.voteStatus === false ? '0' :
-    nextProps.voteStatus === true ? '1' : '2';
-      return {
-        rationale: nextProps.rationale,
-        voteStatus: newValue
-      };
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.value !== prevState.selectedValue) {
+      this.setState({
+        selectedValue: prevProps.value,
+      });
     }
+  }
 
   selectOption = (e, value) => {
+    e.preventDefault();
     this.setState(prev => {
-      prev.value = value;
+      prev.selectedValue = value;
       return prev;
     }, () => {
-      this.props.onChange(e, this.state.name, value);
+      this.props.onChange(e, this.props.name, value);
     });
   };
 
   render() {
 
+    const { id, name, optionValues, optionLabels } = this.props;
+    const { selectedValue } = this.state;
+
     return (
 
       div({ className: 'radio-inline' }, [
-        this.state.optionLabels.map((option, ix) => {
+        this.props.optionLabels.map((option, ix) => {
           return (
 
             label({
-              key: this.props.id + ix,
-              onClick: (e) => this.selectOption(e, this.state.optionValues[ix]),
+              key: id + ix,
+              onClick: (e) => this.selectOption(e, optionValues[ix]),
               id: "lbl_" + this.props.id + "_" + ix,
-              htmlFor: "rad_" + this.props.id + "_" + ix,
+              htmlFor: "rad_" + id + "_" + ix,
               className: "radio-wrapper"
             }, [
                 input({
                   type: "radio",
-                  id: "rad_" + this.props.id + "_" + ix,
-                  name: this.state.name,
-                  // value: this.state.optionValues[ix],
-                  checked: this.state.value === this.state.optionValues[ix],
+                  id: "rad_" + id + "_" + ix,
+                  name: name,
+                  value: optionValues[ix],
+                  checked: selectedValue === optionValues[ix],
+                  onChange: () => { }
                 }),
                 span({ className: "radio-check" }),
-                span({ className: "radio-label" }, [this.state.optionLabels[ix]])
+                span({ className: "radio-label" }, [optionLabels[ix]])
               ])
           )
         })

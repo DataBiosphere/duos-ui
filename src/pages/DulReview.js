@@ -3,7 +3,6 @@ import { div, b, span, a, h4, hr, i, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
 
@@ -11,19 +10,19 @@ class DulReview extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
+    this.state = this.initialState();
+  }
+
+  initialState() {
+    let currentUser = Storage.getCurrentUser();
+    return {
+      currentUser: currentUser,
       showConfirmationDialog: false,
-      loading: true,
-      value: '',
-      currentUser: Storage.getCurrentUser(),
       enableVoteButton: false,
       consent: {},
       election: {},
-      vote: {vote: '', rational: ''}
+      vote: {},
     };
-    this.back = this.back.bind(this);
-    this.logVote = this.logVote.bind(this);
-    this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
   back() {
@@ -31,25 +30,40 @@ class DulReview extends Component {
   }
 
   componentDidMount() {
-    this.setState(prev => {
-      prev.currentUser = Storage.getCurrentUser();
-      return prev;
-    });
     this.voteInfo();
+    this.back = this.back.bind(this);
+    this.logVote = this.logVote.bind(this);
+    this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
   async voteInfo() {
-    let vote = await Votes.find(this.props.match.params.consentId, this.props.match.params.voteId);
-    let election = await Election.findElectionByVoteId(this.props.match.params.voteId);
-    let consent = await Consent.findConsentById(this.props.match.params.consentId);
-    this.setState(prev => { 
-      prev.vote = vote; 
-      prev.loading = false;
-      prev.election = election; 
-      prev.consent = consent;
-      prev.consentName = consent.dulName
-      return prev;
-    });
+    const voteId = this.props.match.params.voteId;
+    const consentId = this.props.match.params.consentId;
+
+    Votes.find(consentId, voteId).then(
+      vote => {
+        this.setState({
+          vote: vote
+        });
+      }
+    );
+
+    Election.findElectionByVoteId(voteId).then(
+      election => {
+        this.setState({
+          election: election
+        });
+      }
+    );
+
+    Consent.findConsentById(consentId).then(
+      consent => {
+        this.setState({
+          consent: consent,
+          consentName: consent.dulName
+        });
+      }
+    );
   };
 
   setEnableVoteButton() {
@@ -67,22 +81,22 @@ class DulReview extends Component {
   };
 
   async processVote(vote) {
-    if(vote.createDate === null){
-      Votes.postVote(this.state.consent.consentId, vote).then( 
+    if (vote.createDate === null) {
+      Votes.postVote(this.state.consent.consentId, vote).then(
         data => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully logged!" });
         }
       ).catch(error => {
-          this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       })
 
-    } else  {
-      Votes.updateVote(this.state.consent.consentId, vote).then( 
+    } else {
+      Votes.updateVote(this.state.consent.consentId, vote).then(
         data => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully edited!" });
         }
       ).catch(error => {
-          this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       })
     }
   };
@@ -97,8 +111,6 @@ class DulReview extends Component {
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const consentData = span({ className: "consent-data" }, [
       b({ isRendered: this.state.consent.groupName, className: "pipe", "ng-bind-html": "consentGroupName", dangerouslySetInnerHTML: { __html: this.state.consent.groupName } }, []),
@@ -119,8 +131,8 @@ class DulReview extends Component {
               onClick: this.back,
               className: "btn-primary btn-back"
             }, [
-              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-            ])
+                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+              ])
           ]),
         ]),
 
@@ -142,7 +154,7 @@ class DulReview extends Component {
             div({ className: "panel-heading cm-boxhead dul-color" }, [
               h4({}, ["Structured Limitations"]),
             ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction",  dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction }}, [])
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction } }, [])
           ]),
         ]),
 
@@ -152,20 +164,20 @@ class DulReview extends Component {
               id: "dulReview",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-              voteStatus: this.state.vote.vote === null ? undefined : this.state.vote.vote,
-              rationale: this.state.vote.rationale === null ? '' : this.state.vote.rationale,
+              voteStatus: this.state.vote.vote != null ? this.state.vote.vote : null,
+              rationale: this.state.vote.rationale == null ? '' : this.state.vote.rationale,
               action: { label: "Vote", handler: this.logVote }
             })
           ]),
-        
-            ConfirmationDialog({
-              isRendered: this.state.showConfirmationDialog,
-              showModal: this.state.showConfirmationDialog,
-              title: "Vote confirmation",
-              color: "dul",
-              type: "informative",
-              action: { label: "Ok", handler: this.confirmationHandlerOK }
-            }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
+
+          ConfirmationDialog({
+            isRendered: this.state.showConfirmationDialog,
+            showModal: this.state.showConfirmationDialog,
+            title: "Vote confirmation",
+            color: "dul",
+            type: "informative",
+            action: { label: "Ok", handler: this.confirmationHandlerOK }
+          }, [div({ className: "dialog-description" }, [this.state.alertMessage])])
         ]),
       ])
     );

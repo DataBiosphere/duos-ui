@@ -6,7 +6,6 @@ import { Storage } from '../libs/storage';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
 import { SearchBox } from '../components/SearchBox';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -19,7 +18,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       showModal: false,
       currentUser: {},
       dulLimit: 5,
@@ -75,19 +73,27 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     });
   }
 
-  async init(currentUser) {
+  init(currentUser) {
 
-    let duls = await PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
-    let dars = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
+    PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId).then(
+      duls => {
+        this.setState(prev => {
+          prev.electionsList.dul = duls.dul;
+          prev.totalDulPendingVotes = duls.totalDulPendingVotes;
+          return prev;
+        });
+      }
+    );
 
-    this.setState(prev => {
-      prev.loading = false;
-      prev.electionsList.dul = duls.dul;
-      prev.totalDulPendingVotes = duls.totalDulPendingVotes;
-      prev.electionsList.access = dars.access;
-      prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
-      return prev;
-    });
+    PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
+      dars => {
+        this.setState(prev => {
+          prev.electionsList.access = dars.access;
+          prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
+          return prev;
+        });
+      }
+    );
   }
 
   openDULReview = (voteId, referenceId) => (e) => {
@@ -134,14 +140,12 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   };
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit, searchDulText, searchDarText } = this.state;
 

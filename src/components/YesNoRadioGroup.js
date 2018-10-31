@@ -5,41 +5,76 @@ import './RadioGroups.css';
 
 export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
 
-  handleChange = (changeEvent) => {
-    this.props.onChange(changeEvent, this.props.name, changeEvent.target.value)
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedValue: this.props.value,
+    };
+  }
+
+  selectOption = (e, value) => {
+    e.preventDefault();
+    this.setState(prev => {
+      prev.selectedValue = value;
+      return prev;
+    }, () => {
+      this.props.onChange(e, this.props.name, value);
+    });
   };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevProps.value !== prevState.selectedValue) {
+      this.setState({
+        selectedValue: prevProps.value,
+      });
+    }
+  }
 
   render() {
 
-    const { id, name, value } = this.props;
+    const { id, name } = this.props;
+    const { selectedValue } = this.state;
+
+    const isYes = selectedValue === 'true' || selectedValue === true || selectedValue === '1';
+    const isNo = selectedValue === 'false' || selectedValue === false || selectedValue === '0';
 
     return (
 
       div({ className: 'radio-inline' }, [
-        label({ id: "lbl_positive_" + id, htmlFor: "rad_positive_" + id, className: "radio-wrapper" }, [
-          input({
-            value: 'true',
-            type: "radio",
-            id: "rad_positive_" + id,
-            name: name,
-            checked: value === 'true' || value === true || value === '1',
-            onChange: this.handleChange
-          }),
-          span({ className: "radio-check" }),
-          span({ className: "radio-label" }, ["Yes"])
-        ]),
-        label({ id: "lbl_negative_" + id, htmlFor: "rad_negative_" + id, className: "radio-wrapper" }, [
-          input({
-            value: 'false',
-            type: "radio",
-            id: "rad_negative_" + id,
-            name: name,
-            checked: value === 'false' || value === false || value === '0',
-            onChange: this.handleChange
-          }),
-          span({ className: "radio-check" }),
-          span({ className: "radio-label" }, ["No"])
-        ])
+        label({
+          id: "lbl_positive_" + id,
+          htmlFor: "rad_positive_" + id,
+          onClick: (e) => this.selectOption(e, 'true'),
+          className: "radio-wrapper"
+        }, [
+            input({
+              value: 'true',
+              type: "radio",
+              id: "rad_positive_" + id,
+              name: name,
+              checked: isYes,
+              onChange: () => { }
+            }),
+            span({ className: "radio-check" }),
+            span({ className: "radio-label" }, ["Yes"])
+          ]),
+        label({
+          id: "lbl_negative_" + id,
+          htmlFor: "rad_negative_" + id,
+          onClick: (e) => this.selectOption(e, 'false'),
+          className: "radio-wrapper"
+        }, [
+            input({
+              value: 'false',
+              type: "radio",
+              id: "rad_negative_" + id,
+              name: name,
+              checked: isNo,
+              onChange: () => { }
+            }),
+            span({ className: "radio-check" }),
+            span({ className: "radio-label" }, ["No"])
+          ]),
       ])
     );
   }

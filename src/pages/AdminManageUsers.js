@@ -6,7 +6,6 @@ import { User } from "../libs/ajax";
 import { PaginatorBar } from '../components/PaginatorBar';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
-import { LoadingIndicator } from '../components/LoadingIndicator';
 
 class AdminManageUsers extends Component {
 
@@ -15,7 +14,6 @@ class AdminManageUsers extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      loading: true,
       searchText: '',
       userList: [],
       showAddUserModal: false,
@@ -44,10 +42,11 @@ class AdminManageUsers extends Component {
     });
 
     this.setState(prev => {
-      prev.loading = false;
       prev.currentPage = 1;
       prev.userList = userList;
       return prev;
+    }, () => {
+      ReactTooltip.rebuild();
     });
 
   }
@@ -99,10 +98,9 @@ class AdminManageUsers extends Component {
   }
 
   okModal = async (name) => {
-    this.setState(prev => { 
-      prev.showAddUserModal = false; 
-      prev.loading = true;
-      return prev; 
+    this.setState(prev => {
+      prev.showAddUserModal = false;
+      return prev;
     }, () => {
       this.getUsers();
     });
@@ -123,14 +121,12 @@ class AdminManageUsers extends Component {
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
       let text = JSON.stringify(row);
-      return text.includes(query);
+      return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
   }
 
   render() {
-
-    if (this.state.loading) { return LoadingIndicator(); }
 
     const { currentPage, searchUserText } = this.state;
 
@@ -251,7 +247,7 @@ class AdminManageUsers extends Component {
             place: 'right',
             effect: 'solid',
             multiline: true,
-            className: 'tooltip-wrapper'
+            className: 'tooltip-wrapper',
           }),
           h(ReactTooltip, {
             id: "tip_nonBonafide",

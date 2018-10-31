@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, a, hh, h2, span } from 'react-hyperscript-helpers';
+import { div, a, hh, h2, span, h } from 'react-hyperscript-helpers';
+import { Link } from 'react-router-dom';
 import './AdminConsoleBox.css';
 
 export const AdminConsoleBox = hh(class AdminConsoleBox extends Component {
@@ -19,7 +20,7 @@ export const AdminConsoleBox = hh(class AdminConsoleBox extends Component {
 
 
     if (this.props.url !== undefined && this.props.clickHandler === undefined) {
-      tag = a({ id: this.props.id, href: this.props.url, className: "admin-box-wrapper" }, [
+      tag = h(Link, { id: this.props.id, to: this.props.url, className: "admin-box-wrapper" }, [
         iconTag, textWrapTag
       ]);
     }

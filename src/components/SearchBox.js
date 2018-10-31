@@ -4,7 +4,7 @@ import { div, h, input, i, a } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
-  export class SearchBox extends Component {
+export class SearchBox extends Component {
 
   constructor(props) {
     super(props);
@@ -21,6 +21,10 @@ import './SearchBox.css';
     this.myRef.current.value = '';
     this.props.searchHandler('');
   };
+
+  componentDidMount() {
+    ReactTooltip.rebuild();
+  }
 
   render() {
     return (
@@ -42,8 +46,8 @@ SearchBox.propTypes = {
 };
 
 SearchBox.defaultProps = {
-  searchHandler: (query) => {},
-  pageHandler: (page) => {}
+  searchHandler: (query) => { },
+  pageHandler: (page) => { }
 }
 
 

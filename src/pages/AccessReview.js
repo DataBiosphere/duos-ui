@@ -4,9 +4,10 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { LoadingIndicator } from '../components/LoadingIndicator';
 import { Alert } from '../components/Alert';
+import { Link} from 'react-router-dom';
 
 class AccessReview extends Component {
 
@@ -16,15 +17,6 @@ class AccessReview extends Component {
   }
 
   componentDidMount() {
-    this.setState(prev => {
-      prev.currentUser = {
-        roles: [
-          { name: 'CHAIRPERSON' },
-          { name: 'ADMIN' },
-        ]
-      };
-      return prev;
-    });
     this.darReviewAccess();
     this.submitRpVote = this.submitRpVote.bind(this);
     this.submitVote = this.submitVote.bind(this);
@@ -32,7 +24,7 @@ class AccessReview extends Component {
 
   submitRpVote = (voteStatus, rationale) => {
     let vote = this.state.rpVote;
-    this.setState({disableQ2Btn: true});
+    this.setState({ disableQ2Btn: true });
     vote.vote = voteStatus;
     vote.rationale = rationale;
 
@@ -46,8 +38,8 @@ class AccessReview extends Component {
             return prev;
           });
         }).catch(error => {
-        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-      });
+          this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        });
     } else {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
@@ -58,15 +50,15 @@ class AccessReview extends Component {
             return prev;
           });
         }).catch(error => {
-        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-      });
+          this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        });
     }
 
   };
 
-  submitVote(voteStatus, rationale) {
+  submitVote = (voteStatus, rationale) => {
     let vote = this.state.vote;
-    this.setState({disableQ1Btn: true});
+    this.setState({ disableQ1Btn: true });
     vote.vote = voteStatus;
     vote.rationale = rationale;
 
@@ -80,8 +72,8 @@ class AccessReview extends Component {
           });
           this.alertRPVoteRemember();
         }).catch(error => {
-        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-      });
+          this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        });
     } else {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
@@ -91,8 +83,8 @@ class AccessReview extends Component {
             return prev;
           });
         }).catch(error => {
-        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-      });
+          this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+        });
     }
 
   };
@@ -170,18 +162,11 @@ class AccessReview extends Component {
 
     Election.findConsentElectionByDarElection(vote.electionId).then(data => {
       if (data.dulName !== null && data.dulElection !== null) {
-        this.setState({dulName: data.dulName});
+        this.setState({ dulName: data.dulName });
       } else {
-        this.setState({dulName: consent.dulName});
+        this.setState({ dulName: consent.dulName });
       }
     });
-
-
-    this.setState({
-      loading: false
-    });
-    
-    
   }
 
   confirmationHandlerOK = (answer) => (e) => {
@@ -193,10 +178,12 @@ class AccessReview extends Component {
   };
 
   initialState() {
+    let currentUser = Storage.getCurrentUser();
+
     return {
-      loading: true,
+      currentUser: currentUser,
       showConfirmationDialogOK: false,
-      alertMessage: "Your vote has been successfully logged!",
+      alertMessage: 'Your vote has been successfully logged!',
       hasUseRestriction: false,
       projectTitle: '',
       consentName: '',
@@ -216,19 +203,19 @@ class AccessReview extends Component {
       alertRPVote: false,
 
       darInfo: {
-        havePI: true,
+        havePI: false,
         pi: '',
         profileName: '',
         status: '',
-        hasAdminComment: true,
+        hasAdminComment: false,
         adminComment: '',
         institution: '',
         department: '',
         city: '',
         country: '',
-        purposeManualReview: true,
-        researchTypeManualReview: true,
-        hasDiseases: true,
+        purposeManualReview: false,
+        researchTypeManualReview: false,
+        hasDiseases: false,
         purposeStatements: [],
         researchType: [],
         diseases: [],
@@ -263,12 +250,6 @@ class AccessReview extends Component {
 
   render() {
 
-    const { loading } = this.state;
-
-    if (loading) {
-      return LoadingIndicator();
-    }
-
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe" }, [this.state.projectTitle]),
       this.state.consentName
@@ -296,7 +277,7 @@ class AccessReview extends Component {
             }),
             this.state.currentUser.roles.map((rol, ind) => {
               return (
-                a({ id: "btn_back", href: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
+                h(Link, { id: "btn_back", to: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );
@@ -376,7 +357,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                              return h(Fragment, {key: rIndex}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_purposeStatement_" + rIndex, className: purpose.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [purpose.title]), purpose.description
                                 ])
@@ -394,7 +375,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.researchType.map((type, rIndex) => {
-                              return h(Fragment, {key: rIndex}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_researchType_" + rIndex, className: type.manualReview ? 'cancel-color' : '' }, [
                                   b({}, [type.title]), type.description
                                 ]),
@@ -412,7 +393,7 @@ class AccessReview extends Component {
                         div({ className: "response-label" }, [
                           ul({}, [
                             this.state.darInfo.diseases.map((disease, rIndex) => {
-                              return h(Fragment, {key: rIndex}, [
+                              return h(Fragment, { key: rIndex }, [
                                 li({ id: "lbl_disease_" + rIndex }, [
                                   disease
                                 ]),
@@ -449,7 +430,7 @@ class AccessReview extends Component {
                       title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                         : "Should data access be granted to this applicant?",
                       disabled: this.state.disableQ1Btn,
-                      voteStatus: this.state.vote.vote !== null ? this.state.vote.vote : undefined,
+                      voteStatus: this.state.vote.vote != null ? this.state.vote.vote : null,
                       rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
                       action: { label: "Vote", handler: this.submitVote },
                       showAlert: this.state.alertRPVote,
@@ -490,7 +471,7 @@ class AccessReview extends Component {
                   div({ className: "panel-heading cm-boxhead access-color" }, [
                     h4({}, ["Structured Research Purpose"]),
                   ]),
-                  div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML:{ __html: this.state.darInfo.sDar}  }, []),
+                  div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.darInfo.sDar } }, []),
                 ]),
               ]),
 
