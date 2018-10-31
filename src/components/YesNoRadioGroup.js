@@ -1,42 +1,20 @@
-import { Component, } from 'react';
+import { PureComponent, } from 'react';
 import { div, input, hh, label, span } from 'react-hyperscript-helpers';
 import PropTypes from 'prop-types';
 import './RadioGroups.css';
 
-export const YesNoRadioGroup = hh(class YesNoRadioGroup extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedValue: this.props.value,
-    };
-  }
+export const YesNoRadioGroup = hh(class YesNoRadioGroup extends PureComponent {
 
   selectOption = (e, value) => {
-    e.preventDefault();
-    this.setState(prev => {
-      prev.selectedValue = value;
-      return prev;
-    }, () => {
-      this.props.onChange(e, this.props.name, value);
-    });
+    this.props.onChange(e, this.props.name, value);
   };
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.value !== prevState.selectedValue) {
-      this.setState({
-        selectedValue: prevProps.value,
-      });
-    }
-  }
 
   render() {
 
-    const { id, name } = this.props;
-    const { selectedValue } = this.state;
+    const { id, name, value } = this.props;
 
-    const isYes = selectedValue === 'true' || selectedValue === true || selectedValue === '1';
-    const isNo = selectedValue === 'false' || selectedValue === false || selectedValue === '0';
+    const isYes = value === 'true' || value === true || value === '1';
+    const isNo = value === 'false' || value === false || value === '0';
 
     return (
 

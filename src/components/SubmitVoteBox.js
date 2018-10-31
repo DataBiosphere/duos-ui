@@ -1,24 +1,18 @@
-import { Component } from 'react';
+import { PureComponent } from 'react';
 import { div, hh, h3, hr, form, fieldset, input, label, span, button } from 'react-hyperscript-helpers';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { Alert } from '../components/Alert';
 
-export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
+export const SubmitVoteBox = hh(class SubmitVoteBox extends PureComponent {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      currentUser: {},
-      enableVoteButton: true,
-      voteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
-      prevVoteStatus: this.props.voteStatus != null ? this.props.voteStatus : '',
-      showDialogSubmit: false,
-      rationale: this.props.rationale != null ? this.props.rationale : '',
-      prevRationale: this.props.rationale != null ? this.props.rationale : '',
-      requiredMessage: false
-    };
-  }
+  state = {
+    enableVoteButton: true,
+    requiredMessage: false,
+    voteStatus: this.props.voteStatus,
+    voteEdited: false,
+    rationale: this.props.rationale,
+    rationaleEdited: false
+  };
 
   logVote = (e) => {
     if (this.state.voteStatus != null) {
@@ -28,29 +22,16 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
       });
       this.props.action.handler(this.state.voteStatus, this.state.rationale);
     } else {
-      this.setState({ requiredMessage: true });
+      this.setState({
+        requiredMessage: true
+      });
     }
   };
-
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.rationale !== prevState.prevRationale
-      || nextProps.voteStatus !== prevState.prevVoteStatus) {
-      return {
-        rationale: nextProps.rationale,
-        prevRationale: nextProps.rationale,
-        voteStatus: nextProps.voteStatus,
-        prevVoteStatus: nextProps.voteStatus,
-        enableVoteButton: true
-      };
-    }
-    return {
-      enableVoteButton: true
-    };
-  }
 
   yesNoChange = (e, name, value) => {
     this.setState({
       voteStatus: value,
+      voteEdited: true,
       requiredMessage: false
     });
   };
@@ -58,15 +39,37 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
   changeRationale = async (e) => {
     e.preventDefault();
     await this.setState({
-      rationale: e.target.value
+      rationale: e.target.value,
+      rationaleEdited: true
     });
   };
 
   render() {
 
-    const { id, isDisabled, title, agreementData, color, showAlert, alertMessage } = this.props;
-    const { enableVoteButton, voteStatus = '', rationale = '', requiredMessage } = this.state;
+    let newState = {}
 
+    if (this.props.voteStatus !== this.state.voteStatus) {
+      if (this.state.voteEdited === false) {
+        newState.voteStatus = this.props.voteStatus;
+      } 
+    }
+
+    if (this.props.rationale !== this.state.rationale) {
+      if (this.state.rationaleEdited === false) {
+        newState.rationale = this.props.rationale === undefined ? null : this.props.rationale;
+      }
+    }
+
+    if (newState !== {}) {
+      this.setState(newState);
+    }
+
+    const { id, isDisabled, title, agreementData, color, showAlert, alertMessage } = this.props;
+    const { enableVoteButton, requiredMessage, voteStatus = '', rationale = '' } = this.state;
+
+    const showComments = voteStatus === '1' || voteStatus === 'true' || voteStatus === true;
+    const showRationale = voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '';
+ 
     return (
 
       div({ id: "box_" + id, className: isDisabled === true ? "box-vote-disabled" : "" }, [
@@ -91,10 +94,10 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends Component {
             ]),
 
             div({ className: "form-group" }, [
-              span({ isRendered: voteStatus === '1' || voteStatus === 'true' || voteStatus === true }, [
+              span({ isRendered: showComments }, [
                 label({ id: "lbl_comments" + id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Comments"]),
               ]),
-              span({ isRendered: voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '' }, [
+              span({ isRendered: showRationale }, [
                 label({ id: "lbl_rationale" + id, className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 control-label vote-label " + color + "-color" }, ["Rationale"]),
               ]),
               div({ className: "col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [

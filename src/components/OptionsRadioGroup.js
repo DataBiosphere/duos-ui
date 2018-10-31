@@ -1,38 +1,17 @@
-import { Component } from 'react';
+import { PureComponent } from 'react';
 import { div, input, hh, label, span } from 'react-hyperscript-helpers';
 import PropTypes from 'prop-types';
 
-export const OptionsRadioGroup = hh(class OptionsRadioGroup extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedValue: this.props.value,
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevProps.value !== prevState.selectedValue) {
-      this.setState({
-        selectedValue: prevProps.value,
-      });
-    }
-  }
+export const OptionsRadioGroup = hh(class OptionsRadioGroup extends PureComponent {
 
   selectOption = (e, value) => {
-    e.preventDefault();
-    this.setState(prev => {
-      prev.selectedValue = value;
-      return prev;
-    }, () => {
-      this.props.onChange(e, this.props.name, value);
-    });
+    this.props.onChange(e, this.props.name, value);
   };
 
   render() {
 
     const { id, name, optionValues, optionLabels } = this.props;
-    const { selectedValue } = this.state;
+    const selectedValue = this.props.value;
 
     return (
 
