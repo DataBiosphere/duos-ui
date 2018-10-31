@@ -10,8 +10,7 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends PureComponen
 
   render() {
 
-    const { id, name, optionValues, optionLabels } = this.props;
-    const selectedValue = this.props.value;
+    const { id, name, optionValues, optionLabels, value } = this.props;
 
     return (
 
@@ -31,7 +30,7 @@ export const OptionsRadioGroup = hh(class OptionsRadioGroup extends PureComponen
                   id: "rad_" + id + "_" + ix,
                   name: name,
                   value: optionValues[ix],
-                  checked: selectedValue === optionValues[ix],
+                  checked: value === optionValues[ix],
                   onChange: () => { }
                 }),
                 span({ className: "radio-check" }),
