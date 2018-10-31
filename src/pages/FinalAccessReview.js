@@ -11,6 +11,7 @@ import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
+import { Link } from 'react-router-dom';
 
 class FinalAccessReview extends Component {
 
@@ -590,7 +591,7 @@ class FinalAccessReview extends Component {
             PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review", description: consentData }),
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            a({ id: "btn_back", href: "/chair_console", className: "btn-primary btn-back" }, [
+            h(Link, { id: "btn_back", to: "/chair_console", className: "btn-primary btn-back" }, [
               i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
             ])
           ]),

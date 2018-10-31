@@ -7,6 +7,7 @@ import { DAR, Election, Files, Votes } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { Alert } from '../components/Alert';
+import { Link} from 'react-router-dom';
 
 class AccessReview extends Component {
 
@@ -276,7 +277,7 @@ class AccessReview extends Component {
             }),
             this.state.currentUser.roles.map((rol, ind) => {
               return (
-                a({ id: "btn_back", href: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
+                h(Link, { id: "btn_back", to: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
                   i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
                 ])
               );

@@ -9,6 +9,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
 import { Researcher, DAR } from '../libs/ajax';
 import { Storage } from "../libs/storage";
+import { Link } from 'react-router-dom';
 
 import './DataAccessRequestApplication.css';
 
@@ -617,13 +618,13 @@ class DataAccessRequestApplication extends Component {
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
-      a({ href: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
       " to be able to create a Data Access Request"
     ]);
 
     const profileSubmitted = span({}, [
       "Please make sure ",
-      a({ href: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
       " is updated, as it will be submited with your DAR Application"
     ]);
 

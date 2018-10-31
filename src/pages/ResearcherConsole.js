@@ -7,6 +7,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { DAR } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { Link } from 'react-router-dom';
 
 class ResearcherConsole extends Component {
 
@@ -199,9 +200,9 @@ class ResearcherConsole extends Component {
                 }),
               ]),
 
-              a({
+              h(Link, {
                 id: "btn_createRequest",
-                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", href: "/dar_application"
+                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", to: "/dar_application"
               }, [
                   div({ className: "all-icons add-access_white" }, []),
                   span({}, ["Create Data Access Request"]),
