@@ -104,14 +104,17 @@ class DulResultRecords extends Component {
       dulElection: {
         finalVote: '',
         finalRationale: '',
-        finalVoteDate: ''
+        finalVoteDate: null
       },
       election: {
-        finalVote: '',
-        finalRationale: '',
-        finalVoteDate: ''
       },
       dulVoteList: [[], []],
+      chartData : [
+        ['Results', 'Votes'],
+        ['YES', 0],
+        ['NO', 0],
+        ['Pending', 0]
+      ]
     };
   }
 
@@ -121,7 +124,7 @@ class DulResultRecords extends Component {
 
   render() {
 
-    const { chartData } = this.state;
+    const { chartData = {} } = this.state;
 
     const consentData = span({ className: "consent-data" }, [
       b({ className: "pipe", isRendered: this.state.consentGroupName }, [this.state.consentGroupName]),
