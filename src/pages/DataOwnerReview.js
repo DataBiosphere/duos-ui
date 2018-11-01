@@ -193,7 +193,6 @@ class DataOwnerReview extends Component {
 
   async submitVote(answer, rationale) {
     let updatedVote = {};
-    let result;
 
     switch (answer) {
       case (APPROVE): {
