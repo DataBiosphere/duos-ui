@@ -8,9 +8,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends PureComponent {
   state = {
     enableVoteButton: true,
     requiredMessage: false,
-    voteStatus: this.props.voteStatus,
+    voteStatus: this.props.voteStatus === undefined ? null : this.props.voteStatus,
     voteEdited: false,
-    rationale: this.props.rationale,
+    rationale: this.props.rationale === null ? '' : this.props.rationale,
     rationaleEdited: false
   };
 
@@ -50,11 +50,11 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends PureComponent {
     let { enableVoteButton, requiredMessage, voteStatus = '', rationale = '' } = this.state;
 
     if (this.props.voteStatus !== this.state.voteStatus && this.state.voteEdited === false) {
-      voteStatus = this.props.voteStatus;
+      voteStatus = this.props.voteStatus === undefined ? null : this.props.voteStatus;
     }
 
     if (this.props.rationale !== this.state.rationale && this.state.rationaleEdited === false) {
-      rationale = this.props.rationale === undefined ? null : this.props.rationale;
+      rationale = this.props.rationale === null ? '' : this.props.rationale;
     }
 
     const showComments = voteStatus === '1' || voteStatus === 'true' || voteStatus === true;
