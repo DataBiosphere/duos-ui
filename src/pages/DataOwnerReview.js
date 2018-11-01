@@ -186,7 +186,9 @@ class DataOwnerReview extends Component {
     );
     this.props.history.goBack();
   };
+
   downloadDUL = () => (e) => {
+    console.log("¿download dul? consentId ",this.state.consent.id, "dulName ", this.state.consent.data.dulName);
     Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
   };
 
@@ -306,7 +308,7 @@ class DataOwnerReview extends Component {
             div({ id: "dul", className: "panel-body cm-boxbody" }, [
               button({
                 className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn-secondary btn-reminder hover-color",
-                onClick: this.downloadDUL
+                onClick: this.downloadDUL()
               }, ["Download Data Use Letter"]),
             ])
           ]),
