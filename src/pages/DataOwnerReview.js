@@ -188,7 +188,6 @@ class DataOwnerReview extends Component {
   };
 
   downloadDUL = () => (e) => {
-    console.log("¿download dul? consentId ",this.state.consent.id, "dulName ", this.state.consent.data.dulName);
     Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
   };
 
