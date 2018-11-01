@@ -1,6 +1,7 @@
 import _ from 'lodash/fp'
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
+import { Storage } from './storage';
 
 const dataTemplate = {
   accessTotal: [
