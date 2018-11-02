@@ -297,7 +297,7 @@ class AccessResultRecords extends Component {
     return (
       div({
         isRendered: this.state.hasUseRestriction,
-        className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 jumbotron box-vote-results no-padding"
+        className: "col-lg-4 col-md-5 col-sm-12 col-xs-12 jumbotron box-vote-results no-padding"
       }, [
           h4({ className: "box-vote-title access-color" }, ["DUOS Matching Algorithm Decision"]),
           hr({ className: "box-separator" }),
@@ -599,7 +599,7 @@ class AccessResultRecords extends Component {
         id: "accessRecordResult",
         title: "DAC Decision",
         color: "access",
-        class: "col-lg-7 col-md-7 col-sm-12 col-xs-12",
+        class: "col-lg-8 col-md-7 col-sm-12 col-xs-12",
         vote: electionAccess.finalVote,
         voteDate: electionAccess.finalVoteDate,
         rationale: electionAccess.finalRationale,
