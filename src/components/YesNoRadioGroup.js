@@ -1,69 +1,43 @@
-import { PureComponent, } from 'react';
-import { div, input, hh, label, span } from 'react-hyperscript-helpers';
-import PropTypes from 'prop-types';
+import { div, input, label, span } from 'react-hyperscript-helpers';
 import './RadioGroups.css';
 
-export const YesNoRadioGroup = hh(class YesNoRadioGroup extends PureComponent {
+export const YesNoRadioGroup = (props) => {
 
-  selectOption = (e, value) => {
+  const selectOption = (e, value) => {
     e.preventDefault();
-    this.props.onChange(e, this.props.name, value);
+    props.onChange(e, props.name, value);
   };
 
-  static defaultProps = {
-    value: null
-  }
+  const { id, name, optionValues = ['true', 'false'], optionLabels = ['Yes', 'No'], value } = props;
+  const normValue = (value === 'true' || value === true || value === '1') ? 'true' :
+    (value === 'false' || value === false || value === '0') ? 'false' : null;
 
-  render() {
+  return (
 
-    const { id, name, value } = this.props;
+    div({ className: 'radio-inline' }, [
+      optionLabels.map((option, ix) => {
+        return (
 
-    const isYes = value === 'true' || value === true || value === '1';
-    const isNo = value === 'false' || value === false || value === '0';
-
-    return (
-
-      div({ className: 'radio-inline' }, [
-        label({
-          id: "lbl_positive_" + id,
-          htmlFor: "rad_positive_" + id,
-          onClick: (e) => this.selectOption(e, 'true'),
-          className: "radio-wrapper"
-        }, [
-            input({
-              value: 'true',
-              type: "radio",
-              id: "rad_positive_" + id,
-              name: name,
-              checked: isYes,
-              onChange: () => { }
-            }),
-            span({ className: "radio-check" }),
-            span({ className: "radio-label" }, ["Yes"])
-          ]),
-        label({
-          id: "lbl_negative_" + id,
-          htmlFor: "rad_negative_" + id,
-          onClick: (e) => this.selectOption(e, 'false'),
-          className: "radio-wrapper"
-        }, [
-            input({
-              value: 'false',
-              type: "radio",
-              id: "rad_negative_" + id,
-              name: name,
-              checked: isNo,
-              onChange: () => { }
-            }),
-            span({ className: "radio-check" }),
-            span({ className: "radio-label" }, ["No"])
-          ]),
-      ])
-    );
-  }
-});
-
-YesNoRadioGroup.PropTypes = {
-  name: PropTypes.string,
-  value: PropTypes.bool
+          label({
+            key: id + ix,
+            onClick: (e) => selectOption(e, optionValues[ix]),
+            id: "lbl_" + props.id + "_" + ix,
+            htmlFor: "rad_" + id + "_" + ix,
+            className: "radio-wrapper"
+          }, [
+              input({
+                type: "radio",
+                id: "rad_" + id + "_" + ix,
+                name: name,
+                value: optionValues[ix],
+                checked: normValue === optionValues[ix],
+                onChange: () => { }
+              }),
+              span({ className: "radio-check" }),
+              span({ className: "radio-label" }, [optionLabels[ix]])
+            ])
+         )
+      })
+    ])
+  );
 };

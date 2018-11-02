@@ -135,13 +135,13 @@ class AccessCollect extends Component {
     this.setState({ showDialogReminder: false });
   };
 
-  confirmationHandlerOK = (answer) => (e) => {
+  confirmationHandlerOK = (answer) => async (e) => {
     if (answer === true) {
       let election = this.state.election;
       election.status = 'Final';
       election.finalVote = this.state.accessVote;
       election.finalRationale = this.state.accessRationale;
-      this.updateElection(election);
+      await this.updateElection(election);
       if (this.state.showRPaccordion === false || (this.state.showRPaccordion && this.state.rpAlreadyVote)) {
         this.props.history.goBack();
       } else {
@@ -161,17 +161,17 @@ class AccessCollect extends Component {
     }
   };
 
-  async updateElection(election) {
-    return await Election.updateElection(election.electionId, election);
+  updateElection(election) {
+    return Election.updateElection(election.electionId, election);
   };
 
-  confirmationRPHandlerOK = (answer) => (e) => {
+  confirmationRPHandlerOK = (answer) => async (e) => {
     if (answer === true) {
       let election = this.state.rpElection;
       election.finalVote = this.state.rpVote;
       election.finalRationale = this.state.rpRationale;
       election.status = 'Final';
-      this.updateElection(election);
+      await this.updateElection(election);
       if (this.state.accessAlreadyVote) {
         this.props.history.goBack();
       } else {
