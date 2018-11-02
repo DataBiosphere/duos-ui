@@ -143,6 +143,7 @@ export const CollectResultBox = hh(class CollectResultBox extends PureComponent 
               data: this.props.chartData,
               options: this.chartOptions[this.props.color],
               className: "result-chart",
+              loader: "Loading...",
               style: { 'marginTop': '10px', 'marginBottom': '10px', }
             })
           ]),
@@ -157,6 +158,7 @@ export const CollectResultBox = hh(class CollectResultBox extends PureComponent 
             data: this.props.chartData,
             options: this.chartOptions[this.props.color],
             className: "result-chart",
+            loader: "Loading...",
             style: { 'marginTop': '10px' }
           })
         ]),

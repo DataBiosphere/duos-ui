@@ -42,7 +42,8 @@ class DataOwnerReview extends Component {
         id: '',
         data: {}
       },
-      showError: false
+      showError: false,
+      alertMessage: '',
     };
 
     this.myHandler = this.myHandler.bind(this);
@@ -192,7 +193,6 @@ class DataOwnerReview extends Component {
 
   async submitVote(answer, rationale) {
     let updatedVote = {};
-    let result;
 
     switch (answer) {
       case (APPROVE): {
@@ -221,22 +221,22 @@ class DataOwnerReview extends Component {
       (updatedVote.rationale !== this.state.vote.rationale) ||
       (updatedVote.hasConcerns !== this.state.vote.hasConcerns)) {
       if (this.state.vote.createDate === null) {
-        result = Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote);
+        Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote).then(
+          resp => {
+            this.setState({ showConfirmDialog:true, showError:false, alertMessage: 'Your vote has been successfully logged!'});
+          }
+        ).catch(error => {
+          this.setState({showError:true});
+        });
       } else {
-        result = Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote);
+        Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote).then(
+          resp => {
+            this.setState({ showConfirmDialog:true, showError:false, alertMessage: 'Your vote has been successfully edited!'});
+          }
+        ).catch(error => {
+          this.setState({showError:true});
+        });
       }
-
-      await result.then(
-        () => {
-          this.setState({
-            showConfirmDialog: true,
-            showError: false
-          });
-        },
-        () => {
-          this.setState({ showError: true });
-        }
-      );
     }
   };
 
@@ -341,10 +341,9 @@ class DataOwnerReview extends Component {
             handler: this.dialogHandlerCreate
           }
         }, [
-            div({ className: "dialog-description" }, [
-              span({}, ["Your vote has been successfully edited!"]),
-            ])
-          ]),
+          div({className: "dialog-description"}, [span({}, [this.state.alertMessage]),
+          ])
+        ]),
       ])
     );
   }

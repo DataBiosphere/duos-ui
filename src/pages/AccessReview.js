@@ -66,6 +66,7 @@ class AccessReview extends Component {
       Votes.postDarVote(this.state.election.referenceId, vote).then(
         data => {
           this.setState(prev => {
+            prev.alertMessage = 'Your vote has been successfully logged!';
             prev.alertVote = false;
             prev.showConfirmationDialogOK = true;
             return prev;
@@ -78,6 +79,7 @@ class AccessReview extends Component {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
           this.setState(prev => {
+            prev.alertMessage = 'Your vote has been successfully edited!';
             prev.alertVote = false;
             prev.showConfirmationDialogOK = true;
             return prev;

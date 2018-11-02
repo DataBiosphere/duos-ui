@@ -112,10 +112,11 @@ export const StatsBox = hh(class StatsBox extends PureComponent {
         h4({ id: id + "_title", className: "cm-results-subtitle" }, [subtitle]),
         buttonTag,
         hr({ className: "box-separator-white" }),
-        div({ className: "row", style: { 'marginTop': '10px' } }, [
+        div({ className: "row no-margin", style: { 'marginTop': '10px' } }, [
           h(Chart, {
             chartType: "PieChart",
             data: data,
+            loader: "Loading...",
             options: this.chartOptions[options],
           })
         ]),

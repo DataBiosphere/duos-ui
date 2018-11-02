@@ -99,20 +99,11 @@
   margin-top: 3px;
 }
 
-.auth-link,
 .auth-id {
   float: left;
   font-weight: 500;
   display: inline;
   padding-top: 5px;
-}
-
-.auth-link {
-  transition: all 0.2s ease;
-}
-
-.auth-link:hover {
-  color: #00609f !important;
 }
 
 .auth-clear {
@@ -121,8 +112,13 @@
 }
 
 .auth-message {
-  padding-top: 8px;
+  margin-top: 8px;
   font-style: italic;
+  display: block;
+}
+
+.auth-message div {
+  color: #777777;
   display: block;
 }
 
