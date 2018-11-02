@@ -1,8 +1,8 @@
-import { Component } from 'react';
+import { PureComponent } from 'react';
 import { div, button, span, hh, h, hr, h4 } from 'react-hyperscript-helpers';
 import { Chart } from "react-google-charts";
 
-export const StatsBox = hh(class StatsBox extends Component {
+export const StatsBox = hh(class StatsBox extends PureComponent {
 
   chartOptions = {
     'dul': {
@@ -88,20 +88,9 @@ export const StatsBox = hh(class StatsBox extends Component {
     },
   };
 
-  componentDidMount() {
-
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-  }
-
-  componentWillUnmount() {
-  }
-
   render() {
 
-    let options = this.props.options;
-    let data = this.props.data;
+    const { id, data, options, clickHandler, buttonLabel, subtitle } = this.props;
 
     let total = 0;
     data.forEach((element, index) => {
@@ -112,15 +101,15 @@ export const StatsBox = hh(class StatsBox extends Component {
 
     let buttonTag = null;
 
-    if (this.props.clickHandler !== undefined) {
+    if (clickHandler !== undefined) {
       buttonTag = div({ className: "no-padding f-right display-inline-block" }, [
-        button({ id: this.props.id + "_btnDownload", onClick: this.props.clickHandler, className: "btn-secondary btn-reminder " + this.props.options + "-color" }, [this.props.buttonLabel]),
+        button({ id: id + "_btnDownload", onClick: clickHandler, className: "btn-secondary btn-reminder " + options + "-color" }, [buttonLabel]),
       ])
     }
 
     return (
       div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 jumbotron box-vote-stats" }, [
-        h4({ id: this.props.id + "_title", className: "cm-results-subtitle" }, [this.props.subtitle]),
+        h4({ id: id + "_title", className: "cm-results-subtitle" }, [subtitle]),
         buttonTag,
         hr({ className: "box-separator-white" }),
         div({ className: "row", style: { 'marginTop': '10px' } }, [
@@ -132,13 +121,10 @@ export const StatsBox = hh(class StatsBox extends Component {
         ]),
         h4({ className: "cm-results-amount" }, [
           "Amount of cases: ",
-          span({ className: "bold " + this.props.options + "-color" }, [total])
+          span({ className: "bold " + options + "-color" }, [total])
         ]
         )
       ])
     );
-  }
-
-  clickConsumer() {
   }
 });

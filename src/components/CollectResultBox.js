@@ -4,13 +4,6 @@ import { Chart } from "react-google-charts";
 import * as Utils from '../libs/utils';
 export const CollectResultBox = hh(class CollectResultBox extends PureComponent {
 
-  // constructor(props) {
-  //   super(props);
-  //   this.state = {
-  //     chartData: { Results: '', Yes: 0, No: 0, Pending: 0 }
-  //   }
-  // }
-
   static defaultProps = {
     chartData: {
       Results: '',
@@ -19,10 +12,6 @@ export const CollectResultBox = hh(class CollectResultBox extends PureComponent 
       Pending: 0
     }
   };
-
-  // static getDerivedStateFromProps(nextProps, prevState) {
-  //   return { chartData: nextProps.chartData };
-  // }
 
   chartOptions = {
     'dul': {
