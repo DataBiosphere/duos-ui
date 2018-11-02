@@ -24,7 +24,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     this.handleNeedsApprovalChange = this.handleNeedsApprovalChange.bind(this);
 
     this.closeHandler = this.closeHandler.bind(this);
-    this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
     this.handleLSelection  = this.handleLSelection.bind(this);
     this.handleStateSubmit = this.handleStateSubmit.bind(this);
@@ -37,13 +36,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   }
 
   async getAvailableDataOwners(dataset) {
-    let datasetId = '';
-    dataset.properties.forEach(property => {
-      if (property.propertyName === 'Dataset ID') {
-        datasetId = property.propertyValue;
-      }
-    });
-
+    let datasetId = dataset.dataSetId;
     const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetId);
     const availableClients = clients.not_associated_users.map(user => {
       return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
@@ -109,11 +102,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   closeHandler() {
     this.props.onCloseRequest();
-  }
-
-  afterOpenHandler() {
-    // DO SOMETHING HERE ...
-    // and call parent's after open handler
   }
 
   handleNeedsApprovalChange(event) {
@@ -243,7 +231,6 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
         id: "connectDatasetModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
-        onAfterOpen: this.afterOpenHandler,
         imgSrc: "/images/icon_dataset_link.png",
         color: "dataset",
         iconSize: 'large',
