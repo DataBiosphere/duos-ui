@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 export const OptionsRadioGroup = hh(class OptionsRadioGroup extends PureComponent {
 
   selectOption = (e, value) => {
+    e.preventDefault();
     this.props.onChange(e, this.props.name, value);
   };
 

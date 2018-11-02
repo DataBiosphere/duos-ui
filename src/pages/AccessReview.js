@@ -124,18 +124,22 @@ class AccessReview extends Component {
 
   async darReviewAccess() {
     // dar
-    const rusDarData = await DAR.getDarFields(this.props.match.params.darId, 'rus');
-    const consent = await DAR.getDarConsent(this.props.match.params.darId);
-    const election = await Election.findElectionByDarId(this.props.match.params.darId);
-    const vote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.voteId);
-    const request = await DAR.getDarFields(this.props.match.params.darId, 'projectTitle');
-    const darInfo = await DAR.describeDar(this.props.match.params.darId);
+    const darId = this.props.match.params.darId;
+    const voteId = this.props.match.params.voteId;
+    const rusDarData = await DAR.getDarFields(darId, 'rus');
+    const consent = await DAR.getDarConsent(darId);
+    const election = await Election.findElectionByDarId(darId);
+    const vote = await Votes.getDarVote(darId, voteId);
+    const request = await DAR.getDarFields(darId, 'projectTitle');
+    const darInfo = await DAR.describeDar(darId);
 
-    let rpVote;
+    let rpVote, rpVoteId;
 
     if (this.props.match.params.rpVoteId !== undefined) {
-      rpVote = await Votes.getDarVote(this.props.match.params.darId, this.props.match.params.rpVoteId)
+      rpVoteId = this.props.match.params.rpVoteId;
+      rpVote = await Votes.getDarVote(darId, rpVoteId);
     } else {
+      rpVoteId = null;
       rpVote = null;
     }
 
@@ -157,6 +161,7 @@ class AccessReview extends Component {
         prev.hasUseRestriction = false;
       }
       prev.vote = vote;
+      prev.voteId = voteId;
       return prev;
     });
 
@@ -221,7 +226,9 @@ class AccessReview extends Component {
         diseases: [],
         rus: '',
         sDar: '',
-      }
+      },
+      voteId: null,
+      rpVoteId: null
     };
   }
 
@@ -259,6 +266,8 @@ class AccessReview extends Component {
       member: 'MEMBER',
       chairperson: "CHAIRPERSON"
     };
+
+    const { voteId, rpVoteId } = this.state;
 
     return (
 
@@ -434,7 +443,8 @@ class AccessReview extends Component {
                       rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
                       action: { label: "Vote", handler: this.submitVote },
                       showAlert: this.state.alertRPVote,
-                      alertMessage: 'Remember to log a vote on: 2. Was the research purpose accurately converted to a structured format?'
+                      alertMessage: 'Remember to log a vote on: 2. Was the research purpose accurately converted to a structured format?',
+                      key: voteId
                     })
                   ])
                 ])
@@ -488,7 +498,8 @@ class AccessReview extends Component {
                       rationale: this.state.rpVote !== null && this.state.rpVote.rationale !== null ? this.state.rpVote.rationale : '',
                       action: { label: "Vote", handler: this.submitRpVote },
                       showAlert: this.state.alertVote,
-                      alertMessage: 'Remember to log a vote on: 1. Should data access be granted to this applicant?'
+                      alertMessage: 'Remember to log a vote on: 1. Should data access be granted to this applicant?',
+                      key: rpVoteId
                     }),
                   ])
                 ])

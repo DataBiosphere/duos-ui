@@ -22,6 +22,7 @@ class DulReview extends Component {
       consent: {},
       election: {},
       vote: {},
+      voteId: null,
     };
   }
 
@@ -43,6 +44,7 @@ class DulReview extends Component {
     Votes.find(consentId, voteId).then(
       vote => {
         this.setState({
+          voteId: voteId,
           vote: vote
         });
       }
@@ -166,7 +168,8 @@ class DulReview extends Component {
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
               voteStatus: this.state.vote.vote != null ? this.state.vote.vote : null,
               rationale: this.state.vote.rationale == null ? '' : this.state.vote.rationale,
-              action: { label: "Vote", handler: this.logVote }
+              action: { label: "Vote", handler: this.logVote },
+              key: this.state.voteId
             })
           ]),
 

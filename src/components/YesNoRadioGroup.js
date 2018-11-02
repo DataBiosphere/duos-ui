@@ -6,8 +6,13 @@ import './RadioGroups.css';
 export const YesNoRadioGroup = hh(class YesNoRadioGroup extends PureComponent {
 
   selectOption = (e, value) => {
+    e.preventDefault();
     this.props.onChange(e, this.props.name, value);
   };
+
+  static defaultProps = {
+    value: null
+  }
 
   render() {
 

@@ -262,6 +262,7 @@ class AccessCollect extends Component {
       prev.election = electionReview.election;
       prev.darOriginalFinalVote = electionReview.election.finalVote;
       prev.darOriginalFinalRationale = electionReview.election.finalRationale;
+      prev.darOriginalFinalVoteId = electionReview.election.electionId;
       prev.downloadUrl = Config.getApiUrl() + 'consent/' + electionReview.associatedConsent.consentId + '/dul';
       prev.dulName = electionReview.consent.dulName;
       prev.status = electionReview.election.status;
@@ -285,6 +286,7 @@ class AccessCollect extends Component {
         prev.rpAlreadyVote = rpElectionReview.election.finalVote !== null ? true : false;
         prev.rpOriginalFinalVote = rpElectionReview.election.finalVote;
         prev.rpOriginalFinalRationale = rpElectionReview.election.finalRationale;
+        prev.rpOriginalFinalVoteId = rpElectionReview.election.electionId;
         prev.hasUseRestriction = true;
         return prev;
       });
@@ -548,7 +550,8 @@ class AccessCollect extends Component {
                     action: { label: "Vote", handler: this.accessCollectVote },
                     rationale: this.state.darOriginalFinalRationale,
                     alertMessage: this.state.alertAccessMessage,
-                    showAlert: this.state.showAlertAccess
+                    showAlert: this.state.showAlertAccess,
+                    key: this.state.darOriginalFinalVoteId
                   }),
                   ConfirmationDialog({
                     title: "Post Final Vote?", color: 'access', showModal: this.state.showConfirmationDialogOK,
@@ -654,7 +657,8 @@ class AccessCollect extends Component {
                     action: { label: "Vote", handler: this.rpCollectVote },
                     rationale: this.state.rpOriginalFinalRationale,
                     alertMessage: this.state.alertRPMessage,
-                    showAlert: this.state.showAlertRP
+                    showAlert: this.state.showAlertRP,
+                    key: this.state.rpOriginalFinalVoteId
                   }),
                 ]),
               ]),

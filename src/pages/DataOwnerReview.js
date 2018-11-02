@@ -327,6 +327,7 @@ class DataOwnerReview extends Component {
               alertMessage: "Error updating vote.",
               rationale: this.state.vote.rationale,
               action: { label: "Vote", handler: this.submitVote },
+              key: this.state.vote.voteId
             }),
           ]),
         ]),

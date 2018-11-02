@@ -9,9 +9,7 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends PureComponent 
     enableVoteButton: true,
     requiredMessage: false,
     voteStatus: this.props.voteStatus === undefined ? null : this.props.voteStatus,
-    voteEdited: false,
     rationale: this.props.rationale === null ? '' : this.props.rationale,
-    rationaleEdited: false
   };
 
   logVote = (e) => {
@@ -31,7 +29,6 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends PureComponent 
   optionsChange = (e, name, value) => {
     this.setState({
       voteStatus: value,
-      voteEdited: true,
       requiredMessage: false,
     });
   };
@@ -40,7 +37,6 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends PureComponent 
     e.preventDefault();
     await this.setState({
       rationale: e.target.value,
-      rationaleEdited: true
     });
   };
 
@@ -48,14 +44,6 @@ export const SubmitTriVoteBox = hh(class SubmitTriVoteBox extends PureComponent 
 
     const { id, isDisabled, title, agreementData, color, showAlert, alertMessage, radioLabels, radioValues } = this.props;
     let { enableVoteButton, requiredMessage, voteStatus = '', rationale = '' } = this.state;
-
-    if (this.props.voteStatus !== this.state.voteStatus && this.state.voteEdited === false) {
-      voteStatus = this.props.voteStatus === undefined ? null : this.props.voteStatus;
-    }
-
-    if (this.props.rationale !== this.state.rationale && this.state.rationaleEdited === false) {
-      rationale = this.props.rationale === null ? '' : this.props.rationale;
-    }
 
     const showComments = voteStatus === '1' || voteStatus === 'true' || voteStatus === true;
     const showRationale = voteStatus === '0' || voteStatus === '2' || voteStatus === 'false' || voteStatus === false || voteStatus === null || voteStatus === '';

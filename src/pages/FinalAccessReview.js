@@ -363,6 +363,7 @@ class FinalAccessReview extends Component {
       vote => {
 
         this.setState({
+          voteId: this.state.electionId,
           vote: vote
         });
 
@@ -468,7 +469,8 @@ class FinalAccessReview extends Component {
       status: electionReview.election.status,
       voteAccessList: this.chunk(electionReview.reviewVote, 2),
       chartDataAccess: this.getGraphData(electionReview.reviewVote),
-      voteAgreement: electionReview.voteAgreement
+      voteAgreement: electionReview.voteAgreement,
+      voteAgreementId: electionReview.election.referenceId
     });
 
     if (Boolean(electionReview.voteAgreement) && electionReview.voteAgreement.vote !== null) {
@@ -765,7 +767,8 @@ class FinalAccessReview extends Component {
                 rationale: this.state.vote.rationale !== null ? this.state.vote.rationale : '',
                 showAlert: this.state.showQ1Alert,
                 alertMessage: this.state.alertQ1Message,
-                action: { label: "Vote", handler: this.logVote }
+                action: { label: "Vote", handler: this.logVote },
+                key: this.state.voteId
               }),
             ]),
 
@@ -978,7 +981,8 @@ class FinalAccessReview extends Component {
             rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
             showAlert: this.state.showQ2Alert,
             alertMessage: this.state.alertQ2Message,
-            action: { label: "Vote", handler: this.logVoteAgreement }
+            action: { label: "Vote", handler: this.logVoteAgreement },
+            key: this.state.voteAgreementId
           }),
         ]);
     }
