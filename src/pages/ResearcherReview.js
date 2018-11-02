@@ -72,6 +72,7 @@ class ResearcherReview extends Component {
       prev.formData = researcher;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
+      prev.voteId = this.props.match.params.dacUserId;
       return prev;
     });
   };
@@ -121,7 +122,8 @@ class ResearcherReview extends Component {
               rationale: rationale,
               showAlert: false,
               alertMessage: "something!",
-              action: { label: "Vote", handler: this.submitVote }
+              action: { label: "Vote", handler: this.submitVote },
+              key: this.state.voteId
             })
           ])
         ]),

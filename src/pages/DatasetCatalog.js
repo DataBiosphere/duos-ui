@@ -21,7 +21,7 @@ class DatasetCatalog extends Component {
 
     this.state = {
       showConnectDatasetModal: false,
-      limit: 5,
+      limit: 10,
       currentPage: null,
       allChecked: false,
       dataSetList: {

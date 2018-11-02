@@ -35,6 +35,7 @@ class DulCollect extends Component {
       prev.finalVote = election.election.finalVote;
       prev.finalRationale = election.election.finalRationale;
       prev.finalVoteDate = election.election.finalVoteDate;
+      prev.finalVoteId = election.election.electionId;
       prev.election = election.election;
       return prev;
     });
@@ -243,7 +244,8 @@ class DulCollect extends Component {
                 isDisabled: this.state.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
                 voteStatus: this.state.finalVote,
                 rationale: this.state.finalRationale,
-                action: { label: "Vote", handler: this.dulCollect }
+                action: { label: "Vote", handler: this.dulCollect },
+                key: this.state.finalVoteId
               }),
             ]),
             ConfirmationDialog({
