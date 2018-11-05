@@ -517,7 +517,8 @@ small {
 
 .vote-label {
   font-weight: normal;
-  padding-left: 10px
+  padding-left: 10px;
+  overflow-wrap: break-word;
 }
 
 .results-box {
