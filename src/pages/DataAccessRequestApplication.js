@@ -598,7 +598,8 @@ class DataAccessRequestApplication extends Component {
 
   render() {
 
-    const { orcid = '',
+    const {
+      orcid = '',
       researcherGate = '',
       othertext = '',
       checkCollaborator = false,
@@ -608,7 +609,8 @@ class DataAccessRequestApplication extends Component {
       population = false,
       controls = false,
       methods = false,
-      diseases = false
+      diseases = false,
+      linkedIn = '',
     } = this.state.formData;
 
     const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
@@ -784,7 +786,7 @@ class DataAccessRequestApplication extends Component {
                           type: "text",
                           name: "linkedIn",
                           id: "inputLinkedIn",
-                          value: this.state.formData.linkedIn,
+                          value: linkedIn, 
                           onChange: this.handleChange,
                           disabled: false,
                           className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
