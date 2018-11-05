@@ -1,6 +1,7 @@
 import _ from 'lodash/fp'
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
+import { Storage } from './storage';
 
 const dataTemplate = {
   accessTotal: [
@@ -988,6 +989,7 @@ const fetchOk = async (...args) => {
   const res = await fetch(...args);
   spinnerService.hideAll();
   if (!res.ok && res.status === 401) {
+    Storage.clearStorage();
     window.location.href = '/login';
   }
   return res.ok ? res : Promise.reject(res);
