@@ -285,22 +285,17 @@ class AccessReview extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
           ]),
+          
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map((rol, ind) => {
-              return (
-                a({ id: "btn_back", onClick: () => this.back(), key: ind, isRendered: rol.name === userRoles.member, className: "btn-primary btn-back" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
-            this.state.currentUser.roles.map((rol, ind) => {
-              return (
-                h(Link, { id: "btn_back", to: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
+            a({
+              id: "btn_back",
+              onClick: this.back,
+              className: "btn-primary btn-back"
+            }, [
+                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+              ])
           ]),
+
         ]),
 
         div({ className: "row no-margin" }, [
