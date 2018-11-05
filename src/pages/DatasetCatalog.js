@@ -61,24 +61,25 @@ class DatasetCatalog extends Component {
       if (researcher.completed !== 'true') {
         this.props.history.push('researcher_profile');
       }
+    } else {
+
+      const dictionary = await DataSet.findDictionary();
+      const catalog = await DataSet.findDataSets(this.USER_ID);
+      catalog.forEach((row, index) => {
+        row.checked = false;
+        row.ix = index;
+      });
+
+      const data = {
+        catalog: catalog,
+        dictionary: dictionary
+      };
+
+      this.setState({
+        dataSetList: data,
+        currentPage: 1
+      });
     }
-
-    const dictionary = await DataSet.findDictionary();
-    const catalog = await DataSet.findDataSets(this.USER_ID);
-    catalog.forEach((row, index) => {
-      row.checked = false;
-      row.ix = index;
-    });
-
-    const data = {
-      catalog: catalog,
-      dictionary: dictionary
-    };
-
-    this.setState({
-      dataSetList: data,
-      currentPage: 1
-    });
   }
 
   componentDidMount() {
@@ -367,7 +368,7 @@ class DatasetCatalog extends Component {
                     th({ className: "table-titles dataset-color cell-size" }, ["Dataset Id"]),
                     this.state.dataSetList.dictionary.map((dictionary, dIndex) => {
                       return h(Fragment, { key: dIndex }, [
-                        th({isRendered: dictionary.key !== 'Sample Collection ID', className: "table-titles dataset-color cell-size", id: dictionary.key }, [
+                        th({ isRendered: dictionary.key !== 'Sample Collection ID', className: "table-titles dataset-color cell-size", id: dictionary.key }, [
                           dictionary.key
                         ])
                       ])
