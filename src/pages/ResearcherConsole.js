@@ -4,7 +4,7 @@ import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-import { DAR } from '../libs/ajax';
+import { DAR, DataSet } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
@@ -74,18 +74,28 @@ class ResearcherConsole extends Component {
 
   async review (e) {
     const dataRequestId = e.target.getAttribute('value');
-    const SEPARATOR = '|';
+    const SEPARATOR = ' | ';
     let darFields = await DAR.getDarFields(dataRequestId, null);
+
     let formData = darFields;
+    let piName = '';
     formData.datasetId = [];
     formData.datasetDetail.forEach(
-      detail => {
+     async detail => {
         let obj = {};
         obj.id = detail.datasetId;
+        let ds = await DataSet.getDataSetsByDatasetId(obj.id);
+        ds.properties.forEach(
+          prop => {
+            if (prop.propertyName === 'Principal Investigator(PI)') {
+              piName = prop.propertyValue;
+            }
+          }
+        )
         if (detail.objectId !== undefined && detail.objectId !== null) {
-          obj.concatenation = detail.objectId.concat(SEPARATOR, detail.name, SEPARATOR, formData.investigator);
+          obj.concatenation = detail.objectId.concat(SEPARATOR, detail.name, SEPARATOR, piName, SEPARATOR, ds.consentId);
         } else {
-          obj.concatenation = detail.name.concat(SEPARATOR, formData.investigator);
+          obj.concatenation = detail.name.concat(SEPARATOR, piName, SEPARATOR, ds.consentId);
         }       
         formData.datasetId.push(obj);
       });
