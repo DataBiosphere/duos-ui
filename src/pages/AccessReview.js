@@ -92,8 +92,15 @@ class AccessReview extends Component {
   };
 
   back = () => {
-    this.props.history.goBack();
-  };
+    const user = this.state.currentUser;
+    const page = user.isChairPerson ? '/chair_console' :
+      user.isMember ? '/member_console' :
+        user.isAdmin ? '/admin_console' :
+          user.isResearcher ? '/dataset_catalog?reviewProfile' :
+            user.isDataOwner ? '/data_owner_console' :
+              user.isAlumni ? '/summary_votes' : '/';
+    this.props.history.push(page);
+  }
 
   alertRPVoteRemember = () => {
     if (this.state.hasUseRestriction && this.state.vote.vote !== null && this.state.rpVote.vote === null) {
