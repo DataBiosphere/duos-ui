@@ -76,7 +76,7 @@ class ResearcherConsole extends Component {
     const dataRequestId = e.target.getAttribute('value');
     const SEPARATOR = ' | ';
     let darFields = await DAR.getDarFields(dataRequestId, null);
-
+    console.log("darFields", darFields);
     let formData = darFields;
     let piName = '';
     formData.datasetId = [];
@@ -85,20 +85,24 @@ class ResearcherConsole extends Component {
         let obj = {};
         obj.id = detail.datasetId;
         let ds = await DataSet.getDataSetsByDatasetId(obj.id);
+        console.log('ds', ds);
         ds.properties.forEach(
           prop => {
             if (prop.propertyName === 'Principal Investigator(PI)') {
               piName = prop.propertyValue;
             }
           }
-        )
+        );
         if (detail.objectId !== undefined && detail.objectId !== null) {
           obj.concatenation = detail.objectId.concat(SEPARATOR, detail.name, SEPARATOR, piName, SEPARATOR, ds.consentId);
+          console.log('a001 ', obj.concatenation, detail.objectId, detail.name, piName, ds.consentId );
         } else {
           obj.concatenation = detail.name.concat(SEPARATOR, piName, SEPARATOR, ds.consentId);
+          console.log('a001 ', obj.concatenation, detail.name, piName, ds.consentId );
         }       
         formData.datasetId.push(obj);
       });
+      console.log("formData: ", formData);
     this.props.history.push({ pathname: 'dar_application', props: {formData: formData} });
 
   };
