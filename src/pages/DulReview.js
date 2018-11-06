@@ -26,8 +26,15 @@ class DulReview extends Component {
     };
   }
 
-  back() {
-    this.props.history.goBack();
+  back = () => {
+    const user = this.state.currentUser;
+    const page = user.isChairPerson ? '/chair_console' :
+      user.isMember ? '/member_console' :
+        user.isAdmin ? '/admin_console' :
+          user.isResearcher ? '/dataset_catalog?reviewProfile' :
+            user.isDataOwner ? '/data_owner_console' :
+              user.isAlumni ? '/summary_votes' : '/';
+    this.props.history.push(page);
   }
 
   componentDidMount() {
@@ -109,7 +116,7 @@ class DulReview extends Component {
 
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialog: false });
-    this.props.history.goBack();
+    this.back();
   };
 
   render() {

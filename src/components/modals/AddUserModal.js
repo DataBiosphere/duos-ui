@@ -82,7 +82,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
       user.roles.forEach(role => {
         rolesState[role.name.toUpperCase()] = true;
-        if (role.name === 'Admin') adminEmailPreference = role.emailPreference;
+        if (role.name === 'Admin') adminEmailPreference = !role.emailPreference;
       });
 
       this.setState({
@@ -179,7 +179,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         if (key === USER_ROLES_UPPER.admin) {
           updatedRoles.push({
             name: key,
-            emailPreference: this.state.emailPreference,
+            emailPreference: !this.state.emailPreference,
             roleId: ADMIN_ROLE_ID
           });
         } else updatedRoles.push({

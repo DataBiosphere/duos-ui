@@ -189,7 +189,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     if (this.state.researcherProfile.isThePI === 'false' && this.state.researcherProfile.havePI === 'true') {
-      if (!this.isValid(this.state.researcherProfile.piEmail)) {
+      if (!this.isValid(this.state.researcherProfile.piEmail) || this.state.researcherProfile.piEmail.indexOf('@') === -1) {
         piEmail = true;
         showValidationMessages = true;
       }
@@ -747,7 +747,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }),
                     span({
                       className: "cancel-color required-field-error-span",
-                      isRendered: ((this.state.researcherProfile.piEmail === undefined || this.state.researcherProfile.piEmail.indexOf('@') === -1) && showValidationMessages)
+                      isRendered: (this.state.invalidFields.piEmail && this.state.researcherProfile.piEmail.indexOf('@') === -1) && showValidationMessages
                     }, ["Email Address is empty or has invalid format"]),
                   ]),
 

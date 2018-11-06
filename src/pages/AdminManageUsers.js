@@ -17,7 +17,7 @@ class AdminManageUsers extends Component {
       searchText: '',
       userList: [],
       showAddUserModal: false,
-      limit: 5,
+      limit: 10,
       currentPage: null,
     };
   }

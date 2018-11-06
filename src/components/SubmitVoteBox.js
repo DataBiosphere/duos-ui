@@ -19,6 +19,9 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends PureComponent {
         requiredMessage: false
       });
       this.props.action.handler(this.state.voteStatus, this.state.rationale);
+      this.setState({
+        enableVoteButton: true
+      });
     } else {
       this.setState({
         requiredMessage: true

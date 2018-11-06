@@ -20,6 +20,7 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
+
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
@@ -126,6 +127,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
+
     let formData = this.state.formData;
     let datasets = [];
     if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
@@ -141,7 +143,9 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
     formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-    formData.researcher = rpProperties.profileName;
+    
+    formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
+
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
@@ -149,15 +153,7 @@ class DataAccessRequestApplication extends Component {
     } else {
       formData.investigator = rpProperties.piName;
     }
-    formData.institution = rpProperties.institution;
-    formData.department = rpProperties.department;
-    formData.division = rpProperties.division;
-    formData.address1 = rpProperties.address1;
-    formData.address2 = rpProperties.address2;
-    formData.city = rpProperties.city;
-    formData.zipcode = rpProperties.zipcode;
-    formData.country = rpProperties.country;
-    formData.state = rpProperties.state;
+
     if (formData.dar_code === null) {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
@@ -386,6 +382,7 @@ class DataAccessRequestApplication extends Component {
     }
     return isValidGender;
   }
+
   verifyStep3() {
     let invalid = false;
     if (!(this.isValid(this.state.formData.forProfit) &&
@@ -598,7 +595,8 @@ class DataAccessRequestApplication extends Component {
 
   render() {
 
-    const { orcid = '',
+    const {
+      orcid = '',
       researcherGate = '',
       othertext = '',
       checkCollaborator = false,
@@ -608,7 +606,9 @@ class DataAccessRequestApplication extends Component {
       population = false,
       controls = false,
       methods = false,
-      diseases = false
+      diseases = false,
+      linkedIn = '',
+      investigator = ''
     } = this.state.formData;
 
     const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
@@ -627,7 +627,6 @@ class DataAccessRequestApplication extends Component {
       h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
       " is updated, as it will be submited with your DAR Application"
     ]);
-
 
     return (
 
@@ -784,7 +783,7 @@ class DataAccessRequestApplication extends Component {
                           type: "text",
                           name: "linkedIn",
                           id: "inputLinkedIn",
-                          value: this.state.formData.linkedIn,
+                          value: linkedIn, 
                           onChange: this.handleChange,
                           disabled: false,
                           className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
@@ -835,7 +834,7 @@ class DataAccessRequestApplication extends Component {
                         type: "text",
                         name: "investigator",
                         id: "inputInvestigator",
-                        value: this.state.formData.investigator,
+                        value: investigator,
                         disabled: true,
                         className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                         required: true
@@ -1100,15 +1099,18 @@ class DataAccessRequestApplication extends Component {
                     ]),
 
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                      input({
-                        type: "text",
-                        name: "othertext",
-                        id: "inputOtherText",
+
+                      textarea({
                         value: othertext,
                         onChange: this.handleChange,
-                        required: this.state.formData.other, className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
+                        name: "othertext",
+                        id: "inputOtherText",
+                        maxLength: "512",
+                        rows: "2",
+                        required: this.state.formData.other, 
+                        className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
+                        placeholder: "Please specify if selected (max. 512 characters)",
                         disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
-                        placeholder: "Please specify if selected"
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages }, ["Required field"]),
                     ]),

@@ -37,7 +37,7 @@ import Election404 from "./pages/Election404";
 import AuthenticatedRoute from "./components/AuthenticatedRoute";
 import { USER_ROLES } from './libs/utils';
 
-export default ( props ) => (
+const Routes = ( props ) => (
   <Switch>
     <Route exact path='/' component={Home} props={props} />
     <Route exact path='/home' component={Home} props={props} />
@@ -76,3 +76,5 @@ export default ( props ) => (
     <Route path='*' component={NotFound} />
   </Switch>
 );
+
+export default Routes;

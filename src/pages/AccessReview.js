@@ -7,7 +7,6 @@ import { DAR, Election, Files, Votes } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { Alert } from '../components/Alert';
-import { Link} from 'react-router-dom';
 
 class AccessReview extends Component {
 
@@ -92,8 +91,15 @@ class AccessReview extends Component {
   };
 
   back = () => {
-    this.props.history.goBack();
-  };
+    const user = this.state.currentUser;
+    const page = user.isChairPerson ? '/chair_console' :
+      user.isMember ? '/member_console' :
+        user.isAdmin ? '/admin_console' :
+          user.isResearcher ? '/dataset_catalog?reviewProfile' :
+            user.isDataOwner ? '/data_owner_console' :
+              user.isAlumni ? '/summary_votes' : '/';
+    this.props.history.push(page);
+  }
 
   alertRPVoteRemember = () => {
     if (this.state.hasUseRestriction && this.state.vote.vote !== null && this.state.rpVote.vote === null) {
@@ -264,11 +270,6 @@ class AccessReview extends Component {
       this.state.consentName
     ]);
 
-    let userRoles = {
-      member: 'MEMBER',
-      chairperson: "CHAIRPERSON"
-    };
-
     const { voteId, rpVoteId } = this.state;
 
     return (
@@ -278,22 +279,17 @@ class AccessReview extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
           ]),
+          
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
-            this.state.currentUser.roles.map((rol, ind) => {
-              return (
-                a({ id: "btn_back", onClick: () => this.back(), key: ind, isRendered: rol.name === userRoles.member, className: "btn-primary btn-back" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
-            this.state.currentUser.roles.map((rol, ind) => {
-              return (
-                h(Link, { id: "btn_back", to: "/chair_console", key: ind, isRendered: rol.name === userRoles.chairperson, className: "btn-primary btn-back" }, [
-                  i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-                ])
-              );
-            }),
+            a({
+              id: "btn_back",
+              onClick: this.back,
+              className: "btn-primary btn-back"
+            }, [
+                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+              ])
           ]),
+
         ]),
 
         div({ className: "row no-margin" }, [
