@@ -1103,17 +1103,32 @@ class DataAccessRequestApplication extends Component {
                     ]),
 
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                      input({
-                        type: "text",
+
+                      textarea({
+                        value: othertext,
+                        onChange: this.handleChange,
                         name: "othertext",
                         id: "inputOtherText",
-                        value: othertext,
-                        maxLength:"256",
-                        onChange: this.handleChange,
-                        required: this.state.formData.other, className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
+                        maxLength: "512",
+                        rows: "2",
+                        required: this.state.formData.other, 
+                        className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
+                        placeholder: "Please specify if selected (max. 512 characters)",
                         disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
-                        placeholder: "Please specify if selected (max. 256 chars)"
                       }),
+
+                      // input({
+                      //   type: "text",
+                      //   name: "othertext",
+                      //   id: "inputOtherText",
+                      //   value: othertext,
+                      //   maxLength:"256",
+                      //   onChange: this.handleChange,
+                      //   required: this.state.formData.other, 
+                      //   className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
+                      //   disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
+                      //   placeholder: "Please specify if selected (max. 512 chars)"
+                      // }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages }, ["Required field"]),
                     ]),
                   ]),
