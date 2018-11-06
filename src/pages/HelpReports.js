@@ -48,12 +48,17 @@ class HelpReports extends Component {
     this.getReportsList();
     this.setState(prev => {
       prev.showHelpModal = false;
+      prev.currentPage = 1;
       return prev;
     });
   };
 
   closeModal = () => {
-    this.setState(prev => { prev.showHelpModal = false; return prev; });
+    this.setState(prev => {
+      prev.showHelpModal = false;
+      prev.currentPage = 1;
+      return prev;
+    });
   };
 
   afterModalOpen = () => {

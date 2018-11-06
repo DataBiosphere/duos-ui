@@ -21,17 +21,17 @@ export const HelpModal = hh(class HelpModal extends Component {
   }
 
   async OKHandler() {
-    const report= {};
+    const report = {};
     report.description = this.state.description;
     report.subject = this.state.subject;
     report.userId = Storage.getCurrentUser().dacUserId;
-    this.props.onOKRequest('help');
     await Help.createHelpMeReport(report);
-    this.setState(prev => {
+    await this.setState(prev => {
       prev.subject = '';
       prev.description = '';
       return prev;
-    });
+    })
+    this.props.onOKRequest('help');;
   }
 
   closeHandler() {
@@ -53,7 +53,7 @@ export const HelpModal = hh(class HelpModal extends Component {
 
   }
 
-  subjectChangeHandler= (e) => {
+  subjectChangeHandler = (e) => {
     const subjectText = e.target.value;
     this.setState(prev => {
       prev.subject = subjectText;
@@ -61,7 +61,7 @@ export const HelpModal = hh(class HelpModal extends Component {
     });
   };
 
-  descriptionChangeHandler= (e) => {
+  descriptionChangeHandler = (e) => {
     const descriptionText = e.target.value;
     this.setState(prev => {
       prev.description = descriptionText;
@@ -98,7 +98,7 @@ export const HelpModal = hh(class HelpModal extends Component {
             div({ className: "form-group" }, [
               label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Description"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                textarea({ name: "helpDescription", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", onChange: this.descriptionChangeHandler ,required: true }),
+                textarea({ name: "helpDescription", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", onChange: this.descriptionChangeHandler, required: true }),
               ]),
             ]),
           ]),
