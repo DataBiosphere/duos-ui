@@ -36,5 +36,17 @@ export const Storage = {
 
   setUserIsLogged: value => {
     sessionStorage.setItem(UserIsLogged, value);
+  },
+
+  setData: (key, value) => {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  },
+
+  getData: key => {
+    return sessionStorage.getItem(key) !== null ? JSON.parse(sessionStorage.getItem(key)) : null;
+  },
+
+  removeData: key => {
+    sessionStorage.removeItem(key)
   }
 };

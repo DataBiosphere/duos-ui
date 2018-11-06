@@ -983,6 +983,42 @@ export const Votes = {
 
 };
 
+export const AuthenticateNIH = {
+
+  verifyNihToken: async (token, userId) => {
+    const url = `${await Config.getApiUrl()}/nih-login/${userId}/${token}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
+    return await res.json();
+  },
+
+  eliminateAccount: async (userId) => {
+    const url = `${await Config.getApiUrl()}/nih-login/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    return await res;
+  },
+
+  expirationCount(expDate) {
+    let result = -1;
+    if(expDate !== null && expDate !== undefined) {
+      var currentDate = new Date().getTime();
+      var millisecondsPerDay = 24 * 60 * 60 * 1000;
+      // Review parseInt(expDate, {{this value is radix, lint throws a warning}}
+      var count = (AuthenticateNIH.treatAsUTC(parseInt(expDate, 10)) - AuthenticateNIH.treatAsUTC(currentDate)) / millisecondsPerDay;
+      if (count > 0) {
+        result = Math.round(count);
+      }
+    }
+    return result;
+  },
+
+  treatAsUTC(date) {
+    var result = new Date(date);
+    result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+    return result;
+  }
+
+};
+
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
