@@ -1116,19 +1116,6 @@ class DataAccessRequestApplication extends Component {
                         placeholder: "Please specify if selected (max. 512 characters)",
                         disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
                       }),
-
-                      // input({
-                      //   type: "text",
-                      //   name: "othertext",
-                      //   id: "inputOtherText",
-                      //   value: othertext,
-                      //   maxLength:"256",
-                      //   onChange: this.handleChange,
-                      //   required: this.state.formData.other, 
-                      //   className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
-                      //   disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
-                      //   placeholder: "Please specify if selected (max. 512 chars)"
-                      // }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages }, ["Required field"]),
                     ]),
                   ]),
