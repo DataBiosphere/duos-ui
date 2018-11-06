@@ -1,0 +1,41 @@
+.page-sub-heading {
+    width: 100%;
+    margin: 20px 0 10px 0;
+    position: relative;
+  }
+  
+  .page-sub-heading-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 40px;
+  }
+
+  .page-sub-heading-text.none {
+    margin-left: 0;
+  }
+
+  .page-sub-heading-text,
+  .page-sub-heading-text.default {
+    margin-left: 45px;
+  }
+
+  .page-sub-heading-text.large {
+    margin-left: 55px;
+  }
+  
+  .page-sub-heading-title {
+    margin: 10px 0 5px 0;
+    line-break: auto;
+    font-size: 22px;
+    padding: 5px 10px 0 0;
+    font-weight: 500;
+  }
+
+  .page-sub-heading-description {
+    color: #777777;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+  }
+  

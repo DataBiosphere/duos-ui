@@ -1,0 +1,86 @@
+.controls-wrapper {
+  display: block;
+  width: 100%;
+  position: relative;
+  color: #777777;
+}
+
+.amount-wrapper {
+  display: inline;
+  position: absolute;
+  left: 0;
+  top: 20px;
+}
+
+.amount-label.pipe::after {
+  padding: 0 10px;
+}
+
+.amount-label {
+  font-size: 12px;
+  font-family: 'Roboto', sans-serif;
+}
+
+.pagination-wrapper {
+  text-align: center;
+  display: inline-block;
+  width: 100%;
+}
+
+.pagination-btn {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  margin-top: 15px;
+  padding: 5px 10px 5px 10px;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover {
+  background: #2FA4E7 !important;
+  color: #ffffff !important;
+}
+
+.pagination-btn[disabled], [disabled] .glyphicon {
+  cursor: default !important;
+  pointer-events: none;
+}
+
+.pagination-btn.active {
+  font-weight: 700;
+  color: #2FA4E7;
+}
+
+.glyphicon.arrow, .glyphicon.double-arrow {
+  font-size: 10px;
+  vertical-align: 20%;
+}
+
+.glyphicon.double-arrow {
+  margin: 0 -3px;
+}
+
+.select-wrapper {
+  position: absolute;
+  right: 0;
+  top: 15px;
+}
+
+.select-wrapper .select {
+  display: inline-block;
+  font-family: 'Roboto', sans-serif;
+  padding: 5px;
+  border-radius: 2px;
+}
+
+.select-label {
+  font-size: 12px;
+  margin-left: 10px;
+  display: inline-block;
+  font-family: 'Roboto', sans-serif;
+}
