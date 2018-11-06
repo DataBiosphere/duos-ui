@@ -142,20 +142,21 @@ export const DAR = {
     const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
     let data = await res.json();
+
     darInfo.researcherId = data.userId;
     darInfo.status = data.status;
-    darInfo.hasAdminComment = data.rationale !== null;
+    darInfo.hasAdminComment = data.rationale != null;
     darInfo.adminComment = data.rationale;
     darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
     if (darInfo.hasPurposeStatements) {
       darInfo.purposeStatements = data.purposeStatements;
-      darInfo.purposeManualReview = DAR.requiresManualReview(darInfo.purposeStatements);
+      darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
     }
     darInfo.hasDiseases = data.diseases.length > 0;
     darInfo.diseases = darInfo.hasDiseases ? data.diseases : [];
     if (data.researchType.length > 0) {
       darInfo.researchType = data.researchType;
-      darInfo.researchTypeManualReview = DAR.requiresManualReview(darInfo.researchType);
+      darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
     let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
     darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
@@ -165,7 +166,7 @@ export const DAR = {
     darInfo.department = researcherProperties.department;
     darInfo.city = researcherProperties.city;
     darInfo.country = researcherProperties.country;
-    return await darInfo;
+    return darInfo;
   },
 
   getPartialDarRequest: async darId => {
