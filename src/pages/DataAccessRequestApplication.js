@@ -20,6 +20,7 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
+
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
@@ -126,6 +127,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
+
     let formData = this.state.formData;
     let datasets = [];
     if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
@@ -151,15 +153,7 @@ class DataAccessRequestApplication extends Component {
     } else {
       formData.investigator = rpProperties.piName;
     }
-    formData.institution = rpProperties.institution;
-    formData.department = rpProperties.department;
-    formData.division = rpProperties.division;
-    formData.address1 = rpProperties.address1;
-    formData.address2 = rpProperties.address2;
-    formData.city = rpProperties.city;
-    formData.zipcode = rpProperties.zipcode;
-    formData.country = rpProperties.country;
-    formData.state = rpProperties.state;
+
     if (formData.dar_code === null) {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
@@ -388,6 +382,7 @@ class DataAccessRequestApplication extends Component {
     }
     return isValidGender;
   }
+
   verifyStep3() {
     let invalid = false;
     if (!(this.isValid(this.state.formData.forProfit) &&
@@ -613,6 +608,7 @@ class DataAccessRequestApplication extends Component {
       methods = false,
       diseases = false,
       linkedIn = '',
+      investigator = ''
     } = this.state.formData;
 
     const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
@@ -838,7 +834,7 @@ class DataAccessRequestApplication extends Component {
                         type: "text",
                         name: "investigator",
                         id: "inputInvestigator",
-                        value: this.state.formData.investigator,
+                        value: investigator,
                         disabled: true,
                         className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
                         required: true
