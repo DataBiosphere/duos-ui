@@ -97,13 +97,11 @@ export const Consent = {
     const url = `${await Config.getApiUrl()}/consent/${consent.consentId}`;
     try {
       const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(consent), { method: 'PUT' }]));
-      return await res.json().then(() => {
-        return true
-      });
+      await res.json();
+      return true;
     } catch (err) {
-      return await err.json().then(message => {
-        return message.message
-      });
+      const message = await err.json();
+      return message.message;
     }
   },
 
