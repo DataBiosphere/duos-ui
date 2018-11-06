@@ -163,6 +163,8 @@ class FinalAccessReview extends Component {
       // vote cancelled 
       this.setState(prev => {
         prev.showConfirmDialog = false;
+        prev.q1OkBtnDisabled = false;
+        prev.q1NoBtnDisabled = false
         return prev;
       });
     }
@@ -228,6 +230,8 @@ class FinalAccessReview extends Component {
       // vote cancelled
       this.setState(prev => {
         prev.showConfirmAgreementDialog = false;
+        prev.q2OkBtnDisabled = false;
+        prev.q2NoBtnDisabled = false;
         return prev;
       });
     }

@@ -141,7 +141,9 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
     formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-    formData.researcher = rpProperties.profileName;
+    
+    formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
+
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
@@ -630,7 +632,6 @@ class DataAccessRequestApplication extends Component {
       " is updated, as it will be submited with your DAR Application"
     ]);
 
-
     return (
 
       div({ className: "container" }, [
@@ -1107,10 +1108,11 @@ class DataAccessRequestApplication extends Component {
                         name: "othertext",
                         id: "inputOtherText",
                         value: othertext,
+                        maxLength:"256",
                         onChange: this.handleChange,
                         required: this.state.formData.other, className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                         disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
-                        placeholder: "Please specify if selected"
+                        placeholder: "Please specify if selected (max. 256 chars)"
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages }, ["Required field"]),
                     ]),
