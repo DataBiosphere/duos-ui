@@ -77,7 +77,6 @@ class ResearcherConsole extends Component {
     const SEPARATOR = ' | ';
     let darFields = await DAR.getDarFields(dataRequestId, null);
     let formData = darFields;
-    let piName = '';
     formData.datasetId = [];
     for (let detail of formData.datasetDetail) {
       let obj = {};
@@ -88,7 +87,7 @@ class ResearcherConsole extends Component {
       if (detail.objectId !== undefined && detail.objectId !== null) {
         obj.concatenation = detail.objectId.concat(SEPARATOR, detail.name, SEPARATOR, ds.piName, SEPARATOR, ds.consentId);
       } else {
-        obj.concatenation = detail.name.concat(SEPARATOR, piName, SEPARATOR, ds.consentId);
+        obj.concatenation = detail.name.concat(SEPARATOR, ds.piName, SEPARATOR, ds.consentId);
       }
       formData.datasetId.push(obj);
 
