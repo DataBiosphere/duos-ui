@@ -580,4 +580,3 @@ class DatasetCatalog extends Component {
 }
 
 export default DatasetCatalog;
-

@@ -42,7 +42,7 @@
 
 .navbar-brand {
   padding: 0;
-} 
+}
 
 .navbar-brand img {
   margin-top: 20px;
@@ -87,7 +87,7 @@
 }
 
 .navbar-join {
-  color: #5BB0CA !important;  
+  color: #5BB0CA !important;
 }
 
 .navbar-join:hover {
@@ -174,7 +174,7 @@
   .obCBO .navbar-logged {
     margin: 0 !important;
     width: 100%;
-  } 
+  }
   .obCBO .navbar-public {
     float: right !important;
     text-align: right;
@@ -188,9 +188,9 @@
 @media (max-width: 767px) {
   .navbar-brand {
     position: absolute;
-    top: 0; 
+    top: 0;
     left: 30px;
-  } 
+  }
   .dropdown.user-li {
     position: absolute;
     top: 65px;

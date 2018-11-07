@@ -690,4 +690,3 @@ class AccessCollect extends Component {
 }
 
 export default AccessCollect;
-

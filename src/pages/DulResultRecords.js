@@ -216,4 +216,3 @@ class DulResultRecords extends Component {
 }
 
 export default DulResultRecords;
-

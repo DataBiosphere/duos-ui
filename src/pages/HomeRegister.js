@@ -151,5 +151,5 @@ class HomeRegister extends Component {
     );
   }
 }
-export default HomeRegister;
 
+export default HomeRegister;

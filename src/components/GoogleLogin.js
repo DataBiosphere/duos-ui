@@ -104,4 +104,3 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
 });
 
 export const GoogleLoginButton = withRouter(LoginButton);
-
