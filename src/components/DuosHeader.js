@@ -81,8 +81,8 @@ class DuosHeader extends Component {
                       small({ id: "dacUserMail" }, [currentUser.email]),
                     ]),
                     ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                      li({ isRendered: isResearcher }, [
-                        h(Link, { id: "link_profile", to: "/researcher_profile" }, ["Your Profile"]),]),
+                      li([
+                        h(Link, { id: "link_profile", to: "/profile" }, ["Your Profile"]),]),
                       li({}, [a({ id: "link_signOut", onClick: this.signOut }, ["Sign out"]),]),
                     ])
                   ]),

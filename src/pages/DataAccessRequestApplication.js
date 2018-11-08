@@ -158,6 +158,15 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+      formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
+      formData.department = rpProperties.department != null ? rpProperties.department : '';
+      formData.division = rpProperties.division != null ? rpProperties.division : '';
+      formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
+      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : ''; 
+      formData.city = rpProperties.city != null ? rpProperties.city : '';  
+      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : ''; 
+      formData.country = rpProperties.country != null ? rpProperties.country : ''; 
+      formData.state = rpProperties.state != null ? rpProperties.state : ''; 
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -618,13 +627,13 @@ class DataAccessRequestApplication extends Component {
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
-      h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      h(Link, { to: "/profile", className: "hover-color" }, ["Your Profile"]),
       " to be able to create a Data Access Request"
     ]);
 
     const profileSubmitted = span({}, [
       "Please make sure ",
-      h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      h(Link, { to: "/profile", className: "hover-color" }, ["Your Profile"]),
       " is updated, as it will be submited with your DAR Application"
     ]);
 
