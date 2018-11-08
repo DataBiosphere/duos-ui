@@ -1,0 +1,204 @@
+.rp-form-title {
+  margin: 25px 10px 5px 10px
+}
+
+.rp-group {
+  margin-bottom: 10px !important;
+  position: relative;
+}
+
+.rp-last-group {
+  margin-bottom: 20px !important;
+}
+
+.rp-title-question,
+.rp-choice-questions,
+.rp-accept-statement {
+  float: left !important;
+  text-align: left !important;
+  display: block;
+}
+
+.rp-title-question {
+  font-size: 16px;
+  line-height: 23px;
+  font-weight: 500 !important;
+  color: #603B9B;
+}
+
+.rp-choice-questions,
+.rp-accept-statement {
+  font-weight: normal !important;
+  font-size: 15px;
+  color: #777777;
+}
+
+.rp-accept-statement {
+  line-height: 25px;
+  margin-left: 33px;
+}
+
+.rp-title-question span, .rp-choice-questions span {
+  font-weight: normal;
+  font-size: 15px;
+}
+
+.rp-choice-questions span {
+  display: inline;
+  color: #603B9B;
+}
+
+.rp-title-question span {
+  display: block;
+  color: #777777;
+}
+
+.rp-title-question span a,
+.rp-choice-questions span a {
+  color: #2FA4E7;
+  cursor: pointer !important;
+}
+
+.auth-button.eRACommons {
+  height: 34px;
+  width: 210px;
+  border: none;
+  border-radius: 3px;
+  display: block;
+  border: 1px solid #d3d3d3;
+  padding: 3px;
+  text-align: center;
+  margin-top: 3px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 1px 1px 3px #999;
+  cursor: pointer;
+  color: #999;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.auth-button.eRACommons:hover {
+  box-shadow: 1px 1px 5px #00609f;
+}
+
+.auth-button.eRACommons .logo {
+  height: 27px;
+  width: 38px;
+  background-size: cover !important;
+  background-image: url('/images/era-commons-logo.png');
+  display: inline-block;
+}
+
+.auth-button.eRACommons span {
+  vertical-align: 50%;
+}
+
+.auth-button {
+  margin-top: 3px;
+}
+
+.auth-id {
+  float: left;
+  font-weight: 500;
+  display: inline;
+  padding-top: 5px;
+}
+
+.auth-clear {
+  float: left;
+  margin: 2px 0 0 10px;
+}
+
+.auth-message {
+  margin-top: 8px;
+  font-style: italic;
+  display: block;
+}
+
+.auth-message div {
+  color: #777777;
+  display: block;
+}
+
+a.btn-primary,
+a.btn-secondary {
+  padding-top: 10px;
+}
+
+.btn-download-pdf {
+  height: 35px;
+  line-height: 18px;
+}
+
+.btn-download-pdf .glyphicon {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.fileUpload.btn-download-pdf {
+  margin-bottom: 10px;
+}
+
+.btn-download-pdf:not([disabled]):hover,
+fieldset:not([disabled]) .btn-download-pdf:hover {
+  background: #2FA4E7 !important;
+  color: #ffffff !important;
+}
+
+.select-autocomplete .select__control {
+  border: 1px solid #999999;
+  background: #ffffff;
+}
+
+.required-select-error .select__control {
+  outline: none;
+  border: solid 1px #D13B07;
+}
+
+.select-autocomplete .select__control--is-focused,
+.select-autocomplete .select__control--is-focused:hover {
+  border: 1px solid  rgba(47, 164, 231, 0.75);
+  box-shadow: 0 0 3px rgba(47, 164, 231, 0.5);
+}
+
+.select-autocomplete .select__multi-value {
+  background: rgba(96, 59, 155, 0.2);
+  border-radius: 3px;
+  border: none !important;
+}
+
+.select-autocomplete .select__multi-value__label {
+  font-size: 14px;
+  font-family: "Roboto", sans-serif;
+  height: 26px;
+  line-height: 25px;
+  padding: 1px 10px 0 10px;
+  color: #603B9B;
+  font-weight: 500;
+}
+
+fieldset {
+  min-width: 100%;
+}
+
+fieldset[disabled] .btn-download-pdf {
+  background: #eeeeee;
+}
+
+fieldset[disabled] .btn-download-pdf,
+fieldset[disabled] .select-autocomplete {
+  cursor: default;
+  pointer-events: none;
+}
+
+fieldset[disabled] .select-autocomplete .select__control {
+  color: #cccccc !important;
+  background: #eeeeee;
+}
+
+fieldset[disabled] .regular-checkbox:before {
+  cursor: not-allowed !important;
+  opacity: 0.65;
+}

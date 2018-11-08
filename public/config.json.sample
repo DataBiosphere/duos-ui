@@ -1,0 +1,6 @@
+{
+  "apiUrl": "http://localhost:8180/api",
+  "ontologyApiUrl": "https://ontologyURL.org/",
+  "clientId": "111111111111-11111111111111111111111111111111.apps.googleusercontent.com",
+  "gwasUrl": ""
+}

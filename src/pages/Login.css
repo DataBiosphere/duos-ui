@@ -1,0 +1,52 @@
+.btn_gSignInWrapper {
+  border: 1px solid #4285F4;
+  background: #4285F4;
+  width: auto;
+  padding: 0;
+  border-radius: 2px;
+  box-shadow: 1px 1px 1px grey;
+  transition: all 0.3s ease;
+  margin: 10px 0;
+}
+
+.btn_gSignInWrapper:not([disabled]):active {
+  border: 1px solid #3367d6;
+  background: #3367d6;
+}
+
+.btn_gSignInWrapper:not([disabled]):hover,
+.btn_gSignInWrapper:not([disabled]):active {
+  cursor: pointer;
+  box-shadow: 1px 1px 4px #4285F4;
+}
+
+.btn_gSignIn {
+  padding: 0;
+  border: none;
+  height: 100%;
+  width: 100%;
+}
+
+.btn_gSignIn:not([disabled]):hover,
+.btn_gSignIn:not([disabled]):hover label,
+.btn_gSignIn:not([disabled]):hover icon {
+  cursor: pointer;
+}
+
+.btn_gSignIn label {
+  font-family: 'Roboto', arial, sans-serif;
+  margin: 11px 15px 0 15px;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+  color: white;
+}
+
+.btn_gSignIn .icon {
+  background: url('/images/btn_google_light_normal_ios.svg') no-repeat;
+  float: left;
+  background-color: #fff;
+  vertical-align: middle;
+  width: 42px;
+  height: 42px;
+}
