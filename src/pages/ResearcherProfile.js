@@ -431,10 +431,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   render() {
     let completed = this.state.profile.completed;
-    // if (completed !== undefined && completed !== "") {
-    //   completed = JSON.parse(this.state.profile.completed);
-    // }
-
     const showValidationMessages = this.state.showValidationMessages;
 
     return (
