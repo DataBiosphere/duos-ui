@@ -218,4 +218,3 @@ class ManageOntologies extends Component {
 }
 
 export default ManageOntologies;
-

@@ -42,4 +42,3 @@ class HomeHelp extends Component {
 }
 
 export default HomeHelp;
-

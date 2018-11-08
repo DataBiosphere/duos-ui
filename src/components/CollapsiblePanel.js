@@ -16,7 +16,8 @@ export const CollapsiblePanel = hh(class CollapsiblePanel extends Component {
       prev.expanded = ! prev.expanded;
       return prev;
     });
-  }
+  };
+
   render() {
     return (
       div({ id: this.props.id, className: 'collapsible-panel' }, [

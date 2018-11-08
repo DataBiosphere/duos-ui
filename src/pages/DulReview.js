@@ -35,7 +35,7 @@ class DulReview extends Component {
             user.isDataOwner ? '/data_owner_console' :
               user.isAlumni ? '/summary_votes' : '/';
     this.props.history.push(page);
-  }
+  };
 
   componentDidMount() {
     this.voteInfo();

@@ -48,8 +48,4 @@ SearchBox.propTypes = {
 SearchBox.defaultProps = {
   searchHandler: (query) => { },
   pageHandler: (page) => { }
-}
-
-
-
-
+};

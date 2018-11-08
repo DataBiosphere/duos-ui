@@ -1009,4 +1009,3 @@ const getFileNameFromHttpResponse = (response) => {
   const respHeaders = response.headers;
   return respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
 };
-

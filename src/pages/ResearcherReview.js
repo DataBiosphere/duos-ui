@@ -292,4 +292,3 @@ class ResearcherReview extends Component {
 }
 
 export default ResearcherReview;
-

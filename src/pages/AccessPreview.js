@@ -349,4 +349,3 @@ class AccessPreview extends Component {
 }
 
 export default AccessPreview;
-

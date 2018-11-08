@@ -222,4 +222,3 @@ class InvalidRestrictions extends Component {
 }
 
 export default InvalidRestrictions;
-

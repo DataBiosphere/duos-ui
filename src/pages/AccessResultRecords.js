@@ -836,4 +836,3 @@ class AccessResultRecords extends Component {
 }
 
 export default AccessResultRecords;
-
