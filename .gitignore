@@ -3,6 +3,9 @@
 
 # ides
 .idea/
+**/*.iml
+.vscode/
+settings.json
 
 # dependencies
 /node_modules
