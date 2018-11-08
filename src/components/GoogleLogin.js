@@ -43,10 +43,13 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     Storage.clearStorage();
   };
 
+<<<<<<< HEAD
   logout = () => {
 
   };
 
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
   async getGoogleConfig() {
     const googleButton = await h(GoogleLogin, {
       className: "btn navbar-duos-button",
@@ -56,7 +59,11 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
       onFailure: this.forbidden,
     });
 
+<<<<<<< HEAD
     this.setState( prev => {
+=======
+    this.setState(prev => {
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       prev.googleButton = googleButton;
       prev.loading = false;
       return prev;
@@ -72,6 +79,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   }
 
   render() {
+<<<<<<< HEAD
 // if (this.state.loading === true) {
 //   return null;
 // }
@@ -84,6 +92,8 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     //   onFailure: this.forbidden,
     // });
 
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
     return this.state.googleButton;
   }
 
@@ -104,4 +114,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
 });
 
 export const GoogleLoginButton = withRouter(LoginButton);
+<<<<<<< HEAD
 
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

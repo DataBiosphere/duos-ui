@@ -36,6 +36,7 @@ export const Storage = {
 
   setUserIsLogged: value => {
     sessionStorage.setItem(UserIsLogged, value);
+<<<<<<< HEAD
   },
 
   setData: (key, value) => {
@@ -50,3 +51,7 @@ export const Storage = {
     sessionStorage.removeItem(key)
   }
 };
+=======
+  }
+};
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

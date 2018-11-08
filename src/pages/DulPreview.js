@@ -112,4 +112,7 @@ class DulPreview extends Component {
 }
 
 export default DulPreview;
+<<<<<<< HEAD
 
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

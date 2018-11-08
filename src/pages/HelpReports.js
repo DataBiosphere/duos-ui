@@ -167,4 +167,8 @@ class HelpReports extends Component {
   }
 }
 
+<<<<<<< HEAD
 export default HelpReports;
+=======
+export default HelpReports;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

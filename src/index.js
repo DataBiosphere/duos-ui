@@ -19,4 +19,7 @@ ReactDOM.render(
   </BrowserRouter>
   , document.getElementById('root'));
 registerServiceWorker();
+<<<<<<< HEAD
 
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

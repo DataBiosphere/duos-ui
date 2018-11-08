@@ -77,4 +77,8 @@ const Routes = ( props ) => (
   </Switch>
 );
 
+<<<<<<< HEAD
 export default Routes;
+=======
+export default Routes;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

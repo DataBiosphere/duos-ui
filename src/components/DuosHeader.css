@@ -42,7 +42,11 @@
 
 .navbar-brand {
   padding: 0;
+<<<<<<< HEAD
 } 
+=======
+}
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 
 .navbar-brand img {
   margin-top: 20px;
@@ -87,7 +91,11 @@
 }
 
 .navbar-join {
+<<<<<<< HEAD
   color: #5BB0CA !important;  
+=======
+  color: #5BB0CA !important;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 }
 
 .navbar-join:hover {
@@ -174,7 +182,11 @@
   .obCBO .navbar-logged {
     margin: 0 !important;
     width: 100%;
+<<<<<<< HEAD
   } 
+=======
+  }
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
   .obCBO .navbar-public {
     float: right !important;
     text-align: right;
@@ -188,9 +200,15 @@
 @media (max-width: 767px) {
   .navbar-brand {
     position: absolute;
+<<<<<<< HEAD
     top: 0; 
     left: 30px;
   } 
+=======
+    top: 0;
+    left: 30px;
+  }
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
   .dropdown.user-li {
     position: absolute;
     top: 65px;

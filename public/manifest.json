@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
   "short_name": "React App",
   "name": "Create React App Sample",
+=======
+  "short_name": "DUOS",
+  "name": "Data Use Oversight System",
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
   "icons": [
     {
       "src": "favicon.ico",

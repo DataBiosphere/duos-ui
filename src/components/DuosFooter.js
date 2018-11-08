@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 import { Component } from 'react';
 import { div, footer, ul, li, img, a } from 'react-hyperscript-helpers';
 

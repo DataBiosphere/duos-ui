@@ -39,7 +39,11 @@ class DulCollect extends Component {
       prev.election = election.election;
       return prev;
     });
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
   };
 
   chunk(arr, size) {
@@ -144,6 +148,7 @@ class DulCollect extends Component {
     }
   };
 
+<<<<<<< HEAD
     setGraphData(votes) {
       var yes = 0, no = 0, empty = 0;
       for (var i = 0; i < votes.length; i++) {
@@ -285,3 +290,142 @@ class DulCollect extends Component {
 
   export default DulCollect;
 
+=======
+  setGraphData(votes) {
+    var yes = 0, no = 0, empty = 0;
+    for (var i = 0; i < votes.length; i++) {
+      switch (votes[i].vote.vote) {
+        case true:
+          yes++;
+          break;
+        case false:
+          no++;
+          break;
+        default:
+          empty++;
+          break;
+      }
+    }
+    this.setState(prev => {
+      prev.isFormDisabled = empty === 0 ? false : true;
+      prev.chartData = [
+        ['Results', 'Votes'],
+        ['Yes', yes],
+        ['No', no],
+        ['Pending', empty]
+      ];
+      return prev;
+    });
+  };
+
+  render() {
+
+    const consentData = span({ className: "consent-data" }, [
+      b({ isRendered: this.state.consentGroupName, className: "pipe", dangerouslySetInnerHTML: { __html: this.state.consentGroupName } }, []),
+      this.state.consentName
+    ]);
+
+    return (
+
+      div({ className: "container container-wide" }, [
+        div({ className: "row no-margin" }, [
+          div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
+            PageHeading({ id: "collectDul", imgSrc: "/images/icon_dul.png", iconSize: "medium", color: "dul", title: "Collect votes for Data Use Limitations Congruence Review", description: consentData }),
+          ]),
+          div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
+            a({ id: "btn_back", onClick: () => this.back(), className: "btn-primary btn-back" }, [
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
+          ]),
+        ]),
+
+        ConfirmationDialog({
+          title: this.state.dialogTitle, color: 'dul', showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
+        }, [
+            div({ className: "dialog-description" }, [
+              span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
+              span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
+            ]),
+          ]),
+        div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
+
+        hr({ className: "section-separator", style: { 'marginTop': '0' } }),
+        h4({ className: "hint" }, ["Please review the Data Use Letter, Structured Limitations, and DAC votes to determine if the Data Use Limitations were appropriately converted to Structured Limitations"]),
+
+        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+            div({ className: "panel-heading cm-boxhead dul-color" }, [
+              h4({}, ["Data Use Limitations"]),
+            ]),
+            div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
+              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+            ])
+          ]),
+
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+            div({ className: "panel-heading cm-boxhead dul-color" }, [
+              h4({}, ["Structured Limitations"]),
+            ]),
+            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
+          ]),
+        ]),
+
+        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+          CollectResultBox({
+            id: "dulCollectResult",
+            title: "Vote Results",
+            color: "dul",
+            type: "stats",
+            class: "col-lg-4 col-md-4 col-sm-12 col-xs-12",
+            chartData: this.state.chartData
+          }),
+
+          div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 jumbotron box-vote-results dul-background-lighter" }, [
+            SubmitVoteBox({
+              id: "dulCollect",
+              color: "dul",
+              title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
+              isDisabled: this.state.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
+              voteStatus: this.state.finalVote,
+              rationale: this.state.finalRationale,
+              action: { label: "Vote", handler: this.dulCollect },
+              key: this.state.finalVoteId
+            }),
+          ]),
+          ConfirmationDialog({
+            title: "Post Final Vote?", color: 'dul', showModal: this.state.showConfirmationDialogOK,
+            action: { label: "Yes", handler: this.confirmationHandlerOK }
+          }, [
+              div({ className: "dialog-description" }, [
+                span({}, ["If you post this vote the Election will be closed with current results."]),
+              ]),
+            ]),
+        ]),
+
+        h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
+
+        this.state.dulVoteList.map((row, rIndex) => {
+          return h(Fragment, { key: rIndex }, [
+            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+              row.map((vm, vIndex) => {
+                return h(Fragment, { key: vIndex }, [
+                  SingleResultBox({
+                    id: "dulSingleResult_" + vIndex,
+                    color: "dul",
+                    data: vm,
+                    buttonDisabled: this.state.buttonDisabled,
+                    handler: this.handlerReminder
+                  })
+                ]);
+              })
+            ]),
+          ]);
+        })
+
+      ])
+    );
+  }
+}
+
+export default DulCollect;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

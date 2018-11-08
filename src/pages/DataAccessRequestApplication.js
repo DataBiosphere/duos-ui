@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { Alert } from '../components/Alert';
 import AsyncSelect from 'react-select/lib/Async';
+<<<<<<< HEAD
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
@@ -11,6 +12,14 @@ import { Researcher, DAR, AuthenticateNIH } from '../libs/ajax';
 import { Storage } from "../libs/storage";
 import { Link } from 'react-router-dom';
 import * as qs from 'query-string';
+=======
+
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import ReactTooltip from 'react-tooltip';
+import { Researcher, DAR } from '../libs/ajax';
+import { Storage } from "../libs/storage";
+import { Link } from 'react-router-dom';
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 
 import './DataAccessRequestApplication.css';
 
@@ -21,6 +30,7 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
+<<<<<<< HEAD
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
@@ -30,6 +40,17 @@ class DataAccessRequestApplication extends Component {
       expirationCount: -1,
       disableOkBtn: false,
       showValidationMessages: false,
+=======
+
+    this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
+    this.setShowDialogSave = this.setShowDialogSave.bind(this);
+    this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
+
+    this.state = {
+      disableOkBtn: false,
+      showValidationMessages: false,
+      datasets: [],
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       optionMessage: noOptionMessage,
       file: {
         name: '',
@@ -40,7 +61,10 @@ class DataAccessRequestApplication extends Component {
       showDialogSave: false,
       step: 1,
       formData: {
+<<<<<<< HEAD
         datasets: [],
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
         dar_code: null,
         checkCollaborator: false,
         rus: '',
@@ -94,11 +118,16 @@ class DataAccessRequestApplication extends Component {
         },
         inputTitle: {
           invalid: false
+<<<<<<< HEAD
         },
         inputNih: {
           invalid: false
         }
     },
+=======
+        }
+      },
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       step2: {
         inputDatasets: {
           invalid: false
@@ -127,6 +156,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentDidMount() {
+<<<<<<< HEAD
 
     if (this.props.location !== undefined && this.props.location.search !== "") {
       const parsed = qs.parse(this.props.location.search);
@@ -146,19 +176,32 @@ class DataAccessRequestApplication extends Component {
     } else {
       await this.init();
     }
+=======
+    await this.init();
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
     ReactTooltip.rebuild();
   }
 
   async init() {
+<<<<<<< HEAD
     let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
     Storage.removeData('dar_application');
+=======
+
+    let formData = this.state.formData;
+    let datasets = [];
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
     if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
       if (this.props.location.props.formData.dar_code !== undefined) {
         formData = this.props.location.props.formData;
         formData.ontologies = this.getOntologies(formData);
       } else if (this.props.location.props.formData.datasetId !== undefined) {
         // set datasets sent by data set catalog
+<<<<<<< HEAD
         this.props.location.props.formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+=======
+        datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       }
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
@@ -180,6 +223,7 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+<<<<<<< HEAD
       formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
       formData.eraAuthorized = rpProperties.eraAuthorized !== undefined ? JSON.parse(rpProperties.eraAuthorized) : false;
       formData.eraExpiration = rpProperties.eraExpiration !== undefined ? rpProperties.eraExpiration : false;
@@ -190,6 +234,13 @@ class DataAccessRequestApplication extends Component {
 
     if (formData.dar_code !== null || formData.partial_dar_code !== null) {
       formData.datasets = this.processDataSet(formData.datasetId);
+=======
+    }
+    formData.userId = Storage.getCurrentUser().dacUserId;
+
+    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
+      datasets = this.processDataSet(formData.datasetId);
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
     }
     let completed = false;
     if (formData.dar_code !== null) {
@@ -201,8 +252,12 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
+<<<<<<< HEAD
       prev.formData.datasets = formData.datasets;
       prev.expirationCount = expirationCount;
+=======
+      prev.datasets = datasets;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       return formData;
     });
 
@@ -352,7 +407,11 @@ class DataAccessRequestApplication extends Component {
     let isTitleInvalid = false, isResearcherInvalid = false,
       isInvestigatorInvalid = false, isLinkedInInvalid = false,
       isOrcidInvalid = false, isResearcherGateInvalid = false,
+<<<<<<< HEAD
       showValidationMessages = false, isNihInvalid = false;
+=======
+      showValidationMessages = false;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
@@ -369,6 +428,7 @@ class DataAccessRequestApplication extends Component {
     if (this.state.formData.checkCollaborator !== true
       && !this.isValid(this.state.formData.linkedIn)
       && !this.isValid(this.state.formData.researcherGate)
+<<<<<<< HEAD
       && !this.isValid(this.state.formData.orcid)
       && (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0)) {
       isLinkedInInvalid = true;
@@ -378,12 +438,23 @@ class DataAccessRequestApplication extends Component {
       showValidationMessages = true;
     }
 
+=======
+      && !this.isValid(this.state.formData.orcid)) {
+      isLinkedInInvalid = true;
+      isOrcidInvalid = true;
+      isResearcherGateInvalid = true;
+      showValidationMessages = true;
+    }
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
     this.setState(prev => {
       prev.step1.inputTitle.invalid = isTitleInvalid;
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
       prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
       prev.step1.inputLinkedIn.invalid = isLinkedInInvalid;
+<<<<<<< HEAD
       prev.step1.inputNih.invalid = isNihInvalid;
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       prev.step1.inputOrcid.invalid = isOrcidInvalid;
       prev.step1.inputResearcherGate.invalid = isResearcherGateInvalid;
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
@@ -394,7 +465,11 @@ class DataAccessRequestApplication extends Component {
 
   verifyStep2() {
     let isDatasetsInvalid = false, isRusInvalid = false, isSummaryInvalid = false;
+<<<<<<< HEAD
     if (this.state.formData.datasets.length === 0) {
+=======
+    if (this.state.datasets.length === 0) {
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       isDatasetsInvalid = true;
     }
     if (!this.isValid(this.state.formData.rus)) {
@@ -500,7 +575,11 @@ class DataAccessRequestApplication extends Component {
       }, () => {
         let formData = this.state.formData;
         let ds = [];
+<<<<<<< HEAD
         this.state.formData.datasets.forEach(dataset => {
+=======
+        this.state.datasets.forEach(dataset => {
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
           ds.push(dataset.value);
         });
         formData.datasetId = ds;
@@ -543,7 +622,11 @@ class DataAccessRequestApplication extends Component {
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       };
+<<<<<<< HEAD
       let datasets = this.state.formData.datasets.map(function (item) {
+=======
+      let datasets = this.state.datasets.map(function (item) {
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
         return {
           id: item.value,
           concatenation: item.label
@@ -583,7 +666,11 @@ class DataAccessRequestApplication extends Component {
 
   onDatasetsChange = (data, action) => {
     this.setState(prev => {
+<<<<<<< HEAD
       prev.formData.datasets = data;
+=======
+      prev.datasets = data;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
       return prev;
     }, () => this.checkValidations());
   };
@@ -618,6 +705,7 @@ class DataAccessRequestApplication extends Component {
       });
   };
 
+<<<<<<< HEAD
   async redirectToNihLogin() {
     const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
     const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?token%3D%7Btoken%7D");
@@ -633,6 +721,14 @@ class DataAccessRequestApplication extends Component {
       });
     });
   }
+=======
+  redirectToNihLogin() {
+    //TODO
+  };
+
+  deleteNihAccount() {
+  };
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 
   render() {
 
@@ -733,7 +829,10 @@ class DataAccessRequestApplication extends Component {
               title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
             }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
 
+<<<<<<< HEAD
             //------------------ Step 1--------------------------------------
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
             div({ isRendered: this.state.step === 1 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
@@ -792,24 +891,42 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
                         label({ className: "control-label" }, ["NIH eRA Commons ID"]),
+<<<<<<< HEAD
                         div({ isRendered: (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0 ) && this.state.formData.dar_code === null}, [
+=======
+
+                        div({ isRendered: this.state.formData.eraAuthorized !== true }, [
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                           a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
                             div({ className: "logo" }, []),
                             span({}, ["Authenticate your account"])
                           ])
                         ]),
 
+<<<<<<< HEAD
                         div({ isRendered: (this.state.formData.eraAuthorized === true)  }, [
                           div({ isRendered: this.state.formData.dar_code === null && this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername]),
                             button({type: 'button', onClick: this.deleteNihAccount, className: "close auth-clear" }, [
+=======
+                        div({ isRendered: (this.state.formData.eraAuthorized === true) && (this.state.formData.dar_code === null) }, [
+                          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                            div({ className: "auth-id" }, [this.state.formData.nihUsername]),
+                            button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                               span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "Clear account", "data-for": "tip_clearNihAccount" })
                             ])
                           ]),
 
+<<<<<<< HEAD
                           div({ isRendered: this.state.formData.dar_code === null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
                             div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
                             div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
+=======
+                          div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
+                            div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
+                            div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                           ]),
                           div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername])
@@ -918,7 +1035,10 @@ class DataAccessRequestApplication extends Component {
               ])
             ]),
 
+<<<<<<< HEAD
             //------------------ Step 2--------------------------------------
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
             div({ isRendered: this.state.step === 2 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
@@ -935,12 +1055,20 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       h(AsyncSelect, {
                         id: "sel_datasets",
+<<<<<<< HEAD
                         key: this.state.formData.datasets.value,
+=======
+                        key: this.state.datasets.value,
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
                         loadOptions: (query, callback) => this.searchDataSets(query, callback),
                         onChange: (option) => this.onDatasetsChange(option),
+<<<<<<< HEAD
                         value: this.state.formData.datasets,
+=======
+                        value: this.state.datasets,
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                         noOptionsMessage: () => this.state.optionMessage,
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: "select",
@@ -1195,7 +1323,10 @@ class DataAccessRequestApplication extends Component {
               ])
             ]),
 
+<<<<<<< HEAD
             //------------------ Step 3--------------------------------------
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
             div({ isRendered: this.state.step === 3 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
@@ -1341,7 +1472,10 @@ class DataAccessRequestApplication extends Component {
               ])
             ]),
 
+<<<<<<< HEAD
             //------------------ Step 4--------------------------------------
+=======
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
             div({ isRendered: this.state.step === 4 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
@@ -1437,4 +1571,8 @@ class DataAccessRequestApplication extends Component {
   }
 }
 
+<<<<<<< HEAD
 export default DataAccessRequestApplication;
+=======
+export default DataAccessRequestApplication;
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

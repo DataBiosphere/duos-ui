@@ -216,7 +216,11 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 label({
                   id: "lbl_consentId",
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+<<<<<<< HEAD
                 }, ["Unique id"]),
+=======
+                }, ["Unique ID"]),
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   input({
                     type: "text", "ng-model": "consent.consentId",
@@ -225,7 +229,11 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     id: CONSENT_ID,
                     name: "consentId",
                     className: "form-control col-lg-12 vote-input",
+<<<<<<< HEAD
                     placeholder: "Unique id from Compliance",
+=======
+                    placeholder: "Unique ID from Compliance",
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                     required: true,
                     disabled: this.state.isEditMode,
                   }),
@@ -236,7 +244,11 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 label({
                   id: "lbl_consentName",
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
+<<<<<<< HEAD
                 }, ["Consent id"]),
+=======
+                }, ["Consent ID"]),
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   input({
                     type: "text",
@@ -245,7 +257,11 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     id: CONSENT_NAME,
                     name: "name",
                     className: "form-control col-lg-12 vote-input",
+<<<<<<< HEAD
                     placeholder: "Consent id",
+=======
+                    placeholder: "Consent ID",
+>>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
                     required: true,
                   }),
                 ]),
