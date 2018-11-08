@@ -59,7 +59,7 @@ class DatasetCatalog extends Component {
     if (this.state.isResearcher && '?reviewProfile' === this.props.location.search) {
       const researcher = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
       if (researcher.completed !== 'true') {
-        this.props.history.push('researcher_profile');
+        this.props.history.push('profile');
       }
     } else {
 
