@@ -137,11 +137,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   deleteNihAccount() {
-
+    AuthenticateNIH.eliminateAccount(Storage.getCurrentUser().dacUserId).then(result => {
+      this.setState(prev => {
+        prev.researcherProfile.eraAuthorized = false;
+        return prev;
+      });
+    });
   }
 
-  redirectToNihLogin() {
-
+  async redirectToNihLogin() {
+    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const landingUrl = nihUrl.concat(window.location.origin + "/researcher_profile?token%3D%7Btoken%7D");
+    Storage.setData('researcher', this.state.researcherProfile);
+    window.location.href = landingUrl;
   }
 
   handleChange = (event) => {
