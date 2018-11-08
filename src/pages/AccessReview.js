@@ -304,7 +304,7 @@ class AccessReview extends Component {
 
               hr({ className: "section-separator", style: { 'marginTop': '0' } }),
               h4({ className: "hint" }, ["Please review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data"]),
-              //-----
+
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead access-color" }, [
@@ -413,7 +413,6 @@ class AccessReview extends Component {
                   ]),
                 ]),
 
-                //-----
                 div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead dul-color" }, [
                     h4({}, ["Data Use Limitations"]),
@@ -426,7 +425,6 @@ class AccessReview extends Component {
                 ]),
               ]),
 
-              //-----
               div({ className: "row no-margin" }, [
 
                 div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
@@ -483,7 +481,6 @@ class AccessReview extends Component {
                 ]),
               ]),
 
-              //-----
               div({ className: "row no-margin" }, [
                 div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
                   div({ className: "jumbotron box-vote access-background-lighter" }, [

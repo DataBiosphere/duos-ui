@@ -405,7 +405,7 @@ class AccessCollect extends Component {
 
               hr({ className: "section-separator", style: { 'marginTop': '0' } }),
               h4({ className: "hint" }, ["Please review the Application Summary, Data Use Limitations, and DAC Votes to determine if the researcher should be granted access to the data"]),
-              //-----
+
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead access-color" }, [
@@ -514,7 +514,6 @@ class AccessCollect extends Component {
                   ]),
                 ]),
 
-                //-----
                 div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead dul-color" }, [
                     h4({}, ["Data Use Limitations"]),
@@ -526,8 +525,6 @@ class AccessCollect extends Component {
                   ]),
                 ]),
               ]),
-
-              //-----
 
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 CollectResultBox({
@@ -634,8 +631,6 @@ class AccessCollect extends Component {
                   div({ id: "panel_structuredPurpose", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.userestriction } }, [])
                 ]),
               ]),
-
-              //-----
 
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 CollectResultBox({

@@ -216,7 +216,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 label({
                   id: "lbl_consentId",
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
-                }, ["Unique id"]),
+                }, ["Unique ID"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   input({
                     type: "text", "ng-model": "consent.consentId",
@@ -225,7 +225,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     id: CONSENT_ID,
                     name: "consentId",
                     className: "form-control col-lg-12 vote-input",
-                    placeholder: "Unique id from Compliance",
+                    placeholder: "Unique ID from Compliance",
                     required: true,
                     disabled: this.state.isEditMode,
                   }),
@@ -236,7 +236,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                 label({
                   id: "lbl_consentName",
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dul-color"
-                }, ["Consent id"]),
+                }, ["Consent ID"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   input({
                     type: "text",
@@ -245,7 +245,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
                     id: CONSENT_NAME,
                     name: "name",
                     className: "form-control col-lg-12 vote-input",
-                    placeholder: "Consent id",
+                    placeholder: "Consent ID",
                     required: true,
                   }),
                 ]),

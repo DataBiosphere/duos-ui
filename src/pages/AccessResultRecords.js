@@ -39,23 +39,12 @@ class AccessResultRecords extends Component {
       isDulExpanded: false,
       match: '-1',
       election: {
-        // finalVote: '0',
-        // finalRationale: '',
-        // finalVoteDate: '2018-08-30'
       },
       electionAccess: {
-        // finalVote: '0',
-        // finalRationale: 'lalala',
-        // finalVoteDate: '2018-08-30'
       },
       electionRP: {
-        // finalVote: '0',
-        // finalRationale: '',
-        // finalVoteDate: '2018-08-30'
       },
       voteAgreement: {
-        // vote: '0',
-        // rationale: '',
       },
       dar: {
         rus: "",
@@ -143,18 +132,6 @@ class AccessResultRecords extends Component {
 
   downloadDUL = (e) => {
     Files.getDulFile(this.state.electionReview.consent.consentId, this.state.electionReview.election.dulName);
-  }
-
-  positiveVote = (e) => {
-
-  }
-
-  setEnableFinalButton = (e) => {
-
-  }
-
-  logVote = (e) => {
-
   }
 
   toggleQ1 = (e) => {
@@ -663,7 +640,6 @@ class AccessResultRecords extends Component {
       referenceId: referenceId,
     });
 
-    // const darElection = await 
     Election.findElectionById(electionId).then(
       darElection => {
         this.setState({
@@ -672,7 +648,6 @@ class AccessResultRecords extends Component {
       }
     );
 
-    // const darInfo = await 
     DAR.describeDar(referenceId).then(
       darInfo => {
         if (darInfo.purposeStatements === undefined) {
@@ -689,8 +664,6 @@ class AccessResultRecords extends Component {
     this.setState({
       hasUseRestriction,
     });
-
-    // const finalDACVote = await 
     Votes.getDarFinalAccessVote(electionId).then(
       data => {
         this.setState({
@@ -699,12 +672,10 @@ class AccessResultRecords extends Component {
       }
     );
 
-    //const data = await 
+
     Election.findDataAccessElectionReview(electionId, false).then(
       data => {
-        // await
         this.showDarData(data);
-        // const data3 = await 
         Election.findElectionReviewById(data.associatedConsent.electionId, data.associatedConsent.consentId).then(
           data3 => {
             this.setState({
@@ -733,12 +704,10 @@ class AccessResultRecords extends Component {
         showRPaccordion: false
       });
     }
-
-
   }
 
   async showDarData(electionReview) {
-    // const dar = await
+
     DAR.getDarFields(electionReview.election.referenceId, "rus").then(
       data => {
         this.setState({
@@ -747,7 +716,6 @@ class AccessResultRecords extends Component {
       }
     );
 
-    // let tmp = await 
     DAR.getDarFields(electionReview.election.referenceId, "dar_code").then(
       data => {
         this.setState({
@@ -756,9 +724,6 @@ class AccessResultRecords extends Component {
       }
     );
 
-    // const darCode = tmp.dar_code;
-
-    // tmp = await 
     DAR.getDarFields(electionReview.election.referenceId, "projectTitle").then(
       data => {
         this.setState({
@@ -766,7 +731,6 @@ class AccessResultRecords extends Component {
         });
       }
     );
-    // const projectTitle = tmp.projectTitle;
 
     let electionAccess = electionReview.election;
     if (electionReview.election.finalRationale === null) {
@@ -782,9 +746,6 @@ class AccessResultRecords extends Component {
     const sDAR = electionReview.election.translatedUseRestriction;
 
     this.setState({
-      // dar: dar,
-      // darCode: darCode,
-      // projectTitle: projectTitle,
       electionAccess: electionAccess,
       status: status,
       voteAccessList: voteAccessList,

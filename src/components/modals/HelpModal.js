@@ -46,9 +46,7 @@ export const HelpModal = hh(class HelpModal extends Component {
   }
 
   afterOpenHandler() {
-    // DO SOMETHING HERE ...
-
-    // and call parent's after open handler
+    // call parent's after open handler
     this.props.onAfterOpen('help');
 
   }

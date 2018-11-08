@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h1, label, input, hr, span, h  } from 'react-hyperscript-helpers';
+import { div, h1, label, input, hr, span, h } from 'react-hyperscript-helpers';
 import { Config } from "../libs/config";
 import { USER_ROLES } from '../libs/utils';
 import GoogleLogin from 'react-google-login';
@@ -69,7 +69,7 @@ class HomeRegister extends Component {
   };
 
 
-  setRoles(user){
+  setRoles(user) {
     const currentUserRoles = user.roles.map(roles => roles.name);
     let roles = {};
     roles.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
@@ -102,21 +102,19 @@ class HomeRegister extends Component {
   // for external re-directions, the method will first check if the usr has permission to access,
   // if this is true, and user is not logged, it will be auto-logged and redirected to the url.
   redirect = (user) => {
-     let page = user.isChairPerson ? 'chair_console' :
-        user.isMember ? 'member_console' :
-          user.isAdmin ? 'admin_console' :
-            user.isResearcher ? 'dataset_catalog?reviewProfile' :
-              user.isDataOwner ? 'data_owner_console' :
-                user.isAlumni ? 'summary_votes' : '/';
+    let page = user.isChairPerson ? 'chair_console' :
+      user.isMember ? 'member_console' :
+        user.isAdmin ? 'admin_console' :
+          user.isResearcher ? 'dataset_catalog?reviewProfile' :
+            user.isDataOwner ? 'data_owner_console' :
+              user.isAlumni ? 'summary_votes' : '/';
     this.props.history.push(page);
   };
 
   render() {
     let googleLoginButton;
     if (this.state.clientId === '') {
-      googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
-        // img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
-      ]);
+      googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } });
     } else {
       googleLoginButton = h(GoogleLogin, {
         className: "btn_gSignInWrapper",
@@ -125,11 +123,11 @@ class HomeRegister extends Component {
         onFailure: this.forbidden,
         disabled: this.state.displayName === ''
       }, [
-        div({id: "btn_gSignIn", className: "btn_gSignIn"}, [
-          span({className: "icon"}),
-          label({}, ["Register with Google"])
-        ])
-      ]);
+          div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
+            span({ className: "icon" }),
+            label({}, ["Register with Google"])
+          ])
+        ]);
     }
 
     return (
@@ -141,8 +139,8 @@ class HomeRegister extends Component {
           hr({ className: "home-line" }),
           div({ className: "row" }, [
             div({ className: "col-lg-6 col-md-8 col-sm-12 col-xs-12" }, [
-            label({ className: "home-control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" }, ["Full Name"]),
-            input({ className: "form-control col-lg-12 col-md-12 col-sm-12 col-xs-12", type: "text", onChange: this.myHandler })
+              label({ className: "home-control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" }, ["Full Name"]),
+              input({ className: "form-control col-lg-12 col-md-12 col-sm-12 col-xs-12", type: "text", onChange: this.myHandler })
             ])
           ]),
           div({}, [googleLoginButton])
