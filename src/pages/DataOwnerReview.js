@@ -351,7 +351,4 @@ class DataOwnerReview extends Component {
 }
 
 export default DataOwnerReview;
-<<<<<<< HEAD
 
-=======
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

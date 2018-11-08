@@ -29,8 +29,4 @@ export const GoogleLogoutButton = hh(class GoogleLogoutButton extends Component 
   render() {
     return (this.state.logoutButton);
   }
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

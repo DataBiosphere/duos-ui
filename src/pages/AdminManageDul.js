@@ -598,8 +598,4 @@ class AdminManageDul extends Component {
   }
 }
 
-<<<<<<< HEAD
 export default AdminManageDul;
-=======
-export default AdminManageDul;
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

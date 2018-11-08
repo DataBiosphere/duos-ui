@@ -42,7 +42,4 @@ class HomeHelp extends Component {
 }
 
 export default HomeHelp;
-<<<<<<< HEAD
 
-=======
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

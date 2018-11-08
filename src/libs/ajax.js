@@ -983,7 +983,6 @@ export const Votes = {
 
 };
 
-<<<<<<< HEAD
 export const AuthenticateNIH = {
 
   verifyNihToken: async (token, userId) => {
@@ -1020,8 +1019,6 @@ export const AuthenticateNIH = {
 
 };
 
-=======
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
@@ -1048,7 +1045,4 @@ const getFileNameFromHttpResponse = (response) => {
   const respHeaders = response.headers;
   return respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
 };
-<<<<<<< HEAD
 
-=======
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

@@ -28,8 +28,4 @@ const verifyUser = (allowedComponentRoles, usrRoles) => {
   return false;
 };
 
-<<<<<<< HEAD
 export default AuthenticatedRoute;
-=======
-export default AuthenticatedRoute;
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

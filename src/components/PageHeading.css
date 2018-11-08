@@ -1,47 +1,4 @@
 .page-heading {
-<<<<<<< HEAD
-    width: 100%;
-    margin: 20px 0 10px 0;
-    position: relative;
-  }
-  
-  .page-heading-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 50px;
-  }
-
-  .page-heading-text.medium {
-    margin-left: 55px;
-  }
-  
-  .page-heading-text.large {
-    margin-left: 70px;
-  }
-  
-  .page-heading-title {
-    margin: 7px 0 5px 0;
-    line-break: auto;
-  }
-   
-  .page-heading-description {
-    color: #777777;
-    font-style: italic;
-    font-weight: normal;
-    font-size: 19px;
-    line-height: 25px;
-  }
-
-  .page-heading-description .consent-data {
-    font-size: 22px;
-    font-style: normal;
-    margin: 10px 0 0 2px;
-    display: block;
-    color: #333333;
-    font-weight: 300;
-  }
-=======
   width: 100%;
   margin: 20px 0 10px 0;
   position: relative;
@@ -83,4 +40,3 @@
   color: #333333;
   font-weight: 300;
 }
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9

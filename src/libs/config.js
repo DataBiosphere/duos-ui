@@ -8,11 +8,8 @@ export const Config = {
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
-<<<<<<< HEAD
   getNihUrl: async () => (await getConfig()).nihUrl,
 
-=======
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
   getGoogleClientId: async () => (await getConfig()).clientId,
 
   authOpts : (token = Token.getToken()) => ({

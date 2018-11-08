@@ -180,13 +180,7 @@ class DuosHeader extends Component {
     this.props.history.push('/login');
   }
 
-<<<<<<< HEAD
-  goToRP() {
 
-  }
-
-=======
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 }
 
 export default withRouter(DuosHeader);

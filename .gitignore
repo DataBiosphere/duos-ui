@@ -3,11 +3,8 @@
 
 # ides
 .idea/
-<<<<<<< HEAD
-=======
 **/*.iml
 .vscode
->>>>>>> e91a15aa0b00ba88642a96803bad846fee159cf9
 
 # dependencies
 /node_modules
