@@ -520,6 +520,7 @@ class DataAccessRequestApplication extends Component {
         this.setState(prev => { prev.disableOkBtn = true; return prev; });
         this.uploadFile().then(resp => {
           formData.urlFile = resp;
+          // TODO validate if the DAA file was uploaded OK
           if (formData.dar_code !== undefined && formData.dar_code !== null) {
             DAR.updateDar(formData, formData.dar_code).then(response => {
               this.setState({ showDialogSubmit: false });
