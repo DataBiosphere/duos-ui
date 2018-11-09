@@ -391,18 +391,18 @@ small {
 
 /***************************************************Hr*/
 
-.section-separator {
+.section-separator,
+.box-separator-lighter {
   border-color: #d5d5d5;
   margin: 10px 0;
 }
 
-.box-separator {
-  border-color: #d5d5d5 !important;
+.box-separator-lighter {
   margin: 5px 0 5px 0;
 }
 
-.box-separator-white {
-  border-color: #c9c9c9 !important;
+.box-separator {
+  border-color: #b9b9b9 !important;
   margin: 5px 0 5px 0;
 }
 
@@ -1137,7 +1137,7 @@ a .editable:hover, a .enabled:hover {
   margin-bottom: 20px !important;
 }
 
-.rp-title-question, .rp-choice-questions, .rp-accept-statement {
+.rp-title-question, .rp-choice-questions {
   float: left !important;
   text-align: left !important;
   display: block;
@@ -1150,15 +1150,10 @@ a .editable:hover, a .enabled:hover {
   color: #603B9B;
 }
 
-.rp-choice-questions, .rp-accept-statement {
+.rp-choice-questions {
   font-weight: normal !important;
   font-size: 15px;
   color: #777777;
-}
-
-.rp-accept-statement {
-  line-height: 25px;
-  margin-left: 33px;
 }
 
 .rp-title-question span, .rp-choice-questions span {

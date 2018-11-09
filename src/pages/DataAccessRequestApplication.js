@@ -20,7 +20,7 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
-
+    
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
@@ -110,6 +110,11 @@ class DataAccessRequestApplication extends Component {
       },
       step3: {
         inputPurposes: {
+          invalid: false
+        }
+      },
+      step4: {
+        uploadFile: {
           invalid: false
         }
       },
@@ -238,6 +243,9 @@ class DataAccessRequestApplication extends Component {
     else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
     }
+    else if (this.state.showValidationMessages === true && this.state.step === 4) {
+      this.verifyStep4();
+    }
   };
 
   handleCheckboxChange = (e) => {
@@ -307,7 +315,8 @@ class DataAccessRequestApplication extends Component {
     let invalidStep1 = this.verifyStep1();
     let invalidStep2 = this.verifyStep2();
     let invalidStep3 = this.verifyStep3();
-    if (!invalidStep1 && !invalidStep2 && !invalidStep3) {
+    let invalidStep4 = this.verifyStep4();
+    if (!invalidStep1 && !invalidStep2 && !invalidStep3 && !invalidStep4) {
       this.setState({ showDialogSubmit: true });
     }
   };
@@ -324,7 +333,7 @@ class DataAccessRequestApplication extends Component {
     let isTitleInvalid = false, isResearcherInvalid = false,
       isInvestigatorInvalid = false, isLinkedInInvalid = false,
       isOrcidInvalid = false, isResearcherGateInvalid = false,
-      showValidationMessages = false;
+      isDAAInvalid = false, showValidationMessages = false;
 
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
@@ -341,10 +350,14 @@ class DataAccessRequestApplication extends Component {
     if (this.state.formData.checkCollaborator !== true
       && !this.isValid(this.state.formData.linkedIn)
       && !this.isValid(this.state.formData.researcherGate)
-      && !this.isValid(this.state.formData.orcid)) {
+      && !this.isValid(this.state.formData.orcid)
+      && !this.isValid(this.state.formData.uploadFile)
+      )      
+      {
       isLinkedInInvalid = true;
       isOrcidInvalid = true;
       isResearcherGateInvalid = true;
+      isDAAInvalid = true;
       showValidationMessages = true;
     }
     this.setState(prev => {
@@ -354,6 +367,7 @@ class DataAccessRequestApplication extends Component {
       prev.step1.inputLinkedIn.invalid = isLinkedInInvalid;
       prev.step1.inputOrcid.invalid = isOrcidInvalid;
       prev.step1.inputResearcherGate.invalid = isResearcherGateInvalid;
+      prev.step4.uploadFile.invalid = isDAAInvalid;
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
       return prev;
     });
@@ -410,6 +424,24 @@ class DataAccessRequestApplication extends Component {
       });
     }
     return invalid;
+  }
+
+  verifyStep4() {
+    let isDAAInvalid = false;
+    if (!this.isValid(this.state.file.name) && !this.state.formData.checkCollaborator) {
+      this.setState(prev => {
+        prev.step4.uploadFile.invalid = true;
+        prev.showValidationMessages = true;
+        return prev;
+      });
+      isDAAInvalid = true;
+    } else {
+      this.setState(prev => {
+        prev.step4.uploadFile.invalid = false;
+        return prev;
+      });
+    }
+    return isDAAInvalid;
   }
 
   verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
@@ -611,7 +643,7 @@ class DataAccessRequestApplication extends Component {
       investigator = ''
     } = this.state.formData;
 
-    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3 } = this.state;
+    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3, step4 } = this.state;
 
     const genderLabels = ['Female', "Male"];
     const genderValues = ['F', 'M'];
@@ -680,7 +712,7 @@ class DataAccessRequestApplication extends Component {
                 + (this.state.step === 4 ? 'active' : '')
             }, [
                 small({}, ["Step 4"]),
-                "Data Use Attestation",
+                "Data Use Agreements",
                 span({ className: "glyphicon glyphicon-chevron-right", "aria-hidden": "true" }, [])
               ])
           ])
@@ -1302,18 +1334,20 @@ class DataAccessRequestApplication extends Component {
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
 
-                  h3({ className: "rp-form-title access-color" }, ["4. Data Use Attestation"]),
+                  h3({ className: "rp-form-title access-color" }, ["4. Data Use Agreements"]),
 
                   div({ className: "form-group" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                       label({ className: "control-label rp-title-question" }, [
-                        "4.1 Data Access Agreement*",
+                        "4.1 Data Access Agreement",
+                        div({ isRendered: this.state.formData.checkCollaborator !== true, className: "display-inline" }, ["*"]),
+                        div({ isRendered: this.state.formData.checkCollaborator === true, className: "display-inline italic" }, [" (optional)"])
                       ])
                     ]),
 
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                        label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and complete it"])
+                        label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
                       ]),
 
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
@@ -1324,17 +1358,22 @@ class DataAccessRequestApplication extends Component {
                       ]),
 
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                        label({ className: "control-label default-color" }, ["2. Upload your signed version of the Data Access Agreement"])
+                        label({ className: "control-label default-color" }, ["2. Upload your template of the Data Access Agreement signed by your organization's Signing Official"]),
+                        p({ className: "rp-agreement"}, ["By uploading and submitting the Data Access Agreement with your Data Access Request application you agree to comply with all terms put forth in the agreement."])
                       ]),
 
-                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                         button({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                           span({ className: "glyphicon glyphicon-upload" }),
-                          "Upload Signed Agreement",
-                          input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true }),
-                        ]),
-                        p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name])
-                      ])
+                          "Upload S.O. Signed Agreement",
+                          input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true })
+                        ])
+                      ]),
+                      p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name }, [
+                        "Your currently uploaded Data Access Agreement: ",
+                        span({ className: "italic normal" }, [this.state.file.name]),
+                      ]),
+                      span({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span", isRendered: step4.uploadFile.invalid && showValidationMessages }, ["Required field"])
                     ]),
 
                     div({ className: "row no-margin" }, [
@@ -1345,7 +1384,7 @@ class DataAccessRequestApplication extends Component {
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                         label({ className: "control-label default-color" }, ["I attest to the following:"]),
 
-                        ol({ className: "rp-accept-statement rp-last-group" }, [
+                        ol({ className: "rp-agreement rp-last-group" }, [
                           li({}, ["Data will only be used for approved research"]),
                           li({}, ["Data confidentiality will be protected and the investigator will never make any attempt at \"re-identification\""]),
                           li({}, ["All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed."]),

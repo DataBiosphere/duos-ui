@@ -2,61 +2,19 @@
   margin: 25px 10px 5px 10px
 }
 
-.rp-group {
-  margin-bottom: 10px !important;
-  position: relative;
-}
-
-.rp-last-group {
-  margin-bottom: 20px !important;
-}
-
-.rp-title-question,
-.rp-choice-questions,
-.rp-accept-statement {
-  float: left !important;
-  text-align: left !important;
+.rp-agreement {
+  float: left;
+  text-align: left;
   display: block;
-}
-
-.rp-title-question {
-  font-size: 16px;
-  line-height: 23px;
-  font-weight: 500 !important;
-  color: #603B9B;
-}
-
-.rp-choice-questions,
-.rp-accept-statement {
-  font-weight: normal !important;
-  font-size: 15px;
-  color: #777777;
-}
-
-.rp-accept-statement {
-  line-height: 25px;
-  margin-left: 33px;
-}
-
-.rp-title-question span, .rp-choice-questions span {
   font-weight: normal;
   font-size: 15px;
-}
-
-.rp-choice-questions span {
-  display: inline;
-  color: #603B9B;
-}
-
-.rp-title-question span {
-  display: block;
   color: #777777;
+  margin: 5px 0;
 }
 
-.rp-title-question span a,
-.rp-choice-questions span a {
-  color: #2FA4E7;
-  cursor: pointer !important;
+ol.rp-agreement {
+  line-height: 25px;
+  margin-left: 33px;
 }
 
 .auth-button.eRACommons {
@@ -121,6 +79,18 @@
   color: #777777;
   display: block;
 }
+
+.fileName.daa {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.fileName.daa span{
+  font-weight: 400 !important;
+  font-style: italic;
+}
+
 
 a.btn-primary,
 a.btn-secondary {
