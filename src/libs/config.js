@@ -8,6 +8,8 @@ export const Config = {
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
+  getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
+
   getNihUrl: async () => (await getConfig()).nihUrl,
 
   getGoogleClientId: async () => (await getConfig()).clientId,

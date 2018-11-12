@@ -90,6 +90,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         roles: user.roles.map(role => role.name.toUpperCase()),
         displayName: user.displayName,
         email: user.email,
+        additionalEmail: user.additionalEmail,
         user: user,
         rolesState: Object.assign({}, rolesState),
         originalRolesState: Object.assign({}, rolesState),
@@ -126,6 +127,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         roles: [],
         displayName: '',
         email: '',
+        additionalEmail: '',
         rolesState: Object.assign({}, rolesState),
         originalRolesState: Object.assign({}, rolesState),
         emailPreference: false,
@@ -206,6 +208,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         const editUser = {
           displayName: this.state.displayName,
           email: this.state.email,
+          additionalEmail: this.state.additionalEmail,
           completed: this.state.user.completed,
           createDate: this.state.user.createDate,
           dacUserId: this.state.user.dacUserId,

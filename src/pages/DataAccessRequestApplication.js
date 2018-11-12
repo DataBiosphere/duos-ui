@@ -127,26 +127,46 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentDidMount() {
+    let isFcUser;
+    let nihError = false;
+    let rpProperties = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
 
     if (this.props.location !== undefined && this.props.location.search !== "") {
-      const parsed = qs.parse(this.props.location.search);
-      AuthenticateNIH.verifyNihToken(parsed.token, Storage.getCurrentUser().dacUserId).then(
-        result => {
-           this.init()
+      const parsedToken = qs.parse(this.props.location.search);
+      isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
+        (callback) => {
+          if (callback.status === 404) {
+            // If user is not a registered User in Firecloud, will first register to it
+            AuthenticateNIH.fireCloudRegisterUsr(rpProperties).then(
+              (success) => AuthenticateNIH.fireCloudVerifyUsr(),
+              (fail) => {
+                nihError = true;
+              });
+          } else {
+            // Error trying to verify Firecloud's user
+            nihError = true;
+          }
         }
-      ).catch(error => {
+      );
+
+      if (isFcUser !== undefined && !nihError && isFcUser.enabled.google === true) {
+        // Decode token with FC
+        const decoded = await AuthenticateNIH.verifyNihToken(parsedToken);
+        // save data
+        await AuthenticateNIH.saveNihUsr(decoded, Storage.getCurrentUser().dacUserId);
+        // reload
+        this.init();
+      } else {
         this.setState(prev => {
-          prev.nihError = true;
+          prev.nihError = nihError;
           prev.formData =  Storage.getData('dar_application');
           Storage.removeData('dar_application');
           return prev;
         });
-      });
-
+      }
     } else {
       await this.init();
     }
-    ReactTooltip.rebuild();
   }
 
   async init() {
@@ -183,6 +203,15 @@ class DataAccessRequestApplication extends Component {
       formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
       formData.eraAuthorized = rpProperties.eraAuthorized !== undefined ? JSON.parse(rpProperties.eraAuthorized) : false;
       formData.eraExpiration = rpProperties.eraExpiration !== undefined ? rpProperties.eraExpiration : false;
+      formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
+      formData.department = rpProperties.department != null ? rpProperties.department : '';
+      formData.division = rpProperties.division != null ? rpProperties.division : '';
+      formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
+      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
+      formData.city = rpProperties.city != null ? rpProperties.city : '';
+      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+      formData.country = rpProperties.country != null ? rpProperties.country : '';
+      formData.state = rpProperties.state != null ? rpProperties.state : '';
     }
     let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
 
@@ -620,7 +649,7 @@ class DataAccessRequestApplication extends Component {
 
   async redirectToNihLogin() {
     const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
-    const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?token%3D%7Btoken%7D");
+    const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?jwt%3D%7Btoken%7D");
     Storage.setData('dar_application', this.state.formData);
     window.location.href = landingUrl;
   }
@@ -659,13 +688,13 @@ class DataAccessRequestApplication extends Component {
 
     const profileUnsubmitted = span({}, [
       "Please submit ",
-      h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      h(Link, { to: "/profile", className: "hover-color" }, ["Your Profile"]),
       " to be able to create a Data Access Request"
     ]);
 
     const profileSubmitted = span({}, [
       "Please make sure ",
-      h(Link, { to: "/researcher_profile", className: "hover-color" }, ["Your Profile"]),
+      h(Link, { to: "/profile", className: "hover-color" }, ["Your Profile"]),
       " is updated, as it will be submited with your DAR Application"
     ]);
 
