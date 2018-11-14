@@ -548,6 +548,12 @@ small {
   border-bottom: 1px solid #cccccc;
 }
 
+.control-data.textarea {
+  min-height: 75px;
+  border: none;
+  border-bottom: 1px solid #cccccc;
+}
+
 .response-label {
   padding: 5px 0 0 15px;
   text-align: left;
