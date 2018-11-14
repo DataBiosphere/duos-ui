@@ -39,6 +39,7 @@ class DataAccessRequestApplication extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
+      nihError: false,
       formData: {
         datasets: [],
         dar_code: null,
@@ -127,47 +128,67 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentDidMount() {
-    let isFcUser;
-    let nihError = false;
-    let rpProperties = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
 
     if (this.props.location !== undefined && this.props.location.search !== "") {
-      const parsedToken = qs.parse(this.props.location.search);
-      isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
-        (callback) => {
-          if (callback.status === 404) {
-            // If user is not a registered User in Firecloud, will first register to it
-            AuthenticateNIH.fireCloudRegisterUsr(rpProperties).then(
-              (success) => AuthenticateNIH.fireCloudVerifyUsr(),
-              (fail) => {
-                nihError = true;
-              });
-          } else {
-            // Error trying to verify Firecloud's user
-            nihError = true;
-          }
+      let rpProperties = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
+      let isFcUser = await this.verifyUser();
+      if (!isFcUser) {
+        isFcUser = await this.registerUsertoFC(rpProperties);
+      }
+      if (isFcUser) {
+        const parsedToken = qs.parse(this.props.location.search);
+        const decodedNihAccount = await this.verifyToken(parsedToken);
+        if (decodedNihAccount !== null)
+        {
+          await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
+          await this.init();
         }
-      );
-
-      if (isFcUser !== undefined && !nihError && isFcUser.enabled.google === true) {
-        // Decode token with FC
-        const decoded = await AuthenticateNIH.verifyNihToken(parsedToken);
-        // save data
-        await AuthenticateNIH.saveNihUsr(decoded, Storage.getCurrentUser().dacUserId);
-        // reload
-        this.init();
-      } else {
-        this.setState(prev => {
-          prev.nihError = nihError;
-          prev.formData =  Storage.getData('dar_application');
-          Storage.removeData('dar_application');
-          return prev;
-        });
       }
     } else {
       await this.init();
     }
+    this.props.history.push('/dar_application');
+    ReactTooltip.rebuild();
   }
+
+  async verifyToken(parsedToken) {
+    return await AuthenticateNIH.verifyNihToken(parsedToken).then(
+      (decoded) => decoded,
+      (error) => {
+        this.setState(prev => {
+          prev.nihError = true;
+          prev.formData = Storage.getData('dar_application');
+          return prev;
+        }, () => Storage.removeData('dar_application'));
+        return null;
+      }
+    );
+  }
+
+  async verifyUser() {
+    let isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
+      (callback) => {
+          return false;
+        });
+      return isFcUser !== undefined && isFcUser !== false &&  isFcUser.enabled.google === true;
+  }
+
+  async registerUsertoFC(rpProperties) {
+    AuthenticateNIH.fireCloudRegisterUsr(rpProperties).then(
+      (success) => {
+        // user has been successfully registered to firecloud, and will re-verify.
+        return true;
+      },
+      (fail) => {
+        this.setState(prev => {
+          prev.nihError = true;
+          prev.formData = Storage.getData('dar_application');
+          return prev;
+        }, () => Storage.removeData('dar_application'));
+        return false;
+      })
+  }
+
 
   async init() {
     let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
@@ -827,7 +848,11 @@ class DataAccessRequestApplication extends Component {
                             span({}, ["Authenticate your account"])
                           ])
                         ]),
-
+                        span({
+                          className: "cancel-color required-field-error-span",
+                          isRendered: this.state.nihError
+                        }, ["Something went wrong. Please try again. "]),
+                        // }, [this.state.nihErrorMessage]),
                         div({ isRendered: (this.state.formData.eraAuthorized === true)  }, [
                           div({ isRendered: this.state.formData.dar_code === null && this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername]),

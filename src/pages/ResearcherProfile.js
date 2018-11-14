@@ -16,7 +16,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.state = this.initialState();
 
     this.getResearcherProfile = this.getResearcherProfile.bind(this);
-
     this.clearNotRelatedPIFields = this.clearNotRelatedPIFields.bind(this);
     this.clearCommonsFields = this.clearCommonsFields.bind(this);
     this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
@@ -28,38 +27,53 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
-    let isFcUser;
-    let nihError;
     this.getResearcherProfile();
     if (this.props.location !== undefined && this.props.location.search !== "") {
-      const parsedToken = qs.parse(this.props.location.search);
-      isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
-        (callback) => {
-          if (callback.status === 404) {
-            // If user is not a registered User in Firecloud, will first register to it
-            AuthenticateNIH.fireCloudRegisterUsr(this.state.profile).then(
-              (success) => {},
-              (fail) => nihError = true
-            )
-          } else {
-            // Error trying to verify user against Firecloud
-            nihError = true;
-          }
-        }
-      );
-
-      if (isFcUser !== undefined && !nihError && isFcUser.enabled.google === true) {
-        // Decode token with FC
-        const decoded = await AuthenticateNIH.verifyNihToken(parsedToken);
-        console.log("token decodificado ", decoded);
-        // save data
-        await AuthenticateNIH.saveNihUsr(decoded, Storage.getCurrentUser().dacUserId);
-        // reload
-        this.props.history.push('/profile');
-      } else {
-        this.setState({nihError: true});
+      let isFcUser = await this.verifyUser();
+      if (!isFcUser) {
+        isFcUser = await this.registerUsertoFC(this.state.profile);
       }
-    }
+      if (isFcUser) {
+        const parsedToken = qs.parse(this.props.location.search);
+        const decodedNihAccount = await this.verifyToken(parsedToken);
+        if (decodedNihAccount !== null)
+        {
+          await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
+          await this.getResearcherProfile();
+          this.props.history.push('profile');        }
+        }
+      }
+    ReactTooltip.rebuild();
+  }
+
+  async verifyToken(parsedToken) {
+    return await AuthenticateNIH.verifyNihToken(parsedToken).then(
+      (decoded) => decoded,
+      (error) => {
+        this.setState({nihError: true});
+        return null;
+      }
+    );
+  }
+
+  async verifyUser() {
+    let isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
+      (callback) => {
+        return false;
+      });
+    return isFcUser !== undefined && isFcUser !== false &&  isFcUser.enabled.google === true;
+  }
+
+  async registerUsertoFC(profile) {
+    AuthenticateNIH.fireCloudRegisterUsr(profile).then(
+      (success) => {
+        // user has been successfully registered to firecloud, and will re-verify.
+        return true;
+      },
+      (fail) => {
+        this.setState({nihError: true});
+        return false;
+      })
   }
 
   initialState() {
@@ -613,14 +627,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
                           div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
                           div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
-// =======
-//                         div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-//                           div({ isRendered: this.state.profile.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.profile.eraExpirationCount + " days"]),
-//                           div({ isRendered: this.state.profile.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
-//                         ]),
-//                         div({ isRendered: this.state.profile.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-//                           div({ className: "auth-id" }, [this.state.profile.nihUsername])
-// >>>>>>> 889a248d221bf061ba55ff158e1077931a42dd02
                         ])
                       ]),
 
