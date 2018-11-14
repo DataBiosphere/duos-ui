@@ -72,7 +72,9 @@ class DataAccessRequestApplication extends Component {
         investigator: '',
         researcher: '',
         projectTitle: '',
-        researcherGate: ''
+        researcherGate: '',
+        urlFile: '',
+        fileName: '',
       },
       step1: {
         inputResearcher: {
@@ -489,6 +491,16 @@ class DataAccessRequestApplication extends Component {
     this.setState({ showDialogSave: true });
   };
 
+  uploadFile() {
+    const response = DAR.postDAA(this.state.file.name, this.state.file);
+    return response;
+    //   .then( data => {
+    //   console.log('uploadFile -> ', data);
+    //   return data; // --> URL con UID
+    //   // TODO si falla detener la creación del DAR
+    // });
+  }
+
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       let ontologies = [];
@@ -515,22 +527,25 @@ class DataAccessRequestApplication extends Component {
         formData.datasetId = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => { prev.disableOkBtn = true; return prev; });
-
-        if (formData.dar_code !== undefined && formData.dar_code !== null) {
-          DAR.updateDar(formData, formData.dar_code).then(response => {
-            this.setState({ showDialogSubmit: false });
-            this.props.history.push('researcher_console');
-          });
-        } else {
-          DAR.postDataAccessRequest(formData).then(response => {
-            this.setState({ showDialogSubmit: false });
-            this.props.history.push('researcher_console');
-          }).catch(e =>
-            this.setState(prev => {
-              prev.problemSavingRequest = true;
-              return prev;
-            }));
-        }
+        this.uploadFile().then(resp => {
+          formData.urlFile = resp;
+          // TODO validate if the DAA file was uploaded OK
+          if (formData.dar_code !== undefined && formData.dar_code !== null) {
+            DAR.updateDar(formData, formData.dar_code).then(response => {
+              this.setState({ showDialogSubmit: false });
+              this.props.history.push('researcher_console');
+            });
+          } else {
+            DAR.postDataAccessRequest(formData).then(response => {
+              this.setState({ showDialogSubmit: false });
+              this.props.history.push('researcher_console');
+            }).catch(e =>
+              this.setState(prev => {
+                prev.problemSavingRequest = true;
+                return prev;
+              }));
+          }
+        });
       });
     } else {
       this.setState({ showDialogSubmit: false });
