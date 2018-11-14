@@ -910,6 +910,7 @@ class DataAccessRequestApplication extends Component {
                         type: "text",
                         name: "projectTitle",
                         id: "inputTitle",
+                        maxLength: "256",
                         value: this.state.formData.projectTitle,
                         onChange: this.handleChange,
                         className: step1.inputTitle.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
@@ -1373,11 +1374,11 @@ class DataAccessRequestApplication extends Component {
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                         label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
                       ]),
-
+                      
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                        button({ id: "btn_downloadAgreement", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadAgreement }, [
+                        a({ id: "link_downloadAgreement", href: "YourName_DataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                           span({ className: "glyphicon glyphicon-download" }),
-                          "Download Agreement Template",
+                          "Download Agreement Template"
                         ])
                       ]),
 
