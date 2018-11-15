@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h, hh, form, label, input, span, hr, a, button } from 'react-hyperscript-helpers';
+import { div, h, hh, form, label, input, span, hr, a, p, button, textarea } from 'react-hyperscript-helpers';
 import { Researcher, User, AuthenticateNIH } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
@@ -24,6 +24,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.deleteNihAccount = this.deleteNihAccount.bind(this);
     this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
     this.saveUser = this.saveUser.bind(this);
+    this.handleFileChange = this.handleFileChange.bind(this);
   }
 
   async componentDidMount() {
@@ -87,6 +88,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       nihError: false,
       nihErrorMessage: "Something went wrong. Please try again. ",
       expirationCount: -1,
+      file: {
+        name: '',
+      },
       profile: {
         eraAuthorized: false,
         checkNotifications: false,
@@ -113,6 +117,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         scientificURL: '',
         state: '',
         zipcode: '',
+        uploadFile: '',
       },
       showRequired: false,
       invalidFields: {
@@ -175,7 +180,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }, () => {
       if (this.state.profile.completed !== undefined && this.state.profile.completed !== "") {
         this.setState(prev => {
-          prev.profile.completed =  JSON.parse(this.state.profile.completed);
+          prev.profile.completed = JSON.parse(this.state.profile.completed);
           return prev;
         });
       }
@@ -211,6 +216,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.researcherFieldsValidation();
       }
     });
+  };
+
+  handleFileChange(event) {
+    if (event.target.files !== undefined && event.target.files[0]) {
+      let file = event.target.files[0];
+      this.setState({
+        file: file,
+      });
+    }
   };
 
   researcherFieldsValidation() {
@@ -427,17 +441,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
             this.saveUser().then(resp => {
               this.setState({ showDialogSubmit: false });
               this.props.history.push({ pathname: 'dataset_catalog' });
-            });            
+            });
           });
         } else {
           Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
             this.saveUser().then(resp => {
               this.setState({ showDialogSubmit: false });
               this.props.history.push({ pathname: 'dataset_catalog' });
-            });            
+            });
           });
         }
-      
       }
       else {
         this.saveUser().then(resp => {
@@ -454,12 +467,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async saveUser() {
     const currentUser = Storage.getCurrentUser();
     currentUser.displayName = this.state.profile.profileName;
-          let map = {
-            dacUserId: currentUser.dacUserId,
-            email: currentUser.email,
-            displayName: this.state.profile.profileName,
-            additionalEmail: this.state.additionalEmail
-          };
+    let map = {
+      dacUserId: currentUser.dacUserId,
+      email: currentUser.email,
+      displayName: this.state.profile.profileName,
+      additionalEmail: this.state.additionalEmail
+    };
     await User.updateMainFields(map, currentUser.dacUserId);
   };
 
@@ -479,7 +492,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  
   dialogHandlerSave = (answer) => (e) => {
     if (answer === true) {
       let profile = this.profileCopy(this.state.profile);
@@ -589,7 +601,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   span({
                     className: "cancel-color required-field-error-span",
                     isRendered: (this.state.additionalEmail.indexOf('@') === -1) && showValidationMessages
-                  }, ["Email Address is empty or has invalid format"]),                ])
+                  }, ["Email Address is empty or has invalid format"])
+                ])
               ]),
 
               div({ isRendered: this.state.isResearcher, className: "form-group" }, [
@@ -860,7 +873,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 }, ["Required field"])
               ]),
 
-              div({ isRendered: this.state.profile.isThePI === 'false' &&  this.state.isResearcher, className: "form-group" }, [
+              div({ isRendered: this.state.profile.isThePI === 'false' && this.state.isResearcher, className: "form-group" }, [
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                   label({
@@ -938,7 +951,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({  isRendered: this.state.isResearcher, className: "form-group" }, [
+              div({ isRendered: this.state.isResearcher, className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                   label({
                     id: "lbl_profilePubmedID",
@@ -959,18 +972,55 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: "lbl_profileScientificURL",
                     className: "control-label"
                   }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
-                  input({
+                  textarea({
                     id: "profileScientificURL",
                     name: "scientificURL",
-                    type: "text",
                     className: "form-control",
+                    maxLength: "512",
+                    rows: "3",
                     onChange: this.handleChange,
                     value: this.state.profile.scientificURL
                   })
                 ])
               ]),
 
+              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                label({ className: "control-label rp-title-question default-color" }, [
+                  "Data Access Agreement ", span({ className: "italic display-inline" }, ["(optional)"]),
+                  span({ className: "default-color" }, ["Data Access Agreement will be required for submission of a Data Access Request"])
+                ])
+              ]),
+
               div({ className: "row no-margin" }, [
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                  label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                  a({ id: "link_downloadAgreement", href: "YourName_DataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
+                    span({ className: "glyphicon glyphicon-download" }),
+                    "Download Agreement Template"
+                  ])
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                  label({ className: "control-label default-color" }, ["2. Upload your template of the Data Access Agreement signed by your organization's Signing Official"]),
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  button({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
+                    span({ className: "glyphicon glyphicon-upload" }),
+                    "Upload S.O. Signed Agreement",
+                    input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload" })
+                  ])
+                ]),
+                p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name }, [
+                  "Your currently uploaded Data Access Agreement: ",
+                  span({ className: "italic normal" }, [this.state.file.name]),
+                ])
+              ]),
+
+              div({ className: "row margin-top-20" }, [
                 div({ className: "col-lg-4 col-md-6 col-sm-6 col-xs-6" }, [
                   div({ className: "italic default-color" }, ["*Required field"])
                 ]),

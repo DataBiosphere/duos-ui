@@ -176,7 +176,7 @@ class DataAccessRequestApplication extends Component {
   async registerUsertoFC(rpProperties) {
     return await AuthenticateNIH.fireCloudRegisterUsr(rpProperties).then(
       (success) => {
-        // user has been successfully registered to firecloud, and will re-verify.
+        // user has been successfully registered to firecloud.
         return true;
       },
       (fail) => {
