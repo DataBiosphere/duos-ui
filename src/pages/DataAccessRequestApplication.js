@@ -20,7 +20,7 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
-    
+
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
@@ -74,7 +74,6 @@ class DataAccessRequestApplication extends Component {
         projectTitle: '',
         researcherGate: '',
         urlFile: '',
-        fileName: '',
       },
       step1: {
         inputResearcher: {

@@ -80,18 +80,6 @@ ol.rp-agreement {
   display: block;
 }
 
-.fileName.daa {
-  font-size: 15px;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.fileName.daa span{
-  font-weight: 400 !important;
-  font-style: italic;
-}
-
-
 a.btn-primary,
 a.btn-secondary {
   padding-top: 10px;
