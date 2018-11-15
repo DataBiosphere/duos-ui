@@ -1027,13 +1027,13 @@ export const AuthenticateNIH = {
   },
 
   saveNihUsr: async (decodedData, userId) => {
-    const url = `${await Config.getApiUrl()}/nih-login/${userId}`;
+    const url = `${await Config.getApiUrl()}/nih-register/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
     return await res.json();
   },
 
   eliminateAccount: async (userId) => {
-    const url = `${await Config.getApiUrl()}/nih-login/${userId}`;
+    const url = `${await Config.getApiUrl()}/nih-register/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
