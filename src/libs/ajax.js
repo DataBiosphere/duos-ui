@@ -1014,12 +1014,14 @@ export const AuthenticateNIH = {
     fireCloudProfileObj.lastName= Storage.getCurrentUser().displayName;
     fireCloudProfileObj.title= "DUOS Researcher";
     fireCloudProfileObj.contactEmail= Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute= profile.institution !== "" ? profile.institution : "n/a";
+    fireCloudProfileObj.institute= (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
     fireCloudProfileObj.institutionalProgram= "n/a";
     fireCloudProfileObj.programLocationCity= "n/a";
     fireCloudProfileObj.programLocationState= "n/a";
     fireCloudProfileObj.programLocationCountry= "n/a";
-    fireCloudProfileObj.pi= profile.havePi === true ? profile.piName : profile.isThePI === true ? Storage.getCurrentUser().displayName : "n/a";
+    fireCloudProfileObj.pi= (profile.havePi !== undefined && profile.havePi === true)
+      ? profile.piName : profile.isThePI === true
+        ? Storage.getCurrentUser().displayName : "n/a";
     fireCloudProfileObj.nonProfitStatus= "n/a";
     return fireCloudProfileObj;
   },
