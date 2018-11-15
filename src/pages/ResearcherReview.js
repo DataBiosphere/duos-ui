@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, label, form } from 'react-hyperscript-helpers';
+import { div, hr, label, form, textarea, a, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Researcher } from "../libs/ajax";
@@ -58,7 +58,7 @@ class ResearcherReview extends Component {
       researcher.havePI = JSON.parse(researcher.havePI);
       researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
     }
- 
+
     let user = await User.findUserStatus(this.props.match.params.dacUserId);
 
     let status = null;
@@ -79,18 +79,18 @@ class ResearcherReview extends Component {
 
   submitVote = (voteStatus, rationale) => {
     let status = "pending";
-    if(voteStatus === true || voteStatus === "true") {
+    if (voteStatus === true || voteStatus === "true") {
       status = "approved";
-    } else if(voteStatus === "false") {
+    } else if (voteStatus === "false") {
       status = "rejected";
-    } 
-    let userStatus = {status: status, rationale: rationale, roleId: 5};
-    User.registerStatus(userStatus, this.props.match.params.dacUserId).then( 
+    }
+    let userStatus = { status: status, rationale: rationale, roleId: 5 };
+    User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
       data => {
         this.setState({ showConfirmationDialogOK: true });
       }
     ).catch(error => {
-        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
     })
   };
 
@@ -102,7 +102,7 @@ class ResearcherReview extends Component {
   render() {
 
     const { formData, rationale, voteStatus } = this.state;
-    
+
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
@@ -171,15 +171,18 @@ class ResearcherReview extends Component {
             ]),
 
             div({ className: "row margin-top-20" }, [
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
+              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
                 div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution" }, [formData.institution]),
-              ]),
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
+              ])
+            ]),
+
+            div({ className: "row no-margin" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Department"]),
                 div({ id: "lbl_profileDepartment", className: "control-data", name: "profileDepartment" }, [formData.department]),
               ]),
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Division"]),
                 div({ id: "lbl_profileDivision", className: "control-data", name: "profileDivision" }, [formData.division]),
               ])
@@ -255,16 +258,17 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                textarea({
+                  value: [formData.scientificURL],
+                  name: "profileScientificURL",
+                  id: "lbl_profileScientificURL",
+                  className: "control-data textarea",
+                  maxLength: "512"
+                })
               ])
             ]),
 
             div({ className: "row no-margin", isRendered: formData.isThePI === true || formData.havePI === false }, [
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
-              ]),
-
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
                 div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
@@ -272,7 +276,26 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
-                div({ id: "lbl_profileScientificURL", className: "control-data", name: "profileScientificURL" }, [formData.scientificURL]),
+                textarea({
+                  value: [formData.scientificURL],
+                  name: "profileScientificURL",
+                  id: "lbl_profileScientificURL",
+                  className: "control-data textarea",
+                  maxLength: "512"
+                })
+              ])
+            ]),
+
+            div({ className: "row no-margin" }, [
+              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                label({ className: "control-label default-color" }, ["Data Access Agreement signed by the organization's Signing Official"])
+              ]),
+
+              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                a({ id: "link_downloadAgreement", href: "YourName_DataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
+                  span({ className: "glyphicon glyphicon-download" }),
+                  "Download S.O. Signed Agreement"
+                ])
               ])
             ])
           ])
