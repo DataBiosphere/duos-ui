@@ -40,10 +40,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         if (decodedNihAccount !== null) {
           await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
           await this.getResearcherProfile();
-          this.props.history.push('profile');
         }
       }
     }
+    this.props.history.push('profile');
     ReactTooltip.rebuild();
   }
 
@@ -172,7 +172,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         }
 
       }
-      prev.nihError = false;
+      // prev.nihError = false;
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
       prev.expirationCount = expirationCount;
       prev.profile.eraAuthorized = profile.eraAuthorized !== undefined ? profile.eraAuthorized : false;
