@@ -1014,7 +1014,7 @@ export const AuthenticateNIH = {
     fireCloudProfileObj.lastName= Storage.getCurrentUser().displayName;
     fireCloudProfileObj.title= "DUOS Researcher";
     fireCloudProfileObj.contactEmail= Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute= profile.institution !== undefined ? profile.institution : "n/a";
+    fireCloudProfileObj.institute= profile.institution !== "" ? profile.institution : "n/a";
     fireCloudProfileObj.institutionalProgram= "n/a";
     fireCloudProfileObj.programLocationCity= "n/a";
     fireCloudProfileObj.programLocationState= "n/a";
