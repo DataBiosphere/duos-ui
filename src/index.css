@@ -548,6 +548,12 @@ small {
   border-bottom: 1px solid #cccccc;
 }
 
+.control-data.textarea {
+  min-height: 75px;
+  border: none;
+  border-bottom: 1px solid #cccccc;
+}
+
 .response-label {
   padding: 5px 0 0 15px;
   text-align: left;
@@ -1291,6 +1297,17 @@ input:-webkit-autofill {
   padding: 8px 0 0 15px;
   font-weight: 500 !important;
   color: #777777;
+}
+
+.fileName.daa {
+  font-size: 15px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+ .fileName.daa span{
+  font-weight: 400 !important;
+  font-style: italic;
 }
 
 /*///////////////////////////////////////////////////////ADMIN USERS*/
