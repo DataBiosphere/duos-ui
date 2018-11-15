@@ -58,7 +58,7 @@ class ResearcherReview extends Component {
       researcher.havePI = JSON.parse(researcher.havePI);
       researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
     }
- 
+
     let user = await User.findUserStatus(this.props.match.params.dacUserId);
 
     let status = null;
@@ -79,18 +79,18 @@ class ResearcherReview extends Component {
 
   submitVote = (voteStatus, rationale) => {
     let status = "pending";
-    if(voteStatus === true || voteStatus === "true") {
+    if (voteStatus === true || voteStatus === "true") {
       status = "approved";
-    } else if(voteStatus === "false") {
+    } else if (voteStatus === "false") {
       status = "rejected";
-    } 
-    let userStatus = {status: status, rationale: rationale, roleId: 5};
-    User.registerStatus(userStatus, this.props.match.params.dacUserId).then( 
+    }
+    let userStatus = { status: status, rationale: rationale, roleId: 5 };
+    User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
       data => {
         this.setState({ showConfirmationDialogOK: true });
       }
     ).catch(error => {
-        this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
+      this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
     })
   };
 
@@ -102,7 +102,7 @@ class ResearcherReview extends Component {
   render() {
 
     const { formData, rationale, voteStatus } = this.state;
-    
+
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
@@ -255,7 +255,7 @@ class ResearcherReview extends Component {
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
                 div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
               ]),
-              
+
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
                 textarea({

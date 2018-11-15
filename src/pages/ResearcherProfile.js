@@ -106,7 +106,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         } else {
           prev.profile[key] = profile[key];
         }
-
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
       return prev;
@@ -376,7 +375,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
             });
           });
         }
-
       }
       else {
         this.saveUser().then(resp => {
@@ -417,7 +415,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       return prev;
     });
   };
-
 
   dialogHandlerSave = (answer) => (e) => {
     if (answer === true) {
@@ -528,7 +525,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   span({
                     className: "cancel-color required-field-error-span",
                     isRendered: (this.state.additionalEmail.indexOf('@') === -1) && showValidationMessages
-                  }, ["Email Address is empty or has invalid format"]),])
+                  }, ["Email Address is empty or has invalid format"])
+                ])
               ]),
 
               div({ isRendered: this.state.isResearcher, className: "form-group" }, [
