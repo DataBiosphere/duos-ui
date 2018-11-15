@@ -903,6 +903,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label rp-title-question default-color" }, [
                   "Data Access Agreement ", span({ className: "italic display-inline" }, ["(optional)"]),
+                  span({ className: "default-color" }, ["Data Access Agreement will be required for submission of a Data Access Request"])
                 ])
               ]),
 
