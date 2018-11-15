@@ -23,6 +23,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.deleteNihAccount = this.deleteNihAccount.bind(this);
     this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
     this.saveUser = this.saveUser.bind(this);
+    this.handleFileChange = this.handleFileChange.bind(this);
   }
 
   componentDidMount() {
@@ -67,7 +68,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         state: '',
         zipcode: '',
         uploadFile: '',
-        fileName: '',
       },
       showRequired: false,
       invalidFields: {
@@ -143,6 +143,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
+  handleFileChange(event) {
+    if (event.target.files !== undefined && event.target.files[0]) {
+      let file = event.target.files[0];
+      this.setState({
+        file: file,
+      });
+    }
+  };
 
   researcherFieldsValidation() {
     let profileName = false,
@@ -927,7 +935,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   button({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                     span({ className: "glyphicon glyphicon-upload" }),
                     "Upload S.O. Signed Agreement",
-                    input({ id: "uploadFile", type: "file", className: "upload" })
+                    input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload" })
                   ])
                 ]),
                 p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name }, [
