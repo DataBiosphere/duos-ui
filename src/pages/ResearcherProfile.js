@@ -36,13 +36,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       if (isFcUser) {
         const parsedToken = qs.parse(this.props.location.search);
         const decodedNihAccount = await this.verifyToken(parsedToken);
-        if (decodedNihAccount !== null)
-        {
+        if (decodedNihAccount !== null) {
           await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
           await this.getResearcherProfile();
-          this.props.history.push('profile');        }
+          this.props.history.push('profile');
         }
       }
+    }
     ReactTooltip.rebuild();
   }
 
@@ -65,9 +65,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async registerUsertoFC(profile) {
-    AuthenticateNIH.fireCloudRegisterUsr(profile).then(
+    return await AuthenticateNIH.fireCloudRegisterUsr(profile).then(
       (success) => {
-        // user has been successfully registered to firecloud, and will re-verify.
+        // user has been successfully registered to firecloud.
         return true;
       },
       (fail) => {
