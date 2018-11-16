@@ -632,7 +632,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       div({ isRendered: this.state.profile.eraAuthorized}, [
                         div({ isRendered: this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                           div({ className: "auth-id" }, [this.state.profile.nihUsername]),
-                          button({ type: "button", onClick: this.deleteNihAccount, className: "close auth-clear" }, [
+                          button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
                             span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
                           ]),
                         ]),
