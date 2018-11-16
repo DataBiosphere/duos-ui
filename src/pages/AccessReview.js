@@ -413,7 +413,6 @@ class AccessReview extends Component {
                   ]),
                 ]),
 
-
                 div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead dul-color" }, [
                     h4({}, ["Data Use Limitations"]),
@@ -425,7 +424,6 @@ class AccessReview extends Component {
                   ]),
                 ]),
               ]),
-
 
               div({ className: "row no-margin" }, [
 
@@ -483,7 +481,6 @@ class AccessReview extends Component {
                 ]),
               ]),
 
-
               div({ className: "row no-margin" }, [
                 div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
                   div({ className: "jumbotron box-vote access-background-lighter" }, [
@@ -518,4 +515,3 @@ class AccessReview extends Component {
 }
 
 export default AccessReview;
-

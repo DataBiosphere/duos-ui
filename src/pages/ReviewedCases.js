@@ -303,4 +303,3 @@ class ReviewedCases extends Component {
 }
 
 export default ReviewedCases;
-

@@ -43,7 +43,6 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
     Storage.clearStorage();
   };
 
-
   async getGoogleConfig() {
     const googleButton = await h(GoogleLogin, {
       className: "btn navbar-duos-button",
@@ -69,7 +68,6 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
   }
 
   render() {
-
     return this.state.googleButton;
   }
 
@@ -90,4 +88,3 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
 });
 
 export const GoogleLoginButton = withRouter(LoginButton);
-

@@ -1,4 +1,3 @@
-
 import { Component } from 'react';
 import { div, footer, ul, li, img, a } from 'react-hyperscript-helpers';
 

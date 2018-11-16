@@ -191,7 +191,6 @@ class AccessPreview extends Component {
             expanded: this.state.isQ1Expanded
           }, [
 
-
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 div({ className: "col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead access-color" }, [
@@ -349,4 +348,3 @@ class AccessPreview extends Component {
 }
 
 export default AccessPreview;
-

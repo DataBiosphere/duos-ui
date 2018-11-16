@@ -1043,7 +1043,6 @@ export const AuthenticateNIH = {
     if(expDate !== null && expDate !== undefined) {
       var currentDate = new Date().getTime();
       var millisecondsPerDay = 24 * 60 * 60 * 1000;
-      // Review parseInt(expDate, {{this value is radix, lint throws a warning}}
       var count = (AuthenticateNIH.treatAsUTC(parseInt(expDate, 10)) - AuthenticateNIH.treatAsUTC(currentDate)) / millisecondsPerDay;
       if (count > 0) {
         result = Math.round(count);
@@ -1086,4 +1085,3 @@ const getFileNameFromHttpResponse = (response) => {
   const respHeaders = response.headers;
   return respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
 };
-

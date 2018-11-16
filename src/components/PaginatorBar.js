@@ -104,4 +104,3 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
     );
   }
 });
-

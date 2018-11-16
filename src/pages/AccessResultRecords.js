@@ -134,7 +134,6 @@ class AccessResultRecords extends Component {
     Files.getDulFile(this.state.electionReview.consent.consentId, this.state.electionReview.election.dulName);
   }
 
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
@@ -641,7 +640,6 @@ class AccessResultRecords extends Component {
       referenceId: referenceId,
     });
 
-
     Election.findElectionById(electionId).then(
       darElection => {
         this.setState({
@@ -649,7 +647,6 @@ class AccessResultRecords extends Component {
         });
       }
     );
-
 
     DAR.describeDar(referenceId).then(
       darInfo => {
@@ -675,7 +672,6 @@ class AccessResultRecords extends Component {
         });
       }
     );
-
 
     Election.findDataAccessElectionReview(electionId, false).then(
       data => {
@@ -720,7 +716,6 @@ class AccessResultRecords extends Component {
       }
     );
 
-
     DAR.getDarFields(electionReview.election.referenceId, "dar_code").then(
       data => {
         this.setState({
@@ -729,7 +724,6 @@ class AccessResultRecords extends Component {
       }
     );
 
-
     DAR.getDarFields(electionReview.election.referenceId, "projectTitle").then(
       data => {
         this.setState({
@@ -737,7 +731,6 @@ class AccessResultRecords extends Component {
         });
       }
     );
-
 
     let electionAccess = electionReview.election;
     if (electionReview.election.finalRationale === null) {
@@ -753,7 +746,6 @@ class AccessResultRecords extends Component {
     const sDAR = electionReview.election.translatedUseRestriction;
 
     this.setState({
-
       electionAccess: electionAccess,
       status: status,
       voteAccessList: voteAccessList,
@@ -805,4 +797,3 @@ class AccessResultRecords extends Component {
 }
 
 export default AccessResultRecords;
-

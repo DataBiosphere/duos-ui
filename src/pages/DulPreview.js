@@ -112,4 +112,3 @@ class DulPreview extends Component {
 }
 
 export default DulPreview;
-

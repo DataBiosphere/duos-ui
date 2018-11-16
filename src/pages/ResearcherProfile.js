@@ -172,7 +172,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         }
 
       }
-      // prev.nihError = false;
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
       prev.expirationCount = expirationCount;
       prev.profile.eraAuthorized = profile.eraAuthorized !== undefined ? profile.eraAuthorized : false;

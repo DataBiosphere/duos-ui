@@ -167,7 +167,6 @@ class DulResultRecords extends Component {
           ]),
         ]),
 
-
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
             CollectResultBox({
@@ -215,4 +214,3 @@ class DulResultRecords extends Component {
 }
 
 export default DulResultRecords;
-

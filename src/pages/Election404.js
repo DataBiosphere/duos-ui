@@ -42,4 +42,3 @@ class Election404 extends Component {
 }
 
 export default Election404;
-

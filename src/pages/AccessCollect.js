@@ -514,7 +514,6 @@ class AccessCollect extends Component {
                   ]),
                 ]),
 
-
                 div({ className: "col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
                   div({ className: "panel-heading cm-boxhead dul-color" }, [
                     h4({}, ["Data Use Limitations"]),
@@ -526,7 +525,6 @@ class AccessCollect extends Component {
                   ]),
                 ]),
               ]),
-
 
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 CollectResultBox({
@@ -634,7 +632,6 @@ class AccessCollect extends Component {
                 ]),
               ]),
 
-
               div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
                 CollectResultBox({
                   id: "rpCollectResult",
@@ -688,4 +685,3 @@ class AccessCollect extends Component {
 }
 
 export default AccessCollect;
-
