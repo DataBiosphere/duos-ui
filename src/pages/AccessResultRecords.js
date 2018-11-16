@@ -664,7 +664,6 @@ class AccessResultRecords extends Component {
     this.setState({
       hasUseRestriction,
     });
-
     Votes.getDarFinalAccessVote(electionId).then(
       data => {
         this.setState({
@@ -672,6 +671,7 @@ class AccessResultRecords extends Component {
         });
       }
     );
+
 
     Election.findDataAccessElectionReview(electionId, false).then(
       data => {

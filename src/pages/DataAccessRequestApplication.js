@@ -99,7 +99,7 @@ class DataAccessRequestApplication extends Component {
         inputNih: {
           invalid: false
         }
-    },
+      },
       step2: {
         inputDatasets: {
           invalid: false
@@ -783,7 +783,6 @@ class DataAccessRequestApplication extends Component {
               title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access', showModal: this.state.showDialogSave, action: { label: "Yes", handler: this.dialogHandlerSave }
             }, [div({ className: "dialog-description" }, ["Are you sure you want to save this Data Access Request? Previous changes will be overwritten."]),]),
 
-
             div({ isRendered: this.state.step === 1 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
@@ -971,7 +970,6 @@ class DataAccessRequestApplication extends Component {
                 ])
               ])
             ]),
-
 
             div({ isRendered: this.state.step === 2 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
@@ -1249,7 +1247,6 @@ class DataAccessRequestApplication extends Component {
               ])
             ]),
 
-
             div({ isRendered: this.state.step === 3 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
@@ -1394,7 +1391,6 @@ class DataAccessRequestApplication extends Component {
                 ])
               ])
             ]),
-
 
             div({ isRendered: this.state.step === 4 }, [
               div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
