@@ -62,7 +62,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       (callback) => {
         return false;
       });
-    return isFcUser !== undefined && isFcUser !== false &&  isFcUser.enabled.google === true;
+    return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
   }
 
   async registerUsertoFC(profile) {
@@ -338,7 +338,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   submit(event) {
-    this.setState({ validateFields: true });
+    this.setState({validateFields: true});
     event.preventDefault();
     let errorsShowed = false;
     if (this.state.isResearcher) {
@@ -361,7 +361,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   handleRadioChange = (e, field, value) => {
 
-    this.setState(prev => { prev.profile[field] = value; return prev; },
+    this.setState(prev => {
+        prev.profile[field] = value;
+        return prev;
+      },
       () => {
         if (field === 'isThePI') {
           this.clearNotRelatedPIFields();
@@ -417,7 +420,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   saveProfile(event) {
     event.preventDefault();
-    this.setState({ showDialogSave: true });
+    this.setState({showDialogSave: true});
   }
 
   cleanObject = (obj) => {
@@ -438,28 +441,28 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         if (this.state.profile.completed === undefined) {
           Researcher.createResearcherProperties(Storage.getCurrentUser().dacUserId, false, profile).then(resp => {
             this.saveUser().then(resp => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push({ pathname: 'dataset_catalog' });
+              this.setState({showDialogSubmit: false});
+              this.props.history.push({pathname: 'dataset_catalog'});
             });
           });
         } else {
           Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
             this.saveUser().then(resp => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push({ pathname: 'dataset_catalog' });
+              this.setState({showDialogSubmit: false});
+              this.props.history.push({pathname: 'dataset_catalog'});
             });
           });
         }
       }
       else {
         this.saveUser().then(resp => {
-          this.setState({ showDialogSubmit: false });
+          this.setState({showDialogSubmit: false});
           this.props.history.goBack();
         });
       }
 
     } else {
-      this.setState({ showDialogSubmit: false });
+      this.setState({showDialogSubmit: false});
     }
   };
 
@@ -496,10 +499,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       let profile = this.profileCopy(this.state.profile);
       profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
-      this.props.history.push({ pathname: 'dataset_catalog' });
+      this.props.history.push({pathname: 'dataset_catalog'});
     }
 
-    this.setState({ showDialogSave: false });
+    this.setState({showDialogSave: false});
   };
 
   profileCopy = (fullProfile) => {
@@ -625,7 +628,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       span({
                         className: "cancel-color required-field-error-span",
                         isRendered: this.state.nihError
-                      // }, ["Something went wrong. Please try again. "]),
                       }, [this.state.nihErrorMessage]),
                       div({ isRendered: this.state.profile.eraAuthorized}, [
                         div({ isRendered: this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
@@ -633,15 +635,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                           button({ type: "button", onClick: this.deleteNihAccount, className: "close auth-clear" }, [
                             span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
                           ]),
-
                         ]),
-
                         div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
                           div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
                           div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
                         ])
                       ]),
-
                     ]),
                     div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
                       label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["LinkedIn Profile"]),

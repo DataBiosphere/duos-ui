@@ -860,12 +860,12 @@ export const User = {
     }
   },
 
-  updateMainFields: async (user, userId) => { 
+  updateMainFields: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
     return res.json();
   },
-  
+
   updateName: async (body, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), { method: 'PUT' }]));
@@ -1004,25 +1004,25 @@ export const AuthenticateNIH = {
 
   verifyNihToken: async (token) => {
     const url = `${await Config.getFireCloudUrl()}api/nih/callback`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(token),{ method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
     return await res.json();
   },
 
   parseProfile: (profile) => {
-    let fireCloudProfileObj= {};
-    fireCloudProfileObj.firstName= Storage.getCurrentUser().displayName;
-    fireCloudProfileObj.lastName= Storage.getCurrentUser().displayName;
-    fireCloudProfileObj.title= "DUOS Researcher";
-    fireCloudProfileObj.contactEmail= Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute= (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
-    fireCloudProfileObj.institutionalProgram= "n/a";
-    fireCloudProfileObj.programLocationCity= "n/a";
-    fireCloudProfileObj.programLocationState= "n/a";
-    fireCloudProfileObj.programLocationCountry= "n/a";
-    fireCloudProfileObj.pi= (profile.havePi !== undefined && profile.havePi === true)
+    let fireCloudProfileObj = {};
+    fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
+    fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
+    fireCloudProfileObj.title = "DUOS Researcher";
+    fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
+    fireCloudProfileObj.institute = (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
+    fireCloudProfileObj.institutionalProgram = "n/a";
+    fireCloudProfileObj.programLocationCity = "n/a";
+    fireCloudProfileObj.programLocationState = "n/a";
+    fireCloudProfileObj.programLocationCountry = "n/a";
+    fireCloudProfileObj.pi = (profile.havePi !== undefined && profile.havePi === true)
       ? profile.piName : profile.isThePI === true
         ? Storage.getCurrentUser().displayName : "n/a";
-    fireCloudProfileObj.nonProfitStatus= "n/a";
+    fireCloudProfileObj.nonProfitStatus = "n/a";
     return fireCloudProfileObj;
   },
 
@@ -1040,7 +1040,7 @@ export const AuthenticateNIH = {
 
   expirationCount(expDate) {
     let result = -1;
-    if(expDate !== null && expDate !== undefined) {
+    if (expDate !== null && expDate !== undefined) {
       var currentDate = new Date().getTime();
       var millisecondsPerDay = 24 * 60 * 60 * 1000;
       var count = (AuthenticateNIH.treatAsUTC(parseInt(expDate, 10)) - AuthenticateNIH.treatAsUTC(currentDate)) / millisecondsPerDay;

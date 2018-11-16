@@ -14,13 +14,13 @@ export const Config = {
 
   getGoogleClientId: async () => (await getConfig()).clientId,
 
-  authOpts : (token = Token.getToken()) => ({
+  authOpts: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json'
     }
   }),
-  fileOpts : (token = Token.getToken()) => ({
+  fileOpts: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json'

@@ -40,6 +40,7 @@ class DataAccessRequestApplication extends Component {
       showDialogSave: false,
       step: 1,
       nihError: false,
+      nihErrorMessage:"Something went wrong. Please try again. ",
       formData: {
         datasets: [],
         dar_code: null,
@@ -138,8 +139,7 @@ class DataAccessRequestApplication extends Component {
       if (isFcUser) {
         const parsedToken = qs.parse(this.props.location.search);
         const decodedNihAccount = await this.verifyToken(parsedToken);
-        if (decodedNihAccount !== null)
-        {
+        if (decodedNihAccount !== null) {
           await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
           await this.init();
         }
@@ -168,9 +168,9 @@ class DataAccessRequestApplication extends Component {
   async verifyUser() {
     let isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
       (callback) => {
-          return false;
-        });
-      return isFcUser !== undefined && isFcUser !== false &&  isFcUser.enabled.google === true;
+        return false;
+      });
+    return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
   }
 
   async registerUsertoFC(rpProperties) {
@@ -206,7 +206,6 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
     formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-    
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
 
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
@@ -841,7 +840,7 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
                         label({ className: "control-label" }, ["NIH eRA Commons ID"]),
-                        div({ isRendered: (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0 ) && this.state.formData.dar_code === null}, [
+                        div({ isRendered: (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0) && this.state.formData.dar_code === null }, [
                           a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
                             div({ className: "logo" }, []),
                             span({}, ["Authenticate your account"])
@@ -850,12 +849,11 @@ class DataAccessRequestApplication extends Component {
                         span({
                           className: "cancel-color required-field-error-span",
                           isRendered: this.state.nihError
-                        }, ["Something went wrong. Please try again. "]),
-                        // }, [this.state.nihErrorMessage]),
-                        div({ isRendered: (this.state.formData.eraAuthorized === true)  }, [
+                        }, [this.state.nihErrorMessage]),
+                        div({ isRendered: (this.state.formData.eraAuthorized === true) }, [
                           div({ isRendered: this.state.formData.dar_code === null && this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername]),
-                            button({type: 'button', onClick: this.deleteNihAccount, className: "close auth-clear" }, [
+                            button({ type: 'button', onClick: this.deleteNihAccount, className: "close auth-clear" }, [
                               span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "Clear account", "data-for": "tip_clearNihAccount" })
                             ])
                           ]),
@@ -876,7 +874,7 @@ class DataAccessRequestApplication extends Component {
                           type: "text",
                           name: "linkedIn",
                           id: "inputLinkedIn",
-                          value: linkedIn, 
+                          value: linkedIn,
                           onChange: this.handleChange,
                           disabled: false,
                           className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
@@ -1199,7 +1197,7 @@ class DataAccessRequestApplication extends Component {
                         id: "inputOtherText",
                         maxLength: "512",
                         rows: "2",
-                        required: this.state.formData.other, 
+                        required: this.state.formData.other,
                         className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                         placeholder: "Please specify if selected (max. 512 characters)",
                         disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
