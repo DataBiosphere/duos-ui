@@ -73,7 +73,7 @@ class DataAccessRequestApplication extends Component {
         researcher: '',
         projectTitle: '',
         researcherGate: '',
-        urlFile: '',
+        urlDAA: '',
       },
       step1: {
         inputResearcher: {
@@ -490,16 +490,6 @@ class DataAccessRequestApplication extends Component {
     this.setState({ showDialogSave: true });
   };
 
-  uploadFile() {
-    const response = DAR.postDAA(this.state.file.name, this.state.file);
-    return response;
-    //   .then( data => {
-    //   console.log('uploadFile -> ', data);
-    //   return data; // --> URL con UID
-    //   // TODO si falla detener la creación del DAR
-    // });
-  }
-
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       let ontologies = [];
@@ -526,9 +516,8 @@ class DataAccessRequestApplication extends Component {
         formData.datasetId = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => { prev.disableOkBtn = true; return prev; });
-        this.uploadFile().then(resp => {
-          formData.urlFile = resp;
-          // TODO validate if the DAA file was uploaded OK
+        DAR.postDAA(this.state.file.name, this.state.file).then(response => {
+          formData.urlDAA = response.urlDAA;
           if (formData.dar_code !== undefined && formData.dar_code !== null) {
             DAR.updateDar(formData, formData.dar_code).then(response => {
               this.setState({ showDialogSubmit: false });
@@ -583,17 +572,21 @@ class DataAccessRequestApplication extends Component {
   };
 
   savePartial() {
-    if (this.state.formData.partial_dar_code === null) {
-      DAR.postPartialDarRequest(this.state.formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.push('researcher_console');
-      });
-    } else {
-      DAR.updatePartialDarRequest(this.state.formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.push({ pathname: 'researcher_console' });
-      });
-    }
+    let formData = this.state.formData;
+    DAR.postDAA(this.state.file.name, this.state.file).then(response => {
+      formData.urlDAA = response.urlDAA;
+      if (formData.partial_dar_code === null) {
+        DAR.postPartialDarRequest(formData).then(resp => {
+          this.setShowDialogSave(false);
+          this.props.history.push('researcher_console');
+        });
+      } else {
+        DAR.updatePartialDarRequest(formData).then(resp => {
+          this.setShowDialogSave(false);
+          this.props.history.push({ pathname: 'researcher_console' });
+        });
+      }
+    });    
   };
 
 

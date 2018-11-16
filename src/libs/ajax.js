@@ -297,20 +297,11 @@ export const DAR = {
   },
 
     postDAA: async (fileName, file) => {
-      const url = `${await Config.getApiUrl()}/dar/storeDaa?fileName=${fileName}`;
+      const url = `${await Config.getApiUrl()}/dar/storeDAA?fileName=${fileName}`;
       let formData = new FormData();
       formData.append("data", new Blob([file], { type: 'application/pdf' }));
       const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-      return res.json().then(
-        (data) => {
-          console.log(data);
-          return data;
-        },
-        (error) => {
-          console.log(JSON.stringify(error));
-          return error
-        }
-      );
+      return await res.json();
     },
 };
 
