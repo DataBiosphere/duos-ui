@@ -518,6 +518,7 @@ class DataAccessRequestApplication extends Component {
         this.setState(prev => { prev.disableOkBtn = true; return prev; });
         DAR.postDAA(this.state.file.name, this.state.file).then(response => {
           formData.urlDAA = response.urlDAA;
+          formData.nameDAA = response.nameDAA;
           if (formData.dar_code !== undefined && formData.dar_code !== null) {
             DAR.updateDar(formData, formData.dar_code).then(response => {
               this.setState({ showDialogSubmit: false });
@@ -575,6 +576,7 @@ class DataAccessRequestApplication extends Component {
     let formData = this.state.formData;
     DAR.postDAA(this.state.file.name, this.state.file).then(response => {
       formData.urlDAA = response.urlDAA;
+      formData.nameDAA = response.nameDAA;
       if (formData.partial_dar_code === null) {
         DAR.postPartialDarRequest(formData).then(resp => {
           this.setShowDialogSave(false);
