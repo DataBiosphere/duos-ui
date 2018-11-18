@@ -229,7 +229,7 @@ class ResearcherReview extends Component {
 
               div({ isRendered: formData.isThePI === false }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                  label({ className: "control-label" }, ["Does the resercher have a Principal Investigator?"]),
+                  label({ className: "control-label" }, ["Does the researcher have a Principal Investigator?"]),
                   div({ id: "lbl_researcherhavePI", className: "control-data" }, [formData.havePIValue]),
                 ])
               ])
