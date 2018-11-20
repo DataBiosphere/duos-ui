@@ -573,11 +573,23 @@ class DataAccessRequestApplication extends Component {
   };
 
   savePartial() {
+    
+    if(this.state.file !== undefined && this.state.file.name !== '') {
+      DAR.postDAA(this.state.file.name, this.state.file).then(response => {
+        this.saveDAR(response);
+      });
+    } else {
+      this.saveDAR(null);
+    }
+  };
+
+  saveDAR(response){
     let formData = this.state.formData;
-    DAR.postDAA(this.state.file.name, this.state.file).then(response => {
+    if(response !== null) {
       formData.urlDAA = response.urlDAA;
       formData.nameDAA = response.nameDAA;
-      if (formData.partial_dar_code === null) {
+    }
+    if (formData.partial_dar_code === null) {
         DAR.postPartialDarRequest(formData).then(resp => {
           this.setShowDialogSave(false);
           this.props.history.push('researcher_console');
@@ -588,8 +600,7 @@ class DataAccessRequestApplication extends Component {
           this.props.history.push({ pathname: 'researcher_console' });
         });
       }
-    });    
-  };
+  }
 
 
   onOntologiesChange = (data, action) => {
