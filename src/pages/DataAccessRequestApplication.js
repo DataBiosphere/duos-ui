@@ -199,7 +199,7 @@ class DataAccessRequestApplication extends Component {
         formData.ontologies = this.getOntologies(formData);
       } else if (this.props.location.props.formData.datasetId !== undefined) {
         // set datasets sent by data set catalog
-        this.props.location.props.formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
       }
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
@@ -250,7 +250,6 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
-      prev.formData.datasets = formData.datasets;
       prev.expirationCount = expirationCount;
       return formData;
     });
