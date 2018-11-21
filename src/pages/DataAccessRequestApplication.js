@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, br, h, small, h3, a, span, form, ol, li, label, button, input, textarea, p, fieldset } from 'react-hyperscript-helpers';
+import { div, hr, br, h, small, h3, a, span, form, ol, li, label, button, input, textarea, p, fieldset, i } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { Alert } from '../components/Alert';
@@ -143,7 +143,7 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
     formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-    
+
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
 
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
@@ -162,11 +162,11 @@ class DataAccessRequestApplication extends Component {
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
       formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
-      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : ''; 
-      formData.city = rpProperties.city != null ? rpProperties.city : '';  
-      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : ''; 
-      formData.country = rpProperties.country != null ? rpProperties.country : ''; 
-      formData.state = rpProperties.state != null ? rpProperties.state : ''; 
+      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
+      formData.city = rpProperties.city != null ? rpProperties.city : '';
+      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+      formData.country = rpProperties.country != null ? rpProperties.country : '';
+      formData.state = rpProperties.state != null ? rpProperties.state : '';
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -595,6 +595,10 @@ class DataAccessRequestApplication extends Component {
       });
   };
 
+  back = (e) => {
+    this.props.history.goBack();
+  };
+
   redirectToNihLogin() {
     //TODO
   };
@@ -641,10 +645,19 @@ class DataAccessRequestApplication extends Component {
 
       div({ className: "container" }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12" }, [
-          PageHeading({
-            id: "requestApplication", imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application",
-            description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
-          }),
+          div({ className: "row no-margin" }, [
+            div({ className: (this.state.formData.dar_code !== null ? 'col-lg-10 col-md-9 col-sm-9 ' : this.state.formData.dar_code === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding') }, [
+              PageHeading({
+                id: "requestApplication", imgSrc: "/images/icon_add_access.png", iconSize: "medium", color: "access", title: "Data Access Request Application",
+                description: "The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control."
+              })
+            ]),
+            div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
+              a({ id: "btn_back", onClick: this.back, className: "btn-primary btn-back" }, [
+                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+              ])
+            ])
+          ]),
           hr({ className: "section-separator" }),
 
           div({ className: "row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin" }, [
@@ -791,7 +804,7 @@ class DataAccessRequestApplication extends Component {
                           type: "text",
                           name: "linkedIn",
                           id: "inputLinkedIn",
-                          value: linkedIn, 
+                          value: linkedIn,
                           onChange: this.handleChange,
                           disabled: false,
                           className: step1.inputLinkedIn.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
@@ -1114,7 +1127,7 @@ class DataAccessRequestApplication extends Component {
                         id: "inputOtherText",
                         maxLength: "512",
                         rows: "2",
-                        required: this.state.formData.other, 
+                        required: this.state.formData.other,
                         className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ? ' required-field-error form-control' : 'form-control',
                         placeholder: "Please specify if selected (max. 512 characters)",
                         disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true,
