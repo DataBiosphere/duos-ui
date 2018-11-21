@@ -140,7 +140,7 @@ class DataAccessRequestApplication extends Component {
         const parsedToken = qs.parse(this.props.location.search);
         const decodedNihAccount = await this.verifyToken(parsedToken);
         if (decodedNihAccount !== null) {
-          await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
+          await AuthenticateNIH.saveNihUsr(decodedNihAccount);
           await this.init();
         }
       }
@@ -674,7 +674,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   deleteNihAccount() {
-    AuthenticateNIH.eliminateAccount(Storage.getCurrentUser().dacUserId).then(result => {
+    AuthenticateNIH.eliminateAccount().then(result => {
       this.setState(prev => {
         prev.formData.eraAuthorized = false;
         return prev;

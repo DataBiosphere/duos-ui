@@ -30,21 +30,22 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async componentDidMount() {
     this.getResearcherProfile();
     if (this.props.location !== undefined && this.props.location.search !== "") {
+      const parsedToken = qs.parse(this.props.location.search);
       let isFcUser = await this.verifyUser();
       if (!isFcUser) {
         isFcUser = await this.registerUsertoFC(this.state.profile);
       }
       if (isFcUser) {
-        const parsedToken = qs.parse(this.props.location.search);
+        // const parsedToken = qs.parse(this.props.location.search);
         const decodedNihAccount = await this.verifyToken(parsedToken);
         if (decodedNihAccount !== null) {
-          await AuthenticateNIH.saveNihUsr(decodedNihAccount, Storage.getCurrentUser().dacUserId);
+          await AuthenticateNIH.saveNihUsr(decodedNihAccount);
           await this.getResearcherProfile();
         }
       }
     }
-    this.props.history.push('profile');
     ReactTooltip.rebuild();
+    this.props.history.push('profile');
   }
 
   async verifyToken(parsedToken) {
@@ -188,7 +189,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   deleteNihAccount() {
-    AuthenticateNIH.eliminateAccount(Storage.getCurrentUser().dacUserId).then(result => {
+    AuthenticateNIH.eliminateAccount().then(result => {
       this.setState(prev => {
         prev.profile.eraAuthorized = false;
         return prev;

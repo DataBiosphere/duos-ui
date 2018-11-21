@@ -1026,14 +1026,14 @@ export const AuthenticateNIH = {
     return fireCloudProfileObj;
   },
 
-  saveNihUsr: async (decodedData, userId) => {
-    const url = `${await Config.getApiUrl()}/nih/${userId}`;
+  saveNihUsr: async (decodedData) => {
+    const url = `${await Config.getApiUrl()}/nih`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
     return await res.json();
   },
 
-  eliminateAccount: async (userId) => {
-    const url = `${await Config.getApiUrl()}/nih/${userId}`;
+  eliminateAccount: async () => {
+    const url = `${await Config.getApiUrl()}/nih`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
