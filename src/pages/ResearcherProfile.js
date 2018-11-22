@@ -29,14 +29,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async componentDidMount() {
     this.getResearcherProfile();
-    if (this.props.location !== undefined && this.props.location.search !== "") {
-      const parsedToken = qs.parse(this.props.location.search);
+    if (this.props.location !== undefined && this.props.location.search !== "" && qs.parse(this.props.location.search).jwt !== undefined) {
       let isFcUser = await this.verifyUser();
       if (!isFcUser) {
         isFcUser = await this.registerUsertoFC(this.state.profile);
       }
       if (isFcUser) {
-        // const parsedToken = qs.parse(this.props.location.search);
+        const parsedToken = qs.parse(this.props.location.search);
         const decodedNihAccount = await this.verifyToken(parsedToken);
         if (decodedNihAccount !== null) {
           await AuthenticateNIH.saveNihUsr(decodedNihAccount);
@@ -436,7 +435,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       if (this.state.isResearcher) {
-        let profile = this.profileCopy(this.state.profile);
+        let profile = this.state.profile;
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
@@ -497,25 +496,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   dialogHandlerSave = (answer) => (e) => {
     if (answer === true) {
-      let profile = this.profileCopy(this.state.profile);
+      let profile = this.state.profile;
       profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
       this.props.history.push({pathname: 'dataset_catalog'});
     }
 
     this.setState({showDialogSave: false});
-  };
-
-  profileCopy = (fullProfile) => {
-    let profile = {};
-    let key;
-
-    for (key in fullProfile) {
-      if (key !== 'nihUsername') {
-        profile[key] = fullProfile[key];
-      }
-    }
-    return profile;
   };
 
   render() {
