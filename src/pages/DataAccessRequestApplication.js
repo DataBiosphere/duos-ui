@@ -74,6 +74,7 @@ class DataAccessRequestApplication extends Component {
         projectTitle: '',
         researcherGate: '',
         urlDAA: '',
+        nameDAA: ''
       },
       step1: {
         inputResearcher: {
@@ -172,7 +173,9 @@ class DataAccessRequestApplication extends Component {
       formData.city = rpProperties.city != null ? rpProperties.city : '';  
       formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : ''; 
       formData.country = rpProperties.country != null ? rpProperties.country : ''; 
-      formData.state = rpProperties.state != null ? rpProperties.state : ''; 
+      formData.state = rpProperties.state != null ? rpProperties.state : '';
+      formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
+      formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -516,7 +519,7 @@ class DataAccessRequestApplication extends Component {
         formData.datasetId = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => { prev.disableOkBtn = true; return prev; });
-        DAR.postDAA(this.state.file.name, this.state.file).then(response => {
+        DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
           formData.urlDAA = response.urlDAA;
           formData.nameDAA = response.nameDAA;
           if (formData.dar_code !== undefined && formData.dar_code !== null) {
@@ -575,7 +578,7 @@ class DataAccessRequestApplication extends Component {
   savePartial() {
     
     if(this.state.file !== undefined && this.state.file.name !== '') {
-      DAR.postDAA(this.state.file.name, this.state.file).then(response => {
+      DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
         this.saveDAR(response);
       });
     } else {
@@ -1399,9 +1402,9 @@ class DataAccessRequestApplication extends Component {
                           input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true })
                         ])
                       ]),
-                      p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name }, [
+                      p({ id: "txt_uploadFile", className: "fileName daa", isRendered:  this.state.file.name !== '' || this.state.formData.nameDAA }, [
                         "Your currently uploaded Data Access Agreement: ",
-                        span({ className: "italic normal" }, [this.state.file.name]),
+                        span({ className: "italic normal" }, [this.state.file.name !== '' ? this.state.file.name : this.state.formData.nameDAA]),
                       ]),
                       span({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span", isRendered: step4.uploadFile.invalid && showValidationMessages }, ["Required field"])
                     ]),
