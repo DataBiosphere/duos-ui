@@ -72,7 +72,11 @@ class DataAccessRequestApplication extends Component {
         investigator: '',
         researcher: '',
         projectTitle: '',
-        researcherGate: ''
+        researcherGate: '',
+        isThePi: '',
+        havePi: '',
+        profileName: '',
+        piName: ''
       },
       step1: {
         inputResearcher: {
@@ -167,6 +171,10 @@ class DataAccessRequestApplication extends Component {
       formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
       formData.country = rpProperties.country != null ? rpProperties.country : '';
       formData.state = rpProperties.state != null ? rpProperties.state : '';
+      formData.isThePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
+      formData.havePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
+      formData.profileName = rpProperties.profileName !== null ? rpProperties.profileName : '';
+      formData.piName = rpProperties.piName !== null ? rpProperties.piName : '' ;
     }
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -490,6 +498,7 @@ class DataAccessRequestApplication extends Component {
             this.props.history.push('researcher_console');
           });
         } else {
+          console.log("formData a crear ", formData);
           DAR.postDataAccessRequest(formData).then(response => {
             this.setState({ showDialogSubmit: false });
             this.props.history.push('researcher_console');
