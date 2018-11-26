@@ -361,8 +361,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.props.history.push({ pathname: 'dataset_catalog' });
       });
     });
-  } 
-  
+  }
+
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       if (this.state.isResearcher) {
@@ -370,24 +370,24 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          if(this.state.file !== undefined && this.state.file.name !== '') {
+          if (this.state.file !== undefined && this.state.file.name !== '') {
             DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
               profile.urlDAA = response.urlDAA;
               profile.nameDAA = response.nameDAA;
               this.saveResearcher(profile);
-          });
-        }
-        else {
-          this.saveResearcher(profile);
-        }
+            });
+          }
+          else {
+            this.saveResearcher(profile);
+          }
 
-       } else {
-          if(this.state.file !== undefined && this.state.file.name !== '') {
+        } else {
+          if (this.state.file !== undefined && this.state.file.name !== '') {
             DAR.postDAA(this.state.file.name, this.state.file, profile.urlDAA).then(response => {
               profile.urlDAA = response.urlDAA;
               profile.nameDAA = response.nameDAA;
               this.updateResearcher(profile);
-          });
+            });
           } else {
             this.updateResearcher(profile);
           }
@@ -932,14 +932,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+              div({ isRendered: this.state.isResearcher, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label rp-title-question default-color" }, [
                   "Data Access Agreement ", span({ className: "italic display-inline" }, ["(optional)"]),
                   span({ className: "default-color" }, ["Data Access Agreement will be required for submission of a Data Access Request"])
                 ])
               ]),
 
-              div({ className: "row no-margin" }, [
+              div({ isRendered: this.state.isResearcher, className: "row no-margin" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
                 ]),
@@ -962,7 +962,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload" })
                   ])
                 ]),
-                p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name !== '' || this.state.profile.nameDAA  !== ''}, [
+                p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name !== '' || this.state.profile.nameDAA !== '' }, [
                   "Your currently uploaded Data Access Agreement: ",
                   span({ className: "italic normal" }, [this.state.file.name !== '' ? this.state.file.name : this.state.profile.nameDAA]),
                 ])
