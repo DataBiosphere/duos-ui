@@ -140,7 +140,6 @@ export const DAR = {
     const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
     let data = await res.json();
-
     darInfo.researcherId = data.userId;
     darInfo.status = data.status;
     darInfo.hasAdminComment = data.rationale != null;
@@ -156,14 +155,26 @@ export const DAR = {
       darInfo.researchType = data.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
-    let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
-    darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
-    darInfo.havePI = researcherProperties.havePI === 'true' || researcherProperties.isThePI === 'true';
-    darInfo.profileName = researcherProperties.profileName;
-    darInfo.institution = researcherProperties.institution;
-    darInfo.department = researcherProperties.department;
-    darInfo.city = researcherProperties.city;
-    darInfo.country = researcherProperties.country;
+    /* Researcher's data is obtained from "data" coming from mongo.
+       For old DARs that don't have these values stored, we obtain them from Mysql, which are not DAR's snapshots values. */
+    if (data.profileName !== null && data.profileName !== '' && data.profileName !== undefined) {
+      darInfo.pi = data.researcherIsThePi ? data.profileName : data.piName;
+      darInfo.havePI = data.researcherHasPi === 'true' || data.researcherIsThePi === 'true';
+      darInfo.profileName = data.profileName;
+      darInfo.institution = data.institutionName;
+      darInfo.department = data.researcherDepartment;
+      darInfo.city = data.researcherCity;
+      darInfo.country = data.researcherCountry;
+    } else {
+      let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
+      darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
+      darInfo.havePI = researcherProperties.havePI === 'true' || researcherProperties.isThePI === 'true';
+      darInfo.profileName = researcherProperties.profileName;
+      darInfo.institution = researcherProperties.institution;
+      darInfo.department = researcherProperties.department;
+      darInfo.city = researcherProperties.city;
+      darInfo.country = researcherProperties.country;
+    }
     return darInfo;
   },
 

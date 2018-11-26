@@ -498,7 +498,6 @@ class DataAccessRequestApplication extends Component {
             this.props.history.push('researcher_console');
           });
         } else {
-          console.log("formData a crear ", formData);
           DAR.postDataAccessRequest(formData).then(response => {
             this.setState({ showDialogSubmit: false });
             this.props.history.push('researcher_console');
