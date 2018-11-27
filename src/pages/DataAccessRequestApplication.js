@@ -235,10 +235,10 @@ class DataAccessRequestApplication extends Component {
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
       formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
-      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : ''; 
-      formData.city = rpProperties.city != null ? rpProperties.city : '';  
-      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : ''; 
-      formData.country = rpProperties.country != null ? rpProperties.country : ''; 
+      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
+      formData.city = rpProperties.city != null ? rpProperties.city : '';
+      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+      formData.country = rpProperties.country != null ? rpProperties.country : '';
       formData.state = rpProperties.state != null ? rpProperties.state : '';
       formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
       formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
@@ -647,8 +647,8 @@ class DataAccessRequestApplication extends Component {
   };
 
   savePartial() {
-    
-    if(this.state.file !== undefined && this.state.file.name !== '') {
+
+    if (this.state.file !== undefined && this.state.file.name !== '') {
       DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
         this.saveDAR(response);
       });
@@ -657,23 +657,23 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-  saveDAR(response){
+  saveDAR(response) {
     let formData = this.state.formData;
-    if(response !== null) {
+    if (response !== null) {
       formData.urlDAA = response.urlDAA;
       formData.nameDAA = response.nameDAA;
     }
     if (formData.partial_dar_code === null) {
-        DAR.postPartialDarRequest(formData).then(resp => {
-          this.setShowDialogSave(false);
-          this.props.history.push('researcher_console');
-        });
-      } else {
-        DAR.updatePartialDarRequest(formData).then(resp => {
-          this.setShowDialogSave(false);
-          this.props.history.push({ pathname: 'researcher_console' });
-        });
-      }
+      DAR.postPartialDarRequest(formData).then(resp => {
+        this.setShowDialogSave(false);
+        this.props.history.push('researcher_console');
+      });
+    } else {
+      DAR.updatePartialDarRequest(formData).then(resp => {
+        this.setShowDialogSave(false);
+        this.props.history.push({ pathname: 'researcher_console' });
+      });
+    }
   }
 
 
@@ -1477,7 +1477,7 @@ class DataAccessRequestApplication extends Component {
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                         label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
                       ]),
-                      
+
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                         a({ id: "link_downloadAgreement", href: "YourName_DataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                           span({ className: "glyphicon glyphicon-download" }),
@@ -1487,7 +1487,7 @@ class DataAccessRequestApplication extends Component {
 
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                         label({ className: "control-label default-color" }, ["2. Upload your template of the Data Access Agreement signed by your organization's Signing Official"]),
-                        p({ className: "rp-agreement"}, ["By uploading and submitting the Data Access Agreement with your Data Access Request application you agree to comply with all terms put forth in the agreement."])
+                        p({ className: "rp-agreement" }, ["By uploading and submitting the Data Access Agreement with your Data Access Request application you agree to comply with all terms put forth in the agreement."])
                       ]),
 
                       div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
@@ -1497,7 +1497,7 @@ class DataAccessRequestApplication extends Component {
                           input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true })
                         ])
                       ]),
-                      p({ id: "txt_uploadFile", className: "fileName daa", isRendered:  this.state.file.name !== '' || this.state.formData.nameDAA }, [
+                      p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name !== '' || this.state.formData.nameDAA }, [
                         "Your currently uploaded Data Access Agreement: ",
                         span({ className: "italic normal" }, [this.state.file.name !== '' ? this.state.file.name : this.state.formData.nameDAA]),
                       ]),

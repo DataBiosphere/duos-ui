@@ -143,6 +143,8 @@ fieldset {
 
 fieldset[disabled] .btn-download-pdf {
   background: #eeeeee;
+  color: #cccccc !important;
+  box-shadow: none;  
 }
 
 fieldset[disabled] .btn-download-pdf,
