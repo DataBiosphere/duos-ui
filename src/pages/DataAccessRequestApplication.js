@@ -4,12 +4,13 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { Alert } from '../components/Alert';
 import AsyncSelect from 'react-select/lib/Async';
-
+import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
-import { Researcher, DAR } from '../libs/ajax';
+import { Researcher, DAR, AuthenticateNIH } from '../libs/ajax';
 import { Storage } from "../libs/storage";
 import { Link } from 'react-router-dom';
+import * as qs from 'query-string';
 
 import './DataAccessRequestApplication.css';
 
@@ -20,15 +21,15 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
-
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
-
+    this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
+    this.deleteNihAccount = this.deleteNihAccount.bind(this);
     this.state = {
+      expirationCount: -1,
       disableOkBtn: false,
       showValidationMessages: false,
-      datasets: [],
       optionMessage: noOptionMessage,
       file: {
         name: '',
@@ -38,7 +39,10 @@ class DataAccessRequestApplication extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
+      nihError: false,
+      nihErrorMessage:"Something went wrong. Please try again. ",
       formData: {
+        datasets: [],
         dar_code: null,
         checkCollaborator: false,
         rus: '',
@@ -94,6 +98,9 @@ class DataAccessRequestApplication extends Component {
         },
         inputTitle: {
           invalid: false
+        },
+        inputNih: {
+          invalid: false
         }
       },
       step2: {
@@ -129,21 +136,77 @@ class DataAccessRequestApplication extends Component {
   }
 
   async componentDidMount() {
-    await this.init();
+
+    if (this.props.location !== undefined && this.props.location.search !== "") {
+      let rpProperties = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
+      let isFcUser = await this.verifyUser();
+      if (!isFcUser) {
+        isFcUser = await this.registerUsertoFC(rpProperties);
+      }
+      if (isFcUser) {
+        const parsedToken = qs.parse(this.props.location.search);
+        const decodedNihAccount = await this.verifyToken(parsedToken);
+        if (decodedNihAccount !== null) {
+          await AuthenticateNIH.saveNihUsr(decodedNihAccount);
+          await this.init();
+        }
+      }
+    } else {
+      await this.init();
+    }
+    this.props.history.push('/dar_application');
     ReactTooltip.rebuild();
   }
 
-  async init() {
+  async verifyToken(parsedToken) {
+    return await AuthenticateNIH.verifyNihToken(parsedToken).then(
+      (decoded) => decoded,
+      (error) => {
+        this.setState(prev => {
+          prev.nihError = true;
+          prev.formData = Storage.getData('dar_application');
+          return prev;
+        }, () => Storage.removeData('dar_application'));
+        return null;
+      }
+    );
+  }
 
-    let formData = this.state.formData;
-    let datasets = [];
+  async verifyUser() {
+    let isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
+      (callback) => {
+        return false;
+      });
+    return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
+  }
+
+  async registerUsertoFC(rpProperties) {
+    return await AuthenticateNIH.fireCloudRegisterUsr(rpProperties).then(
+      (success) => {
+        // user has been successfully registered to firecloud.
+        return true;
+      },
+      (fail) => {
+        this.setState(prev => {
+          prev.nihError = true;
+          prev.formData = Storage.getData('dar_application');
+          return prev;
+        }, () => Storage.removeData('dar_application'));
+        return false;
+      })
+  }
+
+
+  async init() {
+    let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
+    Storage.removeData('dar_application');
     if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
       if (this.props.location.props.formData.dar_code !== undefined) {
         formData = this.props.location.props.formData;
         formData.ontologies = this.getOntologies(formData);
       } else if (this.props.location.props.formData.datasetId !== undefined) {
         // set datasets sent by data set catalog
-        datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
       }
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
@@ -165,6 +228,9 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+      formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
+      formData.eraAuthorized = rpProperties.eraAuthorized !== undefined ? JSON.parse(rpProperties.eraAuthorized) : false;
+      formData.eraExpiration = rpProperties.eraExpiration !== undefined ? rpProperties.eraExpiration : false;
       formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
@@ -178,10 +244,12 @@ class DataAccessRequestApplication extends Component {
       formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
 
     }
+    let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
+
     formData.userId = Storage.getCurrentUser().dacUserId;
 
     if (formData.dar_code !== null || formData.partial_dar_code !== null) {
-      datasets = this.processDataSet(formData.datasetId);
+      formData.datasets = this.processDataSet(formData.datasetId);
     }
     let completed = false;
     if (formData.dar_code !== null) {
@@ -193,7 +261,7 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
-      prev.datasets = datasets;
+      prev.expirationCount = expirationCount;
       return formData;
     });
 
@@ -347,8 +415,9 @@ class DataAccessRequestApplication extends Component {
     let isTitleInvalid = false, isResearcherInvalid = false,
       isInvestigatorInvalid = false, isLinkedInInvalid = false,
       isOrcidInvalid = false, isResearcherGateInvalid = false,
-      isDAAInvalid = false, showValidationMessages = false;
-
+      isDAAInvalid = false, showValidationMessages = false,
+      isNihInvalid = false;
+      
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
       showValidationMessages = true;
@@ -366,12 +435,12 @@ class DataAccessRequestApplication extends Component {
       && !this.isValid(this.state.formData.researcherGate)
       && !this.isValid(this.state.formData.orcid)
       && !this.isValid(this.state.formData.uploadFile)
-      )      
-      {
+      && (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0)) {
       isLinkedInInvalid = true;
       isOrcidInvalid = true;
       isResearcherGateInvalid = true;
       isDAAInvalid = true;
+      isNihInvalid = true;
       showValidationMessages = true;
     }
     this.setState(prev => {
@@ -379,6 +448,7 @@ class DataAccessRequestApplication extends Component {
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
       prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
       prev.step1.inputLinkedIn.invalid = isLinkedInInvalid;
+      prev.step1.inputNih.invalid = isNihInvalid;
       prev.step1.inputOrcid.invalid = isOrcidInvalid;
       prev.step1.inputResearcherGate.invalid = isResearcherGateInvalid;
       prev.step4.uploadFile.invalid = isDAAInvalid;
@@ -390,7 +460,7 @@ class DataAccessRequestApplication extends Component {
 
   verifyStep2() {
     let isDatasetsInvalid = false, isRusInvalid = false, isSummaryInvalid = false;
-    if (this.state.datasets.length === 0) {
+    if (this.state.formData.datasets.length === 0) {
       isDatasetsInvalid = true;
     }
     if (!this.isValid(this.state.formData.rus)) {
@@ -514,7 +584,7 @@ class DataAccessRequestApplication extends Component {
       }, () => {
         let formData = this.state.formData;
         let ds = [];
-        this.state.datasets.forEach(dataset => {
+        this.state.formData.datasets.forEach(dataset => {
           ds.push(dataset.value);
         });
         formData.datasetId = ds;
@@ -560,7 +630,7 @@ class DataAccessRequestApplication extends Component {
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       };
-      let datasets = this.state.datasets.map(function (item) {
+      let datasets = this.state.formData.datasets.map(function (item) {
         return {
           id: item.value,
           concatenation: item.label
@@ -616,7 +686,7 @@ class DataAccessRequestApplication extends Component {
 
   onDatasetsChange = (data, action) => {
     this.setState(prev => {
-      prev.datasets = data;
+      prev.formData.datasets = data;
       return prev;
     }, () => this.checkValidations());
   };
@@ -651,16 +721,25 @@ class DataAccessRequestApplication extends Component {
       });
   };
 
+  async redirectToNihLogin() {
+    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?jwt%3D%7Btoken%7D");
+    Storage.setData('dar_application', this.state.formData);
+    window.location.href = landingUrl;
+  }
+
   back = (e) => {
     this.props.history.goBack();
   };
 
-  redirectToNihLogin() {
-    //TODO
-  };
-
   deleteNihAccount() {
-  };
+    AuthenticateNIH.eliminateAccount().then(result => {
+      this.setState(prev => {
+        prev.formData.eraAuthorized = false;
+        return prev;
+      });
+    });
+  }
 
   render() {
 
@@ -828,25 +907,27 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "row no-margin" }, [
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
                         label({ className: "control-label" }, ["NIH eRA Commons ID"]),
-
-                        div({ isRendered: this.state.formData.eraAuthorized !== true }, [
+                        div({ isRendered: (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0) && this.state.formData.dar_code === null }, [
                           a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
                             div({ className: "logo" }, []),
                             span({}, ["Authenticate your account"])
                           ])
                         ]),
-
-                        div({ isRendered: (this.state.formData.eraAuthorized === true) && (this.state.formData.dar_code === null) }, [
-                          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                        span({
+                          className: "cancel-color required-field-error-span",
+                          isRendered: this.state.nihError
+                        }, [this.state.nihErrorMessage]),
+                        div({ isRendered: (this.state.formData.eraAuthorized === true) }, [
+                          div({ isRendered: this.state.formData.dar_code === null && this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername]),
-                            button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
+                            button({ type: 'button', onClick: this.deleteNihAccount, className: "close auth-clear" }, [
                               span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "Clear account", "data-for": "tip_clearNihAccount" })
                             ])
                           ]),
 
-                          div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                            div({ isRendered: this.state.formData.eraExpirationCount !== 0, className: "default-color display-block" }, ["Your NIH authentication will expire in " + this.state.formData.eraExpirationCount + " days"]),
-                            div({ isRendered: this.state.formData.eraExpirationCount === 0, className: "default-color display-block" }, ["Your NIH authentication expired"]),
+                          div({ isRendered: this.state.formData.dar_code === null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
+                            div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
+                            div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
                           ]),
                           div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
                             div({ className: "auth-id" }, [this.state.formData.nihUsername])
@@ -972,12 +1053,12 @@ class DataAccessRequestApplication extends Component {
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       h(AsyncSelect, {
                         id: "sel_datasets",
-                        key: this.state.datasets.value,
+                        key: this.state.formData.datasets.value,
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
                         loadOptions: (query, callback) => this.searchDataSets(query, callback),
                         onChange: (option) => this.onDatasetsChange(option),
-                        value: this.state.datasets,
+                        value: this.state.formData.datasets,
                         noOptionsMessage: () => this.state.optionMessage,
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: "select",
