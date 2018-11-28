@@ -294,7 +294,15 @@ export const DAR = {
       }
     });
     return manualReview;
-  }
+  },
+
+    postDAA: async (fileName, file, existentFileUrl) => {
+      const url = `${await Config.getApiUrl()}/dar/storeDAA?fileName=${fileName}&existentFileUrl=${existentFileUrl}`;
+      let formData = new FormData();
+      formData.append("data", new Blob([file], { type: 'application/pdf' }));
+      const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
+      return await res.json();
+    },
 };
 
 export const DataSet = {
@@ -568,6 +576,11 @@ export const Files = {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
   },
+
+  getDAAFile: async (researcherId, fileName) => {
+    const url = `${await Config.getApiUrl()}/dar/downloadDAA/${researcherId}`;
+    return getFile(url, fileName);
+  }
 };
 
 export const Summary = {

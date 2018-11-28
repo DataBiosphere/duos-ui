@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import { div, h, hh, form, label, input, span, hr, a, p, button, textarea } from 'react-hyperscript-helpers';
-import { Researcher, User, AuthenticateNIH } from '../libs/ajax';
+import { Researcher, User, DAR, AuthenticateNIH } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { PageHeading } from '../components/PageHeading';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -117,7 +117,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         scientificURL: '',
         state: '',
         zipcode: '',
-        uploadFile: '',
+        urlDAA: '',
+        nameDAA: '',
       },
       showRequired: false,
       invalidFields: {
@@ -369,7 +370,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         if (field === 'isThePI') {
           this.clearNotRelatedPIFields();
         }
-
         if (field === 'havePI' && (value === true || value === 'true')) {
           this.clearCommonsFields();
         } else if (field === 'havePI' && (value === false || value === 'false')) {
@@ -432,38 +432,65 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return obj;
   };
 
+  saveResearcher(profile) {
+    Researcher.createResearcherProperties(Storage.getCurrentUser().dacUserId, false, profile).then(resp => {
+      this.saveUser().then(resp => {
+        this.setState({ showDialogSubmit: false });
+        this.props.history.push({ pathname: 'dataset_catalog' });
+      });
+    });
+  }
+
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       if (this.state.isResearcher) {
-        let profile = this.state.profile;
+        let profile = this.profileCopy(this.state.profile);
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          Researcher.createResearcherProperties(Storage.getCurrentUser().dacUserId, false, profile).then(resp => {
-            this.saveUser().then(resp => {
-              this.setState({showDialogSubmit: false});
-              this.props.history.push({pathname: 'dataset_catalog'});
+          if (this.state.file !== undefined && this.state.file.name !== '') {
+            DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
+              profile.urlDAA = response.urlDAA;
+              profile.nameDAA = response.nameDAA;
+              this.saveResearcher(profile);
             });
-          });
+          }
+          else {
+            this.saveResearcher(profile);
+          }
+
         } else {
-          Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
-            this.saveUser().then(resp => {
-              this.setState({showDialogSubmit: false});
-              this.props.history.push({pathname: 'dataset_catalog'});
+          if (this.state.file !== undefined && this.state.file.name !== '') {
+            DAR.postDAA(this.state.file.name, this.state.file, profile.urlDAA).then(response => {
+              profile.urlDAA = response.urlDAA;
+              profile.nameDAA = response.nameDAA;
+              this.updateResearcher(profile);
             });
-          });
+          } else {
+            this.updateResearcher(profile);
+          }
         }
       }
       else {
         this.saveUser().then(resp => {
-          this.setState({showDialogSubmit: false});
+          this.setState({ showDialogSubmit: false });
           this.props.history.goBack();
         });
       }
 
     } else {
-      this.setState({showDialogSubmit: false});
+      this.setState({ showDialogSubmit: false });
     }
+  };
+
+
+  updateResearcher(profile) {
+    Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
+      this.saveUser().then(resp => {
+        this.setState({ showDialogSubmit: false });
+        this.props.history.push({ pathname: 'dataset_catalog' });
+      });
+    });
   };
 
   async saveUser() {
@@ -970,14 +997,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+              div({ isRendered: this.state.isResearcher, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label rp-title-question default-color" }, [
                   "Data Access Agreement ", span({ className: "italic display-inline" }, ["(optional)"]),
                   span({ className: "default-color" }, ["Data Access Agreement will be required for submission of a Data Access Request"])
                 ])
               ]),
 
-              div({ className: "row no-margin" }, [
+              div({ isRendered: this.state.isResearcher, className: "row no-margin" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                   label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
                 ]),
@@ -1000,9 +1027,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload" })
                   ])
                 ]),
-                p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name }, [
+                p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name !== '' || this.state.profile.nameDAA !== '' }, [
                   "Your currently uploaded Data Access Agreement: ",
-                  span({ className: "italic normal" }, [this.state.file.name]),
+                  span({ className: "italic normal" }, [this.state.file.name !== '' ? this.state.file.name : this.state.profile.nameDAA]),
                 ])
               ]),
 
