@@ -444,7 +444,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
       if (this.state.isResearcher) {
-        let profile = this.profileCopy(this.state.profile);
+        let profile = this.state.profile;
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
