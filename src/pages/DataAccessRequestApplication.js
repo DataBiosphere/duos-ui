@@ -242,7 +242,7 @@ class DataAccessRequestApplication extends Component {
       formData.state = rpProperties.state != null ? rpProperties.state : '';
       formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
       formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
-
+      
     }
     let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
 
@@ -262,7 +262,10 @@ class DataAccessRequestApplication extends Component {
       prev.completed = completed;
       prev.formData = formData;
       prev.expirationCount = expirationCount;
-      return formData;
+      if (formData.nameDAA !== '') {
+        prev.file.name = formData.nameDAA;
+      }
+      return prev;
     });
 
   };
