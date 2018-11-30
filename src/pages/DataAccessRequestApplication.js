@@ -82,7 +82,10 @@ class DataAccessRequestApplication extends Component {
         profileName: '',
         piName: '',
         urlDAA: '',
-        nameDAA: ''
+        nameDAA: '',
+        eRACommonsID: '',
+        pubmedId: '',
+        scientificUrl: ''
       },
       step1: {
         inputResearcher: {
@@ -244,13 +247,17 @@ class DataAccessRequestApplication extends Component {
       formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
       formData.country = rpProperties.country != null ? rpProperties.country : '';
       formData.state = rpProperties.state != null ? rpProperties.state : '';
-      formData.isThePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      formData.havePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
-      formData.profileName = rpProperties.profileName !== null ? rpProperties.profileName : '';
       formData.piName = rpProperties.piName !== null ? rpProperties.piName : '' ;
       formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
       formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
-
+      formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
+      formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
+      formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
+      formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
+      formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
+      formData.eRACommonsID = rpProperties.eRACommonsID !== undefined ? rpProperties.eRACommonsID : '';
+      formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
+      formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
     }
     let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
 
