@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { div, hr, label, form, textarea, a, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { User, Researcher } from "../libs/ajax";
+import { User, Researcher, Files } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherReview extends Component {
@@ -36,7 +36,8 @@ class ResearcherReview extends Component {
         pubmedID: '',
         scientificURL: '',
         state: '',
-        zipcode: ''
+        zipcode: '',
+        nameDAA: ''
       },
     }
   }
@@ -99,6 +100,10 @@ class ResearcherReview extends Component {
     this.props.history.goBack();
   };
 
+  downloadDAA() {
+    Files.getDAAFile(this.props.match.params.dacUserId, this.state.formData.nameDAA);
+  };
+
   render() {
 
     const { formData, rationale, voteStatus } = this.state;
@@ -133,11 +138,11 @@ class ResearcherReview extends Component {
             div({ className: "row form-group margin-top-20" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Full Name"]),
-                div({ id: "lbl_profileName", className: "control-data", name: "profileName" }, [formData.profileName])
+                div({ id: "lbl_profileName", className: "control-data", name: "profileName", readOnly: true }, [formData.profileName])
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Academic/Business Email Address"]),
-                div({ id: "lbl_profileAcademicEmail", className: "control-data", name: "profileAcademicEmail" }, [formData.academicEmail]),
+                div({ id: "lbl_profileAcademicEmail", className: "control-data", name: "profileAcademicEmail", readOnly: true}, [formData.academicEmail]),
               ])
             ]),
 
@@ -150,74 +155,74 @@ class ResearcherReview extends Component {
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["NIH User Name"]),
-                div({ id: "lbl_profileNihUsername", className: "control-data", name: "profileNihUsername" }, [formData.nihUsername]),
+                div({ id: "lbl_profileNihUsername", className: "control-data", name: "profileNihUsername",  readOnly: true}, [formData.nihUsername]),
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["LinkedIn Profile"]),
-                div({ id: "lbl_profileLinkedIn", className: "control-data", name: "profileLinkedIn" }, [formData.linkedIn]),
+                div({ id: "lbl_profileLinkedIn", className: "control-data", name: "profileLinkedIn", readOnly: true}, [formData.linkedIn]),
               ])
             ]),
 
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["ORCID iD"]),
-                div({ id: "lbl_profileOrcid", className: "control-data", name: "profileOrcid" }, [formData.orcid]),
+                div({ id: "lbl_profileOrcid", className: "control-data", name: "profileOrcid", readOnly: true}, [formData.orcid]),
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["ResearchGate ID"]),
-                div({ id: "lbl_profileResearcherGate", className: "control-data", name: "profileResearcherGate" }, [formData.researcherGate]),
+                div({ id: "lbl_profileResearcherGate", className: "control-data", name: "profileResearcherGate", readOnly: true}, [formData.researcherGate]),
               ])
             ]),
 
             div({ className: "row margin-top-20" }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
-                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution" }, [formData.institution]),
+                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [formData.institution]),
               ])
             ]),
 
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Department"]),
-                div({ id: "lbl_profileDepartment", className: "control-data", name: "profileDepartment" }, [formData.department]),
+                div({ id: "lbl_profileDepartment", className: "control-data", name: "profileDepartment", readOnly: true}, [formData.department]),
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Division"]),
-                div({ id: "lbl_profileDivision", className: "control-data", name: "profileDivision" }, [formData.division]),
+                div({ id: "lbl_profileDivision", className: "control-data", name: "profileDivision", readOnly: true}, [formData.division]),
               ])
             ]),
 
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Street Address 1"]),
-                div({ id: "lbl_profileAddress1", className: "control-data", name: "profileAddress1" }, [formData.address1]),
+                div({ id: "lbl_profileAddress1", className: "control-data", name: "profileAddress1", readOnly: true}, [formData.address1]),
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Street Address 2"]),
-                div({ id: "lbl_profileAddress2", className: "control-data", name: "profileAddress2" }, [formData.address2]),
+                div({ id: "lbl_profileAddress2", className: "control-data", name: "profileAddress2", readOnly: true}, [formData.address2]),
               ])
             ]),
 
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["City"]),
-                div({ className: "control-data", name: "profileCity", id: "profileCity" }, [formData.city]),
+                div({ className: "control-data", name: "profileCity", id: "profileCity", readOnly: true}, [formData.city]),
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["State"]),
-                div({ id: "lbl_profileState", className: "control-data", name: "profileState" }, [formData.state]),
+                div({ id: "lbl_profileState", className: "control-data", name: "profileState", readOnly: true}, [formData.state]),
               ])
             ]),
 
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Zip/Postal Code"]),
-                div({ id: "lbl_profileZip", className: "control-data", name: "profileZip" }, [formData.zipcode]),
+                div({ id: "lbl_profileZip", className: "control-data", name: "profileZip", readOnly: true}, [formData.zipcode]),
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Country"]),
-                div({ id: "lbl_profileCountry", className: "control-data", name: "profileCountry" }, [formData.country]),
+                div({ id: "lbl_profileCountry", className: "control-data", name: "profileCountry", readOnly: true}, [formData.country]),
               ])
             ]),
 
@@ -229,8 +234,8 @@ class ResearcherReview extends Component {
 
               div({ isRendered: formData.isThePI === false }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
-                  label({ className: "control-label" }, ["Does the researcher have a Principal Investigator?"]),
-                  div({ id: "lbl_researcherhavePI", className: "control-data" }, [formData.havePIValue]),
+                  label({ className: "control-label" }, ["Does the resercher have a Principal Investigator?"]),
+                  div({ id: "lbl_researcherhavePI", className: "control-data", readOnly: true}, [formData.havePIValue]),
                 ])
               ])
             ]),
@@ -238,28 +243,29 @@ class ResearcherReview extends Component {
             div({ className: "row no-margin", isRendered: formData.havePI === true }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Principal Investigator Name"]),
-                div({ id: "lbl_profilePIName", className: "control-data", name: "profilePIName" }, [formData.piName]),
+                div({ id: "lbl_profilePIName", className: "control-data", name: "profilePIName", readOnly: true}, [formData.piName]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Principal Investigator Email Address"]),
-                div({ id: "lbl_profilePIEmail", className: "control-data", name: "profilePIEmail" }, [formData.piEmail]),
+                div({ id: "lbl_profilePIEmail", className: "control-data", name: "profilePIEmail", readOnly: true}, [formData.piEmail]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons" }, [formData.eRACommonsID]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.eRACommonsID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID", readOnly: true}, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["URL of a scientific publication"]),
                 textarea({
                   value: [formData.scientificURL],
+                  readOnly: true,
                   name: "profileScientificURL",
                   id: "lbl_profileScientificURL",
                   className: "control-data textarea",
@@ -271,7 +277,7 @@ class ResearcherReview extends Component {
             div({ className: "row no-margin", isRendered: formData.isThePI === true || formData.havePI === false }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Pubmed ID of a publication"]),
-                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID" }, [formData.pubmedID]),
+                div({ id: "lbl_profilePubmedId", className: "control-data", name: "profilePubmedID", readOnly: true}, [formData.pubmedID]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
@@ -281,18 +287,19 @@ class ResearcherReview extends Component {
                   name: "profileScientificURL",
                   id: "lbl_profileScientificURL",
                   className: "control-data textarea",
-                  maxLength: "512"
+                  maxLength: "512",
+                  readOnly: true
                 })
               ])
             ]),
 
-            div({ className: "row no-margin" }, [
+            div({isRendered: formData.nameDAA !== undefined, className: "row no-margin" }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                 label({ className: "control-label default-color" }, ["Data Access Agreement signed by the organization's Signing Official"])
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                a({ id: "link_downloadAgreement", href: "YourName_DataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
+                a({ id: "link_downloadAgreement", onClick: () => this.downloadDAA(), className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                   span({ className: "glyphicon glyphicon-download" }),
                   "Download S.O. Signed Agreement"
                 ])

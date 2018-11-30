@@ -305,7 +305,15 @@ export const DAR = {
       }
     });
     return manualReview;
-  }
+  },
+
+    postDAA: async (fileName, file, existentFileUrl) => {
+      const url = `${await Config.getApiUrl()}/dar/storeDAA?fileName=${fileName}&existentFileUrl=${existentFileUrl}`;
+      let formData = new FormData();
+      formData.append("data", new Blob([file], { type: 'application/pdf' }));
+      const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
+      return await res.json();
+    },
 };
 
 export const DataSet = {
@@ -579,6 +587,11 @@ export const Files = {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
   },
+
+  getDAAFile: async (researcherId, fileName) => {
+    const url = `${await Config.getApiUrl()}/dar/downloadDAA/${researcherId}`;
+    return getFile(url, fileName);
+  }
 };
 
 export const Summary = {
@@ -871,12 +884,12 @@ export const User = {
     }
   },
 
-  updateMainFields: async (user, userId) => { 
+  updateMainFields: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
     return res.json();
   },
-  
+
   updateName: async (body, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), { method: 'PUT' }]));
@@ -996,6 +1009,76 @@ export const Votes = {
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return await res.json();
 
+  }
+
+};
+
+export const AuthenticateNIH = {
+  fireCloudVerifyUsr: async () => {
+    const url = `${await Config.getFireCloudUrl()}me`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
+    return await res.json();
+  },
+
+  fireCloudRegisterUsr: async (profile) => {
+    const url = `${await Config.getFireCloudUrl()}register/profile`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(AuthenticateNIH.parseProfile(profile)), { method: 'POST' }]));
+    return await res.json();
+  },
+
+  verifyNihToken: async (token) => {
+    const url = `${await Config.getFireCloudUrl()}api/nih/callback`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
+    return await res.json();
+  },
+
+  parseProfile: (profile) => {
+    let fireCloudProfileObj = {};
+    fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
+    fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
+    fireCloudProfileObj.title = "DUOS Researcher";
+    fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
+    fireCloudProfileObj.institute = (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
+    fireCloudProfileObj.institutionalProgram = "n/a";
+    fireCloudProfileObj.programLocationCity = "n/a";
+    fireCloudProfileObj.programLocationState = "n/a";
+    fireCloudProfileObj.programLocationCountry = "n/a";
+    fireCloudProfileObj.pi = (profile.havePi !== undefined && profile.havePi === true)
+      ? profile.piName : profile.isThePI === true
+        ? Storage.getCurrentUser().displayName : "n/a";
+    fireCloudProfileObj.nonProfitStatus = "n/a";
+    return fireCloudProfileObj;
+  },
+
+  saveNihUsr: async (decodedData) => {
+    const url = `${await Config.getApiUrl()}/nih`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(decodedData), { method: 'POST' }]));
+    return await res.json();
+  },
+
+  eliminateAccount: async () => {
+    const url = `${await Config.getApiUrl()}/nih`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    return await res;
+  },
+
+  expirationCount(expDate) {
+    let result = -1;
+    if (expDate !== null && expDate !== undefined) {
+      var currentDate = new Date().getTime();
+      var millisecondsPerDay = 24 * 60 * 60 * 1000;
+      var count = (AuthenticateNIH.treatAsUTC(parseInt(expDate, 10)) - AuthenticateNIH.treatAsUTC(currentDate)) / millisecondsPerDay;
+      if (count > 0) {
+        result = Math.round(count);
+      }
+    }
+    return result;
+  },
+
+  treatAsUTC(date) {
+    var result = new Date(date);
+    result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
+    return result;
   }
 
 };
