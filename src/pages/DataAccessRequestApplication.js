@@ -277,7 +277,10 @@ class DataAccessRequestApplication extends Component {
       prev.completed = completed;
       prev.formData = formData;
       prev.expirationCount = expirationCount;
-      return formData;
+      if (formData.nameDAA !== '') {
+        prev.file.name = formData.nameDAA;
+      }
+      return prev;
     });
 
   };
