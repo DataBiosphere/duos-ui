@@ -133,7 +133,6 @@ class AdminManageAccess extends Component {
     this.props.history.push(`${page}/${dataRequestId}/${electionId}`)
   };
 
-
   okApplicationSummaryModal() {
     this.setState({ showModal: false });
   };
