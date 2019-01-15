@@ -4,7 +4,7 @@ import { Storage } from "../libs/storage";
 import * as Utils from "../libs/utils";
 import Login from '../pages/Login';
 
-const AuthenticatedRoute = ({ component: Component, props: componentProps, ...rest, rolesAllowed }) =>
+const AuthenticatedRoute = ({ component: Component, props: componentProps, rolesAllowed, ...rest }) =>
   <Route
     {...rest}
     render={
