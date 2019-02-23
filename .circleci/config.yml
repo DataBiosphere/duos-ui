@@ -58,3 +58,6 @@ workflows:
       - deploy_dev:
           requires:
             - build_and_test
+          filters:
+            branches:
+              only: gr/circle
