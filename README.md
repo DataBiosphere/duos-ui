@@ -27,6 +27,11 @@ Builds/deploying handled by CircleCI.
     ```sh
     npm start
     ```
+5. Testing:
+    
+    ```sh
+    npm test
+    ```
     
 ### TODO
 
