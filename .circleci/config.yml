@@ -13,12 +13,11 @@ jobs:
           key: deps1-{{ .Branch }}-{{ checksum "package.json" }}
           paths:
             - node_modules
-# TODO: Get tests to run.
-#      - run: npm test
-#      - persist_to_workspace:
-#          root: .
-#          paths:
-#            - node_modules
+      - run: npm test
+      - persist_to_workspace:
+          root: .
+          paths:
+            - node_modules
 
 workflows:
   version: 2
