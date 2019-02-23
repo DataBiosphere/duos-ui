@@ -1,26 +1,48 @@
 version: 2
 
 jobs:
-  test:
+  build_and_test:
     docker:
       - image: node:8
     steps:
       - checkout
       - restore_cache:
           key: deps1-{{ .Branch }}-{{ checksum "package.json" }}
-      - run: npm install
+      - run:
+          name: Install Dependencies
+          command: npm install
       - save_cache:
           key: deps1-{{ .Branch }}-{{ checksum "package.json" }}
           paths:
             - node_modules
-      - run: npm test
+      - run:
+          name: Run Tests
+          command: npm test
+      - store_test_results:
+          path: test-results
       - persist_to_workspace:
           root: .
           paths:
             - node_modules
+  deploy_dev:
+    environment:
+      - PROJECT_NAME: "duos-ui"
+      - GOOGLE_PROJECT_ID: "broad-duos-dev"
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Docker build (TODO ... add authentication and push as well.
+          command: |
+            docker build \
+              --build-arg COMMIT_REF=${CIRCLE_SHA1}
+              --build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
+              -t gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:dev
 
 workflows:
   version: 2
   build-deploy:
     jobs:
-      - test
+      - build_and_test
+      - deploy_dev
