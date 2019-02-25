@@ -23,7 +23,7 @@ metadata:
   labels:
     app: ${PROJECT_NAME}
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: ${PROJECT_NAME}
@@ -45,13 +45,3 @@ spec:
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: ${PROJECT_NAME}
-  namespace: default
-spec:
-  containers:
-    - name: ${PROJECT_NAME}
-      image: gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:latest

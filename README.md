@@ -37,3 +37,21 @@ Builds/deploys handled by CircleCI.
 
 - Testing documentation
 - Description    
+
+### Deployment
+
+Builds are deployed with every merge to `develop` and `master`
+
+To execute a deploy manually, generate a "Personal API Token" documented here:
+
+* https://circleci.com/account/api
+
+And use the documentation here: 
+
+* https://circleci.com/docs/2.0/api-job-trigger/
+
+An example run:
+```
+curl -u <token>: -d build_parameters[CIRCLE_JOB]=build_dev_deploy \
+    https://circleci.com/api/v1.1/project/github/DataBiosphere/duos-ui/tree/develop
+```
