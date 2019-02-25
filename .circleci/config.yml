@@ -71,5 +71,4 @@ workflows:
             - build_and_test
           filters:
             branches:
-              # This should be changed to `develop` when PR is ready for merging.
-              only: gr/circle
+              only: develop
