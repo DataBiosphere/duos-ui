@@ -24,7 +24,7 @@ jobs:
             - node_modules
   deploy_dev:
     environment:
-      - PROJECT_NAME: "duos-ui"
+      - PROJECT_NAME: "duos-ui-dev"
       - GOOGLE_PROJECT_ID: "broad-duos-dev"
       - GOOGLE_COMPUTE_ZONE: "us-central1-a"
       - GOOGLE_CLUSTER_NAME: "duos-ui-dev-cluster"
@@ -50,11 +50,18 @@ jobs:
               --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
               -t gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:dev .
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
-            docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:latest
+            docker tag ${PROJECT_NAME} gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1}
+            docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1}
+#      - run:
+#          name: Deploy to Kubernetes
+#          command: |
+#            envsubst < ${HOME}/config/k8s.yml > ${HOME}/patched_k8s.yml
+#            kubectl apply -f ${HOME}/patched_k8s.yml
+#            kubectl rollout status deployment/${PROJECT_NAME}
 
 workflows:
   version: 2
-  build-deploy:
+  build_dev_deploy:
     jobs:
       - build_and_test
       - deploy_dev:
@@ -62,4 +69,5 @@ workflows:
             - build_and_test
           filters:
             branches:
-              only: develop
+              # This should be changed to `develop` when PR is ready for merging.
+              only: gr/circle
