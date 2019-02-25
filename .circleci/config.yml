@@ -54,12 +54,12 @@ jobs:
               -t gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1} .
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
             docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1}
-#      - run:
-#          name: Deploy to Kubernetes
-#          command: |
-#            envsubst < ${HOME}/config/k8s.yml > ${HOME}/patched_k8s.yml
-#            kubectl apply -f ${HOME}/patched_k8s.yml
-#            kubectl rollout status deployment/${PROJECT_NAME}
+      - run:
+          name: Deploy to Kubernetes
+          command: |
+            envsubst < ${HOME}/config/k8s.yml > ${HOME}/patched_k8s.yml
+            kubectl apply -f ${HOME}/patched_k8s.yml
+            kubectl rollout status deployment/${PROJECT_NAME}
 
 workflows:
   version: 2
