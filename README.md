@@ -52,6 +52,6 @@ And use the documentation here:
 
 An example run:
 ```
-curl -u <token>: -d build_parameters[CIRCLE_JOB]=build_dev_deploy \
+curl -u <token>: -d build_parameters[CIRCLE_JOB]=deploy_dev \
     https://circleci.com/api/v1.1/project/github/DataBiosphere/duos-ui/tree/develop
 ```
