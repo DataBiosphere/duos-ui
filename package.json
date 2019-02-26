@@ -1,6 +1,6 @@
 {
   "name": "duos-ui",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@material-ui/core": "1.4.3",
@@ -9,7 +9,7 @@
     "chart.js": "1.1.1",
     "classnames": "2.2.6",
     "jquery": "3.3.1",
-    "lodash": "4.17.10",
+    "lodash": "4.17.11",
     "popper.js": "1.14.4",
     "query-string": "6.2.0",
     "react": "16.5.2",
@@ -24,16 +24,20 @@
     "react-router": "4.3.1",
     "react-router-bootstrap": "0.24.4",
     "react-router-dom": "4.3.1",
-    "react-scripts": "2.1.1",
+    "react-scripts": "2.1.5",
     "react-select": "2.0.0",
     "react-tabs": "2.2.2",
-    "react-tooltip": "3.8.4"
+    "react-tooltip": "3.8.4",
+    "source-map-explorer": "1.6.0"
   },
   "scripts": {
+    "analyze": "npm run build; source-map-explorer build/static/js/main.*",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
   },
   "browserslist": [
     ">0.2%",
