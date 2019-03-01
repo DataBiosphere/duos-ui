@@ -6,8 +6,8 @@ jobs:
       - image: circleci/node:10
     steps:
       - checkout
-      # - restore_cache:
-      #     key: deps1-{{ .Branch }}-{{ checksum "package.json" }}
+      - restore_cache:
+          key: deps1-{{ .Branch }}-{{ checksum "package.json" }}
       - run:
           name: Install Dependencies
           command: npm install
@@ -73,3 +73,4 @@ workflows:
           filters:
             branches:
               only: config-fixes
+
