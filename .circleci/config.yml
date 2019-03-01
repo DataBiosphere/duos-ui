@@ -3,7 +3,7 @@ version: 2
 jobs:
   build_and_test:
     docker:
-      - image: node:8
+      - image: circleci/node:10
     steps:
       - checkout
       - restore_cache:
@@ -23,13 +23,13 @@ jobs:
           paths:
             - node_modules
   deploy_dev:
+    docker:
+      - image: google/cloud-sdk
     environment:
       - PROJECT_NAME: "duos-ui-dev"
       - GOOGLE_PROJECT_ID: "broad-duos-dev"
       - GOOGLE_COMPUTE_ZONE: "us-central1-a"
       - GOOGLE_CLUSTER_NAME: "duos-ui-dev-cluster"
-    docker:
-      - image: google/cloud-sdk
     steps:
       - checkout
       - run:
@@ -49,7 +49,8 @@ jobs:
             docker build \
               --build-arg COMMIT_REF=${CIRCLE_SHA1} \
               --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-              -t gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1} .
+              -t ${PROJECT_NAME} .
+            docker tag ${PROJECT_NAME} gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1}
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
             docker push gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1}
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:${CIRCLE_SHA1} gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:dev -q
@@ -71,4 +72,4 @@ workflows:
             - build_and_test
           filters:
             branches:
-              only: develop
+              only: config-fixes
