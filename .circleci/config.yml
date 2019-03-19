@@ -72,5 +72,5 @@ workflows:
             - build_and_test
           filters:
             branches:
-              only: config-fixes
+              only: develop
 
