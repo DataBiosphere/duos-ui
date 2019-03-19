@@ -12,8 +12,8 @@
     "lodash": "4.17.11",
     "popper.js": "1.14.4",
     "query-string": "6.2.0",
-    "react": "16.5.2",
-    "react-dom": "16.5.2",
+    "react": "16.8.3",
+    "react-dom": "16.8.3",
     "react-google-charts": "2.0.28",
     "react-google-login": "3.2.1",
     "react-hyperscript-helpers": "2.0.0",
@@ -37,8 +37,7 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "browserslist": [
     ">0.2%",
     "not dead",
