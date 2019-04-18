@@ -81,6 +81,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return {
       loading: true,
       isResearcher: Storage.getCurrentUser().isResearcher,
+      hasLibraryCard: false,
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
@@ -632,7 +633,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
                       label({ id: "lbl_profileNIH", className: "control-label" }, ["NIH eRA Commons ID"]),
                       div({ isRendered: !this.state.profile.eraAuthorized || this.state.expirationCount < 0 }, [
                         a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
@@ -657,7 +658,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         ])
                       ]),
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ style: { 'paddingLeft': '15px' }}, [
+                      label({ id: "lbl_profileLibraryCard", className: "control-label" }, ["NIH Library Card(s)"]),
+                      div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
+                        div({ className: "library-icon"}, []),
+                        span({ className: "library-label"}, "Library Card")
+                      ])
+                    ])
+                  ])
+                ]),
+
+                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
                       label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["LinkedIn Profile"]),
                       input({
                         id: "profileLinkedIn",
@@ -667,13 +680,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         onChange: this.handleChange,
                         value: this.state.profile.linkedIn
                       })
-                    ])
-                  ])
-                ]),
-
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    ]),
+                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
                       label({ id: "lbl_profileOrcid", className: "control-label" }, ["ORCID iD"]),
                       input({
                         id: "profileOrcid",
@@ -684,7 +692,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         value: this.state.profile.orcid
                       })
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
                       label({ id: "lbl_profileResearcherGate", className: "control-label" }, ["ResearchGate ID"]),
                       input({
                         id: "profileResearcherGate",
