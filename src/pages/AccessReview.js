@@ -198,6 +198,7 @@ class AccessReview extends Component {
       showConfirmationDialogOK: false,
       alertMessage: 'Your vote has been successfully logged!',
       hasUseRestriction: false,
+      hasLibraryCard: false,
       projectTitle: '',
       consentName: '',
       consentId: '',
@@ -330,9 +331,15 @@ class AccessReview extends Component {
                         span({}, [
                           label({ className: "control-label no-padding" }, ["Comments: "]),
                           span({ id: "lbl_adminComment", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
-                        ]),
+                        ])
                       ]),
-
+                      div({ className: "row no-margin" }, [
+                        label({ className: "control-label no-padding" }, ["NIH Library Card(s): "]),
+                        div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
+                          div({ className: "library-icon"}),
+                          span({ className: "library-label"}, "Library Card")
+                        ])
+                      ]),
                       div({ className: "row no-margin" }, [
                         label({ className: "control-label access-color" }, ["Institution: "]),
                         span({ id: "lbl_institution", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.institution]),

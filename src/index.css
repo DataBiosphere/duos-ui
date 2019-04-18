@@ -1184,10 +1184,11 @@ a .editable:hover, a .enabled:hover {
 
 .library-flag {
   height: 34px;
-  width: auto;
-  border-radius: 5px;
+  width: 145px;
+  border-radius: 2px;
   padding: 7px 12px 0 12px;
   color: white;
+  cursor: default;
 }
 
 .library-flag.flag-enabled {

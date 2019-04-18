@@ -658,10 +658,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         ])
                       ]),
                     ]),
-                    div({ style: { 'paddingLeft': '15px' }}, [
+                    div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
                       label({ id: "lbl_profileLibraryCard", className: "control-label" }, ["NIH Library Card(s)"]),
                       div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
-                        div({ className: "library-icon"}, []),
+                        div({ className: "library-icon"}),
                         span({ className: "library-label"}, "Library Card")
                       ])
                     ])

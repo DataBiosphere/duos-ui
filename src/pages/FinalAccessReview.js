@@ -69,6 +69,7 @@ class FinalAccessReview extends Component {
     this.setState({
       path: 'final-access-review',
       hasUseRestriction: hasUseRestrictionResp.hasUseRestriction,
+      hasLibraryCard: false,
       vote: {},
       voteAgreement: {},
       electionType: null,
@@ -704,8 +705,15 @@ class FinalAccessReview extends Component {
                   span({ isRendered: this.state.darInfo.hasAdminComment === true }, [
                     label({ className: "control-label no-padding" }, [" - Comments: "]),
                     span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
-                  ]),
+                  ])
                 ]),
+                div({ className: "row no-margin" }, [
+                  label({ className: "control-label no-padding" }, ["NIH Library Card(s): "]),
+                  div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
+                    div({ className: "library-icon"}),
+                    span({ className: "library-label"}, "Library Card")
+                  ])
+                ])
               ]),
               div({ className: "row no-margin" }, [
                 label({ className: "control-label access-color" }, ["Institution: "]),
