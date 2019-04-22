@@ -32,6 +32,7 @@ class AccessResultRecords extends Component {
       enableFinalButton: true,
       enableAgreementButton: true,
       hasUseRestriction: true,
+      hasLibraryCard: false,
       projectTitle: '',
       darCode: '',
       isQ1Expanded: false,
@@ -460,6 +461,13 @@ class AccessResultRecords extends Component {
               span({ isRendered: darInfo.hasAdminComment }, [
                 label({ className: "control-label no-padding" }, [" - Comments: "]),
                 span({ className: "response-label", style: { 'paddingLeft': '5px' } }, [darInfo.adminComment]),
+              ])
+            ]),
+            div({ className: "row no-margin" }, [
+              label({ className: "control-label no-padding" }, ["NIH Library Card: "]),
+              div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
+                div({ className: "library-icon"}),
+                span({ className: "library-label"}, "Library Card")
               ])
             ])
           ]),

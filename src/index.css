@@ -1182,6 +1182,35 @@ a .editable:hover, a .enabled:hover {
   cursor: pointer !important;
 }
 
+.library-flag {
+  height: 34px;
+  width: 145px;
+  border-radius: 2px;
+  padding: 7px 12px 0 12px;
+  color: white;
+  cursor: default;
+}
+
+.library-flag.flag-enabled {
+  background: #00609f;
+}
+
+.library-flag.flag-disabled {
+  background: #cccccc;
+}
+
+.library-icon {
+  background: url('/images/library_card_icon.png') no-repeat 0 0;
+  width: 38px;
+  height: 24px;
+  background-size: 32px 20px ;
+  display: inline-block;
+}
+
+.library-label {
+  vertical-align: 40%;
+}
+
 /*///////////////////////////////////////////////////////ADMIN*/
 
 .all-icons {

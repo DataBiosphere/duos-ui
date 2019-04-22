@@ -65,6 +65,7 @@ class AccessCollect extends Component {
       voteStatus: '',
       createDate: '',
       hasUseRestriction: false,
+      hasLibraryCard: false,
       projectTitle: '',
       consentName: '',
       isQ1Expanded: true,
@@ -431,9 +432,15 @@ class AccessCollect extends Component {
                         span({}, [
                           label({ className: "control-label no-padding" }, ["Comments: "]),
                           span({ id: "lbl_adminComment", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment]),
-                        ]),
+                        ])
                       ]),
-
+                      div({ className: "row no-margin" }, [
+                        label({ className: "control-label no-padding" }, ["NIH Library Card: "]),
+                        div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
+                          div({ className: "library-icon"}),
+                          span({ className: "library-label"}, "Library Card")
+                        ])
+                      ]),
                       div({ className: "row no-margin" }, [
                         label({ className: "control-label access-color" }, ["Institution: "]),
                         span({ id: "lbl_institution", className: "response-label", style: { 'paddingLeft': '5px' } }, [this.state.darInfo.institution]),
