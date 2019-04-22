@@ -3,18 +3,26 @@ import { Route, Redirect } from "react-router-dom";
 import { Storage } from "../libs/storage";
 import * as Utils from "../libs/utils";
 import Login from '../pages/Login';
+import { pathToFileURL } from "url";
 
-const AuthenticatedRoute = ({ component: Component, props: componentProps, ...rest, rolesAllowed }) =>
-  <Route
-    {...rest}
-    render={
-      props =>
-        verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps, ...rest)
-          ? <Component {...props} {...componentProps} />
-          : !Storage.userIsLogged() ? <Login {...props} {...componentProps} componentRoles={rolesAllowed} />
-            : <Redirect to={'/'} />
-    }
-  />;
+const AuthenticatedRoute = ({ component: Component, props: componentProps, rolesAllowed, ...rest }) => {
+
+  const { path, location, computedMatch } = rest;
+  
+  return (
+    <Route
+      path={path}
+      location={location}
+      render={
+        props =>
+          verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps)
+            ? <Component {...props} {...componentProps} />
+            : !Storage.userIsLogged() ? <Login {...props} {...componentProps} componentRoles={rolesAllowed} />
+              : <Redirect to={'/'} />
+      }
+    />
+  );
+}
 
 // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
 const verifyUser = (allowedComponentRoles, usrRoles) => {
