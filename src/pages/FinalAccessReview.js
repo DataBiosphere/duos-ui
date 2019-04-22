@@ -708,7 +708,7 @@ class FinalAccessReview extends Component {
                   ])
                 ]),
                 div({ className: "row no-margin" }, [
-                  label({ className: "control-label no-padding" }, ["NIH Library Card(s): "]),
+                  label({ className: "control-label no-padding" }, ["NIH Library Card: "]),
                   div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
                     div({ className: "library-icon"}),
                     span({ className: "library-label"}, "Library Card")
