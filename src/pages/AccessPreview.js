@@ -310,8 +310,10 @@ class AccessPreview extends Component {
                     h4({}, ["Data Use Limitations"]),
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-                    div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
+                    div({ className: "row dar-summary" }, [
+                      div({ className: "control-label dul-color" }, ["Structured Limitations"]),
+                      // div({ className: "response-label", dangerouslySetInnerHTML: { __html: sDUL } }, [])
+                      div({ className: "response-label" }, ["Something"])
                     ])
                   ])
                 ])

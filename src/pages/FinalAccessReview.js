@@ -741,12 +741,6 @@ class FinalAccessReview extends Component {
               h4({}, ["Data Use Limitations"]),
             ]),
             div({ id: "dul", className: "panel-body cm-boxbody" }, [
-              div({ className: "row no-margin" }, [
-                button({
-                  id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-                  onClick: this.downloadDUL
-                }, ["Download Data Use Letter"]),
-              ]),
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label dul-color" }, ["Structured Limitations"]),
                 div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.sDul } }, []),
