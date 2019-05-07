@@ -135,20 +135,6 @@ class AccessPreview extends Component {
     Files.getDARFile(this.props.match.params.referenceId);
   };
 
-  downloadDUL() {
-    let consentElection = undefined;
-    if (this.props.match.params.electionId !== undefined) {
-      Election.findConsentElectionByDarElection(this.props.match.params.electionId).then(data => {
-        consentElection = data;
-        if (consentElection !== undefined && consentElection.dulName !== undefined) {
-          Files.getDulFile(this.props.match.params.consentId, consentElection.dulName);
-        }
-      });
-    } else {
-      Files.getDulFile(this.state.consent.consentId, this.state.consent.dulName);
-    }
-  };
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;

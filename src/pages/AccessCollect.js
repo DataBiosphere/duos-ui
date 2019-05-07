@@ -199,10 +199,6 @@ class AccessCollect extends Component {
     Files.getDARFile(this.state.election.referenceId);
   };
 
-  downloadDUL() {
-    Files.getDulFile(this.state.consentId, this.state.dulName);
-  };
-
   accessCollectVote = (vote, rationale) => {
     this.setState(
       prev => {

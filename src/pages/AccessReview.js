@@ -252,10 +252,6 @@ class AccessReview extends Component {
     Files.getDARFile(this.props.match.params.darId);
   };
 
-  downloadDUL = (e) => {
-    Files.getDulFile(this.state.consentId, this.state.dulName);
-  };
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
