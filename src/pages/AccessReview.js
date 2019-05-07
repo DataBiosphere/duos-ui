@@ -20,7 +20,7 @@ class AccessReview extends Component {
     this.submitRpVote = this.submitRpVote.bind(this);
     this.submitVote = this.submitVote.bind(this);
   }
-
+  
   submitRpVote = (voteStatus, rationale) => {
     let vote = this.state.rpVote;
     this.setState({ disableQ2Btn: true });
@@ -175,9 +175,15 @@ class AccessReview extends Component {
 
     Election.findConsentElectionByDarElection(vote.electionId).then(data => {
       if (data.dulName !== null && data.dulElection !== null) {
-        this.setState({ dulName: data.dulName });
+        this.setState({ 
+          dulName: data.dulName,
+          translatedUseRestriction: data.translatedUseRestriction
+        });
       } else {
-        this.setState({ dulName: consent.dulName });
+        this.setState({ 
+          dulName: consent.dulName,
+          translatedUseRestriction: consent.translatedUseRestriction
+         });
       }
     });
   }
@@ -203,6 +209,7 @@ class AccessReview extends Component {
       consentName: '',
       consentId: '',
       dulName: '',
+      translatedUseRestriction: '',
       isQ1Expanded: true,
       disableQ1Btn: false,
       isQ2Expanded: false,
@@ -427,8 +434,7 @@ class AccessReview extends Component {
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row dar-summary" }, [
                       div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-                      // div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
-                      div({ className: "response-label" }, ["Something"])
+                      div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
                     ]),
                   ]),
                 ]),

@@ -61,6 +61,7 @@ class AccessCollect extends Component {
           ['Pending', 0]
         ]
       },
+      translatedUseRestriction: '',
       rus: '',
       voteStatus: '',
       createDate: '',
@@ -259,6 +260,7 @@ class AccessCollect extends Component {
       prev.isQ2Expanded = false;
       prev.consentName = electionReview.associatedConsent.name;
       prev.consentId = electionReview.consent.consentId;
+      prev.translatedUseRestriction = electionReview.consent.translatedUseRestriction;
       prev.electionType = "access";
       prev.election = electionReview.election;
       prev.darOriginalFinalVote = electionReview.election.finalVote;
@@ -380,6 +382,8 @@ class AccessCollect extends Component {
       b({ className: "pipe" }, [this.state.projectTitle]),
       this.state.consentName
     ]);
+
+    const { translatedUseRestriction } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
@@ -528,8 +532,7 @@ class AccessCollect extends Component {
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row dar-summary" }, [
                       div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-                      // div({ className: "response-label", dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
-                      div({ className: "response-label" }, ["Something"])
+                      div({ className: "response-label", dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
                     ]),
                   ]),
                 ]),

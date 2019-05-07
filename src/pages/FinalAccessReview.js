@@ -336,10 +336,6 @@ class FinalAccessReview extends Component {
     })
   }
 
-  downloadDUL = (e) => {
-    Files.getDulFile(this.state.electionReview.consent.consentId, this.state.electionReview.election.dulName);
-  }
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;

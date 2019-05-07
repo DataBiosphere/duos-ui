@@ -105,7 +105,9 @@ class AccessPreview extends Component {
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
-
+      consent : {
+        translatedUseRestriction: ''
+      },
       darInfo: {
         rus: '',
         havePI: true,
@@ -168,6 +170,8 @@ class AccessPreview extends Component {
       this.state.consentName
     ]);
 
+    const { translatedUseRestriction } = this.state.consent;
+    
     return (
 
       div({ className: "container container-wide" }, [
@@ -312,8 +316,7 @@ class AccessPreview extends Component {
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row dar-summary" }, [
                       div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-                      // div({ className: "response-label", dangerouslySetInnerHTML: { __html: sDUL } }, [])
-                      div({ className: "response-label" }, ["Something"])
+                       div({ className: "response-label", dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
                     ])
                   ])
                 ])

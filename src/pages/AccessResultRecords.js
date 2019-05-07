@@ -131,9 +131,6 @@ class AccessResultRecords extends Component {
     Files.getDARFile(this.state.darElection.referenceId);
   }
 
-  downloadDUL = (e) => {
-    Files.getDulFile(this.state.electionReview.consent.consentId, this.state.electionReview.election.dulName);
-  }
 
   toggleQ1 = (e) => {
     this.setState(prev => {
