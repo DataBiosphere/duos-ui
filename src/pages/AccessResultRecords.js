@@ -501,7 +501,7 @@ class AccessResultRecords extends Component {
         div({ id: "dul", className: "panel-body cm-boxbody" }, [
           div({ className: "row dar-summary" }, [
             div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-            div({ className: "response-label", dangerouslySetInnerHTML: { __html: sDUL } }, []),
+            div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: sDUL } }, []),
             a({
               id: "btn_downloadSDul", onClick: () => this.download("machine-readable-DUL.json", mrDUL),
               filename: 'machine-readable-DUL.json', value: mrDUL, className: "italic hover-color"
