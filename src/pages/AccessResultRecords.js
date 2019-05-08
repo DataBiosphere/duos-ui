@@ -131,9 +131,6 @@ class AccessResultRecords extends Component {
     Files.getDARFile(this.state.darElection.referenceId);
   }
 
-  downloadDUL = (e) => {
-    Files.getDulFile(this.state.electionReview.consent.consentId, this.state.electionReview.election.dulName);
-  }
 
   toggleQ1 = (e) => {
     this.setState(prev => {
@@ -390,7 +387,7 @@ class AccessResultRecords extends Component {
 
           div({ isRendered: this.state.hasUseRestriction, className: "row dar-summary" }, [
             div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
-            div({ className: "response-label", dangerouslySetInnerHTML: { __html: sDAR } }, []),
+            div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: sDAR } }, []),
             a({
               onClick: () => this.download("machine-readable-DAR.json", mrDAR),
               filename: 'machine-readable-DAR.json',
@@ -502,12 +499,9 @@ class AccessResultRecords extends Component {
           h4({}, ["Data Use Limitations"]),
         ]),
         div({ id: "dul", className: "panel-body cm-boxbody" }, [
-          div({ className: "row no-margin" }, [
-            button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-          ]),
           div({ className: "row dar-summary" }, [
             div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-            div({ className: "response-label", dangerouslySetInnerHTML: { __html: sDUL } }, []),
+            div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: sDUL } }, []),
             a({
               id: "btn_downloadSDul", onClick: () => this.download("machine-readable-DUL.json", mrDUL),
               filename: 'machine-readable-DUL.json', value: mrDUL, className: "italic hover-color"

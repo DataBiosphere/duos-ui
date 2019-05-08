@@ -105,7 +105,9 @@ class AccessPreview extends Component {
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
-
+      consent : {
+        translatedUseRestriction: ''
+      },
       darInfo: {
         rus: '',
         havePI: true,
@@ -133,20 +135,6 @@ class AccessPreview extends Component {
     Files.getDARFile(this.props.match.params.referenceId);
   };
 
-  downloadDUL() {
-    let consentElection = undefined;
-    if (this.props.match.params.electionId !== undefined) {
-      Election.findConsentElectionByDarElection(this.props.match.params.electionId).then(data => {
-        consentElection = data;
-        if (consentElection !== undefined && consentElection.dulName !== undefined) {
-          Files.getDulFile(this.props.match.params.consentId, consentElection.dulName);
-        }
-      });
-    } else {
-      Files.getDulFile(this.state.consent.consentId, this.state.consent.dulName);
-    }
-  };
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
@@ -168,6 +156,8 @@ class AccessPreview extends Component {
       this.state.consentName
     ]);
 
+    const { translatedUseRestriction } = this.state.consent;
+    
     return (
 
       div({ className: "container container-wide" }, [
@@ -310,8 +300,9 @@ class AccessPreview extends Component {
                     h4({}, ["Data Use Limitations"]),
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-                    div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
+                    div({ className: "row dar-summary" }, [
+                      div({ className: "control-label dul-color" }, ["Structured Limitations"]),
+                       div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
                     ])
                   ])
                 ])
