@@ -387,7 +387,7 @@ class AccessResultRecords extends Component {
 
           div({ isRendered: this.state.hasUseRestriction, className: "row dar-summary" }, [
             div({ className: "control-label access-color" }, ["Structured Research Purpose"]),
-            div({ className: "response-label", dangerouslySetInnerHTML: { __html: sDAR } }, []),
+            div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: sDAR } }, []),
             a({
               onClick: () => this.download("machine-readable-DAR.json", mrDAR),
               filename: 'machine-readable-DAR.json',

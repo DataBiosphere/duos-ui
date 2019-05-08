@@ -430,7 +430,7 @@ class AccessReview extends Component {
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
                     div({ className: "row dar-summary" }, [
                       div({ className: "control-label dul-color" }, ["Structured Limitations"]),
-                      div({ className: "response-label", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
+                      div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
                     ]),
                   ]),
                 ]),
