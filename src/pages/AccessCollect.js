@@ -44,7 +44,6 @@ class AccessCollect extends Component {
       showConfirmationDialogOK: false,
       showConfirmationRPDialogOK: false,
       access: {
-        isFormDisabled: false,
         chartData: [
           ['Results', 'Votes'],
           ['Yes', 0],
@@ -53,7 +52,6 @@ class AccessCollect extends Component {
         ]
       },
       rp: {
-        isFormDisabled: false,
         chartData: [
           ['Results', 'Votes'],
           ['Yes', 0],
@@ -340,15 +338,14 @@ class AccessCollect extends Component {
       }
     }
     if (type === 'access') {
-      this.setAccessChartData(yes, no, empty, empty === 0 ? false : true);
+      this.setAccessChartData(yes, no, empty);
     } else {
-      this.setRPChartData(yes, no, empty, empty === 0 ? false : true);
+      this.setRPChartData(yes, no, empty);
     }
   }
 
-  setAccessChartData(yes, no, empty, isFormDisabled) {
+  setAccessChartData(yes, no, empty) {
     this.setState(prev => {
-      prev.access.isFormDisabled = isFormDisabled;
       prev.access.chartData = [
         ['Results', 'Votes'],
         ['Yes', yes],
@@ -358,10 +355,8 @@ class AccessCollect extends Component {
       return prev;
     })
   };
-  setRPChartData(yes, no, empty, isFormDisabled) {
+  setRPChartData(yes, no, empty) {
     this.setState(prev => {
-      prev.isFormDisabled = isFormDisabled;
-      prev.rp.isFormDisabled = isFormDisabled;
       prev.rp.chartData = [
         ['Results', 'Votes'],
         ['Yes', yes],
@@ -550,7 +545,7 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: this.state.access.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
+                    isDisabled: !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.darOriginalFinalVote,
                     action: { label: "Vote", handler: this.accessCollectVote },
                     rationale: this.state.darOriginalFinalRationale,
@@ -655,7 +650,7 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: this.state.rp.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
+                    isDisabled: !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.rpOriginalFinalVote,
                     action: { label: "Vote", handler: this.rpCollectVote },
                     rationale: this.state.rpOriginalFinalRationale,
