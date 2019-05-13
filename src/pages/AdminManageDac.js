@@ -51,9 +51,17 @@ class AdminManageDac extends Component {
     this.setState({ showModal: false });
   }
 
+  async editDac() {
+    this.setState({
+      showModal: true,
+      isEditMode: true
+    });
+  };
+
   addDac() {
     this.setState({
       showModal: true,
+      isEditMode: false
     });
   }
 
@@ -74,6 +82,7 @@ class AdminManageDac extends Component {
   afterAddDacModalOpen() {
   }
 
+  
   handleSearchDac = (query) => {
     this.setState({ searchDacText: query });
   };
@@ -211,6 +220,7 @@ class AdminManageDac extends Component {
               AddDacModal({
                 isRendered: this.state.showModal,
                 showModal: this.state.showModal,
+                isEditMode: this.state.isEditMode,
                 onOKRequest: this.okAddDacModal,
                 onCloseRequest: this.closeAddDacModal,
                 onAfterOpen: this.afterAddDacModalOpen,

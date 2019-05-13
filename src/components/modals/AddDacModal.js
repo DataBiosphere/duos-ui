@@ -1,7 +1,8 @@
 import { Component } from 'react';
-import { div, form, input, label, textarea, hh } from 'react-hyperscript-helpers';
+import { div, form, input, label, textarea, hh, h } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
+import AsyncSelect from 'react-select/lib/Async';
 
 
 export const AddDacModal = hh(class AddDacModal extends Component {
@@ -9,6 +10,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      isEditMode: false,
       dac: {
         dacName: '',
         dacDescription: '',
@@ -28,6 +30,14 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   }
 
   componentDidMount() {
+    if (this.props.isEditMode) {
+      this.setState({
+        isEditMode: this.props.isEditMode,
+      });
+    } else {
+      this.setState({
+      });
+    }
   };
 
   async OKHandler() {
@@ -60,12 +70,12 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_add_dac.png",
+        imgSrc: this.state.isEditMode ? "/images/icon_edit_dac.png" : "/images/icon_add_dac.png",
         color: "common",
-        title: "Add Data Access Committee",
-        description: "Create a new Data Access Committee in the system",
+        title: this.state.isEditMode ? "Edit Data Access Committee" : "Add Data Access Committee",
+        description: this.state.isEditMode ? "Edit a Data Access Committee" : "Create a new Data Access Committee in the system",
         action: {
-          label: "Add",
+          label: this.state.isEditMode ? "Edit" : "Add",
           handler: this.OKHandler
         }
       },
@@ -118,15 +128,19 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
                 }, ["DAC Chairperson*"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                  input({
+                  h(AsyncSelect, {
                     id: "sel_dacChair",
-                    type: "text",
-                    value: this.state.dac.dacChair,
-                    onChange: this.handleChange,
-                    name: "dacChair",
-                    className: "form-control col-lg-12 vote-input",
+                    // key: this.state.formData.datasets.value,
+                    // isDisabled: this.state.formData.dar_code !== null,
+                    isMulti: false,
+                    // loadOptions: (query, callback) => this.searchDataSets(query, callback),
+                    // onChange: (option) => this.onDatasetsChange(option),
+                    // value: this.state.formData.datasets,
+                    // noOptionsMessage: () => this.state.optionMessage,
+                    // loadingMessage: () => this.state.optionMessage,
+                    classNamePrefix: "select",
                     placeholder: "Select a DUOS User...",
-                    required: true,
+                    className: 'select-autocomplete',
                   })
                 ])
               ]),
@@ -137,15 +151,19 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
                 }, ["DAC Member"]),
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                  input({
+                  h(AsyncSelect, {
                     id: "sel_dacMember",
-                    type: "text",
-                    value: this.state.dac.dacMember,
-                    onChange: this.handleChange,
-                    name: "dacMember",
-                    className: "form-control col-lg-12 vote-input",
+                    // key: this.state.formData.datasets.value,
+                    // isDisabled: this.state.formData.dar_code !== null,
+                    isMulti: true,
+                    // loadOptions: (query, callback) => this.searchDataSets(query, callback),
+                    // onChange: (option) => this.onDatasetsChange(option),
+                    // value: this.state.formData.datasets,
+                    // noOptionsMessage: () => this.state.optionMessage,
+                    // loadingMessage: () => this.state.optionMessage,
+                    classNamePrefix: "select",
                     placeholder: "Select DUOS User(s)...",
-                    required: false,
+                    className: 'select-autocomplete',
                   })
                 ])
               ])
