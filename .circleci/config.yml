@@ -29,7 +29,7 @@ jobs:
       - PROJECT_NAME: "duos-ui-dev"
       - GOOGLE_PROJECT_ID: "broad-duos-dev"
       - GOOGLE_COMPUTE_ZONE: "us-central1-a"
-      - GOOGLE_CLUSTER_NAME: "duos-ui-dev-cluster"
+      - GOOGLE_CLUSTER_NAME: "duos-dev-belax-cluster"
     steps:
       - checkout
       - run:
