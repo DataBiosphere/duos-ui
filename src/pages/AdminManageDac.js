@@ -2,18 +2,22 @@ import { Component, Fragment } from 'react';
 import { div, hr, h, span, a, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { AddDacModal } from '../components/modals/AddDacModal';
+import { DacMembersModal } from '../components/modals/DacMembersModal';
+import { DacDatasetsModal } from '../components/modals/DacDatasetsModal';
 import { PaginatorBar } from "../components/PaginatorBar";
 import { SearchBox } from '../components/SearchBox';
 
 const limit = 10;
 
-class AdminManageDac extends Component {
+class AdminManageDac extends Component { 
 
   constructor(props) {
     super(props);
     this.state = {
       currentPage: 1,
       showModal: false,
+      showMembersModal: false,
+      showDatasetsModal: false,
       value: '',
       limit: limit,
       dacsList: {
@@ -26,10 +30,21 @@ class AdminManageDac extends Component {
 
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
+
     this.addDac = this.addDac.bind(this);
     this.closeAddDacModal = this.closeAddDacModal.bind(this);
     this.okAddDacModal = this.okAddDacModal.bind(this);
     this.afterAddDacModalOpen = this.afterAddDacModalOpen.bind(this);
+
+    this.viewMembers = this.viewMembers.bind(this);
+    this.closeViewMembersModal = this.closeViewMembersModal.bind(this);
+    this.okViewMembersModal = this.okViewMembersModal.bind(this);
+    this.afterViewMembersModalOpen = this.afterViewMembersModalOpen.bind(this);
+
+    this.viewDatasets = this.viewDatasets.bind(this);
+    this.closeViewDatasetsModal = this.closeViewDatasetsModal.bind(this);
+    this.okViewDatasetsModal = this.okViewDatasetsModal.bind(this);
+    this.afterViewDatasetsModalOpen = this.afterViewDatasetsModalOpen.bind(this);
   }
 
   handlePageChange = page => {
@@ -65,9 +80,35 @@ class AdminManageDac extends Component {
     });
   }
 
+  viewMembers() {
+    this.setState({
+      showMembersModal: true,
+    });
+  }
+
+  viewDatasets() {
+    this.setState({
+      showDatasetsModal: true,
+    });
+  }
+
   closeAddDacModal() {
     this.setState(prev => {
       prev.showModal = false;
+      return prev;
+    });
+  }
+
+  closeViewMembersModal() {
+    this.setState(prev => {
+      prev.showMembersModal = false;
+      return prev;
+    });
+  }
+
+  closeViewDatasetsModal() {
+    this.setState(prev => {
+      prev.showDatasetsModal = false;
       return prev;
     });
   }
@@ -79,9 +120,28 @@ class AdminManageDac extends Component {
     });
   }
 
+  async okViewMembersModal() {
+    this.setState(prev => {
+      prev.showMembersModal = false;
+      return prev;
+    });
+  }
+
+  async okViewDatasetsModal() {
+    this.setState(prev => {
+      prev.showDatasetsModal = false;
+      return prev;
+    });
+  }
+
   afterAddDacModalOpen() {
   }
 
+  afterViewMembersModalOpen() {
+  }
+
+  afterViewDatasetsModalOpen() {
+  }
   
   handleSearchDac = (query) => {
     this.setState({ searchDacText: query });
@@ -177,7 +237,7 @@ class AdminManageDac extends Component {
                         // id: dac.dacId + "_linkDacRoster",
                         name: "link_dacRoster",
                         // href: property.propertyValue,
-                        target: "_blank",
+                        onClick: this.viewMembers,
                         className: "enabled hover-color"
                       }, ["DAC Members"])
                     ]),
@@ -190,7 +250,7 @@ class AdminManageDac extends Component {
                         // id: dac.dacId + "_linkDacDatasets",
                         name: "link_dacDatasets",
                         // href: property.propertyValue,
-                        target: "_blank",
+                        onClick: this.viewDatasets,
                         className: "enabled hover-color"
                       }, ["Linked Datasets"])
                     ]),
@@ -206,25 +266,41 @@ class AdminManageDac extends Component {
                       }, ["Edit"])
                     ])
                 ]),
-              hr({ className: "table-body-separator" }),
+                hr({ className: "table-body-separator" }),
 
-              PaginatorBar({
-                total: this.state.dacsList.dac.filter(this.searchTable(searchDacText)).length,
-                limit: this.state.limit,
-                pageCount: this.pageCount,
-                currentPage: this.state.currentPage,
-                onPageChange: this.handlePageChange,
-                changeHandler: this.handleSizeChange,
-              }),
+                PaginatorBar({
+                  total: this.state.dacsList.dac.filter(this.searchTable(searchDacText)).length,
+                  limit: this.state.limit,
+                  pageCount: this.pageCount,
+                  currentPage: this.state.currentPage,
+                  onPageChange: this.handlePageChange,
+                  changeHandler: this.handleSizeChange,
+                }),
 
-              AddDacModal({
-                isRendered: this.state.showModal,
-                showModal: this.state.showModal,
-                isEditMode: this.state.isEditMode,
-                onOKRequest: this.okAddDacModal,
-                onCloseRequest: this.closeAddDacModal,
-                onAfterOpen: this.afterAddDacModalOpen,
-              })
+                AddDacModal({
+                  isRendered: this.state.showModal,
+                  showModal: this.state.showModal,
+                  isEditMode: this.state.isEditMode,
+                  onOKRequest: this.okAddDacModal,
+                  onCloseRequest: this.closeAddDacModal,
+                  onAfterOpen: this.afterAddDacModalOpen,
+                }),
+
+                DacMembersModal({
+                  isRendered: this.state.showMembersModal,
+                  showModal: this.state.showMembersModal,
+                  onOKRequest: this.okViewMembersModal,
+                  onCloseRequest: this.closeViewMembersModal,
+                  onAfterOpen: this.afterViewMembersModalOpen,
+                }),
+
+                DacDatasetsModal({
+                  isRendered: this.state.showDatasetsModal,
+                  showModal: this.state.showDatasetsModal,
+                  onOKRequest: this.okViewDatasetModal,
+                  onCloseRequest: this.closeViewDatasetsModal,
+                  onAfterOpen: this.afterViewDatasetsModalOpen,
+                })
             ])
           //   )
           // })
