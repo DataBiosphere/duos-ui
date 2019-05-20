@@ -53,7 +53,6 @@ class DulCollect extends Component {
   initialState() {
     return {
       buttonDisabled: false,
-      isFormDisabled: true,
       showConfirmationDialogOK: false,
       dialogTitle: 'Email Notification Sent.',
       showDialogReminder: false,
@@ -160,7 +159,6 @@ class DulCollect extends Component {
       }
     }
     this.setState(prev => {
-      prev.isFormDisabled = empty === 0 ? false : true;
       prev.chartData = [
         ['Results', 'Votes'],
         ['Yes', yes],
@@ -238,7 +236,7 @@ class DulCollect extends Component {
               id: "dulCollect",
               color: "dul",
               title: "Were the data use limitations in the Data Use Letter accurately converted to structured limitations?",
-              isDisabled: this.state.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
+              isDisabled: !Storage.getCurrentUser().isChairPerson,
               voteStatus: this.state.finalVote,
               rationale: this.state.finalRationale,
               action: { label: "Vote", handler: this.dulCollect },

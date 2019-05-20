@@ -44,7 +44,6 @@ class AccessCollect extends Component {
       showConfirmationDialogOK: false,
       showConfirmationRPDialogOK: false,
       access: {
-        isFormDisabled: false,
         chartData: [
           ['Results', 'Votes'],
           ['Yes', 0],
@@ -53,7 +52,6 @@ class AccessCollect extends Component {
         ]
       },
       rp: {
-        isFormDisabled: false,
         chartData: [
           ['Results', 'Votes'],
           ['Yes', 0],
@@ -61,6 +59,7 @@ class AccessCollect extends Component {
           ['Pending', 0]
         ]
       },
+      translatedUseRestriction: '',
       rus: '',
       voteStatus: '',
       createDate: '',
@@ -198,10 +197,6 @@ class AccessCollect extends Component {
     Files.getDARFile(this.state.election.referenceId);
   };
 
-  downloadDUL() {
-    Files.getDulFile(this.state.consentId, this.state.dulName);
-  };
-
   accessCollectVote = (vote, rationale) => {
     this.setState(
       prev => {
@@ -259,6 +254,7 @@ class AccessCollect extends Component {
       prev.isQ2Expanded = false;
       prev.consentName = electionReview.associatedConsent.name;
       prev.consentId = electionReview.consent.consentId;
+      prev.translatedUseRestriction = electionReview.consent.translatedUseRestriction;
       prev.electionType = "access";
       prev.election = electionReview.election;
       prev.darOriginalFinalVote = electionReview.election.finalVote;
@@ -342,15 +338,14 @@ class AccessCollect extends Component {
       }
     }
     if (type === 'access') {
-      this.setAccessChartData(yes, no, empty, empty === 0 ? false : true);
+      this.setAccessChartData(yes, no, empty);
     } else {
-      this.setRPChartData(yes, no, empty, empty === 0 ? false : true);
+      this.setRPChartData(yes, no, empty);
     }
   }
 
-  setAccessChartData(yes, no, empty, isFormDisabled) {
+  setAccessChartData(yes, no, empty) {
     this.setState(prev => {
-      prev.access.isFormDisabled = isFormDisabled;
       prev.access.chartData = [
         ['Results', 'Votes'],
         ['Yes', yes],
@@ -360,10 +355,8 @@ class AccessCollect extends Component {
       return prev;
     })
   };
-  setRPChartData(yes, no, empty, isFormDisabled) {
+  setRPChartData(yes, no, empty) {
     this.setState(prev => {
-      prev.isFormDisabled = isFormDisabled;
-      prev.rp.isFormDisabled = isFormDisabled;
       prev.rp.chartData = [
         ['Results', 'Votes'],
         ['Yes', yes],
@@ -380,6 +373,8 @@ class AccessCollect extends Component {
       b({ className: "pipe" }, [this.state.projectTitle]),
       this.state.consentName
     ]);
+
+    const { translatedUseRestriction } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
@@ -526,8 +521,9 @@ class AccessCollect extends Component {
                     h4({}, ["Data Use Limitations"]),
                   ]),
                   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-                    div({ className: "row no-margin" }, [
-                      button({ id: "btn_downloadDataUseLetter", className: "col-lg-8 col-md-8 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDUL() }, ["Download Data Use Letter"]),
+                    div({ className: "row dar-summary" }, [
+                      div({ className: "control-label dul-color" }, ["Structured Limitations"]),
+                      div({ className: "response-label translated-restriction", dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
                     ]),
                   ]),
                 ]),
@@ -549,7 +545,7 @@ class AccessCollect extends Component {
                     color: "access",
                     title: this.state.hasUseRestriction ? "Q1. Should data access be granted to this applicant?"
                       : "Should data access be granted to this applicant?",
-                    isDisabled: this.state.access.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
+                    isDisabled: !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.darOriginalFinalVote,
                     action: { label: "Vote", handler: this.accessCollectVote },
                     rationale: this.state.darOriginalFinalRationale,
@@ -654,7 +650,7 @@ class AccessCollect extends Component {
                     id: "rpCollect",
                     color: "access",
                     title: "Q2. Was the research purpose accurately converted to a structured format?",
-                    isDisabled: this.state.rp.isFormDisabled || !Storage.getCurrentUser().isChairPerson,
+                    isDisabled: !Storage.getCurrentUser().isChairPerson,
                     voteStatus: this.state.rpOriginalFinalVote,
                     action: { label: "Vote", handler: this.rpCollectVote },
                     rationale: this.state.rpOriginalFinalRationale,
