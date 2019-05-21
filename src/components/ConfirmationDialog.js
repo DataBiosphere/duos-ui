@@ -45,10 +45,10 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    return {
-      alertMessage: nextProps.alertMessage,
-      alertTitle: nextProps.alertTitle
-    };
+      return {
+        alertMessage: nextProps.alertMessage,
+        alertTitle: nextProps.alertTitle
+      };
   }
 
   render() {
