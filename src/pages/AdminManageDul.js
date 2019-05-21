@@ -308,10 +308,11 @@ class AdminManageDul extends Component {
         ]),
         div({ className: "jumbotron table-box" }, [
           div({ className: "grid-9-row pushed-2" }, [
-            div({ className: "col-2 cell-header dul-color" }, ["Consent id"]),
+            div({ className: "col-1 cell-header dul-color" }, ["Consent id"]),
             div({ className: "col-2 cell-header dul-color" }, ["Consent Group Name"]),
             div({ className: "col-1 cell-header dul-color" }, ["Election N°"]),
             div({ className: "col-1 cell-header dul-color" }, ["Date"]),
+            div({ className: "col-1 cell-header dul-color" }, ["DAC Name"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Edit Record"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Election status"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Election actions"]),
@@ -329,7 +330,7 @@ class AdminManageDul extends Component {
                     div({
                       id: election.consentId + "_consentId",
                       name: "consentId",
-                      className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""),
+                      className: "col-1 cell-body text " + (election.archived === true ? "flagged" : ""),
                       title: election.consentName
                     },
                       [
@@ -363,6 +364,13 @@ class AdminManageDul extends Component {
                       name: "createDate",
                       className: "col-1 cell-body text"
                     }, [Utils.formatDate(election.createDate)]),
+                    div({
+                      id: election.consentId + "_dacName",
+                      name: "dacName",
+                      // title: election.dacName,
+                      className: "col-1 cell-body text"
+                      //replace with actual DAC Name
+                    }, ["DAC Name"]),
                     div({
                       className: "col-1 cell-body f-center",
                       disabled: (election.electionStatus !== 'un-reviewed' || !election.editable)
