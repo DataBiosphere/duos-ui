@@ -3,6 +3,7 @@ import { div, hr } from 'react-hyperscript-helpers';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
+import { AddDacModal } from '../components/modals/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
@@ -21,6 +22,7 @@ class AdminConsole extends Component {
       currentUser: currentUser,
       showModal: false,
       showAddDulModal: false,
+      showAddDacModal: false,
       showAddUserModal: false,
       showAddDatasetModal: false,
       showAddOntologiesModal: false,
@@ -64,6 +66,13 @@ class AdminConsole extends Component {
   addDul = (e) => {
     this.setState(prev => {
       prev.showAddDulModal = true;
+      return prev;
+    });
+  };
+
+  addDac = (e) => {
+    this.setState(prev => {
+      prev.showAddDacModal = true;
       return prev;
     });
   };
@@ -112,6 +121,10 @@ class AdminConsole extends Component {
         this.setState({showAddUserModal: false});
         this.props.history.push(`admin_manage_users`);
         break;
+      case 'addDac':
+        this.setState({showAddDacModal: false});
+        this.props.history.push(`admin_manage_dac`);
+        break;
       case 'addDataset': {
         this.setState({ showAddDatasetModal: false });
         this.props.history.push(`dataset_catalog`);
@@ -126,6 +139,7 @@ class AdminConsole extends Component {
   closeModal = (name) => {
     switch (name) {
       case 'addDul': this.setState({ showAddDulModal: false }); break;
+      case 'addDac': this.setState({ showAddDacModal: false }); break;
       case 'addUser': this.setState({ showAddUserModal: false }); break;
       case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
       case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
@@ -137,6 +151,7 @@ class AdminConsole extends Component {
   afterModalOpen = (name) => {
     switch (name) {
       case 'addDul': this.setState(prev => { prev.showAddDulModal = false; return prev; }); break;
+      case 'addDac': this.setState(prev => { prev.showAddDacModal = false; return prev; }); break;
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
       case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
       case 'addOntologies': this.setState(prev => { prev.showAddOntologiesModal = false; return prev; }); break;
@@ -262,8 +277,42 @@ class AdminConsole extends Component {
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
                   onAfterOpen: this.afterModalOpen
-                }),
+                })
+              ])
+            ]),
+
+            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                AdminConsoleBox({
+                  id: 'btn_manageDAC',
+                  url: '/admin_manage_dac',
+                  color: 'common',
+                  title: 'Manage Data Access Committee',
+                  description: 'Create and manage Data Access Committees',
+                  iconName: 'manage-dac',
+                  iconSize: 'large',
+                  unreviewedCases: darUnreviewedCases
+                })
               ]),
+
+              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                AdminConsoleBox({
+                  id: 'btn_addDAC',
+                  clickHandler: this.addDac,
+                  color: 'common',
+                  title: 'Add Data Access Committee',
+                  description: 'Create a new Data Access Committee in the system',
+                  iconName: 'add-dac',
+                  iconSize: 'large',
+                  unreviewedCases: 0
+                }),
+                AddDacModal({
+                  showModal: this.state.showAddDacModal,
+                  onOKRequest: this.okModal,
+                  onCloseRequest: this.closeModal,
+                  onAfterOpen: this.afterModalOpen
+                })
+              ])
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -285,7 +334,7 @@ class AdminConsole extends Component {
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
                   onAfterOpen: this.afterModalOpen
-                }),
+                })
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
@@ -298,8 +347,8 @@ class AdminConsole extends Component {
                   iconName: 'invalid-restrictions',
                   iconSize: 'large',
                   unreviewedCases: 0
-                }),
-              ]),
+                })
+              ])
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -313,7 +362,7 @@ class AdminConsole extends Component {
                   iconName: 'manage-ontologies',
                   iconSize: 'large',
                   unreviewedCases: 0
-                }),
+                })
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
