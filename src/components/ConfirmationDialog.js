@@ -1,7 +1,6 @@
 import { Component } from 'react';
-import { button, div, h, h2, span, hh, label } from 'react-hyperscript-helpers';
+import { button, div, h, h2, span, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import AsyncSelect from 'react-select/lib/Async';
 import { Alert } from '../components/Alert';
 import './ConfirmationDialog.css';
 
@@ -30,10 +29,6 @@ const customStyles = {
     borderRadius: '4px',
     outline: 'none',
     padding: '10px 20px 20px 20px',
-  },
-
-  labelMargin: {
-    margin: '10px 0 5px 0', textAlign: 'left', float: 'left'
   }
 };
 
@@ -44,7 +39,6 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
   constructor(props) {
     super(props);
     this.state = {
-      dacName: '',
       alertMessage: undefined,
       alertTitle: undefined
     }
@@ -81,28 +75,6 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
 
             div({ id: "lbl_dialogContent", className: "dialog-content" }, [
               this.props.children,
-              div({ 
-                isRendered: this.props.dacSelection !== undefined, 
-                className: "form-group" }, [
-                label({
-                  id: "lbl_selectDAC",
-                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 control-label " + this.props.color + "-color", style: customStyles.labelMargin,
-                }, ["Select a DAC to vote on this election"]),
-                  h(AsyncSelect, {
-                    id: "sel_dac",
-                    // key: this.state.dacName,
-                    isMulti: false,
-                    // loadOptions: (query, callback) => this.searchDacs(query, callback),
-                    // onChange: (option) => this.onDacsChange(option),
-                    // value: this.state.dacName,
-                    // noOptionsMessage: () => this.state.optionMessage,
-                    // loadingMessage: () => this.state.optionMessage,
-                    classNamePrefix: "select",
-                    placeholder: "Select DAC...",
-                    className: 'select-autocomplete',
-                    required: true
-                  })
-              ]),
               div({ isRendered: this.state.alertTitle !== undefined, className: "dialog-alert" }, [
                 Alert({ id: "dialog", type: "danger", title: this.state.alertTitle, description: this.state.alertMessage })
               ])

@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { Consent, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
+import AsyncSelect from 'react-select/lib/Async';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
 import { SearchBox } from '../components/SearchBox';
@@ -34,7 +35,8 @@ class AdminManageDul extends Component {
       alertMessage: undefined,
       alertTitle: undefined,
       disableOkBtn: false,
-      disableCancelBtn: false
+      disableCancelBtn: false,
+      dacName: ''
     };
 
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -277,6 +279,12 @@ class AdminManageDul extends Component {
   render() {
 
     const { currentPage, limit, searchDulText } = this.state;
+
+    const customStyles = {
+      labelMargin: {
+        margin: '10px 0 5px 0', textAlign: 'left', float: 'left'
+      }
+    }
 
     return (
       div({ className: "container container-wide" }, [
@@ -566,7 +574,24 @@ class AdminManageDul extends Component {
               span({
                 isRendered: this.state.createWarning,
                 className: "no-padding display-inline"
-              }, ["The previous election will be archived and it's result will no longer be valid."]),
+              }, ["The previous election will be archived and it's result will no longer be valid."])
+            ]),
+            div({ className: "form-group" }, [
+              label({ id: "lbl_selectDAC", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 control-label dul-color", style: customStyles.labelMargin }, ["Select a DAC to vote on this election"]),
+                h(AsyncSelect, {
+                  id: "sel_dac",
+                  // key: this.state.dacName,
+                  isMulti: false,
+                  // loadOptions: (query, callback) => this.searchDacs(query, callback),
+                  // onChange: (option) => this.onDacsChange(option),
+                  // value: this.state.dacName,
+                  // noOptionsMessage: () => this.state.optionMessage,
+                  // loadingMessage: () => this.state.optionMessage,
+                  classNamePrefix: "select",
+                  placeholder: "Select DAC...",
+                  className: 'select-autocomplete',
+                  required: true
+                })
             ])
           ]),
 

@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hh, ul, li } from 'react-hyperscript-helpers';
+import { hh, ul, li } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 
 const MODAL_ID = 'dacDatasets';
