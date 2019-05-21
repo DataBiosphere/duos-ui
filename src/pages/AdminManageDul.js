@@ -555,6 +555,7 @@ class AdminManageDul extends Component {
           color: 'dul',
           disableOkBtn: this.state.disableOkBtn,
           disableNoBtn: this.state.disableCancelBtn,
+          dacSelection: true,
           action: { label: "Yes", handler: this.dialogHandlerCreate },
           alertMessage: this.state.alertMessage,
           alertTitle: this.state.alertTitle
