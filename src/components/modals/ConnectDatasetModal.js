@@ -59,7 +59,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   OKHandler() {
     if (this.state.needsApprovalModified) {
       DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(response => {
-        this.createOrUpdateAssociations()
+        this.createOrUpdateAssociations();
       }, (error) => {
         this.setState(prev => {
           prev.showError = true;
@@ -258,7 +258,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
                     this.state.availableclients.map((client, index) => {
                       return h(Fragment, { key: index }, [
                         option({ value: client.id }, [client.name]),
-                      ])
+                      ]);
                     })
                   ]),
               ]),
@@ -295,7 +295,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
                     this.state.selectedclients.map((client, index) => {
                       return h(Fragment, { key: index }, [
                         option({ value: client.id }, [client.name]),
-                      ])
+                      ]);
                     })
                   ])
               ]),
@@ -311,7 +311,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
                 className: "checkbox-inline",
                 name: "needsApproval"
               }),
-                label({ 
+                label({
                   id: "lbl_needsApproval",
                   className: "regular-checkbox dataset-label",
                   htmlFor: "chk_needsApproval"

@@ -33,7 +33,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     return {
       timeOut: nextProps.timeOut,
       isDataSetElection: nextProps.isDataSetElection.open
-    }
+    };
   }
 
 
@@ -52,7 +52,9 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     approvalExpirationTime.amountOfDays = this.state.updatedTimeOut.amountOfDays;
     if (this.state.timeOut.id === null) {
       await ElectionTimeout.createApprovalExpirationTime(approvalExpirationTime);
-      this.setState(prev => { prev.timeOut.amountOfDays = approvalExpirationTime.amountOfDays; return prev; });
+      this.setState(prev => {
+ prev.timeOut.amountOfDays = approvalExpirationTime.amountOfDays; return prev;
+});
       this.props.onOKRequest('electionTimeout');
     } else {
       await ElectionTimeout.updateApprovalExpirationTime(approvalExpirationTime);
@@ -66,7 +68,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
 
   closeHandler() {
     // this is the method to handle Cancel click
-    // could do some cleaning here 
+    // could do some cleaning here
     // or delegate it to the parent
     // we need to use it to close the
     // DO SOMETHING HERE ...

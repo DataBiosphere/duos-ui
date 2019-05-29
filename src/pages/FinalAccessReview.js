@@ -133,7 +133,7 @@ class FinalAccessReview extends Component {
       vote.rationale = this.state.tmpRationale;
 
       try {
-        // vote 
+        // vote
         await Votes.updateFinalAccessDarVote(this.state.referenceId, vote);
       } catch (e) {
         this.setState({
@@ -161,11 +161,11 @@ class FinalAccessReview extends Component {
       }
 
     } else {
-      // vote cancelled 
+      // vote cancelled
       this.setState(prev => {
         prev.showConfirmDialog = false;
         prev.q1OkBtnDisabled = false;
-        prev.q1NoBtnDisabled = false
+        prev.q1NoBtnDisabled = false;
         return prev;
       });
     }
@@ -194,7 +194,7 @@ class FinalAccessReview extends Component {
 
     if (answer === true) {
 
-      let voteAgreement = this.state.voteAgreement
+      let voteAgreement = this.state.voteAgreement;
       voteAgreement.finalVote = this.state.tmpAgreementVote;
       voteAgreement.finalRationale = this.state.tmpAgreementRationale;
       voteAgreement.vote = this.state.tmpAgreementVote;
@@ -241,8 +241,10 @@ class FinalAccessReview extends Component {
   closeElection = async (q) => {
 
     try {
-      // change election status 
-      await this.setState(prev => { prev.electionAccess.status = 'Closed'; });
+      // change election status
+      await this.setState(prev => {
+ prev.electionAccess.status = 'Closed';
+});
 
       // update election
       await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);
@@ -329,11 +331,11 @@ class FinalAccessReview extends Component {
   downloadDAR = async (e) => {
     this.setState({
       loading: true
-    })
+    });
     await Files.getDARFile(this.state.referenceId);
     this.setState({
       loading: false
-    })
+    });
   }
 
   toggleQ1 = (e) => {
@@ -359,7 +361,7 @@ class FinalAccessReview extends Component {
 
   init = async () => {
 
-    // const vote = await 
+    // const vote = await
     Votes.getDarFinalAccessVote(this.state.electionId).then(
       vote => {
 
@@ -382,7 +384,7 @@ class FinalAccessReview extends Component {
       }
     );
 
-    // const data1 = await 
+    // const data1 = await
     Election.findDataAccessElectionReview(this.state.electionId, false).then(
       async data1 => {
 
@@ -412,7 +414,7 @@ class FinalAccessReview extends Component {
         this.setState(prev => {
           prev.electionRP.finalRationale = '';
           return prev;
-        })
+        });
       }
 
       this.setState({
@@ -427,7 +429,7 @@ class FinalAccessReview extends Component {
         rpVoteAccessList: [],
         chartRP: { 'Total': [] },
         showRPaccordion: false
-      })
+      });
     }
 
     this.setState({

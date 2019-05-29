@@ -2,7 +2,7 @@ export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';
   }
-  
+
   let dateFormat = new Date(dateval);
   let year = dateFormat.getFullYear();
   let month = ('0' + (dateFormat.getMonth() + 1)).slice(-2);

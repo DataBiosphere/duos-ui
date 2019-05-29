@@ -200,7 +200,7 @@ class DataAccessRequestApplication extends Component {
           return prev;
         }, () => Storage.removeData('dar_application'));
         return false;
-      })
+      });
   }
 
 
@@ -269,8 +269,7 @@ class DataAccessRequestApplication extends Component {
     let completed = false;
     if (formData.dar_code !== null) {
       completed = '';
-    }
-    else if (rpProperties.completed !== undefined) {
+    } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
@@ -294,7 +293,7 @@ class DataAccessRequestApplication extends Component {
           value: item.id,
           label: item.label,
           item: item
-        }
+        };
       });
     }
     return ontologies;
@@ -304,7 +303,7 @@ class DataAccessRequestApplication extends Component {
       return {
         value: item.id,
         label: item.concatenation
-      }
+      };
     });
   }
   handleFileChange(event) {
@@ -336,14 +335,11 @@ class DataAccessRequestApplication extends Component {
   checkValidations() {
     if (this.state.showValidationMessages === true && this.state.step === 1) {
       this.verifyStep1();
-    }
-    else if (this.state.showValidationMessages === true && this.state.step === 2) {
+    } else if (this.state.showValidationMessages === true && this.state.step === 2) {
       this.verifyStep2();
-    }
-    else if (this.state.showValidationMessages === true && this.state.step === 3) {
+    } else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
-    }
-    else if (this.state.showValidationMessages === true && this.state.step === 4) {
+    } else if (this.state.showValidationMessages === true && this.state.step === 4) {
       this.verifyStep4();
     }
   };
@@ -435,7 +431,7 @@ class DataAccessRequestApplication extends Component {
       isOrcidInvalid = false, isResearcherGateInvalid = false,
       isDAAInvalid = false, showValidationMessages = false,
       isNihInvalid = false;
-      
+
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
       showValidationMessages = true;
@@ -607,7 +603,9 @@ class DataAccessRequestApplication extends Component {
         });
         formData.datasetId = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
-        this.setState(prev => { prev.disableOkBtn = true; return prev; });
+        this.setState(prev => {
+ prev.disableOkBtn = true; return prev;
+});
         DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
           formData.urlDAA = response.urlDAA;
           formData.nameDAA = response.nameDAA;
@@ -642,7 +640,9 @@ class DataAccessRequestApplication extends Component {
   };
 
   dialogHandlerSave = (answer) => (e) => {
-    this.setState(prev => { prev.disableOkBtn = true; return prev; });
+    this.setState(prev => {
+ prev.disableOkBtn = true; return prev;
+});
     if (answer === true) {
       let ontologies = [];
       for (let ontology of this.state.formData.ontologies) {
@@ -1386,7 +1386,7 @@ class DataAccessRequestApplication extends Component {
                                     span({ className: "radio-check" }),
                                     span({ className: "radio-label" }, [genderLabels[ix]])
                                   ])
-                              )
+                              );
                             })
                           ])
                         ])

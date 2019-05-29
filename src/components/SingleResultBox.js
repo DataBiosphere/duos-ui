@@ -8,7 +8,7 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
     super(props);
     this.state = {
       showDialogReminder: false,
-    }
+    };
   }
 
   openDialogReminder = (e) => {
@@ -59,11 +59,11 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
               span({ isRendered: this.props.data.vote.createDate === null }, ["---"]),
               span(
                 { isRendered: this.props.data.vote.createDate !== null && this.props.data.vote.updateDate === null },
-                [Utils.formatDate(this.props.data.vote.createDate) /* | date:dateFormat */]
+                [Utils.formatDate(this.props.data.vote.createDate)]
               ),
               span(
                 { isRendered: this.props.data.vote.createDate !== null && this.props.data.vote.updateDate !== null },
-                [Utils.formatDate(this.props.data.vote.updateDate) /* | date:dateFormat */]
+                [Utils.formatDate(this.props.data.vote.updateDate)]
               ),
             ]),
           ]),

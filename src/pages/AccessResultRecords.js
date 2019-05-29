@@ -73,7 +73,7 @@ class AccessResultRecords extends Component {
         diseases: [
         ]
       }
-    }
+    };
   }
 
   chunk(arr, size) {

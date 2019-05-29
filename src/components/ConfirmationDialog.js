@@ -41,7 +41,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
     this.state = {
       alertMessage: undefined,
       alertTitle: undefined
-    }
+    };
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {

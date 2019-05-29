@@ -11,7 +11,7 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
     super(props);
     this.state = {
       translatedUseRestriction: this.props.translatedUseRestriction
-    }
+    };
   };
 
   OKHandler = (e) => {

@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import Pagination from 'react-paginating';
 import { div, hh, h, button, span, select, option } from 'react-hyperscript-helpers';
-import _ from 'lodash/fp'
+import _ from 'lodash/fp';
 import './PaginatorBar.css';
 
 const paginatorButton = (props, label) => button(_.merge({ className: "pagination-btn" }, props), label);
@@ -15,7 +15,7 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
     this.state = {
       limit: this.props.limit ? this.props.limit : 5,
       pageCount: this.props.pageCount ? this.props.pageCount : 5
-    }
+    };
   }
 
   changeLimit(e) {
@@ -24,7 +24,9 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
     this.setState(prev => {
       prev.limit = value;
       return prev;
-    }, () => { this.props.changeHandler(this.state.limit); });
+    }, () => {
+ this.props.changeHandler(this.state.limit);
+});
   }
 
   render() {

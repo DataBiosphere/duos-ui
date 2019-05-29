@@ -36,7 +36,7 @@ export const YesNoRadioGroup = (props) => {
               span({ className: "radio-check" }),
               span({ className: "radio-label" }, [optionLabels[ix]])
             ])
-         )
+         );
       })
     ])
   );

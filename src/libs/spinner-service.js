@@ -80,4 +80,4 @@ export class SpinnerService {
 }
 
 const spinnerService = new SpinnerService();
-export { spinnerService }
+export { spinnerService };

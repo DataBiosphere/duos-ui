@@ -8,7 +8,7 @@ export const CollapsiblePanel = hh(class CollapsiblePanel extends Component {
     super(props);
     this.state = {
       expanded: this.props.expanded
-    }
+    };
   }
 
   toggle = () => {

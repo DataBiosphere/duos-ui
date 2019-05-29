@@ -15,12 +15,12 @@ export const Alert = hh(class Alert extends Component {
           className: "alert-title",
           isRendered: this.props.title !== undefined
          }, [this.props.title]),
-        span({ 
+        span({
           id: this.props.id + "_description",
           className: "alert-description",
           isRendered: this.props.description !== undefined
          }, [this.props.description]),
-      ])
+      ]);
   }
 
 });

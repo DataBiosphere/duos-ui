@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, hr, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DataSet, Consent } from '../../libs/ajax'
+import { DataSet, Consent } from '../../libs/ajax';
 
 export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Component {
 

@@ -124,7 +124,7 @@ class AccessCollect extends Component {
         prev.dialogTitle = 'Email Notification Error.';
         return prev;
       });
-    })
+    });
   };
 
   async sendReminder(voteId) {
@@ -151,7 +151,7 @@ class AccessCollect extends Component {
           prev.alertAccessMessage = 'Remember to log a vote on: Q2. Was the research purpose accurately converted to a structured format?';
           prev.showAlertAccess = true;
           return prev;
-        })
+        });
       }
     } else {
       this.setState(prev => {
@@ -353,7 +353,7 @@ class AccessCollect extends Component {
         ['Pending', empty]
       ];
       return prev;
-    })
+    });
   };
   setRPChartData(yes, no, empty) {
     this.setState(prev => {
@@ -364,7 +364,7 @@ class AccessCollect extends Component {
         ['Pending', empty]
       ];
       return prev;
-    })
+    });
   }
 
   render() {

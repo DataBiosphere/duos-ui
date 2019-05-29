@@ -98,7 +98,7 @@ class AdminManageDul extends Component {
 
 
   open(electionId, page, action, status) {
-    this.props.history.push(`${page}/${electionId}`)
+    this.props.history.push(`${page}/${electionId}`);
   }
 
   async editDul(election) {
@@ -450,7 +450,7 @@ class AdminManageDul extends Component {
                   ]),
                 hr({ className: "table-body-separator" })
               ])
-            )
+            );
           }),
           PaginatorBar({
             total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,

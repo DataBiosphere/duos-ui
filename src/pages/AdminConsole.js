@@ -136,11 +136,21 @@ class AdminConsole extends Component {
 
   afterModalOpen = (name) => {
     switch (name) {
-      case 'addDul': this.setState(prev => { prev.showAddDulModal = false; return prev; }); break;
-      case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
-      case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
-      case 'addOntologies': this.setState(prev => { prev.showAddOntologiesModal = false; return prev; }); break;
-      case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
+      case 'addDul': this.setState(prev => {
+ prev.showAddDulModal = false; return prev;
+}); break;
+      case 'addUser': this.setState(prev => {
+ prev.showAddUserModal = false; return prev;
+}); break;
+      case 'addDataset': this.setState(prev => {
+ prev.showAddDatasetModal = false; return prev;
+}); break;
+      case 'addOntologies': this.setState(prev => {
+ prev.showAddOntologiesModal = false; return prev;
+}); break;
+      case 'electionTimeout': this.setState(prev => {
+ prev.showElectionTimeoutModal = false; return prev;
+}); break;
       default: break;
     }
   };
