@@ -24,9 +24,7 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
     this.setState(prev => {
       prev.limit = value;
       return prev;
-    }, () => {
- this.props.changeHandler(this.state.limit);
-});
+    }, () => { this.props.changeHandler(this.state.limit); });
   }
 
   render() {

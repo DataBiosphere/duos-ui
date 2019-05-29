@@ -289,9 +289,7 @@ class DatasetCatalog extends Component {
 
   selectAll = (e) => {
     const checked = e.target.checked;
-    const checkedCatalog = this.state.dataSetList.catalog.map(row => {
- row.checked = checked; return row;
-});
+    const checkedCatalog = this.state.dataSetList.catalog.map(row => { row.checked = checked; return row; });
     this.setState(prev => {
       prev.allChecked = checked;
       prev.dataSetList.catalog = checkedCatalog;

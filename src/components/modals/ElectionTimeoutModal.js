@@ -52,9 +52,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     approvalExpirationTime.amountOfDays = this.state.updatedTimeOut.amountOfDays;
     if (this.state.timeOut.id === null) {
       await ElectionTimeout.createApprovalExpirationTime(approvalExpirationTime);
-      this.setState(prev => {
- prev.timeOut.amountOfDays = approvalExpirationTime.amountOfDays; return prev;
-});
+      this.setState(prev => { prev.timeOut.amountOfDays = approvalExpirationTime.amountOfDays; return prev; });
       this.props.onOKRequest('electionTimeout');
     } else {
       await ElectionTimeout.updateApprovalExpirationTime(approvalExpirationTime);

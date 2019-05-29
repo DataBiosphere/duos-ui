@@ -643,9 +643,7 @@ export const Ontology = {
   retrieveIndexedFiles: async () => {
     const url = `${await Config.getApiUrl()}/ontology`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json().then((data) => {
- return data;
-});
+    return await res.json().then((data) => { return data });
   },
 
   deleteOntologyFile: async (fileUrl) => {

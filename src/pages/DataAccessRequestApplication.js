@@ -603,9 +603,7 @@ class DataAccessRequestApplication extends Component {
         });
         formData.datasetId = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
-        this.setState(prev => {
- prev.disableOkBtn = true; return prev;
-});
+        this.setState(prev => { prev.disableOkBtn = true; return prev; });
         DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
           formData.urlDAA = response.urlDAA;
           formData.nameDAA = response.nameDAA;
@@ -640,9 +638,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   dialogHandlerSave = (answer) => (e) => {
-    this.setState(prev => {
- prev.disableOkBtn = true; return prev;
-});
+    this.setState(prev => { prev.disableOkBtn = true; return prev; });
     if (answer === true) {
       let ontologies = [];
       for (let ontology of this.state.formData.ontologies) {

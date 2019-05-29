@@ -242,9 +242,7 @@ class FinalAccessReview extends Component {
 
     try {
       // change election status
-      await this.setState(prev => {
- prev.electionAccess.status = 'Closed';
-});
+      await this.setState(prev => { prev.electionAccess.status = 'Closed'; });
 
       // update election
       await Election.updateElection(this.state.electionAccess.electionId, this.state.electionAccess);

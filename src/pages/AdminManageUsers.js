@@ -107,15 +107,11 @@ class AdminManageUsers extends Component {
   }
 
   closeModal = (name) => {
-    this.setState(prev => {
- prev.showAddUserModal = false; return prev;
-});
+    this.setState(prev => { prev.showAddUserModal = false; return prev; });
   }
 
   afterModalOpen = (name) => {
-    this.setState(prev => {
- prev.showAddUserModal = false; return prev;
-});
+    this.setState(prev => { prev.showAddUserModal = false; return prev; });
   };
 
   handleSearchUser = (query) => {
