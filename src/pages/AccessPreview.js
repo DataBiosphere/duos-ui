@@ -25,7 +25,7 @@ class AccessPreview extends Component {
     let referenceId = this.props.match.params.referenceId;
 
     this.setState(prev => {
-      prev.dar_id = this.props.match.params.referenceId
+      prev.dar_id = this.props.match.params.referenceId;
     });
 
     DAR.getDarFields(referenceId, 'rus').then(
@@ -157,7 +157,7 @@ class AccessPreview extends Component {
     ]);
 
     const { translatedUseRestriction } = this.state.consent;
-    
+
     return (
 
       div({ className: "container container-wide" }, [

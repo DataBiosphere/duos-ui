@@ -42,7 +42,7 @@ class Login extends Component {
         user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
         Storage.setCurrentUser(user);
         Storage.setUserIsLogged(true);
-        this.redirect(user, this.state.redirectUrl)
+        this.redirect(user, this.state.redirectUrl);
       },
       error => {
         Storage.clearStorage();

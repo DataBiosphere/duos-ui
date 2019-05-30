@@ -4,7 +4,7 @@ import DuosHeader from './components/DuosHeader';
 import DuosFooter from './components/DuosFooter';
 import { div, h } from 'react-hyperscript-helpers';
 import './App.css';
-import Routes from "./Routes"
+import Routes from "./Routes";
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
 
@@ -21,13 +21,13 @@ class App extends React.Component {
     this.setState({
       loading: true
     });
-  }
+  };
 
   hideSpinner = () => {
     this.setState({
       loading: false
     });
-  }
+  };
 
   componentWillMount() {
     Modal.setAppElement(document.getElementById('modal-root'));

@@ -97,7 +97,7 @@ class DulReview extends Component {
         }
       ).catch(error => {
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-      })
+      });
 
     } else {
       Votes.updateVote(this.state.consent.consentId, vote).then(
@@ -106,7 +106,7 @@ class DulReview extends Component {
         }
       ).catch(error => {
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-      })
+      });
     }
   };
 

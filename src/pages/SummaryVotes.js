@@ -3,7 +3,7 @@ import { div, hr, hh, span, h3, button } from 'react-hyperscript-helpers';
 import { StatsBox } from '../components/StatsBox';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
-import { PendingCases, StatFiles, Summary } from '../libs/ajax'
+import { PendingCases, StatFiles, Summary } from '../libs/ajax';
 
 export const SummaryVotes = hh(class SummaryVotes extends Component {
 
@@ -230,7 +230,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           }),
         ]),
       ])
-    )
+    );
   }
 
   getFile(fileName) {

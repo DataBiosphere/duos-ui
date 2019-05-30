@@ -105,7 +105,7 @@ class ManageOntologies extends Component {
         if (data.ok) {
           this.removeOntologyfromList(ontologyFileId);
         }
-      })
+      });
     }
   };
 

@@ -20,7 +20,7 @@ class AccessReview extends Component {
     this.submitRpVote = this.submitRpVote.bind(this);
     this.submitVote = this.submitVote.bind(this);
   }
-  
+
   submitRpVote = (voteStatus, rationale) => {
     let vote = this.state.rpVote;
     this.setState({ disableQ2Btn: true });
@@ -175,12 +175,12 @@ class AccessReview extends Component {
 
     Election.findConsentElectionByDarElection(vote.electionId).then(data => {
       if (data.dulName !== null && data.dulElection !== null) {
-        this.setState({ 
+        this.setState({
           dulName: data.dulName,
           translatedUseRestriction: data.translatedUseRestriction
         });
       } else {
-        this.setState({ 
+        this.setState({
           dulName: consent.dulName,
           translatedUseRestriction: consent.translatedUseRestriction
          });
@@ -283,7 +283,7 @@ class AccessReview extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
           ]),
-          
+
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             a({
               id: "btn_back",

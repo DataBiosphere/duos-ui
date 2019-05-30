@@ -8,7 +8,7 @@ import { pathToFileURL } from "url";
 const AuthenticatedRoute = ({ component: Component, props: componentProps, rolesAllowed, ...rest }) => {
 
   const { path, location, computedMatch } = rest;
-  
+
   return (
     <Route
       path={path}
@@ -22,7 +22,7 @@ const AuthenticatedRoute = ({ component: Component, props: componentProps, roles
       }
     />
   );
-}
+};
 
 // Verifies if user is logged and if the user matches with any component allowed roles which is trying to navigate.
 const verifyUser = (allowedComponentRoles, usrRoles) => {

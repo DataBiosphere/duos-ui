@@ -1,4 +1,4 @@
-import _ from 'lodash/fp'
+import _ from 'lodash/fp';
 import { Storage } from './storage';
 
 
@@ -46,9 +46,9 @@ const Token = {
 
 const loadConfig = _.memoize(async () => {
   const res = await fetch('/config.json');
-  return res.json()
+  return res.json();
 });
 
 const getConfig = async () => {
-  return await loadConfig()
+  return await loadConfig();
 };

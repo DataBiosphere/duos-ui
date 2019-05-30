@@ -1,4 +1,4 @@
-import _ from 'lodash/fp'
+import _ from 'lodash/fp';
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
@@ -85,7 +85,7 @@ export const Consent = {
       }
     } catch (err) {
       return await err.json().then(message => {
-        return message.message
+        return message.message;
       });
     }
   },
@@ -112,10 +112,10 @@ export const Consent = {
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
     return res.json().then(
       () => {
-        return true
+        return true;
       },
       (error) => {
-        return error
+        return error;
       }
     );
   },
@@ -643,7 +643,7 @@ export const Ontology = {
   retrieveIndexedFiles: async () => {
     const url = `${await Config.getApiUrl()}/ontology`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json().then((data) => { return data });
+    return await res.json().then((data) => { return data; });
   },
 
   deleteOntologyFile: async (fileUrl) => {

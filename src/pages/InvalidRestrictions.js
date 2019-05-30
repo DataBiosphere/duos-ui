@@ -26,7 +26,7 @@ class InvalidRestrictions extends Component {
           {}
         ]
       }
-    }
+    };
   }
 
   componentDidMount() {
@@ -38,7 +38,7 @@ class InvalidRestrictions extends Component {
         dulList: [],
         darList: [],
       }
-    })
+    });
   }
 
   async loadAsyncData() {
@@ -166,7 +166,7 @@ class InvalidRestrictions extends Component {
                     ])
                   ]),
                   hr({ className: "table-body-separator" })
-                ])
+                ]);
               }),
             PaginatorBar({
               total: this.state.InvalidRestrictions.dulList.filter(this.searchTable(searchDulText)).length,
@@ -205,7 +205,7 @@ class InvalidRestrictions extends Component {
                     ]),
                   ]),
                   hr({ className: "table-body-separator" }),
-                ])
+                ]);
               }),
             PaginatorBar({
               total: this.state.InvalidRestrictions.darList.filter(this.searchTable(searchDarText)).length,

@@ -101,7 +101,7 @@ class DulCollect extends Component {
         prev.dialogTitle = 'Email Notification Error.';
         return prev;
       });
-    })
+    });
   };
 
   async sendReminder(voteId) {

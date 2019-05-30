@@ -19,7 +19,7 @@ export const GoogleLogoutButton = hh(class GoogleLogoutButton extends Component 
       buttonText: "Sign Out",
       onSuccess: this.logout,
     });
-    this.setState({ logoutButton: logoutButton })
+    this.setState({ logoutButton: logoutButton });
   }
 
   componentWillMount() {

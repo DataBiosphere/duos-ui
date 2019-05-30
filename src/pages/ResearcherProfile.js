@@ -74,7 +74,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       (fail) => {
         this.setState({nihError: true});
         return false;
-      })
+      });
   }
 
   initialState() {
@@ -455,8 +455,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               profile.nameDAA = response.nameDAA;
               this.saveResearcher(profile);
             });
-          }
-          else {
+          } else {
             this.saveResearcher(profile);
           }
 
@@ -471,8 +470,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
             this.updateResearcher(profile);
           }
         }
-      }
-      else {
+      } else {
         this.saveUser().then(resp => {
           this.setState({ showDialogSubmit: false });
           this.props.history.goBack();

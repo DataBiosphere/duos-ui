@@ -49,7 +49,7 @@ class DataOwnerConsole extends Component {
             dataOwnerUnreviewedCases: dars,
           });
         }
-      )
+      );
     });
   }
 
@@ -155,7 +155,7 @@ class DataOwnerConsole extends Component {
                     ]),
                   ]),
                   hr({ className: "table-body-separator" }),
-                ])
+                ]);
               }),
               PaginatorBar({
                 total: this.state.dataOwnerUnreviewedCases.length,

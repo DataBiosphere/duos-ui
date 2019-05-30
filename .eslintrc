@@ -23,12 +23,12 @@
     ],
     "implicit-arrow-linebreak": "off",
     "array-bracket-newline": "off",
+    "brace-style": "off",
     "no-trailing-spaces": "warn",
     "semi": "warn",
     "no-unreachable": "warn",
     "no-await-in-loop": "warn",
     "no-console": "warn",
-    "array-bracket-spacing": "warn",
-    "brace-style": "warn"
+    "array-bracket-spacing": "warn"
   }
 }

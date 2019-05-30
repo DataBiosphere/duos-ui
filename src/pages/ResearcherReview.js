@@ -39,7 +39,7 @@ class ResearcherReview extends Component {
         zipcode: '',
         nameDAA: ''
       },
-    }
+    };
   }
 
   componentDidMount() {
@@ -92,7 +92,7 @@ class ResearcherReview extends Component {
       }
     ).catch(error => {
       this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
-    })
+    });
   };
 
   confirmationHandlerOK = (answer) => (e) => {
