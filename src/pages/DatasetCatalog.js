@@ -371,7 +371,7 @@ class DatasetCatalog extends Component {
                         th({ isRendered: dictionary.key !== 'Sample Collection ID', className: "table-titles dataset-color cell-size", id: dictionary.key }, [
                           dictionary.key
                         ])
-                      ])
+                      ]);
                     }),
                     th({ className: "table-titles dataset-color cell-size" }, ["Consent Id"]),
                     th({ className: "table-titles dataset-color cell-size" }, ["SC-ID"]),
@@ -401,7 +401,7 @@ class DatasetCatalog extends Component {
                                   label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chkSelect" }),
                                 ])
                               ])
-                          ])
+                          ]);
                         }),
 
                         dataSet.properties.map((property, dIndex) => {
@@ -428,7 +428,7 @@ class DatasetCatalog extends Component {
                                   ]),
                               ])
                             ])
-                          ])
+                          ]);
                         }),
 
                         td({ id: dataSet.alias + "_dataset", name: "alias", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.alias]),
@@ -455,7 +455,7 @@ class DatasetCatalog extends Component {
                                 className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
                               }, ["Link"]),
                             ])
-                          ])
+                          ]);
                         }),
 
                         td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),

@@ -138,8 +138,7 @@ class ResearcherConsole extends Component {
       }).catch(error => {
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to cancel the request. Please try again.', buttonDisabled: false });
       });
-    }
-    else {
+    } else {
       this.setState({ showDialogCancelDAR: false, buttonDisabled: false, alertTitle: undefined });
     }
   };
@@ -152,8 +151,7 @@ class ResearcherConsole extends Component {
       }).catch(error => {
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to delete the request. Please try again.', buttonDisabled: false });
       });
-    }
-    else {
+    } else {
       this.setState({ showDialogDeletePDAR: false, buttonDisabled: false, alertTitle: undefined });
     }
   };
@@ -268,7 +266,7 @@ class ResearcherConsole extends Component {
                     ])
                   ]),
                   hr({ className: "table-body-separator" })
-                ])
+                ]);
               }),
               PaginatorBar({
                 name: 'dar',
@@ -317,7 +315,7 @@ class ResearcherConsole extends Component {
                       ]),
                     ]),
                     hr({ className: "table-body-separator" })
-                  ])
+                  ]);
                 }),
                 PaginatorBar({
                   name: 'partialDar',

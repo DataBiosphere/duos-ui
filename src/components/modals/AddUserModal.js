@@ -324,7 +324,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const checkState = e.target.checked;
     this.setState({
       emailPreference: checkState
-    })
+    });
   };
 
   memberChanged = async (e) => {
@@ -333,8 +333,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     // need to set the role in roles
     if (this.state.wasMember) {
       if (!checkState) {
-        // removing member role, need to verify if needs to add another user as member 
-        const result = await this.searchDACUsers(USER_ROLES_UPPER.member)
+        // removing member role, need to verify if needs to add another user as member
+        const result = await this.searchDACUsers(USER_ROLES_UPPER.member);
         if (this.checkNoEmptyDelegateCandidates(result.needsDelegation, result.delegateCandidates, USER_ROLES_UPPER.member)) {
           this.setState(prev => {
             prev.delegateMemberRequired = result.needsDelegation;
@@ -345,7 +345,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             if (this.state.delegateDacUser.delegateCandidates.length === 1) {
               this.setState({
                 alternativeDACMemberUser: JSON.stringify(this.state.delegateDacUser.delegateCandidates[0])
-              })
+              });
             }
           });
           // return;
@@ -382,7 +382,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             if (this.state.delegateDacUser.delegateCandidates.length === 1) {
               this.setState({
                 alternativeDACMemberUser: JSON.stringify(this.state.delegateDacUser.delegateCandidates[0])
-              })
+              });
             }
           });
         }
@@ -398,8 +398,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     } else {
       if (checkState && result.needsDelegation) {
         this.changeChairpersonRoleAlert();
-      }
-      else {
+      } else {
         this.closeAlert('1');
       }
 
@@ -423,7 +422,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             if (this.state.delegateDataOwner.delegateCandidates.length === 1) {
               this.setState({
                 alternativeDataOwnerUser: JSON.stringify(this.state.delegateDataOwner.delegateCandidates[0])
-              })
+              });
             }
           });
           // return;
@@ -449,8 +448,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (this.state.wasResearcher) {
       if (!checkState) {
         this.changeResearcherRoleAlert();
-      }
-      else {
+      } else {
         this.closeAlert('3');
       }
     }
@@ -522,7 +520,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
   closeAlert = (alertType) => {
     const alerts = this.state.alerts.filter(alert => {
-      return alert.alertType !== alertType
+      return alert.alertType !== alertType;
     });
     this.setState({
       alerts: alerts
@@ -580,7 +578,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       prev.roleValid = this.validateRoles(prev.rolesState);
       prev.invalidForm = (prev.roleValid && prev.displayNameValid && prev.emailValid);
       return prev;
-    })
+    });
   };
 
   render() {

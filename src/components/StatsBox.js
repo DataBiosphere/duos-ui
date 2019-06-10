@@ -104,7 +104,7 @@ export const StatsBox = hh(class StatsBox extends PureComponent {
     if (clickHandler !== undefined) {
       buttonTag = div({ className: "no-padding f-right display-inline-block" }, [
         button({ id: id + "_btnDownload", onClick: clickHandler, className: "btn-secondary btn-reminder " + options + "-color" }, [buttonLabel]),
-      ])
+      ]);
     }
 
     return (

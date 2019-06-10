@@ -181,7 +181,7 @@ class MemberConsole extends Component {
                     ]),
                   ]),
                   hr({ className: "table-body-separator" })
-                ])
+                ]);
               }),
             PaginatorBar({
               name: 'dul',
@@ -240,7 +240,7 @@ class MemberConsole extends Component {
                       ]),
                   ]),
                   hr({ className: "table-body-separator" })
-                ])
+                ]);
               }),
             PaginatorBar({
               name: 'access',

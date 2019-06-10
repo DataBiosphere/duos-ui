@@ -233,7 +233,7 @@ class AdminManageUsers extends Component {
 
               ]),
               hr({ className: "table-body-separator" })
-            ])
+            ]);
           }),
           PaginatorBar({
             total: this.state.userList.filter(this.searchTable(searchUserText)).length,

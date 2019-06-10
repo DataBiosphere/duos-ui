@@ -1,7 +1,7 @@
 import { Component, Fragment } from 'react';
 import { div, b, ul, h, li, hr, label, span, hh, a } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import { DAR, Election } from '../../libs/ajax'
+import { DAR, Election } from '../../libs/ajax';
 import { Alert } from '../Alert';
 
 
@@ -12,7 +12,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
     this.state = { summary: {} };
     this.state = {
       loading: true
-    }
+    };
     this.closeHandler = this.closeHandler.bind(this);
     this.downloadDetail = this.downloadDetail.bind(this);
   };
@@ -124,7 +124,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                         span({ className: "glyphicon glyphicon-download-alt hover-color", style: { "marginRight": "10px" } }),
                         a({ onClick: this.downloadDetail, className: "bold hover-color" }, ["Download Datasets Vote Summary"]),
                       ])
-                    ])
+                    ]);
                   })
                 ])
               ])
@@ -138,7 +138,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                   summary.researchType.map((rt, Index) => {
                     return h(Fragment, { key: Index }, [
                       li({ id: "txt_typeResearch_" + Index }, [b({}, [rt.title]), " ", rt.description]),
-                    ])
+                    ]);
                   })
                 ])
               ])
@@ -152,7 +152,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                   summary.diseases.map((disease, Index) => {
                     return h(Fragment, { key: Index }, [
                       li({ id: "txt_disease_" + Index }, [disease])
-                    ])
+                    ]);
                   })
                 ])
               ])
@@ -168,7 +168,7 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
                       li({ id: "txt_statement_" + Index, className: rt.manualReview ? 'cancel-color' : '' }, [
                         b({}, [rt.title]), " ", rt.description
                       ])
-                    ])
+                    ]);
                   })
                 ])
               ])

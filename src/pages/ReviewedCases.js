@@ -69,7 +69,7 @@ class ReviewedCases extends Component {
       } else if (varA < varB) {
         comparison = -1;
       }
-      return (descendantOrder) ? (comparison * -1) : comparison
+      return (descendantOrder) ? (comparison * -1) : comparison;
     });
 
     this.setState(prev => {
@@ -285,7 +285,7 @@ class ReviewedCases extends Component {
                   ]),
                 ]),
                 hr({ className: "table-body-separator" }),
-              ])
+              ]);
             }),
           PaginatorBar({
             name: 'access',

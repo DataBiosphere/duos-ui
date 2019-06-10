@@ -99,7 +99,7 @@ class DataOwnerReview extends Component {
       prev.consent.id = consent.consentId;
       prev.consent.data = consent;
       return prev;
-    })
+    });
   }
 
   async getVote() {
@@ -114,7 +114,7 @@ class DataOwnerReview extends Component {
         prev.vote.createDate = pendingCaseReview.createDate;
         prev.pendingCase.referenceId = this.props.match.params.referenceId;
         return prev;
-      })
+      });
     }
   }
 

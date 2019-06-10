@@ -19,7 +19,7 @@ export const PageHeading = hh(class PageHeading extends Component {
         span({ id: this.props.id + "_description", className: "page-heading-description"}, [this.props.description]),
       ]),
 
-    ])
+    ]);
 
   }
 

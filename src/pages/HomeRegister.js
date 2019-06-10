@@ -58,7 +58,7 @@ class HomeRegister extends Component {
             user => {
               user = Object.assign(user, this.setRoles(user));
               this.setStorage(user);
-              this.redirect(user)
+              this.redirect(user);
             },
             error => {
               Storage.clearStorage();

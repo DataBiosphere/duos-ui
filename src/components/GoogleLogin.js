@@ -56,7 +56,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
       prev.googleButton = googleButton;
       prev.loading = false;
       return prev;
-    })
+    });
   }
 
   async getUser() {
@@ -82,7 +82,7 @@ const LoginButton = hh(class GoogleLoginButton extends Component {
               user.isDataOwner ? 'data_owner_console' :
                 user.isAlumni ? 'summary_votes' : '/';
     }
-    return page
+    return page;
   };
 
 });

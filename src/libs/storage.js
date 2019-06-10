@@ -47,6 +47,6 @@ export const Storage = {
   },
 
   removeData: key => {
-    sessionStorage.removeItem(key)
+    sessionStorage.removeItem(key);
   }
 };

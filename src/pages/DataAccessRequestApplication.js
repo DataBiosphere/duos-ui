@@ -200,7 +200,7 @@ class DataAccessRequestApplication extends Component {
           return prev;
         }, () => Storage.removeData('dar_application'));
         return false;
-      })
+      });
   }
 
 
@@ -269,8 +269,7 @@ class DataAccessRequestApplication extends Component {
     let completed = false;
     if (formData.dar_code !== null) {
       completed = '';
-    }
-    else if (rpProperties.completed !== undefined) {
+    } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
@@ -294,7 +293,7 @@ class DataAccessRequestApplication extends Component {
           value: item.id,
           label: item.label,
           item: item
-        }
+        };
       });
     }
     return ontologies;
@@ -304,7 +303,7 @@ class DataAccessRequestApplication extends Component {
       return {
         value: item.id,
         label: item.concatenation
-      }
+      };
     });
   }
   handleFileChange(event) {
@@ -336,14 +335,11 @@ class DataAccessRequestApplication extends Component {
   checkValidations() {
     if (this.state.showValidationMessages === true && this.state.step === 1) {
       this.verifyStep1();
-    }
-    else if (this.state.showValidationMessages === true && this.state.step === 2) {
+    } else if (this.state.showValidationMessages === true && this.state.step === 2) {
       this.verifyStep2();
-    }
-    else if (this.state.showValidationMessages === true && this.state.step === 3) {
+    } else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
-    }
-    else if (this.state.showValidationMessages === true && this.state.step === 4) {
+    } else if (this.state.showValidationMessages === true && this.state.step === 4) {
       this.verifyStep4();
     }
   };
@@ -435,7 +431,7 @@ class DataAccessRequestApplication extends Component {
       isOrcidInvalid = false, isResearcherGateInvalid = false,
       isDAAInvalid = false, showValidationMessages = false,
       isNihInvalid = false;
-      
+
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
       showValidationMessages = true;
@@ -1128,7 +1124,6 @@ class DataAccessRequestApplication extends Component {
                         name: "rus",
                         id: "inputRUS",
                         className: step2.inputRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
-                        maxLength: "2200",
                         rows: "6",
                         required: true,
                         placeholder: "Please limit your RUS to 2200 characters.",
@@ -1153,7 +1148,6 @@ class DataAccessRequestApplication extends Component {
                         name: "non_tech_rus",
                         id: "inputNonTechRUS",
                         className: step2.inputNonTechRUS.invalid && showValidationMessages ? 'required-field-error form-control' : 'form-control',
-                        maxLength: "1100",
                         rows: "3",
                         required: true,
                         placeholder: "Please limit your non-technical summary to 1100 characters.",
@@ -1410,7 +1404,7 @@ class DataAccessRequestApplication extends Component {
                                     span({ className: "radio-check" }),
                                     span({ className: "radio-label" }, [genderLabels[ix]])
                                   ])
-                              )
+                              );
                             })
                           ])
                         ])

@@ -180,7 +180,7 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
                       this.state.ontologyTypes.map((type, index) => {
                         return h(Fragment, { key: index }, [
                           option({ value: type }, [type]),
-                        ])
+                        ]);
                       })
                     ])
                 ])
