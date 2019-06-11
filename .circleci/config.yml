@@ -35,10 +35,10 @@ commands:
             echo << parameters.env >>
             echo << parameters.project-name >>
             echo << parameters.google-project >>
-            echo ${COMMIT}
-            echo ${ENV}
-            echo ${PROJECT_NAME}
-            echo ${GOOGLE_PROJECT}
+            echo $COMMIT
+            echo $ENV
+            echo $PROJECT_NAME
+            echo $GOOGLE_PROJECT
       - run:
           name: Setup Google Cloud SDK
           command: |
