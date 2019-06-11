@@ -32,7 +32,6 @@ commands:
             echo << parameters.env >>
             echo << parameters.project-name >>
             echo << parameters.google-project >>
-            echo $COMMIT
             echo ${COMMIT}
       - run:
           name: Setup Google Cloud SDK
@@ -78,6 +77,16 @@ commands:
         default: ''
     steps:
       - run:
+          name: "Test me what my env looks like in build-env..."
+          command: |
+            echo << parameters.env >>
+            echo << parameters.namespace >>
+            echo << parameters.project-name >>
+            echo << parameters.google-project >>
+            echo << parameters.google-zone >>
+            echo << parameters.google-cluster >>
+            echo << parameters.commit >>
+      - run:
           name: Setup Google Cloud SDK
           command: |
             apt-get install -qq -y gettext
@@ -90,8 +99,9 @@ commands:
           name: Deploy to Kubernetes
           command: |
             envsubst < ${HOME}/project/conf/k8s.yml > ${HOME}/patched_k8s.yml
-            kubectl apply -f ${HOME}/patched_k8s.yml
-            kubectl rollout status deployment/<< parameters.project-name >>
+            cat ${HOME}/patched_k8s.yml
+#            kubectl apply -f ${HOME}/patched_k8s.yml
+#            kubectl rollout status deployment/<< parameters.project-name >>
 
 jobs:
   test:
