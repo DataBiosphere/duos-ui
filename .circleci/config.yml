@@ -10,7 +10,7 @@ executors:
 
 commands:
   build-env:
-    description: "Build/push environment image to GCR"
+    description: "Build/push image to GCR"
     parameters:
       env:
         type: string
@@ -30,7 +30,7 @@ commands:
             echo 'export PROJECT_NAME="$<< parameters.project-name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="$<< parameters.google-project >>"' >> $BASH_ENV
       - run:
-          name: "Test what my env looks like"
+          name: "Test me what my env looks like in build-env..."
           command: printenv
       - run:
           name: Setup Google Cloud SDK
@@ -51,7 +51,7 @@ commands:
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${ENV} -q
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:latest -q
   deploy-env:
-    description: "Build/push environment image to GCR"
+    description: "Deploy commit to GCR"
     parameters:
       env:
         type: string
@@ -75,6 +75,9 @@ commands:
         type: string
         default: ""
     steps:
+      - run:
+          name: "Test me what my env looks like in deploy-env..."
+          command: printenv
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
@@ -140,4 +143,4 @@ workflows:
       - deploy-dev:
           filters:
             branches:
-              only: develop
+              only: deployment # TODO: revert this before merging.
