@@ -73,8 +73,9 @@ commands:
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
-            echo 'export PROJECT_NAME="$<< parameters.project_name >>" >> $BASH_ENV
-            echo 'export GOOGLE_PROJECT="$<< parameters.google_project >>" >> $BASH_ENV
+            echo 'export NAMESPACE="<< parameters.namespace >>" >> $BASH_ENV
+            echo 'export PROJECT_NAME="<< parameters.project_name >>" >> $BASH_ENV
+            echo 'export GOOGLE_PROJECT="<< parameters.google_project >>" >> $BASH_ENV
             source $BASH_ENV
       - run:
           name: "Test me what my env looks like in deploy-env..."
@@ -86,8 +87,12 @@ commands:
             echo << parameters.google_zone >>
             echo << parameters.google_cluster >>
             echo << parameters.commit >>
+            echo $NAMESPACE
             echo $PROJECT_NAME
             echo $GOOGLE_PROJECT
+            echo ${NAMESPACE}
+            echo ${PROJECT_NAME}
+            echo ${GOOGLE_PROJECT}
       - run:
           name: Setup Google Cloud SDK
           command: |
