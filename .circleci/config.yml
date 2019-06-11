@@ -102,6 +102,7 @@ commands:
           command: |
             envsubst < ${HOME}/project/conf/k8s.yml > ${HOME}/patched_k8s.yml
             cat ${HOME}/patched_k8s.yml
+            kubectl config set-context --current --namespace=${NAMESPACE}
             kubectl apply -f ${HOME}/patched_k8s.yml
             kubectl get deployments
             kubectl rollout status deployment/${PROJECT_NAME}
