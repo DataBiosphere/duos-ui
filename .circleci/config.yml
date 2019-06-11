@@ -73,9 +73,9 @@ commands:
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
-            echo 'export NAMESPACE="<< parameters.namespace >>" >> $BASH_ENV
-            echo 'export PROJECT_NAME="<< parameters.project_name >>" >> $BASH_ENV
-            echo 'export GOOGLE_PROJECT="<< parameters.google_project >>" >> $BASH_ENV
+            echo 'export NAMESPACE="<< parameters.namespace >>"' >> $BASH_ENV
+            echo 'export PROJECT_NAME="<< parameters.project_name >>"' >> $BASH_ENV
+            echo 'export GOOGLE_PROJECT="<< parameters.google_project >>"' >> $BASH_ENV
             source $BASH_ENV
       - run:
           name: "Test me what my env looks like in deploy-env..."
