@@ -11,7 +11,6 @@ executors:
 commands:
   build-env:
     description: "Build/push environment image to GCR"
-    executor: cloud-sdk
     parameters:
       env:
         type: string
@@ -53,7 +52,6 @@ commands:
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:latest -q
   deploy-env:
     description: "Build/push environment image to GCR"
-    executor: cloud-sdk
     parameters:
       env:
         type: string
@@ -118,6 +116,7 @@ jobs:
             - ~/.npm
       - run: npm test
   deploy-dev:
+    executor: cloud-sdk
     steps:
       - checkout
       - build-env:
