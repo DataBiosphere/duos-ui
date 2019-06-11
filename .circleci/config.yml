@@ -104,9 +104,7 @@ commands:
             cat ${HOME}/patched_k8s.yml
             kubectl config set-context --current --namespace=${NAMESPACE}
             kubectl apply -f ${HOME}/patched_k8s.yml
-            kubectl get deployments
             kubectl rollout status deployment/${PROJECT_NAME}
-            kubectl get deployments
 
 jobs:
   test:
@@ -153,4 +151,4 @@ workflows:
             - test
           filters:
             branches:
-              only: deployment # TODO: revert this before merging.
+              only: develop
