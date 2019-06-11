@@ -14,18 +14,18 @@ commands:
     parameters:
       env:
         type: string
-        default: "dev"
+        default: 'dev'
       project-name:
         type: string
-        default: "duos-ui"
+        default: 'duos-ui'
       google-project:
         type: string
-        default: "broad-duos-dev"
+        default: 'broad-duos-dev'
     steps:
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
-            echo 'export COMMIT="git rev-parse --short HEAD"' >> $BASH_ENV
+            echo 'export COMMIT="`git rev-parse --short HEAD`"' >> $BASH_ENV
             echo 'export ENV="$<< parameters.env >>"' >> $BASH_ENV
             echo 'export PROJECT_NAME="$<< parameters.project-name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="$<< parameters.google-project >>"' >> $BASH_ENV
@@ -55,25 +55,25 @@ commands:
     parameters:
       env:
         type: string
-        default: "dev"
+        default: 'dev'
       namespace:
         type: string
-        default: "duos"
+        default: 'duos'
       project-name:
         type: string
-        default: "duos-ui"
+        default: 'duos-ui'
       google-project:
         type: string
-        default: "broad-duos-dev"
+        default: 'broad-duos-dev'
       google-zone:
         type: string
-        default: "us-central1-a"
+        default: 'us-central1-a'
       google-cluster:
         type: string
-        default: "duos-ui-dev-cluster"
+        default: 'duos-ui-dev-cluster'
       commit:
         type: string
-        default: ""
+        default: ''
     steps:
       - run:
           name: "Test me what my env looks like in deploy-env..."
@@ -123,16 +123,16 @@ jobs:
     steps:
       - checkout
       - build-env:
-          env: "dev"
-          project-name: "duos-ui"
-          google-project: "broad-duos-dev"
+          env: 'dev'
+          project-name: 'duos-ui'
+          google-project: 'broad-duos-dev'
       - deploy-env:
-          env: "dev"
-          namespace: "duos"
-          project-name: "duos-ui"
-          google-project: "broad-duos-dev"
-          google-zone: "us-central1-a"
-          google-cluster: "duos-ui-dev-cluster"
+          env: 'dev'
+          namespace: 'duos'
+          project-name: 'duos-ui'
+          google-project: 'broad-duos-dev'
+          google-zone: 'us-central1-a'
+          google-cluster: 'duos-ui-dev-cluster'
           commit: ${COMMIT}
 
 workflows:
