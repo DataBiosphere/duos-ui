@@ -146,6 +146,8 @@ workflows:
     jobs:
       - test
       - deploy-dev:
+          requires:
+            - test
           filters:
             branches:
               only: deployment # TODO: revert this before merging.
