@@ -23,7 +23,6 @@ commands:
         type: string
         default: "broad-duos-dev"
     steps:
-      - checkout
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
@@ -31,7 +30,7 @@ commands:
             echo 'export ENV="$<< parameters.env >>"' >> $BASH_ENV
             echo 'export PROJECT_NAME="$<< parameters.project-name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="$<< parameters.google-project >>"' >> $BASH_ENV
-      -run:
+      - run:
           name: "Test what my env looks like"
           command: printenv
       - run:
@@ -120,6 +119,7 @@ jobs:
       - run: npm test
   deploy-dev:
     steps:
+      - checkout
       - build-env:
           env: "dev"
           project-name: "duos-ui"
