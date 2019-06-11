@@ -37,7 +37,7 @@ commands:
           name: Setup Google Cloud SDK
           command: |
             apt-get install -qq -y gettext
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            echo $GCLOUD_DUOS_DEV > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             gcloud --quiet config set project << parameters.google-project >>
       - setup_remote_docker:
@@ -77,6 +77,11 @@ commands:
         default: ''
     steps:
       - run:
+          name: Export env vars for substitution. $BASH_ENV is sourced before each step
+          command: |
+            echo 'export PROJECT_NAME="$<< parameters.project-name >>" >> $BASH_ENV
+            echo 'export GOOGLE_PROJECT="$<< parameters.google-project >>" >> $BASH_ENV
+      - run:
           name: "Test me what my env looks like in build-env..."
           command: |
             echo << parameters.env >>
@@ -86,11 +91,13 @@ commands:
             echo << parameters.google-zone >>
             echo << parameters.google-cluster >>
             echo << parameters.commit >>
+            echo $PROJECT_NAME
+            echo GOOGLE_PROJECT
       - run:
           name: Setup Google Cloud SDK
           command: |
             apt-get install -qq -y gettext
-            echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+            echo $GCLOUD_DUOS_DEV > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             gcloud --quiet config set project << parameters.google-project >>
             gcloud --quiet config set compute/zone << parameters.google-zone >>
