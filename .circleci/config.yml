@@ -31,7 +31,11 @@ commands:
             echo 'export GOOGLE_PROJECT="$<< parameters.google-project >>"' >> $BASH_ENV
       - run:
           name: "Test me what my env looks like in build-env..."
-          command: printenv
+          command: |
+            printenv
+            echo << parameters.env >>
+            echo << parameters.project-name >>
+            echo << parameters.google-project >>
       - run:
           name: Setup Google Cloud SDK
           command: |
