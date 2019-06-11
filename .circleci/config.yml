@@ -103,7 +103,9 @@ commands:
             envsubst < ${HOME}/project/conf/k8s.yml > ${HOME}/patched_k8s.yml
             cat ${HOME}/patched_k8s.yml
             kubectl apply -f ${HOME}/patched_k8s.yml
+            kubectl get deployments
             kubectl rollout status deployment/${PROJECT_NAME}
+            kubectl get deployments
 
 jobs:
   test:
