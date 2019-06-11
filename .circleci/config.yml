@@ -32,10 +32,13 @@ commands:
       - run:
           name: "Test me what my env looks like in build-env..."
           command: |
-            printenv
             echo << parameters.env >>
             echo << parameters.project-name >>
             echo << parameters.google-project >>
+            echo ${COMMIT}
+            echo ${ENV}
+            echo ${PROJECT_NAME}
+            echo ${GOOGLE_PROJECT}
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -79,9 +82,6 @@ commands:
         type: string
         default: ''
     steps:
-      - run:
-          name: "Test me what my env looks like in deploy-env..."
-          command: printenv
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
