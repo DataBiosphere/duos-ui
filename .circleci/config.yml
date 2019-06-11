@@ -15,10 +15,10 @@ commands:
       env:
         type: string
         default: 'dev'
-      project-name:
+      project_name:
         type: string
         default: 'duos-ui'
-      google-project:
+      google_project:
         type: string
         default: 'broad-duos-dev'
     steps:
@@ -26,31 +26,25 @@ commands:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
             echo 'export COMMIT="`git rev-parse --short HEAD`"' >> $BASH_ENV
-      - run:
-          name: "Test me what my env looks like in build-env..."
-          command: |
-            echo << parameters.env >>
-            echo << parameters.project-name >>
-            echo << parameters.google-project >>
-            echo ${COMMIT}
+            source $BASH_ENV
       - run:
           name: Setup Google Cloud SDK
           command: |
             apt-get install -qq -y gettext
             echo $GCLOUD_DUOS_DEV > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-            gcloud --quiet config set project << parameters.google-project >>
+            gcloud --quiet config set project << parameters.google_project >>
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
           name: Docker build/push to GCR
           command: |
-            docker build -t << parameters.project-name >> .
-            docker tag << parameters.project-name >> gcr.io/<< parameters.google-project >>/<< parameters.project-name >>:${COMMIT}
+            docker build -t << parameters.project_name >> .
+            docker tag << parameters.project_name >> gcr.io/<< parameters.google_project >>/<< parameters.project_name >>:${COMMIT}
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
-            docker push gcr.io/<< parameters.google-project >>/<< parameters.project-name >>:${COMMIT}
-            gcloud container images add-tag gcr.io/<< parameters.google-project >>/<< parameters.project-name >>:${COMMIT} gcr.io/<< parameters.google-project >>/<< parameters.project-name >>:<< parameters.env >> -q
-            gcloud container images add-tag gcr.io/<< parameters.google-project >>/<< parameters.project-name >>:${COMMIT} gcr.io/<< parameters.google-project >>/<< parameters.project-name >>:latest -q
+            docker push gcr.io/<< parameters.google_project >>/<< parameters.project_name >>:${COMMIT}
+            gcloud container images add-tag gcr.io/<< parameters.google_project >>/<< parameters.project_name >>:${COMMIT} gcr.io/<< parameters.google_project >>/<< parameters.project_name >>:<< parameters.env >> -q
+            gcloud container images add-tag gcr.io/<< parameters.google_project >>/<< parameters.project_name >>:${COMMIT} gcr.io/<< parameters.google_project >>/<< parameters.project_name >>:latest -q
   deploy-env:
     description: "Deploy commit to GCR"
     parameters:
@@ -60,16 +54,16 @@ commands:
       namespace:
         type: string
         default: 'duos'
-      project-name:
+      project_name:
         type: string
         default: 'duos-ui'
-      google-project:
+      google_project:
         type: string
         default: 'broad-duos-dev'
-      google-zone:
+      google_zone:
         type: string
         default: 'us-central1-a'
-      google-cluster:
+      google_cluster:
         type: string
         default: 'duos-ui-dev-cluster'
       commit:
@@ -79,36 +73,37 @@ commands:
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
-            echo 'export PROJECT_NAME="$<< parameters.project-name >>" >> $BASH_ENV
-            echo 'export GOOGLE_PROJECT="$<< parameters.google-project >>" >> $BASH_ENV
+            echo 'export PROJECT_NAME="$<< parameters.project_name >>" >> $BASH_ENV
+            echo 'export GOOGLE_PROJECT="$<< parameters.google_project >>" >> $BASH_ENV
+            source $BASH_ENV
       - run:
-          name: "Test me what my env looks like in build-env..."
+          name: "Test me what my env looks like in deploy-env..."
           command: |
             echo << parameters.env >>
             echo << parameters.namespace >>
-            echo << parameters.project-name >>
-            echo << parameters.google-project >>
-            echo << parameters.google-zone >>
-            echo << parameters.google-cluster >>
+            echo << parameters.project_name >>
+            echo << parameters.google_project >>
+            echo << parameters.google_zone >>
+            echo << parameters.google_cluster >>
             echo << parameters.commit >>
             echo $PROJECT_NAME
-            echo GOOGLE_PROJECT
+            echo $GOOGLE_PROJECT
       - run:
           name: Setup Google Cloud SDK
           command: |
             apt-get install -qq -y gettext
             echo $GCLOUD_DUOS_DEV > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-            gcloud --quiet config set project << parameters.google-project >>
-            gcloud --quiet config set compute/zone << parameters.google-zone >>
-            gcloud --quiet container clusters get-credentials << parameters.google-cluster >>
+            gcloud --quiet config set project << parameters.google_project >>
+            gcloud --quiet config set compute/zone << parameters.google_zone >>
+            gcloud --quiet container clusters get-credentials << parameters.google_cluster >>
       - run:
           name: Deploy to Kubernetes
           command: |
             envsubst < ${HOME}/project/conf/k8s.yml > ${HOME}/patched_k8s.yml
             cat ${HOME}/patched_k8s.yml
 #            kubectl apply -f ${HOME}/patched_k8s.yml
-#            kubectl rollout status deployment/<< parameters.project-name >>
+#            kubectl rollout status deployment/<< parameters.project_name >>
 
 jobs:
   test:
@@ -132,15 +127,15 @@ jobs:
       - checkout
       - build-env:
           env: 'dev'
-          project-name: 'duos-ui'
-          google-project: 'broad-duos-dev'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
       - deploy-env:
           env: 'dev'
           namespace: 'duos'
-          project-name: 'duos-ui'
-          google-project: 'broad-duos-dev'
-          google-zone: 'us-central1-a'
-          google-cluster: 'duos-ui-dev-cluster'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
+          google_zone: 'us-central1-a'
+          google_cluster: 'duos-ui-dev-cluster'
           commit: ${COMMIT}
 
 workflows:
