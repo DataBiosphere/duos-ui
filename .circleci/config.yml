@@ -136,9 +136,7 @@ jobs:
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
-      - run: echo 'export process.env.CI=false' >> $BASH_ENV
-      - run: source $BASH_ENV
-      - run: npm run build --silent
+      - run: CI=false npm run build --silent
       - run: ls -al .
   deploy-dev:
     executor: cloud-sdk
