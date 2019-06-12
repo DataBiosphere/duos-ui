@@ -137,12 +137,14 @@ jobs:
       - run: CI=false npm run build --silent
       - run: ls -al .
       - persist_to_workspace:
-          at: .
+          root: /tmp/workspace
+          paths:
+            - *
   deploy-dev:
     executor: cloud-sdk
     steps:
       - attach_workspace:
-          at: .
+          at: /tmp/workspace
       - run: ls -al .
       - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
