@@ -1,16 +1,27 @@
 version: 2.1
 
 executors:
-  cloud-sdk:
-    docker:
-      - image: google/cloud-sdk
   node:
     docker:
       - image: circleci/node:10
 
 commands:
   build-env:
-    description: "Build/push image to GCR"
+    description: "Build image"
+    parameters:
+      env:
+        type: string
+        default: 'dev'
+    steps:
+      - run:
+          name:
+          command: |
+            cp config/<< parameters.env >>.json public/config.json
+            npm install --silent
+            npm install react-scripts -g --silent
+            npm run build
+  push-env:
+    description: "Push image to GCR"
     parameters:
       sa_key_name:
         type: string
@@ -123,23 +134,28 @@ jobs:
             - ~/.npm
       - run: npm test
   deploy-dev:
-    executor: cloud-sdk
+    docker:
+      - image: google/cloud-sdk
+      - image: circleci/node:10
     steps:
       - checkout
       - build-env:
-          sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'dev'
-          project_name: 'duos-ui'
-          google_project: 'broad-duos-dev'
-      - deploy-env:
-          sa_key_name: 'GCLOUD_DUOS_DEV'
-          env: 'dev'
-          namespace: 'duos'
-          project_name: 'duos-ui'
-          google_project: 'broad-duos-dev'
-          google_zone: 'us-central1-a'
-          google_cluster: 'duos-ui-dev-cluster'
-          commit: ${COMMIT}
+# TODO: Revert this before merging
+#      - push-env:
+#          sa_key_name: 'GCLOUD_DUOS_DEV'
+#          env: 'dev'
+#          project_name: 'duos-ui'
+#          google_project: 'broad-duos-dev'
+#      - deploy-env:
+#          sa_key_name: 'GCLOUD_DUOS_DEV'
+#          env: 'dev'
+#          namespace: 'duos'
+#          project_name: 'duos-ui'
+#          google_project: 'broad-duos-dev'
+#          google_zone: 'us-central1-a'
+#          google_cluster: 'duos-ui-dev-cluster'
+#          commit: ${COMMIT}
 
 workflows:
   version: 2
@@ -151,4 +167,4 @@ workflows:
             - test
           filters:
             branches:
-              only: develop
+              only: DUOS-381 # TODO: Revert this before merging
