@@ -1087,6 +1087,28 @@ class DataAccessRequestApplication extends Component {
 
                   div({ className: "form-group" }, [
                     div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                      label({ className: "control-label rp-title-question" }, [,
+                        span({className: "x1"}, ["You have selected a dataset which requires IRB approval. Please upload your IRB Approval here:"]),
+                      ]),
+                      a({ id: "btn_upload_IRB_Approval",className: "btn-secondary clear-both f-left access-color" }, [
+                        span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }), "Upload IRB Approval"
+                      ]),
+                    ]),
+                  ]),
+
+                  div({ className: "form-group" }, [
+                      div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                        label({ className: "control-label rp-title-question" }, [,
+                          span({className: "x1"}, ["You have selected a dataset which requires collaboration. Please upload your Collaboration Letter here:"]),
+                        ]),
+                        a({ id: "btn_upload_COL",className: "btn-secondary clear-both f-left access-color" }, [
+                          span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }), "Upload Collaboration Letter"
+                        ]),
+                      ]),
+                  ]),
+
+                  div({ className: "form-group" }, [
+                    div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
                       label({ className: "control-label rp-title-question" }, [
                         "2.2 Research use statement (RUS)* ",
                         span({}, ["A RUS is a brief description of the applicant’s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.",
