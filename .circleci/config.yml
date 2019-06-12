@@ -139,7 +139,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
-            - *
+            - ./*
   deploy-dev:
     executor: cloud-sdk
     steps:
