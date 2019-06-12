@@ -136,7 +136,12 @@ jobs:
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
-      - run: npm run build --silent
+      - run:
+          environment:
+            process:
+              env:
+                CI: false
+          command: npm run build --silent
       - run: ls -al .
   deploy-dev:
     executor: cloud-sdk
