@@ -125,8 +125,6 @@ jobs:
   build-dev:
     executor: node
     steps:
-      - attach_workspace:
-          at: .
       - checkout
       - restore_cache:
           keys:
@@ -138,11 +136,13 @@ jobs:
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
       - run: ls -al .
+      - attach_workspace:
+          at: .
   deploy-dev:
     executor: cloud-sdk
     steps:
-      - attach_workspace:
-          at: .
+#      - attach_workspace:
+#          at: .
       - run: ls -al .
       - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
