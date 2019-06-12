@@ -148,7 +148,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: ls -al .
+      - run: pwd
       - run: ls -al .
       - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
