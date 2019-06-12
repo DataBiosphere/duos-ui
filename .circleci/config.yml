@@ -135,7 +135,7 @@ jobs:
             cp config/dev.json public/config.json
             npm install --silent
             npm install react-scripts -g --silent
-            npm run build
+            npm run build --silent
   deploy-dev:
     executor: cloud-sdk
     steps:
