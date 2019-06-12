@@ -125,6 +125,8 @@ jobs:
   build-dev:
     executor: node
     steps:
+      - checkout
+      - run: ls -al .
       - attach_workspace:
           at: .
       - run:
