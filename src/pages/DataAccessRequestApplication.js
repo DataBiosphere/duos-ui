@@ -1082,6 +1082,7 @@ class DataAccessRequestApplication extends Component {
                       }),
                       span({ className: "cancel-color required-field-error-span", isRendered: step2.inputDatasets.invalid && showValidationMessages }, ["Required field"]),
                     ]),
+
                   ]),
 
                   div({ className: "form-group" }, [

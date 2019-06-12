@@ -653,7 +653,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
 
             div({ className: "form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Roles"]),
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Role"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
 
