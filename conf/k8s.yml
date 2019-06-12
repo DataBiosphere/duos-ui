@@ -1,20 +1,20 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: ${PROJECT_NAME}-service
   labels:
     app: ${PROJECT_NAME}
-  name: ${PROJECT_NAME}-service
-  namespace: default
+  namespace: ${NAMESPACE}
 spec:
   selector:
     app: ${PROJECT_NAME}
   ports:
-    - nodePort: 30887
+    - name: http
       port: 80
       protocol: TCP
       targetPort: 80
   sessionAffinity: None
-  type: LoadBalancer
+  type: NodePort
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -22,6 +22,7 @@ metadata:
   name: ${PROJECT_NAME}
   labels:
     app: ${PROJECT_NAME}
+  namespace: ${NAMESPACE}
 spec:
   replicas: 1
   selector:
@@ -39,7 +40,8 @@ spec:
     spec:
       containers:
         - name: ${PROJECT_NAME}
-          image: gcr.io/${GOOGLE_PROJECT_ID}/${PROJECT_NAME}:latest
+          image: gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT}
+          imagePullPolicy: Always
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
