@@ -19,7 +19,7 @@ commands:
       - run:
           name: "Update Node.js and npm"
           command: |
-            curl -sSL "https://nodejs.org/dist/v0.10.15/node-v0.10.15-linux-x64.tar.gz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-v11.10.0-linux-x64/bin/node
+            curl -sSL "https://nodejs.org/dist/v0.10.15/node-v0.10.15-linux-x64.tar.gz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-v0.10.15-linux-x64/bin/node
             curl https://www.npmjs.com/install.sh | sudo bash
       - run:
           name: "Run npm build"
