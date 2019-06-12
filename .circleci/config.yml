@@ -9,25 +9,6 @@ executors:
       - image: circleci/node:10
 
 commands:
-  build-env:
-    description: "Build image"
-    parameters:
-      env:
-        type: string
-        default: 'dev'
-    steps:
-      - run:
-          name: "Update Node.js and npm"
-          command: |
-            curl -sSL "https://nodejs.org/dist/v0.10.15/node-v0.10.15-linux-x64.tar.gz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-v0.10.15-linux-x64/bin/node
-            curl https://www.npmjs.com/install.sh | sudo bash
-      - run:
-          name: "Run npm build"
-          command: |
-            cp config/<< parameters.env >>.json public/config.json
-            npm install --silent
-            npm install react-scripts -g --silent
-            npm run build
   push-env:
     description: "Push image to GCR"
     parameters:
@@ -141,12 +122,21 @@ jobs:
           paths:
             - ~/.npm
       - run: npm test
+  build-dev:
+    executor: node
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Run npm build"
+          command: |
+            cp config/dev.json public/config.json
+            npm install --silent
+            npm install react-scripts -g --silent
+            npm run build
   deploy-dev:
     executor: cloud-sdk
     steps:
-      - checkout
-      - build-env:
-          env: 'dev'
 # TODO: Revert this before merging
 #      - push-env:
 #          sa_key_name: 'GCLOUD_DUOS_DEV'
@@ -168,9 +158,15 @@ workflows:
   build-deploy:
     jobs:
       - test
-      - deploy-dev:
+      - build-dev:
           requires:
             - test
+          filters:
+            branches:
+              only: DUOS-381 # TODO: Change this to develop before merging
+      - deploy-dev:
+          requires:
+            - build-dev
           filters:
             branches:
               only: DUOS-381 # TODO: Revert this before merging
