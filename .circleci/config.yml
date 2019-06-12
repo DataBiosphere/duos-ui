@@ -125,17 +125,17 @@ jobs:
   build-dev:
     executor: node
     steps:
-      - checkout
-      - run: ls -al .
       - attach_workspace:
           at: .
-      - run:
-          name: "Run npm build"
-          command: |
-            cp config/dev.json public/config.json
-            npm install --silent
-            npm install react-scripts -g --silent
-            npm run build --silent
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/dev.json public/config.json
+      - run: npm run build --silent
+      - run: ls -al .
   deploy-dev:
     executor: cloud-sdk
     steps:
