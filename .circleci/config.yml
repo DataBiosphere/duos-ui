@@ -134,6 +134,7 @@ jobs:
             - deps2-{{ checksum "package.json" }}-
             - deps2-
       - run: cp config/dev.json public/config.json
+      - run: npm install react-scripts --silent
       - run: npm run build --silent
       - run: ls -al .
   deploy-dev:
