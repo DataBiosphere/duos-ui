@@ -17,6 +17,7 @@ commands:
           name:
           command: |
             cp config/<< parameters.env >>.json public/config.json
+            cat public/config.json
             npm install --silent
             npm install react-scripts -g --silent
             npm run build
