@@ -137,7 +137,7 @@ jobs:
   deploy-dev:
     executor: cloud-sdk
     steps:
-      -run: ls -al .
+      - run: ls -al .
 # TODO: Revert this before merging
 #      - push-env:
 #          sa_key_name: 'GCLOUD_DUOS_DEV'
