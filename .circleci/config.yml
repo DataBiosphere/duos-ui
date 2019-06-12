@@ -142,21 +142,20 @@ jobs:
     executor: cloud-sdk
     steps:
       - run: ls -al .
-# TODO: Revert this before merging
-#      - push-env:
-#          sa_key_name: 'GCLOUD_DUOS_DEV'
-#          env: 'dev'
-#          project_name: 'duos-ui'
-#          google_project: 'broad-duos-dev'
-#      - deploy-env:
-#          sa_key_name: 'GCLOUD_DUOS_DEV'
-#          env: 'dev'
-#          namespace: 'duos'
-#          project_name: 'duos-ui'
-#          google_project: 'broad-duos-dev'
-#          google_zone: 'us-central1-a'
-#          google_cluster: 'duos-ui-dev-cluster'
-#          commit: ${COMMIT}
+      - push-env:
+          sa_key_name: 'GCLOUD_DUOS_DEV'
+          env: 'dev'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
+      - deploy-env:
+          sa_key_name: 'GCLOUD_DUOS_DEV'
+          env: 'dev'
+          namespace: 'duos'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
+          google_zone: 'us-central1-a'
+          google_cluster: 'duos-ui-dev-cluster'
+          commit: ${COMMIT}
 
 workflows:
   version: 2
