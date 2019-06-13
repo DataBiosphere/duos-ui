@@ -9,6 +9,30 @@ executors:
       - image: circleci/node:10
 
 commands:
+  build-env:
+    description: "Build env specific image"
+    parameters:
+      env:
+        type: string
+        default: 'dev'
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/<< parameters.env >>.json public/config.json
+      - run: npm install --silent
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .gcloudignore
+            - build
+            - config
+            - Dockerfile
   push-env:
     description: "Push image to GCR"
     parameters:
@@ -25,6 +49,7 @@ commands:
         type: string
         default: 'broad-duos-dev'
     steps:
+      - run: cat public/config.json
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
@@ -124,44 +149,12 @@ jobs:
       - run: npm test
   build-dev:
     executor: node
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
-      - run: cp config/dev.json public/config.json
-      - run: npm install --silent
-      - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .gcloudignore
-            - build
-            - config
-            - Dockerfile
+    build-env:
+      env: 'dev'
   build-staging:
     executor: node
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
-      - run: cp config/staging.json public/config.json
-      - run: npm install --silent
-      - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .gcloudignore
-            - build
-            - config
-            - Dockerfile
+    build-env:
+      env: 'staging'
   deploy-dev:
     executor: cloud-sdk
     steps:
@@ -203,15 +196,16 @@ jobs:
           env: 'staging'
           project_name: 'duos-ui'
           google_project: 'broad-duos-dev'
-      - deploy-env:
-          sa_key_name: 'GCLOUD_DUOS_DEV'
-          env: 'staging'
-          namespace: 'duos'
-          project_name: 'duos-ui'
-          google_project: 'broad-duos-dev'
-          google_zone: 'us-central1-a'
-          google_cluster: 'duos-ui-staging-cluster'
-          commit: ${COMMIT}
+# TODO: Uncomment when cluster is properly configured
+#      - deploy-env:
+#          sa_key_name: 'GCLOUD_DUOS_DEV'
+#          env: 'staging'
+#          namespace: 'duos'
+#          project_name: 'duos-ui'
+#          google_project: 'broad-duos-dev'
+#          google_zone: 'us-central1-a'
+#          google_cluster: 'duos-ui-staging-cluster'
+#          commit: ${COMMIT}
 
 workflows:
   version: 2
