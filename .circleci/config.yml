@@ -146,6 +146,12 @@ jobs:
   deploy-dev:
     executor: cloud-sdk
     steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
       - attach_workspace:
           at: .
       - run: pwd
