@@ -53,3 +53,11 @@
   font-size: 15px;
   text-align: center;
 }
+
+small.font-normal {
+  display: block;
+  font-style: normal;
+  font-size: 14px;
+  line-height: 20px;
+  margin-top: 5px;
+}

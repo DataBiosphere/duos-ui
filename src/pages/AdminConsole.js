@@ -267,7 +267,7 @@ class AdminConsole extends Component {
                   clickHandler: this.addDataset,
                   color: 'dataset',
                   title: 'Add Datasets',
-                  description: 'Store Datasets associated with Data Use Limitations',
+                  description: 'Upload Datasets associated with Data Use Limitations',
                   iconName: 'add-dataset',
                   iconSize: 'large',
                   unreviewedCases: 0
