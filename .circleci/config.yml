@@ -42,7 +42,6 @@ commands:
             gcloud --quiet config set project ${GOOGLE_PROJECT}
       - setup_remote_docker:
           docker_layer_caching: true
-      - run: cat build/config.json
       - run:
           name: Docker build/push to GCR
           command: |
@@ -136,7 +135,6 @@ jobs:
       - run: npm install --silent
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
-      - run: ls -al .
       - persist_to_workspace:
           root: .
           paths:
@@ -155,8 +153,6 @@ jobs:
             - deps2-
       - attach_workspace:
           at: .
-      - run: pwd
-      - run: ls -al .
       - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'dev'
@@ -182,10 +178,10 @@ workflows:
             - test
           filters:
             branches:
-              only: DUOS-381 # TODO: Change this to develop before merging
+              only: develop
       - deploy-dev:
           requires:
             - build-dev
           filters:
             branches:
-              only: DUOS-381 # TODO: Revert this before merging
+              only: develop
