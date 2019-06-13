@@ -3,11 +3,10 @@ import { Route, Redirect } from "react-router-dom";
 import { Storage } from "../libs/storage";
 import * as Utils from "../libs/utils";
 import Login from '../pages/Login';
-import { pathToFileURL } from "url";
 
 const AuthenticatedRoute = ({ component: Component, props: componentProps, rolesAllowed, ...rest }) => {
 
-  const { path, location, computedMatch } = rest;
+  const { path, location } = rest;
 
   return (
     <Route

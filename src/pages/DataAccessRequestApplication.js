@@ -4,7 +4,6 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { Alert } from '../components/Alert';
 import AsyncSelect from 'react-select/lib/Async';
-import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
 import { Researcher, DAR, AuthenticateNIH } from '../libs/ajax';
@@ -736,7 +735,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const nihUrl = `${process.env.REACT_APP_NIH_URL}??redirect-url=`;
     const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?jwt%3D%7Btoken%7D");
     Storage.setData('dar_application', this.state.formData);
     window.location.href = landingUrl;

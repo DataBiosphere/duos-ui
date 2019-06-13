@@ -9,7 +9,6 @@ import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { Alert } from '../components/Alert';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
-import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
 import { Link } from 'react-router-dom';
 
@@ -496,7 +495,7 @@ class FinalAccessReview extends Component {
     this.setState({
       sDul: electionReview.election.translatedUseRestriction,
       mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2),
-      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
+      downloadUrl: process.env.REACT_APP_API_URL + 'consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
       status: electionReview.election.status,
       voteList: this.chunk(electionReview.reviewVote, 2),

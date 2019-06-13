@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { div, h1, label, input, hr, span, h } from 'react-hyperscript-helpers';
-import { Config } from "../libs/config";
 import { USER_ROLES } from '../libs/utils';
 import GoogleLogin from 'react-google-login';
 import { Storage } from "../libs/storage";
@@ -19,7 +18,7 @@ class HomeRegister extends Component {
   }
 
   async getGoogleClientId() {
-    const clientKey = `${await Config.getGoogleClientId()}`;
+    const clientKey = `${process.env.REACT_APP_GOOGLE_CLIENT_ID}`;
     this.setState(prev => {
       prev.clientId = clientKey;
       return prev;

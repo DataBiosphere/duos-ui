@@ -6,7 +6,6 @@ import { PageHeading } from '../components/PageHeading';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import ReactTooltip from 'react-tooltip';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Config } from '../libs/config';
 import * as qs from 'query-string';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
@@ -199,7 +198,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const nihUrl = `${process.env.REACT_APP_NIH_URL}??redirect-url=`;
     const landingUrl = nihUrl.concat(window.location.origin + "/profile?jwt%3D%7Btoken%7D");
     Storage.setData('researcher', this.state.profile);
     window.location.href = landingUrl;

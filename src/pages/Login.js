@@ -5,7 +5,6 @@ import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { User } from '../libs/ajax';
 import './Login.css';
-import { Config } from '../libs/config';
 
 class Login extends Component {
   constructor(props) {
@@ -14,15 +13,18 @@ class Login extends Component {
       redirectUrl: this.props.match.url,
       clientId: ''
     };
-    this.getGoogleClientId();
   }
 
   async getGoogleClientId() {
-    const clientKey = `${await Config.getGoogleClientId()}`;
+    const clientKey = process.env.REACT_APP_GOOGLE_CLIENT_ID;
     this.setState(prev => {
       prev.clientId = clientKey;
       return prev;
     });
+  }
+
+  componentDidMount() {
+    this.getGoogleClientId();
   }
 
   async getUser() {

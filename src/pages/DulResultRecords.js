@@ -6,7 +6,6 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { Config } from '../libs/config';
 
 class DulResultRecords extends Component {
 
@@ -53,7 +52,7 @@ class DulResultRecords extends Component {
       consentName: electionReview.consent.name,
       election: electionReview.election,
       dul: electionReview.election.dataUseLetter,
-      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
+      downloadUrl: process.env.REACT_APP_API_URL + 'consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
       sDul: electionReview.election.translatedUseRestriction,
       finalRationale: electionReview.election.finalRationale,

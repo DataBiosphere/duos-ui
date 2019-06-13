@@ -6,7 +6,6 @@ import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Election, DAR, Files, Email } from '../libs/ajax';
-import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
 import { Alert } from '../components/Alert';
@@ -260,7 +259,7 @@ class AccessCollect extends Component {
       prev.darOriginalFinalVote = electionReview.election.finalVote;
       prev.darOriginalFinalRationale = electionReview.election.finalRationale;
       prev.darOriginalFinalVoteId = electionReview.election.electionId;
-      prev.downloadUrl = Config.getApiUrl() + 'consent/' + electionReview.associatedConsent.consentId + '/dul';
+      prev.downloadUrl = process.env.REACT_APP_API_URL + 'consent/' + electionReview.associatedConsent.consentId + '/dul';
       prev.dulName = electionReview.consent.dulName;
       prev.status = electionReview.election.status;
       prev.accessAlreadyVote = electionReview.election.finalVote !== null ? true : false;

@@ -7,7 +7,6 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
 
-import { Config } from '../libs/config';
 import * as Utils from '../libs/utils';
 import { Alert } from '../components/Alert';
 
@@ -765,7 +764,7 @@ class AccessResultRecords extends Component {
     }
     this.setState({
       election: election,
-      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
+      downloadUrl: process.env.REACT_APP_API_URL + 'consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
       status: electionReview.election.status,
       voteList: this.chunk(electionReview.reviewVote, 2),
