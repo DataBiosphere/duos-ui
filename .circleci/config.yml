@@ -9,8 +9,8 @@ executors:
       - image: circleci/node:10
 
 commands:
-  build-env:
-    description: "Build/push image to GCR"
+  push-env:
+    description: "Push image to GCR"
     parameters:
       sa_key_name:
         type: string
@@ -122,11 +122,38 @@ jobs:
           paths:
             - ~/.npm
       - run: npm test
+  build-dev:
+    executor: node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/dev.json public/config.json
+      - run: npm install --silent
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .gcloudignore
+            - build
+            - config
+            - Dockerfile
   deploy-dev:
     executor: cloud-sdk
     steps:
       - checkout
-      - build-env:
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - attach_workspace:
+          at: .
+      - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'dev'
           project_name: 'duos-ui'
@@ -146,9 +173,15 @@ workflows:
   build-deploy:
     jobs:
       - test
-      - deploy-dev:
+      - build-dev:
           requires:
             - test
+          filters:
+            branches:
+              only: develop
+      - deploy-dev:
+          requires:
+            - build-dev
           filters:
             branches:
               only: develop
