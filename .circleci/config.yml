@@ -42,6 +42,7 @@ commands:
             gcloud --quiet config set project ${GOOGLE_PROJECT}
       - setup_remote_docker:
           docker_layer_caching: true
+      - run: cat build/config.json
       - run:
           name: Docker build/push to GCR
           command: |
