@@ -9,30 +9,6 @@ executors:
       - image: circleci/node:10
 
 commands:
-  build-env:
-    description: "Build env specific image"
-    parameters:
-      env:
-        type: string
-        default: 'dev'
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
-      - run: cp config/<< parameters.env >>.json public/config.json
-      - run: npm install --silent
-      - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .gcloudignore
-            - build
-            - config
-            - Dockerfile
   push-env:
     description: "Push image to GCR"
     parameters:
@@ -149,12 +125,44 @@ jobs:
       - run: npm test
   build-dev:
     executor: node
-    build-env:
-      env: 'dev'
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/dev.json public/config.json
+      - run: npm install --silent
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .gcloudignore
+            - build
+            - config
+            - Dockerfile
   build-staging:
     executor: node
-    build-env:
-      env: 'staging'
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/staging.json public/config.json
+      - run: npm install --silent
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .gcloudignore
+            - build
+            - config
+            - Dockerfile
   deploy-dev:
     executor: cloud-sdk
     steps:
@@ -231,7 +239,7 @@ workflows:
 #            tags:
 #              only: staging
             branches:
-              only: staging # TODO: This should build off of the staging tag
+              only: staging # TODO: This should build off of the develop branch + staging tag
       - deploy-staging:
           requires:
             - build-staging
@@ -239,5 +247,5 @@ workflows:
 #            tags:
 #              only: staging
             branches:
-              only: staging # TODO: This should build off of the staging tag
+              only: staging # TODO: This should build off of the develop branch + staging tag
 
