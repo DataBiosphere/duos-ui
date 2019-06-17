@@ -40,9 +40,11 @@
   "devDependencies": {
     "eslint": "5.16.0",
     "eslint-plugin-react": "7.12.4",
-    "//": "The following are security related updates for indirect dependencies",
     "handlebars": "4.0.14",
     "js-yaml": "3.13.1"
+  },
+  "comments": {
+    "security-alerts": "handlebars and js-yaml are security related updates for indirect dependencies"
   },
   "browserslist": [
     ">0.2%",
