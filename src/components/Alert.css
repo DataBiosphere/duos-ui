@@ -57,7 +57,20 @@
 small.font-normal {
   display: block;
   font-style: normal;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 20px;
   margin-top: 5px;
+}
+
+.css-form-container {
+  border: 1px solid #E1E1E1;
+  padding: 26px 0px 26px 52px;
+  height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 15px 0;
+}
+
+.css-form-container .control-label {
+  margin-bottom: 5px;
 }

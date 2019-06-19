@@ -112,7 +112,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         action: { label: "Add", handler: this.OKHandler }
       },
         [
-          form({ className: "form-vertical css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
+          form({ className: "form-vertical css-form-container", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
 
             /* Row 1 */
             div({ className: "row" }, [
