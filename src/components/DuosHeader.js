@@ -8,8 +8,6 @@ import './DuosHeader.css';
 
 class DuosHeader extends Component {
 
-  navBarCollapsed = true;
-
   constructor(props) {
     super(props);
     this.state = {
@@ -18,7 +16,12 @@ class DuosHeader extends Component {
     this.signOut = this.signOut.bind(this);
   };
 
-  helpModal = (e) => {
+  signOut = () => {
+    this.props.history.push('/home');
+    this.props.onSignOut();
+  };
+
+  helpModal = () => {
     this.setState(prev => {
       prev.showHelpModal = true;
       return prev;
@@ -172,12 +175,6 @@ class DuosHeader extends Component {
         ])
       ])
     );
-  }
-
-  signOut() {
-    Storage.setUserIsLogged(false);
-    Storage.clearStorage();
-    this.props.history.push('/login');
   }
 
 }
