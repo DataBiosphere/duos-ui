@@ -112,151 +112,173 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         action: { label: "Add", handler: this.OKHandler }
       },
         [
-          form({ className: "form-vertical css-form-container", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
+          form({ className: "form-vertical css-form-container dashed", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
 
-            /* Row 1 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Dataset Name*"]),
-                  input({ id: "dataset_name", type: "text", className: "form-control", required: true }),
-                  small({className: "form-text text-muted font-normal"}, ["The publicly visible name for this dataset displayed in the DUOS Dataset Catalog"])
+            div({id: "dataset-form", className: "hidden"},[
+              /* Row 1 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Dataset Name*"]),
+                    input({ id: "dataset_name", type: "text", className: "form-control", required: true }),
+                    small({className: "form-text text-muted font-normal"}, ["The publicly visible name for this dataset displayed in the DUOS Dataset Catalog"])
+                  ])
+                ]),
+
+                div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["FireCloud/Terra Workspace URL*"]),
+                    input({ id: "workspace_url", type: "text", className: "form-control", required: true })
+                  ])
                 ])
               ]),
 
-              div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["FireCloud/Terra Workspace URL*"]),
-                  input({ id: "workspace_url", type: "text", className: "form-control", required: true })
+              /* Row 2 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Data Type*"]),
+                    input({ id: "datatype", type: "text", className: "form-control", required: true, placeholder: "example: RNASeq, WES, WGS etc." })
+                  ])
+                ]),
+
+                div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Species*"]),
+                    input({ id: "species", type: "text", className: "form-control", required: true })
+                  ])
+                ])
+              ]),
+
+              /* Row 3 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Phenotype/Indication*"]),
+                    input({ id: "phenotype_indication", type: "text", className: "form-control", required: true }),
+                    small({className: "form-text text-muted font-normal"}, ["For a list of phenotypes, please see:"]),
+                    a({className: "", href: "http://disease-ontology.org/", target: "_blank"}, ["http://disease-ontology.org/"])
+                  ])
+                ]),
+
+                div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["# of Participants*"]),
+                    input({ id: "participants", type: "text", className: "form-control", required: true })
+                  ])
+                ])
+              ]),
+
+              /* Row 4 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Dataset Description*"]),
+                    input({ id: "dataset_description", type: "text", className: "form-control", required: true })
+                  ])
+                ]),
+
+                div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["dbGaP/repository study URL*"]),
+                    input({ id: "dbGaP_StudyURL", type: "text", className: "form-control", required: true })
+                  ])
+                ])
+              ]),
+
+              /* Row 5 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Principal Investigator(s)*"]),
+                    input({ id: "principal_investigator", type: "text", className: "form-control", required: true })
+                  ])
+                ]),
+
+                div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Dataset Depositor*"]),
+                    input({ id: "dataset_depositor", type: "text", className: "form-control", required: true })
+                  ])
+                ])
+              ]),
+
+              /* Row 6 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Data Owner"]),
+                    h(AsyncSelect, {
+                      id: "data_owner",
+                      // key: this.state.formData.datasets.value,
+                      // isDisabled: this.state.formData.dar_code !== null,
+                      isMulti: false,
+                      // loadOptions: (query, callback) => this.searchDataSets(query, callback),
+                      // onChange: (option) => this.onDatasetsChange(option),
+                      // value: this.state.formData.datasets,
+                      // noOptionsMessage: () => this.state.optionMessage,
+                      // loadingMessage: () => this.state.optionMessage,
+                      classNamePrefix: "select",
+                      placeholder: "Select a DUOS User...",
+                      className: 'select-autocomplete',
+                      required: false
+                    })
+                  ])
+                ]),
+
+                div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Data Access Committee*"]),
+                    h(AsyncSelect, {
+                      id: "data_accessCommittee",
+                      // key: this.state.formData.datasets.value,
+                      // isDisabled: this.state.formData.dar_code !== null,
+                      isMulti: false,
+                      // loadOptions: (query, callback) => this.searchDataSets(query, callback),
+                      // onChange: (option) => this.onDatasetsChange(option),
+                      // value: this.state.formData.datasets,
+                      // noOptionsMessage: () => this.state.optionMessage,
+                      // loadingMessage: () => this.state.optionMessage,
+                      classNamePrefix: "select",
+                      placeholder: "Select a DUOS User...",
+                      className: 'select-autocomplete',
+                      required: true
+                    })
+                  ])
+                ])
+              ]),
+            
+              /* Row 7 */
+              div({ className: "row" }, [
+                div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
+                  div({ className: "form-group" }, [
+                    label({className: "control-label common-color"}, ["Publication Reference"]),
+                    input({ id: "publication_reference", type: "text", className: "form-control", required: false }),
+                  ])
                 ])
               ])
             ]),
 
-            /* Row 2 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Data Type*"]),
-                  input({ id: "datatype", type: "text", className: "form-control", required: true, placeholder: "example: RNASeq, WES, WGS etc." })
-                ])
-              ]),
-
-              div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Species*"]),
-                  input({ id: "species", type: "text", className: "form-control", required: true })
-                ])
-              ])
-            ]),
-
-            /* Row 3 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Phenotype/Indication*"]),
-                  input({ id: "phenotype_indication", type: "text", className: "form-control", required: true }),
-                  small({className: "form-text text-muted font-normal"}, ["For a list of phenotypes, please see:"]),
-                  a({className: "", href: "http://disease-ontology.org/", target: "_blank"}, ["http://disease-ontology.org/"])
-                ])
-              ]),
-
-              div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["# of Participants*"]),
-                  input({ id: "participants", type: "text", className: "form-control", required: true })
-                ])
-              ])
-            ]),
-
-            /* Row 4 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Dataset Description*"]),
-                  input({ id: "dataset_description", type: "text", className: "form-control", required: true })
-                ])
-              ]),
-
-              div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["dbGaP/repository study URL*"]),
-                  input({ id: "dbGaP_StudyURL", type: "text", className: "form-control", required: true })
-                ])
-              ])
-            ]),
-
-            /* Row 5 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Principal Investigator(s)*"]),
-                  input({ id: "principal_investigator", type: "text", className: "form-control", required: true })
-                ])
-              ]),
-
-              div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Dataset Depositor*"]),
-                  input({ id: "dataset_depositor", type: "text", className: "form-control", required: true })
-                ])
-              ])
-            ]),
-
-            /* Row 6 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Data Owner"]),
-                  h(AsyncSelect, {
-                    id: "data_owner",
-                    // key: this.state.formData.datasets.value,
-                    // isDisabled: this.state.formData.dar_code !== null,
-                    isMulti: false,
-                    // loadOptions: (query, callback) => this.searchDataSets(query, callback),
-                    // onChange: (option) => this.onDatasetsChange(option),
-                    // value: this.state.formData.datasets,
-                    // noOptionsMessage: () => this.state.optionMessage,
-                    // loadingMessage: () => this.state.optionMessage,
-                    classNamePrefix: "select",
-                    placeholder: "Select a DUOS User...",
-                    className: 'select-autocomplete',
-                    required: false
-                  })
-                ])
-              ]),
-
-              div({ className: "col-xs-12 col-sm-6 col-md-5 col-md-offset-1" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Data Access Committee"]),
-                  h(AsyncSelect, {
-                    id: "data_accessCommittee",
-                    // key: this.state.formData.datasets.value,
-                    // isDisabled: this.state.formData.dar_code !== null,
-                    isMulti: false,
-                    // loadOptions: (query, callback) => this.searchDataSets(query, callback),
-                    // onChange: (option) => this.onDatasetsChange(option),
-                    // value: this.state.formData.datasets,
-                    // noOptionsMessage: () => this.state.optionMessage,
-                    // loadingMessage: () => this.state.optionMessage,
-                    classNamePrefix: "select",
-                    placeholder: "Select a DUOS User...",
-                    className: 'select-autocomplete',
-                    required: false
-                  })
-                ])
-              ])
-            ]),
-          
-            /* Row 7 */
-            div({ className: "row" }, [
-              div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
-                div({ className: "form-group" }, [
-                  label({className: "control-label common-color"}, ["Publication Reference"]),
-                  input({ id: "publication_reference", type: "text", className: "form-control", required: false }),
-                ])
+            div({className: "", id: "upload-form"}, [
+              span({className: "document-icon"},[]),
+              p({className: "upload"},['Drag and drop your document here, or ',
+                a({className: "hover-color green", href: "#"},['choose a document to upload.'])
               ])
             ])
           ]),
+
+          div({ isRendered: this.state.errors }, [
+            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
+          ]),
+          div({ className: "checkbox dataset-label overwrite"}, [
+            input({ id: "chk_overwrite", onChange: this.handleOverwriteChange, checked: this.state.overwrite, type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
+            label({ id: "lbl_overwrite", className: "regular-checkbox", htmlFor: "chk_overwrite" }, ["Overwrite existing Datasets"]),
+          ])
+        ])
+    );
+  }
+});
+
 
           // a({ className: "hover-color", href: "#" }, ["Upload a .cvs file"])
 
@@ -283,10 +305,3 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
           //     ])
           //   ])
           // ]),
-          div({ isRendered: this.state.errors }, [
-            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
-          ]),
-        ])
-    );
-  }
-});
