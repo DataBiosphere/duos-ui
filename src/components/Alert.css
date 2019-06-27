@@ -75,6 +75,7 @@ small.font-normal {
   border: 2px dashed #E1E1E1;
   height: 206px;
   padding: 26px 0px;
+  margin-top: 97px;
 }
 
 .css-form-container .control-label {
@@ -84,6 +85,28 @@ small.font-normal {
 .css-form-container p.upload {
   font-size: 16px;
   text-align: center;
+}
+
+p.bottom-cta {
+  position: absolute;
+  font-size: 16px;
+  text-align: left;
+  line-height: 22px;
+  font-weight: 100;
+  margin: 0;
+  bottom: -135px;
+}
+
+p.bottom-cta#uploadCta {
+  bottom: -43px;
+}
+
+p.bottom-cta .block {
+  display: block;
+}
+
+p.bottom-cta a {
+  text-decoration: underline !important;
 }
 
 .hover-color.green {
@@ -101,7 +124,8 @@ small.font-normal {
 }
 
 .checkbox.overwrite {
-  margin: 0 0 20px 0;
+  margin: 0 0 68px 0;
+  width:100%;
 }
 
 .checkbox.overwrite .regular-checkbox {

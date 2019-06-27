@@ -18,6 +18,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
       },
       overwrite: false,
       errors: false,
+      uploadForm: false,
       url: {}
     };
     this.handleFileChange = this.handleFileChange.bind(this);
@@ -26,7 +27,15 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
     this.closeHandler = this.closeHandler.bind(this);
     this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
+    this.switchUploadForm = this.switchUploadForm.bind(this);
   };
+
+  switchUploadForm() {
+    this.setState({ 
+      uploadForm: !this.state.uploadForm 
+    });
+    window.$('.css-form-container').toggleClass('dashed');
+  }
 
   handleOverwriteChange(event) {
     this.setState({
@@ -96,7 +105,7 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
       }, ["download this file"]),
       " with the mistakes found."
     ]);
-
+    
     return (
 
       BaseModal({
@@ -109,12 +118,12 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         iconSize: 'large',
         title: "Add Datasets",
         description: 'Upload Datasets associated with Data Use Limitations',
-        action: { label: "Add", handler: this.OKHandler }
+        action: { label: "Submit", handler: this.OKHandler }
       },
         [
-          form({ className: "form-vertical css-form-container dashed", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
+          form({ className: "form-vertical css-form-container", name: "consentForm", noValidate: true, encType: "multipart/form-data"}, [
 
-            div({id: "dataset-form", className: "hidden"},[
+            div({id: "dataset-form", isRendered: !this.state.uploadForm},[
               /* Row 1 */
               div({ className: "row" }, [
                 div({ className: "col-xs-12 col-sm-6 col-md-5" }, [
@@ -259,7 +268,8 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
               ])
             ]),
 
-            div({className: "", id: "upload-form"}, [
+            /* Drag & Drop section */
+            div({isRendered: this.state.uploadForm, id: "upload-form"}, [
               span({className: "document-icon"},[]),
               p({className: "upload"},['Drag and drop your document here, or ',
                 a({className: "hover-color green", href: "#"},['choose a document to upload.'])
@@ -267,21 +277,30 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
             ])
           ]),
 
-          div({ isRendered: this.state.errors }, [
-            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
-          ]),
-          div({ className: "checkbox dataset-label overwrite"}, [
+          /* (Overwrite existing Datasets) Only visible when user upload a file */
+          div({ className: "checkbox dataset-label overwrite", isRendered: this.state.uploadForm}, [
             input({ id: "chk_overwrite", onChange: this.handleOverwriteChange, checked: this.state.overwrite, type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
             label({ id: "lbl_overwrite", className: "regular-checkbox", htmlFor: "chk_overwrite" }, ["Overwrite existing Datasets"]),
+          ]),
+
+          /* Upload a .csv file */
+          p({className: "bottom-cta", id: "uploadCta", isRendered: !this.state.uploadForm, onClick: this.switchUploadForm},[
+            a({className: "hover-color green", href: "#"},['Upload a .csv file'])
+          ]),
+
+          /* Downloaad .csv Template */
+          p({className: "bottom-cta", id: "downloadCta", isRendered: this.state.uploadForm},['Download a ',
+            a({className: "hover-color green", href: "#"},['.csv template' ]),
+            span({className: "block"}, ['to upload multiple datasets.'])
+          ]),
+
+          div({ isRendered: this.state.errors }, [
+            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
           ])
         ])
     );
   }
 });
-
-
-          // a({ className: "hover-color", href: "#" }, ["Upload a .cvs file"])
-
 
           // form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
           //   div({ className: "form-group first-form-group" }, [
