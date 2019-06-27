@@ -41,7 +41,7 @@ class Login extends Component {
         user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
         user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
         Storage.setCurrentUser(user);
-        Storage.setUserIsLogged(true);
+        this.props.onSignIn();
         this.redirect(user, this.state.redirectUrl);
       },
       error => {
