@@ -40,3 +40,13 @@
   color: #333333;
   font-weight: 300;
 }
+
+.consent-data-alt {
+  font-size: 19px;
+  font-style: normal;
+  margin: 10px 0 30px 56px;
+  display: block;
+  color: #333333;
+  font-weight: normal;
+  line-height: 27px;
+}

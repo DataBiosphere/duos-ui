@@ -7,6 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { Alert } from '../components/Alert';
+import { DarDetails } from '../components/DarDetails';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -591,7 +592,14 @@ class FinalAccessReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review", description: consentData }),
+            PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review"}),
+            DarDetails({
+              projectTitle: this.state.projectTitle,
+              darCode: this.state.darInfo.darCode,
+              datasetId: this.state.darInfo.datasetId,
+              datasetName: this.state.darInfo.datasetName,
+              consentName: this.state.consentName
+            })
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             h(Link, { id: "btn_back", to: "/chair_console", className: "btn-primary btn-back" }, [

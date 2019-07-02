@@ -5,6 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { DarDetails } from '../components/DarDetails';
 import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -313,6 +314,7 @@ class AccessCollect extends Component {
     let dar = await DAR.getDarFields(this.props.match.params.referenceId, "rus");
     let request = await DAR.getDarFields(this.props.match.params.referenceId, "projectTitle");
     let darInfo = await DAR.describeDar(this.props.match.params.referenceId);
+    console.log('dar: ' + JSON.stringify(darInfo));
     if (!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
     this.setState(prev => {
       prev.darInfo = darInfo;
@@ -369,18 +371,20 @@ class AccessCollect extends Component {
 
   render() {
 
-    const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [this.state.projectTitle]),
-      this.state.consentName
-    ]);
-
     const { translatedUseRestriction } = this.state;
 
     return (
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review", description: consentData }),
+            PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review"}),
+            DarDetails({
+              projectTitle: this.state.projectTitle,
+              darCode: this.state.darInfo.darCode,
+              datasetId: this.state.darInfo.datasetId,
+              datasetName: this.state.darInfo.datasetName,
+              consentName: this.state.consentName
+            })
           ]),
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             a({ id: "btn_back", onClick: this.back, className: "btn-primary btn-back" }, [

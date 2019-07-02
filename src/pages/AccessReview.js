@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
+import { DarDetails } from '../components/DarDetails';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { Alert } from '../components/Alert';
@@ -281,7 +282,14 @@ class AccessReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review", description: consentData }),
+            PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review"}),
+            DarDetails({
+              projectTitle: this.state.projectTitle,
+              darCode: this.state.darInfo.darCode,
+              datasetId: this.state.darInfo.datasetId,
+              datasetName: this.state.darInfo.datasetName,
+              consentName: this.state.consentName
+            })
           ]),
 
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [

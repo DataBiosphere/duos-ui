@@ -219,6 +219,7 @@ export const DAR = {
     darInfo.hasAdminComment = data.rationale != null;
     darInfo.adminComment = data.rationale;
     darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
+    darInfo.darCode = data.darCode;
     if (darInfo.hasPurposeStatements) {
       darInfo.purposeStatements = data.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
@@ -228,6 +229,12 @@ export const DAR = {
     if (data.researchType.length > 0) {
       darInfo.researchType = data.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
+    }
+    if (data.datasetDetail !== null) {
+      for(var prop in data.datasetDetail) {
+        darInfo.datasetId = data.datasetDetail[prop];
+        darInfo.datasetName = prop;
+      }
     }
     let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
     darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
