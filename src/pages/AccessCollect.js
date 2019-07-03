@@ -314,7 +314,6 @@ class AccessCollect extends Component {
     let dar = await DAR.getDarFields(this.props.match.params.referenceId, "rus");
     let request = await DAR.getDarFields(this.props.match.params.referenceId, "projectTitle");
     let darInfo = await DAR.describeDar(this.props.match.params.referenceId);
-    console.log('dar: ' + JSON.stringify(darInfo));
     if (!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
     this.setState(prev => {
       prev.darInfo = darInfo;

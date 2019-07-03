@@ -1,6 +1,16 @@
 import { PureComponent } from 'react';
-import { div, hh, label, h4, h, hr, span } from 'react-hyperscript-helpers';
-import * as Utils from '../libs/utils';
+import { div, hh, span } from 'react-hyperscript-helpers';
+
+const styles = {
+    consentDataAlt: {
+        'font-size': 19,
+        'font-style': 'normal',
+        'margin': '10px 0 30px 56px',
+        'color': '#333333',
+        'font-weight': 'normal',
+        'line-height': '27px'
+    }
+};
 
 export const DarDetails = hh(class DarDetails extends PureComponent {
     
@@ -10,7 +20,7 @@ export const DarDetails = hh(class DarDetails extends PureComponent {
 
     render() {
         return (
-            span({className: "consent-data-alt"}, [
+            div({style: styles.consentDataAlt}, [
                 span({className: "pipe"}, [
                     this.props.projectTitle  
                 ]),
@@ -19,7 +29,7 @@ export const DarDetails = hh(class DarDetails extends PureComponent {
                     this.props.darCode
                 ]),
     
-                div({style: {'display':'block'}}, [
+                div({}, [
                     span({className: "pipe"}, [
                         this.props.datasetId  
                     ]),
@@ -35,5 +45,4 @@ export const DarDetails = hh(class DarDetails extends PureComponent {
             ])
         )
     }
-
 });
