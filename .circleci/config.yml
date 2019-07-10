@@ -204,16 +204,15 @@ jobs:
           env: 'staging'
           project_name: 'duos-ui'
           google_project: 'broad-duos-dev'
-# TODO: Uncomment when cluster is properly configured
-#      - deploy-env:
-#          sa_key_name: 'GCLOUD_DUOS_DEV'
-#          env: 'staging'
-#          namespace: 'duos'
-#          project_name: 'duos-ui'
-#          google_project: 'broad-duos-dev'
-#          google_zone: 'us-central1-a'
-#          google_cluster: 'duos-ui-staging-cluster'
-#          commit: ${COMMIT}
+      - deploy-env:
+          sa_key_name: 'GCLOUD_DUOS_DEV'
+          env: 'staging'
+          namespace: 'duos'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
+          google_zone: 'us-central1-a'
+          google_cluster: 'duos-ui-staging-cluster'
+          commit: ${COMMIT}
 
 workflows:
   version: 2
@@ -239,7 +238,7 @@ workflows:
 #            tags:
 #              only: staging
             branches:
-              only: staging # TODO: This should build off of the develop branch + staging tag
+              only: staging # TODO: This should build off of the develop branch + staging tag when complete
       - deploy-staging:
           requires:
             - build-staging
@@ -247,5 +246,5 @@ workflows:
 #            tags:
 #              only: staging
             branches:
-              only: staging # TODO: This should build off of the develop branch + staging tag
+              only: staging # TODO: This should build off of the develop branch + staging tag when complete
 
