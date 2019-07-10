@@ -235,16 +235,16 @@ workflows:
           requires:
             - test
           filters:
-#            tags:
-#              only: staging
+            tags:
+              only: staging
             branches:
-              only: staging # TODO: This should build off of the develop branch + staging tag when complete
+              only: develop
       - deploy-staging:
           requires:
             - build-staging
           filters:
-#            tags:
-#              only: staging
+            tags:
+              only: staging
             branches:
-              only: staging # TODO: This should build off of the develop branch + staging tag when complete
+              only: develop
 
