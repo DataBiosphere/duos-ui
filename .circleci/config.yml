@@ -142,6 +142,26 @@ jobs:
             - build
             - config
             - Dockerfile
+  build-staging:
+    executor: node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/staging.json public/config.json
+      - run: npm install --silent
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .gcloudignore
+            - build
+            - config
+            - Dockerfile
   deploy-dev:
     executor: cloud-sdk
     steps:
@@ -167,6 +187,31 @@ jobs:
           google_zone: 'us-central1-a'
           google_cluster: 'duos-ui-dev-cluster'
           commit: ${COMMIT}
+  deploy-staging:
+    executor: cloud-sdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - attach_workspace:
+          at: .
+      - push-env:
+          sa_key_name: 'GCLOUD_DUOS_DEV'
+          env: 'staging'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
+      - deploy-env:
+          sa_key_name: 'GCLOUD_DUOS_DEV'
+          env: 'staging'
+          namespace: 'duos'
+          project_name: 'duos-ui'
+          google_project: 'broad-duos-dev'
+          google_zone: 'us-central1-a'
+          google_cluster: 'duos-ui-staging-cluster'
+          commit: ${COMMIT}
 
 workflows:
   version: 2
@@ -185,3 +230,20 @@ workflows:
           filters:
             branches:
               only: develop
+      - build-staging:
+          requires:
+            - test
+          filters:
+            tags:
+              only: staging
+            branches:
+              only: develop
+      - deploy-staging:
+          requires:
+            - build-staging
+          filters:
+            tags:
+              only: staging
+            branches:
+              only: develop
+
