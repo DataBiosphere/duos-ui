@@ -25,7 +25,6 @@ commands:
         type: string
         default: 'broad-duos-dev'
     steps:
-      - run: cat public/config.json
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
