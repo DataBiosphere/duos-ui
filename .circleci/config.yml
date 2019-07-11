@@ -236,14 +236,9 @@ workflows:
           filters:
             tags:
               only: staging
-            branches:
-              only: develop
       - deploy-staging:
           requires:
             - build-staging
           filters:
             tags:
               only: staging
-            branches:
-              only: develop
-
