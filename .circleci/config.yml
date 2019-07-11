@@ -234,11 +234,15 @@ workflows:
           requires:
             - test
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: staging
       - deploy-staging:
           requires:
             - build-staging
           filters:
+            branches:
+              ignore: /.*/
             tags:
               only: staging
