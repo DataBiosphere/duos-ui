@@ -8,8 +8,10 @@
     "bootstrap": "3.4.1",
     "chart.js": "1.1.1",
     "classnames": "2.2.6",
+    "inquirer": "6.4.1",
     "jquery": "3.4.0",
-    "lodash": "4.17.11",
+    "lodash": "4.17.14",
+    "mixin-deep": "2.0.1",
     "popper.js": "1.14.4",
     "query-string": "6.2.0",
     "react": "16.8.3",
@@ -28,6 +30,7 @@
     "react-select": "2.0.0",
     "react-tabs": "2.2.2",
     "react-tooltip": "3.8.4",
+    "set-value": "3.0.1",
     "source-map-explorer": "1.6.0"
   },
   "scripts": {
