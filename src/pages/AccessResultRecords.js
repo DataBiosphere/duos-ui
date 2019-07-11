@@ -688,7 +688,8 @@ class AccessResultRecords extends Component {
         Election.findElectionReviewById(data.associatedConsent.electionId, data.associatedConsent.consentId).then(
           data3 => {
             this.setState({
-              electionReview: data3
+              electionReview: data3,
+              consentName: data.associatedConsent.name
             });
             this.showDULData(data3);
             this.vaultVote(data3.consent.consentId);
