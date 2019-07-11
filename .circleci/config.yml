@@ -237,7 +237,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: staging
+              only: /^staging.*/
       - deploy-staging:
           requires:
             - build-staging
@@ -245,4 +245,4 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: staging
+              only: /^staging.*/
