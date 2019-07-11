@@ -43,7 +43,7 @@
   "devDependencies": {
     "eslint": "5.16.0",
     "eslint-plugin-react": "7.12.4",
-    "handlebars": "4.0.14",
+    "handlebars": "4.1.2",
     "js-yaml": "3.13.1"
   },
   "comments": {
