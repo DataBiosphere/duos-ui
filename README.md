@@ -1,11 +1,21 @@
 # DUOS UI
-This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
-Guide [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md).
+## Data Use Oversight System
+A semi-automated management service for compliant secondary use of human genomics data.
+There are restrictions on researching human genomics data. For example: 
+"Data can only be used for breast cancer research with non-commercial purpose".
+The Data Use Oversight system ensures that researchers using genomics data honor these restrictions.
 
-Builds/deploys handled by CircleCI.
+### What is DUOS?
+* Interfaces to transform data use restrictions to machine readable codes
+* A matching algorithm that checks if a data access request is compatible with the restrictions on the data
+* Interfaces for the data access committee (DAC) to evaluate data access requests requiring manual review
 
-### Developing
+![What is DUOS](https://github.com/DataBiosphere/duos-ui/blob/develop/public/images/what_is_duos.svg)
+
+### Developers
+
+Builds, tests, and deployments are handled by CircleCI.
 
 1. We use node@8 (the current LTS). On Darwin with Homebrew:
 
@@ -22,36 +32,8 @@ Builds/deploys handled by CircleCI.
     ```sh
     npm install
     ```
-4. Start development server, which will report any lint violations as well:
+4. Start development server:
 
     ```sh
     npm start
     ```
-5. Testing:
-    
-    ```sh
-    npm test
-    ```
-    
-### TODO
-
-- Testing documentation
-- Description    
-
-### Deployment
-
-Builds are deployed with every merge to `develop` and `master`
-
-To execute a deploy manually, generate a "Personal API Token" documented here:
-
-* https://circleci.com/account/api
-
-And use the documentation here: 
-
-* https://circleci.com/docs/2.0/api-job-trigger/
-
-An example run:
-```
-curl -u <token>: -d build_parameters[CIRCLE_JOB]=deploy_dev \
-    https://circleci.com/api/v1.1/project/github/DataBiosphere/duos-ui/tree/develop
-```
