@@ -78,11 +78,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (this.props.user && this.props.user !== undefined) {
 
       const user = await User.getByEmail(this.props.user.email);
-      let adminEmailPreference = false;
 
       user.roles.forEach(role => {
         rolesState[role.name.toUpperCase()] = true;
-        if (role.name === 'Admin') adminEmailPreference = !role.emailPreference;
       });
 
       this.setState({
@@ -95,7 +93,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         rolesState: Object.assign({}, rolesState),
         originalRolesState: Object.assign({}, rolesState),
         originalRoles: user.roles.slice(),
-        emailPreference: adminEmailPreference,
+        emailPreference: !user.emailPreference,
         delegateDacUser: {
           needsDelegation: false,
           delegateCandidates: []
