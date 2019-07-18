@@ -32,9 +32,10 @@ class AdminManageUsers extends Component {
       user.researcher = false;
       user.roles.forEach(role => {
         if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.status = role.status;
-          user.completed = role.profileCompleted;
+          user.completed = user.profileCompleted;
           user.researcher = true;
+        } else {
+          user.status = null;
         }
       });
       user.key = user.id;
