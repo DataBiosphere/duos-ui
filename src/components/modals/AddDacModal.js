@@ -11,12 +11,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     super(props);
     this.state = {
       isEditMode: false,
-      dac: {
-        dacName: '',
-        dacDescription: '',
-        dacChair: '',
-        dacMember: '',
-      },
+      dac: {},
       error: {
         show: false,
         title: '',
@@ -33,6 +28,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     if (this.props.isEditMode) {
       this.setState({
         isEditMode: this.props.isEditMode,
+        dac: this.props.dac,
       });
     } else {
       this.setState({
@@ -96,7 +92,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   input({
                     id: "txt_dacName",
                     type: "text",
-                    value: this.state.dac.dacName,
+                    value: this.state.dac.name,
                     onChange: this.handleChange,
                     name: "dacName",
                     className: "form-control col-lg-12 vote-input",
@@ -113,7 +109,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   textarea({
                     id: "txt_dacDescription",
-                    value: this.state.dac.dacDescription,
+                    value: this.state.dac.description,
                     onChange: this.handleChange,
                     name: "dacDescription",
                     className: "form-control col-lg-12 vote-input",

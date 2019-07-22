@@ -26,6 +26,7 @@ class AdminManageDac extends Component {
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
+      selectedDac: {},
     };
 
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -82,10 +83,11 @@ class AdminManageDac extends Component {
     this.setState({ showModal: false });
   }
 
-  async editDac() {
+  async editDac(dac) {
     this.setState({
       showModal: true,
-      isEditMode: true
+      isEditMode: true,
+      selectedDac: dac,
     });
   };
 
@@ -158,7 +160,7 @@ class AdminManageDac extends Component {
 
   afterViewDatasetsModalOpen() {
   }
-  
+
   handleSearchDac = (query) => {
     this.setState({ searchDacText: query });
   };
@@ -268,11 +270,10 @@ class AdminManageDac extends Component {
                     className: "col-1 cell-body f-center",
                   }, [
                       button({
-                        // id: dac.dacId + "_btnEditDAC",
+                        id: dac.dacId + "_btnEditDAC",
                         name: "btn_editDac",
                         className: "cell-button hover-color",
-                        // onClick: () => this.editDac(dac)
-                        // onClick: () => this.editDac()
+                        onClick: () => this.editDac(dac)
                       }, ["Edit"])
                     ])
                 ]),
@@ -285,6 +286,7 @@ class AdminManageDac extends Component {
                   onOKRequest: this.okAddDacModal,
                   onCloseRequest: this.closeAddDacModal,
                   onAfterOpen: this.afterAddDacModalOpen,
+                  dac: this.state.selectedDac,
                 }),
 
                 DacMembersModal({
