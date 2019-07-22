@@ -291,7 +291,7 @@ class AdminConsole extends Component {
                   description: 'Create and manage Data Access Committees',
                   iconName: 'manage-dac',
                   iconSize: 'large',
-                  unreviewedCases: darUnreviewedCases
+                  // unreviewedCases: darUnreviewedCases
                 })
               ]),
 

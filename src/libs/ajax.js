@@ -133,6 +133,16 @@ export const Consent = {
 
 };
 
+export const DAC = {
+
+  list: async () => {
+    const url = `${await Config.getApiUrl()}/dac`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  }
+
+};
+
 export const DAR = {
 
   describeDar: async (darId) => {

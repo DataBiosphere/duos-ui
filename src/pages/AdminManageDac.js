@@ -1,15 +1,17 @@
 import { Component, Fragment } from 'react';
 import { div, hr, h, span, a, button } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
 import { AddDacModal } from '../components/modals/AddDacModal';
+import { DAC } from '../libs/ajax';
 import { DacMembersModal } from '../components/modals/DacMembersModal';
 import { DacDatasetsModal } from '../components/modals/DacDatasetsModal';
+import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from "../components/PaginatorBar";
+import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
 
 const limit = 10;
 
-class AdminManageDac extends Component { 
+class AdminManageDac extends Component {
 
   constructor(props) {
     super(props);
@@ -20,9 +22,7 @@ class AdminManageDac extends Component {
       showDatasetsModal: false,
       value: '',
       limit: limit,
-      dacsList: {
-        dac: []
-      },
+      dacsList: [],
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
@@ -45,6 +45,22 @@ class AdminManageDac extends Component {
     this.closeViewDatasetsModal = this.closeViewDatasetsModal.bind(this);
     this.okViewDatasetsModal = this.okViewDatasetsModal.bind(this);
     this.afterViewDatasetsModalOpen = this.afterViewDatasetsModalOpen.bind(this);
+  }
+
+  async getDacs() {
+    const dacs = await DAC.list();
+    this.setState(prev => {
+      console.log(JSON.stringify(dacs));
+      prev.currentPage = 1;
+      prev.dacsList = dacs;
+      return prev;
+    }, () => {
+      ReactTooltip.rebuild();
+    });
+  }
+
+  componentDidMount() {
+    this.getDacs();
   }
 
   handlePageChange = page => {
@@ -198,61 +214,55 @@ class AdminManageDac extends Component {
           ]),
 
           hr({ className: "table-head-separator" }),
-          // this.state.dacsList.dac.filter(this.searchTable(searchDacText)).slice((currentPage - 1) * limit, currentPage * limit).map((dac, eIndex) => {
 
-          //   return (
-          h(Fragment, {
-            // key: dac.dacId
-          }, [
+          this.state.dacsList.filter(this.searchTable(searchDacText)).slice((currentPage - 1) * limit, currentPage * this.state.limit).map((dac, eIndex) => {
+            return (h(Fragment, { key: dac.dacId }, [
               div({
-                // id: dac.dacId,
+                id: dac.dacId,
                 className: "grid-9-row tableRow"
               }, [
                   div({
-                    // id: dac.dacId + "_dacName",
-                    name: "dacName",
+                    id: dac.dacId + "_dacName",
+                    name: "name",
                     className: "col-2 cell-body text bold",
-                    // title: dac.dacName
-                  }, ["Some Name"]),
-                  // }, [dac.dacName]),
+                    title: dac.name
+                  }, [dac.name]),
                   div({
-                    // id: dac.dacId + "_dacDescription",
+                    id: dac.dacId + "_dacDescription",
                     name: "dacDescription",
                     className: "col-3 cell-body text",
-                    // title: dac.dacDescription,
-                  }, ["Some Description"]),
-                  // }, [dac.dacDescription]),
+                    title: dac.description,
+                  }, [dac.description]),
                   div({
-                    // id: dac.dacId + "_dacChair",
+                    id: dac.dacId + "_dacChair",
                     name: "dacChair",
                     className: "col-1 cell-body text"
-                  }, ["John Doe"]),
-                  // }, [dac.dacChair]),
+                  }, ["---"]),
                   div({
-                    // id: dac.dacId + "_dacRoster",
+                    id: dac.dacId + "_dacRoster",
                     name: "dacRoster",
                     className: "col-1 cell-body text"
                   }, [
                       a({
-                        // id: dac.dacId + "_linkDacRoster",
+                        id: dac.dacId + "_linkDacRoster",
                         name: "link_dacRoster",
                         // href: property.propertyValue,
-                        onClick: this.viewMembers,
-                        className: "enabled hover-color"
-                      }, ["DAC Members"])
+                        // onClick: this.viewMembers,
+                        className: "disabled hover-color"
+                      }, ["---"])
                     ]),
                   div({
-                    // id: dac.dacId + "_dacDatasets",
+                    id: dac.dacId + "_dacDatasets",
                     name: "dacDatasets",
                     className: "col-1 cell-body text"
                   }, [
                       a({
-                        // id: dac.dacId + "_linkDacDatasets",
+                        id: dac.dacId + "_linkDacDatasets",
                         name: "link_dacDatasets",
                         // href: property.propertyValue,
-                        onClick: this.viewDatasets,
-                        className: "enabled hover-color"
-                      }, ["Linked Datasets"])
+                        // onClick: this.viewDatasets,
+                        className: "disabled hover-color"
+                      }, ["---"])
                     ]),
                   div({
                     className: "col-1 cell-body f-center",
@@ -262,20 +272,11 @@ class AdminManageDac extends Component {
                         name: "btn_editDac",
                         className: "cell-button hover-color",
                         // onClick: () => this.editDac(dac)
-                        onClick: () => this.editDac()
+                        // onClick: () => this.editDac()
                       }, ["Edit"])
                     ])
                 ]),
                 hr({ className: "table-body-separator" }),
-
-                PaginatorBar({
-                  total: this.state.dacsList.dac.filter(this.searchTable(searchDacText)).length,
-                  limit: this.state.limit,
-                  pageCount: this.pageCount,
-                  currentPage: this.state.currentPage,
-                  onPageChange: this.handlePageChange,
-                  changeHandler: this.handleSizeChange,
-                }),
 
                 AddDacModal({
                   isRendered: this.state.showModal,
@@ -302,8 +303,16 @@ class AdminManageDac extends Component {
                   onAfterOpen: this.afterViewDatasetsModalOpen,
                 })
             ])
-          //   )
-          // })
+            );
+          }),
+          PaginatorBar({
+            total: this.state.dacsList.filter(this.searchTable(searchDacText)).length,
+            limit: this.state.limit,
+            pageCount: this.pageCount,
+            currentPage: this.state.currentPage,
+            onPageChange: this.handlePageChange,
+            changeHandler: this.handleSizeChange,
+          }),
         ])
       ])
     );
