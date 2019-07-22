@@ -4,7 +4,6 @@ import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
 import { Consent, Election } from '../libs/ajax';
 import { PaginatorBar } from "../components/PaginatorBar";
-import AsyncSelect from 'react-select/lib/Async';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import * as Utils from '../libs/utils';
 import { SearchBox } from '../components/SearchBox';
@@ -35,8 +34,7 @@ class AdminManageDul extends Component {
       alertMessage: undefined,
       alertTitle: undefined,
       disableOkBtn: false,
-      disableCancelBtn: false,
-      dacName: ''
+      disableCancelBtn: false
     };
 
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -280,12 +278,6 @@ class AdminManageDul extends Component {
 
     const { currentPage, limit, searchDulText } = this.state;
 
-    const customStyles = {
-      labelMargin: {
-        margin: '10px 0 5px 0', textAlign: 'left', float: 'left'
-      }
-    }
-
     return (
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
@@ -316,11 +308,10 @@ class AdminManageDul extends Component {
         ]),
         div({ className: "jumbotron table-box" }, [
           div({ className: "grid-9-row pushed-2" }, [
-            div({ className: "col-1 cell-header dul-color" }, ["Consent id"]),
+            div({ className: "col-2 cell-header dul-color" }, ["Consent id"]),
             div({ className: "col-2 cell-header dul-color" }, ["Consent Group Name"]),
             div({ className: "col-1 cell-header dul-color" }, ["Election N°"]),
             div({ className: "col-1 cell-header dul-color" }, ["Date"]),
-            div({ className: "col-1 cell-header dul-color" }, ["DAC Name"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Edit Record"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Election status"]),
             div({ className: "col-1 cell-header f-center dul-color" }, ["Election actions"]),
@@ -338,7 +329,7 @@ class AdminManageDul extends Component {
                     div({
                       id: election.consentId + "_consentId",
                       name: "consentId",
-                      className: "col-1 cell-body text " + (election.archived === true ? "flagged" : ""),
+                      className: "col-2 cell-body text " + (election.archived === true ? "flagged" : ""),
                       title: election.consentName
                     },
                       [
@@ -372,13 +363,6 @@ class AdminManageDul extends Component {
                       name: "createDate",
                       className: "col-1 cell-body text"
                     }, [Utils.formatDate(election.createDate)]),
-                    div({
-                      id: election.consentId + "_dacName",
-                      name: "dacName",
-                      // title: election.dacName,
-                      className: "col-1 cell-body text"
-                      //replace with actual DAC Name
-                    }, ["DAC Name"]),
                     div({
                       className: "col-1 cell-body f-center",
                       disabled: (election.electionStatus !== 'un-reviewed' || !election.editable)
@@ -563,7 +547,6 @@ class AdminManageDul extends Component {
           color: 'dul',
           disableOkBtn: this.state.disableOkBtn,
           disableNoBtn: this.state.disableCancelBtn,
-          dacSelection: true,
           action: { label: "Yes", handler: this.dialogHandlerCreate },
           alertMessage: this.state.alertMessage,
           alertTitle: this.state.alertTitle
@@ -574,24 +557,7 @@ class AdminManageDul extends Component {
               span({
                 isRendered: this.state.createWarning,
                 className: "no-padding display-inline"
-              }, ["The previous election will be archived and it's result will no longer be valid."])
-            ]),
-            div({ className: "form-group" }, [
-              label({ id: "lbl_selectDAC", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 control-label dul-color", style: customStyles.labelMargin }, ["Select a DAC to vote on this election"]),
-                h(AsyncSelect, {
-                  id: "sel_dac",
-                  // key: this.state.dacName,
-                  isMulti: false,
-                  // loadOptions: (query, callback) => this.searchDacs(query, callback),
-                  // onChange: (option) => this.onDacsChange(option),
-                  // value: this.state.dacName,
-                  // noOptionsMessage: () => this.state.optionMessage,
-                  // loadingMessage: () => this.state.optionMessage,
-                  classNamePrefix: "select",
-                  placeholder: "Select DAC...",
-                  className: 'select-autocomplete',
-                  required: true
-                })
+              }, ["The previous election will be archived and it's result will no longer be valid."]),
             ])
           ]),
 
