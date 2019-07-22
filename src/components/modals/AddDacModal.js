@@ -1,9 +1,9 @@
 import { Component } from 'react';
-import { div, form, input, label, textarea, hh, h } from 'react-hyperscript-helpers';
-import { BaseModal } from '../BaseModal';
-import { Alert } from '../Alert';
+import { div, form, h, hh, input, label, textarea } from 'react-hyperscript-helpers';
 import AsyncSelect from 'react-select/lib/Async';
-
+import { Alert } from '../Alert';
+import { BaseModal } from '../BaseModal';
+import { DAC } from '../../libs/ajax';
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -37,6 +37,13 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   };
 
   async OKHandler() {
+    let dac = this.state.dac;
+    const updatedDac = await DAC.update(dac.dacId, dac.name, dac.description);
+    this.setState(prev => {
+      prev.dac = updatedDac;
+      return prev;
+    });
+    this.closeHandler();
   }
 
   closeHandler() {
@@ -50,7 +57,30 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   handleErrors(message) {
   };
 
-  handleChange = (changeEvent) => {
+  handleChange = (event) => {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+    switch (name) {
+      case "name":
+        this.setState(prev => {
+          let newDac = Object.assign({}, prev.dac);
+          newDac.name = value;
+          prev.dac = newDac;
+          return prev;
+        });
+        break;
+      case "description":
+        this.setState(prev => {
+          let newDac = Object.assign({}, prev.dac);
+          newDac.description = value;
+          prev.dac = newDac;
+          return prev;
+        });
+        break;
+      default:
+        break;
+    }
   };
 
   isValidJson = (obj, error) => {
@@ -92,9 +122,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   input({
                     id: "txt_dacName",
                     type: "text",
-                    value: this.state.dac.name,
+                    defaultValue: this.state.dac.name,
                     onChange: this.handleChange,
-                    name: "dacName",
+                    name: "name",
                     className: "form-control col-lg-12 vote-input",
                     required: true,
                   })
@@ -109,11 +139,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                   textarea({
                     id: "txt_dacDescription",
-                    value: this.state.dac.description,
+                    defaultValue: this.state.dac.description,
                     onChange: this.handleChange,
-                    name: "dacDescription",
+                    name: "description",
                     className: "form-control col-lg-12 vote-input",
-                    required: false
+                    required: true
                   })
                 ])
               ]),

@@ -29,7 +29,6 @@ class AdminManageDac extends Component {
       selectedDac: {},
     };
 
-    this.handleCloseModal = this.handleCloseModal.bind(this);
     this.handlePageChange = this.handlePageChange.bind(this);
 
     this.addDac = this.addDac.bind(this);
@@ -51,7 +50,6 @@ class AdminManageDac extends Component {
   async getDacs() {
     const dacs = await DAC.list();
     this.setState(prev => {
-      console.log(JSON.stringify(dacs));
       prev.currentPage = 1;
       prev.dacsList = dacs;
       return prev;
@@ -78,10 +76,6 @@ class AdminManageDac extends Component {
       return prev;
     });
   };
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  }
 
   async editDac(dac) {
     this.setState({
@@ -111,6 +105,7 @@ class AdminManageDac extends Component {
   }
 
   closeAddDacModal() {
+    this.getDacs();
     this.setState(prev => {
       prev.showModal = false;
       return prev;
