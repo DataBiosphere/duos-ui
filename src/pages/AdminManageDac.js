@@ -47,6 +47,10 @@ class AdminManageDac extends Component {
     this.afterViewDatasetsModalOpen = this.afterViewDatasetsModalOpen.bind(this);
   }
 
+  componentDidMount() {
+    this.getDacs();
+  }
+
   async getDacs() {
     const dacs = await DAC.list();
     this.setState(prev => {
@@ -56,10 +60,6 @@ class AdminManageDac extends Component {
     }, () => {
       ReactTooltip.rebuild();
     });
-  }
-
-  componentDidMount() {
-    this.getDacs();
   }
 
   handlePageChange = page => {

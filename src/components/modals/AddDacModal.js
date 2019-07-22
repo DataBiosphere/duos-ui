@@ -10,8 +10,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isEditMode: false,
-      dac: {},
+      isEditMode: this.props.isEditMode,
+      dac: this.props.isEditMode ? this.props.dac : {},
       error: {
         show: false,
         title: '',
@@ -25,22 +25,18 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   }
 
   componentDidMount() {
-    if (this.props.isEditMode) {
-      this.setState({
-        isEditMode: this.props.isEditMode,
-        dac: this.props.dac,
-      });
-    } else {
-      this.setState({
-      });
-    }
   };
 
   async OKHandler() {
-    let dac = this.state.dac;
-    const updatedDac = await DAC.update(dac.dacId, dac.name, dac.description);
+    let currentDac = this.state.dac;
+    let newDac = {};
+    if (this.state.isEditMode) {
+      newDac = await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
+    } else {
+      newDac = await DAC.create(currentDac.name, currentDac.description);
+    }
     this.setState(prev => {
-      prev.dac = updatedDac;
+      prev.dac = newDac;
       return prev;
     });
     this.closeHandler();
