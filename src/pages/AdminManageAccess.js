@@ -178,9 +178,8 @@ class AdminManageAccess extends Component {
         div({ className: "jumbotron table-box" }, [
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Data Request id"]),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Project title"]),
-            div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header access-color" }, ["Date"]),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["DAC Name"]),
+            div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header access-color" }, ["Project title"]),
+            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Date"]),
             div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["+ Info"]),
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election status"]),
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election actions"]),
@@ -218,23 +217,15 @@ class AdminManageAccess extends Component {
                     div({
                       id: dar.frontEndId + "_projectTitle",
                       name: "projectTitle",
-                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text",
+                      className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text",
                       title: dar.projectTitle
                     }, [dar.projectTitle]),
 
                     div({
                       id: dar.frontEndId + "_createDate",
                       name: "createDate",
-                      className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text"
+                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text"
                     }, [Utils.formatDate(dar.createDate)]),
-                    
-                    div({
-                      id: dar.frontEndId + "_dacName",
-                      name: "dacName",
-                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text",
-                      // title: dar.dacName
-                      //replace with actual DAC Name
-                    }, ["DAC Name"]),
 
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
                       button({

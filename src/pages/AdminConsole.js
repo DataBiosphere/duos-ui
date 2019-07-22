@@ -291,7 +291,6 @@ class AdminConsole extends Component {
                   description: 'Create and manage Data Access Committees',
                   iconName: 'manage-dac',
                   iconSize: 'large',
-                  // unreviewedCases: darUnreviewedCases
                 })
               ]),
 
@@ -304,7 +303,6 @@ class AdminConsole extends Component {
                   description: 'Create a new Data Access Committee in the system',
                   iconName: 'add-dac',
                   iconSize: 'large',
-                  unreviewedCases: 0
                 }),
                 AddDacModal({
                   showModal: this.state.showAddDacModal,
