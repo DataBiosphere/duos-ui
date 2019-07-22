@@ -34,7 +34,7 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
         action: { label: "Close", handler: this.OKHandler }
       },
         [
-          ul({ id: "txt_dacMembers", className: "row no-margin" }, [
+          ul({ id: "txt_dacDatasets", className: "row no-margin" }, [
             //replace with actual datasets, a line per dataset
             li({}, ["Dataset Name"]),
           ]),
