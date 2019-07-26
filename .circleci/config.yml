@@ -18,9 +18,9 @@ commands:
       env:
         type: string
         default: 'dev'
-      project_name:
+      application_name:
         type: string
-        default: 'duos-ui'
+        default: 'duos'
       google_project:
         type: string
         default: 'broad-duos-dev'
@@ -30,7 +30,7 @@ commands:
           command: |
             echo 'export COMMIT="`git rev-parse --short HEAD`"' >> $BASH_ENV
             echo 'export ENV="<< parameters.env >>"' >> $BASH_ENV
-            echo 'export PROJECT_NAME="<< parameters.project_name >>"' >> $BASH_ENV
+            echo 'export APPLICATION_NAME="<< parameters.application_name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="<< parameters.google_project >>"' >> $BASH_ENV
             source $BASH_ENV
       - run:
@@ -45,12 +45,12 @@ commands:
       - run:
           name: Docker build/push to GCR
           command: |
-            docker build -t ${PROJECT_NAME} .
-            docker tag ${PROJECT_NAME} gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT}
+            docker build -t ${APPLICATION_NAME} .
+            docker tag ${APPLICATION_NAME} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
-            docker push gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT}
-            gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${ENV} -q
-            gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${PROJECT_NAME}:latest -q
+            docker push gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
+            gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${ENV} -q
+            gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:latest -q
   deploy-env:
     description: "Deploy commit to GCR"
     parameters:
@@ -63,9 +63,9 @@ commands:
       namespace:
         type: string
         default: 'duos'
-      project_name:
+      application_name:
         type: string
-        default: 'duos-ui'
+        default: 'duos'
       google_project:
         type: string
         default: 'broad-duos-dev'
@@ -83,7 +83,7 @@ commands:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
             echo 'export NAMESPACE="<< parameters.namespace >>"' >> $BASH_ENV
-            echo 'export PROJECT_NAME="<< parameters.project_name >>"' >> $BASH_ENV
+            echo 'export APPLICATION_NAME="<< parameters.application_name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="<< parameters.google_project >>"' >> $BASH_ENV
             echo 'export GOOGLE_ZONE="<< parameters.google_zone >>"' >> $BASH_ENV
             echo 'export GOOGLE_CLUSTER="<< parameters.google_cluster >>"' >> $BASH_ENV
@@ -104,7 +104,7 @@ commands:
             cat ${HOME}/patched_k8s.yml
             kubectl config set-context --current --namespace=${NAMESPACE}
             kubectl apply -f ${HOME}/patched_k8s.yml
-            kubectl rollout status deployment/${PROJECT_NAME}
+            kubectl rollout status deployment/${APPLICATION_NAME}
 
 jobs:
   test:
@@ -176,13 +176,13 @@ jobs:
       - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'dev'
-          project_name: 'duos-ui'
+          application_name: 'duos'
           google_project: 'broad-duos-dev'
       - deploy-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'dev'
           namespace: 'duos'
-          project_name: 'duos-ui'
+          application_name: 'duos'
           google_project: 'broad-duos-dev'
           google_zone: 'us-central1-a'
           google_cluster: 'duos-ui-dev-cluster'
@@ -201,13 +201,13 @@ jobs:
       - push-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'staging'
-          project_name: 'duos-ui'
+          application_name: 'duos'
           google_project: 'broad-duos-dev'
       - deploy-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'staging'
           namespace: 'duos'
-          project_name: 'duos-ui'
+          application_name: 'duos'
           google_project: 'broad-duos-dev'
           google_zone: 'us-central1-a'
           google_cluster: 'duos-ui-staging-cluster'

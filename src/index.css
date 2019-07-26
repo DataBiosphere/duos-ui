@@ -1223,12 +1223,6 @@ a .editable:hover, a .enabled:hover {
   margin: 7px 3px 0 0;
 }
 
-.add-ontologies-white {
-  background-position: -530px 0 !important;
-  width: 42px;
-  margin: -8px 0 0 -5px;
-}
-
 .admin-manage-buttons .enabled, .admin-manage-buttons .disabled {
   text-align: center;
   margin: 4px auto 0 auto !important;
@@ -1825,6 +1819,10 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 .grid-9-row .col-2 {
   width: 22.22%;
+}
+
+.grid-9-row .col-3 {
+  width: 33.33%;
 }
 
 .grid-row .col-1, .grid-row .col-2, .grid-row .col-3, .grid-row .col-4, .grid-row .col-5, .grid-row .col-6, .grid-row .col-7, .grid-row .col-8 {

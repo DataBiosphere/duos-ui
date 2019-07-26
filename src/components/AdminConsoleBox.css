@@ -154,6 +154,36 @@
     background-position: -484px -40px !important;
 }
 
+.manage-dac {
+    background-position: -530px 0;
+    width: 40px !important;
+}
+
+.admin-box:hover .manage-dac {
+    background-position: -530px -40px !important;
+}
+
+.add-dac {
+    background-position: -570px 0;
+    width: 40px !important;
+}
+
+.admin-box:hover .add-dac {
+    background-position: -570px -40px !important;
+}
+
+.add-ontologies_white {
+    background-position: -610px 0 !important;
+    width: 42px;
+    margin: -9px 0 0 -5px;
+}
+
+.add-dac_white {
+    background-position: -610px -40px !important;
+    width: 42px;
+    margin: -10px 0 0 -5px;
+}
+
 .admin-box-text.default{
     margin: 10px 0 5px 45px;
 }
