@@ -133,6 +133,42 @@ export const Consent = {
 
 };
 
+export const DAC = {
+
+  list: async () => {
+    const url = `${await Config.getApiUrl()}/dac`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  create: async (name, description) => {
+    const url = `${await Config.getApiUrl()}/dac`;
+    const dac = {"name": name, "description": description};
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'POST' }]));
+    return res.json();
+  },
+
+  update: async (dacId, name, description) => {
+    const url = `${await Config.getApiUrl()}/dac`;
+    const dac = {"dacId": dacId, "name": name, "description": description};
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'PUT' }]));
+    return res.json();
+  },
+
+  delete: async (dacId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    return res.json();
+  },
+
+  get: async (dacId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+};
+
 export const DAR = {
 
   describeDar: async (darId) => {

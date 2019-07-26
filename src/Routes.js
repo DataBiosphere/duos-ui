@@ -29,6 +29,7 @@ import HelpReports from "./pages/HelpReports";
 import HomeRegister from "./pages/HomeRegister";
 import DataOwnerReview from "./pages/DataOwnerReview";
 import AdminManageUsers from './pages/AdminManageUsers';
+import AdminManageDac from './pages/AdminManageDac';
 import DatasetCatalog from "./pages/DatasetCatalog";
 import DulCollect from "./pages/DulCollect";
 import ResearcherReview from "./pages/ResearcherReview";
@@ -48,6 +49,7 @@ const Routes = ( props ) => (
     <Route path='/election404' component={Election404} />
     <AuthenticatedRoute path='/admin_console' component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/admin_manage_users' component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path='/admin_manage_dac' component={AdminManageDac} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path='/summary_votes' component={SummaryVotes} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path='/researcher_console' component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path='/chair_console' component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
