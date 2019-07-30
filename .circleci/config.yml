@@ -162,6 +162,27 @@ jobs:
             - build
             - config
             - Dockerfile
+  build-prod:
+    executor: node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - run: cp config/prod.json public/config.json
+      - run: npm install --silent
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .gcloudignore
+            - build
+            - config
+            - Dockerfile
+
   deploy-dev:
     executor: cloud-sdk
     steps:
@@ -212,6 +233,31 @@ jobs:
           google_zone: 'us-central1-a'
           google_cluster: 'duos-ui-staging-cluster'
           commit: ${COMMIT}
+  deploy-prod:
+    executor: cloud-sdk
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+            - deps2-{{ checksum "package.json" }}-
+            - deps2-
+      - attach_workspace:
+          at: .
+      - push-env:
+          sa_key_name: 'GCLOUD_DUOS_PROD'
+          env: 'prod'
+          application_name: 'duos'
+          google_project: 'broad-duos-prod'
+      - deploy-env:
+          sa_key_name: 'GCLOUD_DUOS_PROD'
+          env: 'prod'
+          namespace: 'duos'
+          application_name: 'duos'
+          google_project: 'broad-duos-prod'
+          google_zone: 'us-central1-a'
+          google_cluster: 'duos-ui-prod-cluster'
+          commit: ${COMMIT}
 
 workflows:
   version: 2
@@ -251,3 +297,25 @@ workflows:
               only: /^staging.*/
             branches:
               ignore: /.*/
+      - build-prod:
+          requires:
+            - test
+          filters:
+# TODO: Uncomment when ready for merging
+#            tags:
+#              only: /^prod.*/
+#            branches:
+#              ignore: /.*/
+            branches:
+              only: prod-deploy
+      - deploy-prod:
+          requires:
+            - build-prod
+# TODO: Uncomment when ready for merging
+#          filters:
+#            tags:
+#              only: /^prod.*/
+#            branches:
+#              ignore: /.*/
+#            branches:
+#              only: prod-deploy
