@@ -301,21 +301,15 @@ workflows:
           requires:
             - test
           filters:
-# TODO: Uncomment when ready for merging
-#            tags:
-#              only: /^prod.*/
-#            branches:
-#              ignore: /.*/
+            tags:
+              only: /^prod.*/
             branches:
-              only: prod-deploy
+              ignore: /.*/
       - deploy-prod:
           requires:
             - build-prod
-# TODO: Uncomment when ready for merging
-#          filters:
-#            tags:
-#              only: /^prod.*/
-#            branches:
-#              ignore: /.*/
-#            branches:
-#              only: prod-deploy
+          filters:
+            tags:
+              only: /^prod.*/
+            branches:
+              ignore: /.*/
