@@ -3,6 +3,8 @@
   width: 100%;
   position: relative;
   color: #777777;
+  margin-top: 20px;
+  height: 45px;
 }
 
 .amount-wrapper {
@@ -21,29 +23,42 @@
   font-family: 'Roboto', sans-serif;
 }
 
-.pagination-wrapper {
-  text-align: center;
-  display: inline-block;
-  width: 100%;
-}
+
 
 .pagination-btn {
   font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
+  font-weight: 400;
+  font-size: 14px;
   text-align: center;
   border: none;
   background: transparent;
   border-radius: 0;
   box-shadow: none;
-  margin-top: 15px;
   padding: 5px 10px 5px 10px;
   transition: all 0.3s ease;
 }
 
 .pagination-btn:hover {
-  background: #2FA4E7 !important;
-  color: #ffffff !important;
+  color: #000000;
+}
+
+.pagination-btn[disabled] span {
+  color:#CDCDCD;
+}
+
+.pagination-btn .button-label,
+.pagination-btn[disabled] .button-label {
+  height: 20px;
+  display: inline-block;
+  line-height: 20px;
+}
+
+.pagination-btn .glyphicon.arrow {
+  font-size: 14px;
+  margin: 0 12px;
+  display: inline-block;
+  height: 20px;
+  line-height: 20px;
 }
 
 .pagination-btn[disabled], [disabled] .glyphicon {
@@ -52,8 +67,12 @@
 }
 
 .pagination-btn.active {
-  font-weight: 700;
-  color: #2FA4E7;
+  color: #333333;
+  background-color: #ffffff;
+  padding: 8px 13px;
+  border-radius: 7px;
+  border-right: 3px solid #CCCCCC;
+  border-bottom: 4px solid #CCCCCC;
 }
 
 .glyphicon.arrow, .glyphicon.double-arrow {
@@ -65,22 +84,42 @@
   margin: 0 -3px;
 }
 
-.select-wrapper {
-  position: absolute;
-  right: 0;
-  top: 15px;
-}
+
 
 .select-wrapper .select {
   display: inline-block;
   font-family: 'Roboto', sans-serif;
   padding: 5px;
   border-radius: 2px;
+  border:0;
 }
 
 .select-label {
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 400;
   margin-left: 10px;
   display: inline-block;
   font-family: 'Roboto', sans-serif;
+}
+
+
+.show-results-wrapper {
+  float: left;
+}
+
+.pagination-wrapper {
+  display: inline-block;
+  width: auto;
+  position: absolute;
+  left: 50%;
+  margin-left: -12%;
+}
+
+.select-wrapper {
+  float: right;
+}
+
+.show-results-wrapper,
+.select-wrapper {
+  margin-top: 7px;
 }
