@@ -28,20 +28,12 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
   }
 
   firstItem(currentPage, total) {
-    if (total == 0) {
-      return 0;
-    } else {
-      return (currentPage * this.state.limit) - this.state.limit + 1;
-    }
+    return total == 0 ? total : (currentPage * this.state.limit) - this.state.limit + 1;
   }
 
 
   lastItem(hasNextPage) {
-    if (hasNextPage) {
-      return this.props.currentPage * this.state.limit;
-    } else {
-      return this.props.total;
-    }
+    return hasNextPage ? this.props.currentPage * this.state.limit : this.props.total;
   }
 
   render() {
