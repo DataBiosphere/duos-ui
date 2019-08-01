@@ -11,10 +11,6 @@ export const formatDate = (dateval) => {
   return datestr;
 };
 
-export const isObjectEmpty = (obj) => {
-  return Object.getOwnPropertyNames(obj).length === 0;
-};
-
 export const USER_ROLES = {
   admin: 'Admin',
   chairperson: 'Chairperson',

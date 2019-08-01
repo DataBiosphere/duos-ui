@@ -1,3 +1,4 @@
+import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
 import { a, div, h, h3, img, label, span } from 'react-hyperscript-helpers';
@@ -5,7 +6,7 @@ import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
-import { USER_ROLES, isObjectEmpty } from '../libs/utils';
+import { USER_ROLES } from '../libs/utils';
 import './Login.css';
 
 
@@ -119,10 +120,10 @@ class Login extends Component {
             img({ src: '/images/broad_logo.png', alt: 'Broad Institute Logo' }, []),
             div({ className: 'landing-box-title' }, [h3({}, ['Broad Data Use Oversight System'])]),
             div({ className: 'landing-box-google-signin' }, [
-              div({ isRendered: !isObjectEmpty(this.state.error), className: 'dialog-alert' }, [
+              div({ isRendered: !_.isEmpty(this.state.error), className: 'dialog-alert' }, [
                 Alert({ id: 'dialog', type: 'danger', title: this.state.error.title, description: this.state.error.description })
               ]),
-              div({ isRendered: isObjectEmpty(this.state.error) }, [
+              div({ isRendered: _.isEmpty(this.state.error) }, [
                 div({ className: 'new-sign' }, ['Sign in with a google account']),
                 googleLoginButton,
                 div({ className: 'new-sign' }, [
