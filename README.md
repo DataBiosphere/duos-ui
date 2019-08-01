@@ -37,3 +37,15 @@ Builds, tests, and deployments are handled by CircleCI.
     ```sh
     npm start
     ```
+
+### Running as a Docker image that mimics production
+
+Build a local image and then start it up.
+
+```
+docker build -f Dockerfile-dev -t duos-ui:local .
+```
+
+```
+docker run -p 80:80 duos-ui:local
+```
