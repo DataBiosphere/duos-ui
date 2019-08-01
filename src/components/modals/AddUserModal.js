@@ -653,48 +653,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
             ]),
 
             div({ className: "form-group" }, [
-              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Roles"]),
+              label({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Role"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
-                div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-
-                  div({ className: "checkbox", disabled: isMemberDisabled }, [
-                    input({
-                      type: "checkbox",
-                      id: "chk_member",
-                      className: "checkbox-inline user-checkbox",
-                      checked: isMember,
-                      onChange: this.memberChanged,
-                      disabled: isMemberDisabled,
-                    }),
-                    label({ id: "lbl_member", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_member" }, ["Member"])
-                  ]),
-
-                  div({ className: "checkbox", disabled: isChairPersonDisabled }, [
-                    input({
-                      type: "checkbox",
-                      id: "chk_chairperson",
-                      className: "checkbox-inline user-checkbox",
-                      checked: isChairPerson,
-                      onChange: this.chairpersonChanged,
-                      disabled: isChairPersonDisabled
-                    }),
-                    label({ id: "lbl_chairperson", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_chairperson" }, ["Chairperson"])
-                  ]),
-
-                  div({ className: "checkbox", disabled: isAlumniDisabled }, [
-                    input({
-                      type: "checkbox",
-                      id: "chk_alumni",
-                      checked: isAlumni,
-                      className: "checkbox-inline user-checkbox",
-                      onChange: this.alumniChanged,
-                      disabled: isAlumniDisabled,
-                    }),
-                    label({ id: "lbl_alumni", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_alumni" }, ["Alumni"])
-                  ]),
-
-                ]),
-
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
 
                   div({ className: "checkbox" }, [
@@ -707,29 +667,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
                     }),
                     label({ id: "lbl_admin", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_admin" }, ["Admin"])
                   ]),
-
-                  div({ className: "checkbox", disabled: isResearcherDisabled }, [
-                    input({
-                      type: "checkbox",
-                      id: "chk_researcher",
-                      checked: isResearcher,
-                      className: "checkbox-inline user-checkbox",
-                      onChange: this.researcherChanged,
-                      disabled: isResearcherDisabled
-                    }),
-                    label({ id: "lbl_researcher", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_researcher" }, ["Researcher"])
-                  ]),
-
-                  div({ className: "checkbox" }, [
-                    input({
-                      type: "checkbox",
-                      id: "chk_dataOwner",
-                      checked: isDataOwner,
-                      className: "checkbox-inline user-checkbox",
-                      onChange: this.dataOwnerChanged,
-                    }),
-                    label({ id: "lbl_dataOwner", className: "regular-checkbox rp-choice-questions", htmlFor: "chk_dataOwner" }, ["Data Owner"])
-                  ])
                 ])
               ])
             ]),
