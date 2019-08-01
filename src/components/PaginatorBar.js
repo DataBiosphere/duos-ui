@@ -27,6 +27,15 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
     }, () => { this.props.changeHandler(this.state.limit); });
   }
 
+  firstItem(currentPage, total) {
+    return total == 0 ? total : (currentPage * this.state.limit) - this.state.limit + 1;
+  }
+
+
+  lastItem(hasNextPage) {
+    return hasNextPage ? this.props.currentPage * this.state.limit : this.props.total;
+  }
+
   render() {
 
     const nPages = Math.ceil(this.props.total / this.state.limit);
@@ -41,25 +50,19 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
       }, [
           ({ pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, totalPages, getPageItemProps }) =>
             div({ className: 'controls-wrapper' }, [
-              div({ className: "amount-wrapper" }, [
-                span({ className: "amount-label pipe" }, ['Page: ' + this.props.currentPage + ' of ' + nPages]),
-                span({ className: "amount-label" }, ['Results:  ' + this.props.total]),
+
+              div({className: "show-results-wrapper"}, [
+                "Showing ", this.firstItem(currentPage, this.props.total), " to ", this.lastItem(hasNextPage), " of ", this.props.total, " entries"
               ]),
 
               div({ className: 'pagination-wrapper' }, [
-                paginatorButton(_.merge({ disabled: currentPage === 1 },
-                  getPageItemProps({ pageValue: 1, onPageChange: this.props.onPageChange })),
-                  [
-                    span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" }),
-                    span({ className: "glyphicon glyphicon-menu-left double-arrow", "aria-hidden": "true" })
-                  ]
-                ),
 
                 paginatorButton(
                   _.merge({ disabled: !hasPreviousPage, style: { marginRight: '1rem' } },
                     getPageItemProps({ pageValue: previousPage, onPageChange: this.props.onPageChange })),
                   [
-                    span({ className: "glyphicon glyphicon-menu-left arrow", "aria-hidden": "true" })
+                    span({ className: "glyphicon glyphicon-menu-left arrow pull-left", "aria-hidden": "true" }),
+                    span({className: "button-label"},["Previous"])
                   ]
                 ),
 
@@ -76,19 +79,12 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                   _.merge({ disabled: !hasNextPage, style: { marginLeft: '1rem' } },
                     getPageItemProps({ pageValue: nextPage, onPageChange: this.props.onPageChange })),
                   [
-                    span({ className: "glyphicon glyphicon-menu-right arrow", "aria-hidden": "true" })
-                  ]
-                ),
-
-                paginatorButton(
-                  _.merge({ disabled: currentPage === totalPages, style: { marginLeft: '0.5rem' } },
-                    getPageItemProps({ pageValue: totalPages, onPageChange: this.props.onPageChange })),
-                  [
-                    span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" }),
-                    span({ className: "glyphicon glyphicon-menu-right double-arrow", "aria-hidden": "true" })
+                    span({ className: "glyphicon glyphicon-menu-right arrow pull-right", "aria-hidden": "true" }),
+                    span({className: "button-label"},["Next"])
                   ]
                 ),
               ]),
+
               div({ className: "select-wrapper" }, [
                 select({ className: "select", value: this.state.limit, onChange: this.changeLimit }, [
                   option({ value: 5 }, ["  5"]),
@@ -97,10 +93,13 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
                   option({ value: 50 }, [" 50"]),
                   option({ value: 100 }, ["100"]),
                 ]),
-                div({ className: "select-label" }, ["items per page"]),
+
+                div({ className: "select-label" }, ["items per page"])
               ]),
             ])
         ])
     );
   }
 });
+
+
