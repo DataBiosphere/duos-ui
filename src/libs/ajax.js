@@ -220,6 +220,7 @@ export const DAR = {
     darInfo.adminComment = data.rationale;
     darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
     darInfo.darCode = data.darCode;
+    darInfo.projectTitle = data.projectTitle;
     if (darInfo.hasPurposeStatements) {
       darInfo.purposeStatements = data.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
