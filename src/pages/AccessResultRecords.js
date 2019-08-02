@@ -1,16 +1,17 @@
 import { Component, Fragment } from 'react';
-import { div, button, span, b, a, i, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { SingleResultBox } from '../components/SingleResultBox';
+import { a, b, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
+import { Alert } from '../components/Alert';
+import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
 import * as DataAccessRequest from '../components/DataAccessRequest';
-import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { Storage } from '../libs/storage';
-import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
+import { PageHeading } from '../components/PageHeading';
+import { SingleResultBox } from '../components/SingleResultBox';
+import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
 
 import { Config } from '../libs/config';
+import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
-import { Alert } from '../components/Alert';
+
 
 class AccessResultRecords extends Component {
 
@@ -34,8 +35,6 @@ class AccessResultRecords extends Component {
       enableAgreementButton: true,
       hasUseRestriction: true,
       hasLibraryCard: false,
-      projectTitle: '',
-      darCode: '',
       isQ1Expanded: false,
       isQ2Expanded: false,
       isDulExpanded: false,
@@ -48,10 +47,9 @@ class AccessResultRecords extends Component {
       },
       voteAgreement: {
       },
-      dar: {
-        rus: "",
-      },
       darInfo: {
+        darCode: '',
+        projectTitle: '',
         havePI: false,
         pi: '.',
         rus: "",
@@ -130,7 +128,7 @@ class AccessResultRecords extends Component {
 
   downloadDAR = (e) => {
     Files.getDARFile(this.state.darElection.referenceId);
-  }
+  };
 
 
   toggleQ1 = (e) => {
@@ -138,33 +136,29 @@ class AccessResultRecords extends Component {
       prev.isQ1Expanded = !prev.isQ1Expanded;
       return prev;
     });
-  }
+  };
 
   toggleQ2 = (e) => {
     this.setState(prev => {
       prev.isQ2Expanded = !prev.isQ2Expanded;
       return prev;
     });
-  }
+  };
 
   toggleDulExpanded = (e) => {
     this.setState(prev => {
       prev.isDulExpanded = !prev.isDulExpanded;
       return prev;
     });
-  }
+  };
 
   goBack = (e) => {
     this.props.history.goBack();
-  }
+  };
 
   render() {
 
-    const { projectTitle, darCode, dar, darInfo, hasUseRestriction, sDAR, mrDAR, sDUL, mrDUL, showRPaccordion } = this.state;
-
-    const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [projectTitle]), darCode
-    ]);
+    const { darInfo, hasUseRestriction, sDAR, mrDAR, sDUL, mrDUL, showRPaccordion } = this.state;
 
     const backButton = div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
       a({ id: "btn_back", onClick: this.goBack, className: "btn-primary btn-back" }, [
@@ -183,7 +177,7 @@ class AccessResultRecords extends Component {
               id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access",
               title: "Data Access - Results Record"}),
               DataAccessRequest.details({
-                projectTitle: this.state.projectTitle,
+                projectTitle: this.state.darInfo.projectTitle,
                 darCode: this.state.darInfo.darCode,
                 datasetId: this.state.darInfo.datasetId,
                 datasetName: this.state.darInfo.datasetName,
@@ -201,7 +195,7 @@ class AccessResultRecords extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
 
-          this.renderApplicationSummary(darInfo, dar, sDAR, mrDAR),
+          this.renderApplicationSummary(darInfo, sDAR, mrDAR),
 
           this.renderDataUseLimitation(sDUL, mrDUL),
 
@@ -378,7 +372,7 @@ class AccessResultRecords extends Component {
     );
   }
 
-  renderApplicationSummary(darInfo, dar, sDAR, mrDAR) {
+  renderApplicationSummary(darInfo, sDAR, mrDAR) {
 
     return (
       div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
@@ -389,7 +383,7 @@ class AccessResultRecords extends Component {
 
           div({ className: "row dar-summary" }, [
             div({ className: "control-label access-color" }, ["Research Purpose"]),
-            div({ className: "response-label" }, [dar.rus])
+            div({ className: "response-label" }, [darInfo.rus])
           ]),
 
           div({ isRendered: this.state.hasUseRestriction, className: "row dar-summary" }, [
@@ -717,30 +711,6 @@ class AccessResultRecords extends Component {
   }
 
   async showDarData(electionReview) {
-
-    DAR.getDarFields(electionReview.election.referenceId, "rus").then(
-      data => {
-        this.setState({
-          dar: data
-        });
-      }
-    );
-
-    DAR.getDarFields(electionReview.election.referenceId, "dar_code").then(
-      data => {
-        this.setState({
-          darCode: data.dar_code
-        });
-      }
-    );
-
-    DAR.getDarFields(electionReview.election.referenceId, "projectTitle").then(
-      data => {
-        this.setState({
-          projectTitle: data.projectTitle
-        });
-      }
-    );
 
     let electionAccess = electionReview.election;
     if (electionReview.election.finalRationale === null) {
