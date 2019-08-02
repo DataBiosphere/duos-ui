@@ -7,7 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 import { Alert } from '../components/Alert';
-import { DarDetails } from '../components/DarDetails';
+import * as DataAccessRequest from '../components/DataAccessRequest';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -593,7 +593,7 @@ class FinalAccessReview extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review"}),
-            DarDetails({
+            DataAccessRequest.details({
               projectTitle: this.state.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,

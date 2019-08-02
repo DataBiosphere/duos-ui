@@ -3,7 +3,7 @@ import { div, button, span, b, a, i, hr, h4, ul, li, label, h3, h } from 'react-
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { DarDetails } from '../components/DarDetails';
+import * as DataAccessRequest from '../components/DataAccessRequest';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { Storage } from '../libs/storage';
 import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
@@ -182,7 +182,7 @@ class AccessResultRecords extends Component {
             PageHeading({
               id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access",
               title: "Data Access - Results Record"}),
-              DarDetails({
+              DataAccessRequest.details({
                 projectTitle: this.state.projectTitle,
                 darCode: this.state.darInfo.darCode,
                 datasetId: this.state.darInfo.datasetId,

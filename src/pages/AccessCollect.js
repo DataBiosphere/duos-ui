@@ -5,7 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { DarDetails } from '../components/DarDetails';
+import * as DataAccessRequest from '../components/DataAccessRequest';
 import { Election, DAR, Files, Email } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -377,7 +377,7 @@ class AccessCollect extends Component {
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review"}),
-            DarDetails({
+            DataAccessRequest.details({
               projectTitle: this.state.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,
