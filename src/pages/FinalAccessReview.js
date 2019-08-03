@@ -1,18 +1,19 @@
 import { Component, Fragment } from 'react';
-import { div, button, span, b, br, a, i, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { SingleResultBox } from '../components/SingleResultBox';
-import { CollectResultBox } from '../components/CollectResultBox';
-import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { Alert } from '../components/Alert';
-import * as DataAccessRequest from '../components/DataAccessRequest';
-import { Storage } from '../libs/storage';
-import { DAR, Election, Votes, Match, Files } from '../libs/ajax';
-import { Config } from '../libs/config';
-import * as Utils from '../libs/utils';
+import { a, b, br, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
+import { Alert } from '../components/Alert';
+import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { CollectResultBox } from '../components/CollectResultBox';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import * as DataAccessRequest from '../components/DataAccessRequest';
+import { PageHeading } from '../components/PageHeading';
+import { SingleResultBox } from '../components/SingleResultBox';
+import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { Storage } from '../libs/storage';
+import * as Utils from '../libs/utils';
+
 
 class FinalAccessReview extends Component {
 
@@ -34,14 +35,7 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      darInfo: {
-        rus: '',
-        projectTitle: '',
-        hasPurposeStatements: false,
-        purposeStatements: [],
-        researchType: [],
-        diseases: []
-      },
+      darInfo: {},
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],
@@ -63,7 +57,7 @@ class FinalAccessReview extends Component {
 
   async loadData() {
     const hasUseRestrictionResp = await DAR.hasUseRestriction(this.state.referenceId);
-    let darInfo = await DAR.describeDar(this.state.referenceId);
+    const darInfo = await DAR.describeDar(this.state.referenceId);
 
     this.setState({
       path: 'final-access-review',
@@ -288,14 +282,7 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      darInfo: {
-        rus: '',
-        projectTitle: '',
-        hasPurposeStatements: false,
-        purposeStatements: [],
-        researchType: [],
-        diseases: []
-      },
+      darInfo: {},
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],
@@ -574,7 +561,9 @@ class FinalAccessReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review"}),
+            PageHeading({
+              id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
+              color: "access", title: "Final voting for Data Access Review"}),
             DataAccessRequest.details({
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,

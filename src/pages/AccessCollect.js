@@ -1,16 +1,17 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h3, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { SingleResultBox } from '../components/SingleResultBox';
-import { CollectResultBox } from '../components/CollectResultBox';
-import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import * as DataAccessRequest from '../components/DataAccessRequest';
-import { Election, DAR, Files, Email } from '../libs/ajax';
-import { Config } from '../libs/config';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { Storage } from "../libs/storage";
+import { a, b, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
+import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { CollectResultBox } from '../components/CollectResultBox';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import * as DataAccessRequest from '../components/DataAccessRequest';
+import { PageHeading } from '../components/PageHeading';
+import { SingleResultBox } from '../components/SingleResultBox';
+import { SubmitVoteBox } from '../components/SubmitVoteBox';
+import { DAR, Election, Email, Files } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { Storage } from '../libs/storage';
+
 
 class AccessCollect extends Component {
 
@@ -82,26 +83,7 @@ class AccessCollect extends Component {
       voteAccessList: [],
       rpVoteAccessList: [],
 
-      darInfo: {
-        projectTitle: '',
-        rus: '',
-        havePI: false,
-        pi: '',
-        profileName: '',
-        status: '',
-        hasAdminComment: true,
-        adminComment: '',
-        institution: '',
-        department: '',
-        city: '',
-        country: '',
-        purposeManualReview: false,
-        researchTypeManualReview: false,
-        hasDiseases: false,
-        purposeStatements: [],
-        researchType: [],
-        diseases: []
-      }
+      darInfo: {}
     };
   };
 
@@ -243,7 +225,7 @@ class AccessCollect extends Component {
   async loadData() {
     await this.findDataAccessElectionReview();
     await this.findRPElectionReview();
-    await this.findDarFields();
+    await this.findDar();
   }
 
   async findDataAccessElectionReview() {
@@ -310,12 +292,14 @@ class AccessCollect extends Component {
     return newArr;
   };
 
-  async findDarFields() {
-    let darInfo = await DAR.describeDar(this.props.match.params.referenceId);
-    this.setState(prev => {
-      prev.darInfo = darInfo;
-      return prev;
-    });
+  async findDar() {
+    DAR.describeDar(this.props.match.params.referenceId).then(
+      darInfo => {
+        this.setState({
+          darInfo: darInfo,
+        });
+      }
+    );
   };
 
   getRPGraphData(type, reviewVote) {
@@ -371,7 +355,9 @@ class AccessCollect extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review"}),
+            PageHeading({
+              id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
+              color: "access", title: "Collect votes for Data Access Congruence Review"}),
             DataAccessRequest.details({
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,

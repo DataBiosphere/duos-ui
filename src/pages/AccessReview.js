@@ -1,13 +1,14 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, ul, li, label, h } from 'react-hyperscript-helpers';
+import { a, b, button, div, h, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
+import { Alert } from '../components/Alert';
+import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import * as DataAccessRequest from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
-import * as DataAccessRequest from '../components/DataAccessRequest';
 import { Storage } from '../libs/storage';
-import { ConfirmationDialog } from "../components/ConfirmationDialog";
-import { Alert } from '../components/Alert';
+
 
 class AccessReview extends Component {
 
@@ -157,9 +158,6 @@ class AccessReview extends Component {
       prev.darInfo.sDar = election.translatedUseRestriction;
       prev.election = election;
       prev.rpVote = rpVote;
-      if (!darInfo.hasPurposeStatements) {
-        prev.darInfo.purposeStatements = [];
-      }
       if (election.useRestriction !== null && rpVote !== null) {
         prev.hasUseRestriction = true;
       } else {
@@ -219,27 +217,7 @@ class AccessReview extends Component {
       alertVote: false,
       alertRPVote: false,
 
-      darInfo: {
-        projectTitle: '',
-        havePI: false,
-        pi: '',
-        profileName: '',
-        status: '',
-        hasAdminComment: false,
-        adminComment: '',
-        institution: '',
-        department: '',
-        city: '',
-        country: '',
-        purposeManualReview: false,
-        researchTypeManualReview: false,
-        hasDiseases: false,
-        purposeStatements: [],
-        researchType: [],
-        diseases: [],
-        rus: '',
-        sDar: '',
-      },
+      darInfo: {},
       voteId: null,
       rpVoteId: null
     };
@@ -273,7 +251,9 @@ class AccessReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
-            PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review"}),
+            PageHeading({
+              id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium",
+              color: "access", title: "Data Access Congruence Review"}),
             DataAccessRequest.details({
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,

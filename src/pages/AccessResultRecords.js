@@ -47,31 +47,7 @@ class AccessResultRecords extends Component {
       },
       voteAgreement: {
       },
-      darInfo: {
-        darCode: '',
-        projectTitle: '',
-        havePI: false,
-        pi: '.',
-        rus: "",
-        sDar: "",
-        profileName: '',
-        status: '',
-        hasAdminComment: false,
-        adminComment: '',
-        institution: '',
-        department: '',
-        city: '',
-        country: '',
-        purposeManualReview: false,
-        researchTypeManualReview: false,
-        hasDiseases: true,
-        purposeStatements: [
-        ],
-        researchType: [
-        ],
-        diseases: [
-        ]
-      }
+      darInfo: {}
     };
   }
 
@@ -174,15 +150,15 @@ class AccessResultRecords extends Component {
 
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({
-              id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access",
-              title: "Data Access - Results Record"}),
-              DataAccessRequest.details({
-                projectTitle: this.state.darInfo.projectTitle,
-                darCode: this.state.darInfo.darCode,
-                datasetId: this.state.darInfo.datasetId,
-                datasetName: this.state.darInfo.datasetName,
-                consentName: this.state.consentName
-              })
+              id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
+              color: "access", title: "Data Access - Results Record"}),
+            DataAccessRequest.details({
+              projectTitle: this.state.darInfo.projectTitle,
+              darCode: this.state.darInfo.darCode,
+              datasetId: this.state.darInfo.datasetId,
+              datasetName: this.state.darInfo.datasetName,
+              consentName: this.state.consentName
+            })
           ]),
 
           backButton,
