@@ -653,9 +653,6 @@ class AccessResultRecords extends Component {
 
     DAR.describeDar(referenceId).then(
       darInfo => {
-        if (darInfo.purposeStatements === undefined) {
-          darInfo.purposeStatements = [];
-        }
         this.setState({
           darInfo: darInfo,
         });

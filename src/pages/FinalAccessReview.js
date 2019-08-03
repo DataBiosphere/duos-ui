@@ -34,10 +34,9 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      dar: {
-        rus: ''
-      },
       darInfo: {
+        rus: '',
+        projectTitle: '',
         hasPurposeStatements: false,
         purposeStatements: [],
         researchType: [],
@@ -65,7 +64,6 @@ class FinalAccessReview extends Component {
   async loadData() {
     const hasUseRestrictionResp = await DAR.hasUseRestriction(this.state.referenceId);
     let darInfo = await DAR.describeDar(this.state.referenceId);
-    if (!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
 
     this.setState({
       path: 'final-access-review',
@@ -184,7 +182,7 @@ class FinalAccessReview extends Component {
       prev.q2AlertMessage = '';
       return prev;
     });
-  }
+  };
 
   confirmationAgreementHandlerOK = (answer) => async (e) => {
 
@@ -290,10 +288,9 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      dar: {
-        rus: ''
-      },
       darInfo: {
+        rus: '',
+        projectTitle: '',
         hasPurposeStatements: false,
         purposeStatements: [],
         researchType: [],
@@ -335,28 +332,28 @@ class FinalAccessReview extends Component {
     this.setState({
       loading: false
     });
-  }
+  };
 
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
       return prev;
     });
-  }
+  };
 
   toggleQ2 = (e) => {
     this.setState(prev => {
       prev.isQ2Expanded = !prev.isQ2Expanded;
       return prev;
     });
-  }
+  };
 
   toggleDulExpanded = (e) => {
     this.setState(prev => {
       prev.isDulExpanded = !prev.isDulExpanded;
       return prev;
     });
-  }
+  };
 
   init = async () => {
 
@@ -434,7 +431,7 @@ class FinalAccessReview extends Component {
     this.setState({
       loading: false
     });
-  }
+  };
 
   showAccessData = async (electionReview) => {
     if (Boolean(electionReview.voteAgreement)) {
@@ -443,16 +440,6 @@ class FinalAccessReview extends Component {
         originalAgreementRationale: electionReview.voteAgreement.rationale
       });
     }
-
-    const dar = await DAR.getDarFields(electionReview.election.referenceId, "rus");
-    this.setState({
-      dar: dar
-    });
-
-    const ptitle = await DAR.getDarFields(electionReview.election.referenceId, "projectTitle");
-    this.setState({
-      projectTitle: ptitle.projectTitle
-    });
 
     this.setState({
       electionAccess: electionReview.election
@@ -480,7 +467,7 @@ class FinalAccessReview extends Component {
         agreementAlreadyVote: true
       });
     }
-  }
+  };
 
   showDULData = async (electionReview) => {
     this.setState({
@@ -504,7 +491,7 @@ class FinalAccessReview extends Component {
       chartDataDUL: this.getGraphData(electionReview.reviewVote),
     });
 
-  }
+  };
 
   vaultVote = async (consentId) => {
     const data = await Match.findMatch(consentId, this.state.referenceId);
@@ -525,7 +512,7 @@ class FinalAccessReview extends Component {
         hideMatch: true
       });
     }
-  }
+  };
 
   chunk = (arr, size) => {
     var newArr = [];
@@ -533,7 +520,7 @@ class FinalAccessReview extends Component {
       newArr.push(arr.slice(i, i + size));
     }
     return newArr;
-  }
+  };
 
   getGraphData = (reviewVote) => {
     var yes = 0, no = 0, empty = 0;
@@ -561,18 +548,13 @@ class FinalAccessReview extends Component {
       ]
     };
     return chartData;
-  }
+  };
 
   render() {
 
     let finalVote = null;
     if (this.state.electionAccess.finalVote === '1' || this.state.electionAccess.finalVote === true || this.state.electionAccess.finalVote === 'true') finalVote = true;
     if (this.state.electionAccess.finalVote === '0' || this.state.electionAccess.finalVote === false || this.state.electionAccess.finalVote === 'false') finalVote = false;
-
-    const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [this.state.projectTitle]),
-      this.state.consentName
-    ]);
 
     const agreementData = div({ className: "agreement-data" }, [
       label({}, ["DAC Decision: "]),
@@ -594,7 +576,7 @@ class FinalAccessReview extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Final voting for Data Access Review"}),
             DataAccessRequest.details({
-              projectTitle: this.state.projectTitle,
+              projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,
               datasetName: this.state.darInfo.datasetName,
@@ -634,7 +616,7 @@ class FinalAccessReview extends Component {
             div({ id: "rp", className: "panel-body" }, [
               div({ className: "row dar-summary" }, [
                 div({ className: "control-label access-color" }, ["Research Purpose"]),
-                div({ className: "response-label" }, [this.state.dar.rus]),
+                div({ className: "response-label" }, [this.state.darInfo.rus]),
               ]),
 
               div({ className: "row dar-summary" }, [

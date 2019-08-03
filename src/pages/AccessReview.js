@@ -135,11 +135,9 @@ class AccessReview extends Component {
     // dar
     const darId = this.props.match.params.darId;
     const voteId = this.props.match.params.voteId;
-    const rusDarData = await DAR.getDarFields(darId, 'rus');
     const consent = await DAR.getDarConsent(darId);
     const election = await Election.findElectionByDarId(darId);
     const vote = await Votes.getDarVote(darId, voteId);
-    const request = await DAR.getDarFields(darId, 'projectTitle');
     const darInfo = await DAR.describeDar(darId);
 
     let rpVote, rpVoteId;
@@ -155,9 +153,7 @@ class AccessReview extends Component {
     this.setState(prev => {
       prev.consentName = consent.name;
       prev.consentId = consent.consentId;
-      prev.projectTitle = request.projectTitle;
       prev.darInfo = darInfo;
-      prev.darInfo.rus = rusDarData.rus;
       prev.darInfo.sDar = election.translatedUseRestriction;
       prev.election = election;
       prev.rpVote = rpVote;
@@ -206,7 +202,6 @@ class AccessReview extends Component {
       alertMessage: 'Your vote has been successfully logged!',
       hasUseRestriction: false,
       hasLibraryCard: false,
-      projectTitle: '',
       consentName: '',
       consentId: '',
       dulName: '',
@@ -225,6 +220,7 @@ class AccessReview extends Component {
       alertRPVote: false,
 
       darInfo: {
+        projectTitle: '',
         havePI: false,
         pi: '',
         profileName: '',
@@ -270,11 +266,6 @@ class AccessReview extends Component {
 
   render() {
 
-    const consentData = span({ className: "consent-data" }, [
-      b({ className: "pipe" }, [this.state.projectTitle]),
-      this.state.consentName
-    ]);
-
     const { voteId, rpVoteId } = this.state;
 
     return (
@@ -284,7 +275,7 @@ class AccessReview extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Data Access Congruence Review"}),
             DataAccessRequest.details({
-              projectTitle: this.state.projectTitle,
+              projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,
               datasetName: this.state.darInfo.datasetName,

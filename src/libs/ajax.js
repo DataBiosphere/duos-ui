@@ -224,6 +224,8 @@ export const DAR = {
     if (darInfo.hasPurposeStatements) {
       darInfo.purposeStatements = data.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
+    } else {
+      darInfo.purposeStatements = [];
     }
     darInfo.hasDiseases = data.diseases.length > 0;
     darInfo.diseases = darInfo.hasDiseases ? data.diseases : [];

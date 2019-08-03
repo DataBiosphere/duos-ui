@@ -61,12 +61,10 @@ class AccessCollect extends Component {
         ]
       },
       translatedUseRestriction: '',
-      rus: '',
       voteStatus: '',
       createDate: '',
       hasUseRestriction: false,
       hasLibraryCard: false,
-      projectTitle: '',
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
@@ -85,6 +83,8 @@ class AccessCollect extends Component {
       rpVoteAccessList: [],
 
       darInfo: {
+        projectTitle: '',
+        rus: '',
         havePI: false,
         pi: '',
         profileName: '',
@@ -311,14 +311,9 @@ class AccessCollect extends Component {
   };
 
   async findDarFields() {
-    let dar = await DAR.getDarFields(this.props.match.params.referenceId, "rus");
-    let request = await DAR.getDarFields(this.props.match.params.referenceId, "projectTitle");
     let darInfo = await DAR.describeDar(this.props.match.params.referenceId);
-    if (!darInfo.hasPurposeStatements) darInfo.purposeStatements = [];
     this.setState(prev => {
       prev.darInfo = darInfo;
-      prev.rus = dar.rus;
-      prev.projectTitle = request.projectTitle;
       return prev;
     });
   };
@@ -378,7 +373,7 @@ class AccessCollect extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({ id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium", color: "access", title: "Collect votes for Data Access Congruence Review"}),
             DataAccessRequest.details({
-              projectTitle: this.state.projectTitle,
+              projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,
               datasetName: this.state.darInfo.datasetName,
@@ -462,7 +457,7 @@ class AccessCollect extends Component {
 
                       div({ className: "row dar-summary" }, [
                         div({ className: "control-label access-color" }, ["Research Purpose"]),
-                        div({ id: "lbl_rus", className: "response-label" }, [this.state.rus]),
+                        div({ id: "lbl_rus", className: "response-label" }, [this.state.darInfo.rus]),
                       ]),
 
                       div({ isRendered: this.state.darInfo.hasPurposeStatements, className: "row dar-summary" }, [
@@ -625,7 +620,7 @@ class AccessCollect extends Component {
                     h4({}, ["Research Purpose"]),
                   ]),
                   div({ id: "panel_researchPurpose", className: "panel-body cm-boxbody" }, [
-                    div({ style: { 'marginBottom': '10px' } }, [this.state.rus]),
+                    div({ style: { 'marginBottom': '10px' } }, [this.state.darInfo.rus]),
                     button({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: () => this.downloadDAR() }, ["Download Full Application"]),
                   ])
                 ]),
