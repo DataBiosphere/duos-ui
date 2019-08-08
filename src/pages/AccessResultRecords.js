@@ -47,7 +47,8 @@ class AccessResultRecords extends Component {
       },
       voteAgreement: {
       },
-      darInfo: {}
+      darInfo: DataAccessRequest.instance(),
+      consentName: '',
     };
   }
 
@@ -153,6 +154,7 @@ class AccessResultRecords extends Component {
               id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Data Access - Results Record"}),
             DataAccessRequest.details({
+              datasets: this.state.darInfo.datasets,
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,

@@ -217,7 +217,7 @@ class AccessReview extends Component {
       alertVote: false,
       alertRPVote: false,
 
-      darInfo: {},
+      darInfo: DataAccessRequest.instance(),
       voteId: null,
       rpVoteId: null
     };
@@ -255,6 +255,7 @@ class AccessReview extends Component {
               id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Data Access Congruence Review"}),
             DataAccessRequest.details({
+              datasets: this.state.darInfo.datasets,
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,

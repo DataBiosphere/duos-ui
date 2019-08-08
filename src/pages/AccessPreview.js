@@ -75,7 +75,7 @@ class AccessPreview extends Component {
       consent: {
         translatedUseRestriction: ''
       },
-      darInfo: {}
+      darInfo: DataAccessRequest.instance()
     };
   }
 
@@ -111,6 +111,7 @@ class AccessPreview extends Component {
               color: 'access', title: 'Data Access Congruence Preview'
             }),
             DataAccessRequest.details({
+              datasets: this.state.darInfo.datasets,
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,

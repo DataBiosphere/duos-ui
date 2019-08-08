@@ -282,7 +282,7 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      darInfo: {},
+      darInfo: DataAccessRequest.instance(),
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],
@@ -565,6 +565,7 @@ class FinalAccessReview extends Component {
               id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Final voting for Data Access Review"}),
             DataAccessRequest.details({
+              datasets: this.state.darInfo.datasets,
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,

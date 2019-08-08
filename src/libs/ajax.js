@@ -1,8 +1,10 @@
 import _ from 'lodash/fp';
+import * as DataAccessRequest from '../components/DataAccessRequest';
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
 import fileDownload from 'js-file-download';
+
 
 const dataTemplate = {
   accessTotal: [
@@ -209,33 +211,43 @@ export const DAC = {
 export const DAR = {
 
   describeDar: async (darId) => {
-    let darInfo = {};
-    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    let data = await res.json();
+    const apiUrl = await Config.getApiUrl();
+    const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
+    const summaryDar = await summaryDarRes.json();
+    const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
+    const rawDar = await rawDarRes.json();
 
-    darInfo.researcherId = data.userId;
-    darInfo.status = data.status;
-    darInfo.hasAdminComment = data.rationale != null;
-    darInfo.adminComment = data.rationale;
-    darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
-    darInfo.darCode = data.darCode;
-    darInfo.projectTitle = data.projectTitle;
+    let darInfo = DataAccessRequest.instance();
+    darInfo.translatedUseRestriction = rawDar.translatedUseRestriction;
+    if (rawDar.datasets.length > 0) {
+      rawDar.datasets.forEach(d =>
+        d.alias = DataAccessRequest.aliasDatasetId(d.key));
+      darInfo.datasets = rawDar.datasets;
+    } else {
+      darInfo.datasets = [];
+    }
+    darInfo.researcherId = summaryDar.userId;
+    darInfo.status = summaryDar.status;
+    darInfo.hasAdminComment = summaryDar.rationale != null;
+    darInfo.adminComment = summaryDar.rationale;
+    darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
+    darInfo.darCode = summaryDar.darCode;
+    darInfo.projectTitle = summaryDar.projectTitle;
     if (darInfo.hasPurposeStatements) {
-      darInfo.purposeStatements = data.purposeStatements;
+      darInfo.purposeStatements = summaryDar.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
     } else {
       darInfo.purposeStatements = [];
     }
-    darInfo.hasDiseases = data.diseases.length > 0;
-    darInfo.diseases = darInfo.hasDiseases ? data.diseases : [];
-    if (data.researchType.length > 0) {
-      darInfo.researchType = data.researchType;
+    darInfo.hasDiseases = summaryDar.diseases.length > 0;
+    darInfo.diseases = darInfo.hasDiseases ? summaryDar.diseases : [];
+    if (summaryDar.researchType.length > 0) {
+      darInfo.researchType = summaryDar.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
-    if (data.datasetDetail !== null) {
-      for(var prop in data.datasetDetail) {
-        darInfo.datasetId = data.datasetDetail[prop];
+    if (summaryDar.datasetDetail !== null) {
+      for(var prop in summaryDar.datasetDetail) {
+        darInfo.datasetId = summaryDar.datasetDetail[prop];
         darInfo.datasetName = prop;
       }
     }

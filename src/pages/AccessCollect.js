@@ -83,7 +83,7 @@ class AccessCollect extends Component {
       voteAccessList: [],
       rpVoteAccessList: [],
 
-      darInfo: {}
+      darInfo: DataAccessRequest.instance(),
     };
   };
 
@@ -359,6 +359,7 @@ class AccessCollect extends Component {
               id: "collectAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Collect votes for Data Access Congruence Review"}),
             DataAccessRequest.details({
+              datasets: this.state.darInfo.datasets,
               projectTitle: this.state.darInfo.projectTitle,
               darCode: this.state.darInfo.darCode,
               datasetId: this.state.darInfo.datasetId,
