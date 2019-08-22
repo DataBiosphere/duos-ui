@@ -214,6 +214,15 @@ jobs:
           google_cluster: 'duos-ui-staging-cluster'
           commit: ${COMMIT}
 
+  deploy-production:
+    executor: cloud-sdk
+    steps:
+      - checkout
+      - run:
+          name: Call remote deploy job
+          command: |
+            curl -X POST https://circleci.com/api/v1.1/project/gh/broadinstitute/duos-deploy/build?circle-token=${USER_TOKEN}
+
 workflows:
   version: 2
   build-deploy:
@@ -250,5 +259,11 @@ workflows:
           filters:
             tags:
               only: /^staging.*/
+            branches:
+              ignore: /.*/
+      - deploy-production:
+          filters:
+            tags:
+              only: /^production.*/
             branches:
               ignore: /.*/
