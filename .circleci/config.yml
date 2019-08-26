@@ -221,7 +221,7 @@ jobs:
       - run:
           name: Call remote deploy job
           command: |
-            curl -X POST https://circleci.com/api/v1.1/project/gh/broadinstitute/duos-deploy/build?circle-token=${USER_TOKEN}
+            curl -X POST https://circleci.com/api/v1.1/project/gh/broadinstitute/duos-deploy/tree/master?circle-token=${USER_TOKEN}
 
 workflows:
   version: 2
