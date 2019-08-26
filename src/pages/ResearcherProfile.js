@@ -461,7 +461,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
         } else {
           if (this.state.file !== undefined && this.state.file.name !== '') {
-            DAR.postDAA(this.state.file.name, this.state.file, profile.urlDAA).then(response => {
+            const existentDAAUrl = (profile.urlDAA === undefined) ? '' : profile.urlDAA;
+            DAR.postDAA(this.state.file.name, this.state.file, existentDAAUrl).then(response => {
               profile.urlDAA = response.urlDAA;
               profile.nameDAA = response.nameDAA;
               this.updateResearcher(profile);
