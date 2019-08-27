@@ -28,7 +28,7 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
   }
 
   firstItem(currentPage, total) {
-    return total == 0 ? total : (currentPage * this.state.limit) - this.state.limit + 1;
+    return total === 0 ? total : (currentPage * this.state.limit) - this.state.limit + 1;
   }
 
 
@@ -37,8 +37,6 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
   }
 
   render() {
-
-    const nPages = Math.ceil(this.props.total / this.state.limit);
 
     return (
 
