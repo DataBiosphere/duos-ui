@@ -1,9 +1,9 @@
 import { Component } from 'react';
-import { div, form, input, label, span, hh, h, p, a, small } from 'react-hyperscript-helpers';
-import { BaseModal } from '../BaseModal';
+import { a, div, form, hh, input, label, p, span } from 'react-hyperscript-helpers';
 import { DataSet } from '../../libs/ajax';
+import { Storage } from '../../libs/storage';
 import { Alert } from '../Alert';
-import { Storage } from "../../libs/storage";
+import { BaseModal } from '../BaseModal';
 
 
 export const AddDatasetModal = hh(class AddDatasetModal extends Component {
