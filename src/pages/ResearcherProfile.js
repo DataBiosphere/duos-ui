@@ -199,7 +199,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const nihUrl = `${await Config.getNihUrl()}?redirect-url=`;
     const landingUrl = nihUrl.concat(window.location.origin + "/profile?jwt%3D%7Btoken%7D");
     Storage.setData('researcher', this.state.profile);
     window.location.href = landingUrl;
