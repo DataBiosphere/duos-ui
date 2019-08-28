@@ -199,7 +199,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const nihUrl = `${await Config.getNihUrl()}?redirect-url=`;
     const landingUrl = nihUrl.concat(window.location.origin + "/profile?jwt%3D%7Btoken%7D");
     Storage.setData('researcher', this.state.profile);
     window.location.href = landingUrl;
@@ -1017,7 +1017,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  a({ id: "link_downloadAgreement", href: "YourName_DataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
+                  a({ id: "link_downloadAgreement", href: "BroadDataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                     span({ className: "glyphicon glyphicon-download" }),
                     "Download Agreement Template"
                   ])

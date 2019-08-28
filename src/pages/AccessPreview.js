@@ -1,9 +1,10 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, h4, ul, li, label, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { DAR, Election, Files } from "../libs/ajax";
+import { a, b, button, div, h, h4, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
+import { CollapsiblePanel } from '../components/CollapsiblePanel';
+import { PageHeading } from '../components/PageHeading';
+import { DAR, Files } from '../libs/ajax';
+
 
 class AccessPreview extends Component {
 

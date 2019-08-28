@@ -19,7 +19,7 @@ export const Storage = {
   },
 
   getCurrentUserRoles: () => {
-    return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)).user : null;
+    return sessionStorage.getItem(CurrentUser) ? JSON.parse(sessionStorage.getItem(CurrentUser)).roles : null;
   },
 
   setGoogleData: data => {

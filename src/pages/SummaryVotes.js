@@ -1,12 +1,16 @@
+import _ from 'lodash';
 import { Component } from 'react';
-import { div, hr, hh, span, h3, button } from 'react-hyperscript-helpers';
-import { StatsBox } from '../components/StatsBox';
+import { button, div, h3, hh, hr, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
+import { StatsBox } from '../components/StatsBox';
 import { PendingCases, StatFiles, Summary } from '../libs/ajax';
+import { Storage } from '../libs/storage';
+import { USER_ROLES } from '../libs/utils';
+
+const authDownloadRoles = [USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member];
 
 export const SummaryVotes = hh(class SummaryVotes extends Component {
-
 
   constructor(props) {
     super(props);
@@ -21,6 +25,11 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
   componentDidMount() {
     this.getSummaryInfo();
+  }
+
+  isAuthedToDownload() {
+    const userRoleNames = _.map(Storage.getCurrentUserRoles(), 'name');
+    return _.intersection(authDownloadRoles, userRoleNames).length > 0;
   }
 
   initialState() {
@@ -118,7 +127,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             id: "btn_downloadStatsDul",
             className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper btn-primary dul-background",
             onClick: () => this.getFile("TranslateDUL"),
-            isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
+            isRendered: this.isAuthedToDownload()
           }, [
               span({}, ["Download stats"]),
               span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
@@ -158,7 +167,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             id: "btn_downloadStatsAccess",
             className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper btn-primary access-background",
             onClick: () => this.getFile("DataAccess"),
-            isRendered: "roles.showStatistics($root.currentUser.roles, $root.userRoles)"
+            isRendered: this.isAuthedToDownload()
           }, [
               span({}, ["Download stats"]),
               span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
@@ -174,8 +183,8 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             data: this.state.chartData.accessTotal,
             options: 'access',
             className: "result_chart",
-            clickHandler: () => this.getDarReport('reviewed', 'ReviewedDataAccessRequests.tsv'),
-            buttonLabel: 'Download all cases'
+            clickHandler: this.isAuthedToDownload() ? () => this.getDarReport('reviewed', 'ReviewedDataAccessRequests.tsv') : undefined,
+            buttonLabel: this.isAuthedToDownload() ? 'Download all cases' : undefined
           }),
           StatsBox({
             id: "reviewedCasesAccess",
