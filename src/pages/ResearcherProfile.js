@@ -8,6 +8,7 @@ import ReactTooltip from 'react-tooltip';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { Config } from '../libs/config';
 import * as qs from 'query-string';
+import _ from 'lodash';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -461,7 +462,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
         } else {
           if (this.state.file !== undefined && this.state.file.name !== '') {
-            const existentDAAUrl = (profile.urlDAA === undefined) ? '' : profile.urlDAA;
+            const existentDAAUrl = _.isNil(profile.urlDAA) ? '' : profile.urlDAA;
             DAR.postDAA(this.state.file.name, this.state.file, existentDAAUrl).then(response => {
               profile.urlDAA = response.urlDAA;
               profile.nameDAA = response.nameDAA;
@@ -1028,7 +1029,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  button({ className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
+                  div({ style: { paddingTop: 7 }, className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
                     span({ className: "glyphicon glyphicon-upload" }),
                     "Upload S.O. Signed Agreement",
                     input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload" })
