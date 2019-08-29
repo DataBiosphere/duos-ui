@@ -736,7 +736,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}??redirect-url=`;
+    const nihUrl = `${await Config.getNihUrl()}?redirect-url=`;
     const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?jwt%3D%7Btoken%7D");
     Storage.setData('dar_application', this.state.formData);
     window.location.href = landingUrl;
