@@ -180,7 +180,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async verifyUser() {
-    let isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
+    let isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
       (callback) => {
         return false;
       });
@@ -188,7 +188,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   async registerUsertoFC(rpProperties) {
-    return await AuthenticateNIH.fireCloudRegisterUsr(rpProperties).then(
+    return await AuthenticateNIH.fireCloudRegisterUser(rpProperties).then(
       (success) => {
         // user has been successfully registered to firecloud.
         return true;

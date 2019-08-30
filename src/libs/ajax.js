@@ -1039,13 +1039,13 @@ export const Votes = {
 };
 
 export const AuthenticateNIH = {
-  fireCloudVerifyUsr: async () => {
+  fireCloudVerifyUser: async () => {
     const url = `${await Config.getFireCloudUrl()}me`;
     const res = await fetchAny(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
     return await res.json();
   },
 
-  fireCloudRegisterUsr: async (profile) => {
+  fireCloudRegisterUser: async (profile) => {
     const url = `${await Config.getFireCloudUrl()}register/profile`;
     const res = await fetchAny(url, _.mergeAll([Config.authOpts(), Config.jsonBody(AuthenticateNIH.parseProfile(profile)), { method: 'POST' }]));
     return await res.json();
