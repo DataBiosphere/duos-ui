@@ -59,7 +59,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async verifyUser() {
-    let isFcUser = await AuthenticateNIH.fireCloudVerifyUsr().catch(
+    let isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
       (callback) => {
         return false;
       });
@@ -67,7 +67,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async registerUsertoFC(profile) {
-    return await AuthenticateNIH.fireCloudRegisterUsr(profile).then(
+    return await AuthenticateNIH.fireCloudRegisterUser(profile).then(
       (success) => {
         // user has been successfully registered to firecloud.
         return true;

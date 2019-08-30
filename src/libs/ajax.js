@@ -1039,21 +1039,21 @@ export const Votes = {
 };
 
 export const AuthenticateNIH = {
-  fireCloudVerifyUsr: async () => {
+  fireCloudVerifyUser: async () => {
     const url = `${await Config.getFireCloudUrl()}me`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
+    const res = await fetchAny(url, _.mergeAll([Config.authOpts(), { method: 'GET' }]));
     return await res.json();
   },
 
-  fireCloudRegisterUsr: async (profile) => {
+  fireCloudRegisterUser: async (profile) => {
     const url = `${await Config.getFireCloudUrl()}register/profile`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(AuthenticateNIH.parseProfile(profile)), { method: 'POST' }]));
+    const res = await fetchAny(url, _.mergeAll([Config.authOpts(), Config.jsonBody(AuthenticateNIH.parseProfile(profile)), { method: 'POST' }]));
     return await res.json();
   },
 
   verifyNihToken: async (token) => {
     const url = `${await Config.getFireCloudUrl()}api/nih/callback`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
+    const res = await fetchAny(url, _.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
     return await res.json();
   },
 
@@ -1116,6 +1116,13 @@ const fetchOk = async (...args) => {
     Storage.clearStorage();
     window.location.href = '/login';
   }
+  return res.ok ? res : Promise.reject(res);
+};
+
+const fetchAny = async (...args) => {
+  spinnerService.showAll();
+  const res = await fetch(...args);
+  spinnerService.hideAll();
   return res.ok ? res : Promise.reject(res);
 };
 
