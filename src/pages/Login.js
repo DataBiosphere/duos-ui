@@ -100,6 +100,7 @@ class Login extends Component {
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {
+        scope: 'openid email profile',
         className: "btn_gSignInWrapper",
         clientId: this.state.clientId,
         onSuccess: this.responseGoogle,
