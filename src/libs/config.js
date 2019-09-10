@@ -17,7 +17,8 @@ export const Config = {
   authOpts: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
+      Accept: 'application/json',
+      'X-App-ID': 'DUOS'
     }
   }),
   fileOpts: (token = Token.getToken()) => ({
