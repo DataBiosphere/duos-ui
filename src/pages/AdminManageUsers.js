@@ -32,8 +32,7 @@ class AdminManageUsers extends Component {
       user.researcher = false;
       user.roles.forEach(role => {
         if (role.name === 'Researcher' || user.name === 'RESEARCHER') {
-          user.status = role.status;
-          user.completed = role.profileCompleted;
+          user.completed = user.profileCompleted;
           user.researcher = true;
         }
       });
@@ -222,7 +221,7 @@ class AdminManageUsers extends Component {
 
                       span({ className: "glyphicon glyphicon-thumbs-down cancel-color", isRendered: user.status === 'rejected' && user.completed, "data-tip": "Non-Bonafide researcher", "data-for": "tip_nonBonafide" }),
 
-                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.status === 'pending' && user.completed, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
+                      span({ className: "glyphicon glyphicon-hand-right hover-color", isRendered: user.researcher && user.status === 'pending' && user.completed, "data-tip": "Researcher review pending", "data-for": "tip_pendingReview" }),
 
                       span({ className: "glyphicon glyphicon-hand-right dismiss-color", isRendered: !(user.completed) || (user.researcher === false), disabled: "disabled" }, []),
                     ]),

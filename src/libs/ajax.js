@@ -287,7 +287,7 @@ export const DAR = {
       if (dar.ownerUser !== null) {
         dar.ownerUser.roles.map(role => {
           if (role.name === 'Researcher') {
-            dar.status = role.status;
+            dar.status = dar.ownerUser.status;
             return dar;
           }
           return dar;
