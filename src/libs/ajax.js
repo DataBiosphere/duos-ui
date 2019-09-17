@@ -2,6 +2,7 @@ import _ from 'lodash/fp';
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
+import fileDownload from 'js-file-download';
 
 const dataTemplate = {
   accessTotal: [
@@ -1130,11 +1131,7 @@ const getFile = async (URI, fileName) => {
   const res = await fetchOk(URI, Config.fileBody());
   fileName = fileName === null ? getFileNameFromHttpResponse(res) : fileName;
   let blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
-  let a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.click();
+  fileDownload(blob, fileName);
 };
 
 const getFileNameFromHttpResponse = (response) => {
