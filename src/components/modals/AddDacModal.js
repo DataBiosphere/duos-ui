@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { div, form, h, hh, input, label, textarea, p } from 'react-hyperscript-helpers';
+import { a, div, form, h, hh, input, label, span, textarea } from 'react-hyperscript-helpers';
 import AsyncSelect from 'react-select/lib/Async';
 import { DAC } from '../../libs/ajax';
 import { Alert } from '../Alert';
@@ -31,6 +31,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.userSearch = this.userSearch.bind(this);
     this.onChairSearchChange = this.onChairSearchChange.bind(this);
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
+    this.removeChairperson = this.removeChairperson.bind(this);
+    this.removeMember = this.removeMember.bind(this);
   }
 
   componentDidMount() {
@@ -134,6 +136,43 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
   };
 
+  removeChairperson(dacId, dacUserId) {
+    DAC.removeDacChair(dacId, dacUserId).then(
+      response => {
+        let promise = this.updateMembership(dacId);
+        console.log(JSON.stringify(promise));
+      },
+      rejected => {
+        console.error(rejected);
+      }
+    );
+  }
+
+  removeMember(dacId, dacUserId) {
+    DAC.removeDacMember(dacId, dacUserId).then(
+      response => {
+        console.log("Removing member");
+      }
+    );
+  }
+
+  async updateMembership(dacId) {
+    DAC.membership(dacId).then(
+      membership => {
+        const updatedChairs = _.find(membership, {'roles.name': "Chairperson", 'dacId': dacId});
+        const updatedMembers = _.find(membership, {'roles.name': "Member", 'dacId': dacId});
+        this.setState( prev => {
+          prev.dacDTO.chairpersons = updatedChairs;
+          prev.dacDTO.members = updatedMembers;
+          return prev;
+        });
+      },
+      rejected => {
+        console.error(rejected);
+      }
+    );
+  }
+
   isValidJson = (obj, error) => {
   };
 
@@ -196,14 +235,22 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               ])
             ]),
 
-            div({ isRendered: (this.state.dacDTO.members.length > 0), className: "form-group" }, [
+            div({ isRendered: (this.state.dacDTO.chairpersons.length > 0), className: "form-group" }, [
               label({
                 id: "lbl_dacChairs",
                 className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
                 },
                 ["Chairpersons"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8", style: { padding: "9px 0 9px 15px"} },
-                [_.flatMap(this.state.dacDTO.chairpersons, (u) => p({key: u.email}, [u.displayName, " ", u.email]))]
+                [_.flatMap(
+                  this.state.dacDTO.chairpersons,
+                  (u) => div({key: u.dacUserId}, [
+                    span({}, [u.displayName, " ", u.email]),
+                    a({
+                      style: {display: "inline", marginLeft: "1rem"},
+                      role: "button",
+                      onClick: () => this.removeChairperson(this.state.dacDTO.dac.dacId, u.dacUserId),
+                      className: "btn cell-button cancel-color"}, ["Remove"])]))]
               )]
             ),
 
@@ -214,7 +261,15 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 },
                 ["Members"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8", style: { padding: "9px 0 9px 15px"} },
-                [_.flatMap(this.state.dacDTO.members, (u) => p({key: u.email}, [u.displayName, " ", u.email]))]
+                [_.flatMap(
+                  this.state.dacDTO.members,
+                  (u) => div({key: u.dacUserId}, [
+                    span({}, [u.displayName, " ", u.email]),
+                    a({
+                      style: {display: "inline", marginLeft: "1rem"},
+                      role: "button",
+                      onClick: () => this.removeMember(this.state.dacDTO.dac.dacId, u.dacUserId),
+                      className: "btn cell-button cancel-color"}, ["Remove"])]))]
               )]
             ),
 
