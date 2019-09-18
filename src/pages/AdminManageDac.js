@@ -72,11 +72,12 @@ class AdminManageDac extends Component {
     });
   };
 
-  async editDac(selectedDacDTO) {
-    this.setState({
-      showDacModal: true,
-      isEditMode: true,
-      selectedDacDTO: selectedDacDTO,
+  editDac(selectedDacDTO) {
+    this.setState(prev => {
+      prev.showDacModal = true;
+      prev.isEditMode = true;
+      prev.selectedDacDTO = selectedDacDTO;
+      return prev;
     });
   };
 
@@ -170,9 +171,9 @@ class AdminManageDac extends Component {
               className: "col-lg-6 col-md-6 col-sm-6 col-xs-6 btn-primary btn-add common-background",
               onClick: this.addDac
             }, [
-                div({ className: "all-icons add-dac_white" }),
-                span({}, ["Add Data Access Committee"]),
-              ])
+              div({ className: "all-icons add-dac_white" }),
+              span({}, ["Add Data Access Committee"]),
+            ])
           ])
         ]),
         div({ className: "jumbotron table-box" }, [
@@ -186,13 +187,12 @@ class AdminManageDac extends Component {
           hr({ className: "table-head-separator" }),
 
           this.state.dacsList.filter(this.searchTable(searchDacText)).slice((currentPage - 1) * limit, currentPage * this.state.limit).map((dacDTO, eIndex) => {
-            console.log(JSON.stringify(dacDTO));
             const dac = dacDTO.dac;
             return (h(Fragment, { key: dac.dacId }, [
-              div({
-                id: dac.dacId,
-                className: "grid-9-row tableRow"
-              }, [
+                div({
+                  id: dac.dacId,
+                  className: "grid-9-row tableRow"
+                }, [
                   div({
                     id: dac.dacId + "_dacName",
                     name: "name",
@@ -213,21 +213,21 @@ class AdminManageDac extends Component {
                   div({
                     className: "col-2 cell-body f-center",
                   }, [
-                      button({
-                        id: dac.dacId + "_btnViewDAC",
-                        name: "btn_viewDac",
-                        className: "cell-button hover-color",
-                        style: { width: "40%", marginRight: "1rem"},
-                        onClick: () => this.viewMembers(dacDTO),
-                      }, ["View"]),
-                      button({
-                        id: dac.dacId + "_btnEditDAC",
-                        name: "btn_editDac",
-                        className: "cell-button hover-color",
-                        style: { width: "40%", marginRight: "1rem"},
-                        onClick: () => this.editDac(dacDTO)
-                      }, ["Edit"])
-                    ])
+                    button({
+                      id: dac.dacId + "_btnViewDAC",
+                      name: "btn_viewDac",
+                      className: "cell-button hover-color",
+                      style: { width: "40%", marginRight: "1rem"},
+                      onClick: () => this.viewMembers(dacDTO),
+                    }, ["View"]),
+                    button({
+                      id: dac.dacId + "_btnEditDAC",
+                      name: "btn_editDac",
+                      className: "cell-button hover-color",
+                      style: { width: "40%", marginRight: "1rem"},
+                      onClick: () => this.editDac(dacDTO)
+                    }, ["Edit"])
+                  ])
                 ]),
                 hr({ className: "table-body-separator" }),
 
@@ -242,7 +242,7 @@ class AdminManageDac extends Component {
 
                 AddDacModal({
                   isRendered: this.state.showDacModal,
-                  showDacModal: this.state.showDacModal,
+                  showModal: this.state.showDacModal,
                   isEditMode: this.state.isEditMode,
                   onOKRequest: this.okAddDacModal,
                   onCloseRequest: this.closeAddDacModal,
