@@ -1,10 +1,11 @@
+import _ from 'lodash';
 import { Component } from 'react';
-import { div, form, h, hh, h4, ul, li, input, label, textarea } from 'react-hyperscript-helpers';
+import { div, form, h, hh, input, label, textarea, p } from 'react-hyperscript-helpers';
 import AsyncSelect from 'react-select/lib/Async';
+import { DAC } from '../../libs/ajax';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
-import { DAC } from '../../libs/ajax';
-import _ from 'lodash';
+
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -71,10 +72,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   handleErrors(message) {
   };
 
-  userSearch = (query, callback) => {
+  userSearch(query, callback) {
     DAC.autocompleteUsers(query).then(
       items => {
-        console.log("Items from search: " + JSON.stringify(items));
         const options = items.map(function(item) {
           return {
             key: item.dacUserId,
@@ -90,7 +90,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       });
   };
 
-  onChairSearchChange = (data) => {
+  onChairSearchChange(data) {
     this.setState(prev => {
       prev.chairsToAdd = _.map(data, 'item');
       prev.chairsSelectedOptions = data;
@@ -99,7 +99,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     });
   };
 
-  onMemberSearchChange = (data) => {
+  onMemberSearchChange(data) {
     this.setState(prev => {
       prev.membersToAdd = _.map(data, 'item');
       prev.membersSelectedOptions = data;
@@ -108,7 +108,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     });
   };
 
-  handleChange = (event) => {
+  handleChange(event) {
     const target = event.target;
     const value = target.value;
     const name = target.name;
@@ -138,13 +138,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   };
 
   render() {
-
-    let dac = this.state.dacDTO.dac;
-    let chairpersons = this.state.dacDTO.chairpersons;
-    let members = this.state.dacDTO.members;
-
     return (
-
       BaseModal({
           id: "addDacModal",
           disableOkBtn: this.state.file === '' || this.state.disableOkBtn,
@@ -161,7 +155,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           }
         },
         [
-
           form({
             className: "form-horizontal css-form",
             name: "dacForm",
@@ -177,7 +170,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 input({
                   id: "txt_dacName",
                   type: "text",
-                  defaultValue: dac.name,
+                  defaultValue: this.state.dacDTO.dac.name,
                   onChange: this.handleChange,
                   name: "name",
                   className: "form-control col-lg-12 vote-input",
@@ -194,7 +187,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
                   id: "txt_dacDescription",
-                  defaultValue: dac.description,
+                  defaultValue: this.state.dacDTO.dac.description,
                   onChange: this.handleChange,
                   name: "description",
                   className: "form-control col-lg-12 vote-input",
@@ -203,16 +196,25 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               ])
             ]),
 
-            div({}, [
-              div({isRendered: chairpersons.length > 0 },
-                h4(["Chairpersons"]),
-                ul({ id: "txt_chairpersons", className: "row no-margin" },
-                  [chairpersons.map(u => li({key: u.email}, [u.displayName, " ", u.email]))])
-              ),
-              div({isRendered: (members.length > 0) },
-                h4(["Members"]),
-                ul({ id: "txt_members", className: "row no-margin" },
-                  [members.map(u => li({key: u.email}, [u.displayName, " ", u.email]))])
+            div({ isRendered: (this.state.dacDTO.members.length > 0), className: "form-group" }, [
+              label({
+                id: "lbl_dacChairs",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+                },
+                ["Chairpersons"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8", style: { padding: "9px 0 9px 15px"} },
+                [_.flatMap(this.state.dacDTO.chairpersons, (u) => p({key: u.email}, [u.displayName, " ", u.email]))]
+              )]
+            ),
+
+            div({ isRendered: (this.state.dacDTO.members.length > 0), className: "form-group" }, [
+              label({
+                id: "lbl_dacMembers",
+                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+                },
+                ["Members"]),
+              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8", style: { padding: "9px 0 9px 15px"} },
+                [_.flatMap(this.state.dacDTO.members, (u) => p({key: u.email}, [u.displayName, " ", u.email]))]
               )]
             ),
 
