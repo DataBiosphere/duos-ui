@@ -168,6 +168,12 @@ export const DAC = {
     return res.json();
   },
 
+  autocompleteUsers: async (term) => {
+    const url = `${await Config.getApiUrl()}/dac/users/${term}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
 };
 
 export const DAR = {
