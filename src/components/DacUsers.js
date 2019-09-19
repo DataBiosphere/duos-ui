@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, hh, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
+import { a, hh, table, tbody, td, tr } from 'react-hyperscript-helpers';
 
 
 export const DacUsers = hh(class DacUsers extends Component {
@@ -20,13 +20,6 @@ export const DacUsers = hh(class DacUsers extends Component {
     const col3Style = { width: '20%' };
 
     return table({ style: { marginLeft: '2rem' }, className: 'table' }, [
-      thead({}, [
-        tr({}, [
-          th({ style: col1Style }, 'User'),
-          th({ style: col2Style }, 'Role'),
-          th({ isRendered: this.state.removeButton, style: col3Style }, '')
-        ])
-      ]),
       tbody({}, [
         _.flatMap(this.state.dac.chairpersons,
           (u) => tr({key: "chair_" + u.dacUserId}, [
