@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, div, form, h, hh, input, label, table, td, thead, tbody, th, tr, textarea } from 'react-hyperscript-helpers';
+import { div, form, h, hh, input, label, textarea } from 'react-hyperscript-helpers';
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
+import { DacUsers } from '../DacUsers';
 
 
 export const AddDacModal = hh(class AddDacModal extends Component {
@@ -33,6 +34,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
     this.removeChairperson = this.removeChairperson.bind(this);
     this.removeMember = this.removeMember.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount() {
@@ -241,32 +243,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0)},
               [
                 div({style: {fontWeight: "500"}, className: "common-color"}, ["DAC Members"]),
-                table({ style: {marginLeft: "2rem"}, className: "table" }, [
-                thead({}, [tr({}, [
-                  th({style: {width: "60%"}}, "User"),
-                  th({style: {width: "20%"}}, "Role"),
-                  th({style: {width: "20%"}}, "")])]),
-                tbody({}, [_.flatMap(this.state.dac.chairpersons,
-                  (u) => tr({}, [
-                    td({}, [u.displayName, " ", u.email]),
-                    td({}, ["Chairperson"]),
-                    td({}, [a({
-                      style: {display: "inline"},
-                      role: "button",
-                      onClick: () => this.removeChairperson(this.state.dac.dacId, u.dacUserId),
-                      className: "btn cell-button cancel-color"}, ["Remove"])]),
-                  ])),
-                  _.flatMap(this.state.dac.members,
-                    (u) => tr({}, [
-                      td({}, [u.displayName, " ", u.email]),
-                      td({}, ["Member"]),
-                      td({}, [a({
-                        style: {display: "inline"},
-                        role: "button",
-                        onClick: () => this.removeChairperson(this.state.dac.dacId, u.dacUserId),
-                        className: "btn cell-button cancel-color"}, ["Remove"])]),
-                    ]))]),
-              ])]
+                DacUsers({dac: this.state.dac, removeButton: true, removeHandler: () => this.removeChairperson}),
+              ]
             ),
 
             div({ className: "form-group" }, [
