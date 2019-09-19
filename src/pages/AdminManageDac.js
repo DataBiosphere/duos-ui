@@ -1,12 +1,13 @@
 import { Component, Fragment } from 'react';
-import { div, hr, h, span, a, button } from 'react-hyperscript-helpers';
+import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
+import ReactTooltip from 'react-tooltip';
 import { AddDacModal } from '../components/modals/AddDacModal';
-import { DAC } from '../libs/ajax';
 import { DacMembersModal } from '../components/modals/DacMembersModal';
 import { PageHeading } from '../components/PageHeading';
-import { PaginatorBar } from "../components/PaginatorBar";
-import ReactTooltip from 'react-tooltip';
+import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
+import { DAC } from '../libs/ajax';
+
 
 const limit = 10;
 
@@ -21,11 +22,11 @@ class AdminManageDac extends Component {
       showDatasetsModal: false,
       value: '',
       limit: limit,
-      dacsList: [],
+      dacList: [],
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
-      selectedDacDTO: {},
+      selectedDac: {},
     };
 
     this.handlePageChange = this.handlePageChange.bind(this);
@@ -50,7 +51,7 @@ class AdminManageDac extends Component {
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.currentPage = 1;
-      prev.dacsList = dacs;
+      prev.dacList = dacs;
       return prev;
     }, () => {
       ReactTooltip.rebuild();
@@ -72,11 +73,11 @@ class AdminManageDac extends Component {
     });
   };
 
-  editDac(selectedDacDTO) {
+  editDac(selectedDac) {
     this.setState(prev => {
       prev.showDacModal = true;
       prev.isEditMode = true;
-      prev.selectedDacDTO = selectedDacDTO;
+      prev.selectedDac = selectedDac;
       return prev;
     });
   };
@@ -106,10 +107,10 @@ class AdminManageDac extends Component {
   afterAddDacModalOpen() {
   }
 
-  viewMembers(selectedDacDTO) {
+  viewMembers(selectedDac) {
     this.setState(prev => {
       prev.showMembersModal = true;
-      prev.selectedDacDTO = selectedDacDTO;
+      prev.selectedDac = selectedDac;
       return prev;
     });
   }
@@ -117,7 +118,7 @@ class AdminManageDac extends Component {
   closeViewMembersModal() {
     this.setState(prev => {
       prev.showMembersModal = false;
-      prev.selectedDacDTO = {};
+      prev.selectedDac = {};
       return prev;
     });
   }
@@ -145,9 +146,7 @@ class AdminManageDac extends Component {
   };
 
   render() {
-
     const { currentPage, limit, searchDacText } = this.state;
-
     return (
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
@@ -186,8 +185,7 @@ class AdminManageDac extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.dacsList.filter(this.searchTable(searchDacText)).slice((currentPage - 1) * limit, currentPage * this.state.limit).map((dacDTO, eIndex) => {
-            const dac = dacDTO.dac;
+          this.state.dacList.filter(this.searchTable(searchDacText)).slice((currentPage - 1) * limit, currentPage * this.state.limit).map((dac, eIndex) => {
             return (h(Fragment, { key: dac.dacId }, [
                 div({
                   id: dac.dacId,
@@ -218,48 +216,46 @@ class AdminManageDac extends Component {
                       name: "btn_viewDac",
                       className: "cell-button hover-color",
                       style: { width: "40%", marginRight: "1rem"},
-                      onClick: () => this.viewMembers(dacDTO),
+                      onClick: () => this.viewMembers(dac),
                     }, ["View"]),
                     button({
                       id: dac.dacId + "_btnEditDAC",
                       name: "btn_editDac",
                       className: "cell-button hover-color",
                       style: { width: "40%", marginRight: "1rem"},
-                      onClick: () => this.editDac(dacDTO)
+                      onClick: () => this.editDac(dac)
                     }, ["Edit"])
                   ])
                 ]),
                 hr({ className: "table-body-separator" }),
-
-                DacMembersModal({
-                  isRendered: this.state.showMembersModal,
-                  showModal: this.state.showMembersModal,
-                  onOKRequest: this.okViewMembersModal,
-                  onCloseRequest: this.closeViewMembersModal,
-                  onAfterOpen: this.afterViewMembersModalOpen,
-                  dacDTO: this.state.selectedDacDTO
-                }),
-
-                AddDacModal({
-                  isRendered: this.state.showDacModal,
-                  showModal: this.state.showDacModal,
-                  isEditMode: this.state.isEditMode,
-                  onOKRequest: this.okAddDacModal,
-                  onCloseRequest: this.closeAddDacModal,
-                  onAfterOpen: this.afterAddDacModalOpen,
-                  dacDTO: this.state.selectedDacDTO,
-                }),
               ])
             );
           }),
           PaginatorBar({
-            total: this.state.dacsList.filter(this.searchTable(searchDacText)).length,
+            total: this.state.dacList.filter(this.searchTable(searchDacText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,
             onPageChange: this.handlePageChange,
             changeHandler: this.handleSizeChange,
           }),
+          DacMembersModal({
+            isRendered: this.state.showMembersModal,
+            showModal: this.state.showMembersModal,
+            onOKRequest: this.okViewMembersModal,
+            onCloseRequest: this.closeViewMembersModal,
+            onAfterOpen: this.afterViewMembersModalOpen,
+            dac: this.state.selectedDac
+          }),
+          AddDacModal({
+            isRendered: this.state.showDacModal,
+            showModal: this.state.showDacModal,
+            isEditMode: this.state.isEditMode,
+            onOKRequest: this.okAddDacModal,
+            onCloseRequest: this.closeAddDacModal,
+            onAfterOpen: this.afterAddDacModalOpen,
+            dac: this.state.selectedDac,
+          })
         ])
       ])
     );

@@ -15,7 +15,7 @@ export const DacMembersModal = hh(class DacMembersModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      dacDTO: this.props.dacDTO,
+      dac: this.props.dac,
     };
   };
 
@@ -29,11 +29,11 @@ export const DacMembersModal = hh(class DacMembersModal extends Component {
 
   render() {
     // console.log("DAC");
-    // console.log(JSON.stringify(this.state.dacDTO.dac));
+    // console.log(JSON.stringify(this.state.dac));
     // console.log("Chairs");
-    // console.log(JSON.stringify(this.state.dacDTO.chairpersons));
+    // console.log(JSON.stringify(this.state.dac.chairpersons));
     // console.log("Members");
-    // console.log(JSON.stringify(this.state.dacDTO.members));
+    // console.log(JSON.stringify(this.state.dac.members));
     return (
       BaseModal({
           id: "dacMembersModal",
@@ -43,17 +43,17 @@ export const DacMembersModal = hh(class DacMembersModal extends Component {
           color: "common",
           type: "informative",
           iconSize: 'none',
-          title: "DAC Members associated with DAC: " + this.state.dacDTO.dac.name,
+          title: "DAC Members associated with DAC: " + this.state.dac.name,
           action: { label: "Close", handler: this.OKHandler }
         },
         [
           h4("Chairpersons"),
           ul({ id: "txt_chairpersons", className: "row no-margin" },
-            [this.state.dacDTO.chairpersons.map(u => li({style: styles.userList}, [u.displayName, " ", u.email]))]
+            [this.state.dac.chairpersons.map(u => li({style: styles.userList}, [u.displayName, " ", u.email]))]
           ),
           h4("Members"),
           ul({ id: "txt_members", className: "row no-margin" },
-            [this.state.dacDTO.members.map(u => li({style: styles.userList}, [u.displayName, " ", u.email]))]
+            [this.state.dac.members.map(u => li({style: styles.userList}, [u.displayName, " ", u.email]))]
           )
         ])
     );

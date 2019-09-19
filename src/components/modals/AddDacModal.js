@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, div, form, h, hh, input, label, span, textarea } from 'react-hyperscript-helpers';
-import AsyncSelect from 'react-select/lib/Async';
+import { a, div, form, h, hh, input, label, table, td, thead, tbody, th, tr, textarea } from 'react-hyperscript-helpers';
+import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
@@ -13,7 +13,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     super(props);
     this.state = {
       isEditMode: this.props.isEditMode,
-      dacDTO: this.props.isEditMode ? this.props.dacDTO : { dac: {}, chairpersons: [], members: [] },
+      dac: this.props.isEditMode ? this.props.dac : { dac: {}, chairpersons: [], members: [] },
       error: {
         show: false,
         title: '',
@@ -39,7 +39,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   };
 
   async OKHandler() {
-    let currentDac = this.state.dacDTO.dac;
+    let currentDac = this.state.dac;
     let newDac = {};
     if (this.state.isEditMode) {
       newDac = await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
@@ -55,7 +55,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       return newMemberResponse;
     });
     this.setState(prev => {
-      prev.dacDTO.dac = newDac;
+      prev.dac = newDac;
       return prev;
     });
     this.closeHandler();
@@ -113,17 +113,17 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     switch (name) {
       case "name":
         this.setState(prev => {
-          let newDac = Object.assign({}, prev.dacDTO.dac);
+          let newDac = Object.assign({}, prev.dac);
           newDac.name = value;
-          prev.dacDTO.dac = newDac;
+          prev.dac = newDac;
           return prev;
         });
         break;
       case "description":
         this.setState(prev => {
-          let newDac = Object.assign({}, prev.dacDTO.dac);
+          let newDac = Object.assign({}, prev.dac);
           newDac.description = value;
-          prev.dacDTO.dac = newDac;
+          prev.dac = newDac;
           return prev;
         });
         break;
@@ -163,8 +163,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         const updatedChairs = _.find(membership, {'roles.name': "Chairperson", 'dacId': dacId});
         const updatedMembers = _.find(membership, {'roles.name': "Member", 'dacId': dacId});
         this.setState( prev => {
-          prev.dacDTO.chairpersons = updatedChairs;
-          prev.dacDTO.members = updatedMembers;
+          prev.dac.chairpersons = updatedChairs;
+          prev.dac.members = updatedMembers;
           return prev;
         });
       },
@@ -210,7 +210,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 input({
                   id: "txt_dacName",
                   type: "text",
-                  defaultValue: this.state.dacDTO.dac.name,
+                  defaultValue: this.state.dac.name,
                   onChange: this.handleChange,
                   name: "name",
                   className: "form-control col-lg-12 vote-input",
@@ -227,7 +227,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
                 textarea({
                   id: "txt_dacDescription",
-                  defaultValue: this.state.dacDTO.dac.description,
+                  defaultValue: this.state.dac.description,
                   onChange: this.handleChange,
                   name: "description",
                   className: "form-control col-lg-12 vote-input",
@@ -236,42 +236,37 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               ])
             ]),
 
-            div({ isRendered: (this.state.dacDTO.chairpersons.length > 0), className: "form-group" }, [
-              label({
-                id: "lbl_dacChairs",
-                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-                },
-                ["Chairpersons"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8", style: { padding: "9px 0 9px 15px"} },
-                [_.flatMap(
-                  this.state.dacDTO.chairpersons,
-                  (u) => div({key: u.dacUserId}, [
-                    span({}, [u.displayName, " ", u.email]),
-                    a({
-                      style: {display: "inline", marginLeft: "1rem"},
+            div({
+                style: {marginLeft: "7rem"},
+                isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0)},
+              [
+                div({style: {fontWeight: "500"}, className: "common-color"}, ["DAC Members"]),
+                table({ style: {marginLeft: "2rem"}, className: "table" }, [
+                thead({}, [tr({}, [
+                  th({style: {width: "60%"}}, "User"),
+                  th({style: {width: "20%"}}, "Role"),
+                  th({style: {width: "20%"}}, "")])]),
+                tbody({}, [_.flatMap(this.state.dac.chairpersons,
+                  (u) => tr({}, [
+                    td({}, [u.displayName, " ", u.email]),
+                    td({}, ["Chairperson"]),
+                    td({}, [a({
+                      style: {display: "inline"},
                       role: "button",
-                      onClick: () => this.removeChairperson(this.state.dacDTO.dac.dacId, u.dacUserId),
-                      className: "btn cell-button cancel-color"}, ["Remove"])]))]
-              )]
-            ),
-
-            div({ isRendered: (this.state.dacDTO.members.length > 0), className: "form-group" }, [
-              label({
-                id: "lbl_dacMembers",
-                className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-                },
-                ["Members"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8", style: { padding: "9px 0 9px 15px"} },
-                [_.flatMap(
-                  this.state.dacDTO.members,
-                  (u) => div({key: u.dacUserId}, [
-                    span({}, [u.displayName, " ", u.email]),
-                    a({
-                      style: {display: "inline", marginLeft: "1rem"},
-                      role: "button",
-                      onClick: () => this.removeMember(this.state.dacDTO.dac.dacId, u.dacUserId),
-                      className: "btn cell-button cancel-color"}, ["Remove"])]))]
-              )]
+                      onClick: () => this.removeChairperson(this.state.dac.dacId, u.dacUserId),
+                      className: "btn cell-button cancel-color"}, ["Remove"])]),
+                  ])),
+                  _.flatMap(this.state.dac.members,
+                    (u) => tr({}, [
+                      td({}, [u.displayName, " ", u.email]),
+                      td({}, ["Member"]),
+                      td({}, [a({
+                        style: {display: "inline"},
+                        role: "button",
+                        onClick: () => this.removeChairperson(this.state.dac.dacId, u.dacUserId),
+                        className: "btn cell-button cancel-color"}, ["Remove"])]),
+                    ]))]),
+              ])]
             ),
 
             div({ className: "form-group" }, [
