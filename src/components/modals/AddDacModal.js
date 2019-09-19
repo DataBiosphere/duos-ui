@@ -48,12 +48,10 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
     this.state.chairsToAdd.map(function(chair) {
       const newChairResponse = DAC.addDacChair(currentDac.dacId, chair.dacUserId);
-      console.log("Added chair: " + newChairResponse);
       return newChairResponse;
     });
     this.state.membersToAdd.map(function(member) {
       const newMemberResponse = DAC.addDacMember(currentDac.dacId, member.dacUserId);
-      console.log("Added member: " + newMemberResponse);
       return newMemberResponse;
     });
     this.setState(prev => {
@@ -96,7 +94,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.setState(prev => {
       prev.chairsToAdd = _.map(data, 'item');
       prev.chairsSelectedOptions = data;
-      console.log("Chairs to add: " + JSON.stringify(prev.chairsToAdd));
       return prev;
     });
   };
@@ -105,7 +102,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.setState(prev => {
       prev.membersToAdd = _.map(data, 'item');
       prev.membersSelectedOptions = data;
-      console.log("Members to add: " + JSON.stringify(prev.membersToAdd));
       return prev;
     });
   };
@@ -136,11 +132,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
   };
 
-  removeChairperson(dacId, dacUserId) {
-    DAC.removeDacChair(dacId, dacUserId).then(
+  // noinspection JSIgnoredPromiseFromCall
+  async removeChairperson(dacId, dacUserId) {
+    await DAC.removeDacChair(dacId, dacUserId).then(
       response => {
-        let promise = this.updateMembership(dacId);
-        console.log(JSON.stringify(promise));
+        this.updateMembership(dacId);
       },
       rejected => {
         console.error(rejected);
@@ -148,17 +144,22 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     );
   }
 
-  removeMember(dacId, dacUserId) {
-    DAC.removeDacMember(dacId, dacUserId).then(
+  // noinspection JSIgnoredPromiseFromCall
+  async removeMember(dacId, dacUserId) {
+    await DAC.removeDacMember(dacId, dacUserId).then(
       response => {
-        console.log("Removing member");
+        this.updateMembership(dacId);
+      },
+      rejected => {
+        console.error(rejected);
       }
     );
   }
 
   async updateMembership(dacId) {
-    DAC.membership(dacId).then(
+    await DAC.membership(dacId).then(
       membership => {
+        console.log("updated membership: " + JSON.stringify(membership));
         const updatedChairs = _.find(membership, {'roles.name': "Chairperson", 'dacId': dacId});
         const updatedMembers = _.find(membership, {'roles.name': "Member", 'dacId': dacId});
         this.setState( prev => {
