@@ -15,20 +15,24 @@ export const DacUsers = hh(class DacUsers extends Component {
   }
 
   render() {
+    const col1Style = { width: '60%' };
+    const col2Style = { width: (this.state.removeButton) ? '20%' : '40%' };
+    const col3Style = { width: '20%' };
+
     return table({ style: { marginLeft: '2rem' }, className: 'table' }, [
       thead({}, [
         tr({}, [
-          th({ style: { width: '60%' } }, 'User'),
-          th({ style: { width: (this.state.removeButton) ? '20%' : '40%'} }, 'Role'),
-          th({ isRendered: this.state.removeButton, style: { width: '20%' } }, '')
+          th({ style: col1Style }, 'User'),
+          th({ style: col2Style }, 'Role'),
+          th({ isRendered: this.state.removeButton, style: col3Style }, '')
         ])
       ]),
       tbody({}, [
         _.flatMap(this.state.dac.chairpersons,
-          (u) => tr({}, [
-            td({}, [u.displayName, ' ', u.email]),
-            td({}, ['Chairperson']),
-            td({ isRendered: this.state.removeButton }, [
+          (u) => tr({key: "chair_" + u.dacUserId}, [
+            td({ style: col1Style }, [u.displayName, ' ', u.email]),
+            td({ style: col2Style }, ['Chairperson']),
+            td({ isRendered: this.state.removeButton, style: col3Style }, [
               a({
                 style: { display: 'inline' },
                 role: 'button',
@@ -38,10 +42,10 @@ export const DacUsers = hh(class DacUsers extends Component {
             ])
           ])),
         _.flatMap(this.state.dac.members,
-          (u) => tr({}, [
-            td({}, [u.displayName, ' ', u.email]),
-            td({}, ['Member']),
-            td({ isRendered: this.state.removeButton }, [
+          (u) => tr({key: "member_" + u.dacUserId}, [
+            td({ style: col1Style }, [u.displayName, ' ', u.email]),
+            td({ style: col2Style }, ['Member']),
+            td({ isRendered: this.state.removeButton, style: col3Style }, [
               a({
                 style: { display: 'inline' },
                 role: 'button',
