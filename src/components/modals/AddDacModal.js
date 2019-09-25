@@ -211,7 +211,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   render() {
     return (
       BaseModal({
-          style: { content: { overflowY: 'scroll', } },
           id: 'addDacModal',
           showModal: this.props.showModal,
           onRequestClose: this.props.onCloseRequest,
