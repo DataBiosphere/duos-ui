@@ -7,8 +7,9 @@ import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
 import { DacUsers } from '../DacUsers';
 
-export const CHAIR = "chair";
-export const MEMBER = "member";
+
+export const CHAIR = 'chair';
+export const MEMBER = 'member';
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -27,20 +28,18 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       chairIdsToRemove: [],
       membersSelectedOptions: [],
       memberIdsToAdd: [],
-      memberIdsToRemove: [],
+      memberIdsToRemove: []
     };
 
-    this.afterOpenHandler = this.afterOpenHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
     this.userSearch = this.userSearch.bind(this);
+    this.chairSearch = this.chairSearch.bind(this);
+    this.memberSearch = this.memberSearch.bind(this);
     this.onChairSearchChange = this.onChairSearchChange.bind(this);
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
     this.removeDacMember = this.removeDacMember.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
-
-  componentDidMount() {
-  };
 
   async OKHandler() {
     let currentDac = this.state.dac;
@@ -69,14 +68,10 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     });
   }
 
-  afterOpenHandler() {
-    this.props.onAfterOpen('addDac');
-  }
-
   handleErrors(message) {
     this.setState(prev => {
       prev.error = {
-        title: "Error",
+        title: 'Error',
         show: true,
         msg: message
       };
@@ -84,24 +79,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     });
   };
 
-  userSearch(query, callback, type) {
-    // These ids are the allowable selection options, e.g.,
-    //    a selectable chair is any user, minus current chairs, plus any chairs that are slated for removal
-    //    a selectable member is any user, minus current members, plus any members that are slated for removal
-    const ignorableChairIds = _.pull(_.map(this.state.dac.chairpersons, 'dacUserId'), this.state.chairIdsToRemove);
-    const ignorableMemberIds = _.pull(_.map(this.state.dac.members, 'dacUserId'), this.state.memberIdsToRemove);
+  userSearch(invalidUserIds, query, callback) {
     DAC.autocompleteUsers(query).then(
       items => {
-        const filteredUsers = _.filter(items, item => {
-          switch (type) {
-            case CHAIR:
-              return !ignorableChairIds.includes(item.dacUserId);
-            case MEMBER:
-              return !ignorableMemberIds.includes(item.dacUserId);
-            default:
-              return true;
-          }
-        });
+        console.log("invalidUserIds: " + JSON.stringify(invalidUserIds));
+        const filteredUsers = _.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
         const options = filteredUsers.map(function(item) {
           return {
             key: item.dacUserId,
@@ -115,6 +97,36 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       rejected => {
         console.error(rejected);
       });
+  }
+
+  chairSearch(query, callback) {
+    // A valid chair is any user:
+    //    * minus current chairs
+    //    * minus current members (you shouldn't be both a chair and a member)
+    //    * minus any new members selected (you shouldn't be both a chair and a member)
+    //    * plus any chairs that are slated for removal
+    const invalidChairs = _.pull(
+      _.union(
+        _.map(this.state.dac.chairpersons, 'dacUserId'),
+        _.map(this.state.dac.members, 'dacUserId'),
+        this.state.memberIdsToAdd),
+      this.state.chairIdsToRemove);
+    this.userSearch(invalidChairs, query, callback);
+  };
+
+  memberSearch(query, callback) {
+    // A valid member is any user:
+    //    * minus current members
+    //    * minus current chairs (you shouldn't be both a chair and a member)
+    //    * minus any new chairs selected (you shouldn't be both a chair and a member)
+    //    * plus any members that are slated for removal
+    const invalidMembers = _.pull(
+      _.union(
+        _.map(this.state.dac.members, 'dacUserId'),
+        _.map(this.state.dac.chairpersons, 'dacUserId'),
+        this.state.chairIdsToAdd),
+      this.state.memberIdsToRemove);
+    this.userSearch(invalidMembers, query, callback);
   };
 
   onChairSearchChange(data) {
@@ -175,7 +187,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   async updateMembership(dacId) {
     await DAC.membership(dacId).then(
       membership => {
-        console.log('updated membership: ' + JSON.stringify(membership));
         const updatedChairs = _.find(membership, { 'roles.name': 'Chairperson', 'dacId': dacId });
         const updatedMembers = _.find(membership, { 'roles.name': 'Member', 'dacId': dacId });
         this.setState(prev => {
@@ -190,9 +201,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     );
   }
 
-  isValidJson = (obj, error) => {
-  };
-
   render() {
     return (
       BaseModal({
@@ -200,7 +208,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           disableOkBtn: this.state.file === '' || this.state.disableOkBtn,
           showModal: this.props.showModal,
           onRequestClose: this.props.onCloseRequest,
-          onAfterOpen: this.afterOpenHandler,
+          onAfterOpen: this.props.onAfterOpen,
           imgSrc: this.state.isEditMode ? '/images/icon_edit_dac.png' : '/images/icon_add_dac.png',
           color: 'common',
           title: this.state.isEditMode ? 'Edit Data Access Committee' : 'Add Data Access Committee',
@@ -277,8 +285,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   id: 'sel_dacChair',
                   isDisabled: false,
                   isMulti: true,
-                  loadOptions: (query, callback) => this.userSearch(query, callback, CHAIR),
+                  loadOptions: (query, callback) => this.chairSearch(query, callback),
                   onChange: (option) => this.onChairSearchChange(option),
+                  noOptionsMessage: () => 'Select a DUOS User...',
                   value: this.state.chairsSelectedOptions,
                   classNamePrefix: 'select',
                   placeholder: 'Select a DUOS User...',
@@ -297,8 +306,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   id: 'sel_dacMember',
                   isDisabled: false,
                   isMulti: true,
-                  loadOptions: (query, callback) => this.userSearch(query, callback, MEMBER),
+                  loadOptions: (query, callback) => this.memberSearch(query, callback),
                   onChange: (option) => this.onMemberSearchChange(option),
+                  noOptionsMessage: () => 'Select a DUOS User...',
                   value: this.state.membersSelectedOptions,
                   classNamePrefix: 'select',
                   placeholder: 'Select a DUOS User...',

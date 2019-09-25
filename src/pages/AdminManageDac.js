@@ -34,13 +34,10 @@ class AdminManageDac extends Component {
     this.addDac = this.addDac.bind(this);
     this.closeAddDacModal = this.closeAddDacModal.bind(this);
     this.okAddDacModal = this.okAddDacModal.bind(this);
-    this.afterAddDacModalOpen = this.afterAddDacModalOpen.bind(this);
 
     this.viewMembers = this.viewMembers.bind(this);
     this.closeViewMembersModal = this.closeViewMembersModal.bind(this);
     this.okViewMembersModal = this.okViewMembersModal.bind(this);
-    this.afterViewMembersModalOpen = this.afterViewMembersModalOpen.bind(this);
-
   }
 
   componentDidMount() {
@@ -89,11 +86,15 @@ class AdminManageDac extends Component {
     });
   }
 
-  closeAddDacModal() {
-    this.getDacs();
+  async closeAddDacModal() {
+    const dacs = await DAC.list();
     this.setState(prev => {
       prev.showDacModal = false;
+      prev.currentPage = 1;
+      prev.dacList = dacs;
       return prev;
+    }, () => {
+      ReactTooltip.rebuild();
     });
   }
 
@@ -102,9 +103,6 @@ class AdminManageDac extends Component {
       prev.showDacModal = false;
       return prev;
     });
-  }
-
-  afterAddDacModalOpen() {
   }
 
   viewMembers(selectedDac) {
@@ -128,9 +126,6 @@ class AdminManageDac extends Component {
       prev.showMembersModal = false;
       return prev;
     });
-  }
-
-  afterViewMembersModalOpen() {
   }
 
   handleSearchDac = (query) => {
@@ -244,7 +239,6 @@ class AdminManageDac extends Component {
             showModal: this.state.showMembersModal,
             onOKRequest: this.okViewMembersModal,
             onCloseRequest: this.closeViewMembersModal,
-            onAfterOpen: this.afterViewMembersModalOpen,
             dac: this.state.selectedDac
           }),
           AddDacModal({
@@ -253,7 +247,6 @@ class AdminManageDac extends Component {
             isEditMode: this.state.isEditMode,
             onOKRequest: this.okAddDacModal,
             onCloseRequest: this.closeAddDacModal,
-            onAfterOpen: this.afterAddDacModalOpen,
             dac: this.state.selectedDac,
           })
         ])
