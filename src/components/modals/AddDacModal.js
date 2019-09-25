@@ -51,19 +51,15 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     Promise.all(
       [
         _.map(this.state.chairIdsToAdd, (id) => {
-          console.log("adding dac chair: " + id);
           return DAC.addDacChair(currentDac.dacId, id);
         }),
         _.map(this.state.chairIdsToRemove, (id) => {
-          console.log("removing dac chair: " + id);
           return DAC.removeDacChair(currentDac.dacId, id);
         }),
         _.map(this.state.memberIdsToAdd, (id) => {
-          console.log("adding dac member: " + id);
           return DAC.addDacMember(currentDac.dacId, id);
         }),
         _.map(this.state.memberIdsToRemove, (id) => {
-          console.log("removing dac member: " + id);
           return DAC.removeDacMember(currentDac.dacId, id);
         })
       ]
@@ -88,12 +84,14 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     //    * minus current chairs
     //    * minus current members (you shouldn't be both a chair and a member)
     //    * minus any new members selected (you shouldn't be both a chair and a member)
+    //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
-    const invalidChairs = _.pull(
+    const invalidChairs = _.difference(
       _.union(
         _.map(this.state.dac.chairpersons, 'dacUserId'),
         _.map(this.state.dac.members, 'dacUserId'),
         this.state.memberIdsToAdd),
+      this.state.memberIdsToRemove,
       this.state.chairIdsToRemove);
     this.userSearch(invalidChairs, query, callback);
   };
@@ -104,19 +102,20 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     //    * minus current chairs (you shouldn't be both a chair and a member)
     //    * minus any new chairs selected (you shouldn't be both a chair and a member)
     //    * plus any members that are slated for removal
-    const invalidMembers = _.pull(
+    //    * plus any chairs that are slated for removal
+    const invalidMembers = _.difference(
       _.union(
         _.map(this.state.dac.members, 'dacUserId'),
         _.map(this.state.dac.chairpersons, 'dacUserId'),
         this.state.chairIdsToAdd),
-      this.state.memberIdsToRemove);
+      this.state.memberIdsToRemove,
+      this.state.chairIdsToRemove);
     this.userSearch(invalidMembers, query, callback);
   };
 
   userSearch(invalidUserIds, query, callback) {
     DAC.autocompleteUsers(query).then(
       items => {
-        console.log("invalidUserIds: " + JSON.stringify(invalidUserIds));
         const filteredUsers = _.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
         const options = filteredUsers.map(function(item) {
           return {
@@ -176,18 +175,14 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   };
 
   removeDacMember(dacId, dacUserId, type) {
-    console.log("calling remove dac member: " + dacUserId);
-    console.log("calling remove dac member: " + type);
     switch (type) {
       case CHAIR:
         if (this.state.chairIdsToRemove.includes(dacUserId)) {
-          // console.log("chairIdsToRemove includes: " + dacUserId);
           this.setState(prev => {
-            prev.chairIdsToRemove = _.pull(prev.chairIdsToRemove, [dacUserId]);
+            prev.chairIdsToRemove = _.difference(prev.chairIdsToRemove, [dacUserId]);
             return prev;
           });
         } else {
-          // console.log("chairIdsToRemove does not include: " + dacUserId);
           this.setState(prev => {
             prev.chairIdsToRemove = _.union(prev.chairIdsToRemove, [dacUserId]);
             return prev;
@@ -196,9 +191,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         break;
       case MEMBER:
         if (this.state.memberIdsToRemove.includes(dacUserId)) {
-          // console.log("memberIdsToRemove includes: " + dacUserId);
           this.setState(prev => {
-            prev.memberIdsToRemove = _.pull(prev.memberIdsToRemove, [dacUserId]);
+            prev.memberIdsToRemove = _.difference(prev.memberIdsToRemove, [dacUserId]);
             return prev;
           });
         } else {
@@ -214,28 +208,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
   }
 
-  async updateMembership(dacId) {
-    await DAC.membership(dacId).then(
-      membership => {
-        const updatedChairs = _.find(membership, { 'roles.name': 'Chairperson', 'dacId': dacId });
-        const updatedMembers = _.find(membership, { 'roles.name': 'Member', 'dacId': dacId });
-        this.setState(prev => {
-          prev.dac.chairpersons = updatedChairs;
-          prev.dac.members = updatedMembers;
-          return prev;
-        });
-      },
-      rejected => {
-        console.error(rejected);
-      }
-    );
-  }
-
   render() {
     return (
       BaseModal({
+          style: { content: { overflowY: 'scroll', } },
           id: 'addDacModal',
-          disableOkBtn: this.state.file === '' || this.state.disableOkBtn,
           showModal: this.props.showModal,
           onRequestClose: this.props.onCloseRequest,
           onAfterOpen: this.props.onAfterOpen,
@@ -259,7 +236,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               label({
                 id: 'lbl_dacName',
                 className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-              }, ['DAC Name*']),
+              }, ['DAC Name']),
               div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
                 input({
                   id: 'txt_dacName',
@@ -289,21 +266,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 })
               ])
             ]),
-
-            div({
-                style: { marginLeft: '6rem' },
-                isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0)
-              },
-              [
-                div({ style: { fontWeight: '500' }, className: 'common-color' }, ['DAC Members']),
-                DacUsers({
-                  style: { marginLeft: '-1rem' },
-                  dac: this.state.dac,
-                  removeButton: true,
-                  removeHandler: this.removeDacMember
-                })
-              ]
-            ),
 
             div({ className: 'form-group' }, [
               label({
@@ -347,6 +309,21 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               ])
             ])
           ]),
+
+          div({
+              style: { marginLeft: '6rem' },
+              isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0)
+            },
+            [
+              div({ style: { fontWeight: '500' }, className: 'common-color' }, ['DAC Members']),
+              DacUsers({
+                style: { marginLeft: '-1rem' },
+                dac: this.state.dac,
+                removeButton: true,
+                removeHandler: this.removeDacMember
+              })
+            ]
+          ),
 
           div({ isRendered: this.state.error.show }, [
             Alert({ id: 'modal', type: 'danger', title: this.state.error.title, description: this.state.error.msg })
