@@ -32,9 +32,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     };
 
     this.OKHandler = this.OKHandler.bind(this);
-    this.userSearch = this.userSearch.bind(this);
     this.chairSearch = this.chairSearch.bind(this);
     this.memberSearch = this.memberSearch.bind(this);
+    this.userSearch = this.userSearch.bind(this);
     this.onChairSearchChange = this.onChairSearchChange.bind(this);
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
     this.removeDacMember = this.removeDacMember.bind(this);
@@ -51,20 +51,24 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     Promise.all(
       [
         _.map(this.state.chairIdsToAdd, (id) => {
+          console.log("adding dac chair: " + id);
           return DAC.addDacChair(currentDac.dacId, id);
         }),
         _.map(this.state.chairIdsToRemove, (id) => {
+          console.log("removing dac chair: " + id);
           return DAC.removeDacChair(currentDac.dacId, id);
         }),
         _.map(this.state.memberIdsToAdd, (id) => {
+          console.log("adding dac member: " + id);
           return DAC.addDacMember(currentDac.dacId, id);
         }),
         _.map(this.state.memberIdsToRemove, (id) => {
+          console.log("removing dac member: " + id);
           return DAC.removeDacMember(currentDac.dacId, id);
         })
       ]
     ).then(() => {
-      this.props.onCloseRequest();
+      this.props.onOKRequest();
     });
   }
 
@@ -78,26 +82,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       return prev;
     });
   };
-
-  userSearch(invalidUserIds, query, callback) {
-    DAC.autocompleteUsers(query).then(
-      items => {
-        console.log("invalidUserIds: " + JSON.stringify(invalidUserIds));
-        const filteredUsers = _.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
-        const options = filteredUsers.map(function(item) {
-          return {
-            key: item.dacUserId,
-            value: item.dacUserId,
-            label: item.displayName + ' (' + item.email + ')',
-            item: item
-          };
-        });
-        callback(options);
-      },
-      rejected => {
-        console.error(rejected);
-      });
-  }
 
   chairSearch(query, callback) {
     // A valid chair is any user:
@@ -128,6 +112,26 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       this.state.memberIdsToRemove);
     this.userSearch(invalidMembers, query, callback);
   };
+
+  userSearch(invalidUserIds, query, callback) {
+    DAC.autocompleteUsers(query).then(
+      items => {
+        console.log("invalidUserIds: " + JSON.stringify(invalidUserIds));
+        const filteredUsers = _.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
+        const options = filteredUsers.map(function(item) {
+          return {
+            key: item.dacUserId,
+            value: item.dacUserId,
+            label: item.displayName + ' (' + item.email + ')',
+            item: item
+          };
+        });
+        callback(options);
+      },
+      rejected => {
+        console.error(rejected);
+      });
+  }
 
   onChairSearchChange(data) {
     this.setState(prev => {
@@ -172,12 +176,38 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   };
 
   removeDacMember(dacId, dacUserId, type) {
+    console.log("calling remove dac member: " + dacUserId);
+    console.log("calling remove dac member: " + type);
     switch (type) {
       case CHAIR:
-        this.state.chairIdsToRemove.push(dacUserId);
+        if (this.state.chairIdsToRemove.includes(dacUserId)) {
+          // console.log("chairIdsToRemove includes: " + dacUserId);
+          this.setState(prev => {
+            prev.chairIdsToRemove = _.pull(prev.chairIdsToRemove, [dacUserId]);
+            return prev;
+          });
+        } else {
+          // console.log("chairIdsToRemove does not include: " + dacUserId);
+          this.setState(prev => {
+            prev.chairIdsToRemove = _.union(prev.chairIdsToRemove, [dacUserId]);
+            return prev;
+          });
+        }
         break;
       case MEMBER:
-        this.state.memberIdsToRemove.push(dacUserId);
+        if (this.state.memberIdsToRemove.includes(dacUserId)) {
+          // console.log("memberIdsToRemove includes: " + dacUserId);
+          this.setState(prev => {
+            prev.memberIdsToRemove = _.pull(prev.memberIdsToRemove, [dacUserId]);
+            return prev;
+          });
+        } else {
+          // console.log("memberIdsToRemove does not include: " + dacUserId);
+          this.setState(prev => {
+            prev.memberIdsToRemove = _.union(prev.memberIdsToRemove, [dacUserId]);
+            return prev;
+          });
+        }
         break;
       default:
         break;

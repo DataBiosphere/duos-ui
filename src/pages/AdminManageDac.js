@@ -40,11 +40,7 @@ class AdminManageDac extends Component {
     this.okViewMembersModal = this.okViewMembersModal.bind(this);
   }
 
-  componentDidMount() {
-    this.getDacs();
-  }
-
-  async getDacs() {
+  async componentDidMount() {
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.currentPage = 1;
@@ -86,21 +82,22 @@ class AdminManageDac extends Component {
     });
   }
 
-  async closeAddDacModal() {
+  async okAddDacModal() {
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
       prev.dacList = dacs;
       return prev;
-    }, () => {
-      ReactTooltip.rebuild();
     });
   }
 
-  async okAddDacModal() {
+  async closeAddDacModal() {
+    const dacs = await DAC.list();
     this.setState(prev => {
       prev.showDacModal = false;
+      prev.currentPage = 1;
+      prev.dacList = dacs;
       return prev;
     });
   }
