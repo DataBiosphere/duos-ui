@@ -4,8 +4,6 @@ import { BaseModal } from '../BaseModal';
 import { DacUsers } from '../DacUsers';
 
 
-const MODAL_ID = 'dacMembers';
-
 export const DacMembersModal = hh(class DacMembersModal extends Component {
 
   constructor(props) {
@@ -15,26 +13,17 @@ export const DacMembersModal = hh(class DacMembersModal extends Component {
     };
   };
 
-  OKHandler = (e) => {
-    this.props.onOKRequest(MODAL_ID);
-  };
-
-  closeHandler = (e) => {
-    this.props.onCloseRequest(MODAL_ID);
-  };
-
   render() {
     return (
       BaseModal({
           id: 'dacMembersModal',
           showModal: this.props.showModal,
-          onRequestClose: this.closeHandler,
-          onAfterOpen: this.afterOpenHandler,
+          onRequestClose: this.props.onCloseRequest,
           color: 'common',
           type: 'informative',
           iconSize: 'none',
           title: 'DAC Members associated with DAC: ' + this.state.dac.name,
-          action: { label: 'Close', handler: this.OKHandler }
+          action: { label: 'Close', handler: this.props.onCloseRequest }
         },
         [
           div({ style: { marginLeft: '2rem' } },

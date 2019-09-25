@@ -19,7 +19,6 @@ class AdminManageDac extends Component {
       currentPage: 1,
       showDacModal: false,
       showMembersModal: false,
-      showDatasetsModal: false,
       value: '',
       limit: limit,
       dacList: [],
@@ -37,7 +36,6 @@ class AdminManageDac extends Component {
 
     this.viewMembers = this.viewMembers.bind(this);
     this.closeViewMembersModal = this.closeViewMembersModal.bind(this);
-    this.okViewMembersModal = this.okViewMembersModal.bind(this);
   }
 
   async componentDidMount() {
@@ -114,13 +112,6 @@ class AdminManageDac extends Component {
     this.setState(prev => {
       prev.showMembersModal = false;
       prev.selectedDac = {};
-      return prev;
-    });
-  }
-
-  async okViewMembersModal() {
-    this.setState(prev => {
-      prev.showMembersModal = false;
       return prev;
     });
   }
@@ -234,7 +225,7 @@ class AdminManageDac extends Component {
           DacMembersModal({
             isRendered: this.state.showMembersModal,
             showModal: this.state.showMembersModal,
-            onOKRequest: this.okViewMembersModal,
+            onOKRequest: this.closeViewMembersModal,
             onCloseRequest: this.closeViewMembersModal,
             dac: this.state.selectedDac
           }),
