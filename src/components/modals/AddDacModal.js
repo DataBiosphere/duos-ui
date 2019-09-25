@@ -7,8 +7,8 @@ import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
 import { DacUsers } from '../DacUsers';
 
-const CHAIR = "chair";
-const MEMBER = "member";
+export const CHAIR = "chair";
+export const MEMBER = "member";
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -22,11 +22,11 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         title: '',
         msg: ['']
       },
-      chairIdsToAdd: [],
       chairsSelectedOptions: [],
+      chairIdsToAdd: [],
       chairIdsToRemove: [],
-      memberIdsToAdd: [],
       membersSelectedOptions: [],
+      memberIdsToAdd: [],
       memberIdsToRemove: [],
     };
 
@@ -35,8 +35,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.userSearch = this.userSearch.bind(this);
     this.onChairSearchChange = this.onChairSearchChange.bind(this);
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
-    this.removeChairperson = this.removeChairperson.bind(this);
-    this.removeMember = this.removeMember.bind(this);
+    this.removeDacMember = this.removeDacMember.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -86,19 +85,19 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   };
 
   userSearch(query, callback, type) {
-    // These ids are the allowable user ids for each selection, e.g., a chair
-    const chairIds = _.pull(_.map(this.state.dac.chairpersons, 'dacUserId'), this.state.chairIdsToRemove);
-    const memberIds = _.pull(_.map(this.state.dac.members, 'dacUserId'), this.state.memberIdsToRemove);
+    // These ids are the allowable selection options, e.g.,
+    //    a selectable chair is any user, minus current chairs, plus any chairs that are slated for removal
+    //    a selectable member is any user, minus current members, plus any members that are slated for removal
+    const ignorableChairIds = _.pull(_.map(this.state.dac.chairpersons, 'dacUserId'), this.state.chairIdsToRemove);
+    const ignorableMemberIds = _.pull(_.map(this.state.dac.members, 'dacUserId'), this.state.memberIdsToRemove);
     DAC.autocompleteUsers(query).then(
       items => {
         const filteredUsers = _.filter(items, item => {
           switch (type) {
             case CHAIR:
-              console.log(!chairIds.includes(item.dacUserId));
-              return !chairIds.includes(item.dacUserId);
+              return !ignorableChairIds.includes(item.dacUserId);
             case MEMBER:
-              console.log(!memberIds.includes(item.dacUserId));
-              return !memberIds.includes(item.dacUserId);
+              return !ignorableMemberIds.includes(item.dacUserId);
             default:
               return true;
           }
@@ -160,13 +159,17 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
   };
 
-  async removeChairperson(dacId, dacUserId) {
-    this.state.memberIdsToRemove.push(dacUserId);
-  }
-
-  // noinspection JSIgnoredPromiseFromCall
-  async removeMember(dacId, dacUserId) {
-    this.state.memberIdsToRemove.push(dacUserId);
+  removeDacMember(dacId, dacUserId, type) {
+    switch (type) {
+      case CHAIR:
+        this.state.chairIdsToRemove.push(dacUserId);
+        break;
+      case MEMBER:
+        this.state.memberIdsToRemove.push(dacUserId);
+        break;
+      default:
+        break;
+    }
   }
 
   async updateMembership(dacId) {
@@ -196,7 +199,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           id: 'addDacModal',
           disableOkBtn: this.state.file === '' || this.state.disableOkBtn,
           showModal: this.props.showModal,
-          onRequestClose: this.closeHandler,
+          onRequestClose: this.props.onCloseRequest,
           onAfterOpen: this.afterOpenHandler,
           imgSrc: this.state.isEditMode ? '/images/icon_edit_dac.png' : '/images/icon_add_dac.png',
           color: 'common',
@@ -259,7 +262,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   style: { marginLeft: '-1rem' },
                   dac: this.state.dac,
                   removeButton: true,
-                  removeHandler: this.removeChairperson
+                  removeHandler: this.removeDacMember
                 })
               ]
             ),
