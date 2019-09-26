@@ -20,7 +20,7 @@ export const DacUsers = hh(class DacUsers extends Component {
   onRemove(dacId, dacUserId, type) {
     if (this.state.removedIds.includes(dacUserId)) {
       this.setState(prev => {
-        prev.removedIds = _.difference(prev.removedIds, dacUserId);
+        prev.removedIds = _.difference(prev.removedIds, [dacUserId]);
         return prev;
       });
     } else {
