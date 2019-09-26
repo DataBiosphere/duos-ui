@@ -6,13 +6,6 @@ import { DacUsers } from '../DacUsers';
 
 export const DacMembersModal = hh(class DacMembersModal extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      dac: this.props.dac
-    };
-  };
-
   render() {
     return (
       BaseModal({
@@ -22,13 +15,13 @@ export const DacMembersModal = hh(class DacMembersModal extends Component {
           color: 'common',
           type: 'informative',
           iconSize: 'none',
-          title: 'DAC Members associated with DAC: ' + this.state.dac.name,
+          title: 'DAC Members associated with DAC: ' + this.props.dac.name,
           action: { label: 'Close', handler: this.props.onCloseRequest }
         },
         [
           div({ style: { marginLeft: '2rem' } },
             [DacUsers({
-              dac: this.state.dac,
+              dac: this.props.dac,
               removeButton: false
             })]
           )

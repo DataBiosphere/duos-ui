@@ -3,6 +3,7 @@ import { Component } from 'react';
 import { div, form, h, hh, input, label, textarea } from 'react-hyperscript-helpers';
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax';
+import { Models } from '../../libs/models';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
 import { DacUsers } from '../DacUsers';
@@ -17,12 +18,9 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     super(props);
     this.state = {
       isEditMode: this.props.isEditMode,
-      dac: this.props.isEditMode ? this.props.dac : { dac: {}, chairpersons: [], members: [] },
-      error: {
-        show: false,
-        title: '',
-        msg: ['']
-      },
+      error: Models.error,
+      dirtyFlag: false,
+      dac: this.props.isEditMode ? this.props.dac : Models.dac,
       chairsSelectedOptions: [],
       chairIdsToAdd: [],
       chairIdsToRemove: [],
@@ -43,29 +41,33 @@ export const AddDacModal = hh(class AddDacModal extends Component {
 
   async OKHandler() {
     let currentDac = this.state.dac;
-    if (this.state.isEditMode) {
-      await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
+    if (this.state.dirtyFlag) {
+      if (this.state.isEditMode) {
+        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
+      } else {
+        await DAC.create(currentDac.name, currentDac.description);
+      }
+      Promise.all(
+        [
+          _.map(this.state.chairIdsToAdd, (id) => {
+            return DAC.addDacChair(currentDac.dacId, id);
+          }),
+          _.map(this.state.chairIdsToRemove, (id) => {
+            return DAC.removeDacChair(currentDac.dacId, id);
+          }),
+          _.map(this.state.memberIdsToAdd, (id) => {
+            return DAC.addDacMember(currentDac.dacId, id);
+          }),
+          _.map(this.state.memberIdsToRemove, (id) => {
+            return DAC.removeDacMember(currentDac.dacId, id);
+          })
+        ]
+      ).then(() => {
+        this.props.onOKRequest();
+      });
     } else {
-      await DAC.create(currentDac.name, currentDac.description);
+      this.props.onCloseRequest();
     }
-    Promise.all(
-      [
-        _.map(this.state.chairIdsToAdd, (id) => {
-          return DAC.addDacChair(currentDac.dacId, id);
-        }),
-        _.map(this.state.chairIdsToRemove, (id) => {
-          return DAC.removeDacChair(currentDac.dacId, id);
-        }),
-        _.map(this.state.memberIdsToAdd, (id) => {
-          return DAC.addDacMember(currentDac.dacId, id);
-        }),
-        _.map(this.state.memberIdsToRemove, (id) => {
-          return DAC.removeDacMember(currentDac.dacId, id);
-        })
-      ]
-    ).then(() => {
-      this.props.onOKRequest();
-    });
   }
 
   handleErrors(message) {
@@ -136,6 +138,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.setState(prev => {
       prev.chairIdsToAdd = _.map(data, 'item.dacUserId');
       prev.chairsSelectedOptions = data;
+      prev.dirtyFlag = true;
       return prev;
     });
   };
@@ -144,6 +147,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.setState(prev => {
       prev.memberIdsToAdd = _.map(data, 'item.dacUserId');
       prev.membersSelectedOptions = data;
+      prev.dirtyFlag = true;
       return prev;
     });
   };
@@ -158,6 +162,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           let newDac = Object.assign({}, prev.dac);
           newDac.name = value;
           prev.dac = newDac;
+          prev.dirtyFlag = true;
           return prev;
         });
         break;
@@ -166,6 +171,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           let newDac = Object.assign({}, prev.dac);
           newDac.description = value;
           prev.dac = newDac;
+          prev.dirtyFlag = true;
           return prev;
         });
         break;
@@ -180,11 +186,13 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         if (this.state.chairIdsToRemove.includes(dacUserId)) {
           this.setState(prev => {
             prev.chairIdsToRemove = _.difference(prev.chairIdsToRemove, [dacUserId]);
+            prev.dirtyFlag = true;
             return prev;
           });
         } else {
           this.setState(prev => {
             prev.chairIdsToRemove = _.union(prev.chairIdsToRemove, [dacUserId]);
+            prev.dirtyFlag = true;
             return prev;
           });
         }
@@ -193,12 +201,14 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         if (this.state.memberIdsToRemove.includes(dacUserId)) {
           this.setState(prev => {
             prev.memberIdsToRemove = _.difference(prev.memberIdsToRemove, [dacUserId]);
+            prev.dirtyFlag = true;
             return prev;
           });
         } else {
           // console.log("memberIdsToRemove does not include: " + dacUserId);
           this.setState(prev => {
             prev.memberIdsToRemove = _.union(prev.memberIdsToRemove, [dacUserId]);
+            prev.dirtyFlag = true;
             return prev;
           });
         }
