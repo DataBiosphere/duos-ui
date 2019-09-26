@@ -37,6 +37,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
     this.removeDacMember = this.removeDacMember.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleErrors = this.handleErrors.bind(this);
   }
 
   async OKHandler() {
@@ -49,21 +50,23 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       }
       Promise.all(
         [
-          _.map(this.state.chairIdsToAdd, (id) => {
-            return DAC.addDacChair(currentDac.dacId, id);
-          }),
           _.map(this.state.chairIdsToRemove, (id) => {
             return DAC.removeDacChair(currentDac.dacId, id);
           }),
-          _.map(this.state.memberIdsToAdd, (id) => {
-            return DAC.addDacMember(currentDac.dacId, id);
-          }),
           _.map(this.state.memberIdsToRemove, (id) => {
             return DAC.removeDacMember(currentDac.dacId, id);
+          }),
+          _.map(this.state.chairIdsToAdd, (id) => {
+            return DAC.addDacChair(currentDac.dacId, id);
+          }),
+          _.map(this.state.memberIdsToAdd, (id) => {
+            return DAC.addDacMember(currentDac.dacId, id);
           })
         ]
       ).then(() => {
         this.props.onOKRequest();
+      }).catch((err) => {
+        this.handleErrors(err);
       });
     } else {
       this.props.onCloseRequest();
@@ -130,7 +133,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         callback(options);
       },
       rejected => {
-        console.error(rejected);
+        this.handleErrors(rejected);
       });
   }
 
@@ -205,7 +208,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
             return prev;
           });
         } else {
-          // console.log("memberIdsToRemove does not include: " + dacUserId);
           this.setState(prev => {
             prev.memberIdsToRemove = _.union(prev.memberIdsToRemove, [dacUserId]);
             prev.dirtyFlag = true;

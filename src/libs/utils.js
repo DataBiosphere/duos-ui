@@ -30,3 +30,7 @@ export const USER_ROLES_UPPER = {
   dataOwner: 'DATAOWNER',
   all: 'ALL'
 };
+
+export const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+};

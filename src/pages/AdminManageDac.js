@@ -7,6 +7,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC } from '../libs/ajax';
+import { sleep } from '../libs/utils';
 
 
 const limit = 10;
@@ -81,6 +82,7 @@ class AdminManageDac extends Component {
   }
 
   async okAddDacModal() {
+    await sleep(500);
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.showDacModal = false;
@@ -91,6 +93,7 @@ class AdminManageDac extends Component {
   }
 
   async closeAddDacModal() {
+    await sleep(500);
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.showDacModal = false;
