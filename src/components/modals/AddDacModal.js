@@ -68,7 +68,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           })
         ]
       ).then(() => {
-        this.props.onOKRequest();
+        this.props.onOKRequest('addDac');
       }).catch((err) => {
         this.handleErrors(err);
       });
@@ -253,6 +253,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
           color: 'common',
           title: this.state.isEditMode ? 'Edit Data Access Committee' : 'Add Data Access Committee',
           description: this.state.isEditMode ? 'Edit a Data Access Committee' : 'Create a new Data Access Committee in the system',
+          disableOkBtn: !this.state.dirtyFlag,
           action: {
             label: this.state.isEditMode ? 'Save' : 'Add',
             handler: this.OKHandler

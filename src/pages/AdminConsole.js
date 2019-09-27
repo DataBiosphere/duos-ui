@@ -306,6 +306,7 @@ class AdminConsole extends Component {
                 }),
                 AddDacModal({
                   showModal: this.state.showAddDacModal,
+                  isEditMode: false,
                   onOKRequest: this.okModal,
                   onCloseRequest: this.closeModal,
                   onAfterOpen: this.afterModalOpen
