@@ -6,9 +6,6 @@ import { CHAIR, MEMBER } from './modals/AddDacModal';
 
 const buttonPadding = { paddingTop: 6 };
 const headerStyle = { fontWeight: 500, color: '#00609f' };
-function columnClass(hasRemoveButton) {
-  return hasRemoveButton ? 'col-md-4' : 'col-md-6';
-}
 
 export const DacUsers = hh(class DacUsers extends Component {
 
@@ -17,10 +14,11 @@ export const DacUsers = hh(class DacUsers extends Component {
     this.state = {
       dac: props.dac,
       removeButton: props.removeButton,
-      removeHandler: props.removeButton ? props.removeHandler : (dacId, dacUserId, type) => {},
+      removeHandler: props.removeButton ? props.removeHandler : () => {},
       removedIds: []
     };
     this.onRemove = this.onRemove.bind(this);
+    this.columnClass = this.columnClass.bind(this);
     this.makeRow = this.makeRow.bind(this);
   }
 
@@ -39,21 +37,25 @@ export const DacUsers = hh(class DacUsers extends Component {
     this.state.removeHandler(dacId, dacUserId, type);
   }
 
+  columnClass() {
+    return this.state.removeButton ? 'col-md-4' : 'col-md-6';
+  }
+
   makeRow(u, type) {
+    const roleTitle = (type === CHAIR) ? 'Chairperson' : 'Member';
     const isRemoved = this.state.removedIds.includes(u.dacUserId);
     const rowStyle = isRemoved ?
       { borderBottom: '1px solid white', padding: '.75rem 0 .75rem 0', backgroundColor: 'lightgray', opacity: .5, borderRadius: 5 } :
       { borderBottom: '1px solid lightgray', padding: '.75rem 0 .75rem 0' }
     ;
-    const colClass = columnClass(this.state.removeButton);
     const buttonMessage = isRemoved ? 'Pending Removal' : 'Remove';
     return div({ key: 'chair_' + u.dacUserId, className: 'row', style: rowStyle }, [
-      div({ className: colClass }, [u.displayName + ' ' + u.email]),
-      div({ className: colClass }, [type]),
+      div({ className: this.columnClass() }, [u.displayName + ' ' + u.email]),
+      div({ className: this.columnClass() }, [roleTitle]),
       div({
         isRendered: this.state.removeButton,
         style: buttonPadding,
-        className: colClass
+        className: this.columnClass()
       }, [
         a({
           style: { display: 'inline' },
@@ -66,15 +68,14 @@ export const DacUsers = hh(class DacUsers extends Component {
   }
 
   render() {
-    const colClass = columnClass(this.state.removeButton);
     return div({ style: {}, className: 'container-fluid' }, [
       div({ className: 'row' }, [
-        div({ style: headerStyle, className: colClass }, 'User'),
-        div({ style: headerStyle, className: colClass }, 'Role'),
+        div({ style: headerStyle, className: this.columnClass() }, 'User'),
+        div({ style: headerStyle, className: this.columnClass() }, 'Role'),
         div({
           isRendered: this.state.removeButton,
           style: { ...headerStyle, ...buttonPadding },
-          className: colClass
+          className: this.columnClass()
         }, '')
       ]),
       _.flatMap(this.state.dac.chairpersons, (u) => { return this.makeRow(u, CHAIR); }),
