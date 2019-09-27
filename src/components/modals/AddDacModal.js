@@ -278,6 +278,25 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               ])
             ]),
 
+            div({
+              isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0),
+              className: 'form-group'
+            }, [
+              label({
+                id: 'lbl_dacMembers',
+                className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+              }, ['DAC Members']),
+              div({
+                className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
+              }, [
+                DacUsers({
+                  dac: this.state.dac,
+                  removeButton: true,
+                  removeHandler: this.removeDacMember
+                })
+              ])
+            ]),
+
             div({ className: 'form-group' }, [
               label({
                 id: 'lbl_dacChair',
@@ -320,21 +339,6 @@ export const AddDacModal = hh(class AddDacModal extends Component {
               ])
             ])
           ]),
-
-          div({
-              style: { marginLeft: '6rem' },
-              isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0)
-            },
-            [
-              div({ style: { fontWeight: '500' }, className: 'common-color' }, ['DAC Members']),
-              DacUsers({
-                style: { marginLeft: '-1rem' },
-                dac: this.state.dac,
-                removeButton: true,
-                removeHandler: this.removeDacMember
-              })
-            ]
-          ),
 
           div({ isRendered: this.state.error.show }, [
             Alert({ id: 'modal', type: 'danger', title: this.state.error.title, description: this.state.error.msg })

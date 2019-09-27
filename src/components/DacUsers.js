@@ -1,8 +1,14 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, hh, table, tbody, td, tr } from 'react-hyperscript-helpers';
+import { a, div, hh } from 'react-hyperscript-helpers';
 import { CHAIR, MEMBER } from './modals/AddDacModal';
 
+
+const buttonPadding = { paddingTop: 6 };
+const headerStyle = { fontWeight: 500, color: '#00609f' };
+function columnClass(hasRemoveButton) {
+  return hasRemoveButton ? 'col-md-4' : 'col-md-6';
+}
 
 export const DacUsers = hh(class DacUsers extends Component {
 
@@ -15,6 +21,7 @@ export const DacUsers = hh(class DacUsers extends Component {
       removedIds: []
     };
     this.onRemove = this.onRemove.bind(this);
+    this.makeRow = this.makeRow.bind(this);
   }
 
   onRemove(dacId, dacUserId, type) {
@@ -32,49 +39,46 @@ export const DacUsers = hh(class DacUsers extends Component {
     this.state.removeHandler(dacId, dacUserId, type);
   }
 
-  render() {
-    const removedStyle = { opacity: '.5' };
-    const col1Style = { width: '60%' };
-    const col2Style = { width: (this.state.removeButton) ? '15%' : '40%' };
-    const col3Style = { width: '25%' };
-
-    return table({ style: { marginLeft: '2rem' }, className: 'table' }, [
-      tbody({}, [
-        _.flatMap(this.state.dac.chairpersons,
-          (u) => {
-            const rowStyle = this.state.removedIds.includes(u.dacUserId) ? removedStyle : {};
-            const buttonMessage = this.state.removedIds.includes(u.dacUserId) ? 'Pending Removal' : 'Remove';
-            return tr({ key: 'chair_' + u.dacUserId, style: rowStyle }, [
-              td({ style: col1Style }, [u.displayName, ' ', u.email]),
-              td({ style: col2Style }, ['Chairperson']),
-              td({ isRendered: this.state.removeButton, style: col3Style }, [
-                a({
-                  style: { display: 'inline' },
-                  role: 'button',
-                  onClick: () => this.onRemove(this.state.dac.dacId, u.dacUserId, CHAIR),
-                  className: 'btn cell-button cancel-color'
-                }, [buttonMessage])
-              ])
-            ]);
-          }),
-        _.flatMap(this.state.dac.members,
-          (u) => {
-            const rowStyle = this.state.removedIds.includes(u.dacUserId) ? removedStyle : {};
-            const buttonMessage = this.state.removedIds.includes(u.dacUserId) ? 'Pending Removal' : 'Remove';
-            return tr({ key: 'member_' + u.dacUserId, style: rowStyle }, [
-              td({ style: col1Style }, [u.displayName, ' ', u.email]),
-              td({ style: col2Style }, ['Member']),
-              td({ isRendered: this.state.removeButton, style: col3Style }, [
-                a({
-                  style: { display: 'inline' },
-                  role: 'button',
-                  onClick: () => this.onRemove(this.state.dac.dacId, u.dacUserId, MEMBER),
-                  className: 'btn cell-button cancel-color'
-                }, [buttonMessage])
-              ])
-            ]);
-          })
+  makeRow(u, type) {
+    const isRemoved = this.state.removedIds.includes(u.dacUserId);
+    const rowStyle = isRemoved ?
+      { borderBottom: '1px solid white', padding: '.75rem 0 .75rem 0', backgroundColor: 'lightgray', opacity: .5, borderRadius: 5 } :
+      { borderBottom: '1px solid lightgray', padding: '.75rem 0 .75rem 0' }
+    ;
+    const colClass = columnClass(this.state.removeButton);
+    const buttonMessage = isRemoved ? 'Pending Removal' : 'Remove';
+    return div({ key: 'chair_' + u.dacUserId, className: 'row', style: rowStyle }, [
+      div({ className: colClass }, [u.displayName + ' ' + u.email]),
+      div({ className: colClass }, [type]),
+      div({
+        isRendered: this.state.removeButton,
+        style: buttonPadding,
+        className: colClass
+      }, [
+        a({
+          style: { display: 'inline' },
+          role: 'button',
+          onClick: () => this.onRemove(this.state.dac.dacId, u.dacUserId, type),
+          className: 'btn cell-button cancel-color'
+        }, [buttonMessage])
       ])
+    ]);
+  }
+
+  render() {
+    const colClass = columnClass(this.state.removeButton);
+    return div({ style: {}, className: 'container-fluid' }, [
+      div({ className: 'row' }, [
+        div({ style: headerStyle, className: colClass }, 'User'),
+        div({ style: headerStyle, className: colClass }, 'Role'),
+        div({
+          isRendered: this.state.removeButton,
+          style: { ...headerStyle, ...buttonPadding },
+          className: colClass
+        }, '')
+      ]),
+      _.flatMap(this.state.dac.chairpersons, (u) => { return this.makeRow(u, CHAIR); }),
+      _.flatMap(this.state.dac.members, (u) => { return this.makeRow(u, MEMBER); })
     ]);
   }
 });

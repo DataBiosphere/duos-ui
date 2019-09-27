@@ -18,14 +18,7 @@ export const DacMembersModal = hh(class DacMembersModal extends Component {
           title: 'DAC Members associated with DAC: ' + this.props.dac.name,
           action: { label: 'Close', handler: this.props.onCloseRequest }
         },
-        [
-          div({ style: { marginLeft: '2rem' } },
-            [DacUsers({
-              dac: this.props.dac,
-              removeButton: false
-            })]
-          )
-        ]
+        [div({}, [DacUsers({ dac: this.props.dac, removeButton: false })])]
       )
     );
   }
