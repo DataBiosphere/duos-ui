@@ -31,6 +31,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     };
 
     this.OKHandler = this.OKHandler.bind(this);
+    this.closeHandler = this.closeHandler.bind(this);
     this.chairSearch = this.chairSearch.bind(this);
     this.memberSearch = this.memberSearch.bind(this);
     this.userSearch = this.userSearch.bind(this);
@@ -72,8 +73,12 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         this.handleErrors(err);
       });
     } else {
-      this.props.onCloseRequest();
+      this.closeHandler();
     }
+  }
+
+  closeHandler() {
+    this.props.onCloseRequest('addDac');
   }
 
   handleErrors(message) {
@@ -242,7 +247,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       BaseModal({
           id: 'addDacModal',
           showModal: this.props.showModal,
-          onRequestClose: this.props.onCloseRequest,
+          onRequestClose: this.closeHandler,
           onAfterOpen: this.props.onAfterOpen,
           imgSrc: this.state.isEditMode ? '/images/icon_edit_dac.png' : '/images/icon_add_dac.png',
           color: 'common',
