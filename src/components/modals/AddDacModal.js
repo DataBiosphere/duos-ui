@@ -26,7 +26,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       chairIdsToRemove: [],
       membersSelectedOptions: [],
       memberIdsToAdd: [],
-      memberIdsToRemove: []
+      memberIdsToRemove: [],
+      searchInputChanged: false,
     };
 
     this.OKHandler = this.OKHandler.bind(this);
@@ -35,6 +36,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     this.userSearch = this.userSearch.bind(this);
     this.onChairSearchChange = this.onChairSearchChange.bind(this);
     this.onMemberSearchChange = this.onMemberSearchChange.bind(this);
+    this.onSearchInputChanged = this.onSearchInputChanged.bind(this);
+    this.onSearchMenuClosed = this.onSearchMenuClosed.bind(this);
     this.removeDacMember = this.removeDacMember.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleErrors = this.handleErrors.bind(this);
@@ -154,6 +157,20 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       return prev;
     });
   };
+
+  onSearchInputChanged() {
+    this.setState(prev => {
+      prev.searchInputChanged = true;
+      return prev;
+    });
+  }
+
+  onSearchMenuClosed() {
+    this.setState(prev => {
+      prev.searchInputChanged = false;
+      return prev;
+    });
+  }
 
   handleChange(event) {
     const target = event.target;
@@ -309,6 +326,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                   isMulti: true,
                   loadOptions: (query, callback) => this.chairSearch(query, callback),
                   onChange: (option) => this.onChairSearchChange(option),
+                  onInputChange: () => this.onSearchInputChanged(),
+                  onMenuClose: () => this.onSearchMenuClosed(),
                   noOptionsMessage: () => 'Select a DUOS User...',
                   value: this.state.chairsSelectedOptions,
                   classNamePrefix: 'select',
@@ -323,13 +342,18 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 id: 'lbl_dacMember',
                 className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
               }, ['Add Member(s)']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              div({
+                // Necessary to minimize the select options scrolling off screen
+                style: this.state.searchInputChanged ? { paddingBottom: '10rem' } : {},
+                className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
                 h(AsyncSelect, {
                   id: 'sel_dacMember',
                   isDisabled: false,
                   isMulti: true,
                   loadOptions: (query, callback) => this.memberSearch(query, callback),
                   onChange: (option) => this.onMemberSearchChange(option),
+                  onInputChange: () => this.onSearchInputChanged(),
+                  onMenuClose: () => this.onSearchMenuClosed(),
                   noOptionsMessage: () => 'Select a DUOS User...',
                   value: this.state.membersSelectedOptions,
                   classNamePrefix: 'select',
