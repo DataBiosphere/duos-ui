@@ -82,6 +82,7 @@ class AdminManageDac extends Component {
   }
 
   async okAddDacModal() {
+    // Necessary due to the delay in adding/removing N users in addition to updating the DAC information.
     await sleep(500);
     const dacs = await DAC.list();
     this.setState(prev => {
@@ -93,7 +94,6 @@ class AdminManageDac extends Component {
   }
 
   async closeAddDacModal() {
-    await sleep(500);
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.showDacModal = false;

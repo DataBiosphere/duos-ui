@@ -49,7 +49,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       if (this.state.isEditMode) {
         await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
       } else {
-        await DAC.create(currentDac.name, currentDac.description);
+        currentDac = await DAC.create(currentDac.name, currentDac.description);
       }
       Promise.all(
         [
