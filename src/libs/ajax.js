@@ -168,6 +168,42 @@ export const DAC = {
     return res.json();
   },
 
+  membership: async (dacId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  autocompleteUsers: async (term) => {
+    const url = `${await Config.getApiUrl()}/dac/users/${term}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  addDacChair: async (dacId, userId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}/chair/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
+    return res.json();
+  },
+
+  removeDacChair: async (dacId, userId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}/chair/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    return res.json();
+  },
+
+  addDacMember: async (dacId, userId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}/member/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
+    return res.json();
+  },
+
+  removeDacMember: async (dacId, userId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}/member/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+    return res.json();
+  },
+
 };
 
 export const DAR = {
