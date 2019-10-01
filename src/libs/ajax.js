@@ -964,9 +964,9 @@ export const User = {
     return res.json();
   },
 
-  registerUser: async user => {
+  registerUser: async () => {
     const url = `${await Config.getApiUrl()}/user`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(""), { method: 'POST' }]));
     return res.json();
   },
 
