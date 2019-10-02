@@ -1,6 +1,7 @@
 import { Component, Fragment } from 'react';
 import { a, b, br, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
+import { Models } from '../libs/models';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
@@ -282,7 +283,7 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      darInfo: DataAccessRequest.instance(),
+      darInfo: Models.dar,
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],

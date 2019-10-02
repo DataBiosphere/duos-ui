@@ -5,13 +5,24 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import * as DataAccessRequest from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { DAR, Files } from '../libs/ajax';
+import { Models } from '../libs/models';
 
 
 class AccessPreview extends Component {
 
   constructor(props) {
     super(props);
-    this.state = this.initialState();
+    this.state = {
+      hasUseRestriction: false,
+      hasLibraryCard: false,
+      consentName: '',
+      isQ1Expanded: true,
+      isQ2Expanded: false,
+      consent: {
+        translatedUseRestriction: ''
+      },
+      darInfo: Models.dar,
+    };
   }
 
   componentDidMount() {
@@ -75,7 +86,7 @@ class AccessPreview extends Component {
       consent: {
         translatedUseRestriction: ''
       },
-      darInfo: DataAccessRequest.instance()
+      darInfo: Models.dar
     };
   }
 

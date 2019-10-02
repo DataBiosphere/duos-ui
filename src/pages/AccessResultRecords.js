@@ -1,5 +1,6 @@
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
+import { Models } from '../libs/models';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
@@ -47,7 +48,7 @@ class AccessResultRecords extends Component {
       },
       voteAgreement: {
       },
-      darInfo: DataAccessRequest.instance(),
+      darInfo: Models.dar,
       consentName: '',
     };
   }

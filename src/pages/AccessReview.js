@@ -1,5 +1,6 @@
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
+import { Models } from '../libs/models';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -217,7 +218,7 @@ class AccessReview extends Component {
       alertVote: false,
       alertRPVote: false,
 
-      darInfo: DataAccessRequest.instance(),
+      darInfo: Models.dar,
       voteId: null,
       rpVoteId: null
     };

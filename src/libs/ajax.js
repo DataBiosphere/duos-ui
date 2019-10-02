@@ -1,9 +1,11 @@
+import fileDownload from 'js-file-download';
 import _ from 'lodash/fp';
+import map from 'lodash/map';
+import { Models } from './models';
 import * as DataAccessRequest from '../components/DataAccessRequest';
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
-import fileDownload from 'js-file-download';
 
 
 const dataTemplate = {
@@ -212,40 +214,41 @@ export const DAR = {
 
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
-    const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
-    const summaryDar = await summaryDarRes.json();
     const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
     const rawDar = await rawDarRes.json();
 
-    let darInfo = DataAccessRequest.instance();
+    const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
+    const summaryDar = await summaryDarRes.json();
+
+    let darInfo = Models.dar;
     darInfo.translatedUseRestriction = rawDar.translatedUseRestriction;
-    if (rawDar.datasets.length > 0) {
+    if (!_.isEmpty(rawDar.datasets)) {
       rawDar.datasets.forEach(d =>
         d.alias = DataAccessRequest.aliasDatasetId(d.key));
       darInfo.datasets = rawDar.datasets;
     } else {
       darInfo.datasets = [];
     }
-    darInfo.researcherId = summaryDar.userId;
-    darInfo.status = summaryDar.status;
-    darInfo.hasAdminComment = summaryDar.rationale != null;
-    darInfo.adminComment = summaryDar.rationale;
+    darInfo.researcherId = rawDar.userId;
+    darInfo.status = summaryDar.status; // TODO: Should come from the researcher
+    darInfo.hasAdminComment = summaryDar.rationale != null; // TODO: Should come from the researcher
+    darInfo.adminComment = summaryDar.rationale; // TODO: Should come from the researcher
     darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
-    darInfo.darCode = summaryDar.darCode;
-    darInfo.projectTitle = summaryDar.projectTitle;
+    darInfo.darCode = rawDar.dar_code;
+    darInfo.projectTitle = rawDar.projectTitle;
     if (darInfo.hasPurposeStatements) {
       darInfo.purposeStatements = summaryDar.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
     } else {
       darInfo.purposeStatements = [];
     }
-    darInfo.hasDiseases = summaryDar.diseases.length > 0;
-    darInfo.diseases = darInfo.hasDiseases ? summaryDar.diseases : [];
+    darInfo.hasDiseases = !_.isEmpty(rawDar.ontologies);
+    darInfo.diseases = map(rawDar.ontologies, 'label');
     if (summaryDar.researchType.length > 0) {
       darInfo.researchType = summaryDar.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
-    if (summaryDar.datasetDetail !== null) {
+    if (!_.isEmpty(summaryDar.datasetDetail)) {
       for(var prop in summaryDar.datasetDetail) {
         darInfo.datasetId = summaryDar.datasetDetail[prop];
         darInfo.datasetName = prop;
@@ -255,10 +258,10 @@ export const DAR = {
     darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
     darInfo.havePI = researcherProperties.havePI === 'true' || researcherProperties.isThePI === 'true';
     darInfo.profileName = researcherProperties.profileName;
-    darInfo.institution = researcherProperties.institution;
-    darInfo.department = researcherProperties.department;
-    darInfo.city = researcherProperties.city;
-    darInfo.country = researcherProperties.country;
+    darInfo.institution = rawDar.institution;
+    darInfo.department = rawDar.department;
+    darInfo.city = rawDar.city;
+    darInfo.country = rawDar.country;
     return darInfo;
   },
 

@@ -12,37 +12,6 @@ const style = {
 
 const pipe = ' | ';
 
-export const instance = () => {
-  return {
-    translatedUseRestriction: '',
-    researcherId: '',
-    status: '',
-    hasAdminComment: false,
-    adminComment: '',
-    hasPurposeStatements: false,
-    darCode: '',
-    projectTitle: '',
-    purposeStatements: [],
-    hasDiseases: false,
-    diseases: [],
-    researchType: [],
-    researchTypeManualReview: '',
-    pi: '',
-    havePI: false,
-    profileName: '',
-    institution: '',
-    department: '',
-    city: '',
-    country: '',
-    datasets: [],
-
-    // Deprecated
-    datasetId: '',
-    datasetName: '',
-  };
-
-};
-
 export const details = (props) => {
   const isPopulated =
     props.projectTitle.length > 0 &&
@@ -52,7 +21,7 @@ export const details = (props) => {
     props.consentName.length > 0;
   return (
     div({ style: style }, [
-      div ({isRendered: isPopulated, }, [
+      div({ isRendered: isPopulated }, [
         span([props.projectTitle, pipe]),
         span({}, [props.darCode]),
         div({}, [
