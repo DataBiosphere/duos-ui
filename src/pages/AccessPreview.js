@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h4, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
@@ -111,7 +112,7 @@ class AccessPreview extends Component {
               color: 'access', title: 'Data Access Congruence Preview'
             }),
             DataAccessRequest({
-              // isRendered: !_.isEmpty(this.state.darInfo.datasets),
+              isRendered: !_.isEmpty(this.state.darInfo.datasets),
               dar: this.state.darInfo,
               consentName: this.state.consentName
             })
