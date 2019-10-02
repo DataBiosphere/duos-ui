@@ -21,6 +21,7 @@ export const Models = {
     department: '',
     city: '',
     country: '',
+    datasetDetail: [],
     datasets: [],
 
     // Deprecated

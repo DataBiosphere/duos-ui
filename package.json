@@ -11,7 +11,7 @@
     "inquirer": "6.5.0",
     "jquery": "3.4.0",
     "js-file-download": "0.4.8",
-    "lodash": "4.17.14",
+    "lodash": "4.17.15",
     "mixin-deep": "2.0.1",
     "popper.js": "1.14.4",
     "query-string": "6.2.0",

@@ -1,13 +1,14 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Models } from '../libs/models';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
-import * as DataAccessRequest from '../components/DataAccessRequest';
+import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
-import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
+import { DAR, DataSet, Election, Files, Match, Votes } from '../libs/ajax';
 
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
@@ -49,6 +50,7 @@ class AccessResultRecords extends Component {
       voteAgreement: {
       },
       darInfo: Models.dar,
+      datasets: [],
       consentName: '',
     };
   }
@@ -154,12 +156,10 @@ class AccessResultRecords extends Component {
             PageHeading({
               id: "recordAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Data Access - Results Record"}),
-            DataAccessRequest.details({
-              datasets: this.state.darInfo.datasets,
-              projectTitle: this.state.darInfo.projectTitle,
-              darCode: this.state.darInfo.darCode,
-              datasetId: this.state.darInfo.datasetId,
-              datasetName: this.state.darInfo.datasetName,
+            DataAccessRequest({
+              isRendered: (!_.isEmpty(this.state.darInfo) && !_.isEmpty(this.state.datasets)),
+              dar: this.state.darInfo,
+              datasets: this.state.datasets,
               consentName: this.state.consentName
             })
           ]),
@@ -632,8 +632,20 @@ class AccessResultRecords extends Component {
 
     DAR.describeDar(referenceId).then(
       darInfo => {
-        this.setState({
-          darInfo: darInfo,
+        if (!_.isEmpty(darInfo.datasetDetail)) {
+          _.map(darInfo.datasetDetail, async (detail) => {
+            DataSet.getDataSetsByDatasetId(detail.datasetId).then(
+              d => {
+                this.setState(prev => {
+                  prev.datasets = _.union(prev.datasets, [d]);
+                  return prev;
+                });
+              });
+          });
+        }
+        this.setState(prev => {
+          prev.darInfo = darInfo;
+          return prev;
         });
       }
     );

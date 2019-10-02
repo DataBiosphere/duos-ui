@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { a, b, br, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
@@ -6,11 +7,11 @@ import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import * as DataAccessRequest from '../components/DataAccessRequest';
+import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
+import { DAR, DataSet, Election, Files, Match, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
@@ -37,6 +38,7 @@ class FinalAccessReview extends Component {
         finalVote: null
       },
       darInfo: {},
+      datasets: [],
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],
@@ -59,6 +61,12 @@ class FinalAccessReview extends Component {
   async loadData() {
     const hasUseRestrictionResp = await DAR.hasUseRestriction(this.state.referenceId);
     const darInfo = await DAR.describeDar(this.state.referenceId);
+    let datasets = [];
+    if (!_.isEmpty(darInfo.datasetDetail)) {
+      _.map(darInfo.datasetDetail, async (detail) => {
+        datasets = await DataSet.getDataSetsByDatasetId(detail.datasetId);
+      });
+    }
 
     this.setState({
       path: 'final-access-review',
@@ -70,7 +78,8 @@ class FinalAccessReview extends Component {
       alertOn: null,
       alertsDAR: [],
       alertsAgree: [],
-      darInfo: darInfo
+      darInfo: darInfo,
+      datasets: datasets
     }, () => {
       this.init();
     });
@@ -565,12 +574,10 @@ class FinalAccessReview extends Component {
             PageHeading({
               id: "finalAccess", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Final voting for Data Access Review"}),
-            DataAccessRequest.details({
-              datasets: this.state.darInfo.datasets,
-              projectTitle: this.state.darInfo.projectTitle,
-              darCode: this.state.darInfo.darCode,
-              datasetId: this.state.darInfo.datasetId,
-              datasetName: this.state.darInfo.datasetName,
+            DataAccessRequest({
+              isRendered: (!_.isEmpty(this.state.darInfo) && !_.isEmpty(this.state.datasets)),
+              dar: this.state.darInfo,
+              datasets: this.state.datasets,
               consentName: this.state.consentName
             })
           ]),

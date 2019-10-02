@@ -1,10 +1,11 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h4, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import * as DataAccessRequest from '../components/DataAccessRequest';
+import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, Files } from '../libs/ajax';
+import { DAR, DataSet, Files } from '../libs/ajax';
 import { Models } from '../libs/models';
 
 
@@ -22,6 +23,7 @@ class AccessPreview extends Component {
         translatedUseRestriction: ''
       },
       darInfo: Models.dar,
+      datasets: []
     };
   }
 
@@ -68,27 +70,27 @@ class AccessPreview extends Component {
       }
     );
 
-    const darInfo = await DAR.describeDar(referenceId);
-    this.setState(prev => {
-      prev.darInfo = darInfo;
-      return prev;
-    });
+    DAR.describeDar(referenceId).then(
+      darInfo => {
+        if (!_.isEmpty(darInfo.datasetDetail)) {
+          _.map(darInfo.datasetDetail, async (detail) => {
+            DataSet.getDataSetsByDatasetId(detail.datasetId).then(
+              d => {
+                this.setState(prev => {
+                  prev.datasets = _.union(prev.datasets, [d]);
+                  return prev;
+                });
+              });
+          });
+        }
+        this.setState(prev => {
+          prev.darInfo = darInfo;
+          return prev;
+        });
+      }
+    );
 
   };
-
-  initialState() {
-    return {
-      hasUseRestriction: false,
-      hasLibraryCard: false,
-      consentName: '',
-      isQ1Expanded: true,
-      isQ2Expanded: false,
-      consent: {
-        translatedUseRestriction: ''
-      },
-      darInfo: Models.dar
-    };
-  }
 
   downloadDAR = () => {
     Files.getDARFile(this.props.match.params.referenceId);
@@ -121,12 +123,10 @@ class AccessPreview extends Component {
               id: 'previewAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
               color: 'access', title: 'Data Access Congruence Preview'
             }),
-            DataAccessRequest.details({
-              datasets: this.state.darInfo.datasets,
-              projectTitle: this.state.darInfo.projectTitle,
-              darCode: this.state.darInfo.darCode,
-              datasetId: this.state.darInfo.datasetId,
-              datasetName: this.state.darInfo.datasetName,
+            DataAccessRequest({
+              isRendered: (!_.isEmpty(this.state.darInfo) && !_.isEmpty(this.state.datasets)),
+              dar: this.state.darInfo,
+              datasets: this.state.datasets,
               consentName: this.state.consentName
             })
           ]),

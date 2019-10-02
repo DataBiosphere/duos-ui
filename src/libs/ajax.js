@@ -2,7 +2,6 @@ import fileDownload from 'js-file-download';
 import _ from 'lodash/fp';
 import map from 'lodash/map';
 import { Models } from './models';
-import * as DataAccessRequest from '../components/DataAccessRequest';
 import { Config } from './config';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
@@ -222,13 +221,7 @@ export const DAR = {
 
     let darInfo = Models.dar;
     darInfo.translatedUseRestriction = rawDar.translatedUseRestriction;
-    if (!_.isEmpty(rawDar.datasets)) {
-      rawDar.datasets.forEach(d =>
-        d.alias = DataAccessRequest.aliasDatasetId(d.key));
-      darInfo.datasets = rawDar.datasets;
-    } else {
-      darInfo.datasets = [];
-    }
+    darInfo.datasetDetail = rawDar.datasetDetail;
     darInfo.researcherId = rawDar.userId;
     darInfo.status = summaryDar.status; // TODO: Should come from the researcher
     darInfo.hasAdminComment = summaryDar.rationale != null; // TODO: Should come from the researcher

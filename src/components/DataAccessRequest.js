@@ -1,4 +1,6 @@
-import { div, span } from 'react-hyperscript-helpers';
+import _ from 'lodash';
+import { Component } from 'react';
+import { div, hh, span } from 'react-hyperscript-helpers';
 
 
 const style = {
@@ -11,6 +13,39 @@ const style = {
 };
 
 const pipe = ' | ';
+
+export const DataAccessRequest = hh(class DataAccessRequest extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      dar: props.dar,
+      datasets: props.datasets,
+      consentName: props.consentName
+    };
+  };
+
+  render() {
+    const aliases = _.join(_.map(this.state.datasets, 'alias'), ', ');
+    const properties = _.flatMap(this.state.datasets, 'properties');
+    const filtered = _.filter(properties, {'propertyName': 'Dataset Name'});
+    const mapped = _.map(filtered, 'propertyValue');
+    const joined = _.join(mapped, ', ');
+    return (
+      div({ style: style }, [
+        div({}, [
+          span([this.state.dar.projectTitle, pipe]),
+          span({}, [this.state.dar.darCode]),
+          div({}, [
+            span([aliases, pipe]),
+            span([joined, pipe]),
+            span({}, [this.state.consentName])
+          ])
+        ])
+      ])
+    );
+  }
+});
 
 export const details = (props) => {
   const isPopulated =

@@ -1,13 +1,14 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Models } from '../libs/models';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import * as DataAccessRequest from '../components/DataAccessRequest';
+import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { DAR, Election, Files, Votes } from '../libs/ajax';
+import { DAR, DataSet, Election, Files, Votes } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
 
@@ -141,6 +142,12 @@ class AccessReview extends Component {
     const election = await Election.findElectionByDarId(darId);
     const vote = await Votes.getDarVote(darId, voteId);
     const darInfo = await DAR.describeDar(darId);
+    let datasets = [];
+    if (!_.isEmpty(darInfo.datasetDetail)) {
+      _.map(darInfo.datasetDetail, async (detail) => {
+        datasets = await DataSet.getDataSetsByDatasetId(detail.datasetId);
+      });
+    }
 
     let rpVote, rpVoteId;
 
@@ -156,6 +163,7 @@ class AccessReview extends Component {
       prev.consentName = consent.name;
       prev.consentId = consent.consentId;
       prev.darInfo = darInfo;
+      prev.datasets = datasets;
       prev.darInfo.sDar = election.translatedUseRestriction;
       prev.election = election;
       prev.rpVote = rpVote;
@@ -255,12 +263,10 @@ class AccessReview extends Component {
             PageHeading({
               id: "accessReview", imgSrc: "/images/icon_access.png", iconSize: "medium",
               color: "access", title: "Data Access Congruence Review"}),
-            DataAccessRequest.details({
-              datasets: this.state.darInfo.datasets,
-              projectTitle: this.state.darInfo.projectTitle,
-              darCode: this.state.darInfo.darCode,
-              datasetId: this.state.darInfo.datasetId,
-              datasetName: this.state.darInfo.datasetName,
+            DataAccessRequest({
+              isRendered: (!_.isEmpty(this.state.darInfo) && !_.isEmpty(this.state.datasets)),
+              dar: this.state.darInfo,
+              datasets: this.state.datasets,
               consentName: this.state.consentName
             })
           ]),
