@@ -20,15 +20,14 @@ export const DataAccessRequest = hh(class DataAccessRequest extends Component {
     super(props);
     this.state = {
       dar: props.dar,
-      datasets: props.datasets,
       consentName: props.consentName
     };
   };
 
   render() {
-    const aliases = _.join(_.map(this.state.datasets, 'alias'), ', ');
-    const properties = _.flatMap(this.state.datasets, 'properties');
-    const filtered = _.filter(properties, {'propertyName': 'Dataset Name'});
+    const aliases = _.join(_.map(this.state.dar.datasets, 'alias'), ', ');
+    const properties = _.flatMap(this.state.dar.datasets, 'properties');
+    const filtered = _.filter(properties, { 'propertyName': 'Dataset Name' });
     const mapped = _.map(filtered, 'propertyValue');
     const joined = _.join(mapped, ', ');
     return (
@@ -46,46 +45,3 @@ export const DataAccessRequest = hh(class DataAccessRequest extends Component {
     );
   }
 });
-
-export const details = (props) => {
-  const isPopulated =
-    props.projectTitle.length > 0 &&
-    props.darCode.length > 0 &&
-    props.datasetId.length > 0 &&
-    props.datasetName.length > 0 &&
-    props.consentName.length > 0;
-  return (
-    div({ style: style }, [
-      div({ isRendered: isPopulated }, [
-        span([props.projectTitle, pipe]),
-        span({}, [props.darCode]),
-        div({}, [
-          span([props.datasetId, pipe]),
-          span([props.datasetName, pipe]),
-          span({}, [props.consentName])
-        ])
-      ])
-    ])
-  );
-};
-
-export const aliasDatasetId = (datasetId) => {
-  const prefix = 'DUOS-';
-  const i = parseInt(datasetId);
-  if (i < 10) {
-    return prefix + '00000' + i;
-  }
-  if (i < 100) {
-    return prefix + '0000' + i;
-  }
-  if (i < 1000) {
-    return prefix + '000' + i;
-  }
-  if (i < 10000) {
-    return prefix + '00' + i;
-  }
-  if (i < 100000) {
-    return prefix + '0' + i;
-  }
-  return datasetId;
-};

@@ -1,8 +1,8 @@
 import fileDownload from 'js-file-download';
 import _ from 'lodash/fp';
 import map from 'lodash/map';
-import { Models } from './models';
 import { Config } from './config';
+import { Models } from './models';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
 
@@ -223,9 +223,9 @@ export const DAR = {
     darInfo.translatedUseRestriction = rawDar.translatedUseRestriction;
     darInfo.datasetDetail = rawDar.datasetDetail;
     darInfo.researcherId = rawDar.userId;
-    darInfo.status = summaryDar.status; // TODO: Should come from the researcher
-    darInfo.hasAdminComment = summaryDar.rationale != null; // TODO: Should come from the researcher
-    darInfo.adminComment = summaryDar.rationale; // TODO: Should come from the researcher
+    darInfo.status = summaryDar.status;
+    darInfo.hasAdminComment = summaryDar.rationale != null;
+    darInfo.adminComment = summaryDar.rationale;
     darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
     darInfo.darCode = rawDar.dar_code;
     darInfo.projectTitle = rawDar.projectTitle;
@@ -255,6 +255,14 @@ export const DAR = {
     darInfo.department = rawDar.department;
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
+    await Promise.all(
+      darInfo.datasetDetail.map(async d => {
+        return await DataSet.getDataSetsByDatasetId(d.datasetId);
+      })
+    ).then( data => {
+      darInfo.datasets.push(data);
+    });
+    darInfo.datasets = darInfo.datasets.flat();
     return darInfo;
   },
 

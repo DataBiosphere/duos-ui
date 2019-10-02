@@ -1,11 +1,10 @@
-import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { a, b, button, div, h, h4, i, label, li, span, ul } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, DataSet, Files } from '../libs/ajax';
+import { DAR, Files } from '../libs/ajax';
 import { Models } from '../libs/models';
 
 
@@ -22,8 +21,7 @@ class AccessPreview extends Component {
       consent: {
         translatedUseRestriction: ''
       },
-      darInfo: Models.dar,
-      datasets: []
+      darInfo: Models.dar
     };
   }
 
@@ -72,17 +70,6 @@ class AccessPreview extends Component {
 
     DAR.describeDar(referenceId).then(
       darInfo => {
-        if (!_.isEmpty(darInfo.datasetDetail)) {
-          _.map(darInfo.datasetDetail, async (detail) => {
-            DataSet.getDataSetsByDatasetId(detail.datasetId).then(
-              d => {
-                this.setState(prev => {
-                  prev.datasets = _.union(prev.datasets, [d]);
-                  return prev;
-                });
-              });
-          });
-        }
         this.setState(prev => {
           prev.darInfo = darInfo;
           return prev;
@@ -124,9 +111,8 @@ class AccessPreview extends Component {
               color: 'access', title: 'Data Access Congruence Preview'
             }),
             DataAccessRequest({
-              isRendered: (!_.isEmpty(this.state.darInfo) && !_.isEmpty(this.state.datasets)),
+              // isRendered: !_.isEmpty(this.state.darInfo.datasets),
               dar: this.state.darInfo,
-              datasets: this.state.datasets,
               consentName: this.state.consentName
             })
           ]),
