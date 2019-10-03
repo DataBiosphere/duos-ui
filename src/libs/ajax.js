@@ -216,30 +216,29 @@ export const DAR = {
 
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
-    const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
-    const rawDar = await rawDarRes.json();
-
     const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
     const summaryDar = await summaryDarRes.json();
 
     let darInfo = Models.dar;
-    darInfo.translatedUseRestriction = rawDar.translatedUseRestriction;
-    darInfo.datasetDetail = rawDar.datasetDetail;
-    darInfo.researcherId = rawDar.userId;
+    darInfo.hasDiseases = !_.isEmpty(summaryDar.diseases);
+    darInfo.diseases = summaryDar.diseases;
+    darInfo.researcherId = summaryDar.userId;
+    darInfo.darCode = summaryDar.darCode;
+    darInfo.projectTitle = summaryDar.projectTitle;
+    darInfo.institution = summaryDar.institutionName;
+    darInfo.department = summaryDar.department;
+    darInfo.city = summaryDar.city;
+    darInfo.country = summaryDar.country;
     darInfo.status = summaryDar.status;
     darInfo.hasAdminComment = summaryDar.rationale != null;
     darInfo.adminComment = summaryDar.rationale;
     darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
-    darInfo.darCode = rawDar.dar_code;
-    darInfo.projectTitle = rawDar.projectTitle;
     if (darInfo.hasPurposeStatements) {
       darInfo.purposeStatements = summaryDar.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
     } else {
       darInfo.purposeStatements = [];
     }
-    darInfo.hasDiseases = !_.isEmpty(rawDar.ontologies);
-    darInfo.diseases = map(rawDar.ontologies, 'label');
     if (summaryDar.researchType.length > 0) {
       darInfo.researchType = summaryDar.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
@@ -259,10 +258,6 @@ export const DAR = {
     darInfo.pi = isThePI ? profileName : piName;
     darInfo.havePI = havePI || isThePI;
     darInfo.profileName = profileName;
-    darInfo.institution = rawDar.institution;
-    darInfo.department = rawDar.department;
-    darInfo.city = rawDar.city;
-    darInfo.country = rawDar.country;
     return darInfo;
   },
 

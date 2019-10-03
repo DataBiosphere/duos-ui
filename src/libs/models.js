@@ -1,7 +1,6 @@
 export const Models = {
   dac: { dac: {}, chairpersons: [], members: [] },
   dar: {
-    translatedUseRestriction: '',
     researcherProperties: [],
     researcherId: '',
     status: '',
@@ -22,12 +21,7 @@ export const Models = {
     department: '',
     city: '',
     country: '',
-    datasetDetail: [],
-    datasets: [],
-
-    // Deprecated
-    datasetId: '',
-    datasetName: ''
+    datasets: []
   },
   error: { show: false, title: '', msg: [''] }
 };
