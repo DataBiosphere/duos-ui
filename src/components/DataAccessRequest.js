@@ -2,23 +2,24 @@ import _ from 'lodash';
 import { Component } from 'react';
 import { div, hh, span } from 'react-hyperscript-helpers';
 
+
 const parseAlias = (alias) => {
-  const prefix = "DUOS-";
+  const prefix = 'DUOS-';
   const aliasInt = parseInt(alias);
   if (aliasInt < 10) {
-    return prefix + "00000" + alias;
+    return prefix + '00000' + alias;
   }
   if (aliasInt < 100) {
-    return prefix + "0000" + alias;
+    return prefix + '0000' + alias;
   }
   if (aliasInt < 1000) {
-    return prefix + "000" + alias;
+    return prefix + '000' + alias;
   }
   if (aliasInt < 10000) {
-    return prefix + "00" + alias;
+    return prefix + '00' + alias;
   }
   if (aliasInt < 100000) {
-    return prefix + "0" + alias;
+    return prefix + '0' + alias;
   }
   return prefix + alias;
 };
