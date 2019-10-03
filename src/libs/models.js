@@ -3,6 +3,7 @@ export const Models = {
   dar: {
     researcherProperties: [],
     researcherId: '',
+    rus: '',
     status: '',
     hasAdminComment: false,
     adminComment: '',

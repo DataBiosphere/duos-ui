@@ -3,7 +3,6 @@ import _ from 'lodash/fp';
 import get from 'lodash/get';
 import head from 'lodash/head';
 import filter from 'lodash/filter';
-import map from 'lodash/map';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
@@ -222,6 +221,7 @@ export const DAR = {
     let darInfo = Models.dar;
     darInfo.hasDiseases = !_.isEmpty(summaryDar.diseases);
     darInfo.diseases = summaryDar.diseases;
+    darInfo.rus = summaryDar.rus;
     darInfo.researcherId = summaryDar.userId;
     darInfo.darCode = summaryDar.darCode;
     darInfo.projectTitle = summaryDar.projectTitle;
@@ -244,12 +244,6 @@ export const DAR = {
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
     darInfo.datasets = summaryDar.datasets;
-    if (!_.isEmpty(summaryDar.datasetDetail)) {
-      for(var prop in summaryDar.datasetDetail) {
-        darInfo.datasetId = summaryDar.datasetDetail[prop];
-        darInfo.datasetName = prop;
-      }
-    }
     darInfo.researcherProperties = summaryDar.researcherProperties;
     const isThePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
     const havePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
