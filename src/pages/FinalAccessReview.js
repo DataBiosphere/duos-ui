@@ -37,7 +37,7 @@ class FinalAccessReview extends Component {
       electionAccess: {
         finalVote: null
       },
-      darInfo: {},
+      darInfo: Models.dar,
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],
