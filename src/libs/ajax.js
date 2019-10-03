@@ -1,5 +1,8 @@
 import fileDownload from 'js-file-download';
-import _ from 'lodash';
+import _ from 'lodash/fp';
+import get from 'lodash/get';
+import head from 'lodash/head';
+import filter from 'lodash/filter';
 import map from 'lodash/map';
 import { Config } from './config';
 import { Models } from './models';
@@ -249,10 +252,10 @@ export const DAR = {
       }
     }
     darInfo.researcherProperties = summaryDar.researcherProperties;
-    const isThePI = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
-    const havePI = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
-    const profileName = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'profileName'})), 'propertyValue', "");
-    const piName = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'piName'})), 'propertyValue', "");
+    const isThePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
+    const havePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
+    const profileName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'profileName'})), 'propertyValue', "");
+    const piName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'piName'})), 'propertyValue', "");
     darInfo.pi = isThePI ? profileName : piName;
     darInfo.havePI = havePI || isThePI;
     darInfo.profileName = profileName;
