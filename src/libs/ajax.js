@@ -1,5 +1,5 @@
 import fileDownload from 'js-file-download';
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import map from 'lodash/map';
 import { Config } from './config';
 import { Models } from './models';
@@ -241,28 +241,25 @@ export const DAR = {
       darInfo.researchType = summaryDar.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
+    darInfo.datasets = summaryDar.datasets;
     if (!_.isEmpty(summaryDar.datasetDetail)) {
       for(var prop in summaryDar.datasetDetail) {
         darInfo.datasetId = summaryDar.datasetDetail[prop];
         darInfo.datasetName = prop;
       }
     }
-    let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
-    darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
-    darInfo.havePI = researcherProperties.havePI === 'true' || researcherProperties.isThePI === 'true';
-    darInfo.profileName = researcherProperties.profileName;
+    darInfo.researcherProperties = summaryDar.researcherProperties;
+    const isThePI = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
+    const havePI = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
+    const profileName = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'profileName'})), 'propertyValue', "");
+    const piName = _.get(_.head(_.filter(darInfo.researcherProperties, {'propertyKey': 'piName'})), 'propertyValue', "");
+    darInfo.pi = isThePI ? profileName : piName;
+    darInfo.havePI = havePI || isThePI;
+    darInfo.profileName = profileName;
     darInfo.institution = rawDar.institution;
     darInfo.department = rawDar.department;
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
-    await Promise.all(
-      darInfo.datasetDetail.map(async d => {
-        return await DataSet.getDataSetsByDatasetId(d.datasetId);
-      })
-    ).then( data => {
-      darInfo.datasets.push(data);
-    });
-    darInfo.datasets = darInfo.datasets.flat();
     return darInfo;
   },
 

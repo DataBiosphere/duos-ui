@@ -2,6 +2,7 @@ export const Models = {
   dac: { dac: {}, chairpersons: [], members: [] },
   dar: {
     translatedUseRestriction: '',
+    researcherProperties: [],
     researcherId: '',
     status: '',
     hasAdminComment: false,
