@@ -44,20 +44,32 @@ class HomeRegister extends Component {
         this.props.history.push('/profile');
       },
       error => {
-        if (error.status === 409) {
-          this.setState(prev => {
-            prev.error = { show: true, title: 'Conflict', msg: ['This user exists'] };
-            return prev;
-          });
-          this.getUser().then(
-            user => {
-              user = Object.assign(user, this.setRoles(user));
-              this.setStorage(user);
-              this.redirect(user);
-            },
-            error => {
-              Storage.clearStorage();
+        const status = error.status;
+        switch (status) {
+          case 400:
+            this.setState(prev => {
+              prev.error = { show: true, title: 'Error', msg: JSON.stringify(error) };
+              return prev;
             });
+            break;
+          case 409:
+            // If the user exists, just log them in.
+            this.getUser().then(
+              user => {
+                user = Object.assign(user, this.setRoles(user));
+                this.setStorage(user);
+                this.redirect(user);
+              },
+              error => {
+                Storage.clearStorage();
+              });
+            break;
+          default:
+            this.setState(prev => {
+              prev.error = { show: true, title: 'Error', msg: 'Unexpected error, please try again' };
+              return prev;
+            });
+            break;
         }
       }
     );
