@@ -642,7 +642,7 @@ class AccessResultRecords extends Component {
     const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
     const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
     this.setState({
-      hasUseRestriction
+      hasUseRestriction: hasUseRestriction
     });
     Votes.getDarFinalAccessVote(electionId).then(
       data => {
