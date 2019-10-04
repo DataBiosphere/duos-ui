@@ -1,11 +1,12 @@
 import { Component, Fragment } from 'react';
-import { div, button, hr, span, h } from 'react-hyperscript-helpers';
+import { button, div, h, hr, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
-import * as Utils from "../libs/utils";
+import * as Utils from '../libs/utils';
+
 
 class ReviewedCases extends Component {
 
@@ -19,7 +20,7 @@ class ReviewedCases extends Component {
     this.setState({ searchDarText: query });
   };
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
@@ -37,7 +38,7 @@ class ReviewedCases extends Component {
       descendantOrder: false,
       electionsList: {
         dul: [],
-        access: [],
+        access: []
       }
     };
     this.getReviewedConsents = this.getReviewedConsents.bind(this);
@@ -46,12 +47,12 @@ class ReviewedCases extends Component {
 
   }
 
-  sort = (sortKey, descendantOrder=false) => (event) => {
+  sort = (sortKey, descendantOrder = false) => (event) => {
 
     let data = this.state.electionsList.dul;
-    let sortedData = data.sort(function(a, b){
+    let sortedData = data.sort(function(a, b) {
 
-      if(!a.hasOwnProperty(sortKey) || !b.hasOwnProperty(sortKey)) {
+      if (!a.hasOwnProperty(sortKey) || !b.hasOwnProperty(sortKey)) {
         // property doesn't exist on either object
         return 0;
       }
@@ -73,7 +74,7 @@ class ReviewedCases extends Component {
     });
 
     this.setState(prev => {
-      prev.electionsList.dul= sortedData;
+      prev.electionsList.dul = sortedData;
       prev.descendantOrder = !prev.descendantOrder;
       return prev;
     });
@@ -90,18 +91,18 @@ class ReviewedCases extends Component {
     this.setState(prev => {
       prev.electionsList = {
         dul: dul,
-        access: access,
+        access: access
       };
       return prev;
     });
   }
 
   openDulResultsRecord = (electionId) => {
-    this.props.history.push(`dul_results_record/${electionId}`);
+    this.props.history.push(`dul_results_record/${ electionId }`);
   };
 
   openAccessResultRecords = (electionId, referenceId) => {
-    this.props.history.push(`access_result_records/${referenceId}/${electionId}`);
+    this.props.history.push(`access_result_records/${ referenceId }/${ electionId }`);
   };
 
   handleDulPageChange = page => {
@@ -121,7 +122,7 @@ class ReviewedCases extends Component {
 
   handleDarPageChange = page => {
     this.setState(prev => {
-      prev.currentDarPage = page;
+      prev.currentAccessPage = page;
       return prev;
     });
   };
@@ -129,7 +130,7 @@ class ReviewedCases extends Component {
   handleDarSizeChange = size => {
     this.setState(prev => {
       prev.darLimit = size;
-      prev.currentDarPage = 1;
+      prev.currentAccessPage = 1;
       return prev;
     });
   };
@@ -140,92 +141,94 @@ class ReviewedCases extends Component {
 
     return (
 
-      div({ className: "container " }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+      div({ className: 'container ' }, [
+        div({ className: 'row no-margin' }, [
+          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
             PageHeading({
-              id: "reviewedCases",
-              imgSrc: "/images/icon_reviewed.png",
-              iconSize: "medium",
-              color: "common",
-              title: "Reviewed Cases Record",
-              description: "List of Reviewed cases and their results"
-            }),
-          ]),
+              id: 'reviewedCases',
+              imgSrc: '/images/icon_reviewed.png',
+              iconSize: 'medium',
+              color: 'common',
+              title: 'Reviewed Cases Record',
+              description: 'List of Reviewed cases and their results'
+            })
+          ])
         ]),
-        hr({ className: "section-separator" }),
+        hr({ className: 'section-separator' }),
 
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
+        div({ className: 'row no-margin' }, [
+          div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
             PageSubHeading({
-              id: "reviewedCasesDul",
-              imgSrc: "/images/icon_dul.png",
-              color: "dul",
-              title: "Data Use Limitations Reviewed Cases",
-              description: "List of Data Use Limitations Reviewed Cases and their results"
-            }),
+              id: 'reviewedCasesDul',
+              imgSrc: '/images/icon_dul.png',
+              color: 'dul',
+              title: 'Data Use Limitations Reviewed Cases',
+              description: 'List of Data Use Limitations Reviewed Cases and their results'
+            })
           ]),
-          div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
+          div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper' }, [
             h(SearchBox, { id: 'reviewedCasesDul', searchHandler: this.handleSearchDul, pageHandler: this.handleDulPageChange, color: 'dul' })
           ])
         ]),
 
-        div({ className: "jumbotron table-box" }, [
-          div({ className: "grid-row" }, [
-            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('displayId', this.state.descendantOrder) }, [
-              "Consent id",
-              span({ className: "glyphicon sort-icon glyphicon-sort" }),
+        div({ className: 'jumbotron table-box' }, [
+          div({ className: 'grid-row' }, [
+            div({ className: 'col-2 cell-header cell-sort dul-color', onClick: this.sort('displayId', this.state.descendantOrder) }, [
+              'Consent id',
+              span({ className: 'glyphicon sort-icon glyphicon-sort' })
             ]),
-            div({ className: "col-2 cell-header cell-sort dul-color", onClick: this.sort('consentGroupName', this.state.descendantOrder) }, [
-              "Consent Group Name",
-              span({ className: "glyphicon sort-icon glyphicon-sort" }),
+            div({ className: 'col-2 cell-header cell-sort dul-color', onClick: this.sort('consentGroupName', this.state.descendantOrder) }, [
+              'Consent Group Name',
+              span({ className: 'glyphicon sort-icon glyphicon-sort' })
             ]),
-            div({ className: "col-1 cell-header cell-sort dul-color", onClick: this.sort('version', this.state.descendantOrder) }, [
-              "Election N°",
-              span({ className: "glyphicon sort-icon glyphicon-sort" }),
+            div({ className: 'col-1 cell-header cell-sort dul-color', onClick: this.sort('version', this.state.descendantOrder) }, [
+              'Election N°',
+              span({ className: 'glyphicon sort-icon glyphicon-sort' })
             ]),
-            div({ className: "col-1 cell-header dul-color" }, ["Result Date"]),
-            div({ className: "col-1 cell-header f-center dul-color" }, ["Final Result"]),
-            div({ className: "col-1 cell-header f-center dul-color" }, ["Record"]),
+            div({ className: 'col-1 cell-header dul-color' }, ['Result Date']),
+            div({ className: 'col-1 cell-header f-center dul-color' }, ['Final Result']),
+            div({ className: 'col-1 cell-header f-center dul-color' }, ['Record'])
           ]),
-          hr({ className: "table-head-separator" }),
+          hr({ className: 'table-head-separator' }),
 
           this.state.electionsList.dul
             .filter(this.searchTable(searchDulText))
             .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
-              return h(Fragment, { key: rIndex }, [
-                div({ className: "grid-row tableRowDul" }, [
-                  div({
-                    id: election.displayId + "_consentId",
-                    name: "consentId",
-                    className: "col-2 cell-body text " + (election.archived ? 'flagged' : ''),
-                    title: election.displayId
-                  }, [election.displayId]),
-                  div({
-                    id: election.displayId + "_consentGroup",
-                    name: "consentGroup",
-                    className: "col-2 cell-body text " + (!election.consentGroupName ? 'empty' : ''),
-                    title: election.consentGroupName
-                  }, [election.consentGroupName]),
-                  div({ id: election.displayId + "_electionVersion", name: "electionVersion", className: "col-1 cell-body text" }, [election.version < 10 ? '0' + election.version : election.version]),
-                  div({ id: election.displayId + "_resultDateDul", name: "resultDateDul", className: "col-1 cell-body text" }, [Utils.formatDate(election.finalVoteDate)]),
-                  div({ id: election.displayId + "_finalResultDul", name: "finalResulDul", className: "col-1 cell-body text f-center bold" }, [
-                    span({ isRendered: election.finalVote, className: "dul-color" }, ["YES"]),
-                    span({ isRendered: !election.finalVote }, ["NO"]),
-                  ]),
-                  div({ className: "col-1 cell-body f-center" }, [
-                    button({
-                      id: election.displayId + "_btnRecordDul",
-                      name: "btn_recordDul",
-                      className: "cell-button hover-color",
-                      "ui-sref": "dul_results_record({electionId: 'this.election.electionId '})",
-                      onClick: () => this.openDulResultsRecord(election.electionId)
-                    }, ["Record"]),
-                  ]),
+            return h(Fragment, { key: rIndex }, [
+              div({ className: 'grid-row tableRowDul' }, [
+                div({
+                  id: election.displayId + '_consentId',
+                  name: 'consentId',
+                  className: 'col-2 cell-body text ' + (election.archived ? 'flagged' : ''),
+                  title: election.displayId
+                }, [election.displayId]),
+                div({
+                  id: election.displayId + '_consentGroup',
+                  name: 'consentGroup',
+                  className: 'col-2 cell-body text ' + (!election.consentGroupName ? 'empty' : ''),
+                  title: election.consentGroupName
+                }, [election.consentGroupName]),
+                div({ id: election.displayId + '_electionVersion', name: 'electionVersion', className: 'col-1 cell-body text' },
+                  [election.version < 10 ? '0' + election.version : election.version]),
+                div({ id: election.displayId + '_resultDateDul', name: 'resultDateDul', className: 'col-1 cell-body text' },
+                  [Utils.formatDate(election.finalVoteDate)]),
+                div({ id: election.displayId + '_finalResultDul', name: 'finalResulDul', className: 'col-1 cell-body text f-center bold' }, [
+                  span({ isRendered: election.finalVote, className: 'dul-color' }, ['YES']),
+                  span({ isRendered: !election.finalVote }, ['NO'])
                 ]),
-                hr({ className: "table-body-separator" }),
-              ]);
-            }),
+                div({ className: 'col-1 cell-body f-center' }, [
+                  button({
+                    id: election.displayId + '_btnRecordDul',
+                    name: 'btn_recordDul',
+                    className: 'cell-button hover-color',
+                    'ui-sref': 'dul_results_record({electionId: \'this.election.electionId \'})',
+                    onClick: () => this.openDulResultsRecord(election.electionId)
+                  }, ['Record'])
+                ])
+              ]),
+              hr({ className: 'table-body-separator' })
+            ]);
+          }),
           PaginatorBar({
             name: 'dul',
             total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
@@ -234,59 +237,64 @@ class ReviewedCases extends Component {
             currentPage: this.state.currentDulPage,
             onPageChange: this.handleDulPageChange,
             changeHandler: this.handleDulSizeChange
-          }),
+          })
         ]),
 
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding" }, [
+        div({ className: 'row no-margin' }, [
+          div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
             PageSubHeading({
-              id: "reviewedCasesAccess",
-              imgSrc: "/images/icon_access.png",
-              color: "access",
-              title: "Data Access Reviewed Cases",
-              description: "List of Data Access Request Reviewed Cases and their results"
-            }),
+              id: 'reviewedCasesAccess',
+              imgSrc: '/images/icon_access.png',
+              color: 'access',
+              title: 'Data Access Reviewed Cases',
+              description: 'List of Data Access Request Reviewed Cases and their results'
+            })
           ]),
-          div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper" }, [
+          div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper' }, [
             h(SearchBox, { id: 'reviewedCasesAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleDarPageChange, color: 'access' })
           ])
         ]),
 
-        div({ className: "jumbotron table-box" }, [
-          div({ className: "grid-row" }, [
-            div({ className: "col-2 cell-header access-color" }, ["Data Request id"]),
-            div({ className: "col-3 cell-header access-color" }, ["Project Title"]),
-            div({ className: "col-1 cell-header access-color" }, ["Result Date"]),
-            div({ className: "col-1 cell-header f-center access-color" }, ["Final Result"]),
-            div({ className: "col-1 cell-header f-center access-color" }, ["Record"]),
+        div({ className: 'jumbotron table-box' }, [
+          div({ className: 'grid-row' }, [
+            div({ className: 'col-2 cell-header access-color' }, ['Data Request id']),
+            div({ className: 'col-3 cell-header access-color' }, ['Project Title']),
+            div({ className: 'col-1 cell-header access-color' }, ['Result Date']),
+            div({ className: 'col-1 cell-header f-center access-color' }, ['Final Result']),
+            div({ className: 'col-1 cell-header f-center access-color' }, ['Record'])
           ]),
-          hr({ className: "table-head-separator" }),
+          hr({ className: 'table-head-separator' }),
 
           this.state.electionsList.access
             .filter(this.searchTable(searchDarText))
             .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
-              return h(Fragment, { key: rIndex }, [
-                div({ className: "grid-row tableRowAccess" }, [
-                  div({ id: election.displayId + "_darId", name: "darId", className: "col-2 cell-body text", title: "this.election.displayId " }, [election.displayId]),
-                  div({ id: election.displayId + "_projectTitle", name: "projectTitle", className: "col-3 cell-body text", title: "this.election.projectTitle " }, [election.projectTitle]),
-                  div({ id: election.displayId + "_resultDateAccess", name: "resultDateAccess", className: "col-1 cell-body text" }, [Utils.formatDate(election.finalVoteDate)]),
-                  div({ id: election.displayId + "_finalResultAccess", name: "finalResultAccess", className: "col-1 cell-body text f-center bold" }, [
-                    span({ isRendered: election.finalVote === true, className: "access-color" }, ["YES"]),
-                    span({ isRendered: election.finalVote === false }, ["NO"]),
-                  ]),
-                  div({ className: "col-1 cell-body f-center" }, [
-                    button({
-                      id: election.displayId + "_btnRecordAccess",
-                      name: "btn_recordAccess",
-                      className: "cell-button hover-color",
-                      "ui-sref": "access_results_record({electionId: 'this.election.electionId ', referenceId: 'this.election.referenceId '})",
-                      onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
-                    }, ["Record"])
-                  ]),
+            return h(Fragment, { key: rIndex }, [
+              div({ className: 'grid-row tableRowAccess' }, [
+                div({ id: election.displayId + '_darId', name: 'darId', className: 'col-2 cell-body text', title: 'this.election.displayId ' },
+                  [election.displayId]),
+                div({
+                  id: election.displayId + '_projectTitle', name: 'projectTitle', className: 'col-3 cell-body text',
+                  title: 'this.election.projectTitle '
+                }, [election.projectTitle]),
+                div({ id: election.displayId + '_resultDateAccess', name: 'resultDateAccess', className: 'col-1 cell-body text' },
+                  [Utils.formatDate(election.finalVoteDate)]),
+                div({ id: election.displayId + '_finalResultAccess', name: 'finalResultAccess', className: 'col-1 cell-body text f-center bold' }, [
+                  span({ isRendered: election.finalVote === true, className: 'access-color' }, ['YES']),
+                  span({ isRendered: election.finalVote === false }, ['NO'])
                 ]),
-                hr({ className: "table-body-separator" }),
-              ]);
-            }),
+                div({ className: 'col-1 cell-body f-center' }, [
+                  button({
+                    id: election.displayId + '_btnRecordAccess',
+                    name: 'btn_recordAccess',
+                    className: 'cell-button hover-color',
+                    'ui-sref': 'access_results_record({electionId: \'this.election.electionId \', referenceId: \'this.election.referenceId \'})',
+                    onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
+                  }, ['Record'])
+                ])
+              ]),
+              hr({ className: 'table-body-separator' })
+            ]);
+          }),
           PaginatorBar({
             name: 'access',
             total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
@@ -295,8 +303,8 @@ class ReviewedCases extends Component {
             currentPage: this.state.currentAccessPage,
             onPageChange: this.handleDarPageChange,
             changeHandler: this.handleDarSizeChange
-          }),
-        ]),
+          })
+        ])
       ])
     );
   }
