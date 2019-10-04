@@ -41,7 +41,7 @@ class AccessReview extends Component {
             return prev;
           });
         }).catch(error => {
-        this.setState(
+          this.setState(
           { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
       });
     } else {
@@ -54,7 +54,7 @@ class AccessReview extends Component {
             return prev;
           });
         }).catch(error => {
-        this.setState(
+          this.setState(
           { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
       });
     }
@@ -78,7 +78,7 @@ class AccessReview extends Component {
           });
           this.alertRPVoteRemember();
         }).catch(error => {
-        this.setState(
+          this.setState(
           { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
       });
     } else {
@@ -91,7 +91,7 @@ class AccessReview extends Component {
             return prev;
           });
         }).catch(error => {
-        this.setState(
+          this.setState(
           { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
       });
     }
