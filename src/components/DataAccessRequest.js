@@ -4,24 +4,10 @@ import { div, hh, span } from 'react-hyperscript-helpers';
 
 
 const parseAlias = (alias) => {
+  const n = parseInt(alias);
   const prefix = 'DUOS-';
-  const aliasInt = parseInt(alias);
-  if (aliasInt < 10) {
-    return prefix + '00000' + alias;
-  }
-  if (aliasInt < 100) {
-    return prefix + '0000' + alias;
-  }
-  if (aliasInt < 1000) {
-    return prefix + '000' + alias;
-  }
-  if (aliasInt < 10000) {
-    return prefix + '00' + alias;
-  }
-  if (aliasInt < 100000) {
-    return prefix + '0' + alias;
-  }
-  return prefix + alias;
+  const pad = '000000';
+  return prefix + (pad + n).slice(-pad.length);
 };
 
 const style = {
