@@ -40,10 +40,12 @@ class AccessReview extends Component {
             prev.showConfirmationDialogOK = true;
             return prev;
           });
-        }).catch(error => {
+        }
+      ).catch(
+        error => {
           this.setState(
-          { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
-      });
+            { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
+        });
     } else {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
@@ -53,10 +55,12 @@ class AccessReview extends Component {
             prev.showConfirmationDialogOK = true;
             return prev;
           });
-        }).catch(error => {
+        }
+      ).catch(
+        error => {
           this.setState(
-          { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
-      });
+            { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
+        });
     }
 
   };
@@ -77,10 +81,12 @@ class AccessReview extends Component {
             return prev;
           });
           this.alertRPVoteRemember();
-        }).catch(error => {
+        }
+      ).catch(
+        error => {
           this.setState(
-          { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
-      });
+            { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
+        });
     } else {
       Votes.updateDarVote(this.state.election.referenceId, vote).then(
         data => {
@@ -90,10 +96,12 @@ class AccessReview extends Component {
             prev.showConfirmationDialogOK = true;
             return prev;
           });
-        }).catch(error => {
+        }
+      ).catch(
+        error => {
           this.setState(
-          { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
-      });
+            { showConfirmationDialogOK: true, alertMessage: 'Sorry, something went wrong when trying to submit the vote. Please try again.' });
+        });
     }
 
   };
