@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, footer, ul, li, img, a } from 'react-hyperscript-helpers';
+import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
+
 
 class DuosFooter extends Component {
 
@@ -13,6 +14,7 @@ class DuosFooter extends Component {
             li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/privacy-policy" }, ["Privacy Policy"]),]),
             li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/terms-conditions" }, ["Terms of Service"]),]),
             li({ className: "footer-links__item" }, [a({ href: supportLink }, ["Support"]),]),
+            li({ className: 'footer-links__item' }, [a({ href: 'status' }, ['Status'])])
           ]),
           img({ src: "/images/broad_logo.svg", className: "footer-logo", alt: "Broad Institute logo" })
         ])
