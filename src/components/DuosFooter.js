@@ -14,7 +14,7 @@ class DuosFooter extends Component {
             li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/privacy-policy" }, ["Privacy Policy"]),]),
             li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/terms-conditions" }, ["Terms of Service"]),]),
             li({ className: "footer-links__item" }, [a({ href: supportLink }, ["Support"]),]),
-            li({ className: 'footer-links__item' }, [a({ href: 'status' }, ['Status'])])
+            li({ className: 'footer-links__item' }, [a({ href: '/status' }, ['Status'])])
           ]),
           img({ src: "/images/broad_logo.svg", className: "footer-logo", alt: "Broad Institute logo" })
         ])
