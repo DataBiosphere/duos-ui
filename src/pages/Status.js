@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { span, a, div, h2, hh, hr, li, pre, ul } from 'react-hyperscript-helpers';
+import { a, div, h2, hh, hr, li, pre, ul } from 'react-hyperscript-helpers';
+import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
+import DiameterVariant from 'react-material-icon-svg/dist/DiameterVariant';
 import { Config } from '../libs/config';
 
 
@@ -40,17 +42,18 @@ export const Status = hh(class Status extends Component {
   }
 
   render() {
-    const consentHealthy = this.isHealthy(this.state.consentStatus);
-    const ontologyHealthy = this.isHealthy(this.state.ontologyStatus);
-    const fireCloudHealthy = this.isHealthy(this.state.fireCloudStatus);
-    const healthy = div({style: {background: 'url("/images/check-solid.svg") no-repeat 0 0;'}}, []);
+    const healthyState = <CheckboxMarkedCircleOutline fill={ 'green' } style={ { marginLeft: '2rem', verticalAlign: 'middle' } }/>;
+    const unhealthyState = <DiameterVariant fill={ 'red' } style={ { marginLeft: '2rem', verticalAlign: 'middle' } }/>;
+    const consentHealthy = this.isHealthy(this.state.consentStatus) ? healthyState : unhealthyState;
+    const ontologyHealthy = this.isHealthy(this.state.ontologyStatus) ? healthyState : unhealthyState;
+    const fireCloudHealthy = this.isFCHealthy(this.state.fireCloudStatus) ? healthyState : unhealthyState;
 
     return (
       div({ style: { margin: '2rem' } }, [
         ul({ style: { marginTop: '2rem', listStyle: 'none', fontSize: 'x-large' } }, [
-          li({}, [a({ href: '#consent' }, 'Consent'), ' ', consentHealthy ? 'Healthy': 'Unhealthy', healthy]),
-          li({}, [a({ href: '#ontology' }, 'Ontology'), ' ', ontologyHealthy ? 'Healthy': 'Unhealthy']),
-          li({}, [a({ href: '#firecloud' }, 'FireCloud'), ' ', fireCloudHealthy ? 'Healthy': 'Unhealthy'])
+          li({}, [a({ href: '#consent' }, 'Consent'), ' ', consentHealthy]),
+          li({}, [a({ href: '#ontology' }, 'Ontology'), ' ', ontologyHealthy]),
+          li({}, [a({ href: '#firecloud' }, 'FireCloud'), ' ', fireCloudHealthy])
         ]),
         hr(),
         h2({}, [a({ id: 'consent' }, ['Consent Status'])]),
@@ -61,4 +64,5 @@ export const Status = hh(class Status extends Component {
         pre({}, [JSON.stringify(this.state.fireCloudStatus, null, 4)])
       ]));
   }
+
 });
