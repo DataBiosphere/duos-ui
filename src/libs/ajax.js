@@ -219,9 +219,14 @@ export const DAR = {
     const summaryDar = await summaryDarRes.json();
 
     let darInfo = Models.dar;
+    // Workaround for DUOS-461 until the backend API is updated.
+    // Get the research purpose directly from the DAR instead of the summary.
+    const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
+    const rawDar = await rawDarRes.json();
     darInfo.hasDiseases = !_.isEmpty(summaryDar.diseases);
     darInfo.diseases = summaryDar.diseases;
-    darInfo.rus = summaryDar.rus;
+    // darInfo.rus = summaryDar.rus; // Revert this change when API is updated.
+    darInfo.rus = rawDar.rus;
     darInfo.researcherId = summaryDar.userId;
     darInfo.darCode = summaryDar.darCode;
     darInfo.projectTitle = summaryDar.projectTitle;
