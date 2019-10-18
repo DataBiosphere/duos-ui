@@ -32,20 +32,13 @@ Builds, tests, and deployments are handled by CircleCI.
     ```sh
     npm install
     ```
-4. Start development server:
+4. Install configs depending on the environment:
+
+    ```sh
+    cp config/dev.json public/config.json
+    ```
+5. Start development server:
 
     ```sh
     npm start
     ```
-
-### Running as a Docker image that mimics production
-
-Build a local image and then start it up.
-
-```
-docker build -f Dockerfile-dev -t duos-ui:local .
-```
-
-```
-docker run -p 80:80 duos-ui:local
-```

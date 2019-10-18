@@ -115,9 +115,9 @@ export const ApplicationSummaryModal = hh(class ApplicationSummaryModal extends 
               label({ id: "lbl_dataset", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label access-color" }, ["Dataset(s)"]),
               div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [
                 ul({}, [
-                  Object.entries(summary.datasetDetail).map((row, Index) => {
+                  summary.datasets.map((row, Index) => {
                     return h(Fragment, { key: Index }, [
-                      li({ id: "txt_dataset_" + Index }, [b({}, [row[Index]]), " ", row[Index + 1]]),
+                      li({ id: "txt_dataset_" + Index }, [b({}, [row.name, " ", row.objectId])]),
                       div({ isRendered: this.state.calledFromAdmin === true && summary.needDOApproval !== 'Approval not needed.' }, [summary.needDOApproval]),
                       div({ isRendered: this.state.calledFromAdmin === true && (summary.needDOApproval === 'Approved by Data Owner(s).' || summary.needDOApproval === 'Denied by Data Owner(s).') }, [
 
