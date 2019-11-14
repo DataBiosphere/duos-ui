@@ -1,14 +1,16 @@
-import { Component } from 'react';
-import { div, h, hh, form, label, input, span, hr, a, p, button, textarea } from 'react-hyperscript-helpers';
-import { Researcher, User, DAR, AuthenticateNIH } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-import { PageHeading } from '../components/PageHeading';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import ReactTooltip from 'react-tooltip';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Config } from '../libs/config';
-import * as qs from 'query-string';
 import _ from 'lodash';
+import * as qs from 'query-string';
+import { Component } from 'react';
+import { a, button, div, form, h, hh, hr, input, label, p, span, textarea } from 'react-hyperscript-helpers';
+import ReactTooltip from 'react-tooltip';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { eRACommons } from '../components/eRACommons';
+import { PageHeading } from '../components/PageHeading';
+import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
+import { AuthenticateNIH, DAR, Researcher, User } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { Storage } from '../libs/storage';
+
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -52,7 +54,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return await AuthenticateNIH.verifyNihToken(parsedToken).then(
       (decoded) => decoded,
       (error) => {
-        this.setState({nihError: true});
+        // this.setState({nihError: true});
         return null;
       }
     );
@@ -73,7 +75,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         return true;
       },
       (fail) => {
-        this.setState({nihError: true});
+        // this.setState({nihError: true});
         return false;
       });
   }
@@ -87,14 +89,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       additionalEmail: '',
-      nihError: false,
-      nihErrorMessage: "Something went wrong. Please try again. ",
-      expirationCount: -1,
+      // nihError: false,
+      // nihErrorMessage: "Something went wrong. Please try again. ",
+      // expirationCount: -1,
       file: {
         name: '',
       },
+      rpProperties: {},
       profile: {
-        eraAuthorized: false,
+        // eraAuthorized: false,
         checkNotifications: false,
         academicEmail: '',
         address1: '',
@@ -109,7 +112,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         institution: '',
         isThePI: null,
         linkedIn: '',
-        nihUsername: '',
+        // nihUsername: '',
         orcid: '',
         piEmail: '',
         piName: '',
@@ -146,6 +149,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async getResearcherProfile() {
     let rp = {};
     let profile = await Researcher.getResearcherProfile(Storage.getCurrentUser().dacUserId);
+    let rpProperties = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
     const currentUser = Storage.getCurrentUser();
     const user = await User.getByEmail(currentUser.email);
     if (profile.profileName === undefined) {
@@ -155,15 +159,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (Storage.getData('researcher') !== null) {
       rp = Storage.getData('researcher');
       Storage.removeData('researcher');
-      rp.eraAuthorized = profile.eraAuthorized;
-      rp.eraExpiration = profile.eraExpiration;
-      rp.nihUsername = profile.nihUsername;
+      // rp.eraAuthorized = profile.eraAuthorized;
+      // rp.eraExpiration = profile.eraExpiration;
+      // rp.nihUsername = profile.nihUsername;
     } else {
       rp = profile;
       rp.profileName = profile.profileName === undefined ? Storage.getCurrentUser().displayName : profile.profileName;
     }
 
-    let expirationCount = await AuthenticateNIH.expirationCount(rp.eraExpiration);
+    // let expirationCount = await AuthenticateNIH.expirationCount(rp.eraExpiration);
 
     this.setState(prev => {
       let key;
@@ -175,9 +179,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         }
 
       }
+      prev.rpProperties = rpProperties;
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
-      prev.expirationCount = expirationCount;
-      prev.profile.eraAuthorized = profile.eraAuthorized !== undefined ? profile.eraAuthorized : false;
+      // prev.expirationCount = expirationCount;
+      // prev.profile.eraAuthorized = profile.eraAuthorized !== undefined ? profile.eraAuthorized : false;
       return prev;
     }, () => {
       if (this.state.profile.completed !== undefined && this.state.profile.completed !== "") {
@@ -193,7 +198,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   deleteNihAccount() {
     AuthenticateNIH.eliminateAccount().then(result => {
       this.setState(prev => {
-        prev.profile.eraAuthorized = false;
+        // prev.profile.eraAuthorized = false;
         return prev;
       });
     });
@@ -633,31 +638,36 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
                   div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
-                      label({ id: "lbl_profileNIH", className: "control-label" }, ["NIH eRA Commons ID"]),
-                      div({ isRendered: !this.state.profile.eraAuthorized || this.state.expirationCount < 0 }, [
-                        a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
-                          div({ className: "logo" }, []),
-                          span({}, ["Authenticate your account"])
-                        ])
-                      ]),
-                      span({
-                        className: "cancel-color required-field-error-span",
-                        isRendered: this.state.nihError
-                      }, [this.state.nihErrorMessage]),
-                      div({ isRendered: this.state.profile.eraAuthorized}, [
-                        div({ isRendered: this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                          div({ className: "auth-id" }, [this.state.profile.nihUsername]),
-                          button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
-                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
-                          ]),
-                        ]),
-                        div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
-                          div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
-                          div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
-                        ])
-                      ]),
-                    ]),
+                    eRACommons({
+                      className: "col-lg-4 col-md-4 col-sm-6 col-xs-12",
+                      destination: "profile",
+                      rpProperties: this.state.rpProperties
+                    }),
+                    // div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
+                    //   label({ id: "lbl_profileNIH", className: "control-label" }, ["NIH eRA Commons ID"]),
+                    //   div({ isRendered: !this.state.profile.eraAuthorized || this.state.expirationCount < 0 }, [
+                    //     a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
+                    //       div({ className: "logo" }, []),
+                    //       span({}, ["Authenticate your account"])
+                    //     ])
+                    //   ]),
+                    //   span({
+                    //     className: "cancel-color required-field-error-span",
+                    //     isRendered: this.state.nihError
+                    //   }, [this.state.nihErrorMessage]),
+                    //   div({ isRendered: this.state.profile.eraAuthorized}, [
+                    //     div({ isRendered: this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+                    //       div({ className: "auth-id" }, [this.state.profile.nihUsername]),
+                    //       button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
+                    //         span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
+                    //       ]),
+                    //     ]),
+                    //     div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
+                    //       div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
+                    //       div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
+                    //     ])
+                    //   ]),
+                    // ]),
                     div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
                       label({ id: "lbl_profileLibraryCard", className: "control-label" }, ["NIH Library Card"]),
                       div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [

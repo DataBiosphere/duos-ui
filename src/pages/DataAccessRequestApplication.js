@@ -1,16 +1,17 @@
+import * as qs from 'query-string';
 import { Component } from 'react';
-import { div, hr, br, h, small, h3, a, span, form, ol, li, label, button, input, textarea, p, fieldset, i } from 'react-hyperscript-helpers';
+import { a, br, div, fieldset, form, h, h3, hr, i, input, label, li, ol, p, small, span, textarea } from 'react-hyperscript-helpers';
+import { Link } from 'react-router-dom';
+import AsyncSelect from 'react-select/async';
+import ReactTooltip from 'react-tooltip';
+import { Alert } from '../components/Alert';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Alert } from '../components/Alert';
-import AsyncSelect from 'react-select/async';
+import { AuthenticateNIH, DAR, Researcher } from '../libs/ajax';
 import { Config } from '../libs/config';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import ReactTooltip from 'react-tooltip';
-import { Researcher, DAR, AuthenticateNIH } from '../libs/ajax';
-import { Storage } from "../libs/storage";
-import { Link } from 'react-router-dom';
-import * as qs from 'query-string';
+import { Storage } from '../libs/storage';
 
 import './DataAccessRequestApplication.css';
 
@@ -27,7 +28,8 @@ class DataAccessRequestApplication extends Component {
     this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
     this.deleteNihAccount = this.deleteNihAccount.bind(this);
     this.state = {
-      expirationCount: -1,
+      rpProperties: {},
+      // expirationCount: -1,
       disableOkBtn: false,
       showValidationMessages: false,
       optionMessage: noOptionMessage,
@@ -39,8 +41,8 @@ class DataAccessRequestApplication extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
-      nihError: false,
-      nihErrorMessage:"Something went wrong. Please try again. ",
+      // nihError: false,
+      // nihErrorMessage:"Something went wrong. Please try again. ",
       formData: {
         datasets: [],
         dar_code: null,
@@ -49,9 +51,9 @@ class DataAccessRequestApplication extends Component {
         non_tech_rus: '',
         other: '',
         othertext: '',
-        eraAuthorized: '',
-        nihUsername: '',
-        eraExpirationCount: '',
+        // eraAuthorized: '',
+        // nihUsername: '',
+        // eraExpirationCount: '',
         linkedIn: '',
         orcid: '',
         ontologies: [],
@@ -83,7 +85,7 @@ class DataAccessRequestApplication extends Component {
         piName: '',
         urlDAA: '',
         nameDAA: '',
-        eRACommonsID: '',
+        // eRACommonsID: '',
         pubmedId: '',
         scientificUrl: ''
       },
@@ -170,7 +172,7 @@ class DataAccessRequestApplication extends Component {
       (decoded) => decoded,
       (error) => {
         this.setState(prev => {
-          prev.nihError = true;
+          // prev.nihError = true;
           prev.formData = Storage.getData('dar_application');
           return prev;
         }, () => Storage.removeData('dar_application'));
@@ -195,7 +197,7 @@ class DataAccessRequestApplication extends Component {
       },
       (fail) => {
         this.setState(prev => {
-          prev.nihError = true;
+          // prev.nihError = true;
           prev.formData = Storage.getData('dar_application');
           return prev;
         }, () => Storage.removeData('dar_application'));
@@ -235,9 +237,9 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
-      formData.eraAuthorized = rpProperties.eraAuthorized !== undefined ? JSON.parse(rpProperties.eraAuthorized) : false;
-      formData.eraExpiration = rpProperties.eraExpiration !== undefined ? rpProperties.eraExpiration : false;
+      // formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
+      // formData.eraAuthorized = rpProperties.eraAuthorized !== undefined ? JSON.parse(rpProperties.eraAuthorized) : false;
+      // formData.eraExpiration = rpProperties.eraExpiration !== undefined ? rpProperties.eraExpiration : false;
       formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
@@ -254,12 +256,12 @@ class DataAccessRequestApplication extends Component {
       formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
       formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
       formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
-      formData.eRACommonsID = rpProperties.eRACommonsID !== undefined ? rpProperties.eRACommonsID : '';
+      // formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
+      // formData.eRACommonsID = rpProperties.eRACommonsID !== undefined ? rpProperties.eRACommonsID : '';
       formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
       formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
     }
-    let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
+    // let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
 
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -273,9 +275,10 @@ class DataAccessRequestApplication extends Component {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
+      prev.rpProperties = rpProperties;
       prev.completed = completed;
       prev.formData = formData;
-      prev.expirationCount = expirationCount;
+      // prev.expirationCount = expirationCount;
       if (formData.nameDAA !== '') {
         prev.file.name = formData.nameDAA;
       }
@@ -448,8 +451,8 @@ class DataAccessRequestApplication extends Component {
       && !this.isValid(this.state.formData.linkedIn)
       && !this.isValid(this.state.formData.researcherGate)
       && !this.isValid(this.state.formData.orcid)
-      && !this.isValid(this.state.formData.uploadFile)
-      && (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0)) {
+      && !this.isValid(this.state.formData.uploadFile)) {
+      // && (this.state.formData.eraAuthorized !== true)) { //} || this.state.expirationCount < 0)) {
       isLinkedInInvalid = true;
       isOrcidInvalid = true;
       isResearcherGateInvalid = true;
@@ -749,7 +752,7 @@ class DataAccessRequestApplication extends Component {
   deleteNihAccount() {
     AuthenticateNIH.eliminateAccount().then(result => {
       this.setState(prev => {
-        prev.formData.eraAuthorized = false;
+        // prev.formData.eraAuthorized = false;
         return prev;
       });
     });
@@ -919,36 +922,11 @@ class DataAccessRequestApplication extends Component {
                     span({ isRendered: (step1.inputResearcherGate.invalid) && (showValidationMessages), className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span" }, ["At least one of the following fields is required"]),
 
                     div({ className: "row no-margin" }, [
-                      div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
-                        label({ className: "control-label" }, ["NIH eRA Commons ID"]),
-                        div({ isRendered: (this.state.formData.eraAuthorized !== true || this.state.expirationCount < 0) && this.state.formData.dar_code === null }, [
-                          a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
-                            div({ className: "logo" }, []),
-                            span({}, ["Authenticate your account"])
-                          ])
-                        ]),
-                        span({
-                          className: "cancel-color required-field-error-span",
-                          isRendered: this.state.nihError
-                        }, [this.state.nihErrorMessage]),
-                        div({ isRendered: (this.state.formData.eraAuthorized === true) }, [
-                          div({ isRendered: this.state.formData.dar_code === null && this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                            div({ className: "auth-id" }, [this.state.formData.nihUsername]),
-                            button({ type: 'button', onClick: this.deleteNihAccount, className: "close auth-clear" }, [
-                              span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "Clear account", "data-for": "tip_clearNihAccount" })
-                            ])
-                          ]),
-
-                          div({ isRendered: this.state.formData.dar_code === null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
-                            div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
-                            div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
-                          ]),
-                          div({ isRendered: this.state.formData.dar_code !== null, className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding" }, [
-                            div({ className: "auth-id" }, [this.state.formData.nihUsername])
-                          ])
-                        ])
-                      ]),
-
+                      eRACommons({
+                        className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group",
+                        destination: "dar_application",
+                        rpProperties: this.state.rpProperties
+                      }),
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
                         label({ className: "control-label" }, ["LinkedIn Profile"]),
                         input({
