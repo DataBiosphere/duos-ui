@@ -1,4 +1,3 @@
-import * as qs from 'query-string';
 import { Component } from 'react';
 import { a, br, div, fieldset, form, h, h3, hr, i, input, label, li, ol, p, small, span, textarea } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
@@ -9,8 +8,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { AuthenticateNIH, DAR, Researcher } from '../libs/ajax';
-import { Config } from '../libs/config';
+import { DAR, Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
 import './DataAccessRequestApplication.css';
@@ -25,9 +23,8 @@ class DataAccessRequestApplication extends Component {
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
-    this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
-    this.deleteNihAccount = this.deleteNihAccount.bind(this);
     this.state = {
+      nihValid: false,
       rpProperties: {},
       // expirationCount: -1,
       disableOkBtn: false,
@@ -51,9 +48,6 @@ class DataAccessRequestApplication extends Component {
         non_tech_rus: '',
         other: '',
         othertext: '',
-        // eraAuthorized: '',
-        // nihUsername: '',
-        // eraExpirationCount: '',
         linkedIn: '',
         orcid: '',
         ontologies: [],
@@ -85,7 +79,6 @@ class DataAccessRequestApplication extends Component {
         piName: '',
         urlDAA: '',
         nameDAA: '',
-        // eRACommonsID: '',
         pubmedId: '',
         scientificUrl: ''
       },
@@ -142,69 +135,23 @@ class DataAccessRequestApplication extends Component {
     this.handleFileChange = this.handleFileChange.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
+    this.onNihStatusUpdate = this.onNihStatusUpdate.bind(this);
   }
 
-  async componentDidMount() {
-
-    if (this.props.location !== undefined && this.props.location.search !== "") {
-      let rpProperties = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
-      let isFcUser = await this.verifyUser();
-      if (!isFcUser) {
-        isFcUser = await this.registerUsertoFC(rpProperties);
-      }
-      if (isFcUser) {
-        const parsedToken = qs.parse(this.props.location.search);
-        const decodedNihAccount = await this.verifyToken(parsedToken);
-        if (decodedNihAccount !== null) {
-          await AuthenticateNIH.saveNihUsr(decodedNihAccount);
-          await this.init();
-        }
-      }
-    } else {
-      await this.init();
+  onNihStatusUpdate(nihValid) {
+    if (this.state.nihValid !== nihValid) {
+      this.setState(prev => {
+        prev.nihValid = nihValid;
+        return prev;
+      });
     }
+  };
+
+  async componentDidMount() {
+    await this.init();
     this.props.history.push('/dar_application');
     ReactTooltip.rebuild();
   }
-
-  async verifyToken(parsedToken) {
-    return await AuthenticateNIH.verifyNihToken(parsedToken).then(
-      (decoded) => decoded,
-      (error) => {
-        this.setState(prev => {
-          // prev.nihError = true;
-          prev.formData = Storage.getData('dar_application');
-          return prev;
-        }, () => Storage.removeData('dar_application'));
-        return null;
-      }
-    );
-  }
-
-  async verifyUser() {
-    let isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
-      (callback) => {
-        return false;
-      });
-    return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
-  }
-
-  async registerUsertoFC(rpProperties) {
-    return await AuthenticateNIH.fireCloudRegisterUser(rpProperties).then(
-      (success) => {
-        // user has been successfully registered to firecloud.
-        return true;
-      },
-      (fail) => {
-        this.setState(prev => {
-          // prev.nihError = true;
-          prev.formData = Storage.getData('dar_application');
-          return prev;
-        }, () => Storage.removeData('dar_application'));
-        return false;
-      });
-  }
-
 
   async init() {
     let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
@@ -237,9 +184,6 @@ class DataAccessRequestApplication extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      // formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
-      // formData.eraAuthorized = rpProperties.eraAuthorized !== undefined ? JSON.parse(rpProperties.eraAuthorized) : false;
-      // formData.eraExpiration = rpProperties.eraExpiration !== undefined ? rpProperties.eraExpiration : false;
       formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
@@ -256,12 +200,9 @@ class DataAccessRequestApplication extends Component {
       formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
       formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
       formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      // formData.nihUsername = rpProperties.nihUsername !== undefined ? rpProperties.nihUsername : '';
-      // formData.eRACommonsID = rpProperties.eRACommonsID !== undefined ? rpProperties.eRACommonsID : '';
       formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
       formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
     }
-    // let expirationCount = await AuthenticateNIH.expirationCount(rpProperties.eraExpiration);
 
     formData.userId = Storage.getCurrentUser().dacUserId;
 
@@ -452,12 +393,11 @@ class DataAccessRequestApplication extends Component {
       && !this.isValid(this.state.formData.researcherGate)
       && !this.isValid(this.state.formData.orcid)
       && !this.isValid(this.state.formData.uploadFile)) {
-      // && (this.state.formData.eraAuthorized !== true)) { //} || this.state.expirationCount < 0)) {
       isLinkedInInvalid = true;
       isOrcidInvalid = true;
       isResearcherGateInvalid = true;
       isDAAInvalid = true;
-      isNihInvalid = true;
+      isNihInvalid = !this.state.nihValid;
       showValidationMessages = true;
     }
     this.setState(prev => {
@@ -738,25 +678,9 @@ class DataAccessRequestApplication extends Component {
       });
   };
 
-  async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}?redirect-url=`;
-    const landingUrl = nihUrl.concat(window.location.origin + "/dar_application?jwt%3D%7Btoken%7D");
-    Storage.setData('dar_application', this.state.formData);
-    window.location.href = landingUrl;
-  }
-
   back = (e) => {
     this.props.history.goBack();
   };
-
-  deleteNihAccount() {
-    AuthenticateNIH.eliminateAccount().then(result => {
-      this.setState(prev => {
-        // prev.formData.eraAuthorized = false;
-        return prev;
-      });
-    });
-  }
 
   render() {
 
@@ -925,7 +849,8 @@ class DataAccessRequestApplication extends Component {
                       eRACommons({
                         className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group",
                         destination: "dar_application",
-                        rpProperties: this.state.rpProperties
+                        onNihStatusUpdate: this.onNihStatusUpdate,
+                        location: this.props.location
                       }),
                       div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group" }, [
                         label({ className: "control-label" }, ["LinkedIn Profile"]),
