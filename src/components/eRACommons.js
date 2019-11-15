@@ -12,12 +12,11 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      rpProperties: {},
       isAuthorized: false,
       expirationCount: 0,
       nihUsername: '',
       nihError: false,
-      nihErrorMessage: 'Something went wrong. Please try again. '
+      nihErrorMessage: 'Something went wrong. Please try again.'
     };
     this.authenticateAsNIHFCUser = this.authenticateAsNIHFCUser.bind(this);
     this.getResearcherProperties = this.getResearcherProperties.bind(this);
@@ -30,15 +29,14 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   async componentDidMount() {
     if (this.props.location !== undefined && this.props.location.search !== '') {
-      this.authenticateAsNIHFCUser();
+      this.authenticateAsNIHFCUser(this.props.location.search);
     } else {
       this.getResearcherProperties();
     }
   }
 
-  async authenticateAsNIHFCUser() {
+  async authenticateAsNIHFCUser(searchArg) {
     const currentUserId = Storage.getCurrentUser().dacUserId;
-    // Parse the token received from NIH for eRA Commons login and save it to FC/Terra
     let isFcUser = this.verifyUser();
     if (!isFcUser) {
       Researcher.getPropertiesByResearcherId(currentUserId).then(
@@ -48,7 +46,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         () => this.setState({ nihError: true }));
     }
     if (isFcUser) {
-      const parsedToken = qs.parse(this.props.location.search);
+      const parsedToken = qs.parse(searchArg);
       this.verifyToken(parsedToken).then(
         (decodedNihAccount) => {
           AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
@@ -70,7 +68,6 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       const nihValid = isAuthorized && expirationCount > 0;
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
-        prev.rpProperties = response;
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
         prev.nihUsername = _.isNil(response.nihUsername) ? '' : response.nihUsername;
@@ -90,7 +87,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   }
 
   async verifyUser() {
-    let isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
+    const isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
       () => {
         this.setState({ nihError: true });
         return false;
@@ -100,10 +97,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   async registerUserToFC(properties) {
     return await AuthenticateNIH.fireCloudRegisterUser(properties).then(
-      () => {
-        // user has been successfully registered to firecloud.
-        return true;
-      },
+      () => true,
       () => {
         this.setState({ nihError: true });
         return false;
@@ -117,9 +111,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   async deleteNihAccount() {
     AuthenticateNIH.eliminateAccount().then(
-      result => {
-        this.getResearcherProperties();
-      });
+      () => this.getResearcherProperties()
+    );
   }
 
   render() {

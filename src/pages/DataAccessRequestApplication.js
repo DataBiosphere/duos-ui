@@ -374,7 +374,7 @@ class DataAccessRequestApplication extends Component {
       isInvestigatorInvalid = false, isLinkedInInvalid = false,
       isOrcidInvalid = false, isResearcherGateInvalid = false,
       isDAAInvalid = false, showValidationMessages = false,
-      isNihInvalid = false;
+      isNihInvalid = !this.state.nihValid;
 
     if (!this.isValid(this.state.formData.projectTitle)) {
       isTitleInvalid = true;
