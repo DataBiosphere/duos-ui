@@ -61,7 +61,6 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   async getResearcherProperties() {
     const currentUserId = Storage.getCurrentUser().dacUserId;
-    // Refresh the user's researcher properties for the current state.
     Researcher.getPropertiesByResearcherId(currentUserId).then(response => {
       const isAuthorized = _.isNil(response.eraAuthorized) ? false : JSON.parse(response.eraAuthorized);
       const expirationCount = _.isNil(response.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(response.eraExpiration);

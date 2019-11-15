@@ -38,8 +38,6 @@ class DataAccessRequestApplication extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
-      // nihError: false,
-      // nihErrorMessage:"Something went wrong. Please try again. ",
       formData: {
         datasets: [],
         dar_code: null,
@@ -219,7 +217,6 @@ class DataAccessRequestApplication extends Component {
       prev.rpProperties = rpProperties;
       prev.completed = completed;
       prev.formData = formData;
-      // prev.expirationCount = expirationCount;
       if (formData.nameDAA !== '') {
         prev.file.name = formData.nameDAA;
       }
