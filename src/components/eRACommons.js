@@ -40,10 +40,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     let isFcUser = this.verifyUser();
     if (!isFcUser) {
       Researcher.getPropertiesByResearcherId(currentUserId).then(
-        response => {
-          isFcUser = this.registerUserToFC(response);
-        },
-        () => this.setState({ nihError: true }));
+        (response) => isFcUser = this.registerUserToFC(response),
+        () => this.setState({ nihError: true })
+      );
     }
     if (isFcUser) {
       const parsedToken = qs.parse(searchArg);
@@ -110,7 +109,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   async deleteNihAccount() {
     AuthenticateNIH.eliminateAccount().then(
-      () => this.getResearcherProperties()
+      () => this.getResearcherProperties(),
+      () => this.setState({ nihError: true })
     );
   }
 
