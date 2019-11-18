@@ -9,32 +9,22 @@ import { Storage } from '../libs/storage';
 
 export const eRACommons = hh(class eRACommons extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isAuthorized: false,
-      expirationCount: 0,
-      nihUsername: '',
-      nihError: false
-    };
-    this.authenticateAsNIHFCUser = this.authenticateAsNIHFCUser.bind(this);
-    this.getResearcherProperties = this.getResearcherProperties.bind(this);
-    this.verifyToken = this.verifyToken.bind(this);
-    this.verifyUser = this.verifyUser.bind(this);
-    this.registerUserToFC = this.registerUserToFC.bind(this);
-    this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
-    this.deleteNihAccount = this.deleteNihAccount.bind(this);
+  state = {
+    isAuthorized: false,
+    expirationCount: 0,
+    nihUsername: '',
+    nihError: false
   };
 
-  async componentDidMount() {
+  componentDidMount = async () => {
     if (this.props.location !== undefined && this.props.location.search !== '') {
       this.authenticateAsNIHFCUser(this.props.location.search);
     } else {
       this.getResearcherProperties();
     }
-  }
+  };
 
-  async authenticateAsNIHFCUser(searchArg) {
+  authenticateAsNIHFCUser = async (searchArg) => {
     const currentUserId = Storage.getCurrentUser().dacUserId;
     let isFcUser = this.verifyUser();
     if (!isFcUser) {
@@ -57,7 +47,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     }
   };
 
-  async getResearcherProperties() {
+  getResearcherProperties = async () => {
     const currentUserId = Storage.getCurrentUser().dacUserId;
     Researcher.getPropertiesByResearcherId(currentUserId).then(response => {
       const isAuthorized = _.isNil(response.eraAuthorized) ? false : JSON.parse(response.eraAuthorized);
@@ -71,9 +61,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         return prev;
       });
     });
-  }
+  };
 
-  async verifyToken(parsedToken) {
+  verifyToken = async (parsedToken) => {
     return await AuthenticateNIH.verifyNihToken(parsedToken).then(
       (decoded) => decoded,
       () => {
@@ -81,45 +71,45 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         return null;
       }
     );
-  }
+  };
 
-  async verifyUser() {
+  verifyUser = async () => {
     const isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
       () => {
         this.setState({ nihError: true });
         return false;
       });
     return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
-  }
+  };
 
-  async registerUserToFC(properties) {
+  registerUserToFC = async (properties) => {
     return await AuthenticateNIH.fireCloudRegisterUser(properties).then(
       () => true,
       () => {
         this.setState({ nihError: true });
         return false;
       });
-  }
+  };
 
-  async redirectToNihLogin() {
+  redirectToNihLogin = async () => {
     const nihUrl = `${ await Config.getNihUrl() }?redirect-url=`;
     window.location.href = nihUrl.concat(window.location.origin + '/' + this.props.destination + '?jwt%3D%7Btoken%7D');
-  }
+  };
 
-  async deleteNihAccount() {
+  deleteNihAccount = async () => {
     AuthenticateNIH.eliminateAccount().then(
       () => this.getResearcherProperties(),
       () => this.setState({ nihError: true })
     );
-  }
+  };
 
   render() {
-    const validationErrorStyle = _.isNil(this.props.validationError) ? {} : {
+    const validationErrorStyle = (!_.isNil(this.props.validationError) && this.props.validationError) ? {
       color: "#D13B07",
       border: "1px solid #D13B07",
       borderRadius: 5,
       padding: 6
-    };
+    } : {};
     const nihErrorMessage = 'Something went wrong. Please try again.';
     return (
       div({ className: this.props.className }, [
