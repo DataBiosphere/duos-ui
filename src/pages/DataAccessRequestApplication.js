@@ -122,10 +122,9 @@ class DataAccessRequestApplication extends Component {
     this.handleFileChange = this.handleFileChange.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.onNihStatusUpdate = this.onNihStatusUpdate.bind(this);
   }
 
-  onNihStatusUpdate(nihValid) {
+  onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
       this.setState(prev => {
         prev.nihValid = nihValid;
