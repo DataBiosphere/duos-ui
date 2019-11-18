@@ -389,12 +389,13 @@ class DataAccessRequestApplication extends Component {
       && !this.isValid(this.state.formData.linkedIn)
       && !this.isValid(this.state.formData.researcherGate)
       && !this.isValid(this.state.formData.orcid)
+      && !this.state.nihValid
       && !this.isValid(this.state.formData.uploadFile)) {
       isLinkedInInvalid = true;
       isOrcidInvalid = true;
       isResearcherGateInvalid = true;
       isDAAInvalid = true;
-      isNihInvalid = !this.state.nihValid;
+      isNihInvalid = true;
       showValidationMessages = true;
     }
     this.setState(prev => {
