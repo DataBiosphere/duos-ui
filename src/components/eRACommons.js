@@ -104,7 +104,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   render() {
-    const validationErrorStyle = (!_.isNil(this.props.validationError) && this.props.validationError) ? {
+    const validationErrorStyle = _.get(this.props, 'validationError', false) ? {
       color: "#D13B07",
       border: "1px solid #D13B07",
       borderRadius: 5,

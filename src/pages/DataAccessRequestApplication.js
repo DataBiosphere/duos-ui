@@ -847,7 +847,7 @@ class DataAccessRequestApplication extends Component {
                     ]),
 
                     span({
-                      isRendered: showValidationMessages, className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
+                      isRendered: (showValidationMessages && !this.state.nihValid), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
                     }, ['NIH eRA Authentication is required']),
 
                     div({ className: 'row no-margin' }, [
