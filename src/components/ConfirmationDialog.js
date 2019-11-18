@@ -1,3 +1,4 @@
+import _ from 'lodash/fp';
 import { Component } from 'react';
 import { button, div, h, h2, span, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
@@ -62,7 +63,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
           isOpen: this.props.showModal,
           onAfterOpen: this.props.afterOpenModal,
           onRequestClose: this.props.onRequestClose,
-          style: customStyles,
+          style: _.mergeAll([customStyles, this.props.style]),
           contentLabel: "Modal"
         }, [
 

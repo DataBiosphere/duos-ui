@@ -551,6 +551,14 @@ export const Election = {
     return res;
   },
 
+  createElectionForDac: async (consentId, dacId) => {
+    var election = {};
+    election.status = 'Open';
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/election/dac/${dacId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
+    return res;
+  },
+
   findReviewedConsents: async () => {
     const url = `${await Config.getApiUrl()}/consent/cases/closed`;
     const res = await fetchOk(url, Config.authOpts());
