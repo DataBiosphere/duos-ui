@@ -16,7 +16,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       expirationCount: 0,
       nihUsername: '',
       nihError: false,
-      nihErrorMessage: 'Something went wrong. Please try again.'
+      validationError: _.isNil(props.validationError) ? false : props.validationError
     };
     this.authenticateAsNIHFCUser = this.authenticateAsNIHFCUser.bind(this);
     this.getResearcherProperties = this.getResearcherProperties.bind(this);
@@ -115,19 +115,27 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   }
 
   render() {
+    const validationErrorStyle = this.state.validationError ? {
+      color: "#D13B07",
+      border: "1px solid #D13B07",
+      borderRadius: 5,
+      padding: 6
+    } : {};
+    const nihErrorMessage = 'Something went wrong. Please try again.';
     return (
       div({ className: this.props.className }, [
         label({ className: 'control-label' }, ['NIH eRA Commons ID']),
         div({ isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0) }, [
           a({ onClick: this.redirectToNihLogin, target: '_blank', className: 'auth-button ERACommons' }, [
-            div({ className: 'logo' }, []),
-            span({}, ['Authenticate your account'])
+            div({style: validationErrorStyle}, [
+              span({}, ['Authenticate your account'])
+            ]),
           ])
         ]),
         span({
           className: 'cancel-color required-field-error-span',
           isRendered: this.state.nihError
-        }, [this.state.nihErrorMessage]),
+        }, [nihErrorMessage]),
         div({ isRendered: (this.state.isAuthorized) }, [
           div({
             isRendered: this.state.expirationCount >= 0,

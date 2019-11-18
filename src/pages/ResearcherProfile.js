@@ -547,8 +547,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
               div({ isRendered: this.state.isResearcher, className: "form-group" }, [
                 div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '20px' } }, [
                   label({ className: "control-label rp-title-question default-color" }, [
-                    "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
-                    span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
+                    "Researcher Identification*",
+                    span({}, ["Please authenticate your eRA Commons account to submit Data Access Requests. Other profiles are optional:"])
                   ]),
                 ]),
 
