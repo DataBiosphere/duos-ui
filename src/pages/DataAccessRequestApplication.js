@@ -25,7 +25,6 @@ class DataAccessRequestApplication extends Component {
     this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
     this.state = {
       nihValid: false,
-      rpProperties: {},
       disableOkBtn: false,
       showValidationMessages: false,
       optionMessage: noOptionMessage,
@@ -204,7 +203,6 @@ class DataAccessRequestApplication extends Component {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
-      prev.rpProperties = rpProperties;
       prev.completed = completed;
       prev.formData = formData;
       if (formData.nameDAA !== '') {
@@ -386,9 +384,6 @@ class DataAccessRequestApplication extends Component {
       && !this.isValid(this.state.formData.orcid)
       && !this.state.nihValid
       && !this.isValid(this.state.formData.uploadFile)) {
-      // isLinkedInInvalid = true;
-      // isOrcidInvalid = true;
-      // isResearcherGateInvalid = true;
       isDAAInvalid = true;
       isNihInvalid = true;
       showValidationMessages = true;
@@ -397,10 +392,7 @@ class DataAccessRequestApplication extends Component {
       prev.step1.inputTitle.invalid = isTitleInvalid;
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
       prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
-      // prev.step1.inputLinkedIn.invalid = isLinkedInInvalid;
       prev.step1.inputNih.invalid = isNihInvalid;
-      // prev.step1.inputOrcid.invalid = isOrcidInvalid;
-      // prev.step1.inputResearcherGate.invalid = isResearcherGateInvalid;
       prev.step4.uploadFile.invalid = isDAAInvalid;
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
       return prev;
@@ -520,7 +512,6 @@ class DataAccessRequestApplication extends Component {
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       }
-      ;
       this.setState(prev => {
         if (ontologies.length > 0) {
           prev.formData.ontologies = ontologies;
