@@ -113,7 +113,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     const nihErrorMessage = 'Something went wrong. Please try again.';
     return (
       div({ className: this.props.className }, [
-        label({ className: 'control-label' }, ['NIH eRA Commons ID']),
+        label({ className: 'control-label' }, ['NIH eRA Commons ID*']),
         div({ isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0) }, [
           a({ onClick: this.redirectToNihLogin, target: '_blank', className: 'auth-button ERACommons' }, [
             div({style: validationErrorStyle}, [
