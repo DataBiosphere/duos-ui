@@ -1,8 +1,13 @@
+import fileDownload from 'js-file-download';
 import _ from 'lodash/fp';
+import get from 'lodash/get';
+import head from 'lodash/head';
+import filter from 'lodash/filter';
 import { Config } from './config';
+import { Models } from './models';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
-import fileDownload from 'js-file-download';
+
 
 const dataTemplate = {
   accessTotal: [
@@ -209,34 +214,49 @@ export const DAC = {
 export const DAR = {
 
   describeDar: async (darId) => {
-    let darInfo = {};
-    const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    let data = await res.json();
+    const apiUrl = await Config.getApiUrl();
+    const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
+    const summaryDar = await summaryDarRes.json();
 
-    darInfo.researcherId = data.userId;
-    darInfo.status = data.status;
-    darInfo.hasAdminComment = data.rationale != null;
-    darInfo.adminComment = data.rationale;
-    darInfo.hasPurposeStatements = data.purposeStatements.length > 0;
+    let darInfo = Models.dar;
+    // Workaround for DUOS-461 until the backend API is updated.
+    // Get the research purpose directly from the DAR instead of the summary.
+    const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
+    const rawDar = await rawDarRes.json();
+    darInfo.hasDiseases = !_.isEmpty(summaryDar.diseases);
+    darInfo.diseases = summaryDar.diseases;
+    // darInfo.rus = summaryDar.rus; // Revert this change when API is updated.
+    darInfo.rus = rawDar.rus;
+    darInfo.researcherId = summaryDar.userId;
+    darInfo.darCode = summaryDar.darCode;
+    darInfo.projectTitle = summaryDar.projectTitle;
+    darInfo.institution = summaryDar.institutionName;
+    darInfo.department = summaryDar.department;
+    darInfo.city = summaryDar.city;
+    darInfo.country = summaryDar.country;
+    darInfo.status = summaryDar.status;
+    darInfo.hasAdminComment = summaryDar.rationale != null;
+    darInfo.adminComment = summaryDar.rationale;
+    darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
     if (darInfo.hasPurposeStatements) {
-      darInfo.purposeStatements = data.purposeStatements;
+      darInfo.purposeStatements = summaryDar.purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
+    } else {
+      darInfo.purposeStatements = [];
     }
-    darInfo.hasDiseases = data.diseases.length > 0;
-    darInfo.diseases = darInfo.hasDiseases ? data.diseases : [];
-    if (data.researchType.length > 0) {
-      darInfo.researchType = data.researchType;
+    if (summaryDar.researchType.length > 0) {
+      darInfo.researchType = summaryDar.researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
-    let researcherProperties = await Researcher.getResearcherProfile(darInfo.researcherId);
-    darInfo.pi = researcherProperties.isThePI === 'true' ? researcherProperties.profileName : researcherProperties.piName;
-    darInfo.havePI = researcherProperties.havePI === 'true' || researcherProperties.isThePI === 'true';
-    darInfo.profileName = researcherProperties.profileName;
-    darInfo.institution = researcherProperties.institution;
-    darInfo.department = researcherProperties.department;
-    darInfo.city = researcherProperties.city;
-    darInfo.country = researcherProperties.country;
+    darInfo.datasets = summaryDar.datasets;
+    darInfo.researcherProperties = summaryDar.researcherProperties;
+    const isThePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
+    const havePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
+    const profileName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'profileName'})), 'propertyValue', "");
+    const piName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'piName'})), 'propertyValue', "");
+    darInfo.pi = isThePI ? profileName : piName;
+    darInfo.havePI = havePI || isThePI;
+    darInfo.profileName = profileName;
     return darInfo;
   },
 
