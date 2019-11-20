@@ -59,14 +59,14 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   getResearcherProperties = async () => {
     const currentUserId = Storage.getCurrentUser().dacUserId;
     Researcher.getPropertiesByResearcherId(currentUserId).then(response => {
-      const isAuthorized = _.isNil(response.eraAuthorized) ? false : JSON.parse(response.eraAuthorized);
-      const expirationCount = _.isNil(response.eraExpiration) ? 0 : AuthenticateNIH.expirationCount(response.eraExpiration);
+      const isAuthorized = JSON.parse(_.get(response, 'eraAuthorized', "false"));
+      const expirationCount = AuthenticateNIH.expirationCount(_.get(response, 'eraExpiration', 0));
       const nihValid = isAuthorized && expirationCount > 0;
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
-        prev.nihUsername = _.isNil(response.nihUsername) ? '' : response.nihUsername;
+        prev.nihUsername = _.get(response, 'nihUsername', '');
         return prev;
       });
     });
