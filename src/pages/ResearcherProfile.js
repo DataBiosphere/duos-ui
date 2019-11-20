@@ -1,14 +1,14 @@
-import { Component } from 'react';
-import { div, h, hh, form, label, input, span, hr, a, p, button, textarea } from 'react-hyperscript-helpers';
-import { Researcher, User, DAR, AuthenticateNIH } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-import { PageHeading } from '../components/PageHeading';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import ReactTooltip from 'react-tooltip';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Config } from '../libs/config';
-import * as qs from 'query-string';
 import _ from 'lodash';
+import { Component } from 'react';
+import { a, button, div, form, h, hh, hr, input, label, p, span, textarea } from 'react-hyperscript-helpers';
+import ReactTooltip from 'react-tooltip';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { eRACommons } from '../components/eRACommons';
+import { PageHeading } from '../components/PageHeading';
+import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
+import { DAR, Researcher, User } from '../libs/ajax';
+import { Storage } from '../libs/storage';
+
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -22,60 +22,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
     this.saveProfile = this.saveProfile.bind(this);
     this.submit = this.submit.bind(this);
-    this.deleteNihAccount = this.deleteNihAccount.bind(this);
-    this.redirectToNihLogin = this.redirectToNihLogin.bind(this);
     this.saveUser = this.saveUser.bind(this);
     this.handleFileChange = this.handleFileChange.bind(this);
   }
 
   async componentDidMount() {
     this.getResearcherProfile();
-    if (this.props.location !== undefined && this.props.location.search !== "" && qs.parse(this.props.location.search).jwt !== undefined) {
-      let isFcUser = await this.verifyUser();
-      if (!isFcUser) {
-        isFcUser = await this.registerUsertoFC(this.state.profile);
-      }
-      if (isFcUser) {
-        const parsedToken = qs.parse(this.props.location.search);
-        const decodedNihAccount = await this.verifyToken(parsedToken);
-        if (decodedNihAccount !== null) {
-          await AuthenticateNIH.saveNihUsr(decodedNihAccount);
-          await this.getResearcherProfile();
-        }
-      }
-    }
     ReactTooltip.rebuild();
     this.props.history.push('profile');
-  }
-
-  async verifyToken(parsedToken) {
-    return await AuthenticateNIH.verifyNihToken(parsedToken).then(
-      (decoded) => decoded,
-      (error) => {
-        this.setState({nihError: true});
-        return null;
-      }
-    );
-  }
-
-  async verifyUser() {
-    let isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
-      (callback) => {
-        return false;
-      });
-    return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
-  }
-
-  async registerUsertoFC(profile) {
-    return await AuthenticateNIH.fireCloudRegisterUser(profile).then(
-      (success) => {
-        // user has been successfully registered to firecloud.
-        return true;
-      },
-      (fail) => {
-        this.setState({nihError: true});
-        return false;
-      });
   }
 
   initialState() {
@@ -87,14 +41,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       additionalEmail: '',
-      nihError: false,
-      nihErrorMessage: "Something went wrong. Please try again. ",
-      expirationCount: -1,
       file: {
-        name: '',
+        name: ''
       },
       profile: {
-        eraAuthorized: false,
         checkNotifications: false,
         academicEmail: '',
         address1: '',
@@ -109,7 +59,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         institution: '',
         isThePI: null,
         linkedIn: '',
-        nihUsername: '',
         orcid: '',
         piEmail: '',
         piName: '',
@@ -120,7 +69,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         state: '',
         zipcode: '',
         urlDAA: '',
-        nameDAA: '',
+        nameDAA: ''
       },
       showRequired: false,
       invalidFields: {
@@ -136,10 +85,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         havePI: false,
         isThePI: false,
         piName: false,
-        piEmail: false,
+        piEmail: false
       },
       showValidationMessages: false,
-      validateFields: false,
+      validateFields: false
     };
   }
 
@@ -153,17 +102,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     if (Storage.getData('researcher') !== null) {
-      rp = Storage.getData('researcher');
       Storage.removeData('researcher');
-      rp.eraAuthorized = profile.eraAuthorized;
-      rp.eraExpiration = profile.eraExpiration;
-      rp.nihUsername = profile.nihUsername;
     } else {
       rp = profile;
       rp.profileName = profile.profileName === undefined ? Storage.getCurrentUser().displayName : profile.profileName;
     }
-
-    let expirationCount = await AuthenticateNIH.expirationCount(rp.eraExpiration);
 
     this.setState(prev => {
       let key;
@@ -176,11 +119,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
-      prev.expirationCount = expirationCount;
-      prev.profile.eraAuthorized = profile.eraAuthorized !== undefined ? profile.eraAuthorized : false;
       return prev;
     }, () => {
-      if (this.state.profile.completed !== undefined && this.state.profile.completed !== "") {
+      if (this.state.profile.completed !== undefined && this.state.profile.completed !== '') {
         this.setState(prev => {
           prev.profile.completed = JSON.parse(this.state.profile.completed);
           return prev;
@@ -188,22 +129,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       }
       ReactTooltip.rebuild();
     });
-  }
-
-  deleteNihAccount() {
-    AuthenticateNIH.eliminateAccount().then(result => {
-      this.setState(prev => {
-        prev.profile.eraAuthorized = false;
-        return prev;
-      });
-    });
-  }
-
-  async redirectToNihLogin() {
-    const nihUrl = `${await Config.getNihUrl()}?redirect-url=`;
-    const landingUrl = nihUrl.concat(window.location.origin + "/profile?jwt%3D%7Btoken%7D");
-    Storage.setData('researcher', this.state.profile);
-    window.location.href = landingUrl;
   }
 
   handleChange = (event) => {
@@ -224,7 +149,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (event.target.files !== undefined && event.target.files[0]) {
       let file = event.target.files[0];
       this.setState({
-        file: file,
+        file: file
       });
     }
   };
@@ -341,7 +266,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   submit(event) {
-    this.setState({validateFields: true});
+    this.setState({ validateFields: true });
     event.preventDefault();
     let errorsShowed = false;
     if (this.state.isResearcher) {
@@ -416,18 +341,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   }
 
-  saveOProfile() {
-
-  }
-
   saveProfile(event) {
     event.preventDefault();
-    this.setState({showDialogSave: true});
+    this.setState({ showDialogSave: true });
   }
 
   cleanObject = (obj) => {
     for (let key in obj) {
-      if (obj[key] === "") {
+      if (obj[key] === '') {
         delete obj[key];
       }
     }
@@ -527,10 +448,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       let profile = this.state.profile;
       profile.completed = false;
       Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
-      this.props.history.push({pathname: 'dataset_catalog'});
+      this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
-    this.setState({showDialogSave: false});
+    this.setState({ showDialogSave: false });
   };
 
   render() {
@@ -539,166 +460,153 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
     return (
 
-      div({ className: "container" }, [
-        div({ className: "row no-margin" }, [
-          div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
+      div({ className: 'container' }, [
+        div({ className: 'row no-margin' }, [
+          div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
             PageHeading({
-              id: "researcherProfile",
-              color: "common",
-              title: "Your Profile",
-              description: this.state.isResearcher ? "Please complete the following information to be able to request access to dataset(s)" : ""
+              id: 'researcherProfile',
+              color: 'common',
+              title: 'Your Profile',
+              description: this.state.isResearcher ? 'Please complete the following information to be able to request access to dataset(s)' : ''
             }),
-            hr({ className: "section-separator" }),
+            hr({ className: 'section-separator' })
           ]),
-          div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding" }, [
-            form({ name: "researcherForm" }, [
-              div({ className: "form-group" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+          div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding' }, [
+            form({ name: 'researcherForm' }, [
+              div({ className: 'form-group' }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                   label({
-                    id: "lbl_profileName", className: "control-label"
-                  }, ["Full Name*"]),
+                    id: 'lbl_profileName', className: 'control-label'
+                  }, ['Full Name*']),
                   input({
-                    id: "profileName",
-                    name: "profileName",
-                    type: "text",
+                    id: 'profileName',
+                    name: 'profileName',
+                    type: 'text',
                     onChange: this.handleChange,
-                    className: (this.state.invalidFields.profileName && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                    className: (this.state.invalidFields.profileName && showValidationMessages) ?
+                      'form-control required-field-error' :
+                      'form-control',
                     value: this.state.profile.profileName,
                     required: true
                   }),
                   span({
-                    className: "cancel-color required-field-error-span",
+                    className: 'cancel-color required-field-error-span',
                     isRendered: this.state.invalidFields.profileName && showValidationMessages
-                  }, ["Full Name is required"])
+                  }, ['Full Name is required'])
                 ]),
 
-                div({ isRendered: this.state.isResearcher, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                   label({
-                    id: "lbl_profileAcademicEmail",
-                    className: "control-label"
-                  }, ["Academic/Business Email Address*"]),
+                    id: 'lbl_profileAcademicEmail',
+                    className: 'control-label'
+                  }, ['Academic/Business Email Address*']),
                   input({
-                    id: "profileAcademicEmail",
-                    name: "academicEmail",
-                    type: "email",
+                    id: 'profileAcademicEmail',
+                    name: 'academicEmail',
+                    type: 'email',
                     onChange: this.handleChange,
                     value: this.state.profile.academicEmail,
-                    className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                    className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ?
+                      'form-control required-field-error' :
+                      'form-control',
                     required: true
                   }),
                   span({
-                    className: "cancel-color required-field-error-span",
-                    isRendered: (this.state.invalidFields.academicEmail && this.state.profile.academicEmail.indexOf('@') === -1) && showValidationMessages
-                  }, ["Email Address is empty or has invalid format"]),
+                    className: 'cancel-color required-field-error-span',
+                    isRendered: (this.state.invalidFields.academicEmail && this.state.profile.academicEmail.indexOf('@') === -1) &&
+                      showValidationMessages
+                  }, ['Email Address is empty or has invalid format'])
                 ]),
 
-                div({ isRendered: this.state.isResearcher, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox" }, [
+                div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
                   input({
-                    type: "checkbox",
-                    id: "chk_sendNotificationsAcademicEmail",
-                    name: "checkNotifications",
-                    className: "checkbox-inline rp-checkbox",
+                    type: 'checkbox',
+                    id: 'chk_sendNotificationsAcademicEmail',
+                    name: 'checkNotifications',
+                    className: 'checkbox-inline rp-checkbox',
                     checked: this.state.profile.checkNotifications,
                     onChange: this.handleCheckboxChange
                   }),
-                  label({ className: "regular-checkbox rp-choice-questions", htmlFor: "chk_sendNotificationsAcademicEmail" }, ["Send Notifications to my Academic/Business Email Address"]),
+                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_sendNotificationsAcademicEmail' },
+                    ['Send Notifications to my Academic/Business Email Address'])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 " + (!this.state.isResearcher ? 'rp-last-group' : '') }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 ' + (!this.state.isResearcher ? 'rp-last-group' : '') }, [
                   label({
-                    id: "lbl_notificationsEmail", className: "control-label"
-                  }, ["Enter an additional email to receive DUOS notifications ", span({ className: "italic display-inline" }, ["(optional)"]),]),
+                    id: 'lbl_notificationsEmail', className: 'control-label'
+                  }, ['Enter an additional email to receive DUOS notifications ', span({ className: 'italic display-inline' }, ['(optional)'])]),
                   input({
-                    id: "additionalEmail",
-                    name: "additionalEmail",
-                    type: "text",
+                    id: 'additionalEmail',
+                    name: 'additionalEmail',
+                    type: 'text',
                     onChange: this.handleAdditionalEmailChange,
-                    className: "form-control",
-                    value: this.state.additionalEmail,
+                    className: 'form-control',
+                    value: this.state.additionalEmail
                   }),
                   span({
-                    className: "cancel-color required-field-error-span",
+                    className: 'cancel-color required-field-error-span',
                     isRendered: (this.state.additionalEmail.indexOf('@') === -1) && showValidationMessages
-                  }, ["Email Address is empty or has invalid format"])
+                  }, ['Email Address is empty or has invalid format'])
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: "form-group" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '20px' } }, [
-                  label({ className: "control-label rp-title-question default-color" }, [
-                    "Researcher Identification ", span({ className: "italic display-inline" }, ["(optional)"]),
-                    span({}, ["Please authenticate your eRA Commons account or provide a link to one of your other profiles:"])
-                  ]),
+              div({ isRendered: this.state.isResearcher, className: 'form-group' }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '20px' } }, [
+                  label({ className: 'control-label rp-title-question default-color' }, [
+                    'Researcher Identification*',
+                    span({}, ['Please authenticate your eRA Commons account to submit Data Access Requests. Other profiles are optional:'])
+                  ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
-                      label({ id: "lbl_profileNIH", className: "control-label" }, ["NIH eRA Commons ID"]),
-                      div({ isRendered: !this.state.profile.eraAuthorized || this.state.expirationCount < 0 }, [
-                        a({ onClick: this.redirectToNihLogin, target: "_blank", className: "auth-button eRACommons" }, [
-                          div({ className: "logo" }, []),
-                          span({}, ["Authenticate your account"])
-                        ])
-                      ]),
-                      span({
-                        className: "cancel-color required-field-error-span",
-                        isRendered: this.state.nihError
-                      }, [this.state.nihErrorMessage]),
-                      div({ isRendered: this.state.profile.eraAuthorized}, [
-                        div({ isRendered: this.state.expirationCount >= 0, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                          div({ className: "auth-id" }, [this.state.profile.nihUsername]),
-                          button({ onClick: this.deleteNihAccount, className: "close auth-clear" }, [
-                            span({ className: "glyphicon glyphicon-remove-circle", "data-tip": "", "data-for": "tip_clearNihAccount" })
-                          ]),
-                        ]),
-                        div({ className: "col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message" }, [
-                          div({ isRendered: this.state.expirationCount >= 0 }, ["Your NIH authentication will expire in " + this.state.expirationCount + " days"]),
-                          div({ isRendered: this.state.expirationCount < 0 }, ["Your NIH authentication expired"]),
-                        ])
-                      ]),
-                    ]),
-                    div({ className: "col-lg-4 col-md-4 col-sm-6 col-xs-12" }, [
-                      label({ id: "lbl_profileLibraryCard", className: "control-label" }, ["NIH Library Card"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                    eRACommons({
+                      className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12',
+                      destination: 'profile',
+                      onNihStatusUpdate: (nihValid) => {},
+                      location: this.props.location
+                    }),
+                    div({ className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12' }, [
+                      label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['NIH Library Card']),
                       div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
-                        div({ className: "library-icon"}),
-                        span({ className: "library-label"}, "Library Card")
+                        div({ className: 'library-icon' }),
+                        span({ className: 'library-label' }, 'Library Card')
                       ])
                     ])
                   ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
-                      label({ id: "lbl_profileLinkedIn", className: "control-label" }, ["LinkedIn Profile"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                    div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
+                      label({ id: 'lbl_profileLinkedIn', className: 'control-label' }, ['LinkedIn Profile']),
                       input({
-                        id: "profileLinkedIn",
-                        name: "linkedIn",
-                        type: "text",
-                        className: "form-control",
+                        id: 'profileLinkedIn',
+                        name: 'linkedIn',
+                        type: 'text',
+                        className: 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.linkedIn
                       })
                     ]),
-                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
-                      label({ id: "lbl_profileOrcid", className: "control-label" }, ["ORCID iD"]),
+                    div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
+                      label({ id: 'lbl_profileOrcid', className: 'control-label' }, ['ORCID iD']),
                       input({
-                        id: "profileOrcid",
-                        name: "orcid",
-                        type: "text",
-                        className: "form-control",
+                        id: 'profileOrcid',
+                        name: 'orcid',
+                        type: 'text',
+                        className: 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.orcid
                       })
                     ]),
-                    div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-12" }, [
-                      label({ id: "lbl_profileResearcherGate", className: "control-label" }, ["ResearchGate ID"]),
+                    div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
+                      label({ id: 'lbl_profileResearcherGate', className: 'control-label' }, ['ResearchGate ID']),
                       input({
-                        id: "profileResearcherGate",
-                        name: "researcherGate",
-                        type: "text",
-                        className: "form-control",
+                        id: 'profileResearcherGate',
+                        name: 'researcherGate',
+                        type: 'text',
+                        className: 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.researcherGate
                       })
@@ -706,85 +614,91 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '20px' } }, [
-                  label({ id: "lbl_profileInstitution", className: "control-label" }, ["Institution Name*"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '20px' } }, [
+                  label({ id: 'lbl_profileInstitution', className: 'control-label' }, ['Institution Name*']),
                   input({
-                    id: "profileInstitution",
-                    name: "institution",
-                    type: "text",
-                    className: (this.state.invalidFields.institution && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                    id: 'profileInstitution',
+                    name: 'institution',
+                    type: 'text',
+                    className: (this.state.invalidFields.institution && showValidationMessages) ?
+                      'form-control required-field-error' :
+                      'form-control',
                     onChange: this.handleChange,
                     value: this.state.profile.institution,
                     required: true
                   }),
                   span({
-                    className: "cancel-color required-field-error-span",
+                    className: 'cancel-color required-field-error-span',
                     isRendered: this.state.invalidFields.institution && showValidationMessages
-                  }, ["Institution Name is required"]),
+                  }, ['Institution Name is required'])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                      label({ id: "lbl_profileDepartment", className: "control-label" }, ["Department*"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                      label({ id: 'lbl_profileDepartment', className: 'control-label' }, ['Department*']),
                       input({
-                        id: "profileDepartment",
-                        name: "department",
-                        type: "text",
-                        className: (this.state.invalidFields.department && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                        id: 'profileDepartment',
+                        name: 'department',
+                        type: 'text',
+                        className: (this.state.invalidFields.department && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.department,
                         required: true
                       }),
                       span({
-                        className: "cancel-color required-field-error-span",
+                        className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.department && showValidationMessages
-                      }, ["Department is required"]),
+                      }, ['Department is required'])
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
                       label({
-                        id: "lbl_profileDivision",
-                        className: "control-label"
-                      }, ["Division ", span({ className: "italic" }, ["(optional)"])]),
+                        id: 'lbl_profileDivision',
+                        className: 'control-label'
+                      }, ['Division ', span({ className: 'italic' }, ['(optional)'])]),
                       input({
-                        id: "profileDivision",
-                        name: "division",
-                        type: "text",
-                        className: "form-control",
+                        id: 'profileDivision',
+                        name: 'division',
+                        type: 'text',
+                        className: 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.division
                       })
                     ])
                   ])
                 ]),
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                      label({ id: "lbl_profileAddress1", className: "control-label" }, ["Street Address 1*"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                      label({ id: 'lbl_profileAddress1', className: 'control-label' }, ['Street Address 1*']),
                       input({
-                        id: "profileAddress1",
-                        name: "address1",
-                        type: "text",
-                        className: ((this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                        id: 'profileAddress1',
+                        name: 'address1',
+                        type: 'text',
+                        className: ((this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.address1,
                         required: true
                       }),
                       span({
-                        className: "cancel-color required-field-error-span",
+                        className: 'cancel-color required-field-error-span',
                         isRendered: (this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages
-                      }, ["Street Address is required"]),
+                      }, ['Street Address is required'])
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
                       label({
-                        id: "lbl_profileAddress2",
-                        className: "control-label"
-                      }, ["Street Address 2 ", span({ className: "italic" }, ["(optional)"])]),
+                        id: 'lbl_profileAddress2',
+                        className: 'control-label'
+                      }, ['Street Address 2 ', span({ className: 'italic' }, ['(optional)'])]),
                       input({
-                        id: "profileAddress2",
-                        name: "address2",
-                        type: "text",
-                        className: "form-control",
+                        id: 'profileAddress2',
+                        name: 'address2',
+                        type: 'text',
+                        className: 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.address2
                       })
@@ -792,93 +706,101 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                      label({ id: "lbl_profileCity", className: "control-label" }, ["City*"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                      label({ id: 'lbl_profileCity', className: 'control-label' }, ['City*']),
                       input({
-                        id: "profileCity",
-                        name: "city",
-                        type: "text",
-                        className: (this.state.invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                        id: 'profileCity',
+                        name: 'city',
+                        type: 'text',
+                        className: (this.state.invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.city,
                         required: true
                       }),
                       span({
-                        className: "cancel-color required-field-error-span",
+                        className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.city && showValidationMessages
-                      }, ["City is required"]),
+                      }, ['City is required'])
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6" }, [
-                      label({ id: "lbl_profileState", className: "control-label" }, ["State*"]),
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                      label({ id: 'lbl_profileState', className: 'control-label' }, ['State*']),
                       input({
-                        id: "profileState",
-                        name: "state",
-                        type: "text",
-                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                        id: 'profileState',
+                        name: 'state',
+                        type: 'text',
+                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.state,
                         required: true
                       }),
                       span({
-                        className: "cancel-color required-field-error-span",
+                        className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.state && showValidationMessages
-                      }, ["State is required"])
+                      }, ['State is required'])
                     ])
                   ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group" }, [
-                      label({ id: "lbl_profileZip", className: "control-label" }, ["Zip/Postal Code*"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
+                      label({ id: 'lbl_profileZip', className: 'control-label' }, ['Zip/Postal Code*']),
                       input({
-                        id: "profileZip",
-                        name: "zipcode",
-                        type: "text",
-                        className: (this.state.invalidFields.zipcode && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                        id: 'profileZip',
+                        name: 'zipcode',
+                        type: 'text',
+                        className: (this.state.invalidFields.zipcode && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.zipcode,
                         required: true
                       }),
                       span({
-                        className: "cancel-color required-field-error-span",
+                        className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.zipcode && showValidationMessages
-                      }, ["Zip/Postal Code is required"]),
+                      }, ['Zip/Postal Code is required'])
                     ]),
-                    div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group" }, [
-                      label({ id: "lbl_profileCountry", className: "control-label" }, ["Country*"]),
+                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
+                      label({ id: 'lbl_profileCountry', className: 'control-label' }, ['Country*']),
                       input({
-                        id: "profileCountry",
-                        name: "country",
-                        type: "text",
-                        className: (this.state.invalidFields.country && showValidationMessages) ? 'form-control required-field-error' : "form-control",
+                        id: 'profileCountry',
+                        name: 'country',
+                        type: 'text',
+                        className: (this.state.invalidFields.country && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.country,
                         required: true
                       }),
                       span({
-                        className: "cancel-color required-field-error-span",
+                        className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.country && showValidationMessages
-                      }, ["Country is required"]),
-                    ]),
-                  ]),
-                ]),
+                      }, ['Country is required'])
+                    ])
+                  ])
+                ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: "form-group" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12", style: { 'marginTop': '15px' } }, [
+              div({ isRendered: this.state.isResearcher, className: 'form-group' }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '15px' } }, [
                   label({
-                    id: "lbl_isThePI",
-                    className: "control-label ",
+                    id: 'lbl_isThePI',
+                    className: 'control-label '
                   }, [
-                      "Are you the Principal Investigator?* ",
-                      span({ className: "glyphicon glyphicon-question-sign tooltip-icon", "data-tip": "This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.", "data-for": "tip_isthePI" })
-                    ])
+                    'Are you the Principal Investigator?* ',
+                    span({
+                      className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                      'data-tip': 'This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.',
+                      'data-for': 'tip_isthePI'
+                    })
+                  ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
                     value: this.state.profile.isThePI,
                     onChange: this.handleRadioChange,
@@ -888,21 +810,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   })
                 ]),
                 span({
-                  className: "cancel-color required-field-error-span",
+                  className: 'cancel-color required-field-error-span',
                   style: { 'marginLeft': '15px' },
                   isRendered: (this.state.profile.isThePI === null || this.state.invalidFields.isThePI) && showValidationMessages
-                }, ["Required field"])
+                }, ['Required field'])
               ]),
 
-              div({ isRendered: this.state.profile.isThePI === 'false' && this.state.isResearcher, className: "form-group" }, [
+              div({ isRendered: this.state.profile.isThePI === 'false' && this.state.isResearcher, className: 'form-group' }, [
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                   label({
-                    className: "control-label ",
-                  }, ["Do you have a Principal Investigator?*"])
+                    className: 'control-label '
+                  }, ['Do you have a Principal Investigator?*'])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
                     value: this.state.profile.havePI,
                     onChange: this.handleRadioChange,
@@ -912,59 +834,59 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   })
                 ]),
                 span({
-                  className: "cancel-color required-field-error-span",
+                  className: 'cancel-color required-field-error-span',
                   style: { 'marginLeft': '15px' },
                   isRendered: (this.state.invalidFields.havePI === 'true' || this.state.invalidFields.havePI) && showValidationMessages
-                }, ["Required field"]),
+                }, ['Required field']),
 
-                div({ isRendered: this.state.profile.havePI === true || this.state.profile.havePI === 'true', className: "form-group" }, [
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                    label({ id: "lbl_profilePIName", className: "control-label" }, ["Principal Investigator Name*"]),
+                div({ isRendered: this.state.profile.havePI === true || this.state.profile.havePI === 'true', className: 'form-group' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                    label({ id: 'lbl_profilePIName', className: 'control-label' }, ['Principal Investigator Name*']),
                     input({
-                      id: "profilePIName",
-                      name: "piName",
-                      type: "text",
-                      className: "form-control ",
+                      id: 'profilePIName',
+                      name: 'piName',
+                      type: 'text',
+                      className: 'form-control ',
                       onChange: this.handleChange,
                       value: this.state.profile.piName,
-                      required: this.state.profile.havePI === true,
+                      required: this.state.profile.havePI === true
                     }),
                     span({
-                      className: "cancel-color required-field-error-span",
+                      className: 'cancel-color required-field-error-span',
                       isRendered: (this.state.profile.piName === '' || this.state.invalidFields.piName) && showValidationMessages
-                    }, ["Principal Investigator is required"]),
+                    }, ['Principal Investigator is required'])
                   ]),
 
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                     label({
-                      id: "lbl_profilePIEmail",
-                      className: "control-label"
-                    }, ["Principal Investigator Email Address*"]),
+                      id: 'lbl_profilePIEmail',
+                      className: 'control-label'
+                    }, ['Principal Investigator Email Address*']),
                     input({
-                      id: "profilePIEmail",
-                      name: "piEmail",
-                      type: "email",
-                      className: "form-control ",
+                      id: 'profilePIEmail',
+                      name: 'piEmail',
+                      type: 'email',
+                      className: 'form-control ',
                       onChange: this.handleChange,
                       value: this.state.profile.piEmail,
-                      required: this.state.profile.havePI === true,
+                      required: this.state.profile.havePI === true
                     }),
                     span({
-                      className: "cancel-color required-field-error-span",
+                      className: 'cancel-color required-field-error-span',
                       isRendered: (this.state.invalidFields.piEmail && this.state.profile.piEmail.indexOf('@') === -1) && showValidationMessages
-                    }, ["Email Address is empty or has invalid format"]),
+                    }, ['Email Address is empty or has invalid format'])
                   ]),
 
-                  div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                     label({
-                      id: "lbl_profileEraCommons",
-                      className: "control-label"
-                    }, ["eRA Commons ID ", span({ className: "italic" }, ["(optional)"])]),
+                      id: 'lbl_profileEraCommons',
+                      className: 'control-label'
+                    }, ['eRA Commons ID ', span({ className: 'italic' }, ['(optional)'])]),
                     input({
-                      id: "profileEraCommons",
-                      name: "eRACommonsID",
-                      type: "text",
-                      className: "form-control",
+                      id: 'profileEraCommons',
+                      name: 'eRACommonsID',
+                      type: 'text',
+                      className: 'form-control',
                       onChange: this.handleChange,
                       value: this.state.profile.eRACommonsID
                     })
@@ -972,110 +894,123 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: "form-group" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
+              div({ isRendered: this.state.isResearcher, className: 'form-group' }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                   label({
-                    id: "lbl_profilePubmedID",
-                    className: "control-label"
-                  }, ["Pubmed ID of a publication ", span({ className: "italic" }, ["(optional)"])]),
+                    id: 'lbl_profilePubmedID',
+                    className: 'control-label'
+                  }, ['Pubmed ID of a publication ', span({ className: 'italic' }, ['(optional)'])]),
                   input({
-                    id: "profilePubmedID",
-                    name: "pubmedID",
-                    type: "text",
-                    className: "form-control",
+                    id: 'profilePubmedID',
+                    name: 'pubmedID',
+                    type: 'text',
+                    className: 'form-control',
                     onChange: this.handleChange,
                     value: this.state.profile.pubmedID
                   })
                 ]),
 
-                div({ isRendered: this.state.isResearcher, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group" }, [
+                div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group' }, [
                   label({
-                    id: "lbl_profileScientificURL",
-                    className: "control-label"
-                  }, ["URL of a scientific publication ", span({ className: "italic" }, ["(optional)"])]),
+                    id: 'lbl_profileScientificURL',
+                    className: 'control-label'
+                  }, ['URL of a scientific publication ', span({ className: 'italic' }, ['(optional)'])]),
                   textarea({
-                    id: "profileScientificURL",
-                    name: "scientificURL",
-                    className: "form-control",
-                    maxLength: "512",
-                    rows: "3",
+                    id: 'profileScientificURL',
+                    name: 'scientificURL',
+                    className: 'form-control',
+                    maxLength: '512',
+                    rows: '3',
                     onChange: this.handleChange,
                     value: this.state.profile.scientificURL
                   })
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                label({ className: "control-label rp-title-question default-color" }, [
-                  "Data Access Agreement ", span({ className: "italic display-inline" }, ["(optional)"]),
-                  span({ className: "default-color" }, ["Data Access Agreement will be required for submission of a Data Access Request"])
+              div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                label({ className: 'control-label rp-title-question default-color' }, [
+                  'Data Access Agreement ', span({ className: 'italic display-inline' }, ['(optional)']),
+                  span({ className: 'default-color' }, ['Data Access Agreement will be required for submission of a Data Access Request'])
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: "row no-margin" }, [
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  label({ className: "control-label default-color" }, ["1. Download the Data Access Agreement template and have your organization's Signing Official sign it"])
+              div({ isRendered: this.state.isResearcher, className: 'row no-margin' }, [
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  label({ className: 'control-label default-color' },
+                    ['1. Download the Data Access Agreement template and have your organization\'s Signing Official sign it'])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  a({ id: "link_downloadAgreement", href: "BroadDataAccessAgreement.pdf", target: "_blank", className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
-                    span({ className: "glyphicon glyphicon-download" }),
-                    "Download Agreement Template"
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  a({
+                    id: 'link_downloadAgreement', href: 'BroadDataAccessAgreement.pdf', target: '_blank',
+                    className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                  }, [
+                    span({ className: 'glyphicon glyphicon-download' }),
+                    'Download Agreement Template'
                   ])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                  label({ className: "control-label default-color" }, ["2. Upload your template of the Data Access Agreement signed by your organization's Signing Official"]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  label({ className: 'control-label default-color' },
+                    ['2. Upload your template of the Data Access Agreement signed by your organization\'s Signing Official'])
                 ]),
 
-                div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-                  div({ style: { paddingTop: 7 }, className: "fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
-                    span({ className: "glyphicon glyphicon-upload" }),
-                    "Upload S.O. Signed Agreement",
-                    input({ id: "uploadFile", type: "file", onChange: this.handleFileChange, className: "upload" })
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                  div({
+                    style: { paddingTop: 7 }, className: 'fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                  }, [
+                    span({ className: 'glyphicon glyphicon-upload' }),
+                    'Upload S.O. Signed Agreement',
+                    input({ id: 'uploadFile', type: 'file', onChange: this.handleFileChange, className: 'upload' })
                   ])
                 ]),
-                p({ id: "txt_uploadFile", className: "fileName daa", isRendered: this.state.file.name !== '' || this.state.profile.nameDAA !== '' }, [
-                  "Your currently uploaded Data Access Agreement: ",
-                  span({ className: "italic normal" }, [this.state.file.name !== '' ? this.state.file.name : this.state.profile.nameDAA]),
+                p({ id: 'txt_uploadFile', className: 'fileName daa', isRendered: this.state.file.name !== '' || this.state.profile.nameDAA !== '' }, [
+                  'Your currently uploaded Data Access Agreement: ',
+                  span({ className: 'italic normal' }, [this.state.file.name !== '' ? this.state.file.name : this.state.profile.nameDAA])
                 ])
               ]),
 
-              div({ className: "row margin-top-20" }, [
-                div({ className: "col-lg-4 col-md-6 col-sm-6 col-xs-6" }, [
-                  div({ className: "italic default-color" }, ["*Required field"])
+              div({ className: 'row margin-top-20' }, [
+                div({ className: 'col-lg-4 col-md-6 col-sm-6 col-xs-6' }, [
+                  div({ className: 'italic default-color' }, ['*Required field'])
                 ]),
 
-                div({ className: "col-lg-8 col-md-6 col-sm-6 col-xs-6" }, [
-                  button({ id: "btn_submit", onClick: this.submit, className: "f-right btn-primary common-background" }, [
-                    span({ isRendered: ((!completed || completed === undefined)) && this.state.isResearcher }, ["Submit"]),
-                    span({ isRendered: (completed === true || !this.state.isResearcher) }, ["Update"]),
+                div({ className: 'col-lg-8 col-md-6 col-sm-6 col-xs-6' }, [
+                  button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
+                    span({ isRendered: ((!completed || completed === undefined)) && this.state.isResearcher }, ['Submit']),
+                    span({ isRendered: (completed === true || !this.state.isResearcher) }, ['Update'])
                   ]),
                   ConfirmationDialog({
                     title: 'Submit Profile',
                     color: 'common',
                     showModal: this.state.showDialogSubmit,
-                    action: { label: "Yes", handler: this.dialogHandlerSubmit }
-                  }, [div({ className: "dialog-description" }, ["Are you sure you want to submit your Profile information?"]),]),
+                    action: { label: 'Yes', handler: this.dialogHandlerSubmit }
+                  }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit your Profile information?'])]),
 
-                  button({ id: "btn_continueLater", isRendered: !completed && this.state.isResearcher, onClick: this.saveProfile, className: "f-right btn-secondary common-color" }, ["Continue later"]),
+                  button({
+                    id: 'btn_continueLater', isRendered: !completed && this.state.isResearcher, onClick: this.saveProfile,
+                    className: 'f-right btn-secondary common-color'
+                  }, ['Continue later']),
 
                   ConfirmationDialog({
-                    title: 'Continue later',
-                    color: 'common',
-                    showModal: this.state.showDialogSave,
-                    action: { label: "Yes", handler: this.dialogHandlerSave }
-                  }, [div({ className: "dialog-description" }, ["Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request."])]
+                      title: 'Continue later',
+                      color: 'common',
+                      showModal: this.state.showDialogSave,
+                      action: { label: 'Yes', handler: this.dialogHandlerSave }
+                    }, [
+                      div({ className: 'dialog-description' },
+                        ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
+                    ]
                   ),
                   h(ReactTooltip, {
-                    id: "tip_clearNihAccount",
+                    id: 'tip_clearNihAccount',
                     place: 'right',
                     effect: 'solid',
                     multiline: true,
                     className: 'tooltip-wrapper'
                   }),
                   h(ReactTooltip, {
-                    id: "tip_isthePI",
+                    id: 'tip_isthePI',
                     effect: 'solid',
                     multiline: true,
                     className: 'tooltip-wrapper'
