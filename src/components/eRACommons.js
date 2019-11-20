@@ -174,12 +174,34 @@ export const eRACommons = hh(class eRACommons extends React.Component {
             isRendered: this.state.expirationCount >= 0,
             className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding'
           }, [
-            div({ className: 'auth-id' }, [this.state.nihUsername]),
-            button({ type: 'button', onClick: this.deleteNihAccount, className: 'close auth-clear' }, [
+            div({
+              style: {
+                float: 'left',
+                fontWeight: 500,
+                display: 'inline',
+                paddingTop: 5
+              }
+            }, [this.state.nihUsername]),
+            button({
+              style: {
+                float: 'left',
+                margin: '2px 0 0 10px'
+              },
+              type: 'button',
+              onClick: this.deleteNihAccount,
+              className: 'close'
+            }, [
               span({ className: 'glyphicon glyphicon-remove-circle', 'data-tip': 'Clear account', 'data-for': 'tip_clearNihAccount' })
             ])
           ]),
-          div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding auth-message' }, [
+          div({
+            style: {
+              marginTop: 8,
+              fontStyle: 'italic',
+              display: 'block'
+            },
+            className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 no-padding'
+          }, [
             div({ isRendered: this.state.expirationCount >= 0 }, ['Your NIH authentication will expire in ' + this.state.expirationCount + ' days']),
             div({ isRendered: this.state.expirationCount < 0 }, ['Your NIH authentication has expired'])
           ])

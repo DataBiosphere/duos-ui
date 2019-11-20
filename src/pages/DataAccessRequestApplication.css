@@ -17,69 +17,6 @@ ol.rp-agreement {
   margin-left: 33px;
 }
 
-.auth-button.eRACommons {
-  height: 34px;
-  width: 210px;
-  border: none;
-  border-radius: 3px;
-  display: block;
-  border: 1px solid #d3d3d3;
-  padding: 3px;
-  text-align: center;
-  margin-top: 3px;
-  background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 1px 1px 3px #999;
-  cursor: pointer;
-  color: #999;
-  font-weight: 500;
-  font-size: 0.9em;
-  transition: all 0.2s ease;
-}
-
-.auth-button.eRACommons:hover {
-  box-shadow: 1px 1px 5px #00609f;
-}
-
-.auth-button.eRACommons .logo {
-  height: 27px;
-  width: 38px;
-  background-size: cover !important;
-  background-image: url('/images/era-commons-logo.png');
-  display: inline-block;
-}
-
-.auth-button.eRACommons span {
-  vertical-align: 50%;
-}
-
-.auth-button {
-  margin-top: 3px;
-}
-
-.auth-id {
-  float: left;
-  font-weight: 500;
-  display: inline;
-  padding-top: 5px;
-}
-
-.auth-clear {
-  float: left;
-  margin: 2px 0 0 10px;
-}
-
-.auth-message {
-  margin-top: 8px;
-  font-style: italic;
-  display: block;
-}
-
-.auth-message div {
-  color: #777777;
-  display: block;
-}
-
 a.btn-primary,
 a.btn-secondary {
   padding-top: 10px;
