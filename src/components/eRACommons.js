@@ -13,7 +13,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     isAuthorized: false,
     expirationCount: 0,
     nihUsername: '',
-    nihError: false
+    nihError: false,
+    isHovered: false
   };
 
   componentDidMount = async () => {
@@ -22,6 +23,14 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     } else {
       this.getResearcherProperties();
     }
+  };
+
+  onMouseEnter = () => {
+    this.setState({ isHovered: true });
+  };
+
+  onMouseLeave = () => {
+    this.setState({ isHovered: false });
   };
 
   authenticateAsNIHFCUser = async (searchArg) => {
@@ -104,21 +113,56 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   render() {
-    const validationErrorStyle = _.get(this.props, 'validationError', false) ? {
-      color: "#D13B07",
-      border: "1px solid #D13B07",
-      borderRadius: 5,
-      padding: 6
+    const logoStyle = {
+      height: 27,
+      width: 38,
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'contain',
+      backgroundImage: 'url("/images/era-commons-logo.png")',
+      display: 'inline-block'
+    };
+    const buttonHoverState = {
+      boxShadow: '1px 1px 3px #00609f'
+    };
+    const buttonNormalState = {
+      height: 34,
+      width: 210,
+      display: 'block',
+      border: '1px solid #d3d3d3',
+      padding: 3,
+      textAlign: 'center',
+      marginTop: 3,
+      backgroundColor: '#fff',
+      borderRadius: 2,
+      boxShadow: '1px 1px 3px #999999',
+      cursor: 'pointer',
+      color: '#999',
+      fontWeight: 500,
+      fontSize: '.9em',
+      transition: 'all .2s ease'
+    };
+    const validationErrorState = _.get(this.props, 'validationError', false) ? {
+      color: '#D13B07'
     } : {};
+    const buttonStyle =
+      _.merge(this.state.isHovered ? _.merge(buttonNormalState, buttonHoverState) : buttonNormalState, validationErrorState);
     const nihErrorMessage = 'Something went wrong. Please try again.';
+
     return (
       div({ className: this.props.className }, [
         label({ className: 'control-label' }, ['NIH eRA Commons ID*']),
-        div({ isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0) }, [
-          a({ onClick: this.redirectToNihLogin, target: '_blank', className: 'auth-button ERACommons' }, [
-            div({style: validationErrorStyle}, [
-              span({}, ['Authenticate your account'])
-            ]),
+        div({
+          isRendered: (!this.state.isAuthorized || this.state.expirationCount < 0)
+        }, [
+          a({
+            style: buttonStyle,
+            onMouseEnter: this.onMouseEnter,
+            onMouseLeave: this.onMouseLeave,
+            onClick: this.redirectToNihLogin,
+            target: '_blank'
+          }, [
+            div({ style: logoStyle }),
+            span({ style: { verticalAlign: '50%' } }, ['Authenticate your account'])
           ])
         ]),
         span({
