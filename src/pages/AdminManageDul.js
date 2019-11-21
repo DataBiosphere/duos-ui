@@ -609,7 +609,9 @@ class AdminManageDul extends Component {
           title: 'Create election?',
           color: 'dul',
           disableOkBtn: this.state.disableOkBtn ||
-            (_.isNil(this.state.selectedElection.dacId) && _.isEmpty(this.state.selectedDac)),
+            (!_.isEmpty(this.state.dacList) &&
+              _.isNil(this.state.selectedElection.dacId) &&
+              _.isEmpty(this.state.selectedDac)),
           disableNoBtn: this.state.disableCancelBtn,
           action: { label: 'Yes', handler: this.dialogHandlerCreate },
           alertMessage: this.state.alertMessage,
@@ -617,7 +619,8 @@ class AdminManageDul extends Component {
         }, [
           div({ className: 'dialog-description' }, [
             span({}, ['Are you sure you want the DAC to vote on this case? ']),
-            div({ isRendered: _.isNil(this.state.selectedElection.dacId) }, [
+            div({ isRendered: (_.isNil(this.state.selectedElection.dacId) &&
+                !_.isEmpty(this.state.dacList)) }, [
               'This election requires a DAC assignment:',
               h(Select, {
                 classNamePrefix: 'select',
