@@ -1,40 +1,34 @@
 import { Component } from 'react';
-import { div, h1, label, input, hr, span, h } from 'react-hyperscript-helpers';
-import { Config } from "../libs/config";
-import { USER_ROLES } from '../libs/utils';
 import GoogleLogin from 'react-google-login';
-import { Storage } from "../libs/storage";
+import { div, h, h1, hr, label, span } from 'react-hyperscript-helpers';
+import { Alert } from '../components/Alert';
+import { User } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { Models } from '../libs/models';
+import { Storage } from '../libs/storage';
+import { USER_ROLES } from '../libs/utils';
 import './Login.css';
-import { User } from "../libs/ajax";
+
 
 class HomeRegister extends Component {
   constructor(props) {
     super(props);
     this.state = {
       displayName: '',
-      clientId: ''
+      clientId: '',
+      error: Models.error
     };
     this.myHandler = this.myHandler.bind(this);
     this.getGoogleClientId();
   }
 
   async getGoogleClientId() {
-    const clientKey = `${await Config.getGoogleClientId()}`;
+    const clientKey = `${ await Config.getGoogleClientId() }`;
     this.setState(prev => {
       prev.clientId = clientKey;
       return prev;
     });
   }
-
-  getNewUser = () => {
-    let role = {};
-    let user = {};
-    user.roles = [];
-    role.name = USER_ROLES.researcher;
-    user.roles.push(role);
-    user.displayName = this.state.displayName;
-    return user;
-  };
 
   getUser = async () => {
     return await User.getByEmail(Storage.getGoogleData().profileObj.email);
@@ -43,31 +37,43 @@ class HomeRegister extends Component {
   responseGoogle = async (response) => {
     Storage.setGoogleData(response);
 
-    let newUser = this.getNewUser();
-
-    User.registerUser(newUser).then(
+    User.registerUser().then(
       data => {
-        data = Object.assign(data, this.setRoles(newUser));
+        data = Object.assign(data, this.setRoles(data));
         this.setStorage(data);
-        this.props.history.push('dataset_catalog?reviewProfile');
+        this.props.history.push('/profile');
       },
       error => {
-        if (error.status === 409 && this.state.displayName !== '') {
-          alert("User already exists.");
-          this.getUser().then(
-            user => {
-              user = Object.assign(user, this.setRoles(user));
-              this.setStorage(user);
-              this.redirect(user);
-            },
-            error => {
-              Storage.clearStorage();
+        const status = error.status;
+        switch (status) {
+          case 400:
+            this.setState(prev => {
+              prev.error = { show: true, title: 'Error', msg: JSON.stringify(error) };
+              return prev;
             });
+            break;
+          case 409:
+            // If the user exists, just log them in.
+            this.getUser().then(
+              user => {
+                user = Object.assign(user, this.setRoles(user));
+                this.setStorage(user);
+                this.redirect(user);
+              },
+              error => {
+                Storage.clearStorage();
+              });
+            break;
+          default:
+            this.setState(prev => {
+              prev.error = { show: true, title: 'Error', msg: 'Unexpected error, please try again' };
+              return prev;
+            });
+            break;
         }
       }
     );
   };
-
 
   setRoles(user) {
     const currentUserRoles = user.roles.map(roles => roles.name);
@@ -117,33 +123,28 @@ class HomeRegister extends Component {
       googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } });
     } else {
       googleLoginButton = h(GoogleLogin, {
-        className: "btn_gSignInWrapper",
+        className: 'btn_gSignInWrapper',
         clientId: this.state.clientId,
         onSuccess: this.responseGoogle,
-        onFailure: this.forbidden,
-        disabled: this.state.displayName === ''
+        onFailure: this.forbidden
       }, [
-          div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
-            span({ className: "icon" }),
-            label({}, ["Register with Google"])
-          ])
-        ]);
+        div({ id: 'btn_gSignIn', className: 'btn_gSignIn' }, [
+          span({ className: 'icon' }),
+          label({}, ['Register with Google'])
+        ])
+      ]);
     }
 
     return (
-
-      div({ className: "row home" }, [
-        div({ className: "col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          h1({ className: "home-title" }, ["Join DUOS"]),
-          div({ className: "home-title-description" }, ["Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests."]),
-          hr({ className: "home-line" }),
-          div({ className: "row" }, [
-            div({ className: "col-lg-6 col-md-8 col-sm-12 col-xs-12" }, [
-              label({ className: "home-control-label col-lg-12 col-md-12 col-sm-12 col-xs-12" }, ["Full Name"]),
-              input({ className: "form-control col-lg-12 col-md-12 col-sm-12 col-xs-12", type: "text", onChange: this.myHandler })
-            ])
-          ]),
-          div({}, [googleLoginButton])
+      div({ className: 'row home' }, [
+        div({ className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
+          h1({ className: 'home-title' }, ['Join DUOS']),
+          div({ className: 'home-title-description' }, ['Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests.']),
+          hr({ className: 'home-line' }),
+          div({}, [googleLoginButton]),
+          div({ isRendered: this.state.error.show }, [
+            Alert({ id: 'modal', type: 'danger', title: this.state.error.title, description: this.state.error.msg })
+          ])
         ])
       ])
     );
