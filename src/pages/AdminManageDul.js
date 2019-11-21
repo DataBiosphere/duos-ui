@@ -46,11 +46,11 @@ class AdminManageDul extends Component {
   }
 
   getDACs = async () => {
-    const dacs = await DAC.list();
-    this.setState(prev => {
-      prev.dacList = dacs;
-      return prev;
-    });
+    // const dacs = await DAC.list();
+    // this.setState(prev => {
+    //   prev.dacList = dacs;
+    //   return prev;
+    // });
   };
 
   dacOptions = () => {
@@ -246,7 +246,7 @@ class AdminManageDul extends Component {
       let election = this.state.selectedElection;
       let consentId = election.consentId;
       let electionPromise = null;
-      if (_.isNil(election.dacId)) {
+      if (_.isNil(election.dacId) && !_.isEmpty(dac)) {
         electionPromise = Election.createElectionForDac(consentId, dac.dacId);
       } else {
         electionPromise = Election.createElection(consentId);
