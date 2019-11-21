@@ -46,11 +46,11 @@ class AdminManageDul extends Component {
   }
 
   getDACs = async () => {
-    // const dacs = await DAC.list();
-    // this.setState(prev => {
-    //   prev.dacList = dacs;
-    //   return prev;
-    // });
+    const dacs = await DAC.list();
+    this.setState(prev => {
+      prev.dacList = dacs;
+      return prev;
+    });
   };
 
   dacOptions = () => {
