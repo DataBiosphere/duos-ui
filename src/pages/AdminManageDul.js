@@ -625,6 +625,7 @@ class AdminManageDul extends Component {
                 isClearable: true,
                 isMulti: false,
                 isSearchable: true,
+                maxMenuHeight: 210,
                 name: 'dac',
                 onChange: (option) => this.onDacChange(option),
                 onMenuOpen: () => this.onDacMenuOpen(),
