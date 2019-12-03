@@ -1,5 +1,13 @@
 export const Models = {
-  dac: { dac: {}, chairpersons: [], members: [] },
+  dac: {
+    dacId: null,
+    name: '',
+    description: '',
+    createDate: null,
+    updateDate: null,
+    chairpersons: [],
+    members: []
+  },
   dar: {
     researcherProperties: [],
     researcherId: '',
