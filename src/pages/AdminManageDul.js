@@ -193,7 +193,7 @@ class AdminManageDul extends Component {
 
   openDialogCreate = (election) => (e) => {
     this.setState({
-      createWarning: (election.status === 'Closed' && election.archived !== true),
+      createWarning: (election.status === 'Closed' && !election.archived),
       showDialogCreate: true,
       selectedElection: election
     });
@@ -242,9 +242,9 @@ class AdminManageDul extends Component {
   dialogHandlerCreate = (answer) => async (e) => {
     this.setState({ disableOkBtn: answer, disableCancelBtn: answer });
     if (answer) {
-      let dac = this.state.selectedDac;
-      let election = this.state.selectedElection;
-      let consentId = election.consentId;
+      const dac = this.state.selectedDac;
+      const election = this.state.selectedElection;
+      const consentId = election.consentId;
       let electionPromise = null;
       if (_.isNil(election.dacId) && !_.isEmpty(dac)) {
         electionPromise = Election.createElectionForDac(consentId, dac.dacId);
@@ -397,13 +397,13 @@ class AdminManageDul extends Component {
                       div({
                         id: election.consentId + '_groupName',
                         name: 'groupName',
-                        className: 'col-2 cell-body text ' + ((election.groupName === false || election.groupName === null) ? 'empty' : ''),
+                        className: 'col-2 cell-body text ' + ((!election.groupName || false) ? 'empty' : ''),
                         title: election.groupName
                       }, [election.groupName]),
                       div({
                         id: election.consentId + '_version',
                         name: 'version',
-                        className: 'col-1 cell-body text ' + ((election.version === false || election.version === null) ? 'empty' : '')
+                        className: 'col-1 cell-body text ' + ((!election.version || false) ? 'empty' : '')
                       }, [election.version]),
                       div({
                         id: election.consentId + '_createDate',

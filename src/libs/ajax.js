@@ -552,8 +552,7 @@ export const Election = {
   },
 
   createElectionForDac: async (consentId, dacId) => {
-    var election = {};
-    election.status = 'Open';
+    var election = {status: 'Open'};
     const url = `${await Config.getApiUrl()}/consent/${consentId}/election/dac/${dacId}`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
