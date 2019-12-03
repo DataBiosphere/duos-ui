@@ -1,8 +1,8 @@
 import fileDownload from 'js-file-download';
+import filter from 'lodash/filter';
 import _ from 'lodash/fp';
 import get from 'lodash/get';
 import head from 'lodash/head';
-import filter from 'lodash/filter';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
@@ -207,7 +207,7 @@ export const DAC = {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/member/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return res.json();
-  },
+  }
 
 };
 
@@ -395,7 +395,7 @@ export const DAR = {
     formData.append("data", new Blob([file], { type: 'application/pdf' }));
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
     return await res.json();
-  },
+  }
 };
 
 export const DataSet = {
@@ -538,22 +538,21 @@ export const Election = {
   },
 
   updateElection: async (electionId, document) => {
-    const url = `${await Config.getApiUrl()}/election/${electionId}`;
+    const url = `${ await Config.getApiUrl() }/election/${ electionId }`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return await res.json();
   },
 
   createElection: async (consentId) => {
-    var election = {};
-    election.status = 'Open';
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
+    const election = { status: 'Open' };
+    const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
   },
 
   createElectionForDac: async (consentId, dacId) => {
-    var election = {status: 'Open'};
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/election/dac/${dacId}`;
+    const election = { status: 'Open' };
+    const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election/dac/${ dacId }`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
   },
@@ -583,9 +582,7 @@ export const Election = {
   },
 
   createDARElection: async (requestId) => {
-    var election = {};
-    election.status = 'Open';
-    election.finalAccessVote = false;
+    const election = { status: 'Open', finalAccessVote: false };
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
