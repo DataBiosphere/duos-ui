@@ -64,16 +64,16 @@ class DatasetCatalog extends Component {
       }
     } else {
       const customSortOrder = {
-        "Dataset Name": 1,
-        "# of participants": 2,
-        "Phenotype/Indication": 3,
-        "Description": 4,
-        "Data Type": 5,
-        "Species": 6,
-        "Data Depositor": 7,
-        "Principal Investigator(PI)": 8,
-        "Sample Collection ID": 1000, // Not used in rendering
-        "dbGAP": 2000 // Not used in rendering
+        "Dataset Name": 0,
+        "# of participants": 1,
+        "Phenotype/Indication": 2,
+        "Description": 3,
+        "Data Type": 4,
+        "Species": 5,
+        "Data Depositor": 6,
+        "Principal Investigator(PI)": 7,
+        "dbGAP": 8,
+        "Sample Collection ID": 9
       };
       const dictionarySortFunction = o => { return customSortOrder[o.key]; };
       const dictionary = sortBy(await DataSet.findDictionary(), [dictionarySortFunction]);
@@ -474,7 +474,7 @@ class DatasetCatalog extends Component {
                         }),
 
                         td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
-                        td({ id: trIndex + "_scid", name: "sc-id", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.properties[1].propertyValue === '' ? "---" : dataSet.properties[1].propertyValue]),
+                        td({ id: trIndex + "_scid", name: "sc-id", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.properties[9].propertyValue === '' ? "---" : dataSet.properties[9].propertyValue]),
                         td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
                           a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: (!dataSet.active ? 'dataset-disabled' : 'enabled') }, ["Translated Use Restriction"])
                         ]),
