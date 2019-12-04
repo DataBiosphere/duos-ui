@@ -330,7 +330,7 @@ class DatasetCatalog extends Component {
                 iconSize: "large",
                 color: "dataset",
                 title: "Dataset Catalog",
-                description: "Datasets with an associated DUL to apply for secondary use"
+                description: "Use the table below to search and selects datasets you would like to request"
               }),
             ]),
 
@@ -345,9 +345,9 @@ class DatasetCatalog extends Component {
                 onClick: this.download,
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background"
               }, [
-                  "Download selection",
-                  span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
-                ]),
+                "Download selection",
+                span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
+              ]),
             ]),
           ]),
 
@@ -373,7 +373,7 @@ class DatasetCatalog extends Component {
                         ])
                       ]);
                     }),
-                    th({ className: "table-titles dataset-color cell-size" }, ["Consent Id"]),
+                    th({ className: "table-titles dataset-color cell-size" }, ["Consent ID"]),
                     th({ className: "table-titles dataset-color cell-size" }, ["SC-ID"]),
                     th({ className: "table-titles dataset-color cell-size" }, ["Structured Data Use Limitations"]),
                     th({ isRendered: this.state.isAdmin, className: "table-titles dataset-color cell-size" }, ["Approved Requestors"]),
@@ -391,16 +391,16 @@ class DatasetCatalog extends Component {
                             td({
                               isRendered: property.propertyName === 'Sample Collection ID'
                             }, [
-                                div({ className: "checkbox" }, [
-                                  input({
-                                    type: "checkbox",
-                                    id: trIndex + "_chkSelect",
-                                    name: "chk_select",
-                                    checked: dataSet.checked, className: "checkbox-inline user-checkbox", "add-object-id": "true", onChange: this.checkSingleRow(dataSet.ix)
-                                  }),
-                                  label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chkSelect" }),
-                                ])
+                              div({ className: "checkbox" }, [
+                                input({
+                                  type: "checkbox",
+                                  id: trIndex + "_chkSelect",
+                                  name: "chk_select",
+                                  checked: dataSet.checked, className: "checkbox-inline user-checkbox", "add-object-id": "true", onChange: this.checkSingleRow(dataSet.ix)
+                                }),
+                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chkSelect" }),
                               ])
+                            ])
                           ]);
                         }),
 
@@ -424,8 +424,8 @@ class DatasetCatalog extends Component {
                                 a({
                                   id: trIndex + "_btnConnect", name: "btn_connect", onClick: () => this.openConnectDataset(dataSet)
                                 }, [
-                                    span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "Connect with Data Owner", "data-for": "tip_connect" })
-                                  ]),
+                                  span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "Connect with Data Owner", "data-for": "tip_connect" })
+                                ]),
                               ])
                             ])
                           ]);
@@ -438,18 +438,18 @@ class DatasetCatalog extends Component {
                               p({ isRendered: property.propertyName !== 'dbGAP' }, [
                                 span({ id: trIndex + "_datasetName", name: "datasetName", isRendered: property.propertyName === 'Dataset Name' }),
                                 span({ id: trIndex + "_datasetId", name: "datasetId", isRendered: property.propertyName === 'Dataset ID' }),
+                                span({ id: trIndex + "_participants", name: "participants", isRendered: property.propertyName === '# of participants' }),
+                                span({ id: trIndex + "_phenotype", name: "phenotype", isRendered: property.propertyName === 'Phenotype/Indication' }),
+                                span({ id: trIndex + "_description", name: "description", isRendered: property.propertyName === 'Description' }),
                                 span({ id: trIndex + "_dataType", name: "dataType", isRendered: property.propertyName === 'Data Type' }),
                                 span({ id: trIndex + "_species", name: "species", isRendered: property.propertyName === 'Species' }),
-                                span({ id: trIndex + "_phenotype", name: "phenotype", isRendered: property.propertyName === 'Phenotype/Indication' }),
-                                span({ id: trIndex + "_participants", name: "participants", isRendered: property.propertyName === '# of participants' }),
-                                span({ id: trIndex + "_description", name: "description", isRendered: property.propertyName === 'Description' }),
                                 property.propertyValue
                               ]),
 
                               a({
                                 id: trIndex + "_linkdbGap",
                                 name: "link_dbGap",
-                                isRendered: property.propertyName === 'dbGAP',
+                                isRendered: property.propertyName === 'Repository',
                                 href: property.propertyValue,
                                 target: "_blank",
                                 className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
