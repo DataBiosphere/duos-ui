@@ -72,8 +72,8 @@ class DatasetCatalog extends Component {
         "Species": 5,
         "Data Depositor": 6,
         "Principal Investigator(PI)": 7,
-        "dbGAP": 8,
-        "Sample Collection ID": 9
+        "dbGAP": 8, // Not dynamically rendered
+        "Sample Collection ID": 9 // Not dynamically rendered
       };
       const dictionarySortFunction = o => { return customSortOrder[o.key]; };
       const dictionary = sortBy(await DataSet.findDictionary(), [dictionarySortFunction]);
