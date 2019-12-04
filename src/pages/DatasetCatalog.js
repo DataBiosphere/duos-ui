@@ -1,3 +1,4 @@
+import sortBy from 'lodash/sortBy';
 import { Component, Fragment } from 'react';
 import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
@@ -62,12 +63,26 @@ class DatasetCatalog extends Component {
         this.props.history.push('profile');
       }
     } else {
-
-      const dictionary = await DataSet.findDictionary();
-      const catalog = await DataSet.findDataSets(this.USER_ID);
+      const customSortOrder = {
+        "Dataset Name": 1,
+        "# of participants": 2,
+        "Phenotype/Indication": 3,
+        "Description": 4,
+        "Data Type": 5,
+        "Species": 6,
+        "Data Depositor": 7,
+        "Principal Investigator(PI)": 8,
+        "Sample Collection ID": 1000, // Not used in rendering
+        "dbGAP": 2000 // Not used in rendering
+      };
+      const dictionarySortFunction = o => { return customSortOrder[o.key]; };
+      const dictionary = sortBy(await DataSet.findDictionary(), [dictionarySortFunction]);
+      const catalogPropertySortFunction = o => { return customSortOrder[o.propertyName]; };
+      let catalog = await DataSet.findDataSets(this.USER_ID);
       catalog.forEach((row, index) => {
         row.checked = false;
         row.ix = index;
+        row.properties = sortBy(row.properties, [catalogPropertySortFunction]);
       });
 
       const data = {
@@ -449,7 +464,7 @@ class DatasetCatalog extends Component {
                               a({
                                 id: trIndex + "_linkdbGap",
                                 name: "link_dbGap",
-                                isRendered: property.propertyName === 'Repository',
+                                isRendered: property.propertyName === 'dbGAP',
                                 href: property.propertyValue,
                                 target: "_blank",
                                 className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
