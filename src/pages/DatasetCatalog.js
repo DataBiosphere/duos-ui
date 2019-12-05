@@ -48,13 +48,12 @@ class DatasetCatalog extends Component {
     this.openConnectDataset = this.openConnectDataset.bind(this);
     this.closeConnectDatasetModal = this.closeConnectDatasetModal.bind(this);
     this.okConnectDatasetModal = this.okConnectDatasetModal.bind(this);
-    this.openTranslatedDUL = this.openTranslatedDUL.bind(this);
     this.closeTranslatedDULModal = this.closeTranslatedDULModal.bind(this);
     this.okTranslatedDULModal = this.okTranslatedDULModal.bind(this);
 
     this.download = this.download.bind(this);
-    this.selectAll = this.selectAll.bind(this);
     this.exportToRequest = this.exportToRequest.bind(this);
+    this.defaultString = this.defaultString.bind(this);
   }
 
   async getDatasets() {
@@ -316,6 +315,11 @@ class DatasetCatalog extends Component {
     });
   };
 
+  defaultString(str, defaultStr) {
+    if (str.length === 0) { return defaultStr; }
+    return str;
+  };
+
   render() {
 
     const { searchDulText, currentPage, limit } = this.state;
@@ -536,7 +540,9 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_scid', name: 'sc-id', className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Sample Collection ID'; }), 'propertyValue', '')
+                            this.defaultString(
+                              get(find(dataSet.properties, p => { return p.propertyName === 'Sample Collection ID'; }), 'propertyValue', ''),
+                              '---')
                           ]),
 
                           td({ isRendered: this.state.isAdmin, className: 'table-items cell-size' }, [
