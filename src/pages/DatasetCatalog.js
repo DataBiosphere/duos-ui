@@ -29,7 +29,6 @@ class DatasetCatalog extends Component {
       allChecked: false,
       dataSetList: {
         catalog: [],
-        dictionary: [],
         showDialogDelete: false,
         showDialogEnable: false,
         showDialogDisable: false,
@@ -64,20 +63,14 @@ class DatasetCatalog extends Component {
         this.props.history.push('profile');
       }
     } else {
-      const dictionary = await DataSet.findDictionary();
       let catalog = await DataSet.findDataSets(this.USER_ID);
       catalog.forEach((row, index) => {
         row.checked = false;
         row.ix = index;
       });
 
-      const data = {
-        catalog: catalog,
-        dictionary: dictionary
-      };
-
       this.setState({
-        dataSetList: data,
+        dataSetList: { catalog: catalog },
         currentPage: 1
       });
     }
