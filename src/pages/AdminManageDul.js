@@ -319,6 +319,17 @@ class AdminManageDul extends Component {
     return true;
   };
 
+  findDacNameForDacId = (dacId) => {
+    if (_.isNil(dacId)) {
+      return '---';
+    }
+    const foundDac = _.findLast(this.state.dacList, (d) => { return d.dacId === dacId; });
+    if (_.isNil(foundDac)) {
+      return '---';
+    }
+    return foundDac.name;
+  };
+
   render() {
 
     const { currentPage, limit, searchDulText } = this.state;
@@ -357,6 +368,7 @@ class AdminManageDul extends Component {
             div({ className: 'col-2 cell-header dul-color' }, ['Consent Group Name']),
             div({ className: 'col-1 cell-header dul-color' }, ['Election N°']),
             div({ className: 'col-1 cell-header dul-color' }, ['Date']),
+            div({ className: 'col-1 cell-header dul-color' }, ['DAC']),
             div({ className: 'col-1 cell-header f-center dul-color' }, ['Edit Record']),
             div({ className: 'col-1 cell-header f-center dul-color' }, ['Election status']),
             div({ className: 'col-1 cell-header f-center dul-color' }, ['Election actions'])
@@ -410,6 +422,11 @@ class AdminManageDul extends Component {
                         name: 'createDate',
                         className: 'col-1 cell-body text'
                       }, [Utils.formatDate(election.createDate)]),
+                      div({
+                        id: election.consentId + '_dacName',
+                        name: 'dacName',
+                        className: 'col-1 cell-body text'
+                      }, [this.findDacNameForDacId(election.dacId)]),
                       div({
                           className: 'col-1 cell-body f-center',
                           disabled: (election.electionStatus !== 'un-reviewed' || !election.editable)
