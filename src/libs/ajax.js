@@ -173,6 +173,12 @@ export const DAC = {
     return res.json();
   },
 
+  datasets: async (dacId) => {
+    const url = `${await Config.getApiUrl()}/dac/${dacId}/datasets`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
   membership: async (dacId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
     const res = await fetchOk(url, Config.authOpts());

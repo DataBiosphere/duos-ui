@@ -20,6 +20,7 @@ class AdminManageDac extends Component {
     this.state = {
       currentPage: 1,
       showDacModal: false,
+      showDatasetsModal: false,
       showMembersModal: false,
       value: '',
       limit: limit,
@@ -29,8 +30,6 @@ class AdminManageDac extends Component {
       alertTitle: undefined,
       selectedDac: {}
     };
-
-    this.handlePageChange = this.handlePageChange.bind(this);
 
     this.addDac = this.addDac.bind(this);
     this.closeAddDacModal = this.closeAddDacModal.bind(this);
@@ -120,6 +119,22 @@ class AdminManageDac extends Component {
     });
   }
 
+  viewDatasets = (selectedDac) => {
+    this.setState(prev => {
+      prev.showDatasetsModal = true;
+      prev.selectedDac = selectedDac;
+      return prev;
+    });
+  };
+
+  closeViewDatasetsModal = () => {
+    this.setState(prev => {
+      prev.showDatasetsModal = false;
+      prev.selectedDac = {};
+      return prev;
+    });
+  };
+
   handleSearchDac = (query) => {
     this.setState({ searchDacText: query });
   };
@@ -193,10 +208,16 @@ class AdminManageDac extends Component {
                       title: dac.description
                     }, [dac.description]),
                     div({
-                      id: dac.dacId + '_dacDatasets',
-                      name: 'dacDatasets',
-                      className: 'col-2 cell-body text'
-                    }, ['---']),
+                      className: 'col-2 cell-body'
+                    }, [
+                      button({
+                        id: dac.dacId + '_dacDatasets',
+                        name: 'dacDatasets',
+                        className: 'cell-button hover-color',
+                        style: actionButtonStyle,
+                        onClick: () => this.viewDatasets(dac)
+                      }, ['View'])
+                    ]),
                     div({
                       className: 'col-2 cell-body f-center'
                     }, [
