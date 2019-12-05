@@ -1,15 +1,17 @@
-import sortBy from 'lodash/sortBy';
+import find from 'lodash/find';
+import get from 'lodash/get';
 import { Component, Fragment } from 'react';
-import { div, button, table, thead, tbody, th, tr, td, form, h, input, label, span, a, p } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { DataSet, Researcher, Files, DAR } from "../libs/ajax";
-import { Storage } from "../libs/storage";
+import { a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
+import ReactTooltip from 'react-tooltip';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
 import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
-import ReactTooltip from 'react-tooltip';
+import { PageHeading } from '../components/PageHeading';
+import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { PaginatorBar } from "../components/PaginatorBar";
+import { DAR, DataSet, Files, Researcher } from '../libs/ajax';
+import { Storage } from '../libs/storage';
+
 
 class DatasetCatalog extends Component {
 
@@ -63,26 +65,11 @@ class DatasetCatalog extends Component {
         this.props.history.push('profile');
       }
     } else {
-      const customSortOrder = {
-        "Dataset Name": 0,
-        "# of participants": 1,
-        "Phenotype/Indication": 2,
-        "Description": 3,
-        "Data Type": 4,
-        "Species": 5,
-        "Data Depositor": 6,
-        "Principal Investigator(PI)": 7,
-        "dbGAP": 8, // Not dynamically rendered
-        "Sample Collection ID": 9 // Not dynamically rendered
-      };
-      const dictionarySortFunction = o => { return customSortOrder[o.key]; };
-      const dictionary = sortBy(await DataSet.findDictionary(), [dictionarySortFunction]);
-      const catalogPropertySortFunction = o => { return customSortOrder[o.propertyName]; };
+      const dictionary = await DataSet.findDictionary();
       let catalog = await DataSet.findDataSets(this.USER_ID);
       catalog.forEach((row, index) => {
         row.checked = false;
         row.ix = index;
-        row.properties = sortBy(row.properties, [catalogPropertySortFunction]);
       });
 
       const data = {
@@ -380,111 +367,187 @@ class DatasetCatalog extends Component {
                 thead({}, [
                   tr({}, [
                     th({}),
-                    th({ className: "table-titles dataset-color cell-size" }, ["Dataset Id"]),
-                    this.state.dataSetList.dictionary.map((dictionary, dIndex) => {
-                      return h(Fragment, { key: dIndex }, [
-                        th({ isRendered: dictionary.key !== 'Sample Collection ID', className: "table-titles dataset-color cell-size", id: dictionary.key }, [
-                          dictionary.key
-                        ])
-                      ]);
-                    }),
-                    th({ className: "table-titles dataset-color cell-size" }, ["Consent ID"]),
-                    th({ className: "table-titles dataset-color cell-size" }, ["SC-ID"]),
-                    th({ className: "table-titles dataset-color cell-size" }, ["Structured Data Use Limitations"]),
-                    th({ isRendered: this.state.isAdmin, className: "table-titles dataset-color cell-size" }, ["Approved Requestors"]),
-                  ]),
+                    th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size', style: { textAlign: 'center' } }, ['Actions']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Dataset Id']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Dataset Name']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['dbGap']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Structured Data Use Limitations']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Type']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Phenotype/Indication']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Principal Investigator(PI)']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['# of participants']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Description']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Species']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Depositor']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['Consent ID']),
+                    th({ className: 'table-titles dataset-color cell-size' }, ['SC-ID']),
+                    th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size' }, ['Approved Requestors'])
+                  ])
                 ]),
 
                 tbody({}, [
-                  this.state.dataSetList.catalog.filter(this.searchTable(searchDulText)).slice((currentPage - 1) * limit, currentPage * limit).map((dataSet, trIndex) => {
-                    return h(Fragment, { key: trIndex }, [
+                  this.state.dataSetList.catalog.filter(this.searchTable(searchDulText))
+                    .slice((currentPage - 1) * limit, currentPage * limit)
+                    .map((dataSet, trIndex) => {
+                      return h(Fragment, { key: trIndex }, [
 
-                      tr({ className: "tableRow" }, [
-                        dataSet.properties.map((property, dIndex) => {
-                          return h(Fragment, { key: dIndex }, [
+                        tr({ className: 'tableRow' }, [
 
-                            td({
-                              isRendered: property.propertyName === 'Sample Collection ID'
-                            }, [
-                              div({ className: "checkbox" }, [
-                                input({
-                                  type: "checkbox",
-                                  id: trIndex + "_chkSelect",
-                                  name: "chk_select",
-                                  checked: dataSet.checked, className: "checkbox-inline user-checkbox", "add-object-id": "true", onChange: this.checkSingleRow(dataSet.ix)
-                                }),
-                                label({ className: "regular-checkbox rp-choice-questions", htmlFor: trIndex + "_chkSelect" }),
-                              ])
+                          td({}, [
+                            div({ className: 'checkbox' }, [
+                              input({
+                                type: 'checkbox',
+                                id: trIndex + '_chkSelect',
+                                name: 'chk_select',
+                                checked: dataSet.checked, className: 'checkbox-inline user-checkbox', 'add-object-id': 'true',
+                                onChange: this.checkSingleRow(dataSet.ix)
+                              }),
+                              label({ className: 'regular-checkbox rp-choice-questions', htmlFor: trIndex + '_chkSelect' })
                             ])
-                          ]);
-                        }),
+                          ]),
 
-                        dataSet.properties.map((property, dIndex) => {
-                          return h(Fragment, { key: dIndex }, [
-
-                            td({ className: "fixed-col", isRendered: property.propertyName === 'Sample Collection ID' && this.state.isAdmin && !this.state.isResearcher }, [
-                              div({ className: "dataset-actions" }, [
-                                a({ id: trIndex + "_btnDelete", name: "btn_delete", onClick: this.openDelete(dataSet.dataSetId), disabled: !dataSet.deletable }, [
-                                  span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin " + (dataSet.deletable ? "default-color" : ""), "aria-hidden": "true", "data-tip": "Delete dataset", "data-for": "tip_delete" })
-                                ]),
-
-                                a({ id: trIndex + "_btnDisable", name: "btn_disable", isRendered: dataSet.active, onClick: this.openDisable(dataSet.dataSetId) }, [
-                                  span({ className: "cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color", "aria-hidden": "true", "data-tip": "Disable dataset", "data-for": "tip_disable" })
-                                ]),
-
-                                a({ id: trIndex + "_btnEnable", name: "btn_enable", isRendered: !dataSet.active, onClick: this.openEnable(dataSet.dataSetId) }, [
-                                  span({ className: "cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color", "aria-hidden": "true", "data-tip": "Enable dataset", "data-for": "tip_enable" })
-                                ]),
-
-                                a({
-                                  id: trIndex + "_btnConnect", name: "btn_connect", onClick: () => this.openConnectDataset(dataSet)
-                                }, [
-                                  span({ className: "cm-icon-button glyphicon glyphicon-link caret-margin " + (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), "aria-hidden": "true", "data-tip": "Connect with Data Owner", "data-for": "tip_connect" })
-                                ]),
-                              ])
-                            ])
-                          ]);
-                        }),
-
-                        td({ id: dataSet.alias + "_dataset", name: "alias", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.alias]),
-                        dataSet.properties.map((property, dIndex) => {
-                          return h(Fragment, { key: dIndex }, [
-                            td({ isRendered: property.propertyName !== 'Sample Collection ID', className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                              p({ isRendered: property.propertyName !== 'dbGAP' }, [
-                                span({ id: trIndex + "_datasetName", name: "datasetName", isRendered: property.propertyName === 'Dataset Name' }),
-                                span({ id: trIndex + "_datasetId", name: "datasetId", isRendered: property.propertyName === 'Dataset ID' }),
-                                span({ id: trIndex + "_participants", name: "participants", isRendered: property.propertyName === '# of participants' }),
-                                span({ id: trIndex + "_phenotype", name: "phenotype", isRendered: property.propertyName === 'Phenotype/Indication' }),
-                                span({ id: trIndex + "_description", name: "description", isRendered: property.propertyName === 'Description' }),
-                                span({ id: trIndex + "_dataType", name: "dataType", isRendered: property.propertyName === 'Data Type' }),
-                                span({ id: trIndex + "_species", name: "species", isRendered: property.propertyName === 'Species' }),
-                                property.propertyValue
+                          td({ isRendered: this.state.isAdmin, style: { minWidth: '10rem' } }, [
+                            div({ className: 'dataset-actions' }, [
+                              a({
+                                id: trIndex + '_btnDelete', name: 'btn_delete', onClick: this.openDelete(dataSet.dataSetId),
+                                disabled: !dataSet.deletable
+                              }, [
+                                span({
+                                  className: 'cm-icon-button glyphicon glyphicon-trash caret-margin ' + (dataSet.deletable ? 'default-color' : ''),
+                                  'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
+                                })
                               ]),
 
                               a({
-                                id: trIndex + "_linkdbGap",
-                                name: "link_dbGap",
-                                isRendered: property.propertyName === 'dbGAP',
-                                href: property.propertyValue,
-                                target: "_blank",
-                                className: (property.propertyValue.length > 0 ? 'enabled' : property.propertyValue.length === 0 ? 'disabled' : '')
-                              }, ["Link"]),
+                                id: trIndex + '_btnDisable', name: 'btn_disable', isRendered: dataSet.active,
+                                onClick: this.openDisable(dataSet.dataSetId)
+                              }, [
+                                span({
+                                  className: 'cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color', 'aria-hidden': 'true',
+                                  'data-tip': 'Disable dataset', 'data-for': 'tip_disable'
+                                })
+                              ]),
+
+                              a({
+                                id: trIndex + '_btnEnable', name: 'btn_enable', isRendered: !dataSet.active,
+                                onClick: this.openEnable(dataSet.dataSetId)
+                              }, [
+                                span({
+                                  className: 'cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color', 'aria-hidden': 'true',
+                                  'data-tip': 'Enable dataset', 'data-for': 'tip_enable'
+                                })
+                              ]),
+
+                              a({
+                                id: trIndex + '_btnConnect', name: 'btn_connect', onClick: () => this.openConnectDataset(dataSet)
+                              }, [
+                                span({
+                                  className: 'cm-icon-button glyphicon glyphicon-link caret-margin ' +
+                                    (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), 'aria-hidden': 'true',
+                                  'data-tip': 'Connect with Data Owner', 'data-for': 'tip_connect'
+                                })
+                              ])
                             ])
-                          ]);
-                        }),
+                          ]),
 
-                        td({ id: trIndex + "_consentId", name: "consentId", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.consentId]),
-                        td({ id: trIndex + "_scid", name: "sc-id", className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [dataSet.properties[9].propertyValue === '' ? "---" : dataSet.properties[9].propertyValue]),
-                        td({ className: "table-items cell-size " + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                          a({ id: trIndex + "_linkTranslatedDul", name: "link_translatedDul", onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction), className: (!dataSet.active ? 'dataset-disabled' : 'enabled') }, ["Translated Use Restriction"])
-                        ]),
+                          td({
+                            id: dataSet.alias + '_dataset', name: 'alias',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [dataSet.alias]),
 
-                        td({ isRendered: this.state.isAdmin, className: "table-items cell-size" }, [
-                          a({ id: trIndex + "_linkDownloadList", name: "link_downloadList", onClick: () => this.downloadList(dataSet), className: "enabled" }, ["Download List"]),
-                        ]),
-                      ]),
-                    ]);
-                  })
+                          td({
+                            id: trIndex + '_datasetName', name: 'datasetName',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Dataset Name'; }), 'propertyValue', '')
+                          ]),
+
+                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                            a({
+                              id: trIndex + '_linkdbGap',
+                              name: 'link_dbGap',
+                              href: get(find(dataSet.properties, p => { return p.propertyName === 'dbGAP'; }), 'propertyValue', ''),
+                              target: '_blank',
+                              className: (get(find(dataSet.properties, p => { return p.propertyName === 'dbGAP'; }), 'propertyValue', '').length > 0 ?
+                                'enabled' :
+                                'disabled')
+                            }, ['Link'])
+                          ]),
+
+                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                            a({
+                              id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
+                              onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction),
+                              className: (!dataSet.active ? 'dataset-disabled' : 'enabled')
+                            }, ['Translated Use Restriction'])
+                          ]),
+
+                          td({
+                            id: trIndex + '_dataType', name: 'dataType',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Data Type'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_phenotype', name: 'phenotype',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Phenotype/Indication'; }), 'propertyValue', '')
+                          ]),
+
+                          td({ id: trIndex + '_pi', name: 'pi', className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Principal Investigator(PI)'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_participants', name: 'participants',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === '# of participants'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_description', name: 'description',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Description'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_species', name: 'species',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Species'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_depositor', name: 'depositor',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Data Depositor'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_consentId', name: 'consentId',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [dataSet.consentId]),
+
+                          td({
+                            id: trIndex + '_scid', name: 'sc-id', className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'Sample Collection ID'; }), 'propertyValue', '')
+                          ]),
+
+                          td({ isRendered: this.state.isAdmin, className: 'table-items cell-size' }, [
+                            a({
+                              id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => this.downloadList(dataSet),
+                              className: 'enabled'
+                            }, ['Download List'])
+                          ])
+                        ])
+                      ]);
+                    })
                 ])
               ])
             ]),
