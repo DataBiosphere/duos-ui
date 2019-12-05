@@ -408,12 +408,6 @@ export const DataSet = {
     return await res.json();
   },
 
-  findDictionary: async () => {
-    const url = `${await Config.getApiUrl()}/dataset/dictionary`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   findDataSets: async dacUserId => {
     const url = `${await Config.getApiUrl()}/dataset?dacUserId=${dacUserId}`;
     const res = await fetchOk(url, Config.authOpts());
