@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { AddDacModal } from '../components/modals/AddDacModal';
+import { DacDatasetsModal } from '../components/modals/DacDatasetsModal';
 import { DacMembersModal } from '../components/modals/DacMembersModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
@@ -29,7 +30,7 @@ class AdminManageDac extends Component {
       alertMessage: undefined,
       alertTitle: undefined,
       selectedDac: {},
-      datasets: []
+      selectedDatasets: []
     };
 
     this.addDac = this.addDac.bind(this);
@@ -120,12 +121,12 @@ class AdminManageDac extends Component {
     });
   }
 
-  viewDatasets = (selectedDac) => {
-    const datasets = DAC.datasets(selectedDac.dacId);
+  viewDatasets = async (selectedDac) => {
+    const datasets = await DAC.datasets(selectedDac.dacId);
     this.setState(prev => {
       prev.showDatasetsModal = true;
       prev.selectedDac = selectedDac;
-      prev.datasets = datasets;
+      prev.selectedDatasets = datasets;
       return prev;
     });
   };
@@ -134,7 +135,7 @@ class AdminManageDac extends Component {
     this.setState(prev => {
       prev.showDatasetsModal = false;
       prev.selectedDac = {};
-      prev.datasets = [];
+      prev.selectedDatasets = [];
       return prev;
     });
   };
@@ -259,6 +260,14 @@ class AdminManageDac extends Component {
             onOKRequest: this.closeViewMembersModal,
             onCloseRequest: this.closeViewMembersModal,
             dac: this.state.selectedDac
+          }),
+          DacDatasetsModal({
+            isRendered: this.state.showDatasetsModal,
+            showModal: this.state.showDatasetsModal,
+            onOKRequest: this.closeViewDatasetsModal,
+            onCloseRequest: this.closeViewDatasetsModal,
+            dac: this.state.selectedDac,
+            datasets: this.state.selectedDatasets
           }),
           AddDacModal({
             isRendered: this.state.showDacModal,
