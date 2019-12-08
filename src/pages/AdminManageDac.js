@@ -28,7 +28,8 @@ class AdminManageDac extends Component {
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
-      selectedDac: {}
+      selectedDac: {},
+      datasets: []
     };
 
     this.addDac = this.addDac.bind(this);
@@ -120,9 +121,11 @@ class AdminManageDac extends Component {
   }
 
   viewDatasets = (selectedDac) => {
+    const datasets = DAC.datasets(selectedDac.dacId);
     this.setState(prev => {
       prev.showDatasetsModal = true;
       prev.selectedDac = selectedDac;
+      prev.datasets = datasets;
       return prev;
     });
   };
@@ -131,6 +134,7 @@ class AdminManageDac extends Component {
     this.setState(prev => {
       prev.showDatasetsModal = false;
       prev.selectedDac = {};
+      prev.datasets = [];
       return prev;
     });
   };
