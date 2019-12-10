@@ -4,6 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import { Component } from 'react';
 import { a, div, hh, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
+import { ReadMore } from '../ReadMore';
 
 
 export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
@@ -26,11 +27,16 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
   };
 
   getStructuredUseRestrictionLink = (dataset) => {
-    return a({
-      name: 'link_translatedDul',
-      // onClick: this.openTranslatedDUL(dataset.translatedUseRestriction),
-      className: (!dataset.active ? 'dataset-disabled' : 'enabled')
-    }, ['Translated Use Restriction']);
+    const trimmedContent = dataset.translatedUseRestriction.trim();
+    if (isEmpty(trimmedContent)) {
+      return span({ className: 'disabled' }, ['---']);
+    }
+    return ReadMore({
+      content: trimmedContent,
+      className: 'row no-margin',
+      style: { whiteSpace: 'pre-line' },
+      charLimit: 30
+    });
   };
 
   render() {
@@ -66,15 +72,12 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
                 ])
               ]),
               tbody({}, [
-                // JSON.stringify(this.props.datasets),
                 this.props.datasets.map((dataset) => {
                   return tr({}, [
-                    td({ style: { position: 'relative' } }, [dataset.alias]),
+                    td({ className: 'table-items cell-size', style: { position: 'relative' } }, [dataset.alias]),
                     td({ className: 'table-items cell-size' }, [this.getPropertyValue(dataset.properties, 'Dataset Name', '---')]),
                     td({ className: 'table-items cell-size' }, [this.getDbGapLinkValue(dataset.properties)]),
-                    td({ className: 'table-items cell-size' }, [
-                      this.getStructuredUseRestrictionLink(dataset)
-                    ]),
+                    td({ className: 'table-items cell-size' }, [this.getStructuredUseRestrictionLink(dataset)]),
                     td({ className: 'table-items cell-size' }, [this.getPropertyValue(dataset.properties, 'Data Type', '---')]),
                     td({ className: 'table-items cell-size' }, [this.getPropertyValue(dataset.properties, 'Phenotype/Indication', '---')]),
                     td({ className: 'table-items cell-size' }, [this.getPropertyValue(dataset.properties, 'Principal Investigator(PI)', '---')]),
