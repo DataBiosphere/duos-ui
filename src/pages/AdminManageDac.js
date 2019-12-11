@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { AddDacModal } from '../components/modals/AddDacModal';
+import { DacDatasetsModal } from '../components/modals/DacDatasetsModal';
 import { DacMembersModal } from '../components/modals/DacMembersModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
@@ -20,6 +21,7 @@ class AdminManageDac extends Component {
     this.state = {
       currentPage: 1,
       showDacModal: false,
+      showDatasetsModal: false,
       showMembersModal: false,
       value: '',
       limit: limit,
@@ -27,10 +29,9 @@ class AdminManageDac extends Component {
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
-      selectedDac: {}
+      selectedDac: {},
+      selectedDatasets: []
     };
-
-    this.handlePageChange = this.handlePageChange.bind(this);
 
     this.addDac = this.addDac.bind(this);
     this.closeAddDacModal = this.closeAddDacModal.bind(this);
@@ -120,6 +121,25 @@ class AdminManageDac extends Component {
     });
   }
 
+  viewDatasets = async (selectedDac) => {
+    const datasets = await DAC.datasets(selectedDac.dacId);
+    this.setState(prev => {
+      prev.showDatasetsModal = true;
+      prev.selectedDac = selectedDac;
+      prev.selectedDatasets = datasets;
+      return prev;
+    });
+  };
+
+  closeViewDatasetsModal = () => {
+    this.setState(prev => {
+      prev.showDatasetsModal = false;
+      prev.selectedDac = {};
+      prev.selectedDatasets = [];
+      return prev;
+    });
+  };
+
   handleSearchDac = (query) => {
     this.setState({ searchDacText: query });
   };
@@ -193,10 +213,16 @@ class AdminManageDac extends Component {
                       title: dac.description
                     }, [dac.description]),
                     div({
-                      id: dac.dacId + '_dacDatasets',
-                      name: 'dacDatasets',
-                      className: 'col-2 cell-body text'
-                    }, ['---']),
+                      className: 'col-2 cell-body'
+                    }, [
+                      button({
+                        id: dac.dacId + '_dacDatasets',
+                        name: 'dacDatasets',
+                        className: 'cell-button hover-color',
+                        style: actionButtonStyle,
+                        onClick: () => this.viewDatasets(dac)
+                      }, ['View'])
+                    ]),
                     div({
                       className: 'col-2 cell-body f-center'
                     }, [
@@ -234,6 +260,14 @@ class AdminManageDac extends Component {
             onOKRequest: this.closeViewMembersModal,
             onCloseRequest: this.closeViewMembersModal,
             dac: this.state.selectedDac
+          }),
+          DacDatasetsModal({
+            isRendered: this.state.showDatasetsModal,
+            showModal: this.state.showDatasetsModal,
+            onOKRequest: this.closeViewDatasetsModal,
+            onCloseRequest: this.closeViewDatasetsModal,
+            dac: this.state.selectedDac,
+            datasets: this.state.selectedDatasets
           }),
           AddDacModal({
             isRendered: this.state.showDacModal,
