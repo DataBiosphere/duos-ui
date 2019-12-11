@@ -56,25 +56,16 @@ class DatasetCatalog extends Component {
   }
 
   async getDatasets() {
-
-    if (this.state.isResearcher && '?reviewProfile' === this.props.location.search) {
-      const researcher = await Researcher.getPropertiesByResearcherId(Storage.getCurrentUser().dacUserId);
-      if (researcher.completed !== 'true') {
-        this.props.history.push('profile');
-      }
-    } else {
-      let catalog = await DataSet.findDataSets(this.USER_ID);
-      catalog.forEach((row, index) => {
-        row.checked = false;
-        row.ix = index;
-      });
-
-      this.setState({
-        dataSetList: { catalog: catalog },
-        currentPage: 1
-      });
-    }
-  }
+    let catalog = await DataSet.findDataSets(this.currentUser.dacUserId);
+    catalog.forEach((row, index) => {
+      row.checked = false;
+      row.ix = index;
+    });
+    this.setState({
+      dataSetList: { catalog: catalog },
+      currentPage: 1
+    });
+ }
 
   componentDidMount() {
 
