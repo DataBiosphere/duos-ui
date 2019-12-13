@@ -1,13 +1,15 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import { div, hr, span, a, h, button } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { DAR, Election } from '../libs/ajax';
-import { PaginatorBar } from "../components/PaginatorBar";
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import * as Utils from '../libs/utils';
+import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
+import { PageHeading } from '../components/PageHeading';
+import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
+import { DAC, DAR, Election } from '../libs/ajax';
+import * as Utils from '../libs/utils';
+
 
 const limit = 10;
 
@@ -25,6 +27,7 @@ class AdminManageAccess extends Component {
       limit: limit,
       showDialogCancel: false,
       showDialogCreate: false,
+      dacList: []
     };
     this.getElectionDarList = this.getElectionDarList.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -49,7 +52,16 @@ class AdminManageAccess extends Component {
 
   async componentDidMount() {
     await this.getElectionDarList();
+    await this.getDACs();
     ReactTooltip.rebuild();
+  };
+
+  getDACs = async () => {
+    const dacs = await DAC.list();
+    this.setState(prev => {
+      prev.dacList = dacs;
+      return prev;
+    });
   };
 
   handlePageChange = page => {
@@ -153,6 +165,17 @@ class AdminManageAccess extends Component {
     return true;
   };
 
+  findDacNameForDacId = (dacId) => {
+    if (_.isNil(dacId)) {
+      return '---';
+    }
+    const foundDac = _.findLast(this.state.dacList, (d) => { return d.dacId === dacId; });
+    if (_.isNil(foundDac)) {
+      return '---';
+    }
+    return foundDac.name;
+  };
+
   render() {
 
     const { searchDarText, currentPage, limit } = this.state;
@@ -179,8 +202,9 @@ class AdminManageAccess extends Component {
           div({ className: "row no-margin" }, [
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Data Request id"]),
             div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header access-color" }, ["Project title"]),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Date"]),
+            div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header access-color" }, ["Date"]),
             div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["+ Info"]),
+            div({ className: 'col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color' }, ['DAC']),
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election status"]),
             div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election actions"]),
           ]),
@@ -224,7 +248,7 @@ class AdminManageAccess extends Component {
                     div({
                       id: dar.frontEndId + "_createDate",
                       name: "createDate",
-                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text"
+                      className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text"
                     }, [Utils.formatDate(dar.createDate)]),
 
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
@@ -235,7 +259,9 @@ class AdminManageAccess extends Component {
                         onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus)
                       }, ["Summary"]),
                     ]),
-
+                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text bold f-center" },
+                      [this.findDacNameForDacId(dar.dacId)]
+                    ),
                     div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
                         a({
