@@ -196,7 +196,7 @@ export const AddDulModal = hh(class AddDulModal extends Component {
           showModal: this.props.showModal,
           onRequestClose: this.closeHandler,
           onAfterOpen: this.afterOpenHandler,
-          imgSrc: '/images/icon_add_dul.png',
+          imgSrc: this.state.isEditMode ? '/images/icon_edit_dul.png' : '/images/icon_add_dul.png',
           color: 'dul',
           title: this.state.isEditMode ? 'Edit Data Use Limitations' : 'Add Data Use Limitations',
           description: this.state.isEditMode ? 'Edit a Data Use Limitations Record' : 'Catalog a Data Use Limitation Record',
