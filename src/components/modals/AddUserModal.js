@@ -2,11 +2,12 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 import { div, form, h, hh, input, label } from 'react-hyperscript-helpers';
 import { User } from '../../libs/ajax';
+import { USER_ROLES } from '../../libs/utils';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
 
 
-const adminRole = { 'roleId': 4, 'name': 'Admin' };
+const adminRole = { 'roleId': 4, 'name': USER_ROLES.admin };
 
 export const AddUserModal = hh(class AddUserModal extends Component {
 
