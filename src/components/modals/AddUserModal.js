@@ -22,7 +22,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       invalidForm: true,
       submitted: false,
       alerts: [],
-      originalRoles: [],
       updatedRoles: [],
       emailPreference: false
     };
@@ -43,9 +42,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           mode: 'Edit',
           displayName: user.displayName,
           email: user.email,
-          additionalEmail: user.additionalEmail,
           user: user,
-          originalRoles: user.roles,
           updatedRoles: updatedRoles,
           emailPreference: user.emailPreference
         },
@@ -62,8 +59,6 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           mode: 'Add',
           displayName: '',
           email: '',
-          additionalEmail: '',
-          originalRoles: [],
           updatedRoles: [],
           emailPreference: false
         },
@@ -87,32 +82,20 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (validForm === false) {
       return;
     }
+    let user = {
+      displayName: this.state.displayName,
+      email: this.state.email,
+      emailPreference: this.state.emailPreference,
+      roles: this.state.updatedRoles
+    };
     switch (this.state.mode) {
       case 'Add':
-        const newUser = {
-          displayName: this.state.displayName,
-          email: this.state.email,
-          emailPreference: this.state.emailPreference,
-          roles: this.state.updatedRoles
-        };
-        const createdUser = await User.create(newUser);
+        const createdUser = await User.create(user);
         this.setState({ emailValid: createdUser });
         break;
       case 'Edit':
-        let payload = {};
-        const editUser = {
-          displayName: this.state.displayName,
-          email: this.state.email,
-          additionalEmail: this.state.additionalEmail,
-          completed: this.state.user.completed,
-          createDate: this.state.user.createDate,
-          dacUserId: this.state.user.dacUserId,
-          researcher: this.state.user.researcher,
-          status: this.state.user.status,
-          emailPreference: this.state.emailPreference,
-          roles: this.state.updatedRoles
-        };
-        payload.updatedUser = editUser;
+        user.dacUserId = this.state.user.dacUserId;
+        const payload = { updatedUser: user };
         const updatedUser = await User.update(payload, this.state.user.dacUserId);
         this.setState({ emailValid: updatedUser });
         break;
