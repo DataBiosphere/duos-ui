@@ -21,16 +21,6 @@ export const USER_ROLES = {
   all: 'All'
 };
 
-export const USER_ROLES_UPPER = {
-  admin: 'ADMIN',
-  chairperson: 'CHAIRPERSON',
-  member: 'MEMBER',
-  researcher: 'RESEARCHER',
-  alumni: 'ALUMNI',
-  dataOwner: 'DATAOWNER',
-  all: 'ALL'
-};
-
 export const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
