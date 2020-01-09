@@ -355,8 +355,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return obj;
   };
 
-  saveResearcher(profile) {
-    Researcher.createResearcherProperties(Storage.getCurrentUser().dacUserId, false, profile).then(resp => {
+  saveProperties(profile) {
+    Researcher.createProperties(profile).then(resp => {
       this.saveUser().then(resp => {
         this.setState({ showDialogSubmit: false });
         this.props.history.push({ pathname: 'dataset_catalog' });
@@ -375,10 +375,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
             DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
               profile.urlDAA = response.urlDAA;
               profile.nameDAA = response.nameDAA;
-              this.saveResearcher(profile);
+              this.saveProperties(profile);
             });
           } else {
-            this.saveResearcher(profile);
+            this.saveProperties(profile);
           }
 
         } else {
@@ -407,7 +407,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
 
   updateResearcher(profile) {
-    Researcher.update(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
+    Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
       this.saveUser().then(resp => {
         this.setState({ showDialogSubmit: false });
         this.props.history.push({ pathname: 'dataset_catalog' });
@@ -447,7 +447,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
-      Researcher.update(Storage.getCurrentUser().dacUserId, false, profile);
+      Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profile);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 

@@ -893,14 +893,14 @@ export const Researcher = {
     return await res.json();
   },
 
-  createResearcherProperties: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+  createProperties: async (researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
     return await res;
   },
 
-  update: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+  updateProperties: async (userId, validate, researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher?validate=${validate}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'PUT' }]));
     return res.json();
   },
