@@ -35,9 +35,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   authenticateAsNIHFCUser = async (searchArg) => {
     const currentUserId = Storage.getCurrentUser().dacUserId;
-    let isFcUser = this.verifyUser();
+    let isFcUser = await this.verifyUser();
     if (!isFcUser) {
-      Researcher.getPropertiesByResearcherId(currentUserId).then(
+      await Researcher.getPropertiesByResearcherId(currentUserId).then(
         (response) => isFcUser = this.registerUserToFC(response),
         () => this.setState({ nihError: true })
       );
@@ -88,7 +88,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         this.setState({ nihError: true });
         return false;
       });
-    return isFcUser !== undefined && isFcUser !== false && isFcUser.enabled.google === true;
+    if (_.isUndefined(isFcUser)) { return false; }
+    return _.get(isFcUser, 'enabled.google', false);
   };
 
   registerUserToFC = async (properties) => {

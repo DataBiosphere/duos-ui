@@ -1184,7 +1184,7 @@ const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   spinnerService.hideAll();
-  return res.ok ? res : Promise.reject(res);
+  return res;
 };
 
 const getFile = async (URI, fileName) => {
