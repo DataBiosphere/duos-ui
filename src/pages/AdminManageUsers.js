@@ -1,12 +1,13 @@
-import { Component, Fragment } from 'react';
-import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { AddUserModal } from '../components/modals/AddUserModal';
-import { User } from "../libs/ajax";
-import { PaginatorBar } from '../components/PaginatorBar';
-import ReactTooltip from 'react-tooltip';
-import { SearchBox } from '../components/SearchBox';
 import _ from 'lodash';
+import { Component, Fragment } from 'react';
+import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
+import ReactTooltip from 'react-tooltip';
+import { AddUserModal } from '../components/modals/AddUserModal';
+import { PageHeading } from '../components/PageHeading';
+import { PaginatorBar } from '../components/PaginatorBar';
+import { SearchBox } from '../components/SearchBox';
+import { User } from '../libs/ajax';
+
 
 class AdminManageUsers extends Component {
 
