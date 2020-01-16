@@ -9,7 +9,7 @@ import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { DAR, DataSet, Files, Researcher } from '../libs/ajax';
+import { DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
 
