@@ -982,12 +982,6 @@ export const User = {
     return res.json();
   },
 
-  validateDelegation: async (role, dacUser) => {
-    const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dacUser), { method: 'POST' }]));
-    return res.json();
-  },
-
   registerUser: async () => {
     const url = `${await Config.getApiUrl()}/user`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
