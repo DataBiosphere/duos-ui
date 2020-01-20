@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "1.4.3",
-    "@material-ui/icons": "2.0.1",
+    "@material-ui/icons": "3.0.0",
     "bootstrap": "3.4.1",
     "chart.js": "1.1.1",
     "classnames": "2.2.6",
