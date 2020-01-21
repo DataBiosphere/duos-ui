@@ -1,4 +1,6 @@
-# DUOS UI
+DUOS UI
+=======
+[![CircleCI](https://circleci.com/gh/DataBiosphere/duos-ui.svg?style=svg)](https://circleci.com/gh/DataBiosphere/duos-ui)
 
 ## Data Use Oversight System
 A semi-automated management service for compliant secondary use of human genomics data.
@@ -32,7 +34,7 @@ Builds, tests, and deployments are handled by CircleCI.
     ```sh
     npm install
     ```
-4. Install configs depending on the environment:
+4. Install configs for an environment:
 
     ```sh
     cp config/dev.json public/config.json
