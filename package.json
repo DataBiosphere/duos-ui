@@ -15,7 +15,7 @@
     "mixin-deep": "2.0.1",
     "query-string": "6.10.1",
     "popper.js": "1.16.0",
-    "react": "16.8.3",
+    "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-google-charts": "3.0.15",
     "react-google-login": "5.0.7",
