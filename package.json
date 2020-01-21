@@ -10,7 +10,7 @@
     "classnames": "2.2.6",
     "inquirer": "6.5.0",
     "jquery": "3.4.1",
-    "js-file-download": "0.4.8",
+    "js-file-download": "0.4.9",
     "lodash": "4.17.15",
     "mixin-deep": "2.0.1",
     "query-string": "6.10.1",
