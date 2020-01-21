@@ -47,7 +47,7 @@
     "eslint-plugin-react": "7.18.0",
     "handlebars": "4.7.2",
     "js-yaml": "3.13.1",
-    "typescript": "3.5.3"
+    "typescript": "3.7.5"
   },
   "comments": {
     "security-alerts": "handlebars and js-yaml are security related updates for indirect dependencies"
