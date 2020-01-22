@@ -418,13 +418,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   async saveUser() {
     const currentUser = Storage.getCurrentUser();
     currentUser.displayName = this.state.profile.profileName;
-    let map = {
-      dacUserId: currentUser.dacUserId,
-      email: currentUser.email,
-      displayName: this.state.profile.profileName,
-      additionalEmail: this.state.additionalEmail
-    };
-    await User.updateMainFields(map, currentUser.dacUserId);
+    currentUser.additionalEmail = this.state.additionalEmail;
+    const payload = { updatedUser: currentUser };
+    await User.update(payload, currentUser.dacUserId);
   };
 
   handleCheckboxChange = (e) => {
