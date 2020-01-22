@@ -970,15 +970,9 @@ export const User = {
     }
   },
 
-  updateName: async (body, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), { method: 'PUT' }]));
-    return res.json();
-  },
-
-  validateDelegation: async (role, dacUser) => {
-    const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dacUser), { method: 'POST' }]));
+  updateMainFields: async (user, userId) => {
+    const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
     return res.json();
   },
 

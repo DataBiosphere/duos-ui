@@ -123,16 +123,16 @@ class HomeRegister extends Component {
       googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } });
     } else {
       googleLoginButton = h(GoogleLogin, {
-        className: 'btn_gSignInWrapper',
+        scope: 'openid email profile',
+        className: 'g-signin2',
+        dataWidth: '30',
+        dataHeight: '200',
+        dataLongtitle: 'true',
+        theme: 'dark',
         clientId: this.state.clientId,
         onSuccess: this.responseGoogle,
         onFailure: this.forbidden
-      }, [
-        div({ id: 'btn_gSignIn', className: 'btn_gSignIn' }, [
-          span({ className: 'icon' }),
-          label({}, ['Register with Google'])
-        ])
-      ]);
+      });
     }
 
     return (
@@ -141,7 +141,7 @@ class HomeRegister extends Component {
           h1({ className: 'home-title' }, ['Join DUOS']),
           div({ className: 'home-title-description' }, ['Sign up to DUOS to find genomic datasets of interest and to submit Data Access Requests.']),
           hr({ className: 'home-line' }),
-          div({}, [googleLoginButton]),
+          div({style: { margin: '1rem 0 1rem 0' }}, [googleLoginButton]),
           div({ isRendered: this.state.error.show }, [
             Alert({ id: 'modal', type: 'danger', title: this.state.error.title, description: this.state.error.msg })
           ])
