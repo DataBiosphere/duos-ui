@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import { a, div, h, h3, img, label, span } from 'react-hyperscript-helpers';
+import { a, div, h, h3, img, span } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -16,13 +16,13 @@ class Login extends Component {
     this.state = {
       redirectUrl: this.props.match.url,
       clientId: '',
-      error: {},
+      error: {}
     };
     this.getGoogleClientId();
   }
 
   async getGoogleClientId() {
-    const clientKey = `${await Config.getGoogleClientId()}`;
+    const clientKey = `${ await Config.getGoogleClientId() }`;
     this.setState(prev => {
       prev.clientId = clientKey;
       return prev;
@@ -57,7 +57,7 @@ class Login extends Component {
   forbidden = (response) => {
     Storage.clearStorage();
     this.setState(prev => {
-      prev.error = { "title": response.error, "description": response.details};
+      prev.error = { 'title': response.error, 'description': response.details };
       return prev;
     });
   };
@@ -100,18 +100,18 @@ class Login extends Component {
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {
-        scope: 'openid email profile',
-        className: "btn_gSignInWrapper",
-        clientId: this.state.clientId,
-        onSuccess: this.responseGoogle,
-        onFailure: this.forbidden,
-        isSignedIn: this.state.redirectUrl !== '/login'
-      }, [
-          div({ id: "btn_gSignIn", className: "btn_gSignIn" }, [
-            span({ className: "icon" }),
-            label({}, ["Sign in with Google"])
-          ])
-        ]);
+          scope: 'openid email profile',
+          className: 'g-signin2',
+          dataWidth: '30',
+          dataHeight: '200',
+          dataLongtitle: 'true',
+          theme: 'dark',
+          clientId: this.state.clientId,
+          onSuccess: this.responseGoogle,
+          onFailure: this.forbidden,
+          isSignedIn: this.state.redirectUrl !== '/login'
+        }
+      );
     }
 
     return (
@@ -126,10 +126,10 @@ class Login extends Component {
               ]),
               div({ isRendered: _.isEmpty(this.state.error) }, [
                 div({ className: 'new-sign' }, ['Sign in with a google account']),
-                googleLoginButton,
+                  div({style: { margin: '1rem 0 1rem 0' }}, [googleLoginButton]),
                 div({ className: 'new-sign' }, [
                   span({}, [
-                    "Don't have a Google Account? Create one ",
+                    'Don\'t have a Google Account? Create one ',
                     a({
                       href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
                       target: '_blank'
