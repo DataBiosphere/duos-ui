@@ -19,10 +19,10 @@ The Data Use Oversight system ensures that researchers using genomics data honor
 
 Builds, tests, and deployments are handled by CircleCI.
 
-1. We use node@8 (the current LTS). On Darwin with Homebrew:
+1. We use node@13 On Darwin with Homebrew:
 
     ```sh
-    brew install node@8; brew link --overwrite node@8 --force
+    brew install node@13
     ```
 2. Update npm:
 
@@ -43,4 +43,10 @@ Builds, tests, and deployments are handled by CircleCI.
 
     ```sh
     npm start
+    ```
+### Running under Docker
+
+    ```sh
+    docker build -f Dockerfile-dev . -t duos-ui
+    docker run -p 80:80 duos-ui:latest
     ```
