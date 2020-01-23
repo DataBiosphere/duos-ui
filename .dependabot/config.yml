@@ -12,3 +12,15 @@ update_configs:
     - "dependency"
   commit_message:
     prefix: "dependency"
+- package_manager: docker
+  directory: "/"
+  update_schedule: "daily"
+  target_branch: "develop"
+  default_reviewers:
+    - "rushtong"
+  default_assignees:
+    - "rushtong"
+  default_labels:
+    - "dependency"
+  commit_message:
+    prefix: "dependency"
