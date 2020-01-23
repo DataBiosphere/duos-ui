@@ -6,7 +6,7 @@ executors:
       - image: google/cloud-sdk
   node:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:13
 
 commands:
   push-env:
