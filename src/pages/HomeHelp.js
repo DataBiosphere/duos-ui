@@ -27,7 +27,7 @@ class HomeHelp extends Component {
               div({ className: "home-content" }, [
                 p({}, [
                   "Need help? Please contact: ",
-                  span({ className: "bold" }, ["DUOS@broadinstitute.org"])
+                  span({ className: "bold" }, ["duos-support@zendesk.broadinstitute.org"])
                 ])
               ])
             ])
