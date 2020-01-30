@@ -141,8 +141,7 @@ export const SignIn = hh(class SignIn extends Component {
           onSuccess: this.responseGoogle,
           onFailure: this.forbidden,
           icon: false,
-          buttonText: 'Sign-In',
-          style: { minWidth: '200px', pre: 'whiteSpace' }
+          buttonText: 'Sign-In'
         }
       );
     }

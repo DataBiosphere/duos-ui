@@ -18,8 +18,8 @@ class DuosHeader extends Component {
   };
 
   signOut = () => {
-    this.props.onSignOut();
     this.props.history.push('/home');
+    this.props.onSignOut();
   };
 
   helpModal = () => {
