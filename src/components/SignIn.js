@@ -44,6 +44,7 @@ export const SignIn = hh(class SignIn extends Component {
           user => {
             this.setUserRoleStatuses(user);
             this.props.history.push('/profile');
+            this.props.onSignIn();
           },
           error => {
             const status = error.status;
