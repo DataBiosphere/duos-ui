@@ -40,8 +40,8 @@ class Home extends Component {
                 ])
               ])
             ]),
-            p({}, ['Are you a DAC member who wants to learn more about using DUOS?']),
-            p({}, [
+            p({ style: { fontSize: 'larger', fontWeight: '500' } }, ['Are you a DAC member who wants to learn more about using DUOS?']),
+            p({ style: { fontSize: 'larger', fontWeight: '500' } }, [
               'Email us at ',
               h(Mailto, { email: 'DUOS-support@zendesk.broadinstitute.org' })
             ])
