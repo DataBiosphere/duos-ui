@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import { div, h, hh, img } from 'react-hyperscript-helpers';
+import { div, h, hh, img, span } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -88,10 +88,25 @@ export const SignIn = hh(class SignIn extends Component {
 
   forbidden = (response) => {
     Storage.clearStorage();
-    this.setState(prev => {
-      prev.error = { 'title': response.error, 'description': response.details };
-      return prev;
-    });
+    if (response.error === 'popup_closed_by_user') {
+      this.setState(prev => {
+        prev.error = {
+          description: span({}, ['Sign-in cancelled ... ', img({ height: '20px', src: '/images/loading-indicator.svg' })])
+        };
+        return prev;
+      });
+      setTimeout(() => {
+        this.setState(prev => {
+          prev.error = {};
+          return prev;
+        });
+      }, 3000);
+    } else {
+      this.setState(prev => {
+        prev.error = { 'title': response.error, 'description': response.details };
+        return prev;
+      });
+    }
   };
 
   redirect = (user) => {
@@ -116,14 +131,13 @@ export const SignIn = hh(class SignIn extends Component {
     } else {
       googleLoginButton = h(GoogleLogin, {
           scope: 'openid email profile',
-          className: 'g-signin2',
-          dataWidth: '30',
-          dataHeight: '200',
-          dataLongtitle: 'true',
           theme: 'dark',
           clientId: this.state.clientId,
           onSuccess: this.responseGoogle,
-          onFailure: this.forbidden
+          onFailure: this.forbidden,
+          icon: false,
+          buttonText: 'Sign-In',
+          style: { minWidth: '200px', pre: 'whiteSpace' }
         }
       );
     }
@@ -131,7 +145,12 @@ export const SignIn = hh(class SignIn extends Component {
     return (
       div({}, [
         div({ isRendered: !_.isEmpty(this.state.error), className: 'dialog-alert' }, [
-          Alert({ id: 'dialog', type: 'danger', title: this.state.error.title, description: this.state.error.description })
+          Alert({
+            id: 'dialog',
+            type: 'danger',
+            title: this.state.error.title,
+            description: this.state.error.description
+          })
         ]),
         div({ isRendered: _.isEmpty(this.state.error) }, [googleLoginButton])
       ])
