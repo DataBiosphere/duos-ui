@@ -98,7 +98,7 @@ export const SignIn = hh(class SignIn extends Component {
     const page = user.isAdmin ? 'admin_console' :
       user.isChairPerson ? 'chair_console' :
         user.isMember ? 'member_console' :
-          user.isResearcher ? 'researcher_console' :
+          user.isResearcher ? 'dataset_catalog' :
             user.isDataOwner ? 'data_owner_console' :
               user.isAlumni ? 'summary_votes' : '/';
     this.props.history.push(page);
