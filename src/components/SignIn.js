@@ -36,22 +36,13 @@ export const SignIn = hh(class SignIn extends Component {
     Storage.setGoogleData(response);
     this.getUser().then(
       user => {
-        const currentUserRoles = user.roles.map(roles => roles.name);
-        user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
-        user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
-        user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
-        user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-        user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
-        user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-        Storage.setCurrentUser(user);
+        user = Object.assign(user, this.setUserRoleStatuses(user));
         this.redirect(user);
       },
       error => {
-        Storage.clearStorage();
         User.registerUser().then(
-          data => {
-            data = Object.assign(data, this.setRoles(data));
-            this.setStorage(data);
+          user => {
+            this.setUserRoleStatuses(user);
             this.props.history.push('/profile');
           },
           error => {
@@ -67,8 +58,7 @@ export const SignIn = hh(class SignIn extends Component {
                 // If the user exists, just log them in.
                 this.getUser().then(
                   user => {
-                    user = Object.assign(user, this.setRoles(user));
-                    this.setStorage(user);
+                    user = Object.assign(user, this.setUserRoleStatuses(user));
                     this.redirect(user);
                   },
                   error => {
@@ -89,6 +79,7 @@ export const SignIn = hh(class SignIn extends Component {
 
   forbidden = (response) => {
     Storage.clearStorage();
+    console.log(JSON.stringify(response));
     if (response.error === 'popup_closed_by_user') {
       this.setState(prev => {
         prev.error = {
@@ -119,6 +110,18 @@ export const SignIn = hh(class SignIn extends Component {
               user.isAlumni ? 'summary_votes' : '/';
     this.props.history.push(page);
     this.props.onSignIn();
+  };
+
+  setUserRoleStatuses = (user) => {
+    const currentUserRoles = user.roles.map(roles => roles.name);
+    user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
+    user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
+    user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
+    user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
+    user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
+    user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+    Storage.setCurrentUser(user);
+    return user;
   };
 
   render() {
