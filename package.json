@@ -18,7 +18,7 @@
     "react": "16.12.0",
     "react-dom": "16.12.0",
     "react-google-charts": "3.0.15",
-    "react-google-login": "5.0.7",
+    "react-google-login": "5.1.0",
     "react-hyperscript-helpers": "2.0.0",
     "react-material-icon-svg": "3.8.0",
     "react-modal": "3.11.1",
@@ -29,7 +29,7 @@
     "react-router": "5.1.2",
     "react-router-bootstrap": "0.25.0",
     "react-router-dom": "5.1.2",
-    "react-scripts": "3.3.0",
+    "react-scripts": "3.3.1",
     "react-select": "3.0.8",
     "react-tabs": "3.1.0",
     "react-tooltip": "3.11.2",
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "eslint": "6.8.0",
-    "eslint-plugin-react": "7.18.0",
+    "eslint-plugin-react": "7.18.3",
     "handlebars": "4.7.2",
     "js-yaml": "3.13.1",
     "typescript": "3.7.5"
