@@ -1,10 +1,11 @@
 import { Component } from 'react';
-import { nav, ul, li, img, small, hr, div, span, a, h } from 'react-hyperscript-helpers';
+import { a, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
+import ResponsiveMenu from 'react-responsive-navbar';
+import { Link, withRouter } from 'react-router-dom';
 import { HelpModal } from '../components/modals/HelpModal';
 import { Storage } from '../libs/storage';
-import { withRouter, Link } from "react-router-dom";
-import ResponsiveMenu from 'react-responsive-navbar';
 import './DuosHeader.css';
+
 
 class DuosHeader extends Component {
 
@@ -116,7 +117,7 @@ class DuosHeader extends Component {
 
                   li({ className: "dropdown", isRendered: isLogged }, [
                     a({ id: "sel_statistics", role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
-                      div({}, ["Statistics", span({ className: "caret caret-margin" }, []),]),
+                      div({ isRendered: isAdmin }, ['Statistics', span({ className: 'caret caret-margin' }, [])])
                     ]),
                     ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
                       li({}, [
