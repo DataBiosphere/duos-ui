@@ -2,7 +2,6 @@ import { Component } from 'react';
 import { a, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
 import ResponsiveMenu from 'react-responsive-navbar';
 import { Link, withRouter } from 'react-router-dom';
-import { HelpModal } from '../components/modals/HelpModal';
 import { Storage } from '../libs/storage';
 import './DuosHeader.css';
 
@@ -61,6 +60,8 @@ class DuosHeader extends Component {
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
     }
+
+    let helpLink = isAdmin ? '/help_reports' : '/home_help';
 
     return (
 
@@ -131,25 +132,8 @@ class DuosHeader extends Component {
                   li({}, [
                     h(Link, { id: "link_datasetCatalog", isRendered: isLogged, to: "/dataset_catalog" }, ["Dataset Catalog"]),]),
 
-                  li({ className: "dropdown" }, [
-                    a({ id: "sel_requestHelp", isRendered: isLogged, role: "button", className: "dropdown-toggle", "data-toggle": "dropdown" }, [
-                      div({}, ["Request Help", span({ className: "caret caret-margin" })])
-                    ]),
-                    ul({ className: "dropdown-menu user-dropdown", role: "menu" }, [
-                      li({}, [a({ id: 'link_helpModal', className: "f-left", onClick: this.helpModal }, ["Create a Report"]),
-
-                      HelpModal({
-                        showModal: this.state.showHelpModal,
-                        onOKRequest: this.okModal,
-                        onCloseRequest: this.closeModal,
-                        onAfterOpen: this.afterModalOpen
-                      }),
-                      ]),
-                      hr({}),
-                      li({}, [
-                        h(Link, { id: "link_reportList", to: "/help_reports", className: "f-left" }, ["List of Reports"])]),
-                    ])
-                  ])
+                  li({}, [
+                    h(Link, { id: "link_help", to: helpLink }, ["Request Help"]),])
                 ]),
 
                 ul({ isRendered: !isLogged, className: "navbar-public" }, [
