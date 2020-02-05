@@ -2,7 +2,7 @@ import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
-import Login from '../pages/Login';
+import Home from '../pages/Home';
 
 
 const AuthenticatedRoute = ({ component: Component, props: componentProps, rolesAllowed, ...rest }) => {
@@ -11,14 +11,14 @@ const AuthenticatedRoute = ({ component: Component, props: componentProps, roles
 
   return (
     <Route
-      path={path}
-      location={location}
+      path={ path }
+      location={ location }
       render={
         props =>
           verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps)
-            ? <Component {...props} {...componentProps} />
-            : !Storage.userIsLogged() ? <Login {...props} {...componentProps} componentRoles={rolesAllowed} />
-              : <Redirect to={'/'} />
+            ? <Component { ...props } { ...componentProps } />
+            : !Storage.userIsLogged() ? <Home { ...props } { ...componentProps } />
+            : <Redirect to={ '/' }/>
       }
     />
   );

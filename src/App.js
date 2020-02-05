@@ -1,13 +1,14 @@
 import React from 'react';
-import Modal from 'react-modal';
-import { Storage } from './libs/storage';
-import DuosHeader from './components/DuosHeader';
-import DuosFooter from './components/DuosFooter';
 import { div, h } from 'react-hyperscript-helpers';
+import Modal from 'react-modal';
 import './App.css';
-import Routes from "./Routes";
+import DuosFooter from './components/DuosFooter';
+import DuosHeader from './components/DuosHeader';
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
+import { Storage } from './libs/storage';
+import Routes from './Routes';
+
 
 class App extends React.Component {
 
@@ -33,18 +34,18 @@ class App extends React.Component {
 
   async componentDidMount() {
     const isLogged = await Storage.userIsLogged();
-    this.setState({ isLoggedIn: isLogged } );
+    this.setState({ isLoggedIn: isLogged });
   };
 
   signOut = () => {
     Storage.setUserIsLogged(false);
     Storage.clearStorage();
-    this.setState({ isLoggedIn: false } );
+    this.setState({ isLoggedIn: false });
   };
 
   signIn = () => {
     Storage.setUserIsLogged(true);
-    this.setState({ isLoggedIn: true } );
+    this.setState({ isLoggedIn: true });
   };
 
   componentWillMount() {
@@ -56,17 +57,17 @@ class App extends React.Component {
     const { loading } = this.state;
 
     return (
-      div({ className: "body" }, [
-        div({ className: "wrap" }, [
-          div({ className: "main" }, [
-            h(DuosHeader, {onSignOut: this.signOut}),
+      div({ className: 'body' }, [
+        div({ className: 'wrap' }, [
+          div({ className: 'main' }, [
+            h(DuosHeader, { onSignOut: this.signOut }),
             h(Spinner, {
-              name: "mainSpinner", group: "duos", loadingImage: "/images/loading-indicator.svg"
+              name: 'mainSpinner', group: 'duos', loadingImage: '/images/loading-indicator.svg'
             }),
-            h(Routes, { onSignIn: this.signIn, isRendered: !loading }),
+            h(Routes, { onSignIn: this.signIn, isRendered: !loading, isLogged: this.state.isLoggedIn })
           ])
         ]),
-        h(DuosFooter, {isLogged: this.state.isLoggedIn})
+        h(DuosFooter, { isLogged: this.state.isLoggedIn })
       ])
 
     );
