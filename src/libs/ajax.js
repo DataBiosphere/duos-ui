@@ -1163,7 +1163,7 @@ const fetchOk = async (...args) => {
   spinnerService.hideAll();
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
-    window.location.href = '/login';
+    window.location.href = '/home';
   }
   return res.ok ? res : Promise.reject(res);
 };

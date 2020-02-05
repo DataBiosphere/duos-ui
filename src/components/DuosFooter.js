@@ -1,11 +1,17 @@
 import { Component } from 'react';
 import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
+import { Storage } from '../libs/storage';
 
 
 class DuosFooter extends Component {
 
   render() {
-    const supportLink = this.props.isLogged ? '/help_reports' : '/home_help';
+    let isAdmin = false;
+    if (this.props.isLogged) {
+      isAdmin = Storage.getCurrentUser().isAdmin;
+    }
+    const  supportLink = isAdmin ? '/help_reports' : '/home_help';
+
     return (
       div({ className: "footer" }, [
         footer({ className: "main-footer" }, [
