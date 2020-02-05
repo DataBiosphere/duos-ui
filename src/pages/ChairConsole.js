@@ -1,19 +1,18 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import { div, hh, h, hr, span, button } from 'react-hyperscript-helpers';
+import { button, div, h, hh, hr, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
-import { Storage } from '../libs/storage';
 import { PaginatorBar } from '../components/PaginatorBar';
-import { PendingCases } from '../libs/ajax';
 import { SearchBox } from '../components/SearchBox';
+import { PendingCases } from '../libs/ajax';
+import { Storage } from '../libs/storage';
+
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
   dulPageCount = 5;
   accessPageCount = 5;
-
-  searchDulCases = '';
-  searchAccessCases = '';
 
   constructor(props) {
     super(props);
@@ -169,7 +168,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
           div({ className: "jumbotron table-box" }, [
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header dul-color" }, ["Consent id"]),
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-header dul-color" }, ["Consent Group Name"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dul-color" }, ["Consent Group Name"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dul-color" }, ["DAC"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, [
                 "Review/Vote",
                 div({ isRendered: this.state.totalDulPendingVotes > 0, id: "dulPendingVoteCases", className: "pcases-small-tag" }, [
@@ -186,9 +186,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               return h(Fragment, { key: rIndex }, [
                 div({ className: "row no-margin tableRowDul" }, [
                   div({ id: pendingCase.frontEndId, name: "consentId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
-
-                  div({ id: pendingCase.frontEndId + "_consentGroup", name: "consentGroup", className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ''), title: pendingCase.consentGroupName, dangerouslySetInnerHTML: { __html: pendingCase.consentGroupName } }, []),
-
+                  div({ id: pendingCase.frontEndId + "_consentGroup", name: "consentGroup", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ''), title: pendingCase.consentGroupName, dangerouslySetInnerHTML: { __html: pendingCase.consentGroupName } }, []),
+                  div({ id: pendingCase.frontEndId + "_dacName", name: "dacName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: _.get(pendingCase, 'dac.name', '') }, [_.get(pendingCase, 'dac.name', '- -')]),
                   div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({
                       id: pendingCase.frontEndId + "_btnVote",
@@ -234,7 +233,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
           div({ className: "jumbotron table-box" }, [
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header access-color" }, ["Data Request Id"]),
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-header access-color" }, ["Project Title"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Project Title"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["DAC"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, [
                 "Review/Vote",
                 div({ isRendered: this.state.totalAccessPendingVotes > 0, id: "accessPendingVoteCases", className: "pcases-small-tag" }, [
@@ -253,9 +253,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               return h(Fragment, { key: rIndex }, [
                 div({ className: "row no-margin tableRowAccess" }, [
                   div({ id: pendingCase.frontEndId, name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
-
-                  div({ id: pendingCase.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
-
+                  div({ id: pendingCase.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
+                  div({ id: pendingCase.frontEndId + "_dacName", name: "dacName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: _.get(pendingCase, 'dac.name', '') }, [_.get(pendingCase, 'dac.name', '- -')]),
                   div({ isRendered: pendingCase.electionStatus !== 'Final', className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                     button({
                       id: pendingCase.frontEndId + "_btnVote",

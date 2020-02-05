@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { div, hr, span, h, button } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
@@ -146,7 +147,8 @@ class MemberConsole extends Component {
           div({ className: "jumbotron table-box" }, [
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header dul-color" }, ["Consent id"]),
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-header dul-color" }, ["Consent Group Name"]),
+              div({ className: "col-lg-4 col-md-2 col-sm-2 col-xs-2 cell-header dul-color" }, ["Consent Group Name"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dul-color" }, ["DAC"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, ["Status"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, ["Logged"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color" }, [
@@ -164,9 +166,10 @@ class MemberConsole extends Component {
                     div({ id: pendingCase.frontEndId + "_consentId", name: "consentId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
                     div({
                       id: pendingCase.frontEndId + "_consentGroup", name: "consentGroup",
-                      className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ""),
+                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text " + (!pendingCase.consentGroupName ? 'empty' : ""),
                       title: pendingCase.consentGroupName
                     }, [pendingCase.consentGroupName]),
+                    div({ id: pendingCase.frontEndId + "_dacName", name: "dacName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: _.get(pendingCase, 'dac.name', '') }, [_.get(pendingCase, 'dac.name', '- -')]),
                     div({ id: pendingCase.frontEndId + "_statusDul", name: "statusDul", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
                       span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
                       span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ["Pending"]),
@@ -206,7 +209,8 @@ class MemberConsole extends Component {
           div({ className: "jumbotron table-box" }, [
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header access-color" }, ["Data Request Id"]),
-              div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-header access-color" }, ["Project Title"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Project Title"]),
+              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["DAC"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center" }, ["Status"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center" }, ["Logged"]),
               div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center" }, ["Review/Vote",
@@ -222,7 +226,8 @@ class MemberConsole extends Component {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: "row no-margin tableRowAccess" }, [
                     div({ id: pendingCase.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text", title: pendingCase.frontEndId }, [pendingCase.frontEndId]),
-                    div({ id: pendingCase.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-3 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
+                    div({ id: pendingCase.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: pendingCase.projectTitle }, [pendingCase.projectTitle]),
+                    div({ id: pendingCase.frontEndId + "_dacName", name: "dacName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text", title: _.get(pendingCase, 'dac.name', '') }, [_.get(pendingCase, 'dac.name', '- -')]),
                     div({ id: pendingCase.frontEndId + "_statusAccess", name: "statusAccess", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center bold" }, [
                       span({ isRendered: pendingCase.isReminderSent === true }, ["URGENT!"]),
                       span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ["Pending"]),
