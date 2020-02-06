@@ -11,9 +11,6 @@ import { Storage } from '../libs/storage';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
-  dulPageCount = 5;
-  accessPageCount = 5;
-
   constructor(props) {
     super(props);
     this.state = {
@@ -52,6 +49,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   handleDulSizeChange = size => {
     this.setState(prev => {
       prev.dulLimit = size;
+      prev.currentDulPage = 1;
       return prev;
     });
   };
@@ -59,6 +57,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   handleAccessSizeChange = size => {
     this.setState(prev => {
       prev.darLimit = size;
+      prev.currentDarPage = 1;
       return prev;
     });
   };
@@ -137,7 +136,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
@@ -146,7 +145,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   render() {
 
-    const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit, searchDulText, searchDarText } = this.state;
+    const { currentUser, dulLimit, darLimit, searchDulText, searchDarText } = this.state;
     const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
     const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
     const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
@@ -192,7 +191,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             hr({ className: 'table-head-separator' }),
 
             this.state.electionsList.dul.filter(this.searchTable(searchDulText))
-              .slice((currentDulPage - 1) * dulLimit, currentDulPage * dulLimit)
+              .slice((this.state.currentDulPage - 1) * dulLimit, this.state.currentDulPage * dulLimit)
               .map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowDul' }, [
@@ -243,8 +242,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               name: 'dul',
               total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
               limit: dulLimit,
-              pageCount: this.dulPageCount,
-              currentPage: currentDulPage,
+              currentPage: this.state.currentDulPage,
               onPageChange: this.handleDulPageChange,
               changeHandler: this.handleDulSizeChange
             })
@@ -283,7 +281,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
             hr({ className: 'table-head-separator' }),
 
             this.state.electionsList.access.filter(this.searchTable(searchDarText))
-              .slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit)
+              .slice((this.state.currentDarPage - 1) * darLimit, this.state.currentDarPage * darLimit)
               .map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowAccess' }, [
@@ -354,8 +352,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
               name: 'access',
               total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
               limit: darLimit,
-              pageCount: this.accessPageCount,
-              currentPage: currentDarPage,
+              currentPage: this.state.currentDarPage,
               onPageChange: this.handleAccessPageChange,
               changeHandler: this.handleAccessSizeChange
             })

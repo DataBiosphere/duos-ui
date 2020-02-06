@@ -11,9 +11,6 @@ import { Storage } from '../libs/storage';
 
 class MemberConsole extends Component {
 
-  dulPageCount = 5;
-  accessPageCount = 5;
-
   constructor(props) {
     super(props);
 
@@ -47,6 +44,14 @@ class MemberConsole extends Component {
     });
   };
 
+  handleDulSizeChange = size => {
+    this.setState(prev => {
+      prev.dulLimit = size;
+      prev.currentDulPage = 1;
+      return prev;
+    });
+  };
+
   handleAccessPageChange = page => {
     this.setState(prev => {
       prev.currentAccessPage = page;
@@ -54,16 +59,10 @@ class MemberConsole extends Component {
     });
   };
 
-  handleDulSizeChange = size => {
-    this.setState(prev => {
-      prev.dulLimit = size;
-      return prev;
-    });
-  };
-
   handleAccessSizeChange = size => {
     this.setState(prev => {
       prev.accessLimit = size;
+      prev.currentAccessPage = 1;
       return prev;
     });
   };
@@ -127,7 +126,7 @@ class MemberConsole extends Component {
 
   render() {
 
-    const { currentUser, currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
+    const { currentUser, searchDulText, searchDarText } = this.state;
     const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
     const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
     const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
@@ -170,7 +169,7 @@ class MemberConsole extends Component {
 
             this.state.electionsList.dul
               .filter(this.searchTable(searchDulText))
-              .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
+              .slice((this.state.currentDulPage - 1) * this.state.dulLimit, this.state.currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
                 div({ className: 'row no-margin tableRowDul' }, [
                   div({
@@ -218,7 +217,6 @@ class MemberConsole extends Component {
               name: 'dul',
               total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
               limit: this.state.dulLimit,
-              pageCount: this.dulPageCount,
               currentPage: this.state.currentDulPage,
               onPageChange: this.handleDulPageChange,
               changeHandler: this.handleDulSizeChange
@@ -255,7 +253,7 @@ class MemberConsole extends Component {
 
             this.state.electionsList.access
               .filter(this.searchTable(searchDarText))
-              .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
+              .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
               return h(Fragment, { key: rIndex }, [
                 div({ className: 'row no-margin tableRowAccess' }, [
                   div({
@@ -302,7 +300,6 @@ class MemberConsole extends Component {
               name: 'access',
               total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
               limit: this.state.accessLimit,
-              pageCount: this.accessPageCount,
               currentPage: this.state.currentAccessPage,
               onPageChange: this.handleAccessPageChange,
               changeHandler: this.handleAccessSizeChange
