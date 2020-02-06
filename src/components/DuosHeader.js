@@ -148,7 +148,8 @@ class DuosHeader extends Component {
                   ]),
 
                   li({}, [
-                    h(Link, { id: "link_help", to: helpLink }, ["Request Help"]),])
+                    h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
+                  ])
                 ]),
 
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
