@@ -128,6 +128,9 @@ class MemberConsole extends Component {
   render() {
 
     const { currentUser, currentDulPage, currentAccessPage, searchDulText, searchDarText } = this.state;
+    const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
+    const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
+    const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
 
     return (
 
@@ -153,12 +156,12 @@ class MemberConsole extends Component {
 
           div({ className: 'jumbotron table-box' }, [
             div({ className: 'row no-margin' }, [
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header dul-color' }, ['Consent id']),
-              div({ className: 'col-lg-4 col-md-2 col-sm-2 col-xs-2 cell-header dul-color' }, ['Consent Group Name']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dul-color' }, ['DAC']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color' }, ['Status']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color' }, ['Logged']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color' }, [
+              div({ className: twoColumnClass + ' cell-header dul-color' }, ['Consent id']),
+              div({ className: threeColumnClass + ' cell-header dul-color' }, ['Consent Group Name']),
+              div({ className: twoColumnClass + ' cell-header dul-color' }, ['DAC']),
+              div({ className: twoColumnClass + ' cell-header f-center dul-color' }, ['Status']),
+              div({ className: oneColumnClass + ' cell-header f-center dul-color' }, ['Logged']),
+              div({ className: twoColumnClass + ' cell-header f-center dul-color' }, [
                 'Review/Vote',
                 div({ isRendered: this.state.totalDulPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalDulPendingVotes])
               ])
@@ -171,21 +174,21 @@ class MemberConsole extends Component {
               return h(Fragment, { key: rIndex }, [
                 div({ className: 'row no-margin tableRowDul' }, [
                   div({
-                    id: pendingCase.frontEndId + '_consentId', name: 'consentId', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text',
+                    id: pendingCase.frontEndId + '_consentId', name: 'consentId', className: twoColumnClass + ' cell-body text',
                     title: pendingCase.frontEndId
                   }, [pendingCase.frontEndId]),
                   div({
                     id: pendingCase.frontEndId + '_consentGroup', name: 'consentGroup',
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text ' + (!pendingCase.consentGroupName ? 'empty' : ''),
+                    className: threeColumnClass + ' cell-body text ' + (!pendingCase.consentGroupName ? 'empty' : ''),
                     title: pendingCase.consentGroupName
                   }, [pendingCase.consentGroupName]),
                   div({
-                    id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text',
+                    id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
                     title: _.get(pendingCase, 'dac.name', '')
                   }, [_.get(pendingCase, 'dac.name', '- -')]),
                   div({
                     id: pendingCase.frontEndId + '_statusDul', name: 'statusDul',
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center'
+                    className: twoColumnClass + ' cell-body text bold f-center'
                   }, [
                     span({ isRendered: pendingCase.isReminderSent === true }, ['URGENT!']),
                     span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ['Pending']),
@@ -193,11 +196,11 @@ class MemberConsole extends Component {
                   ]),
                   div({
                     id: pendingCase.frontEndId + '_logged', name: 'loggedDul',
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center'
+                    className: oneColumnClass + ' cell-body text f-center'
                   }, [pendingCase.logged]),
                   div({
                     onClick: this.openDULReview(pendingCase.referenceId, pendingCase.voteId),
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center'
+                    className: twoColumnClass + ' cell-body f-center'
                   }, [
                     button({
                       id: pendingCase.frontEndId + '_btnVoteDul', name: 'btn_voteDul',
@@ -237,12 +240,12 @@ class MemberConsole extends Component {
           ]),
           div({ className: 'jumbotron table-box' }, [
             div({ className: 'row no-margin' }, [
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header access-color' }, ['Data Request Id']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color' }, ['Project Title']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color' }, ['DAC']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center' }, ['Status']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center' }, ['Logged']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color f-center' }, [
+              div({ className: twoColumnClass + ' cell-header access-color' }, ['Data Request Id']),
+              div({ className: threeColumnClass + ' cell-header access-color' }, ['Project Title']),
+              div({ className: twoColumnClass + ' cell-header access-color' }, ['DAC']),
+              div({ className: twoColumnClass + ' cell-header access-color f-center' }, ['Status']),
+              div({ className: oneColumnClass + ' cell-header access-color f-center' }, ['Logged']),
+              div({ className: twoColumnClass + ' cell-header access-color f-center' }, [
                 'Review/Vote',
                 div({ isRendered: this.state.totalAccessPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalAccessPendingVotes])
               ])
@@ -256,20 +259,20 @@ class MemberConsole extends Component {
               return h(Fragment, { key: rIndex }, [
                 div({ className: 'row no-margin tableRowAccess' }, [
                   div({
-                    id: pendingCase.frontEndId + '_darId', name: 'darId', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text',
+                    id: pendingCase.frontEndId + '_darId', name: 'darId', className: twoColumnClass + ' cell-body text',
                     title: pendingCase.frontEndId
                   }, [pendingCase.frontEndId]),
                   div({
                     id: pendingCase.frontEndId + '_projectTitle', name: 'projectTitle',
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text', title: pendingCase.projectTitle
+                    className: threeColumnClass + ' cell-body text', title: pendingCase.projectTitle
                   }, [pendingCase.projectTitle]),
                   div({
-                    id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text',
+                    id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
                     title: _.get(pendingCase, 'dac.name', '')
                   }, [_.get(pendingCase, 'dac.name', '- -')]),
                   div({
                     id: pendingCase.frontEndId + '_statusAccess', name: 'statusAccess',
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center bold'
+                    className: twoColumnClass + ' cell-body text f-center bold'
                   }, [
                     span({ isRendered: pendingCase.isReminderSent === true }, ['URGENT!']),
                     span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ['Pending']),
@@ -277,11 +280,11 @@ class MemberConsole extends Component {
                   ]),
                   div({
                     id: pendingCase.frontEndId + '_loggedAccess', name: 'loggedAccess',
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center'
+                    className: oneColumnClass + ' cell-body text f-center'
                   }, [pendingCase.logged]),
                   div({
                     onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
-                    className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center'
+                    className: twoColumnClass + ' cell-body f-center'
                   }, [
                     button({
                       id: pendingCase.frontEndId + '_btnVoteAccess', name: 'btn_voteAccess',
