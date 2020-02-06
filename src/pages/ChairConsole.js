@@ -1,13 +1,13 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import { button, div, h, hh, hr, span } from 'react-hyperscript-helpers';
-import { USER_ROLES } from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { USER_ROLES } from '../libs/utils';
 
 
 export const ChairConsole = hh(class ChairConsole extends Component {
@@ -123,14 +123,15 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   isAccessCollectEnabled = (pendingCase) => {
-    const dacId = _.get(pendingCase, 'dac.dacId', 0);
-    // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
-    if (dacId === 0) { return true; }
-    const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
-    return (!_.isEmpty(dacChairRoles)) &&
+    const pendingCaseAccessCollectStatus =
       (pendingCase.alreadyVoted === true) &&
       (!pendingCase.isFinalVote) &&
       (pendingCase.electionStatus !== 'Final');
+    const dacId = _.get(pendingCase, 'dac.dacId', 0);
+    // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
+    if (dacId === 0) { return pendingCaseAccessCollectStatus; }
+    const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
+    return (!_.isEmpty(dacChairRoles)) && pendingCaseAccessCollectStatus;
   };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
