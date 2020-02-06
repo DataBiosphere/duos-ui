@@ -126,7 +126,7 @@ class DuosHeader extends Component {
                     h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
                   ]),
 
-                  li({ className: 'dropdown', isRendered: isLogged }, [
+                  li({ className: 'dropdown', isRendered: isAdmin }, [
                     a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
                       div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
                     ]),
