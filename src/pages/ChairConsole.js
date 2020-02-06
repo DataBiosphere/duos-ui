@@ -147,6 +147,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   render() {
 
     const { currentUser, currentDulPage, dulLimit, currentDarPage, darLimit, searchDulText, searchDarText } = this.state;
+    const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
+    const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
+    const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
 
     return (
 
@@ -173,17 +176,17 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
           div({ className: 'jumbotron table-box' }, [
             div({ className: 'row no-margin' }, [
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header dul-color' }, ['Consent id']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dul-color' }, ['Consent Group Name']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header dul-color' }, ['DAC']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color' }, [
+              div({ className: twoColumnClass + 'cell-header dul-color' }, ['Consent id']),
+              div({ className: threeColumnClass + ' cell-header dul-color' }, ['Consent Group Name']),
+              div({ className: twoColumnClass + ' cell-header dul-color' }, ['DAC']),
+              div({ className: twoColumnClass + ' cell-header f-center dul-color' }, [
                 'Review/Vote',
                 div({ isRendered: this.state.totalDulPendingVotes > 0, id: 'dulPendingVoteCases', className: 'pcases-small-tag' }, [
                   this.state.totalDulPendingVotes
                 ])
               ]),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color' }, ['Logged']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center dul-color' }, ['Actions'])
+              div({ className: oneColumnClass + ' cell-header f-center dul-color' }, ['Logged']),
+              div({ className: twoColumnClass + ' cell-header f-center dul-color' }, ['Actions'])
             ]),
 
             hr({ className: 'table-head-separator' }),
@@ -194,19 +197,19 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowDul' }, [
                     div({
-                      id: pendingCase.frontEndId, name: 'consentId', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text',
+                      id: pendingCase.frontEndId, name: 'consentId', className: twoColumnClass + ' cell-body text',
                       title: pendingCase.frontEndId
                     }, [pendingCase.frontEndId]),
                     div({
                       id: pendingCase.frontEndId + '_consentGroup', name: 'consentGroup',
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text ' + (!pendingCase.consentGroupName ? 'empty' : ''),
+                      className: threeColumnClass + ' cell-body text ' + (!pendingCase.consentGroupName ? 'empty' : ''),
                       title: pendingCase.consentGroupName, dangerouslySetInnerHTML: { __html: pendingCase.consentGroupName }
                     }, []),
                     div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text',
+                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
                       title: _.get(pendingCase, 'dac.name', '')
                     }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center' }, [
+                    div({ className: twoColumnClass + ' cell-body f-center' }, [
                       button({
                         id: pendingCase.frontEndId + '_btnVote',
                         name: 'btn_voteDul',
@@ -220,17 +223,17 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
                     div({
                       id: pendingCase.frontEndId + '_logged', name: 'loggedDul',
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center'
+                      className: oneColumnClass + ' cell-body text f-center'
                     }, [pendingCase.logged]),
 
-                    div({ isRendered: pendingCase.alreadyVoted === true, className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center' }, [
+                    div({ isRendered: pendingCase.alreadyVoted === true, className: twoColumnClass + ' cell-body f-center' }, [
                       button({
                         id: pendingCase.frontEndId + '_btnCollect', name: 'btn_collectDul', onClick: this.openDulCollect(pendingCase.referenceId),
                         className: 'cell-button cancel-color'
                       }, ['Collect Votes'])
                     ]),
                     div({
-                      isRendered: pendingCase.alreadyVoted === false, className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text empty f-center'
+                      isRendered: pendingCase.alreadyVoted === false, className: twoColumnClass + ' cell-body text empty f-center'
                     }, [])
                   ]),
                   hr({ className: 'table-body-separator' })
@@ -262,17 +265,17 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
           div({ className: 'jumbotron table-box' }, [
             div({ className: 'row no-margin' }, [
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-header access-color' }, ['Data Request Id']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color' }, ['Project Title']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color' }, ['DAC']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color' }, [
+              div({ className: twoColumnClass + ' cell-header access-color' }, ['Data Request Id']),
+              div({ className: threeColumnClass + ' cell-header access-color' }, ['Project Title']),
+              div({ className: twoColumnClass + ' cell-header access-color' }, ['DAC']),
+              div({ className: twoColumnClass + ' cell-header f-center access-color' }, [
                 'Review/Vote',
                 div({ isRendered: this.state.totalAccessPendingVotes > 0, id: 'accessPendingVoteCases', className: 'pcases-small-tag' }, [
                   this.state.totalAccessPendingVotes
                 ])
               ]),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color' }, ['Logged']),
-              div({ className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color' }, [
+              div({ className: oneColumnClass + ' cell-header f-center access-color' }, ['Logged']),
+              div({ className: twoColumnClass + ' cell-header f-center access-color' }, [
                 'Actions'
               ])
             ]),
@@ -285,18 +288,18 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowAccess' }, [
                     div({
-                      id: pendingCase.frontEndId, name: 'darId', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text',
+                      id: pendingCase.frontEndId, name: 'darId', className: twoColumnClass + ' cell-body text',
                       title: pendingCase.frontEndId
                     }, [pendingCase.frontEndId]),
                     div({
                       id: pendingCase.frontEndId + '_projectTitle', name: 'projectTitle',
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text', title: pendingCase.projectTitle
+                      className: threeColumnClass + ' cell-body text', title: pendingCase.projectTitle
                     }, [pendingCase.projectTitle]),
                     div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text',
+                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
                       title: _.get(pendingCase, 'dac.name', '')
                     }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({ isRendered: pendingCase.electionStatus !== 'Final', className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center' }, [
+                    div({ isRendered: pendingCase.electionStatus !== 'Final', className: twoColumnClass + ' cell-body f-center' }, [
                       button({
                         id: pendingCase.frontEndId + '_btnVote',
                         name: 'btn_voteAccess',
@@ -309,17 +312,17 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     ]),
                     div({
                       isRendered: pendingCase.electionStatus === 'Final',
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center empty'
+                      className: twoColumnClass + ' cell-body text f-center empty'
                     }, []),
 
                     div({
                       id: pendingCase.frontEndId + '_logged', name: 'loggedAccess',
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text f-center'
+                      className: oneColumnClass + ' cell-body text f-center'
                     }, [pendingCase.logged]),
 
                     div({
                       isRendered: (pendingCase.alreadyVoted === true) && (!pendingCase.isFinalVote) && (pendingCase.electionStatus !== 'Final'),
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center'
+                      className: twoColumnClass + ' cell-body f-center'
                     }, [
                       button({
                         id: pendingCase.frontEndId + '_btnCollect',
@@ -330,7 +333,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     ]),
                     div({
                       isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body f-center'
+                      className: twoColumnClass + ' cell-body f-center'
                     }, [
                       button({
                         id: pendingCase.frontEndId + '_btnFinal',
@@ -341,7 +344,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     ]),
                     div({
                       isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
-                      className: 'col-lg-2 col-md-2 col-sm-2 col-xs-3 cell-body text f-center empty'
+                      className: twoColumnClass + ' cell-body text f-center empty'
                     }, [])
                   ]),
                   hr({ className: 'table-body-separator' })
