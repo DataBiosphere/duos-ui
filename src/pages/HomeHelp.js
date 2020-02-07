@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, hr, h1, h3, span, p, img } from 'react-hyperscript-helpers';
+import { div, hr, h1, h3, span, p, img, h } from 'react-hyperscript-helpers';
+import Mailto from 'react-protected-mailto';
 
 class HomeHelp extends Component {
 
@@ -27,7 +28,7 @@ class HomeHelp extends Component {
               div({ className: "home-content" }, [
                 p({}, [
                   "Need help? Please contact: ",
-                  span({ className: "bold" }, ["duos-support@broadinstitute.zendesk.org"])
+                  span({ className: "bold" }, [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })])
                 ])
               ])
             ])
