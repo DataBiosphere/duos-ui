@@ -7,6 +7,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { USER_ROLES } from '../libs/utils';
 
 
 export const ChairConsole = hh(class ChairConsole extends Component {
@@ -98,6 +99,12 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`dul_review/${ voteId }/${ referenceId }`);
   };
 
+  isDuLCollectEnabled = (pendingCase) => {
+    const dacId = _.get(pendingCase, 'dac.dacId', 0);
+    const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
+    return (!_.isEmpty(dacChairRoles)) && (pendingCase.alreadyVoted === true);
+  };
+
   openDulCollect = (consentId) => (e) => {
     this.props.history.push(`dul_collect/${ consentId }`);
   };
@@ -112,6 +119,18 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     } else {
       this.props.history.push(`access_review/${ referenceId }/${ voteId }`);
     }
+  };
+
+  isAccessCollectEnabled = (pendingCase) => {
+    const pendingCaseAccessCollectStatus =
+      (pendingCase.alreadyVoted === true) &&
+      (!pendingCase.isFinalVote) &&
+      (pendingCase.electionStatus !== 'Final');
+    const dacId = _.get(pendingCase, 'dac.dacId', 0);
+    // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
+    if (dacId === 0) { return pendingCaseAccessCollectStatus; }
+    const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
+    return (!_.isEmpty(dacChairRoles)) && pendingCaseAccessCollectStatus;
   };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
@@ -225,7 +244,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                       className: oneColumnClass + ' cell-body text f-center'
                     }, [pendingCase.logged]),
 
-                    div({ isRendered: pendingCase.alreadyVoted === true, className: twoColumnClass + ' cell-body f-center' }, [
+                    div({ isRendered: this.isDuLCollectEnabled(pendingCase), className: twoColumnClass + ' cell-body f-center' }, [
                       button({
                         id: pendingCase.frontEndId + '_btnCollect', name: 'btn_collectDul', onClick: this.openDulCollect(pendingCase.referenceId),
                         className: 'cell-button cancel-color'
@@ -319,7 +338,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     }, [pendingCase.logged]),
 
                     div({
-                      isRendered: (pendingCase.alreadyVoted === true) && (!pendingCase.isFinalVote) && (pendingCase.electionStatus !== 'Final'),
+                      isRendered: this.isAccessCollectEnabled(pendingCase),
                       className: twoColumnClass + ' cell-body f-center'
                     }, [
                       button({

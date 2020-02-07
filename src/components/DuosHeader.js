@@ -126,7 +126,7 @@ class DuosHeader extends Component {
                     h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
                   ]),
 
-                  li({ className: 'dropdown', isRendered: isLogged }, [
+                  li({ className: 'dropdown', isRendered: isAdmin }, [
                     a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
                       div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
                     ]),
@@ -148,7 +148,8 @@ class DuosHeader extends Component {
                   ]),
 
                   li({}, [
-                    h(Link, { id: "link_help", to: helpLink }, ["Request Help"]),])
+                    h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
+                  ])
                 ]),
 
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
