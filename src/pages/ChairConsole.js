@@ -100,9 +100,12 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   isDuLCollectEnabled = (pendingCase) => {
+    const pendingCaseDulCollectStatus = (pendingCase.alreadyVoted === true);
     const dacId = _.get(pendingCase, 'dac.dacId', 0);
+    // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
+    if (dacId === 0) { return pendingCaseDulCollectStatus; }
     const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
-    return (!_.isEmpty(dacChairRoles)) && (pendingCase.alreadyVoted === true);
+    return (!_.isEmpty(dacChairRoles)) && pendingCaseDulCollectStatus;
   };
 
   openDulCollect = (consentId) => (e) => {
