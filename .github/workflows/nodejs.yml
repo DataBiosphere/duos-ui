@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x]
+        node-version: [8.x, 10.x, 12.x, 13.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -17,10 +17,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-        - run: cp config/dev.json public/config.json
-        - run: npm install --silent
-        - run: npm install react-scripts --silent
-        - run: npm run build --silent
+    - run: cp config/dev.json public/config.json
+    - run: npm install --silent
+    - run: npm install react-scripts --silent
+    - run: npm run build --silent
     - run: npm test
       env:
         CI: true
