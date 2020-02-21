@@ -79,8 +79,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
     if (this.state.isUpdate) {
       DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(response => {
-          this.props.onOKRequest('ConnectDatasetModal');
-        }
+        this.props.onOKRequest('ConnectDatasetModal');
+      }
       , (error) => {
         this.setState(prev => {
           prev.showError = true;
@@ -110,7 +110,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.needsApproval = checked;
       return prev;
     },
-      () => this.handleStateSubmit() );
+    () => this.handleStateSubmit() );
   }
 
   moveLItem = (e) => {
@@ -127,12 +127,12 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     this.setState(prev => {
-        prev.available = [];
-        prev.availableclients = filteredFrom;
-        prev.selectedclients = filteredTo;
-        return prev;
-      },
-      () => this.handleStateSubmit());
+      prev.available = [];
+      prev.availableclients = filteredFrom;
+      prev.selectedclients = filteredTo;
+      return prev;
+    },
+    () => this.handleStateSubmit());
 
   };
 
@@ -150,12 +150,12 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     this.setState(prev => {
-        prev.available = [];
-        prev.availableclients = filteredTo;
-        prev.selectedclients = filteredFrom;
-        return prev;
-      },
-      () => this.handleStateSubmit());
+      prev.available = [];
+      prev.availableclients = filteredTo;
+      prev.selectedclients = filteredFrom;
+      return prev;
+    },
+    () => this.handleStateSubmit());
 
   };
 
@@ -239,90 +239,90 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
         action: { label: "Submit", handler: this.OKHandler },
         disableOkBtn: !this.state.updatedInfoModal,
       },
-        [
+      [
 
-          form({ className: "form-horizontal css-form", name: "datasetApprovalForm", noValidate: true, encType: "multipart/form-data" }, [
-            div({ className: "row", style: { 'margin': '10px 0 0 0' } }, [
+        form({ className: "form-horizontal css-form", name: "datasetApprovalForm", noValidate: true, encType: "multipart/form-data" }, [
+          div({ className: "row", style: { 'margin': '10px 0 0 0' } }, [
 
-              div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
-                div({ id: "lbl_dataOwners", className: "select-table-title dataset-color" }, ["Data Owners"]),
-                select({
-                  id: "sel_dataOwners",
-                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list",
-                  size: "5",
-                  multiple: true,
-                  value: available,
-                  onChange: this.handleLSelection,
-                  onClick: this.handleSelectionL,
-                }, [
-                    this.state.availableclients.map((client, index) => {
-                      return h(Fragment, { key: index }, [
-                        option({ value: client.id }, [client.name]),
-                      ]);
-                    })
-                  ]),
+            div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
+              div({ id: "lbl_dataOwners", className: "select-table-title dataset-color" }, ["Data Owners"]),
+              select({
+                id: "sel_dataOwners",
+                className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list",
+                size: "5",
+                multiple: true,
+                value: available,
+                onChange: this.handleLSelection,
+                onClick: this.handleSelectionL,
+              }, [
+                this.state.availableclients.map((client, index) => {
+                  return h(Fragment, { key: index }, [
+                    option({ value: client.id }, [client.name]),
+                  ]);
+                })
               ]),
-
-              div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-12", style: { 'marginTop': '30px' } }, [
-                input({
-                  id: "btn_add",
-                  type: "button",
-                  className: "select-table-btn select-table-btn-add default-color",
-                  value: "Add",
-                  onClick: this.moveLItem
-                }),
-
-                input({
-                  id: "btn_remove",
-                  type: "button",
-                  className: "select-table-btn select-table-btn-remove default-color",
-                  value: "Remove",
-                  onClick: this.moveRItem
-                }),
-              ]),
-
-              div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
-                div({ className: "select-table-title dataset-color" }, ["Selected Data Owners"]),
-                select({
-                  id: "sel_selectedDataOwners",
-                  className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list",
-                  size: "5",
-                  multiple: true,
-                  value: selected,
-                  onChange: this.handleRSelection,
-                  onClick: this.handleSelectionR
-                }, [
-                    this.state.selectedclients.map((client, index) => {
-                      return h(Fragment, { key: index }, [
-                        option({ value: client.id }, [client.name]),
-                      ]);
-                    })
-                  ])
-              ]),
-
             ]),
 
-            div({ className: "form-group row", style: { 'margin': '10px 0' } }, [
-              div({ className: "checkbox dataset-label" }, [
-                input({ id: "chk_needsApproval",
+            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-12", style: { 'marginTop': '30px' } }, [
+              input({
+                id: "btn_add",
+                type: "button",
+                className: "select-table-btn select-table-btn-add default-color",
+                value: "Add",
+                onClick: this.moveLItem
+              }),
+
+              input({
+                id: "btn_remove",
+                type: "button",
+                className: "select-table-btn select-table-btn-remove default-color",
+                value: "Remove",
+                onClick: this.moveRItem
+              }),
+            ]),
+
+            div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-12 no-padding" }, [
+              div({ className: "select-table-title dataset-color" }, ["Selected Data Owners"]),
+              select({
+                id: "sel_selectedDataOwners",
+                className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 select-table-list",
+                size: "5",
+                multiple: true,
+                value: selected,
+                onChange: this.handleRSelection,
+                onClick: this.handleSelectionR
+              }, [
+                this.state.selectedclients.map((client, index) => {
+                  return h(Fragment, { key: index }, [
+                    option({ value: client.id }, [client.name]),
+                  ]);
+                })
+              ])
+            ]),
+
+          ]),
+
+          div({ className: "form-group row", style: { 'margin': '10px 0' } }, [
+            div({ className: "checkbox dataset-label" }, [
+              input({ id: "chk_needsApproval",
                 onChange: this.handleNeedsApprovalChange,
                 checked: this.state.needsApproval,
                 type: "checkbox",
                 className: "checkbox-inline",
                 name: "needsApproval"
               }),
-                label({
-                  id: "lbl_needsApproval",
-                  className: "regular-checkbox dataset-label",
-                  htmlFor: "chk_needsApproval"
-                 }, ["Needs Data Owner's approval"]),
-              ]),
+              label({
+                id: "lbl_needsApproval",
+                className: "regular-checkbox dataset-label",
+                htmlFor: "chk_needsApproval"
+              }, ["Needs Data Owner's approval"]),
             ]),
           ]),
-          div({ isRendered: this.state.showError}, [
-            Alert({ id: "modal", type: "danger", title: "Server Error", description: "There was an error creating the associations."})
-          ]),
-        ])
+        ]),
+        div({ isRendered: this.state.showError}, [
+          Alert({ id: "modal", type: "danger", title: "Server Error", description: "There was an error creating the associations."})
+        ]),
+      ])
     );
   }
 });

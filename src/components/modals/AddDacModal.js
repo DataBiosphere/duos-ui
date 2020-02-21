@@ -245,135 +245,135 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   render() {
     return (
       BaseModal({
-          id: 'addDacModal',
-          showModal: this.props.showModal,
-          onRequestClose: this.closeHandler,
-          onAfterOpen: this.props.onAfterOpen,
-          imgSrc: this.state.isEditMode ? '/images/icon_edit_dac.png' : '/images/icon_add_dac.png',
-          color: 'common',
-          title: this.state.isEditMode ? 'Edit Data Access Committee' : 'Add Data Access Committee',
-          description: this.state.isEditMode ? 'Edit a Data Access Committee' : 'Create a new Data Access Committee in the system',
-          disableOkBtn: !this.state.dirtyFlag,
-          action: {
-            label: this.state.isEditMode ? 'Save' : 'Add',
-            handler: this.OKHandler
-          }
-        },
-        [
-          form({
-            className: 'form-horizontal css-form',
-            name: 'dacForm',
-            noValidate: true,
-            encType: 'multipart/form-data'
-          }, [
-            div({ className: 'form-group first-form-group' }, [
-              label({
-                id: 'lbl_dacName',
-                className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-              }, ['DAC Name']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-                input({
-                  id: 'txt_dacName',
-                  type: 'text',
-                  defaultValue: this.state.dac.name,
-                  onChange: this.handleChange,
-                  name: 'name',
-                  className: 'form-control col-lg-12 vote-input',
-                  required: true
-                })
-              ])
-            ]),
-
-            div({ className: 'form-group' }, [
-              label({
-                id: 'lbl_dacDescription',
-                className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-              }, ['DAC Description']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-                textarea({
-                  id: 'txt_dacDescription',
-                  defaultValue: this.state.dac.description,
-                  onChange: this.handleChange,
-                  name: 'description',
-                  className: 'form-control col-lg-12 vote-input',
-                  required: true
-                })
-              ])
-            ]),
-
-            div({
-              isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0),
-              className: 'form-group'
-            }, [
-              label({
-                id: 'lbl_dacMembers',
-                className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-              }, ['DAC Members']),
-              div({
-                className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
-              }, [
-                DacUsers({
-                  dac: this.state.dac,
-                  removeButton: true,
-                  removeHandler: this.removeDacMember
-                })
-              ])
-            ]),
-
-            div({ className: 'form-group' }, [
-              label({
-                id: 'lbl_dacChair',
-                className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-              }, ['Add Chairperson(s)']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-                h(AsyncSelect, {
-                  id: 'sel_dacChair',
-                  isDisabled: false,
-                  isMulti: true,
-                  loadOptions: (query, callback) => this.chairSearch(query, callback),
-                  onChange: (option) => this.onChairSearchChange(option),
-                  onInputChange: () => this.onSearchInputChanged(),
-                  onMenuClose: () => this.onSearchMenuClosed(),
-                  noOptionsMessage: () => 'Select a DUOS User...',
-                  value: this.state.chairsSelectedOptions,
-                  classNamePrefix: 'select',
-                  placeholder: 'Select a DUOS User...',
-                  className: 'select-autocomplete'
-                })
-              ])
-            ]),
-
-            div({ className: 'form-group' }, [
-              label({
-                id: 'lbl_dacMember',
-                className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
-              }, ['Add Member(s)']),
-              div({
-                // Necessary to minimize the select options scrolling off screen
-                style: this.state.searchInputChanged ? { paddingBottom: '10rem' } : {},
-                className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-                h(AsyncSelect, {
-                  id: 'sel_dacMember',
-                  isDisabled: false,
-                  isMulti: true,
-                  loadOptions: (query, callback) => this.memberSearch(query, callback),
-                  onChange: (option) => this.onMemberSearchChange(option),
-                  onInputChange: () => this.onSearchInputChanged(),
-                  onMenuClose: () => this.onSearchMenuClosed(),
-                  noOptionsMessage: () => 'Select a DUOS User...',
-                  value: this.state.membersSelectedOptions,
-                  classNamePrefix: 'select',
-                  placeholder: 'Select a DUOS User...',
-                  className: 'select-autocomplete'
-                })
-              ])
+        id: 'addDacModal',
+        showModal: this.props.showModal,
+        onRequestClose: this.closeHandler,
+        onAfterOpen: this.props.onAfterOpen,
+        imgSrc: this.state.isEditMode ? '/images/icon_edit_dac.png' : '/images/icon_add_dac.png',
+        color: 'common',
+        title: this.state.isEditMode ? 'Edit Data Access Committee' : 'Add Data Access Committee',
+        description: this.state.isEditMode ? 'Edit a Data Access Committee' : 'Create a new Data Access Committee in the system',
+        disableOkBtn: !this.state.dirtyFlag,
+        action: {
+          label: this.state.isEditMode ? 'Save' : 'Add',
+          handler: this.OKHandler
+        }
+      },
+      [
+        form({
+          className: 'form-horizontal css-form',
+          name: 'dacForm',
+          noValidate: true,
+          encType: 'multipart/form-data'
+        }, [
+          div({ className: 'form-group first-form-group' }, [
+            label({
+              id: 'lbl_dacName',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['DAC Name']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              input({
+                id: 'txt_dacName',
+                type: 'text',
+                defaultValue: this.state.dac.name,
+                onChange: this.handleChange,
+                name: 'name',
+                className: 'form-control col-lg-12 vote-input',
+                required: true
+              })
             ])
           ]),
 
-          div({ isRendered: this.state.error.show }, [
-            Alert({ id: 'modal', type: 'danger', title: this.state.error.title, description: this.state.error.msg })
+          div({ className: 'form-group' }, [
+            label({
+              id: 'lbl_dacDescription',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['DAC Description']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              textarea({
+                id: 'txt_dacDescription',
+                defaultValue: this.state.dac.description,
+                onChange: this.handleChange,
+                name: 'description',
+                className: 'form-control col-lg-12 vote-input',
+                required: true
+              })
+            ])
+          ]),
+
+          div({
+            isRendered: (this.state.dac.chairpersons.length > 0 || this.state.dac.members.length > 0),
+            className: 'form-group'
+          }, [
+            label({
+              id: 'lbl_dacMembers',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['DAC Members']),
+            div({
+              className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8'
+            }, [
+              DacUsers({
+                dac: this.state.dac,
+                removeButton: true,
+                removeHandler: this.removeDacMember
+              })
+            ])
+          ]),
+
+          div({ className: 'form-group' }, [
+            label({
+              id: 'lbl_dacChair',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['Add Chairperson(s)']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              h(AsyncSelect, {
+                id: 'sel_dacChair',
+                isDisabled: false,
+                isMulti: true,
+                loadOptions: (query, callback) => this.chairSearch(query, callback),
+                onChange: (option) => this.onChairSearchChange(option),
+                onInputChange: () => this.onSearchInputChanged(),
+                onMenuClose: () => this.onSearchMenuClosed(),
+                noOptionsMessage: () => 'Select a DUOS User...',
+                value: this.state.chairsSelectedOptions,
+                classNamePrefix: 'select',
+                placeholder: 'Select a DUOS User...',
+                className: 'select-autocomplete'
+              })
+            ])
+          ]),
+
+          div({ className: 'form-group' }, [
+            label({
+              id: 'lbl_dacMember',
+              className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color'
+            }, ['Add Member(s)']),
+            div({
+              // Necessary to minimize the select options scrolling off screen
+              style: this.state.searchInputChanged ? { paddingBottom: '10rem' } : {},
+              className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              h(AsyncSelect, {
+                id: 'sel_dacMember',
+                isDisabled: false,
+                isMulti: true,
+                loadOptions: (query, callback) => this.memberSearch(query, callback),
+                onChange: (option) => this.onMemberSearchChange(option),
+                onInputChange: () => this.onSearchInputChanged(),
+                onMenuClose: () => this.onSearchMenuClosed(),
+                noOptionsMessage: () => 'Select a DUOS User...',
+                value: this.state.membersSelectedOptions,
+                classNamePrefix: 'select',
+                placeholder: 'Select a DUOS User...',
+                className: 'select-autocomplete'
+              })
+            ])
           ])
+        ]),
+
+        div({ isRendered: this.state.error.show }, [
+          Alert({ id: 'modal', type: 'danger', title: this.state.error.title, description: this.state.error.msg })
         ])
+      ])
     );
   }
 

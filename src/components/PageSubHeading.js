@@ -13,7 +13,7 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
         src: this.props.imgSrc,
         alt: this.props.title,
         className: "page-sub-heading-icon"
-       }),
+      }),
       div({ className: "page-sub-heading-text " + this.props.iconSize }, [
         h2({ id: this.props.id + "_title", className: "page-sub-heading-title " + this.props.color + "-color" }, [this.props.title]),
         span({ id: this.props.id + "_description", className: "page-sub-heading-description" }, [this.props.description]),

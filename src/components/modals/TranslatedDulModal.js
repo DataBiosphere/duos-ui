@@ -37,9 +37,9 @@ export const TranslatedDulModal = hh(class TranslatedDulModal extends Component 
         description: 'Translated Use Restriction',
         action: { label: "Close", handler: this.OKHandler }
       },
-        [
-          div({ id: "txt_translatedRestrictions", className: "row no-margin translated-restriction", dangerouslySetInnerHTML: {__html:this.props.useRestriction }}, []),
-        ])
+      [
+        div({ id: "txt_translatedRestrictions", className: "row no-margin translated-restriction", dangerouslySetInnerHTML: {__html:this.props.useRestriction }}, []),
+      ])
     );
   }
 });

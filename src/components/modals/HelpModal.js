@@ -84,26 +84,26 @@ export const HelpModal = hh(class HelpModal extends Component {
         action: { label: "Submit", handler: this.OKHandler },
       },
 
-        [
-          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
-            div({ className: "form-group first-form-group" }, [
-              label({ id: "lbl_subject", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Subject"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                input({ type: "text", id: "txt_subject", className: "form-control col-lg-12 vote-input", onChange: this.subjectChangeHandler, required: true }),
-              ]),
-            ]),
-
-            div({ className: "form-group" }, [
-              label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Description"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                textarea({ name: "helpDescription", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", onChange: this.descriptionChangeHandler, required: true }),
-              ]),
+      [
+        form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
+          div({ className: "form-group first-form-group" }, [
+            label({ id: "lbl_subject", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Subject"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+              input({ type: "text", id: "txt_subject", className: "form-control col-lg-12 vote-input", onChange: this.subjectChangeHandler, required: true }),
             ]),
           ]),
-          div({ isRendered: false }, [
-            Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
-          ])
+
+          div({ className: "form-group" }, [
+            label({ id: "lbl_description", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color" }, ["Description"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+              textarea({ name: "helpDescription", id: "txt_description", rows: "5", className: "form-control col-lg-12 vote-input", onChange: this.descriptionChangeHandler, required: true }),
+            ]),
+          ]),
+        ]),
+        div({ isRendered: false }, [
+          Alert({ id: "modal", type: "danger", title: alert.title, description: alert.msg })
         ])
+      ])
     );
   }
 });

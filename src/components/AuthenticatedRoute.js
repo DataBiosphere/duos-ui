@@ -18,7 +18,7 @@ const AuthenticatedRoute = ({ component: Component, props: componentProps, roles
           verifyUser(rolesAllowed, Storage.getCurrentUser(), componentProps)
             ? <Component { ...props } { ...componentProps } />
             : !Storage.userIsLogged() ? <Home { ...props } { ...componentProps } />
-            : <Redirect to={ '/' }/>
+              : <Redirect to={ '/' }/>
       }
     />
   );

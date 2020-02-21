@@ -138,79 +138,79 @@ export const AddOntologiesModal = hh(class AddOntologiesModal extends Component 
         description: 'Store Ontologies for index',
         action: { label: "Add", handler: this.OKHandler }
       },
-        [
-          form({
-            className: "form-horizontal css-form",
-            name: "consentForm",
-            noValidate: true,
-            encType: "multipart/form-data"
-          }, [
-              div({ className: "form-group first-form-group" }, [
-                label({
-                  id: "lbl_uploadFile",
-                  className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-                }, ["Ontology File"]),
-                div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
-                  div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-secondary btn-upload common-color" }, [
-                    span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
-                    "Upload file",
-                    input({
-                      id: "btn_uploadFile",
-                      type: "file",
-                      onChange: this.handleFileChange,
-                      className: "upload",
-                      required: true
-                    }),
-                  ]),
-                  p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
-                ]),
+      [
+        form({
+          className: "form-horizontal css-form",
+          name: "consentForm",
+          noValidate: true,
+          encType: "multipart/form-data"
+        }, [
+          div({ className: "form-group first-form-group" }, [
+            label({
+              id: "lbl_uploadFile",
+              className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+            }, ["Ontology File"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
+              div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-secondary btn-upload common-color" }, [
+                span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
+                "Upload file",
+                input({
+                  id: "btn_uploadFile",
+                  type: "file",
+                  onChange: this.handleFileChange,
+                  className: "upload",
+                  required: true
+                }),
               ]),
+              p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
+            ]),
+          ]),
 
-              div({ className: "form-group" }, [
-                label({
-                  id: "lbl_type",
-                  className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-                }, ["Type"]),
-                div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                  select({
-                    id: "sel_type", className: "form-control select-option",
-                    value: this.state.ontology.type,
-                    onChange: this.handleSelection
-                  }, [
-                      this.state.ontologyTypes.map((type, index) => {
-                        return h(Fragment, { key: index }, [
-                          option({ value: type }, [type]),
-                        ]);
-                      })
-                    ])
-                ])
-              ]),
-
-              div({ className: "form-group" }, [
-                label({
-                  id: "lbl_prefix",
-                  className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
-                }, ["Prefix"]),
-                div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
-                  input({
-                    id: "txt_prefix",
-                    type: "text",
-                    "ng-model": "prefix",
-                    className: "form-control col-lg-12 vote-input",
-                    value: this.state.ontology.prefix,
-                    name: "ontology_prefix",
-                    placeholder: "Ontology Prefix",
-                    required: true,
-                    onChange: this.handlePrefixChange
-                  }),
-                ]),
-              ]),
-
-              div({ isRendered: this.state.error.show }, [
-                Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg })
+          div({ className: "form-group" }, [
+            label({
+              id: "lbl_type",
+              className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+            }, ["Type"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+              select({
+                id: "sel_type", className: "form-control select-option",
+                value: this.state.ontology.type,
+                onChange: this.handleSelection
+              }, [
+                this.state.ontologyTypes.map((type, index) => {
+                  return h(Fragment, { key: index }, [
+                    option({ value: type }, [type]),
+                  ]);
+                })
               ])
             ])
+          ]),
+
+          div({ className: "form-group" }, [
+            label({
+              id: "lbl_prefix",
+              className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color"
+            }, ["Prefix"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8" }, [
+              input({
+                id: "txt_prefix",
+                type: "text",
+                "ng-model": "prefix",
+                className: "form-control col-lg-12 vote-input",
+                value: this.state.ontology.prefix,
+                name: "ontology_prefix",
+                placeholder: "Ontology Prefix",
+                required: true,
+                onChange: this.handlePrefixChange
+              }),
+            ]),
+          ]),
+
+          div({ isRendered: this.state.error.show }, [
+            Alert({ id: "modal", type: "danger", title: this.state.error.title, description: this.state.error.msg })
+          ])
         ])
+      ])
     );
   }
 

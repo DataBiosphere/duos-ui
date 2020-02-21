@@ -46,56 +46,56 @@ export const PaginatorBar = hh(class PaginatorBar extends Component {
         pageCount: this.state.pageCount, // How many pages number you want to display in pagination zone.
         currentPage: this.props.currentPage // Current page number
       }, [
-          ({ pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, totalPages, getPageItemProps }) =>
-            div({ className: 'controls-wrapper' }, [
+        ({ pages, currentPage, hasNextPage, hasPreviousPage, previousPage, nextPage, totalPages, getPageItemProps }) =>
+          div({ className: 'controls-wrapper' }, [
 
-              div({className: "show-results-wrapper"}, [
-                "Showing ", this.firstItem(currentPage, this.props.total), " to ", this.lastItem(hasNextPage), " of ", this.props.total, " entries"
+            div({className: "show-results-wrapper"}, [
+              "Showing ", this.firstItem(currentPage, this.props.total), " to ", this.lastItem(hasNextPage), " of ", this.props.total, " entries"
+            ]),
+
+            div({ className: 'pagination-wrapper' }, [
+
+              paginatorButton(
+                _.merge({ disabled: !hasPreviousPage, style: { marginRight: '1rem' } },
+                  getPageItemProps({ pageValue: previousPage, onPageChange: this.props.onPageChange })),
+                [
+                  span({ className: "glyphicon glyphicon-menu-left arrow pull-left", "aria-hidden": "true" }),
+                  span({className: "button-label"},["Previous"])
+                ]
+              ),
+
+              _.map(num => paginatorButton(
+                _.merge({
+                  key: num,
+                  className: "pagination-btn " + (currentPage === num ? "active" : "")
+                },
+                getPageItemProps({ pageValue: num, onPageChange: this.props.onPageChange })),
+                num), pages
+              ),
+
+              paginatorButton(
+                _.merge({ disabled: !hasNextPage, style: { marginLeft: '1rem' } },
+                  getPageItemProps({ pageValue: nextPage, onPageChange: this.props.onPageChange })),
+                [
+                  span({ className: "glyphicon glyphicon-menu-right arrow pull-right", "aria-hidden": "true" }),
+                  span({className: "button-label"},["Next"])
+                ]
+              ),
+            ]),
+
+            div({ className: "select-wrapper" }, [
+              select({ className: "select", value: this.state.limit, onChange: this.changeLimit }, [
+                option({ value: 5 }, ["  5"]),
+                option({ value: 10 }, [" 10"]),
+                option({ value: 20 }, [" 20"]),
+                option({ value: 50 }, [" 50"]),
+                option({ value: 100 }, ["100"]),
               ]),
 
-              div({ className: 'pagination-wrapper' }, [
-
-                paginatorButton(
-                  _.merge({ disabled: !hasPreviousPage, style: { marginRight: '1rem' } },
-                    getPageItemProps({ pageValue: previousPage, onPageChange: this.props.onPageChange })),
-                  [
-                    span({ className: "glyphicon glyphicon-menu-left arrow pull-left", "aria-hidden": "true" }),
-                    span({className: "button-label"},["Previous"])
-                  ]
-                ),
-
-                _.map(num => paginatorButton(
-                  _.merge({
-                    key: num,
-                    className: "pagination-btn " + (currentPage === num ? "active" : "")
-                  },
-                    getPageItemProps({ pageValue: num, onPageChange: this.props.onPageChange })),
-                  num), pages
-                ),
-
-                paginatorButton(
-                  _.merge({ disabled: !hasNextPage, style: { marginLeft: '1rem' } },
-                    getPageItemProps({ pageValue: nextPage, onPageChange: this.props.onPageChange })),
-                  [
-                    span({ className: "glyphicon glyphicon-menu-right arrow pull-right", "aria-hidden": "true" }),
-                    span({className: "button-label"},["Next"])
-                  ]
-                ),
-              ]),
-
-              div({ className: "select-wrapper" }, [
-                select({ className: "select", value: this.state.limit, onChange: this.changeLimit }, [
-                  option({ value: 5 }, ["  5"]),
-                  option({ value: 10 }, [" 10"]),
-                  option({ value: 20 }, [" 20"]),
-                  option({ value: 50 }, [" 50"]),
-                  option({ value: 100 }, ["100"]),
-                ]),
-
-                div({ className: "select-label" }, ["items per page"])
-              ]),
-            ])
-        ])
+              div({ className: "select-label" }, ["items per page"])
+            ]),
+          ])
+      ])
     );
   }
 });

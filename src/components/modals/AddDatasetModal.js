@@ -110,35 +110,35 @@ export const AddDatasetModal = hh(class AddDatasetModal extends Component {
         description: 'Store Datasets associated with Data Use Limitations',
         action: { label: "Add", handler: this.OKHandler }
       },
-        [
+      [
 
-          form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
-            div({ className: "form-group first-form-group" }, [
-              label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
-              div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
-                div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 dataset-color btn-secondary btn-upload" }, [
-                  span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
-                  "Upload file",
-                  input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true }),
-                ]),
-                p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
+        form({ className: "form-horizontal css-form", name: "consentForm", noValidate: true, encType: "multipart/form-data" }, [
+          div({ className: "form-group first-form-group" }, [
+            label({ id: "lbl_uploadFile", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Datasets File"]),
+            div({ className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 bold" }, [
+              div({ className: "fileUpload col-lg-3 col-md-3 col-sm-4 col-xs-12 dataset-color btn-secondary btn-upload" }, [
+                span({ className: "glyphicon glyphicon-upload", "aria-hidden": "true" }),
+                "Upload file",
+                input({ id: "btn_uploadFile", type: "file", onChange: this.handleFileChange, className: "upload", required: true }),
               ]),
+              p({ id: "txt_uploadFile", className: "fileName" }, [this.state.file.name]),
             ]),
+          ]),
 
-            div({ className: "form-group" }, [
-              div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
-                div({ className: "checkbox dataset-label" }, [
-                  input({ id: "chk_overwrite", onChange: this.handleOverwriteChange, checked: this.state.overwrite, type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
-                  label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "chk_overwrite" }, ["Overwrite existing Datasets"]),
-                ])
+          div({ className: "form-group" }, [
+            div({ className: "col-lg-9 col-lg-offset-3 col-md-9 col-lg-offset-3 col-sm-9 col-lg-offset-3 col-xs-8 col-lg-offset-4 bold" }, [
+              div({ className: "checkbox dataset-label" }, [
+                input({ id: "chk_overwrite", onChange: this.handleOverwriteChange, checked: this.state.overwrite, type: "checkbox", className: "checkbox-inline", name: "checkOther" }),
+                label({ id: "lbl_overwrite", className: "regular-checkbox dataset-label", htmlFor: "chk_overwrite" }, ["Overwrite existing Datasets"]),
               ])
             ])
-          ]),
-          div({ isRendered: this.state.errors }, [
-            Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
-          ]),
-          div({ className: "row no-margin download-link" }, ["Click here to download a ", a({ className: "hover-color", href: "/DataSetSample.tsv" }, ["Dataset Spreadsheet Modal"])]),
-        ])
+          ])
+        ]),
+        div({ isRendered: this.state.errors }, [
+          Alert({ id: "addDataset", type: "danger", title: "Conflicts to resolve!", description: alertMessage })
+        ]),
+        div({ className: "row no-margin download-link" }, ["Click here to download a ", a({ className: "hover-color", href: "/DataSetSample.tsv" }, ["Dataset Spreadsheet Modal"])]),
+      ])
     );
   }
 });

@@ -56,7 +56,7 @@ export const SignIn = hh(class SignIn extends Component {
                 });
                 break;
               case 409:
-                // If the user exists, just log them in.
+              // If the user exists, just log them in.
                 this.getUser().then(
                   user => {
                     user = Object.assign(user, this.setUserRoleStatuses(user));
@@ -80,7 +80,6 @@ export const SignIn = hh(class SignIn extends Component {
 
   forbidden = (response) => {
     Storage.clearStorage();
-    console.log(JSON.stringify(response));
     if (response.error === 'popup_closed_by_user') {
       this.setState(prev => {
         prev.error = {
@@ -135,15 +134,14 @@ export const SignIn = hh(class SignIn extends Component {
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {
-          scope: 'openid email profile',
-          theme: 'dark',
-          clientId: this.state.clientId,
-          onSuccess: this.responseGoogle,
-          onFailure: this.forbidden,
-          icon: false,
-          buttonText: 'Sign-In'
-        }
-      );
+        scope: 'openid email profile',
+        theme: 'dark',
+        clientId: this.state.clientId,
+        onSuccess: this.responseGoogle,
+        onFailure: this.forbidden,
+        icon: false,
+        buttonText: 'Sign-In'
+      });
     }
 
     return (

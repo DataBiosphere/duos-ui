@@ -46,10 +46,10 @@ export const SingleResultBox = hh(class SingleResultBox extends Component {
             div({
               id: "lbl_vote_" + this.props.id, className: "col-lg-4 col-md-4 col-sm-9 col-xs-9 vote-label bold"
             }, [
-                span({ isRendered: this.props.data.vote.vote === '1' || this.props.data.vote.vote === true || this.props.data.vote.vote === 'true' }, ["YES"]),
-                span({ isRendered: this.props.data.vote.vote === '0' || this.props.data.vote.vote === false || this.props.data.vote.vote === 'false' }, ["NO"]),
-                span({ isRendered: this.props.data.vote.vote === null }, ["---"]),
-              ]),
+              span({ isRendered: this.props.data.vote.vote === '1' || this.props.data.vote.vote === true || this.props.data.vote.vote === 'true' }, ["YES"]),
+              span({ isRendered: this.props.data.vote.vote === '0' || this.props.data.vote.vote === false || this.props.data.vote.vote === 'false' }, ["NO"]),
+              span({ isRendered: this.props.data.vote.vote === null }, ["---"]),
+            ]),
 
             label({
               className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 control-label vote-label " + this.props.color + "-color"
