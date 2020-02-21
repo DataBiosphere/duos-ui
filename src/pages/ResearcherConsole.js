@@ -75,8 +75,7 @@ class ResearcherConsole extends Component {
   async review(e) {
     const dataRequestId = e.target.getAttribute('value');
     const SEPARATOR = ' | ';
-    let darFields = await DAR.getDarFields(dataRequestId, null);
-    let formData = darFields;
+    let formData = await DAR.getDarFields(dataRequestId, null);
     formData.datasetId = [];
     for (let detail of formData.datasetDetail) {
       let obj = {};
@@ -107,7 +106,7 @@ class ResearcherConsole extends Component {
       }
     );
     return { piName: piName, consentId: ds.consentId };
-  }
+  };
 
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
@@ -119,8 +118,7 @@ class ResearcherConsole extends Component {
 
     DAR.getPartialDarRequest(dataRequestId).then(
       data => {
-        let formData = data;
-        this.props.history.push({ pathname: 'dar_application', props: { formData: formData } });
+        this.props.history.push({ pathname: 'dar_application', props: { formData: data } });
       });
   };
 
@@ -222,9 +220,9 @@ class ResearcherConsole extends Component {
                 id: "btn_createRequest",
                 className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", to: "/dar_application"
               }, [
-                  div({ className: "all-icons add-access_white" }, []),
-                  span({}, ["Create Data Access Request"]),
-                ]),
+                div({ className: "all-icons add-access_white" }, []),
+                span({}, ["Create Data Access Request"]),
+              ]),
             ]),
 
             div({ className: "jumbotron table-box" }, [
@@ -301,8 +299,8 @@ class ResearcherConsole extends Component {
                         id: pdar.partial_dar_code + "_btnDelete", name: "btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
                         onClick: this.deletePartialDar, value: pdar.dataRequestId
                       }, [
-                          span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
-                        ]),
+                        span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
+                      ]),
 
                       div({ id: pdar.partial_dar_code + "_partialId", name: "partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partial_dar_code]),
                       div({ id: pdar.partial_dar_code + "_partialTitle", name: "partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),

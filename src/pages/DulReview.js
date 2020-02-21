@@ -140,8 +140,8 @@ class DulReview extends Component {
               onClick: this.back,
               className: "btn-primary btn-back"
             }, [
-                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-              ])
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 

@@ -152,9 +152,9 @@ class ManageOntologies extends Component {
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
               onClick: this.addOntologiesModal
             }, [
-                div({ className: "all-icons add-ontologies_white" }),
-                span({}, ["Add Ontologies"]),
-              ]),
+              div({ className: "all-icons add-ontologies_white" }),
+              span({}, ["Add Ontologies"]),
+            ]),
             AddOntologiesModal({
               showModal: this.state.showModal,
               onOKRequest: this.okAddOntologiesModal,

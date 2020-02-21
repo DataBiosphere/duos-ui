@@ -193,11 +193,11 @@ class DulCollect extends Component {
         ConfirmationDialog({
           title: this.state.dialogTitle, color: 'dul', showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
         }, [
-            div({ className: "dialog-description" }, [
-              span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
-              span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
-            ]),
+          div({ className: "dialog-description" }, [
+            span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
+            span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
           ]),
+        ]),
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
 
         hr({ className: "section-separator", style: { 'marginTop': '0' } }),
@@ -247,10 +247,10 @@ class DulCollect extends Component {
             title: "Post Final Vote?", color: 'dul', showModal: this.state.showConfirmationDialogOK,
             action: { label: "Yes", handler: this.confirmationHandlerOK }
           }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["If you post this vote the Election will be closed with current results."]),
-              ]),
+            div({ className: "dialog-description" }, [
+              span({}, ["If you post this vote the Election will be closed with current results."]),
             ]),
+          ]),
         ]),
 
         h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),

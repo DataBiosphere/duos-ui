@@ -65,7 +65,7 @@ class DatasetCatalog extends Component {
       dataSetList: { catalog: catalog },
       currentPage: 1
     });
- }
+  }
 
   componentDidMount() {
 

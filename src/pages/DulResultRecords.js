@@ -191,22 +191,22 @@ class DulResultRecords extends Component {
             title: "Data Access Committee Votes",
             expanded: this.state.isQ1Expanded
           }, [
-              this.state.dulVoteList.map((row, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    row.map((vm, vIndex) => {
-                      return h(Fragment, { key: vIndex }, [
-                        SingleResultBox({
-                          id: "dulSingleResult_" + vIndex,
-                          color: "dul",
-                          data: vm
-                        })
-                      ]);
-                    })
-                  ]),
-                ]);
-              })
-            ]),
+            this.state.dulVoteList.map((row, rIndex) => {
+              return h(Fragment, { key: rIndex }, [
+                div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                  row.map((vm, vIndex) => {
+                    return h(Fragment, { key: vIndex }, [
+                      SingleResultBox({
+                        id: "dulSingleResult_" + vIndex,
+                        color: "dul",
+                        data: vm
+                      })
+                    ]);
+                  })
+                ]),
+              ]);
+            })
+          ]),
         ]),
       ])
     );

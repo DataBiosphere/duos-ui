@@ -73,8 +73,8 @@ class DulPreview extends Component {
               onClick: this.back,
               className: "btn-primary btn-back"
             }, [
-                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-              ])
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 
@@ -91,12 +91,12 @@ class DulPreview extends Component {
               id: "panel_dul",
               className: "panel-body cm-boxbody"
             }, [
-                button({
-                  id: "btn_downloadDataUseLetter",
-                  className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-                  onClick: () => this.downloadDUL()
-                }, ["Download Data Use Letter"]),
-              ])
+              button({
+                id: "btn_downloadDataUseLetter",
+                className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
+                onClick: () => this.downloadDUL()
+              }, ["Download Data Use Letter"]),
+            ])
           ]),
 
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [

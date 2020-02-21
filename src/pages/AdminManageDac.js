@@ -196,54 +196,54 @@ class AdminManageDac extends Component {
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map((dac, eIndex) => {
               return (h(Fragment, { key: dac.dacId }, [
+                div({
+                  id: dac.dacId,
+                  className: 'grid-9-row tableRow'
+                }, [
                   div({
-                    id: dac.dacId,
-                    className: 'grid-9-row tableRow'
+                    id: dac.dacId + '_dacName',
+                    name: 'name',
+                    className: 'col-2 cell-body text bold',
+                    title: dac.name
+                  }, [dac.name]),
+                  div({
+                    id: dac.dacId + '_dacDescription',
+                    name: 'dacDescription',
+                    className: 'col-3 cell-body text',
+                    title: dac.description
+                  }, [dac.description]),
+                  div({
+                    className: 'col-2 cell-body'
                   }, [
-                    div({
-                      id: dac.dacId + '_dacName',
-                      name: 'name',
-                      className: 'col-2 cell-body text bold',
-                      title: dac.name
-                    }, [dac.name]),
-                    div({
-                      id: dac.dacId + '_dacDescription',
-                      name: 'dacDescription',
-                      className: 'col-3 cell-body text',
-                      title: dac.description
-                    }, [dac.description]),
-                    div({
-                      className: 'col-2 cell-body'
-                    }, [
-                      button({
-                        id: dac.dacId + '_dacDatasets',
-                        name: 'dacDatasets',
-                        className: 'cell-button hover-color',
-                        style: actionButtonStyle,
-                        onClick: () => this.viewDatasets(dac)
-                      }, ['View'])
-                    ]),
-                    div({
-                      className: 'col-2 cell-body f-center'
-                    }, [
-                      button({
-                        id: dac.dacId + '_btnViewDAC',
-                        name: 'btn_viewDac',
-                        className: 'cell-button hover-color',
-                        style: actionButtonStyle,
-                        onClick: () => this.viewMembers(dac)
-                      }, ['View']),
-                      button({
-                        id: dac.dacId + '_btnEditDAC',
-                        name: 'btn_editDac',
-                        className: 'cell-button hover-color',
-                        style: actionButtonStyle,
-                        onClick: () => this.editDac(dac)
-                      }, ['Edit'])
-                    ])
+                    button({
+                      id: dac.dacId + '_dacDatasets',
+                      name: 'dacDatasets',
+                      className: 'cell-button hover-color',
+                      style: actionButtonStyle,
+                      onClick: () => this.viewDatasets(dac)
+                    }, ['View'])
                   ]),
-                  hr({ className: 'table-body-separator' })
-                ])
+                  div({
+                    className: 'col-2 cell-body f-center'
+                  }, [
+                    button({
+                      id: dac.dacId + '_btnViewDAC',
+                      name: 'btn_viewDac',
+                      className: 'cell-button hover-color',
+                      style: actionButtonStyle,
+                      onClick: () => this.viewMembers(dac)
+                    }, ['View']),
+                    button({
+                      id: dac.dacId + '_btnEditDAC',
+                      name: 'btn_editDac',
+                      className: 'cell-button hover-color',
+                      style: actionButtonStyle,
+                      onClick: () => this.editDac(dac)
+                    }, ['Edit'])
+                  ])
+                ]),
+                hr({ className: 'table-body-separator' })
+              ])
               );
             }),
           PaginatorBar({

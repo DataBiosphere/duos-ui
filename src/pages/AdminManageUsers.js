@@ -60,7 +60,7 @@ class AdminManageUsers extends Component {
       return prev;
     });
 
-  }
+  };
 
   handlePageChange = page => {
     this.setState(prev => {
@@ -96,7 +96,7 @@ class AdminManageUsers extends Component {
 
   openResearcherReview = (userId) => {
     this.props.history.push(`researcher_review/${userId}`);
-  }
+  };
 
   okModal = async (name) => {
     this.setState(prev => {
@@ -105,11 +105,11 @@ class AdminManageUsers extends Component {
     }, () => {
       this.getUsers();
     });
-  }
+  };
 
   closeModal = (name) => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
-  }
+  };
 
   afterModalOpen = (name) => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
@@ -117,7 +117,7 @@ class AdminManageUsers extends Component {
 
   handleSearchUser = (query) => {
     this.setState({ searchUserText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -125,7 +125,7 @@ class AdminManageUsers extends Component {
       return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
-  }
+  };
 
   render() {
 
@@ -147,9 +147,9 @@ class AdminManageUsers extends Component {
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
               onClick: this.addUser
             }, [
-                div({ className: "all-icons add-user_white" }),
-                span({}, ["Add User"]),
-              ]),
+              div({ className: "all-icons add-user_white" }),
+              span({}, ["Add User"]),
+            ]),
 
             AddUserModal({
               isRendered: this.state.showAddUserModal,
@@ -200,13 +200,13 @@ class AdminManageUsers extends Component {
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
                       isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
-                        div({
-                          className:
+                      div({
+                        className:
                             ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
                               : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
                                 : user.researcher === false || !user.completed ? 'disabled' : ''
-                        }, ["Review"]),
-                      ]),
+                      }, ["Review"]),
+                    ]),
 
                     a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),

@@ -117,9 +117,9 @@ class HelpReports extends Component {
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
               onClick: this.helpModal
             }, [
-                div({ className: "all-icons add-help_white" }),
-                span({}, ["Create a Report"]),
-              ]),
+              div({ className: "all-icons add-help_white" }),
+              span({}, ["Create a Report"]),
+            ]),
             HelpModal({
               showModal: this.state.showHelpModal,
               onOKRequest: this.okModal,
