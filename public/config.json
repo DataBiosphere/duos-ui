@@ -4,5 +4,6 @@
   "clientId": "",
   "firecloudUrl": "",
   "gwasUrl": "",
-  "nihUrl": ""
+  "nihUrl": "",
+  "features": {}
 }
