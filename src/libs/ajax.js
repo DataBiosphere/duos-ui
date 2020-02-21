@@ -60,12 +60,6 @@ export const Consent = {
     return await res.json();
   },
 
-  findDataUseLetterForConsent: async consentId => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
   findConsentManage: async () => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
     const res = await fetchOk(url, Config.authOpts());
@@ -161,12 +155,6 @@ export const DAC = {
     return res.json();
   },
 
-  delete: async (dacId) => {
-    const url = `${await Config.getApiUrl()}/dac/${dacId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
-  },
-
   get: async (dacId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -175,12 +163,6 @@ export const DAC = {
 
   datasets: async (dacId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/datasets`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  membership: async (dacId) => {
-    const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -449,8 +431,7 @@ export const DataSet = {
 
   disableDataset: async (datasetObjectId, active) => {
     const url = `${await Config.getApiUrl()}/dataset/disable/${datasetObjectId}/${active}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res;
+    return await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
   },
 
   reviewDataSet: async (dataSetId, needsApproval) => {
@@ -507,12 +488,6 @@ export const Election = {
     return getFile(url, 'datasetVotesSummary.txt');
   },
 
-  findElection: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -546,25 +521,17 @@ export const Election = {
   createElection: async (consentId) => {
     const election = { status: 'Open' };
     const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res;
+    return await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
   },
 
   createElectionForDac: async (consentId, dacId) => {
     const election = { status: 'Open' };
     const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election/dac/${ dacId }`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res;
+    return await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
   },
 
   findReviewedConsents: async () => {
     const url = `${await Config.getApiUrl()}/consent/cases/closed`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  findInvalidConsentRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/consent/invalid`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -584,8 +551,7 @@ export const Election = {
   createDARElection: async (requestId) => {
     const election = { status: 'Open', finalAccessVote: false };
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res;
+    return await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
   },
 
   isDataSetElectionOpen: async () => {
@@ -623,8 +589,7 @@ export const ElectionTimeout = {
 
   updateApprovalExpirationTime: async (approvalExpirationTime) => {
     const url = `${await Config.getApiUrl()}/approvalExpirationTime/${approvalExpirationTime.id}`;
-    const res = await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
-    return res;
+    return await fetchOk(url, _.mergeAll([Config.jsonBody(approvalExpirationTime), Config.authOpts(), { method: 'PUT' }]));
   },
 
   createApprovalExpirationTime: async (approvalExpirationTime) => {
@@ -638,8 +603,7 @@ export const Email = {
 
   sendReminderEmail: async (voteId) => {
     const url = `${await Config.getApiUrl()}/emailNotifier/reminderMessage/${voteId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return res;
+    return await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
   }
 
 };
@@ -915,17 +879,6 @@ export const Researcher = {
 
 export const StatFiles = {
 
-  getFile: async fileType => {
-    const url = `${await Config.getApiUrl()}/consent/cases/summary/file?fileType=${fileType}`;
-    let fileName = null;
-    if (fileType === 'TranslateDUL') {
-      fileName = "summary.txt";
-    } else if (fileType === 'DataAccess') {
-      fileName = "DAR_summary.txt";
-    }
-    return getFile(url, fileName);
-  },
-
   getDARsReport: async (reportType, fileName) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${reportType}`;
     return getFile(url, fileName);
@@ -970,12 +923,6 @@ export const User = {
     }
   },
 
-  updateMainFields: async (user, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
-    return res.json();
-  },
-
   registerUser: async () => {
     const url = `${await Config.getApiUrl()}/user`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
@@ -991,18 +938,11 @@ export const User = {
   findUserStatus: async userId => {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    const user = await res.json();
-    return user;
+    return await res.json();
   }
 };
 
 export const Votes = {
-
-  getAllVotes: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/vote`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
 
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
@@ -1051,13 +991,6 @@ export const Votes = {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return res.json();
-  },
-
-
-  findDar: async (requestId, voteId) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
   },
 
   updateDarVote: async (requestId, vote) => {

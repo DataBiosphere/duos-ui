@@ -21,6 +21,10 @@
         ]
       }
     ],
+    "indent": [
+      "warn",
+      2
+    ],
     "implicit-arrow-linebreak": "off",
     "array-bracket-newline": "off",
     "brace-style": "off",
