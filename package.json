@@ -34,7 +34,7 @@
     "react-tabs": "3.1.0",
     "react-tooltip": "4.0.3",
     "set-value": "3.0.1",
-    "source-map-explorer": "2.3.0"
+    "source-map-explorer": "2.3.1"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
