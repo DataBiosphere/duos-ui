@@ -141,7 +141,7 @@ export const SignIn = hh(class SignIn extends Component {
           onSuccess: this.responseGoogle,
           onFailure: this.forbidden,
           icon: false,
-          buttonText: 'Sign-In'
+          buttonText: 'Start here!'
         }
       );
     }
