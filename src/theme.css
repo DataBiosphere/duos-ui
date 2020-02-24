@@ -1,0 +1,103 @@
+/***************************************************Colors*/
+
+.primary {
+  color: #1f3b50;
+}
+
+.secondary {
+  color: #00609f;
+}
+
+.highlighted {
+  color: #c16b0c;
+}
+
+.link {
+ color: #216fb4;
+}
+
+/***************************************************Spacing*/
+
+.centered {
+  margin: auto;
+}
+
+.section {
+  margin: 16px;
+}
+
+.text-section {
+  margin: 32px 0px;
+}
+
+/***************************************************Typography*/
+
+.normal-text, .header-text, .title-text, .subheader-text, .link, .button {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.normal-text, .subheader-text, .link, .button {
+  font-size: 14px;
+}
+
+.normal-text, .header-text {
+  line-height: 22px;
+}
+
+.subheader-text, .link, .button {
+  line-height: 18px;
+}
+
+.header-text, .title-text, .subheader-text, .button-outlined {
+  font-weight: 600;
+}
+
+.header-text {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.title-text {
+  font-size: 28px;
+  line-height: 34px;
+  margin-bottom: 5px;
+}
+
+.subheader-text {
+  text-transform: uppercase;
+  opacity: 70%;
+}
+
+/***************************************************Buttons*/
+
+.button-contained, .button-outlined {
+  border-radius: 5px;
+  padding: 10px;
+  text-transform: uppercase;
+}
+
+.button-outlined {
+  border: 1px solid #00609f;
+}
+
+.button-outlined:hover {
+  background-color: rgba(0,96,159, 0.1);
+}
+
+.button-contained {
+  background-color: #00609f;
+  color: #ffffff;
+}
+
+.button-contained:hover {
+  background-color: rgba(0,96,159, 0.9);
+  color: #ffffff;
+}
+
+/***************************************************Component-specific*/
+
+.highlight-box {
+  background-color: rgba(193,107,12, 0.1);
+  border-radius: 9px;
+  padding: 24px;
+}
