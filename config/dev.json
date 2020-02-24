@@ -5,5 +5,7 @@
   "firecloudUrl": "https://firecloud-orchestration.dsde-dev.broadinstitute.org/",
   "gwasUrl": "",
   "nihUrl": "http://mock-nih.dev.test.firecloud.org/link-nih-account/index.html",
-  "features": {}
+  "features": {
+    "newDarUi": true
+  }
 }
