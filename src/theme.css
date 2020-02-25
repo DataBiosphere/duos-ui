@@ -32,7 +32,7 @@
 
 /***************************************************Typography*/
 
-.normal-text, .header-text, .title-text, .subheader-text, .link, .button {
+/* .normal-text, .header-text, .title-text, .subheader-text, .link, .button {
   font-family: 'Montserrat', sans-serif;
 }
 
@@ -66,7 +66,7 @@
 .subheader-text {
   text-transform: uppercase;
   opacity: 70%;
-}
+} */
 
 /***************************************************Buttons*/
 

@@ -119,14 +119,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
 
   openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
     const newDarUiEnabled = Config.getFeatureFlag('newDarUi');
-    if (newDarUiEnabled) {
-      this.props.history.push("/mackenzie");
+    const pathStart = newDarUiEnabled ? "mackenzie" : "access_review";
+    if (rpVoteId !== null) {
+      this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
     } else {
-      if (rpVoteId !== null) {
-        this.props.history.push(`access_review/${referenceId}/${voteId}/${rpVoteId}`);
-      } else {
-        this.props.history.push(`access_review/${referenceId}/${voteId}`);
-      }
+      this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
     }
   };
 

@@ -74,7 +74,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/access_review/:darId/:voteId/:rpVoteId?" component={AccessReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/mackenzie" component={MacKenzieAccessReview} props={props}
+    <AuthenticatedRoute path="/mackenzie/:darId/:voteId/:rpVoteId?" component={MacKenzieAccessReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}
     />
     <AuthenticatedRoute path="/access_preview/:referenceId?/:electionId?" component={AccessPreview} props={props}
