@@ -74,7 +74,7 @@ class Home extends Component {
             span({}, ['Interfaces for the data access committee (DAC) to evaluate data access requests requiring manual review'])
           ]),
           img({
-            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic', alt: 'What is DUOS graphic', src: '/images/duoshomepagev2.PNG'
+            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic', alt: 'What is DUOS graphic', src: '/images/duos_process_flow.png'
           })
         ])
       ])
