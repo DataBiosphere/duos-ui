@@ -930,24 +930,23 @@ class DataAccessRequestApplication extends Component {
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       label({ className: 'control-label rp-title-question' }, [
-                        '1.4 Descriptive Title of Project* ',
-                        span({}, ['Please note that coordinated requests by collaborating institutions should each use the same title.'])
+                        '1.4 Institutional Signing Official* ',
+                        span({}, ['I certify the individual listed below is my Institutional Signing Official.'])
                       ])
                     ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       input({
                         type: 'text',
-                        name: 'projectTitle',
-                        id: 'inputTitle',
-                        maxLength: '256',
-                        value: this.state.formData.projectTitle,
-                        onChange: this.handleChange,
-                        className: step1.inputTitle.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                        required: true,
-                        disabled: this.state.formData.dar_code !== null
+                        name: 'investigator',
+                        id: 'inputInvestigator',
+                        value: investigator,
+                        disabled: true,
+                        className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                        required: true
                       }),
-                      span({ className: 'cancel-color required-field-error-span', isRendered: step1.inputTitle.invalid && showValidationMessages },
-                        ['Required field'])
+                      span({
+                        className: 'cancel-color required-field-error-span', isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages)
+                      }, ['Required field']),
                     ])
                   ])
                 ]),
@@ -1004,243 +1003,436 @@ class DataAccessRequestApplication extends Component {
                     ])
 
                   ]),
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
+                    input({
+                      type: 'checkbox',
+                      id: 'respectDULs',
+                      name: 'respectDULs',
+                      className: 'checkbox-inline rp-checkbox',
+                      disabled: this.state.formData.dar_code !== null,
+                      checked: checkCollaborator,
+                      onChange: this.handleCheckboxChange
+                    }),
+                    label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'respectDULs' },
+                      ['I acknowledge that the datasets can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with the DUL are considered a violation of the Data Use Certification agreement and any additional terms described in the Addendum.'])
+                  ]),
 
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '2.2 Research use statement (RUS)* ',
-                        span({}, [
-                          'A RUS is a brief description of the applicant’s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.',
-                          br(),
-                          'Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ',
-                          a({ target: '_blank', href: 'http://epi.grants.cancer.gov/dac/examples.html' }, ['here'], '.')
-                        ])
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
+                    input({
+                      type: 'checkbox',
+                      id: 'GSO',
+                      name: 'GSO',
+                      className: 'checkbox-inline rp-checkbox',
+                      disabled: this.state.formData.dar_code !== null,
+                      checked: checkCollaborator,
+                      onChange: this.handleCheckboxChange
+                    }),
+                    label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'respectDULs' },
+                      ['I acknowledge that I have selected a dataset with data use limitations that permit genetic studies only. I attest that I will respect these data use limitations.'])
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
+                    input({
+                      type: 'checkbox',
+                      id: 'PUBreq',
+                      name: 'PUBreq',
+                      className: 'checkbox-inline rp-checkbox',
+                      disabled: this.state.formData.dar_code !== null,
+                      checked: checkCollaborator,
+                      onChange: this.handleCheckboxChange
+                    }),
+                    label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'respectDULs' },
+                      ['I acknowledge that I have selected a dataset with data use limitations that require results of studies using the data to be made available to the larger scientific community. I attest that I will respect these data use limitations.'])
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label default-color' },
+                      ['IRB Approval Required']),
+                    p({ className: 'rp-agreement' },
+                      ['One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval here or remove the dataset from your selection above.'])
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                    div({
+                      style: { paddingTop: 7 },
+                      className: 'fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                    }, [
+                      span({ className: 'glyphicon glyphicon-upload' }),
+                      'Upload IRB approval',
+                      input({ id: 'uploadFile', type: 'file', onChange: this.handleFileChange, className: 'upload', required: true })
+                    ])
+                  ]),
+                  p({ id: 'txt_uploadFile', className: 'fileName daa', isRendered: this.state.file.name !== '' || this.state.formData.nameDAA }, [
+                    'Your currently uploaded IRB approval: ',
+                    span({ className: 'italic normal' }, [this.state.file.name !== '' ? this.state.file.name : this.state.formData.nameDAA])
+                  ]),
+                  span({
+                    className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span',
+                    isRendered: step4.uploadFile.invalid && showValidationMessages
+                  }, ['Required field']),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label default-color' },
+                      ['Collaboration Required']),
+                    p({ className: 'rp-agreement' },
+                      ['One or more of the datasets you selected requires collaboration with the primary study investigator(s) for use. Please upload documentation of your collaboration here or remove the dataset from your selection above.'])
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                    div({
+                      style: { paddingTop: 7 },
+                      className: 'fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                    }, [
+                      span({ className: 'glyphicon glyphicon-upload' }),
+                      'Upload Collaboration documentation',
+                      input({ id: 'uploadFile', type: 'file', onChange: this.handleFileChange, className: 'upload', required: true })
+                    ])
+                  ]),
+                  p({ id: 'txt_uploadFile', className: 'fileName daa', isRendered: this.state.file.name !== '' || this.state.formData.nameDAA }, [
+                    'Your currently uploaded Collaboration documentation: ',
+                    span({ className: 'italic normal' }, [this.state.file.name !== '' ? this.state.file.name : this.state.formData.nameDAA])
+                  ]),
+                  span({
+                    className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span',
+                    isRendered: step4.uploadFile.invalid && showValidationMessages
+                  }, ['Required field']),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label rp-choice-questions' }, ['You selected one or more datasets with gender specific data use limitations. Please indicate if this study is limited to one gender.'])
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    YesNoRadioGroup({
+                      value: this.state.formData.onegender, onChange: this.handleRadioChange, id: 'onegender', name: 'onegender',
+                      required: true
+                    }),
+                    div({
+                      isRendered: this.state.formData.onegender === 'true' || this.state.formData.onegender === true,
+                      className: 'multi-step-fields', disabled: (this.state.formData.dar_code !== null)
+                    }, [
+                      span({}, ['Please specify']),
+                      div({ className: 'radio-inline' }, [
+                        genderLabels.map((option, ix) => {
+                          return (
+                            label({
+                              key: 'gender' + ix,
+                              onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
+                              id: 'lbl_gender_' + ix,
+                              htmlFor: 'rad_gender_' + ix,
+                              className: 'radio-wrapper'
+                            }, [
+                              input({
+                                type: 'radio',
+                                id: 'rad_gender_' + ix,
+                                name: this.state.name,
+                                checked: this.state.formData.gender === genderValues[ix],
+                                onChange: () => { }
+                              }),
+                              span({ className: 'radio-check' }),
+                              span({ className: 'radio-label' }, [genderLabels[ix]])
+                            ])
+                          );
+                        })
                       ])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      textarea({
-                        value: this.state.formData.rus, onChange: this.handleChange,
-                        name: 'rus',
-                        id: 'inputRUS',
-                        className: step2.inputRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
-                        rows: '6',
-                        required: true,
-                        placeholder: 'Please limit your RUS to 2200 characters.',
-                        disabled: this.state.formData.dar_code !== null
-                      }),
-                      span({ className: 'cancel-color required-field-error-span', isRendered: step2.inputRUS.invalid && showValidationMessages },
-                        ['Required field'])
                     ])
                   ]),
 
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '2.3 Non-Technical summary* ',
-                        span({}, [
-                          'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).'
-                        ])
-                      ])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      textarea({
-                        value: this.state.formData.non_tech_rus,
-                        onChange: this.handleChange,
-                        name: 'non_tech_rus',
-                        id: 'inputNonTechRUS',
-                        className: step2.inputNonTechRUS.invalid && showValidationMessages ? 'required-field-error form-control' : 'form-control',
-                        rows: '3',
-                        required: true,
-                        placeholder: 'Please limit your non-technical summary to 1100 characters.',
-                        disabled: this.state.formData.dar_code !== null
-                      }),
-                      span(
-                        { className: 'cancel-color required-field-error-span', isRendered: step2.inputNonTechRUS.invalid && showValidationMessages },
-                        ['Required field'])
-                    ])
-                  ]),
+                                    div({ className: 'form-group' }, [
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        label({ className: 'control-label rp-title-question' }, [
+                                          '2.2 Descriptive Title of Project* ',
+                                          span({}, ['Please note that coordinated requests by collaborating institutions should each use the same title.'])
+                                        ])
+                                      ]),
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group' }, [
+                                        input({
+                                          type: 'text',
+                                          name: 'projectTitle',
+                                          id: 'inputTitle',
+                                          maxLength: '256',
+                                          value: this.state.formData.projectTitle,
+                                          onChange: this.handleChange,
+                                          className: step1.inputTitle.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                                          required: true,
+                                          disabled: this.state.formData.dar_code !== null
+                                        }),
+                                        span({ className: 'cancel-color required-field-error-span', isRendered: step1.inputTitle.invalid && showValidationMessages },
+                                          ['Required field'])
+                                      ])
+                                    ]),
 
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '2.4 Type of Research* ',
-                        span({}, ['Select all applicable options.'])
-                      ])
-                    ]),
-                    div({ className: 'row no-margin' }, [
-                      span({
-                        className: 'cancel-color required-field-error-span', isRendered: !atLeastOneCheckboxChecked && showValidationMessages,
-                        style: { 'marginLeft': '15px' }
-                      }, ['At least one of the following fields is required'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: diseases,
-                          onChange: this.handleCheckboxChange,
-                          name: 'diseases',
-                          id: 'checkDiseases',
-                          type: 'checkbox',
-                          className: 'checkbox-inline rp-checkbox',
-                          disabled: (this.state.formData.dar_code !== null)
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkDiseases' }, [
-                          span({}, ['2.4.1 Disease-related studies: ']),
-                          'The primary purpose of the research is to learn more about a particular disease or disorder (e.g., type 2 diabetes), a trait (e.g., blood pressure), or a set of related conditions (e.g., autoimmune diseases, psychiatric disorders).'
-                        ])
-                      ])
-                    ]),
+                                    div({ className: 'form-group' }, [
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        label({ className: 'control-label rp-title-question' }, [
+                                          '2.3 Type of Research* ',
+                                          span({}, ['Please select one of the following opitons.'])
+                                        ])
+                                      ]),
+                                      div({ className: 'row no-margin' }, [
+                                        span({
+                                          className: 'cancel-color required-field-error-span', isRendered: !atLeastOneCheckboxChecked && showValidationMessages,
+                                          style: { 'marginLeft': '15px' }
+                                        }, ['At least one of the following fields is required'])
+                                      ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: methods,
-                          onChange: this.handleCheckboxChange,
-                          id: 'checkMethods',
-                          type: 'checkbox',
-                          disabled: (this.state.formData.dar_code !== null),
-                          className: 'checkbox-inline rp-checkbox',
-                          name: 'methods'
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkMethods' }, [
-                          span({}, ['2.4.2 Methods development and validation studies: ']),
-                          'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data (e.g., developing more powerful methods to detect epistatic, gene-environment, or other types of complex interactions in genome-wide association studies). Data will be used for developing and/or validating new methods.'
-                        ])
-                      ])
-                    ]),
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: hmb,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'checkHmb',
+                                            type: 'checkbox',
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'hmb',
+                                            disabled: (this.state.formData.dar_code !== null)
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkHmb' }, [
+                                            span({}, ['2.3.1 Health/medical/biomedical research: ']),
+                                            'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.'
+                                          ])
+                                        ])
+                                      ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: controls,
-                          onChange: this.handleCheckboxChange,
-                          id: 'checkControls',
-                          type: 'checkbox',
-                          disabled: (this.state.formData.dar_code !== null),
-                          className: 'checkbox-inline rp-checkbox',
-                          name: 'controls'
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkControls' }, [
-                          span({}, ['2.4.3 Controls: ']),
-                          'The reason for this request is to increase the number of controls available for a comparison group (e.g., a case-control study).'
-                        ])
-                      ])
-                    ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: population,
-                          onChange: this.handleCheckboxChange,
-                          id: 'checkPopulation',
-                          type: 'checkbox',
-                          disabled: (this.state.formData.dar_code !== null),
-                          className: 'checkbox-inline rp-checkbox',
-                          name: 'population'
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkPopulation' }, [
-                          span({}, ['2.4.4 Population structure or normal variation studies: ']),
-                          'The primary purpose of the research is to understand variation in the general population (e.g., genetic substructure of a population).'
-                        ])
-                      ])
-                    ]),
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: poa,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'checkPoa',
+                                            type: 'checkbox',
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'poa',
+                                            disabled: (this.state.formData.dar_code !== null)
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkPoa' }, [
+                                            span({}, ['2.3.2 Population origins or ancestry research: ']),
+                                            'The outcome of this study is expected to provide new knowledge about the origins of a certain population or its ancestry.'
+                                          ])
+                                        ])
+                                      ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: hmb,
-                          onChange: this.handleCheckboxChange,
-                          id: 'checkHmb',
-                          type: 'checkbox',
-                          className: 'checkbox-inline rp-checkbox',
-                          name: 'hmb',
-                          disabled: (this.state.formData.dar_code !== null)
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkHmb' }, [
-                          span({}, ['2.4.5 Health/medical/biomedical research: ']),
-                          'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.'
-                        ])
-                      ])
-                    ]),
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: diseases,
+                                            onChange: this.handleCheckboxChange,
+                                            name: 'diseases',
+                                            id: 'checkDiseases',
+                                            type: 'checkbox',
+                                            className: 'checkbox-inline rp-checkbox',
+                                            disabled: (this.state.formData.dar_code !== null)
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkDiseases' }, [
+                                            span({}, ['2.3.3 Disease-related studies: ']),
+                                            'The primary purpose of the research is to learn more about a particular disease or disorder (e.g., type 2 diabetes), a trait (e.g., blood pressure), or a set of related conditions (e.g., autoimmune diseases, psychiatric disorders).'
+                                          ])
+                                        ])
+                                      ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: poa,
-                          onChange: this.handleCheckboxChange,
-                          id: 'checkPoa',
-                          type: 'checkbox',
-                          className: 'checkbox-inline rp-checkbox',
-                          name: 'poa',
-                          disabled: (this.state.formData.dar_code !== null)
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkPoa' }, [
-                          span({}, ['2.4.6 Population origins or ancestry research: ']),
-                          'The outcome of this study is expected to provide new knowledge about the origins of a certain population or its ancestry.'
-                        ])
-                      ])
-                    ]),
+                                      div({ className: 'form-group' }, [
+                                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                          label({ className: 'control-label rp-title-question' }, [
+                                            span({}, ['If you selected Disease-related Studies, please select the disease area(s) this study focuses on in the box below.'])
+                                          ])
+                                        ]),
+                                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group' }, [
+                                          h(AsyncSelect, {
+                                            id: 'sel_diseases',
+                                            isDisabled: this.state.formData.dar_code !== null,
+                                            isMulti: true,
+                                            loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                            onChange: (option) => this.onOntologiesChange(option),
+                                            value: this.state.formData.ontologies,
+                                            placeholder: 'Please enter one or more diseases',
+                                            className: 'select-autocomplete',
+                                            classNamePrefix: 'select'
+                                          })
+                                        ])
+                                      ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      div({ className: 'checkbox' }, [
-                        input({
-                          checked: other,
-                          onChange: this.handleCheckboxChange,
-                          id: 'checkOther',
-                          type: 'checkbox',
-                          className: 'checkbox-inline rp-checkbox',
-                          name: 'other',
-                          disabled: (this.state.formData.dar_code !== null)
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkOther' }, [span({}, ['2.4.7 Other:'])])
-                      ])
-                    ]),
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: other,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'checkOther',
+                                            type: 'checkbox',
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'other',
+                                            disabled: (this.state.formData.dar_code !== null)
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkOther' }, [span({}, ['2.3.4 Other:'])])
+                                        ])
+                                      ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
 
-                      textarea({
-                        value: othertext,
-                        onChange: this.handleChange,
-                        name: 'othertext',
-                        id: 'inputOtherText',
-                        maxLength: '512',
-                        rows: '2',
-                        required: this.state.formData.other,
-                        className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ?
-                          ' required-field-error form-control' :
-                          'form-control',
-                        placeholder: 'Please specify if selected (max. 512 characters)',
-                        disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages
-                      }, ['Required field'])
-                    ])
-                  ]),
+                                        textarea({
+                                          value: othertext,
+                                          onChange: this.handleChange,
+                                          name: 'othertext',
+                                          id: 'inputOtherText',
+                                          maxLength: '512',
+                                          rows: '2',
+                                          required: this.state.formData.other,
+                                          className: step2.inputOther.invalid && this.state.formData.other && showValidationMessages ?
+                                            ' required-field-error form-control' :
+                                            'form-control',
+                                          placeholder: 'Please specify if selected (max. 512 characters)',
+                                          disabled: this.state.formData.dar_code !== null || this.state.formData.other !== true
+                                        }),
+                                        span({
+                                          className: 'cancel-color required-field-error-span',
+                                          isRendered: step2.inputOther.invalid && this.state.formData.other && showValidationMessages
+                                        }, ['Required field'])
+                                      ]),
 
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '2.5 Please state the disease area(s) this study focus on ',
-                        span({}, ['Choose any number of Disease Ontology ; or none.'])
-                      ])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group' }, [
-                      h(AsyncSelect, {
-                        id: 'sel_diseases',
-                        isDisabled: this.state.formData.dar_code !== null,
-                        isMulti: true,
-                        loadOptions: (query, callback) => this.searchOntologies(query, callback),
-                        onChange: (option) => this.onOntologiesChange(option),
-                        value: this.state.formData.ontologies,
-                        placeholder: 'Please enter one or more ontologies',
-                        className: 'select-autocomplete',
-                        classNamePrefix: 'select'
-                      })
-                    ])
-                  ])
-                ]),
+                                      div({ className: 'form-group' }, [
+                                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                          label({ className: 'control-label rp-title-question' }, [
+                                            '2.4 Research Designations* ',
+                                            span({}, ['Select all applicable options.'])
+                                          ])
+                                        ]),
+                                        div({ className: 'row no-margin' }, [
+                                          span({
+                                            className: 'cancel-color required-field-error-span', isRendered: !atLeastOneCheckboxChecked && showValidationMessages,
+                                            style: { 'marginLeft': '15px' }
+                                          }, ['At least one of the following fields is required'])
+                                        ])
+                                      ]),
+
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: methods,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'checkMethods',
+                                            type: 'checkbox',
+                                            disabled: (this.state.formData.dar_code !== null),
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'methods'
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkMethods' }, [
+                                            span({}, ['2.4.1 Methods development and validation studies: ']),
+                                            'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data (e.g., developing more powerful methods to detect epistatic, gene-environment, or other types of complex interactions in genome-wide association studies). Data will be used for developing and/or validating new methods.'
+                                          ])
+                                        ])
+                                      ]),
+
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: controls,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'checkControls',
+                                            type: 'checkbox',
+                                            disabled: (this.state.formData.dar_code !== null),
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'controls'
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkControls' }, [
+                                            span({}, ['2.4.2 Controls: ']),
+                                            'The reason for this request is to increase the number of controls available for a comparison group (e.g., a case-control study).'
+                                          ])
+                                        ])
+                                      ]),
+
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: population,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'checkPopulation',
+                                            type: 'checkbox',
+                                            disabled: (this.state.formData.dar_code !== null),
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'population'
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkPopulation' }, [
+                                            span({}, ['2.4.3 Population structure or normal variation studies: ']),
+                                            'The primary purpose of the research is to understand variation in the general population (e.g., genetic substructure of a population).'
+                                          ])
+                                        ])
+                                      ]),
+
+                                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                        div({ className: 'checkbox' }, [
+                                          input({
+                                            checked: population,
+                                            onChange: this.handleCheckboxChange,
+                                            id: 'forProfit',
+                                            type: 'checkbox',
+                                            disabled: (this.state.formData.dar_code !== null),
+                                            className: 'checkbox-inline rp-checkbox',
+                                            name: 'forProfit'
+                                          }),
+                                          label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'checkforProfit' }, [
+                                            span({}, [' 2.4.5 Commercial or For-Profit Purpose: ']),
+                                            'The primary purpose of the research is exclusively or partially for a commercial purpose'
+                                          ])
+                                        ])
+                                      ])
+                                    ])
+                                  ]),
+
+                                  div({ className: 'form-group' }, [
+                                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                      label({ className: 'control-label rp-title-question' }, [
+                                        '2.5 Research Use Statement (RUS)* ',
+                                        span({}, [
+                                          'A RUS is a brief description of the applicant’s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.',
+                                          br(),
+                                          'Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ',
+                                          a({ target: '_blank', href: 'https://www.ncbi.nlm.nih.gov/books/NBK482114/' }, ['here'], '.')
+                                        ])
+                                      ])
+                                    ]),
+                                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                      textarea({
+                                        value: this.state.formData.rus, onChange: this.handleChange,
+                                        name: 'rus',
+                                        id: 'inputRUS',
+                                        className: step2.inputRUS.invalid && showValidationMessages ? ' required-field-error form-control' : 'form-control',
+                                        rows: '6',
+                                        required: true,
+                                        placeholder: 'Please limit your RUS to 2200 characters.',
+                                        disabled: this.state.formData.dar_code !== null
+                                      }),
+                                      span({ className: 'cancel-color required-field-error-span', isRendered: step2.inputRUS.invalid && showValidationMessages },
+                                        ['Required field'])
+                                    ])
+                                  ]),
+
+                                  div({ className: 'form-group' }, [
+                                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                      label({ className: 'control-label rp-title-question' }, [
+                                        '2.6 Non-Technical Summary* ',
+                                        span({}, [
+                                          'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).'
+                                        ])
+                                      ])
+                                    ]),
+                                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                                      textarea({
+                                        value: this.state.formData.non_tech_rus,
+                                        onChange: this.handleChange,
+                                        name: 'non_tech_rus',
+                                        id: 'inputNonTechRUS',
+                                        className: step2.inputNonTechRUS.invalid && showValidationMessages ? 'required-field-error form-control' : 'form-control',
+                                        rows: '3',
+                                        required: true,
+                                        placeholder: 'Please limit your non-technical summary to 1100 characters.',
+                                        disabled: this.state.formData.dar_code !== null
+                                      }),
+                                      span(
+                                        { className: 'cancel-color required-field-error-span', isRendered: step2.inputNonTechRUS.invalid && showValidationMessages },
+                                        ['Required field'])
+                                    ])
+                                  ]),
+
+
 
                 div({ className: 'row no-margin' }, [
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
