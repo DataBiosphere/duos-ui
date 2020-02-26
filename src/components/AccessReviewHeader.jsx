@@ -1,6 +1,6 @@
 import React from 'react';
-import { div, a } from "react-hyperscript-helpers";
-import { Theme } from '../theme'
+import { div, a, hh } from "react-hyperscript-helpers";
+import { Theme } from '../theme';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -20,7 +20,7 @@ const BUTTON = {
   fontWeight: Theme.font.weight.semibold,
 }
 
-class AccessReviewHeader extends React.PureComponent {
+export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
   back = () => {
     const { currentUser, history } = this.props;
@@ -40,6 +40,7 @@ class AccessReviewHeader extends React.PureComponent {
           alignItems: "center",
           display: "flex",
           fontFamily: 'Montserrat',
+          color: Theme.palette.primary,
         }
       },
       [
@@ -57,7 +58,7 @@ class AccessReviewHeader extends React.PureComponent {
                 width: "50px",
                 height: "50px",
                 backgroundColor: "#eeeeee",
-                marginRight: "12px"
+                marginRight: "16px"
               }
             }),
             div({ id: "header-text" }, [
@@ -85,5 +86,4 @@ class AccessReviewHeader extends React.PureComponent {
       ]
     );
   }
-}
-export default AccessReviewHeader;
+});

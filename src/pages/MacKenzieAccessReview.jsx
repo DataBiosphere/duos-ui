@@ -1,8 +1,13 @@
 import React from "react";
 import { div } from "react-hyperscript-helpers";
 import { Storage } from "../libs/storage";
-import Application from '../components/Application';
-import AccessReviewHeader from '../components/AccessReviewHeader';
+import { Application } from '../components/Application';
+import { AccessReviewHeader } from '../components/AccessReviewHeader';
+import { VoteAsX } from '../components/VoteAsX';
+
+const SECTION = {
+  margin: '16px',
+};
 
 class MacKenzieAccessReview extends React.PureComponent {
   constructor(props) {
@@ -13,36 +18,50 @@ class MacKenzieAccessReview extends React.PureComponent {
   initialState() {
     return {
       currentUser: Storage.getCurrentUser(),
+      voteAsMember: true,
+      voteAsChair: false,
     };
   }
 
+  selectMember = () => {
+    this.setState({ voteAsMember: true, voteAsChair: false });
+  }
+
+  selectChair = () => {
+    this.setState({ voteAsMember: false, voteAsChair: true });
+  }
+
   render() {
-    return div(
-      {
-        id: "container", className: 'container-wide centered normal-text primary'
-      },
+    const { currentUser, voteAsMember, voteAsChair } = this.state;
+    const { history } = this.props;
+    return div({ id: "container", style: { width: '1500px', margin: 'auto' } },
       [
-        div({ id: 'header', style: { margin: '16px' } }, [<AccessReviewHeader currentUser={this.state.currentUser} history={this.props.history} />]),
+        div(
+          {
+            id: 'header', style: SECTION
+          },
+          [AccessReviewHeader({ currentUser, history })]
+        ),
         div({ id: "body", style: { display: "flex" } }, [
           div(
             {
-              id: "voter-roles",
+              id: "vote",
               style: {
                 width: "30%",
-                margin: '16px',
+                margin: SECTION.margin,
               }
             },
-            [div("Vote as X")]
+            [VoteAsX({ currentUser, voteAsMember, voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
           ),
           div(
             {
               id: "application",
               style: {
                 width: "70%",
-                margin: '16px',
+                margin: SECTION.margin,
               }
             },
-            [<Application />]
+            [Application({ currentUser, voteAsChair })]
           )
         ])
       ]

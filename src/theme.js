@@ -4,6 +4,10 @@ export const Theme = {
     secondary: '#00609f',
     hightlighted: '#c16b0c',
     link: '#216fb4',
+    background: {
+      secondary: 'rgba(0, 96, 159, 0.1)',
+      highlighted: 'rgba(193,107,12, 0.1)',
+    }
   },
   font: {
     weight: {
