@@ -30,7 +30,8 @@ export const Models = {
     department: '',
     city: '',
     country: '',
-    datasets: []
+    datasets: [],
+    translatedUseRestriction: ''
   },
   error: { show: false, title: '', msg: [''] }
 };

@@ -1,25 +1,34 @@
 import React from 'react';
-import { div, hh } from "react-hyperscript-helpers";
+import { div, span, hh } from "react-hyperscript-helpers";
 import { Theme } from '../theme';
 import { AppSummary } from '../components/AppSummary';
-import { ApplicationSection } from './ApplicationSection';
+
+const SECTION = {
+  fontFamily: 'Montserrat',
+  margin: '16px 0px 5px 0px',
+  color: Theme.palette.primary,
+};
 
 const HEADER = {
-  fontFamily: 'Montserrat',
   fontSize: Theme.font.size.header,
   lineHeight: Theme.font.leading.regular,
-  fontWeight: Theme.font.weight.semibold,
-  color: Theme.palette.primary,
-  margin: '16px 0px 5px 0px'
 };
+
+const HEADER_BOLD = {
+  ...HEADER,
+  fontWeight: Theme.font.weight.semibold,
+}
 
 export const Application = hh(class Application extends React.PureComponent {
   render() {
-    const { currentUser, voteAsChair } = this.props;
+    const { voteAsChair, darInfo } = this.props;
     return div([
-      div({ style: HEADER }, "Application header"),
-      div({ id: 'votes-summary', isRendered: currentUser.isChairPerson && voteAsChair }),
-      AppSummary()
+      div({ style: SECTION }, [
+        span({ style: HEADER_BOLD }, darInfo.projectTitle),
+        span({ style: HEADER }, " | " + darInfo.darCode)
+      ]),
+      div({ id: 'votes-summary', isRendered: voteAsChair }),
+      AppSummary({ darInfo })
     ]);
   }
 });

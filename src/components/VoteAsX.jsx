@@ -1,6 +1,7 @@
 import React from 'react';
 import { div, a, hh } from "react-hyperscript-helpers";
 import { Theme } from '../theme';
+import { Storage } from "../libs/storage";
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -31,15 +32,15 @@ const TAB_SELECTED = {
 
 export const VoteAsX = hh(class VoteAsX extends React.PureComponent {
   render() {
-    const { isChairPerson } = this.props.currentUser;
-    const { voteAsMember, voteAsChair, selectMember, selectChair } = this.props;
+    const { isChairPerson } = Storage.getCurrentUser();
+    const { voteAsChair, selectMember, selectChair } = this.props;
     return div({ style: ROOT },
       [
         div({ id: 'tabs', style: { display: 'flex' } }, [
           a(
             {
               id: 'vote-as-member',
-              style: voteAsMember ? TAB_SELECTED : TAB_UNSELECTED,
+              style: voteAsChair ? TAB_UNSELECTED : TAB_SELECTED,
               onClick: selectMember,
             },
             "Vote As Member"),
@@ -52,7 +53,7 @@ export const VoteAsX = hh(class VoteAsX extends React.PureComponent {
             },
             "Vote As Chair")
         ]),
-        VoteAsMember({ isRendered: voteAsMember }),
+        VoteAsMember({ isRendered: !voteAsChair }),
         VoteAsChair({ isRendered: isChairPerson && voteAsChair })
       ]
     );

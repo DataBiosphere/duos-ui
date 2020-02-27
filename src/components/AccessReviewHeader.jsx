@@ -1,6 +1,7 @@
 import React from 'react';
 import { div, a, hh } from "react-hyperscript-helpers";
 import { Theme } from '../theme';
+import { Storage } from "../libs/storage";
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -15,21 +16,20 @@ const SMALL = {
 }
 
 const BUTTON = {
-  fontSize: Theme.font.size.small,
-  lineHeight: Theme.font.leading.dense,
+  ...SMALL,
   fontWeight: Theme.font.weight.semibold,
 }
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
   back = () => {
-    const { currentUser, history } = this.props;
+    const currentUser = Storage.getCurrentUser();
     const page = currentUser.isChairPerson
       ? "/chair_console"
       : currentUser.isMember
         ? "/member_console"
         : "/";
-    history.push(page);
+    this.props.history.push(page);
   };
 
   render() {

@@ -149,14 +149,14 @@ export const DAC = {
 
   create: async (name, description) => {
     const url = `${await Config.getApiUrl()}/dac`;
-    const dac = {"name": name, "description": description};
+    const dac = { "name": name, "description": description };
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'POST' }]));
     return res.json();
   },
 
   update: async (dacId, name, description) => {
     const url = `${await Config.getApiUrl()}/dac`;
-    const dac = {"dacId": dacId, "name": name, "description": description};
+    const dac = { "dacId": dacId, "name": name, "description": description };
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'PUT' }]));
     return res.json();
   },
@@ -219,6 +219,13 @@ export const DAC = {
 
 export const DAR = {
 
+  describeDarWithElectionInfo: async (darId, voteId) => {
+    const darInfo = await DAR.describeDar(darId);
+    const electionInfo = await Election.findElectionByVoteId(voteId);
+    darInfo.translatedUseRestriction = electionInfo.translatedUseRestriction;
+    return darInfo;
+  },
+
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
     const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
@@ -256,10 +263,10 @@ export const DAR = {
     }
     darInfo.datasets = summaryDar.datasets;
     darInfo.researcherProperties = summaryDar.researcherProperties;
-    const isThePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
-    const havePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
-    const profileName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'profileName'})), 'propertyValue', "");
-    const piName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'piName'})), 'propertyValue', "");
+    const isThePI = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
+    const havePI = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
+    const profileName = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
+    const piName = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
     darInfo.pi = isThePI ? profileName : piName;
     darInfo.havePI = havePI || isThePI;
     darInfo.profileName = profileName;
@@ -538,21 +545,21 @@ export const Election = {
   },
 
   updateElection: async (electionId, document) => {
-    const url = `${ await Config.getApiUrl() }/election/${ electionId }`;
+    const url = `${await Config.getApiUrl()}/election/${electionId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return await res.json();
   },
 
   createElection: async (consentId) => {
     const election = { status: 'Open' };
-    const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election`;
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
   },
 
   createElectionForDac: async (consentId, dacId) => {
     const election = { status: 'Open' };
-    const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election/dac/${ dacId }`;
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/election/dac/${dacId}`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
   },

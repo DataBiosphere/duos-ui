@@ -1,8 +1,20 @@
 import React from 'react';
+import _ from 'lodash';
 import { div, hh } from "react-hyperscript-helpers";
 import { Theme } from '../theme';
 
+const TEXT = {
+  fontSize: Theme.font.size.small,
+  lineHeight: Theme.font.leading.regular,
+};
+
 export const ApplicationSection = hh(class ApplicationSection extends React.PureComponent {
+  format = content => {
+    const lines = content.split("<br>");
+    const divs = _.map(lines, line => div({ style: TEXT }, line));
+    return divs;
+  };
+
   render() {
     const { header, content, headerColor } = this.props;
     return div({ style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
@@ -15,12 +27,7 @@ export const ApplicationSection = hh(class ApplicationSection extends React.Pure
           color: headerColor,
         }
       }, header),
-      div({
-        style: {
-          fontSize: Theme.font.size.small,
-          lineHeight: Theme.font.leading.regular,
-        }
-      }, content)
+      this.format(content)
     ]);
   }
 });

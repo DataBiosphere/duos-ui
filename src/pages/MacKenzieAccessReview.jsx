@@ -1,9 +1,9 @@
 import React from "react";
 import { div } from "react-hyperscript-helpers";
-import { Storage } from "../libs/storage";
 import { Application } from '../components/Application';
 import { AccessReviewHeader } from '../components/AccessReviewHeader';
 import { VoteAsX } from '../components/VoteAsX';
+import { DAR } from '../libs/ajax';
 
 const SECTION = {
   margin: '16px',
@@ -17,30 +17,39 @@ class MacKenzieAccessReview extends React.PureComponent {
 
   initialState() {
     return {
-      currentUser: Storage.getCurrentUser(),
-      voteAsMember: true,
       voteAsChair: false,
     };
   }
 
   selectMember = () => {
-    this.setState({ voteAsMember: true, voteAsChair: false });
+    this.setState({ voteAsChair: false });
   }
 
   selectChair = () => {
-    this.setState({ voteAsMember: false, voteAsChair: true });
+    this.setState({ voteAsChair: true });
+  }
+
+  componentDidMount() {
+    this.darReviewAccess();
+  }
+
+  async darReviewAccess() {
+    const { darId, voteId } = this.props.match.params;
+    const darInfo = await DAR.describeDarWithElectionInfo(darId, voteId);
+    this.setState({ darInfo });
   }
 
   render() {
-    const { currentUser, voteAsMember, voteAsChair } = this.state;
+    const { voteAsChair, darInfo } = this.state;
     const { history } = this.props;
-    return div({ id: "container", style: { width: '1500px', margin: 'auto' } },
+
+    return div({ isRendered: darInfo != null, id: "container", style: { width: '1500px', margin: 'auto' } },
       [
         div(
           {
             id: 'header', style: SECTION
           },
-          [AccessReviewHeader({ currentUser, history })]
+          [AccessReviewHeader({ history })]
         ),
         div({ id: "body", style: { display: "flex" } }, [
           div(
@@ -51,7 +60,7 @@ class MacKenzieAccessReview extends React.PureComponent {
                 width: "30%",
               }
             },
-            [VoteAsX({ currentUser, voteAsMember, voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
+            [VoteAsX({ voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
           ),
           div(
             {
@@ -61,7 +70,7 @@ class MacKenzieAccessReview extends React.PureComponent {
                 width: "70%",
               }
             },
-            [Application({ currentUser, voteAsChair })]
+            [Application({ voteAsChair, darInfo })]
           )
         ])
       ]
