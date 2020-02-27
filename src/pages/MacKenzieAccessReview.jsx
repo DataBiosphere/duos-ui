@@ -47,8 +47,8 @@ class MacKenzieAccessReview extends React.PureComponent {
             {
               id: "vote",
               style: {
+                ...SECTION,
                 width: "30%",
-                margin: SECTION.margin,
               }
             },
             [VoteAsX({ currentUser, voteAsMember, voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
@@ -57,8 +57,8 @@ class MacKenzieAccessReview extends React.PureComponent {
             {
               id: "application",
               style: {
+                ...SECTION,
                 width: "70%",
-                margin: SECTION.margin,
               }
             },
             [Application({ currentUser, voteAsChair })]

@@ -5,23 +5,14 @@ import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
 const ROOT = {
-  fontFamily: 'Montserrat',
-  color: Theme.palette.primary,
   height: '100%',
-  fontWeight: Theme.font.weight.semibold,
-  opacity: '70%',
+  fontFamily: 'Montserrat',
   fontSize: Theme.font.size.small,
   lineHeight: Theme.font.leading.dense,
+  fontWeight: Theme.font.weight.semibold,
   textTransform: 'uppercase',
-};
-
-const TAB_SELECTED = {
-  width: '50%',
-  backgroundColor: Theme.palette.background.secondary,
-  borderRadius: '9px 9px 0px 0px',
-  textAlign: 'center',
-  padding: '16px',
   color: Theme.palette.primary,
+  opacity: '70%',
 };
 
 const TAB_UNSELECTED = {
@@ -29,6 +20,13 @@ const TAB_UNSELECTED = {
   textAlign: 'center',
   padding: '16px',
   color: Theme.palette.secondary,
+};
+
+const TAB_SELECTED = {
+  ...TAB_UNSELECTED,
+  backgroundColor: Theme.palette.background.secondary,
+  borderRadius: '9px 9px 0px 0px',
+  color: Theme.palette.primary,
 };
 
 export const VoteAsX = hh(class VoteAsX extends React.PureComponent {
