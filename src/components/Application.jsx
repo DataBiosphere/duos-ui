@@ -17,6 +17,13 @@ const HEADER = {
 const HEADER_BOLD = {
   ...HEADER,
   fontWeight: Theme.font.weight.semibold,
+};
+
+const VOTES = {
+  ...SECTION,
+  ...HEADER_BOLD,
+  backgroundColor: Theme.palette.background.secondary,
+  borderRadius: '0px 9px 9px 0px',
 }
 
 export const Application = hh(class Application extends React.PureComponent {
@@ -27,7 +34,7 @@ export const Application = hh(class Application extends React.PureComponent {
         span({ style: HEADER_BOLD }, darInfo.projectTitle),
         span({ style: HEADER }, " | " + darInfo.darCode)
       ]),
-      div({ id: 'votes-summary', isRendered: voteAsChair }),
+      div({ id: 'votes-summary', isRendered: voteAsChair, style: VOTES }, "Chair Votes Summary!!!"),
       AppSummary({ darInfo })
     ]);
   }

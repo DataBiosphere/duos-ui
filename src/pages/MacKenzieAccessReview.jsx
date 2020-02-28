@@ -21,12 +21,8 @@ class MacKenzieAccessReview extends React.PureComponent {
     };
   }
 
-  selectMember = () => {
-    this.setState({ voteAsChair: false });
-  }
-
-  selectChair = () => {
-    this.setState({ voteAsChair: true });
+  selectChair = (selected) => {
+    this.setState({ voteAsChair: selected });
   }
 
   componentDidMount() {
@@ -43,7 +39,7 @@ class MacKenzieAccessReview extends React.PureComponent {
     const { voteAsChair, darInfo } = this.state;
     const { history } = this.props;
 
-    return div({ isRendered: darInfo != null, id: "container", style: { width: '1500px', margin: 'auto' } },
+    return div({ isRendered: darInfo != null, id: "container", className: 'container-wide', style: { margin: 'auto' } },
       [
         div(
           {
@@ -60,7 +56,7 @@ class MacKenzieAccessReview extends React.PureComponent {
                 width: "30%",
               }
             },
-            [VoteAsX({ voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
+            [VoteAsX({ voteAsChair, selectChair: this.selectChair })]
           ),
           div(
             {

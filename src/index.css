@@ -1882,6 +1882,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .button-contained {
   background-color: #00609f;
   color: #ffffff;
+  border: none;
 }
 
 .button-contained:hover {
