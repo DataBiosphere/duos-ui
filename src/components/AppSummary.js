@@ -32,7 +32,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 padding: '24px 48px 24px 0px'
               }
             },
-            [ApplicationSection({ header: 'Structured Research Purpose', content: darInfo.translatedUseRestriction, headerColor: Theme.palette.primary })]
+            [ApplicationSection({ header: 'Structured Research Purpose', content: LOREM_IPSUM, headerColor: Theme.palette.primary })]
           ),
           div(
             {
@@ -52,7 +52,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
             id: "rp",
             style: { margin: '32px 0px' },
           },
-          [ApplicationSection({ header: 'Research Purpose', content: darInfo.rus, headerColor: Theme.palette.primary, })]
+          [ApplicationSection({ header: 'Research Purpose', content: LOREM_IPSUM, headerColor: Theme.palette.primary, })]
         ),
         div(
           {
