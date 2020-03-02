@@ -54,18 +54,18 @@ class Home extends Component {
           ]),
           div({ className: 'home-content-references' }, [
             svg({ height: '14', width: '14' }, [
-              circle({ cx: '7', cy: '7', r: '7', fill: '#B22439' }, [])
+              circle({ cx: '7', cy: '7', r: '7', fill: '#e34420' }, [])
             ]),
             span({}, ['A matching algorithm that checks if a data access request is compatible with the restrictions on the data'])
           ]),
           div({ className: 'home-content-references' }, [
             svg({ height: '14', width: '14' }, [
-              circle({ cx: '7', cy: '7', r: '7', fill: '#3F8C51' }, [])
+              circle({ cx: '7', cy: '7', r: '7', fill: '#52098f' }, [])
             ]),
             span({}, ['Interfaces for the data access committee (DAC) to evaluate data access requests requiring manual review'])
           ]),
           img({
-            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic', alt: 'What is DUOS graphic', src: '/images/what_is_duos.svg'
+            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic', alt: 'What is DUOS graphic', src: '/images/duos_process_flow.png'
           })
         ])
       ])
