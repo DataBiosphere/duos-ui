@@ -1,15 +1,15 @@
 import React from "react";
 import { div } from "react-hyperscript-helpers";
-import { Application } from '../components/Application';
+import { DarApplication } from '../components/DarApplication';
 import { AccessReviewHeader } from '../components/AccessReviewHeader';
-import { VoteAsX } from '../components/VoteAsX';
+import { DacVotePanel } from '../components/DacVotePanel';
 import { DAR } from '../libs/ajax';
 
 const SECTION = {
   margin: '16px',
 };
 
-class MacKenzieAccessReview extends React.PureComponent {
+class AccessReviewV2 extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = this.initialState();
@@ -60,7 +60,7 @@ class MacKenzieAccessReview extends React.PureComponent {
                 width: "30%",
               }
             },
-            [VoteAsX({ voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
+            [DacVotePanel({ voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
           ),
           div(
             {
@@ -70,11 +70,11 @@ class MacKenzieAccessReview extends React.PureComponent {
                 width: "70%",
               }
             },
-            [Application({ voteAsChair, darInfo })]
+            [DarApplication({ voteAsChair, darInfo })]
           )
         ])
       ]
     );
   }
 }
-export default MacKenzieAccessReview;
+export default AccessReviewV2;

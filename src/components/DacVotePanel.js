@@ -1,6 +1,6 @@
 import React from 'react';
 import { div, a, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
@@ -30,7 +30,7 @@ const TAB_SELECTED = {
   color: Theme.palette.primary,
 };
 
-export const VoteAsX = hh(class VoteAsX extends React.PureComponent {
+export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectMember, selectChair } = this.props;

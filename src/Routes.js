@@ -28,7 +28,7 @@ import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeHelp from './pages/HomeHelp';
 import InvalidRestrictions from './pages/InvalidRestrictions';
-import MacKenzieAccessReview from './pages/MacKenzieAccessReview';
+import AccessReviewV2 from './pages/AccessReviewV2';
 import ManageOntologies from './pages/ManageOntologies';
 import MemberConsole from './pages/MemberConsole';
 import NotFound from './pages/NotFound';
@@ -74,7 +74,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/access_review/:darId/:voteId/:rpVoteId?" component={AccessReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/mackenzie/:darId/:voteId/:rpVoteId?" component={MacKenzieAccessReview} props={props}
+    <AuthenticatedRoute path="/new_access_review/:darId/:voteId/:rpVoteId?" component={AccessReviewV2} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}
     />
     <AuthenticatedRoute path="/access_preview/:referenceId?/:electionId?" component={AccessPreview} props={props}

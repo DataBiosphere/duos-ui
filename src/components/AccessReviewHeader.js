@@ -1,6 +1,6 @@
 import React from 'react';
 import { div, a, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
 
 const TITLE = {

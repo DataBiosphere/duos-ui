@@ -1,6 +1,6 @@
 import React from 'react';
 import { div, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { Theme } from '../libs/theme';
 
 const ROOT = {
   height: 'calc(100% - 50px)',
