@@ -149,6 +149,10 @@ class DuosHeader extends Component {
 
                   li({}, [
                     h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
+                  ]),
+
+                  li({}, [
+                    h(Link, { id: 'link_support', to: '/support_request' }, ['Support'])
                   ])
                 ]),
 
