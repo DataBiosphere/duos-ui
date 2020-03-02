@@ -34,8 +34,8 @@ class AccessReviewV2 extends React.PureComponent {
   }
 
   async darReviewAccess() {
-    const { darId, voteId } = this.props.match.params;
-    const darInfo = await DAR.describeDarWithElectionInfo(darId, voteId);
+    const { darId } = this.props.match.params;
+    const darInfo = await DAR.describeDarWithElectionInfo(darId);
     this.setState({ darInfo });
   }
 

@@ -31,7 +31,8 @@ export const Models = {
     city: '',
     country: '',
     datasets: [],
-    translatedUseRestriction: ''
+    structuredRp: '',
+    structuredLimitations: '',
   },
   error: { show: false, title: '', msg: [''] }
 };

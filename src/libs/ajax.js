@@ -219,10 +219,12 @@ export const DAC = {
 
 export const DAR = {
 
-  describeDarWithElectionInfo: async (darId, voteId) => {
+  describeDarWithElectionInfo: async (darId) => {
     const darInfo = await DAR.describeDar(darId);
-    const electionInfo = await Election.findElectionByVoteId(voteId);
-    darInfo.translatedUseRestriction = electionInfo.translatedUseRestriction;
+    const election = await Election.findElectionByDarId(darId);
+    const electionInfo = await Election.findConsentElectionByDarElection(election.electionId);
+    darInfo.structuredRp = election.translatedUseRestriction;
+    darInfo.structuredLimitations = electionInfo.translatedUseRestriction;
     return darInfo;
   },
 

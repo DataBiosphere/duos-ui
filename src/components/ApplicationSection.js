@@ -9,12 +9,6 @@ const TEXT = {
 };
 
 export const ApplicationSection = hh(class ApplicationSection extends React.PureComponent {
-  format = content => {
-    const lines = content.split("<br>");
-    const divs = _.map(lines, line => div({ style: TEXT }, line));
-    return divs;
-  };
-
   render() {
     const { header, content, headerColor } = this.props;
     return div({ style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
@@ -27,7 +21,7 @@ export const ApplicationSection = hh(class ApplicationSection extends React.Pure
           color: headerColor,
         }
       }, header),
-      this.format(content)
+      div({ style: TEXT }, content)
     ]);
   }
 });
