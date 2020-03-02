@@ -1,7 +1,7 @@
 import React from 'react';
 import { div, span, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
-import { AppSummary } from '../components/AppSummary';
+import { Theme } from '../libs/theme';
+import { AppSummary } from './AppSummary';
 
 const SECTION = {
   fontFamily: 'Montserrat',
@@ -26,7 +26,7 @@ const VOTES = {
   borderRadius: '0px 9px 9px 0px',
 }
 
-export const Application = hh(class Application extends React.PureComponent {
+export const DarApplication = hh(class DarApplication extends React.PureComponent {
   render() {
     const { voteAsChair, darInfo } = this.props;
     return div([

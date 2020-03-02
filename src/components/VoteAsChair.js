@@ -1,6 +1,6 @@
 import React from 'react';
-import { div, a, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { div, hh } from "react-hyperscript-helpers";
+import { Theme } from '../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
 
 export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {

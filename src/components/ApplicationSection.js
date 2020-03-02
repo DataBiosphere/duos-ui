@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import { div, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { Theme } from '../libs/theme';
 
 const TEXT = {
   fontSize: Theme.font.size.small,

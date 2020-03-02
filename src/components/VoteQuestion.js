@@ -1,6 +1,6 @@
 import React from 'react';
 import { div, textarea, fieldset, h, input, a, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { Theme } from '../libs/theme';
 
 const HEADER = {
   fontSize: Theme.font.size.header,

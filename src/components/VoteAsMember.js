@@ -1,8 +1,7 @@
 import React from 'react';
-import { div, textarea, a, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { div, hh } from "react-hyperscript-helpers";
+import { Theme } from '../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
-
 
 export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
   render() {

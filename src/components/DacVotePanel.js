@@ -1,6 +1,6 @@
 import React from 'react';
-import { div, a, span, i, button, hh } from "react-hyperscript-helpers";
-import { Theme } from '../theme';
+import { div, a, span, button, hh } from "react-hyperscript-helpers";
+import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
@@ -53,7 +53,7 @@ const DIV = {
   alignContent: 'center',
 }
 
-export const VoteAsX = hh(class VoteAsX extends React.PureComponent {
+export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
