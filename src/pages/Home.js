@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, br, circle, div, h, h1, h3, hr, img, p, span, svg } from 'react-hyperscript-helpers';
+import { a, circle, div, h, h1, h3, hr, img, p, span, svg } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 import { SignIn } from '../components/SignIn';
 
@@ -38,9 +38,9 @@ class Home extends Component {
               ])
             ]),
             p({ style: { fontSize: 'larger', fontWeight: '500' } }, ['Are you a DAC member who wants to learn more about DUOS?']),
-            p({ style: { fontSize: 'large', fontWeight: '350' } }, [ 'Email us! ']),
+            p({ style: { fontSize: 'large', fontWeight: '350' } }, ['Email us! ']),
             p({ style: { fontSize: 'large', fontWeight: '500' } }, [
-               h(Mailto, { email: 'DUOS-support@broadinstitute.zendesk.com' })
+              h(Mailto, { email: 'DUOS-support@broadinstitute.zendesk.com' })
             ])
           ]),
 

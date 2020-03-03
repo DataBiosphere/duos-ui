@@ -1862,3 +1862,29 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .grid-row .col-8 {
   width: 100%;
 }
+
+/***************************************************Buttons*/
+
+.button-contained, .button-outlined {
+  border-radius: 5px;
+  padding: 10px;
+  text-transform: uppercase;
+}
+
+.button-outlined {
+  border: 1px solid #00609f;
+}
+
+.button-outlined:hover {
+  background-color: rgba(0,96,159, 0.1);
+}
+
+.button-contained {
+  background-color: #00609f;
+  color: #ffffff;
+}
+
+.button-contained:hover {
+  background-color: rgba(0,96,159, 0.9);
+  color: #ffffff;
+}

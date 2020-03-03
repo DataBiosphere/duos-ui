@@ -30,7 +30,9 @@ export const Models = {
     department: '',
     city: '',
     country: '',
-    datasets: []
+    datasets: [],
+    structuredRp: '',
+    structuredLimitations: '',
   },
   error: { show: false, title: '', msg: [''] }
 };

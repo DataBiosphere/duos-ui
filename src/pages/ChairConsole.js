@@ -8,6 +8,7 @@ import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
+import { Config } from '../libs/config';
 
 
 export const ChairConsole = hh(class ChairConsole extends Component {
@@ -96,7 +97,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   }
 
   openDULReview = (voteId, referenceId) => (e) => {
-    this.props.history.push(`dul_review/${ voteId }/${ referenceId }`);
+    this.props.history.push(`dul_review/${voteId}/${referenceId}`);
   };
 
   isDuLCollectEnabled = (pendingCase) => {
@@ -109,18 +110,20 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openDulCollect = (consentId) => (e) => {
-    this.props.history.push(`dul_collect/${ consentId }`);
+    this.props.history.push(`dul_collect/${consentId}`);
   };
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push(`${ 'final_access_review' }/${ referenceId }/${ electionId }`);
+    this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
   };
 
   openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
+    const newDarUiEnabled = Config.getFeatureFlag('newDarUi');
+    const pathStart = newDarUiEnabled ? "new_access_review" : "access_review";
     if (rpVoteId !== null) {
-      this.props.history.push(`access_review/${ referenceId }/${ voteId }/${ rpVoteId }`);
+      this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
     } else {
-      this.props.history.push(`access_review/${ referenceId }/${ voteId }`);
+      this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
     }
   };
 
@@ -137,7 +140,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openAccessCollect = (referenceId, electionId) => (e) => {
-    this.props.history.push(`access_collect/${ electionId }/${ referenceId }`);
+    this.props.history.push(`access_collect/${electionId}/${referenceId}`);
   };
 
 
