@@ -36,4 +36,4 @@ export const Navigation = {
                 : '/';
     history.push(page);
   }
-}
+};

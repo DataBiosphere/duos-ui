@@ -17,7 +17,7 @@ const HEADER = {
 const HEADER_BOLD = {
   ...HEADER,
   fontWeight: Theme.font.weight.semibold,
-}
+};
 
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
   render() {

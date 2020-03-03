@@ -41,7 +41,7 @@ class AccessReviewV2 extends React.PureComponent {
 
   render() {
     const { voteAsChair, darInfo } = this.state;
-    const { history } = this.props;
+    const { history, match } = this.props;
 
     return div({ isRendered: darInfo != null, id: "container", style: { width: '1500px', margin: 'auto' } },
       [
@@ -49,7 +49,7 @@ class AccessReviewV2 extends React.PureComponent {
           {
             id: 'header', style: SECTION
           },
-          [AccessReviewHeader({ history })]
+          [AccessReviewHeader({ history, match })]
         ),
         div({ id: "body", style: { display: "flex" } }, [
           div(
