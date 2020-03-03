@@ -2,6 +2,7 @@ import React from 'react';
 import { div, a, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
+import { Navigation } from "../libs/utils";
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -22,17 +23,9 @@ const BUTTON = {
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
-  back = () => {
-    const currentUser = Storage.getCurrentUser();
-    const page = currentUser.isChairPerson
-      ? "/chair_console"
-      : currentUser.isMember
-        ? "/member_console"
-        : "/";
-    this.props.history.push(page);
-  };
-
   render() {
+    const currentUser = Storage.getCurrentUser();
+    const { history } = this.props;
     return div(
       {
         style: {
@@ -75,7 +68,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
             a(
               {
                 id: "btn_back",
-                onClick: this.back,
+                onClick: () => Navigation.back(currentUser, history),
                 className: "button-outlined secondary",
                 style: BUTTON,
               },
