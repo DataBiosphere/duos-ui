@@ -32,7 +32,7 @@
     "react-scripts": "3.4.0",
     "react-select": "3.0.8",
     "react-tabs": "3.1.0",
-    "react-tooltip": "4.0.3",
+    "react-tooltip": "4.1.0",
     "set-value": "3.0.1",
     "source-map-explorer": "2.3.1"
   },
