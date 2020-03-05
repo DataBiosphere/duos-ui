@@ -1,9 +1,12 @@
 import React from 'react';
+import _ from 'lodash';
 import { div, a, span, button, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
+import { Votes } from '../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
+
 const ROOT = {
   height: '100%',
   fontFamily: 'Montserrat',
@@ -47,16 +50,122 @@ const LINK = {
   lineHeight: Theme.font.size.small,
 };
 
-const DIV = {
+const LINK_SECTION = {
   display: 'flex',
   margin: '24px 0px',
   alignContent: 'center',
-}
+};
 
 export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.state = {
+      vote: null,
+      rpVote: null,
+      finalVote: null,
+    };
+  };
+
+  /**
+   * gets data for access vote and, if it exists, rp vote
+   * this is called when VoteAsMember mounts
+   */
+  getVotesAsMember = async () => {
+    const { darId, voteId, rpVoteId } = this.props.ids;
+    try {
+      const vote = await Votes.getDarVote(darId, voteId);
+      this.setState({ vote });
+    }
+    catch (e) {
+      console.log('Something went wrong trying to get the data.')
+    };
+    if (rpVoteId) {
+      try {
+        const rpVote = await Votes.getDarVote(darId, rpVoteId);
+        this.setState({ rpVote });
+      }
+      catch (e) {
+        console.log('Something went wrong trying to get the data.')
+      };
+    };
+  };
+
+  /**
+   * updates the vote object with the given vote ID in state
+   * this is called when changes are made to input buttons/fields
+   */
+  updateMemberVote = (voteId, voteStatus, rationale) => {
+    const { vote, rpVote } = this.state;
+    const isAccessVote = voteId === vote.voteId;
+    const isRpVote = voteId === rpVote.voteId;
+    let voteClone;
+
+    if (isAccessVote) {
+      voteClone = _.cloneDeep(vote);
+    } else if (isRpVote) {
+      voteClone = _.cloneDeep(rpVote);
+    };
+
+    if (voteStatus !== null) {
+      voteClone.vote = voteStatus;
+    };
+    if (!_.isUndefined(rationale)) {
+      voteClone.rationale = rationale;
+    }; // rationale can be null!
+
+    // set state of vote or rpVote depending on vote ID
+    const stateObj = isAccessVote ? { vote: voteClone }
+      : isRpVote ? { rpVote: voteClone }
+        : {};
+    this.setState(stateObj);
+  }
+
+  // checks if required fields are completed before posting votes
+  submitMemberVote = () => {
+    const { vote, rpVote } = this.state;
+    if (rpVote) {
+      if (vote.vote !== null && rpVote.vote !== null) {
+        this.submitVote(vote);
+        this.submitVote(rpVote);
+      } else {
+        console.log('Please complete all required fields');
+      };
+    } else {
+      if (vote.vote !== null) {
+        this.submitVote(vote);
+      } else {
+        console.log('Please complete all required fields');
+      };
+    }
+  };
+
+  // posts the supplied vote for this DAR
+  async submitVote(vote) {
+    const { darId } = this.props.ids;
+    if (vote.createDate === null) {
+      try {
+        await Votes.postDarVote(darId, vote);
+        console.log('Vote sumbitted');
+      }
+      catch (e) {
+        console.log('Something went wrong. Try again.')
+      };
+    } else {
+      try {
+        await Votes.updateDarVote(darId, vote);
+        console.log('Vote edited');
+      }
+      catch (e) {
+        console.log('Something went wrong. Try again.')
+      };
+    }
+  };
+
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
+    const { vote, rpVote, finalVote } = this.state;
+
     return div({ style: ROOT },
       [
         div({ id: 'tabs', style: { display: 'flex' } }, [
@@ -76,13 +185,28 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         ]),
         div({ style: voteAsChair ? VOTE_CHAIR : VOTE_MEMBER, },
           [
-            VoteAsMember({ isRendered: !voteAsChair }),
-            VoteAsChair({ isRendered: isChairPerson && voteAsChair }),
+            VoteAsMember({
+              isRendered: !voteAsChair,
+              getVotes: this.getVotesAsMember,
+              onUpdate: this.updateMemberVote,
+              vote,
+              rpVote,
+            }),
+            VoteAsChair({
+              isRendered: isChairPerson && voteAsChair, finalVote,
+            }),
             div(
-              { isRendered: voteAsChair, style: DIV }, [
+              { isRendered: voteAsChair, style: LINK_SECTION }, [
               a({ style: LINK }, "View DUOS algorithm decision")
             ]),
-            div({ style: { textAlign: 'end' } }, [button({ id: 'vote', className: 'button-contained' }, "Vote")])
+            div({ style: { textAlign: 'end' } }, [
+              button({
+                id: 'vote',
+                className: 'button-contained',
+                onClick: voteAsChair ? this.submitChairVote : this.submitMemberVote,
+              },
+                "Vote")
+            ])
           ])
       ]
     );

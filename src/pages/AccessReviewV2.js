@@ -38,6 +38,7 @@ class AccessReviewV2 extends React.PureComponent {
   render() {
     const { voteAsChair, darInfo } = this.state;
     const { history, match } = this.props;
+    const ids = match.params;
 
     return div({ isRendered: darInfo != null, id: "container", style: { width: '1500px', margin: 'auto' } },
       [
@@ -56,7 +57,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: "30%",
               }
             },
-            [DacVotePanel({ voteAsChair, selectChair: this.selectChair })]
+            [DacVotePanel({ ids, voteAsChair, selectChair: this.selectChair })]
           ),
           div(
             {
