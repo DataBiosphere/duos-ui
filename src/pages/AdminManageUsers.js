@@ -1,11 +1,13 @@
+import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import { div, button, hr, a, span, h } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { AddUserModal } from '../components/modals/AddUserModal';
-import { User } from "../libs/ajax";
-import { PaginatorBar } from '../components/PaginatorBar';
+import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
+import { AddUserModal } from '../components/modals/AddUserModal';
+import { PageHeading } from '../components/PageHeading';
+import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
+import { User } from '../libs/ajax';
+
 
 class AdminManageUsers extends Component {
 
@@ -177,16 +179,10 @@ class AdminManageUsers extends Component {
                 div({ id: user.dacUserId + "_name", name: "userName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
                 div({ id: user.dacUserId + "_email", name: "userEmail", className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text" }, [user.email]),
                 div({ id: user.dacUserId + "_roles", name: "userRoles", className: "col-lg-4 col-md-4 col-sm-3 col-xs-3 cell-body text bold" }, [
-                  user.roles.map((role, eIndex) =>
-                    span({ key: user.dacUserId + "_roles_" + eIndex, id: user.dacUserId + "_roles_" + eIndex, className: "admin-users-list" }, [
-                      span({ className: "enabled default-color", isRendered: role.name === 'Admin' }, ["Admin"]),
-                      span({ className: "enabled default-color", isRendered: role.name === 'Member' }, ["Member"]),
-                      span({ className: "enabled default-color", isRendered: role.name === 'Chairperson' }, ["Chairperson"]),
-                      span({ className: "enabled default-color", isRendered: role.name === 'Alumni' }, ["Alumni"]),
-                      span({ className: "enabled default-color", isRendered: role.name === 'Researcher' }, ["Researcher"]),
-                      span({ className: "enabled default-color", isRendered: role.name === 'DataOwner' }, ["Data Owner"]),
-                    ])
-                  )
+                  span({ className: "admin-users-list"},
+                    _.map(_.sortedUniq(_.map(user.roles, 'name')),
+                      (n) => {return span({ className: "enabled default-color"}, n);})
+                  ),
                 ]),
                 div({ className: "col-lg-1 col-md-1 col-sm-2 col-xs-2 cell-body f-center" }, [
                   button({

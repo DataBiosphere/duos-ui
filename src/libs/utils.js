@@ -21,16 +21,19 @@ export const USER_ROLES = {
   all: 'All'
 };
 
-export const USER_ROLES_UPPER = {
-  admin: 'ADMIN',
-  chairperson: 'CHAIRPERSON',
-  member: 'MEMBER',
-  researcher: 'RESEARCHER',
-  alumni: 'ALUMNI',
-  dataOwner: 'DATAOWNER',
-  all: 'ALL'
-};
-
 export const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
+};
+
+export const Navigation = {
+  back: (user, history) => {
+    const page = user.isChairPerson ? '/chair_console'
+      : user.isMember ? '/member_console'
+        : user.isAdmin ? '/admin_console'
+          : user.isResearcher ? '/dataset_catalog?reviewProfile'
+            : user.isDataOwner ? '/data_owner_console'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
+    history.push(page);
+  }
 };

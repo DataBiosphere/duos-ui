@@ -5,6 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
+import { Navigation } from "../libs/utils";
 
 class DulReview extends Component {
 
@@ -26,20 +27,8 @@ class DulReview extends Component {
     };
   }
 
-  back = () => {
-    const user = this.state.currentUser;
-    const page = user.isChairPerson ? '/chair_console' :
-      user.isMember ? '/member_console' :
-        user.isAdmin ? '/admin_console' :
-          user.isResearcher ? '/dataset_catalog?reviewProfile' :
-            user.isDataOwner ? '/data_owner_console' :
-              user.isAlumni ? '/summary_votes' : '/';
-    this.props.history.push(page);
-  };
-
   componentDidMount() {
     this.voteInfo();
-    this.back = this.back.bind(this);
     this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
@@ -116,7 +105,7 @@ class DulReview extends Component {
 
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialog: false });
-    this.back();
+    Navigation.back(this.state.currentUser, this.props.history);
   };
 
   render() {
@@ -137,11 +126,11 @@ class DulReview extends Component {
           div({ className: "col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding" }, [
             a({
               id: "btn_back",
-              onClick: this.back,
+              onClick: () => Navigation.back(this.state.currentUser, this.props.history),
               className: "btn-primary btn-back"
             }, [
-                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-              ])
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 

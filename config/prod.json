@@ -4,5 +4,6 @@
   "clientId": "383345696373-epss75p24k6on93kq37ccse0n626ojal.apps.googleusercontent.com",
   "firecloudUrl": "https://api.firecloud.org/",
   "gwasUrl": "",
-  "nihUrl": "https://broad-shibboleth-prod.appspot.com/login"
+  "nihUrl": "https://broad-shibboleth-prod.appspot.com/login",
+  "features": {}
 }

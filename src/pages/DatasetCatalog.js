@@ -9,7 +9,7 @@ import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { DAR, DataSet, Files, Researcher } from '../libs/ajax';
+import { DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
 
@@ -394,7 +394,7 @@ class DatasetCatalog extends Component {
                             ])
                           ]),
 
-                          td({ isRendered: this.state.isAdmin, style: { minWidth: '10rem' } }, [
+                          td({ isRendered: this.state.isAdmin, style: { minWidth: '11rem' } }, [
                             div({ className: 'dataset-actions' }, [
                               a({
                                 id: trIndex + '_btnDelete', name: 'btn_delete', onClick: this.openDelete(dataSet.dataSetId),

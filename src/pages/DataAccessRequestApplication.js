@@ -387,6 +387,12 @@ class DataAccessRequestApplication extends Component {
       isNihInvalid = true;
       showValidationMessages = true;
     }
+    // DUOS-565: checkCollaborator : false and nihValid : false is an invalid combination
+    if (this.state.formData.checkCollaborator !== true
+      && !this.state.nihValid) {
+      isNihInvalid = true;
+      showValidationMessages = true;
+    }
     this.setState(prev => {
       prev.step1.inputTitle.invalid = isTitleInvalid;
       prev.step1.inputResearcher.invalid = isResearcherInvalid;

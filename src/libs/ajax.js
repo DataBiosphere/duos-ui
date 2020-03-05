@@ -149,14 +149,14 @@ export const DAC = {
 
   create: async (name, description) => {
     const url = `${await Config.getApiUrl()}/dac`;
-    const dac = {"name": name, "description": description};
+    const dac = { "name": name, "description": description };
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'POST' }]));
     return res.json();
   },
 
   update: async (dacId, name, description) => {
     const url = `${await Config.getApiUrl()}/dac`;
-    const dac = {"dacId": dacId, "name": name, "description": description};
+    const dac = { "dacId": dacId, "name": name, "description": description };
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dac), { method: 'PUT' }]));
     return res.json();
   },
@@ -219,6 +219,15 @@ export const DAC = {
 
 export const DAR = {
 
+  describeDarWithElectionInfo: async (darId) => {
+    const darInfo = await DAR.describeDar(darId);
+    const election = await Election.findElectionByDarId(darId);
+    const electionInfo = await Election.findConsentElectionByDarElection(election.electionId);
+    darInfo.structuredRp = election.translatedUseRestriction;
+    darInfo.structuredLimitations = electionInfo.translatedUseRestriction;
+    return darInfo;
+  },
+
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
     const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
@@ -256,10 +265,10 @@ export const DAR = {
     }
     darInfo.datasets = summaryDar.datasets;
     darInfo.researcherProperties = summaryDar.researcherProperties;
-    const isThePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'isThePI'})), 'propertyValue', false);
-    const havePI = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'havePI'})), 'propertyValue', false);
-    const profileName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'profileName'})), 'propertyValue', "");
-    const piName = get(head(filter(darInfo.researcherProperties, {'propertyKey': 'piName'})), 'propertyValue', "");
+    const isThePI = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
+    const havePI = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
+    const profileName = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
+    const piName = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
     darInfo.pi = isThePI ? profileName : piName;
     darInfo.havePI = havePI || isThePI;
     darInfo.profileName = profileName;
@@ -538,21 +547,21 @@ export const Election = {
   },
 
   updateElection: async (electionId, document) => {
-    const url = `${ await Config.getApiUrl() }/election/${ electionId }`;
+    const url = `${await Config.getApiUrl()}/election/${electionId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(document), { method: 'PUT' }]));
     return await res.json();
   },
 
   createElection: async (consentId) => {
     const election = { status: 'Open' };
-    const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election`;
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
   },
 
   createElectionForDac: async (consentId, dacId) => {
     const election = { status: 'Open' };
-    const url = `${ await Config.getApiUrl() }/consent/${ consentId }/election/dac/${ dacId }`;
+    const url = `${await Config.getApiUrl()}/consent/${consentId}/election/dac/${dacId}`;
     const res = await fetchOk(url, _.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
     return res;
   },
@@ -893,14 +902,14 @@ export const Researcher = {
     return await res.json();
   },
 
-  createResearcherProperties: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+  createProperties: async (researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
     return await res;
   },
 
-  update: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/researcher/${userId}?validate=${validate}`;
+  updateProperties: async (userId, validate, researcherProperties) => {
+    const url = `${await Config.getApiUrl()}/researcher?validate=${validate}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'PUT' }]));
     return res.json();
   },
@@ -973,18 +982,6 @@ export const User = {
   updateMainFields: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
-    return res.json();
-  },
-
-  updateName: async (body, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/name/${userId}`;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(body), { method: 'PUT' }]));
-    return res.json();
-  },
-
-  validateDelegation: async (role, dacUser) => {
-    const url = `${await Config.getApiUrl()}/dacuser/validateDelegation?role=` + role;
-    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dacUser), { method: 'POST' }]));
     return res.json();
   },
 
@@ -1175,7 +1172,7 @@ const fetchOk = async (...args) => {
   spinnerService.hideAll();
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
-    window.location.href = '/login';
+    window.location.href = '/home';
   }
   return res.ok ? res : Promise.reject(res);
 };
@@ -1184,7 +1181,7 @@ const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   spinnerService.hideAll();
-  return res.ok ? res : Promise.reject(res);
+  return res;
 };
 
 const getFile = async (URI, fileName) => {

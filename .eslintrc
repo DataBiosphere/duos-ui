@@ -21,6 +21,13 @@
         ]
       }
     ],
+    "indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
     "implicit-arrow-linebreak": "off",
     "array-bracket-newline": "off",
     "brace-style": "off",
