@@ -1,17 +1,30 @@
 import React from 'react';
 import { div, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-
-const ROOT = {
-  height: 'calc(100% - 50px)',
-  backgroundColor: Theme.palette.background.secondary,
-  borderRadius: '0px 9px 9px 9px',
-  padding: '24px'
-};
+import { VoteQuestion } from './VoteQuestion';
 
 export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
+  componentDidMount() {
+    this.props.getVotes();
+  };
+
   render() {
-    return div({ id: 'member-vote', style: ROOT },
-      "Member vote component!");
+    const { onUpdate, vote, rpVote } = this.props;
+    return div({ id: 'member-vote' }, [
+      VoteQuestion({
+        id: 'access-vote',
+        label: 'Question 1:',
+        question: 'Should data access be granted to this applicant?',
+        updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
+        vote: vote,
+      }),
+      VoteQuestion({
+        id: 'rp-vote',
+        isRendered: rpVote,
+        label: 'Question 2:',
+        question: 'Was the research purpose accurately converted to a structured format?',
+        updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
+        vote: rpVote,
+      }),
+    ]);
   }
 });

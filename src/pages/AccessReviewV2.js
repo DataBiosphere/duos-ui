@@ -21,12 +21,8 @@ class AccessReviewV2 extends React.PureComponent {
     };
   }
 
-  selectMember = () => {
-    this.setState({ voteAsChair: false });
-  }
-
-  selectChair = () => {
-    this.setState({ voteAsChair: true });
+  selectChair = (selected) => {
+    this.setState({ voteAsChair: selected });
   }
 
   componentDidMount() {
@@ -42,6 +38,7 @@ class AccessReviewV2 extends React.PureComponent {
   render() {
     const { voteAsChair, darInfo } = this.state;
     const { history, match } = this.props;
+    const ids = match.params;
 
     return div({ isRendered: darInfo != null, id: "container", style: { width: '1500px', margin: 'auto' } },
       [
@@ -60,7 +57,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: "30%",
               }
             },
-            [DacVotePanel({ voteAsChair, selectMember: this.selectMember, selectChair: this.selectChair })]
+            [DacVotePanel({ ids, voteAsChair, selectChair: this.selectChair })]
           ),
           div(
             {
