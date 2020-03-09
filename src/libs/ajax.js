@@ -222,10 +222,10 @@ export const DAR = {
   describeDarWithElectionInfo: async (darId) => {
     const darInfo = await DAR.describeDar(darId);
     const election = await Election.findElectionByDarId(darId);
-    const electionInfo = await Election.findConsentElectionByDarElection(election.electionId);
+    const consentElection = await Election.findConsentElectionByDarElection(election.electionId);
     darInfo.structuredRp = election.translatedUseRestriction;
-    darInfo.structuredLimitations = electionInfo.translatedUseRestriction;
-    return darInfo;
+    darInfo.structuredLimitations = consentElection.translatedUseRestriction;
+    return { darInfo, election };
   },
 
   describeDar: async (darId) => {

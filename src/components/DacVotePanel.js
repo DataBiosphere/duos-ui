@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { div, a, span, button, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
-import { Votes } from '../libs/ajax';
+import { Votes, Election } from '../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -71,7 +71,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
-    const { electionId } = this.state.vote;
+    const { electionId } = this.props.election;
     try {
       const finalVote = await Votes.getDarFinalAccessVote(electionId);
       this.setState({ finalVote });
@@ -172,6 +172,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { finalVote } = this.state;
     if (finalVote.vote !== null) {
       this.submitVote(finalVote);
+      this.closeElection();
     } else {
       console.log('Please complete all required fields');
     };
@@ -196,6 +197,20 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       console.log('Something went wrong. Try again.')
     };
   };
+
+  // closes the election for this DAR
+  async closeElection() {
+    const { election } = this.props;
+    const electionClone = _.cloneDeep(election);
+    electionClone.status = 'Closed';
+    try {
+      await Election.updateElection(election.electionId, electionClone);
+      console.log('Election closed');
+    }
+    catch (e) {
+      console.log('Something went wrong. Try again.')
+    };
+  }
 
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
