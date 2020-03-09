@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { div, a, span, button, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
-import { Votes } from '../libs/ajax';
+import { Votes, Election } from '../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -67,6 +67,21 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   /**
+   * gets data for final access vote
+   * this is called when VoteAsChair mounts
+   */
+  getVotesAsChair = async () => {
+    const { electionId } = this.props.election;
+    try {
+      const finalVote = await Votes.getDarFinalAccessVote(electionId);
+      this.setState({ finalVote });
+    }
+    catch (e) {
+      console.log('Something went wrong trying to get the data.')
+    };
+  };
+
+  /**
    * gets data for access vote and, if it exists, rp vote
    * this is called when VoteAsMember mounts
    */
@@ -75,18 +90,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     try {
       const vote = await Votes.getDarVote(darId, voteId);
       this.setState({ vote });
-    }
-    catch (e) {
-      console.log('Something went wrong trying to get the data.')
-    };
-    if (rpVoteId) {
-      try {
+      if (rpVoteId) {
         const rpVote = await Votes.getDarVote(darId, rpVoteId);
         this.setState({ rpVote });
       }
-      catch (e) {
-        console.log('Something went wrong trying to get the data.')
-      };
+    }
+    catch (e) {
+      console.log('Something went wrong trying to get the data.')
     };
   };
 
@@ -120,6 +130,24 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     this.setState(stateObj);
   }
 
+  /**
+   * updates the final vote object in state
+   * this is called when changes are made to input buttons/fields
+   */
+  updateChairVote = (voteStatus, rationale) => {
+    const { finalVote } = this.state;
+    const voteClone = _.cloneDeep(finalVote);
+
+    if (voteStatus !== null) {
+      voteClone.vote = voteStatus;
+    };
+    if (!_.isUndefined(rationale)) {
+      voteClone.rationale = rationale;
+    }; // rationale can be null!
+
+    this.setState({ finalVote: voteClone });
+  }
+
   // checks if required fields are completed before posting votes
   submitMemberVote = () => {
     const { vote, rpVote } = this.state;
@@ -139,27 +167,49 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     }
   };
 
+  // checks if required fields are completed before posting votes
+  submitChairVote = () => {
+    const { finalVote } = this.state;
+    if (finalVote.vote !== null) {
+      this.submitVote(finalVote);
+      this.closeElection();
+    } else {
+      console.log('Please complete all required fields');
+    };
+  };
+
   // posts the supplied vote for this DAR
   async submitVote(vote) {
     const { darId } = this.props.ids;
-    if (vote.createDate === null) {
-      try {
+    try {
+      if (vote.type === 'FINAL') {
+        await Votes.updateFinalAccessDarVote(darId, vote);
+        console.log('Final vote sumbitted');
+      } else if (vote.createDate === null) {
         await Votes.postDarVote(darId, vote);
         console.log('Vote sumbitted');
-      }
-      catch (e) {
-        console.log('Something went wrong. Try again.')
-      };
-    } else {
-      try {
+      } else {
         await Votes.updateDarVote(darId, vote);
         console.log('Vote edited');
       }
-      catch (e) {
-        console.log('Something went wrong. Try again.')
-      };
     }
+    catch (e) {
+      console.log('Something went wrong. Try again.')
+    };
   };
+
+  // closes the election for this DAR
+  async closeElection() {
+    const { election } = this.props;
+    const electionClone = _.cloneDeep(election);
+    electionClone.status = 'Closed';
+    try {
+      await Election.updateElection(election.electionId, electionClone);
+    }
+    catch (e) {
+      console.log('Something went wrong. Try again.')
+    };
+  }
 
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
@@ -193,7 +243,10 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               rpVote,
             }),
             VoteAsChair({
-              isRendered: isChairPerson && voteAsChair, finalVote,
+              isRendered: isChairPerson && voteAsChair,
+              getVotes: this.getVotesAsChair,
+              onUpdate: this.updateChairVote,
+              finalVote,
             }),
             div(
               { isRendered: voteAsChair, style: LINK_SECTION }, [
