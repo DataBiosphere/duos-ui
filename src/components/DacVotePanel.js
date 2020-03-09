@@ -205,7 +205,6 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     electionClone.status = 'Closed';
     try {
       await Election.updateElection(election.electionId, electionClone);
-      console.log('Election closed');
     }
     catch (e) {
       console.log('Something went wrong. Try again.')
