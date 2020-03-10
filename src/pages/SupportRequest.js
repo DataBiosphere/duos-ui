@@ -504,8 +504,12 @@
 // export default SupportRequest;
 
 import { Component, Fragment } from 'react';
-import { div, hr, span, a, h } from 'react-hyperscript-helpers';
+import { div, hr, span, a, h, color } from 'react-hyperscript-helpers';
+import { PageHeading } from '../components/PageHeading';
+import { HelpModal } from '../components/modals/HelpModal';
+import { SupportModal } from '../components/modals/SupportModal';
 import { Storage } from '../libs/storage';
+
 
 class SupportRequest extends Component {
 
@@ -517,17 +521,67 @@ class SupportRequest extends Component {
       currentPage: 1,
       reports: [],
       showHelpModal: false,
+      showSupportModal: false,
       isAdmin: Storage.getCurrentUser().isAdmin
     };
   }
 
+
+  supportModal = (e) => {
+    this.setState(prev => {
+      prev.showSupportModal = true;
+      return prev;
+    });
+  };
+
+  okModal = () => {
+    this.getReportsList();
+    this.setState(prev => {
+      prev.showSupportModal = false;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
+
+  closeModal = () => {
+    this.setState(prev => {
+      prev.showSupportModal = false;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
+
+  afterModalOpen = () => {
+    this.setState(prev => { prev.showSupportModal = false; return prev; });
+  };
+
   render() {
 
-    const { searchDulText } = this.state;
-
     return (
-      div({ className: "container" }, ["It works! Also PIZZA"])
+      div({ className: "container" }, [
+        div({ className: "col-lg-6 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+          PageHeading({ id: "Support Help", imgSrc: "/images/icon_manage_help.png", iconSize: "large", color: "common", title: "Support Help", description: "List of comments, suggestions and bug reports" }),
+        ]),
+
+        div({ className: "col-lg-6 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
+          a({
+            id: 'btn_requestHelp',
+            className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
+            onClick: this.supportModal
+          }, [
+            div({ className: "all-icons add-help_white" }),
+            span({}, ["Create a Support Report"]),
+          ]),
+          SupportModal({
+            showModal: this.state.showSupportModal,
+            onOKRequest: this.okModal,
+            onCloseRequest: this.closeModal,
+            onAfterOpen: this.afterModalOpen
+          }),
+        ])
+      ])
     );
+
   }
 }
 
