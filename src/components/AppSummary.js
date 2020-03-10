@@ -2,6 +2,7 @@ import React from 'react';
 import { div, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { ApplicationSection } from './ApplicationSection';
+import { StructuredLimitations } from './StructuredLimitations';
 
 const SUBHEADER = {
   margin: '32px 0px',
@@ -19,7 +20,7 @@ const LOREM_IPSUM =
 
 export const AppSummary = hh(class AppSummary extends React.PureComponent {
   render() {
-    const { darInfo } = this.props;
+    const { darInfo, consentElection } = this.props;
     return div({ id: 'app-summary' },
       [
         div({ style: SUBHEADER }, "Application summary"),
@@ -44,7 +45,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 borderRadius: '9px',
               }
             },
-            [ApplicationSection({ header: 'Data Use Structured Limitations', content: LOREM_IPSUM, headerColor: Theme.palette.hightlighted, })]
+            [StructuredLimitations({ darInfo, consentElection })]
           )
         ]),
         div(
