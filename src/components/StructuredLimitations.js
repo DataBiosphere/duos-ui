@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { div, span, a, i, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Files } from '../libs/ajax';
+import { download } from '../libs/utils';
 
 const ROOT = {
   fontFamily: 'Montserrat',
@@ -57,21 +58,31 @@ export const StructuredLimitations = hh(class StructuredLimitations extends Reac
   };
 
   render() {
-    const { darInfo, consentElection } = this.props;
+    const { darInfo, election, consentElection } = this.props;
+    const mrDUL = JSON.stringify(election.useRestriction, null, 2);
+
     return div({ style: ROOT }, [
       div({ style: HEADER }, 'Data Use Structured Limitations'),
       div({ style: TEXT }, this.format(darInfo.structuredLimitations)),
       div({ style: { margin: '8px 0px' } }, [
-        a({ id: 'download-dar' }, [
-          i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-          'DAR machine-readable format'
-        ])
+        a({
+          id: 'download-dul',
+          onClick: () => download('machine-readable-DUL.json', mrDUL)
+        },
+          [
+            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
+            'DUL machine-readable format'
+          ])
       ]),
       div([
-        a({ id: 'download-letter', onClick: () => this.downloadDUL() }, [
-          i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-          'Data Use Letter'
-        ])
+        a({
+          id: 'download-letter',
+          onClick: () => this.downloadDUL()
+        },
+          [
+            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
+            'Data Use Letter'
+          ])
       ])
     ]);
   }

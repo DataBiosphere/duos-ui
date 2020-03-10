@@ -33,7 +33,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, consentElection } = this.props;
+    const { voteAsChair, darInfo, election, consentElection } = this.props;
     return div([
       div({ id: 'header', style: SECTION }, [
         div({ style: { minWidth: '50%' } }, [
@@ -46,7 +46,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         ])
       ]),
       div({ id: 'votes-summary', isRendered: voteAsChair }),
-      AppSummary({ darInfo, consentElection })
+      AppSummary({ darInfo, election, consentElection })
     ]);
   }
 });

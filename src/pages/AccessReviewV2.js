@@ -67,7 +67,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: "70%",
               }
             },
-            [DarApplication({ voteAsChair, darInfo, consentElection, ids })]
+            [DarApplication({ voteAsChair, darInfo, election, consentElection, ids })]
           )
         ])
       ]

@@ -302,17 +302,6 @@ class FinalAccessReview extends Component {
     };
   };
 
-  download = (fileName, text) => {
-    const break_line = '\r\n \r\n';
-    text = break_line + text;
-    let blob = new Blob([text], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-  };
-
   downloadDAR = async (e) => {
     this.setState({
       loading: true
@@ -626,7 +615,7 @@ class FinalAccessReview extends Component {
                 div({ className: 'control-label access-color' }, ['Structured Research Purpose']),
                 div({ className: 'response-label', dangerouslySetInnerHTML: { __html: this.state.sDar } }, []),
                 a({
-                  isRendered: this.state.hasUseRestriction === true, onClick: () => this.download('machine-readable-DAR.json', this.state.mrDAR),
+                  isRendered: this.state.hasUseRestriction === true, onClick: () => Utils.download('machine-readable-DAR.json', this.state.mrDAR),
                   className: 'italic hover-color'
                 }, ['Download DAR machine-readable format'])
               ]),
@@ -741,7 +730,7 @@ class FinalAccessReview extends Component {
                 div({ className: 'control-label dul-color' }, ['Structured Limitations']),
                 div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: this.state.sDul } }, []),
                 a({
-                  id: 'btn_downloadSDul', onClick: () => this.download('machine-readable-DUL.json', this.state.mrDUL),
+                  id: 'btn_downloadSDul', onClick: () => Utils.download('machine-readable-DUL.json', this.state.mrDUL),
                   className: 'italic hover-color'
                 }, ['Download DUL machine-readable format'])
               ])

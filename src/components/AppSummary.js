@@ -20,7 +20,7 @@ const LOREM_IPSUM =
 
 export const AppSummary = hh(class AppSummary extends React.PureComponent {
   render() {
-    const { darInfo, consentElection } = this.props;
+    const { darInfo, election, consentElection } = this.props;
     return div({ id: 'app-summary' },
       [
         div({ style: SUBHEADER }, "Application summary"),
@@ -45,7 +45,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 borderRadius: '9px',
               }
             },
-            [StructuredLimitations({ darInfo, consentElection })]
+            [StructuredLimitations({ darInfo, election, consentElection })]
           )
         ]),
         div(
