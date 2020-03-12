@@ -45,7 +45,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 borderRadius: '9px',
               }
             },
-            [StructuredLimitations({ darInfo, election, consentElection })]
+            [StructuredLimitations({ darInfo, consentElection })]
           )
         ]),
         div(

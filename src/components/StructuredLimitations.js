@@ -22,6 +22,7 @@ const HEADER = {
 const TEXT = {
   fontSize: Theme.font.size.small,
   lineHeight: Theme.font.leading.regular,
+  fontWeight: Theme.font.weight.regular,
 };
 
 const BOLD = {
@@ -35,35 +36,71 @@ const ICON = {
 };
 
 export const StructuredLimitations = hh(class StructuredLimitations extends React.PureComponent {
-  format = content => {
+  /**
+   * converts the given string to the desired use restrictions object
+   * this will be deleted once we implement returning the JSON object from the API
+   */
+  toObject = content => {
     const lines = content.split('\n');
-    const formatted = _.map(lines, line => {
+    lines.shift(); // gets rid of that "Samples are restricted..." line
+    const formatObject = {
+      primary: [],
+      secondary: []
+    };
+
+    lines.forEach(line => {
+      let code, description;
+      const { primary, secondary } = formatObject;
+      const primaryCodes = ["NRES", "GRU", "HMB", "DS", "POA"];
       if (line.includes('[')) {
         // separate code between brackets from rest of statement
         const arr = line.split(' [');
-        const code = arr[1].substring(0, arr[1].indexOf(']')) + ' '; // text between brackets
-        return span([
-          span({ style: BOLD }, code),
-          span({ style: TEXT }, arr[0]), '\n'])
+        code = arr[1].substring(0, arr[1].indexOf(']')); // text between brackets
+        description = arr[0];
+        primaryCodes.includes(code) ? primary.push({ code, description }) : secondary.push({ code, description });
       } else {
-        return span(`${line}\n`);
+        code = null;
+        description = line;
+        secondary.push({ code, description });
       }
+    });
+    return formatObject;
+  };
+
+  /**
+   * takes a JSON object of the structure { primary: [...], secondary: [...] } and returns HTML elements
+   */
+  format = content => {
+    const formatted = _.map(_.keys(content), key => {
+      const restrictions = content[key];
+      if (!_.isEmpty(restrictions)) {
+        const listRestrictions = _.map(restrictions, (restriction, i) => {
+          const { code, description } = restriction;
+          return span({ key: i }, [
+            span({ style: BOLD }, code === null ? '' : code + ' '),
+            span({ style: TEXT }, [description, '\n'])]);
+        });
+        return span({ style: BOLD, key }, [`${_.startCase(key)}:\n`, listRestrictions]);
+      };
     });
     return formatted;
   };
 
+  /**
+   * downloads the data use letter for this dataset
+   */
   downloadDUL = () => {
     const { referenceId, dulName } = this.props.consentElection;
     Files.getDulFile(referenceId, dulName);
   };
 
   render() {
-    const { darInfo, election, consentElection } = this.props;
-    const mrDUL = JSON.stringify(election.useRestriction, null, 2);
+    const { darInfo, consentElection } = this.props;
+    const mrDUL = JSON.stringify(consentElection.useRestriction, null, 2);
 
     return div({ style: ROOT }, [
       div({ style: HEADER }, 'Data Use Structured Limitations'),
-      div({ style: TEXT }, this.format(darInfo.structuredLimitations)),
+      div({ style: TEXT }, this.format(this.toObject(darInfo.structuredLimitations))),
       div({ style: { margin: '8px 0px' } }, [
         a({
           id: 'download-dul',
