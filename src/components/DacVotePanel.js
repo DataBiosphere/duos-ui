@@ -45,7 +45,7 @@ const VOTE_CHAIR = {
 
 const LINK = {
   color: Theme.palette.link,
-  fontWeight: '400',
+  fontWeight: Theme.font.weight.regular,
   textTransform: 'none',
   lineHeight: Theme.font.size.small,
 };

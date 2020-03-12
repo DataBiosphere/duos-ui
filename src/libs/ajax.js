@@ -225,7 +225,7 @@ export const DAR = {
     const consentElection = await Election.findConsentElectionByDarElection(election.electionId);
     darInfo.structuredRp = election.translatedUseRestriction;
     darInfo.structuredLimitations = consentElection.translatedUseRestriction;
-    return { darInfo, election };
+    return { darInfo, election, consentElection };
   },
 
   describeDar: async (darId) => {

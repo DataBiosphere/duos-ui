@@ -37,3 +37,14 @@ export const Navigation = {
     history.push(page);
   }
 };
+
+export const download = (fileName, text) => {
+  const break_line = '\r\n \r\n';
+  text = break_line + text;
+  let blob = new Blob([text], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = fileName + '-restriction';
+  a.click();
+};
