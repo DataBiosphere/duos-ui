@@ -18,7 +18,7 @@
     "react": "16.13.0",
     "react-dom": "16.13.0",
     "react-google-charts": "3.0.15",
-    "react-google-login": "5.1.1",
+    "react-google-login": "5.1.2",
     "react-hyperscript-helpers": "2.0.0",
     "react-material-icon-svg": "3.8.0",
     "react-modal": "3.11.2",
