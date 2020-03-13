@@ -33,9 +33,7 @@ export const ApplicantInfo = hh(class ApplicantInfo extends React.PureComponent 
   render() {
     const { header, content } = this.props;
     return div({ style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
-      div({
-        style: HEADER
-      }, "Applicant Information"),
+      div({ style: HEADER }, "Applicant Information"),
       div({ style: { display: 'flex', justifyContent: 'space-between' } }, this.format(content)),
     ]);
   }
