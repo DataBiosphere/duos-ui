@@ -3,6 +3,7 @@ import { div, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { ApplicationSection } from './ApplicationSection';
 import { StructuredLimitations } from './StructuredLimitations';
+import { ApplicantInfo } from './ApplicantInfo';
 
 const SUBHEADER = {
   margin: '32px 0px',
@@ -21,6 +22,7 @@ const LOREM_IPSUM =
 export const AppSummary = hh(class AppSummary extends React.PureComponent {
   render() {
     const { darInfo, election, consentElection } = this.props;
+    const { pi, profileName, institution, department, city, country } = darInfo;
     return div({ id: 'app-summary' },
       [
         div({ style: SUBHEADER }, "Application summary"),
@@ -59,7 +61,16 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
           {
             id: "applicant",
           },
-          [ApplicationSection({ header: 'Applicant Information', content: LOREM_IPSUM, headerColor: Theme.palette.primary, })]
+          [ApplicantInfo({
+            content: {
+              principalInvestigator: pi,
+              researcher: profileName,
+              institution,
+              department,
+              city,
+              country
+            },
+          })]
         )
       ]
     );
