@@ -2,6 +2,7 @@ import React from 'react';
 import { div, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { ApplicationSection } from './ApplicationSection';
+import { StructuredRp } from './StructuredRp';
 import { StructuredLimitations } from './StructuredLimitations';
 import { ApplicantInfo } from './ApplicantInfo';
 
@@ -35,7 +36,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 padding: '24px 48px 24px 0px'
               }
             },
-            [ApplicationSection({ header: 'Structured Research Purpose', content: LOREM_IPSUM, headerColor: Theme.palette.primary })]
+            [StructuredRp({ darInfo, election })]
           ),
           div(
             {
