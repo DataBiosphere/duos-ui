@@ -1,9 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, span, a, i, hh } from "react-hyperscript-helpers";
+import { div, span, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
-import { Files } from '../libs/ajax';
-import { download } from '../libs/utils';
+import { DownloadLink } from './DownloadLink';
 
 const ROOT = {
   fontFamily: 'Montserrat',
@@ -28,11 +27,6 @@ const TEXT = {
 const BOLD = {
   ...TEXT,
   fontWeight: Theme.font.weight.semibold,
-};
-
-const ICON = {
-  color: Theme.palette.link,
-  marginRight: '6px',
 };
 
 export const StructuredLimitations = hh(class StructuredLimitations extends React.PureComponent {
@@ -87,40 +81,21 @@ export const StructuredLimitations = hh(class StructuredLimitations extends Reac
   };
 
   /**
-   * downloads the data use letter for this dataset
-   */
-  downloadDUL = () => {
-    const { referenceId, dulName } = this.props.consentElection;
-    Files.getDulFile(referenceId, dulName);
+ * renders the download links passed in as props
+ */
+  makeLinks = (labels, functions) => {
+    return _.map(labels, (label, i) => {
+      return DownloadLink({ key: i, label, onDownload: functions[i] });
+    });
   };
 
   render() {
-    const { darInfo, consentElection } = this.props;
-    const mrDUL = JSON.stringify(consentElection.useRestriction, null, 2);
+    const { darInfo, labels, functions } = this.props;
 
     return div({ style: ROOT }, [
       div({ style: HEADER }, 'Data Use Structured Limitations'),
       div({ style: TEXT }, this.format(this.toObject(darInfo.structuredLimitations))),
-      div({ style: { margin: '8px 0px' } }, [
-        a({
-          id: 'download-dul',
-          onClick: () => download('machine-readable-DUL.json', mrDUL)
-        },
-          [
-            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-            'DUL machine-readable format'
-          ])
-      ]),
-      div([
-        a({
-          id: 'download-letter',
-          onClick: () => this.downloadDUL()
-        },
-          [
-            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-            'Data Use Letter'
-          ])
-      ])
+      div(this.makeLinks(labels, functions)),
     ]);
   }
 });

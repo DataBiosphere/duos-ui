@@ -1,6 +1,8 @@
 import React from 'react';
 import { div, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
+import { Files } from '../libs/ajax';
+import { download } from '../libs/utils';
 import { ApplicationSection } from './ApplicationSection';
 import { StructuredRp } from './StructuredRp';
 import { StructuredLimitations } from './StructuredLimitations';
@@ -17,13 +19,21 @@ const SUBHEADER = {
   fontFamily: 'Montserrat',
 };
 
-const LOREM_IPSUM =
-  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-
 export const AppSummary = hh(class AppSummary extends React.PureComponent {
+  /**
+   * downloads the data use letter for this dataset
+   */
+  downloadDUL = () => {
+    const { referenceId, dulName } = this.props.consentElection;
+    Files.getDulFile(referenceId, dulName);
+  };
+
   render() {
     const { darInfo, election, consentElection } = this.props;
     const { pi, profileName, institution, department, city, country } = darInfo;
+    const mrDAR = JSON.stringify(election.useRestriction, null, 2);
+    const mrDUL = JSON.stringify(consentElection.useRestriction, null, 2);
+
     return div({ id: 'app-summary' },
       [
         div({ style: SUBHEADER }, "Application summary"),
@@ -36,7 +46,11 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 padding: '24px 48px 24px 0px'
               }
             },
-            [StructuredRp({ darInfo, election })]
+            [StructuredRp({
+              darInfo,
+              labels: ["DAR machine-readable format"],
+              functions: [() => download('machine-readable-DAR.json', mrDAR)]
+            })]
           ),
           div(
             {
@@ -48,7 +62,11 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 borderRadius: '9px',
               }
             },
-            [StructuredLimitations({ darInfo, consentElection })]
+            [StructuredLimitations({
+              darInfo,
+              labels: ["DUL machine-readable format", "Data Use Letter"],
+              functions: [() => download('machine-readable-DUL.json', mrDUL), this.downloadDUL]
+            })]
           )
         ]),
         div(

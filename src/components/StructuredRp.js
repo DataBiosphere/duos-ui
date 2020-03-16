@@ -1,9 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, span, a, i, hh } from "react-hyperscript-helpers";
+import { div, span, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
-import { Files } from '../libs/ajax';
-import { download } from '../libs/utils';
+import { DownloadLink } from './DownloadLink';
 
 const ROOT = {
   fontFamily: 'Montserrat',
@@ -27,11 +26,6 @@ const TEXT = {
 const BOLD = {
   ...TEXT,
   fontWeight: Theme.font.weight.semibold,
-};
-
-const ICON = {
-  color: Theme.palette.link,
-  marginRight: '6px',
 };
 
 export const StructuredRp = hh(class StructuredRp extends React.PureComponent {
@@ -86,23 +80,22 @@ export const StructuredRp = hh(class StructuredRp extends React.PureComponent {
     return formatted;
   };
 
+  /**
+   * renders the download links passed in as props
+   */
+  makeLinks = (labels, functions) => {
+    return _.map(labels, (label, i) => {
+      return DownloadLink({ key: i, label, onDownload: functions[i] });
+    });
+  };
+
   render() {
-    const { darInfo, election } = this.props;
-    const mrDAR = JSON.stringify(election.useRestriction, null, 2);
+    const { darInfo, labels, functions } = this.props;
 
     return div({ style: ROOT }, [
       div({ style: HEADER }, 'Structured Research Purpose'),
       div({ style: TEXT }, this.format(this.toObject(darInfo.structuredRp))),
-      div({ style: { margin: '8px 0px' } }, [
-        a({
-          id: 'download-dar',
-          onClick: () => download('machine-readable-DAR.json', mrDAR)
-        },
-          [
-            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-            'DAR machine-readable format'
-          ])
-      ]),
+      div(this.makeLinks(labels, functions)),
     ]);
   }
 });
