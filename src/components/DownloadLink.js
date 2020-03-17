@@ -1,6 +1,5 @@
-import React from 'react';
 import _ from 'lodash';
-import { div, a, i, hh } from "react-hyperscript-helpers";
+import { div, a, i } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 
 const ROOT = {
@@ -12,18 +11,16 @@ const ICON = {
   marginRight: '6px',
 };
 
-export const DownloadLink = hh(class DownloadLink extends React.PureComponent {
-  render() {
-    const { label, onDownload } = this.props;
-    return div({ style: ROOT }, [
-      a({
-        id: _.kebabCase(label),
-        onClick: () => onDownload()
-      },
-        [
-          i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-          label,
-        ])
-    ]);
-  }
-});
+export const DownloadLink = props => {
+  const { label, onDownload } = props;
+  return div({ style: ROOT }, [
+    a({
+      id: _.kebabCase(label),
+      onClick: () => onDownload()
+    },
+      [
+        i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
+        label,
+      ])
+  ]);
+};
