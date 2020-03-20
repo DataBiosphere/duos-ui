@@ -478,7 +478,6 @@ class DataAccessRequestApplication extends Component {
   verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
     if (this.state.formData.controls !== true &&
       this.state.formData.population !== true &&
-      this.state.formData.forProfit !== true &&
       this.state.formData.diseases !== true &&
       this.state.formData.methods !== true &&
       this.state.formData.hmb !== true &&
@@ -690,7 +689,6 @@ class DataAccessRequestApplication extends Component {
       poa = false,
       hmb = false,
       population = false,
-      forProfit = false,
       controls = false,
       methods = false,
       diseases = false,
@@ -1287,9 +1285,9 @@ class DataAccessRequestApplication extends Component {
                       [
                         div({className: 'checkbox'}, [
                           input({
-                            checked: forProfit,
+                            checked: population,
                             onChange: this.handleCheckboxChange,
-                            id: 'checkForProfit',
+                            id: 'forProfit',
                             type: 'checkbox',
                             disabled: (this.state.formData.dar_code !== null),
                             className: 'checkbox-inline rp-checkbox',
@@ -1297,10 +1295,10 @@ class DataAccessRequestApplication extends Component {
                           }),
                           label({
                             className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkForProfit',
+                            htmlFor: 'checkforProfit',
                           }, [
                             span({},
-                              ['2.4.4 Commercial or For-Profit Purpose: ']),
+                              [' 2.4.5 Commercial or For-Profit Purpose: ']),
                             'The primary purpose of the research is exclusively or partially for a commercial purpose',
                           ]),
                         ]),
