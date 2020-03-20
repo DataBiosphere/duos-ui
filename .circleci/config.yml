@@ -6,7 +6,7 @@ executors:
       - image: google/cloud-sdk
   node:
     docker:
-      - image: circleci/node:13
+      - image: circleci/node:13.8.0
 
 commands:
   push-env:
@@ -126,11 +126,6 @@ jobs:
     executor: node
     steps:
       - checkout
-#      - restore_cache:
-#          keys:
-#            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-#            - deps2-{{ checksum "package.json" }}-
-#            - deps2-
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -146,11 +141,6 @@ jobs:
     executor: node
     steps:
       - checkout
-#      - restore_cache:
-#          keys:
-#            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-#            - deps2-{{ checksum "package.json" }}-
-#            - deps2-
       - run: cp config/staging.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
