@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "@material-ui/core": "4.9.5",
+    "@material-ui/core": "4.9.7",
     "@material-ui/icons": "4.9.1",
     "bootstrap": "3.4.1",
     "chart.js": "2.9.3",
@@ -15,9 +15,14 @@
     "mixin-deep": "2.0.1",
     "noty": "^3.2.0-beta",
     "popper.js": "1.16.1",
+<<<<<<< HEAD
     "query-string": "6.11.1",
     "react": "16.13.0",
     "react-dom": "16.13.0",
+=======
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+>>>>>>> develop
     "react-google-charts": "3.0.15",
     "react-google-login": "5.1.2",
     "react-hyperscript-helpers": "2.0.0",
