@@ -238,7 +238,7 @@ workflows:
             - test
           filters:
             branches:
-              only: develop
+              only: /.*/
       - deploy-dev:
           requires:
             - build-dev
