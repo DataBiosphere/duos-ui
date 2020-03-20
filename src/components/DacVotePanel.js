@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { div, a, span, button, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
+import { Notifications } from "../libs/utils";
 import { Votes, Election } from '../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
@@ -43,19 +44,6 @@ const VOTE_CHAIR = {
   borderRadius: '9px 0px 9px 9px',
 };
 
-const LINK = {
-  color: Theme.palette.link,
-  fontWeight: Theme.font.weight.regular,
-  textTransform: 'none',
-  lineHeight: Theme.font.size.small,
-};
-
-const LINK_SECTION = {
-  display: 'flex',
-  margin: '24px 0px',
-  alignContent: 'center',
-};
-
 export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -71,13 +59,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
+    this.setState({ alert: '' });
     const { electionId } = this.props.election;
     try {
       const finalVote = await Votes.getDarFinalAccessVote(electionId);
       this.setState({ finalVote });
     }
     catch (e) {
-      console.log('Something went wrong trying to get the data.')
+      Notifications.showError(e);
     };
   };
 
@@ -86,6 +75,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsMember mounts
    */
   getVotesAsMember = async () => {
+    this.setState({ alert: '' });
     const { darId, voteId, rpVoteId } = this.props.ids;
     try {
       const vote = await Votes.getDarVote(darId, voteId);
@@ -96,7 +86,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       }
     }
     catch (e) {
-      console.log('Something went wrong trying to get the data.')
+      Notifications.showError(e);
     };
   };
 
@@ -156,13 +146,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.submitVote(vote);
         this.submitVote(rpVote);
       } else {
-        console.log('Please complete all required fields');
+        this.setState({ alert: 'incomplete' });
       };
     } else {
       if (vote.vote !== null) {
         this.submitVote(vote);
       } else {
-        console.log('Please complete all required fields');
+        this.setState({ alert: 'incomplete' });
       };
     }
   };
@@ -174,7 +164,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       this.submitVote(finalVote);
       this.closeElection();
     } else {
-      console.log('Please complete all required fields');
+      this.setState({ alert: 'incomplete' });
     };
   };
 
@@ -184,18 +174,16 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     try {
       if (vote.type === 'FINAL') {
         await Votes.updateFinalAccessDarVote(darId, vote);
-        console.log('Final vote sumbitted');
       } else if (vote.createDate === null) {
         await Votes.postDarVote(darId, vote);
-        console.log('Vote sumbitted');
       } else {
         await Votes.updateDarVote(darId, vote);
-        console.log('Vote edited');
       }
+      this.setState({ alert: 'success' });
     }
     catch (e) {
-      console.log('Something went wrong. Try again.')
-    };
+      Notifications.showError(e);
+    }
   };
 
   // closes the election for this DAR
@@ -207,14 +195,33 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       await Election.updateElection(election.electionId, electionClone);
     }
     catch (e) {
-      console.log('Something went wrong. Try again.')
+      Notifications.showError(e);
+    }
+  };
+
+  // gives feedback to the voter in the form of an inline alert
+  showAlert = alert => {
+    let msg, type;
+    switch (alert) {
+      case 'incomplete':
+        msg = 'Please complete all required fields.';
+        type = 'error';
+        break;
+      case 'success':
+        msg = 'Vote successfully logged!';
+        type = 'success';
+        break;
+      default:
+        msg = '';
+        type = 'primary';
     };
-  }
+    return span({ style: { textTransform: 'none', color: Theme.palette[type] } }, msg);
+  };
 
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
-    const { vote, rpVote, finalVote } = this.state;
+    const { vote, rpVote, finalVote, alert } = this.state;
 
     return div({ style: ROOT },
       [
@@ -248,19 +255,21 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               onUpdate: this.updateChairVote,
               finalVote,
             }),
-            div(
-              { isRendered: voteAsChair, style: LINK_SECTION }, [
-              a({ style: LINK }, "View DUOS algorithm decision")
-            ]),
-            div({ style: { textAlign: 'end' } }, [
+            div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
+              this.showAlert(alert),
               button({
                 id: 'vote',
                 className: 'button-contained',
+                style: alert === 'success' ? { backgroundColor: Theme.palette.success } : {},
                 onClick: voteAsChair ? this.submitChairVote : this.submitMemberVote,
               },
-                "Vote")
-            ])
-          ])
+                ["Vote",
+                  alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })
+                ]
+              )
+            ]),
+          ]
+        )
       ]
     );
   }

@@ -1,3 +1,6 @@
+import Noty from 'noty';
+import 'noty/lib/noty.css';
+
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';
@@ -47,4 +50,17 @@ export const download = (fileName, text) => {
   a.href = url;
   a.download = fileName + '-restriction';
   a.click();
+};
+
+export const Notifications = {
+  showError: error => {
+    return new Noty({
+      type: 'error',
+      layout: 'bottomRight',
+      theme: 'duos',
+      text: `Something went wrong. Please try again.\nError code: ${error.status}`,
+      timeout: '3500',
+      progressBar: false,
+    }).show();
+  }
 };
