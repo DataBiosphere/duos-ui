@@ -40,17 +40,22 @@
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test": "start-server-and-test start:ci http://localhost:3000  cypress:run",
+    "start:ci": "BROWSER=none react-scripts start",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "devDependencies": {
     "acorn": "7.1.1",
+    "cypress": "4.2.0",
     "eslint": "6.8.0",
     "eslint-config-react-app": "5.2.1",
     "eslint-plugin-flowtype": "3.13.0",
     "eslint-plugin-react": "7.19.0",
     "handlebars": "4.7.3",
     "js-yaml": "3.13.1",
+    "start-server-and-test": "1.10.11",
     "typescript": "3.8.3"
   },
   "comments": {
