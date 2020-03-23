@@ -4,9 +4,11 @@ executors:
   cloud-sdk:
     docker:
       - image: google/cloud-sdk
-  node:
+  cypress:
     docker:
-      - image: circleci/node:13
+      - image: cypress/base:10
+        environment:
+          TERM: xterm
 
 commands:
   push-env:
@@ -108,10 +110,7 @@ commands:
 
 jobs:
   test:
-    docker:
-      - image: cypress/base:10
-        environment:
-          TERM: xterm
+    executor: cypress
     steps:
       - checkout
       - restore_cache:
@@ -134,7 +133,7 @@ jobs:
           background: true
       - run: npm run cypress:run
   build-dev:
-    executor: node
+    executor: cypress
     steps:
       - checkout
       - restore_cache:
@@ -152,7 +151,7 @@ jobs:
             - config
             - Dockerfile
   build-staging:
-    executor: node
+    executor: cypress
     steps:
       - checkout
       - restore_cache:
