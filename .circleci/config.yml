@@ -124,7 +124,9 @@ jobs:
           key: deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
           paths:
             - ~/.npm
-      - run: npm test
+      - run: npm run start:ci
+      - run: sleep 600;
+      - run: npm run cypress:run
   build-dev:
     executor: node
     steps:
