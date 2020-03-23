@@ -11,7 +11,8 @@ describe('Status', function() {
   });
 
   it('All statuses should succeed', function() {
-    cy.visit('/status');
+    cy.visit('');
+    cy.contains('Status').click();
     headers.forEach((h) => {
       cy.contains(h).parent().children().next('svg')
         .should('have.class', 'rmi-checkbox-marked-circle-outline');

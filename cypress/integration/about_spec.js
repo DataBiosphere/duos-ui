@@ -10,7 +10,9 @@ describe('About', function() {
   });
 
   it('About page shows content', function() {
-    cy.visit('/home_about');
+    cy.visit('');
+    cy.contains('About');
+    cy.contains('About').click();
     cy.contains('Overview of the system and development');
   });
 
