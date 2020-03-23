@@ -109,23 +109,28 @@ commands:
 jobs:
   test:
     docker:
-      - image: cypress/base:8
+      - image: cypress/base:10
         environment:
           TERM: xterm
     steps:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
-      - run: npm install --silent
+            - cache-{{ checksum "package.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run: npm run cypress:verify
       - save_cache:
-          key: deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+          key:
+            - cache-{{ checksum "package.json" }}
           paths:
             - ~/.npm
-      - run: npm run start:ci
-      - run: sleep 1;
+            - ~/.cache
+      - run:
+          name: Start server
+          command: npm run start
+          background: true
       - run: npm run cypress:run
   build-dev:
     executor: node
@@ -133,9 +138,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+            - cache-{{ checksum "package.json" }}
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -152,10 +155,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+          key:
+            - cache-{{ checksum "package.json" }}
       - run: cp config/staging.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -173,10 +174,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+          key:
+            - cache-{{ checksum "package.json" }}
       - attach_workspace:
           at: .
       - push-env:
@@ -198,10 +197,8 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+          key:
+            - cache-{{ checksum "package.json" }}
       - attach_workspace:
           at: .
       - push-env:

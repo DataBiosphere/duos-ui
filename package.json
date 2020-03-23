@@ -44,7 +44,8 @@
     "test": "start-server-and-test start:ci http://localhost:3000  cypress:run",
     "start:ci": "BROWSER=none react-scripts start",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "cypress:verify": "cypress verify"
   },
   "devDependencies": {
     "acorn": "7.1.1",
