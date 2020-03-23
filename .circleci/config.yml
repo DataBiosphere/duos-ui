@@ -128,7 +128,7 @@ jobs:
             - ~/.cache
       - run:
           name: Start server
-          command: npm run start
+          command: npm run start:ci
           background: true
       - run: npm run cypress:run
   build-dev:
