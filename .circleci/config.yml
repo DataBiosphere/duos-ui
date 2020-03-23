@@ -122,8 +122,7 @@ jobs:
           command: npm ci
       - run: npm run cypress:verify
       - save_cache:
-          key:
-            - cache-{{ checksum "package.json" }}
+          key: cache-{{ checksum "package.json" }}
           paths:
             - ~/.npm
             - ~/.cache
@@ -155,7 +154,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key:
+          keys:
             - cache-{{ checksum "package.json" }}
       - run: cp config/staging.json public/config.json
       - run: npm install --silent
@@ -174,7 +173,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key:
+          keys:
             - cache-{{ checksum "package.json" }}
       - attach_workspace:
           at: .
@@ -197,7 +196,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key:
+          keys:
             - cache-{{ checksum "package.json" }}
       - attach_workspace:
           at: .
