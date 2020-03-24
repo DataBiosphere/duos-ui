@@ -115,7 +115,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - cache-{{ checksum "package.json" }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run:
           name: Install dependencies
           command: npm ci
@@ -123,7 +123,7 @@ jobs:
       - run: cp config/dev.json public/config.json
       - run: CI=false npm run build --silent
       - save_cache:
-          key: cache-{{ checksum "package.json" }}
+          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
           paths:
             - ~/.npm
             - ~/.cache
@@ -138,7 +138,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - cache-{{ checksum "package.json" }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -156,7 +156,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - cache-{{ checksum "package.json" }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: cp config/staging.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -175,7 +175,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - cache-{{ checksum "package.json" }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - attach_workspace:
           at: .
       - push-env:
@@ -198,7 +198,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - cache-{{ checksum "package.json" }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - attach_workspace:
           at: .
       - push-env:
