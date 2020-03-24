@@ -222,10 +222,9 @@ export const DAR = {
   describeDarWithElectionInfo: async (darId) => {
     const darInfo = await DAR.describeDar(darId);
     const election = await Election.findElectionByDarId(darId);
-    const consentElection = await Election.findConsentElectionByDarElection(election.electionId);
-    darInfo.structuredRp = election.translatedUseRestriction;
-    darInfo.structuredLimitations = consentElection.translatedUseRestriction;
-    return { darInfo, election, consentElection };
+    const consent = await DAR.getDarConsent(darId);
+    darInfo.translatedDataUse = await DAR.translateDataUse(consent.dataUse);
+    return { darInfo, election, consent };
   },
 
   describeDar: async (darId) => {
@@ -272,7 +271,22 @@ export const DAR = {
     darInfo.pi = isThePI ? profileName : piName;
     darInfo.havePI = havePI || isThePI;
     darInfo.profileName = profileName;
+    // dataUse from Models.dar has properties denoting what research the data will be used for.
+    // Get these properties directly from the DAR.
+    const dataUseModel = _.keys(darInfo.dataUse);
+    dataUseModel.forEach(key => {
+      const value = rawDar[key];
+      if (!_.isUndefined(value)) {
+        darInfo.dataUse[key] = value;
+      }
+    });
     return darInfo;
+  },
+
+  translateDataUse: async dataUse => {
+    const url = `${await Config.getOntologyApiUrl()}translate/summary`;
+    const res = await fetchOk(url, _.mergeAll([Config.authOpts(), Config.jsonBody(dataUse), { method: 'POST' }]));
+    return await res.json();
   },
 
   getPartialDarRequest: async darId => {

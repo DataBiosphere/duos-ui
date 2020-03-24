@@ -31,12 +31,12 @@ class AccessReviewV2 extends React.PureComponent {
 
   async darReviewAccess() {
     const { darId } = this.props.match.params;
-    const { darInfo, election, consentElection } = await DAR.describeDarWithElectionInfo(darId);
-    this.setState({ darInfo, election, consentElection });
+    const { darInfo, election, consent } = await DAR.describeDarWithElectionInfo(darId);
+    this.setState({ darInfo, election, consent });
   }
 
   render() {
-    const { voteAsChair, darInfo, election, consentElection } = this.state;
+    const { voteAsChair, darInfo, election, consent } = this.state;
     const { history, match } = this.props;
     const ids = match.params;
 
@@ -67,7 +67,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: "70%",
               }
             },
-            [DarApplication({ voteAsChair, darInfo, election, consentElection, ids })]
+            [DarApplication({ voteAsChair, darInfo, election, consent, ids })]
           )
         ])
       ]

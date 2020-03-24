@@ -24,15 +24,15 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
    * downloads the data use letter for this dataset
    */
   downloadDUL = () => {
-    const { referenceId, dulName } = this.props.consentElection;
+    const { referenceId, dulName } = this.props.consent;
     Files.getDulFile(referenceId, dulName);
   };
 
   render() {
-    const { darInfo, election, consentElection } = this.props;
+    const { darInfo, election, consent } = this.props;
     const { pi, profileName, institution, department, city, country } = darInfo;
     const mrDAR = JSON.stringify(election.useRestriction, null, 2);
-    const mrDUL = JSON.stringify(consentElection.useRestriction, null, 2);
+    const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
 
     return div({ id: 'app-summary' },
       [
@@ -47,7 +47,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
               }
             },
             [StructuredRp({
-              darInfo,
+              content: darInfo.dataUse,
               labels: ["DAR machine-readable format"],
               functions: [() => download('machine-readable-DAR.json', mrDAR)]
             })]
@@ -63,7 +63,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
               }
             },
             [StructuredLimitations({
-              darInfo,
+              content: darInfo.translatedDataUse,
               labels: ["DUL machine-readable format", "Data Use Letter"],
               functions: [() => download('machine-readable-DUL.json', mrDUL), this.downloadDUL]
             })]

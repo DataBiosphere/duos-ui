@@ -30,34 +30,58 @@ const BOLD = {
 
 export const StructuredRp = hh(class StructuredRp extends React.PureComponent {
   /**
-   * converts the given string to the desired use restrictions object
-   * this will be deleted once we implement returning the JSON object from the API
+   * converts the given data to the desired use restrictions object
    */
   toObject = content => {
-    const lines = content.split('<br>');
-    lines.shift(); // gets rid of that "Samples are restricted..." line
-    lines.pop();
     const formatObject = {
       primary: [],
+      diseases: [],
       secondary: []
     };
+    const { primary, secondary, diseases } = formatObject;
 
-    lines.forEach(line => {
-      let code, description;
-      const { primary, secondary } = formatObject;
-      const primaryCodes = ["NRES", "GRU", "HMB", "DS", "POA"];
-      if (line.includes('[')) {
-        // separate code between brackets from rest of statement
-        const arr = line.split(' [');
-        code = arr[1].substring(0, arr[1].indexOf(']')); // text between brackets
-        description = arr[0];
-        primaryCodes.includes(code) ? primary.push({ code, description }) : secondary.push({ code, description });
-      } else {
-        code = null;
-        description = line;
-        secondary.push({ code, description });
-      }
-    });
+    if (content.diseases) {
+      primary.push({ code: "HMB", description: "Data will be used for health/medical/biomedical research." });
+    };
+
+    if (content.methods) {
+      primary.push({ code: "NMDS", description: "Data will be used for methods development research." });
+    };
+
+    if (content.controls) {
+      primary.push({ code: "NCTRL", description: "Data will be used as a control sample set." });
+    };
+
+    if (content.population) {
+      primary.push({ code: "NPNV", description: "Data will be used for population structure or normal variation studies." });
+    };
+
+    if (!_.isEmpty(content.ontologies)) {
+      content.ontologies.forEach(ontology => {
+        const { label, id } = ontology;
+        const code = _.startCase(id.substring(id.lastIndexOf("/") + 1)); // startCase removes underscores
+        diseases.push({ code, description: label });
+      });
+    };
+
+    if (content.forProfit) {
+      secondary.push({ code: "NPU", description: "Data will be used for commercial purpose." });
+    } else {
+      secondary.push({ code: null, description: "Data will not be used for commercial purpose." });
+    };
+
+    if (content.oneGender) {
+      let gender = content.gender;
+      if (gender !== null) {
+        gender = gender === "M" ? "male" : "female";
+        secondary.push({ code: "RS-[GENDER]", description: `Data will be used to study ONLY a ${gender} population.` });
+      };
+    };
+
+    if (content.pediatric) {
+      secondary.push({ code: "RS-[PEDIATRIC]", description: "Data will be used to study ONLY a pediatric population." });
+    };
+
     return formatObject;
   };
 
@@ -74,7 +98,7 @@ export const StructuredRp = hh(class StructuredRp extends React.PureComponent {
             span({ style: BOLD }, code === null ? '' : code + ' '),
             span({ style: TEXT }, [description, '\n'])]);
         });
-        return span({ style: BOLD, key }, [`${_.startCase(key)}:\n`, listRestrictions]);
+        return div({ style: { ...BOLD, margin: '8px 0px' }, key }, [`${_.startCase(key)}:\n`, listRestrictions]);
       };
     });
     return formatted;
@@ -90,11 +114,11 @@ export const StructuredRp = hh(class StructuredRp extends React.PureComponent {
   };
 
   render() {
-    const { darInfo, labels, functions } = this.props;
+    const { content, labels, functions } = this.props;
 
     return div({ style: ROOT }, [
       div({ style: HEADER }, 'Structured Research Purpose'),
-      div({ style: TEXT }, this.format(this.toObject(darInfo.structuredRp))),
+      div({ style: TEXT }, this.format(this.toObject(content))),
       div(this.makeLinks(labels, functions)),
     ]);
   }
