@@ -6,7 +6,7 @@ executors:
       - image: google/cloud-sdk
   node:
     docker:
-      - image: circleci/node:13
+      - image: cypress/base:10.16.3
         environment:
           TERM: xterm
 
