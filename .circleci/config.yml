@@ -116,7 +116,7 @@ jobs:
             - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch}}
       - run: npm install --silent
       - save_cache:
-          - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch}}
+          key: deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch}}
           paths:
             - ~/.npm
       - run: npm test
