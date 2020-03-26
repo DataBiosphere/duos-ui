@@ -53,14 +53,22 @@ export const download = (fileName, text) => {
 };
 
 export const Notifications = {
-  showError: error => {
+  defaultNotification: {
+    layout: 'bottomRight',
+    timeout: '3500',
+    progressBar: false,
+  },
+  /**
+   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
+   * See https://ned.im/noty/#/options for more customization options.
+   */
+  showError: props => {
     return new Noty({
+      text: 'Something went wrong. Please try again.',
+      ...Notifications.defaultNotification,
+      ...props,
       type: 'error',
-      layout: 'bottomRight',
       theme: 'duos',
-      text: `Something went wrong. Please try again.\nError code: ${error.status}`,
-      timeout: '3500',
-      progressBar: false,
     }).show();
-  }
+  },
 };

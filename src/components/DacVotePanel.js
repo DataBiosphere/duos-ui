@@ -66,7 +66,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       this.setState({ finalVote });
     }
     catch (e) {
-      Notifications.showError(e);
+      Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
     };
   };
 
@@ -86,7 +86,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       }
     }
     catch (e) {
-      Notifications.showError(e);
+      Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
     };
   };
 
@@ -182,7 +182,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       this.setState({ alert: 'success' });
     }
     catch (e) {
-      Notifications.showError(e);
+      Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
     }
   };
 
@@ -195,7 +195,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       await Election.updateElection(election.electionId, electionClone);
     }
     catch (e) {
-      Notifications.showError(e);
+      Notifications.showError({ text: `Something went wrong. Error code: ${e.status}` });
     }
   };
 
