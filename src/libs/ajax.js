@@ -194,25 +194,25 @@ export const DAC = {
   addDacChair: async (dacId, userId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/chair/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return res.json();
+    return res.status;
   },
 
   removeDacChair: async (dacId, userId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/chair/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    return res.status;
   },
 
   addDacMember: async (dacId, userId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/member/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'POST' }]));
-    return res.json();
+    return res.status;
   },
 
   removeDacMember: async (dacId, userId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}/member/${userId}`;
     const res = await fetchOk(url, _.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    return res.status;
   }
 
 };
