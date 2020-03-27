@@ -1,3 +1,6 @@
+import Noty from 'noty';
+import 'noty/lib/noty.css';
+
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';
@@ -47,4 +50,25 @@ export const download = (fileName, text) => {
   a.href = url;
   a.download = fileName + '-restriction';
   a.click();
+};
+
+export const Notifications = {
+  defaultNotification: {
+    layout: 'bottomRight',
+    timeout: '3500',
+    progressBar: false,
+  },
+  /**
+   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
+   * See https://ned.im/noty/#/options for more customization options.
+   */
+  showError: props => {
+    return new Noty({
+      text: 'Something went wrong. Please try again.',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'error',
+      theme: 'duos',
+    }).show();
+  },
 };
