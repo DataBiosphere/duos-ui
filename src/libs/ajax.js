@@ -364,6 +364,12 @@ export const DAR = {
     return await res.json();
   },
 
+  /**
+   * Call with no arguments to get all DARManages accessible to the user.
+   * Call with a user id to get all DARManages for a specific user.
+   * @param userId
+   * @returns {Promise<any>}
+   */
   getDataAccessManage: async userId => {
     userId = userId === undefined ? '' : userId;
     const url = `${await Config.getApiUrl()}/dar/manage/?userId=${userId}`;

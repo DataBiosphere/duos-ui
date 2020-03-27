@@ -24,8 +24,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
         dul: [],
       },
     };
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
   handleDulPageChange = page => {
@@ -86,13 +84,13 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`dul_collect/${consentId}`);
   };
 
-  handleOpenModal() {
+  handleOpenModal = () => {
     this.setState({ showModal: true });
-  }
+  };
 
-  handleCloseModal() {
+  handleCloseModal = () => {
     this.setState({ showModal: false });
-  }
+  };
 
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });

@@ -1,13 +1,13 @@
-import {button, div, h, hh, hr, span} from 'react-hyperscript-helpers';
-import {PageSubHeading} from './PageSubHeading';
-import {SearchBox} from './SearchBox';
-import {Component, Fragment} from 'react';
+import { button, div, h, hh, hr, span } from 'react-hyperscript-helpers';
+import { PageSubHeading } from './PageSubHeading';
+import { SearchBox } from './SearchBox';
+import { Component, Fragment } from 'react';
 import _ from 'lodash';
-import {PaginatorBar} from './PaginatorBar';
-import {Storage} from '../libs/storage';
-import {DAR} from '../libs/ajax';
-import {Config} from '../libs/config';
-import {USER_ROLES} from '../libs/utils';
+import { PaginatorBar } from './PaginatorBar';
+import { Storage } from '../libs/storage';
+import { DAR } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { USER_ROLES } from '../libs/utils';
 
 export const DataAccessRequestReviewTable = hh(
   class DataAccessRequestReview extends Component {
@@ -27,15 +27,15 @@ export const DataAccessRequestReviewTable = hh(
     }
 
     componentDidMount() {
-      let currentUser = Storage.getCurrentUser();
+      const currentUser = Storage.getCurrentUser();
       this.setState({
         currentUser: currentUser,
       }, () => {
-        this.init(currentUser);
+        this.init();
       });
     }
 
-    init(currentUser) {
+    init = () => {
       DAR.getDataAccessManage(undefined).then(
         dars => {
           let totalAccessPendingVotes = 0;
@@ -53,14 +53,14 @@ export const DataAccessRequestReviewTable = hh(
           });
         },
       );
-    }
+    };
 
     handleOpenModal = () => {
-      this.setState({showModal: true});
+      this.setState({ showModal: true });
     };
 
     handleCloseModal = () => {
-      this.setState({showModal: false});
+      this.setState({ showModal: false });
     };
 
     handleAccessPageChange = page => {
@@ -79,7 +79,7 @@ export const DataAccessRequestReviewTable = hh(
     };
 
     handleSearchDar = (query) => {
-      this.setState({searchDarText: query});
+      this.setState({ searchDarText: query });
     };
 
     searchTable = (query) => (row) => {
@@ -117,7 +117,7 @@ export const DataAccessRequestReviewTable = hh(
         return pendingCaseAccessCollectStatus;
       }
       const dacChairRoles = _.filter(this.state.currentUser.roles,
-        {'name': USER_ROLES.chairperson, 'dacId': dacId});
+        { 'name': USER_ROLES.chairperson, 'dacId': dacId });
       return (!_.isEmpty(dacChairRoles)) && pendingCaseAccessCollectStatus;
     };
 
@@ -127,15 +127,15 @@ export const DataAccessRequestReviewTable = hh(
 
     render() {
 
-      const {darLimit, searchDarText} = this.state;
+      const { darLimit, searchDarText } = this.state;
       const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
       const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
       const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
 
       return (
         div({}, [
-          div({className: 'row no-margin'}, [
-            div({className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding'},
+          div({ className: 'row no-margin' }, [
+            div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' },
               [
                 PageSubHeading({
                   id: 'chairConsoleAccess',
@@ -146,7 +146,7 @@ export const DataAccessRequestReviewTable = hh(
                 }),
               ]),
             div(
-              {className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding'},
+              { className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding' },
               [
                 h(SearchBox,
                   {
@@ -157,13 +157,13 @@ export const DataAccessRequestReviewTable = hh(
                   }),
               ]),
           ]),
-          div({className: 'jumbotron table-box'}, [
-            div({className: 'row no-margin'}, [
-              div({className: twoColumnClass + ' cell-header access-color'},
+          div({ className: 'jumbotron table-box' }, [
+            div({ className: 'row no-margin' }, [
+              div({ className: twoColumnClass + ' cell-header access-color' },
                 ['Data Request Id']),
-              div({className: threeColumnClass + ' cell-header access-color'},
+              div({ className: threeColumnClass + ' cell-header access-color' },
                 ['Project Title']),
-              div({className: twoColumnClass + ' cell-header access-color'},
+              div({ className: twoColumnClass + ' cell-header access-color' },
                 ['DAC']),
               div({
                 className: twoColumnClass +
@@ -190,15 +190,15 @@ export const DataAccessRequestReviewTable = hh(
               ]),
             ]),
 
-            hr({className: 'table-head-separator'}),
+            hr({ className: 'table-head-separator' }),
 
             this.state.electionsList.access.filter(
               this.searchTable(searchDarText))
               .slice((this.state.currentDarPage - 1) * darLimit,
                 this.state.currentDarPage * darLimit)
               .map((pendingCase, rIndex) => {
-                return h(Fragment, {key: rIndex}, [
-                  div({className: 'row no-margin tableRowAccess'}, [
+                return h(Fragment, { key: rIndex }, [
+                  div({ className: 'row no-margin tableRowAccess' }, [
                     div({
                       id: pendingCase.frontEndId,
                       name: 'darId',
@@ -235,7 +235,7 @@ export const DataAccessRequestReviewTable = hh(
                           isRendered: (pendingCase.alreadyVoted === false) &&
                               (pendingCase.electionStatus !== 'Final'),
                         }, ['Vote']),
-                        span({isRendered: pendingCase.alreadyVoted === true},
+                        span({ isRendered: pendingCase.alreadyVoted === true },
                           ['Edit']),
                       ]),
                     ]),
@@ -284,7 +284,7 @@ export const DataAccessRequestReviewTable = hh(
                           ' cell-body text f-center empty',
                     }, []),
                   ]),
-                  hr({className: 'table-body-separator'}),
+                  hr({ className: 'table-body-separator' }),
                 ]);
               }),
             PaginatorBar({
