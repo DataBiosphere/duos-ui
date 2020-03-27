@@ -125,7 +125,7 @@ export const DataAccessRequestReviewTable = hh(
       this.props.history.push(`access_collect/${electionId}/${referenceId}`);
     };
 
-    makeTableCell = (id, name, classPrefix, title, value) => {
+    tableCell = (id, name, classPrefix, title, value) => {
       return div({
         id: id,
         name: name,
@@ -209,21 +209,21 @@ export const DataAccessRequestReviewTable = hh(
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowAccess' }, [
 
-                    this.makeTableCell(
+                    this.tableCell(
                       pendingCase.frontEndId,
                       'darId',
                       twoColumnClass,
                       pendingCase.frontEndId,
                       pendingCase.frontEndId
                     ),
-                    this.makeTableCell(
+                    this.tableCell(
                       pendingCase.frontEndId + '_projectTitle',
                       'projectTitle',
                       threeColumnClass,
                       pendingCase.projectTitle,
                       pendingCase.projectTitle
                     ),
-                    this.makeTableCell(
+                    this.tableCell(
                       pendingCase.frontEndId + '_dacName',
                       'dacName',
                       twoColumnClass,
@@ -258,7 +258,7 @@ export const DataAccessRequestReviewTable = hh(
                           ' cell-body text f-center empty',
                     }, []),
 
-                    this.makeTableCell(
+                    this.tableCell(
                       pendingCase.frontEndId + '_logged',
                       'loggedAccess',
                       oneColumnClass + " f-center ",
