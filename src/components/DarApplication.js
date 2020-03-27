@@ -1,8 +1,9 @@
 import React from 'react';
-import { div, span, a, i, hh } from "react-hyperscript-helpers";
+import { div, span, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Files } from '../libs/ajax';
 import { AppSummary } from './AppSummary';
+import { DownloadLink } from './DownloadLink';
 
 const SECTION = {
   fontFamily: 'Montserrat',
@@ -21,11 +22,6 @@ const HEADER_BOLD = {
   fontWeight: Theme.font.weight.semibold,
 };
 
-const ICON = {
-  color: Theme.palette.link,
-  marginRight: '6px',
-};
-
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
 
   downloadDAR = () => {
@@ -33,20 +29,17 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, election, consentElection } = this.props;
+    const { voteAsChair, darInfo, election, consent } = this.props;
     return div([
       div({ id: 'header', style: SECTION }, [
         div({ style: { minWidth: '50%' } }, [
           span({ style: HEADER_BOLD }, darInfo.projectTitle),
           span({ style: HEADER }, " | " + darInfo.darCode)
         ]),
-        a({ id: 'download-dar', onClick: this.downloadDAR }, [
-          i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-          'Full Application'
-        ])
+        DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
       ]),
       div({ id: 'votes-summary', isRendered: voteAsChair }),
-      AppSummary({ darInfo, election, consentElection })
+      AppSummary({ darInfo, election, consent })
     ]);
   }
 });
