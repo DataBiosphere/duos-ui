@@ -113,12 +113,10 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: npm install --silent
       - save_cache:
-          key: deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
+          key: deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
           paths:
             - ~/.npm
       - run: npm test
@@ -128,9 +126,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -148,9 +144,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: cp config/staging.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -169,9 +163,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - attach_workspace:
           at: .
       - push-env:
@@ -194,9 +186,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}
-            - deps2-{{ checksum "package.json" }}-
-            - deps2-
+            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - attach_workspace:
           at: .
       - push-env:
@@ -238,7 +228,7 @@ workflows:
             - test
           filters:
             branches:
-              only: develop
+              only: /.*/
       - deploy-dev:
           requires:
             - build-dev
