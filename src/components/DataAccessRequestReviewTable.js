@@ -17,12 +17,11 @@ export const DataAccessRequestReviewTable = hh(
       this.state = {
         showModal: false,
         currentUser: {},
-        darLimit: 5,
-        currentDarPage: 1,
+        pageLimit: 5,
+        currentPage: 1,
         totalAccessPendingVotes: 0,
-        electionsList: {
-          access: [],
-        },
+        darList: [],
+        searchText: null
       };
     }
 
@@ -47,7 +46,7 @@ export const DataAccessRequestReviewTable = hh(
             },
           );
           this.setState(prev => {
-            prev.electionsList.access = dars;
+            prev.darList = dars;
             prev.totalAccessPendingVotes = totalAccessPendingVotes;
             return prev;
           });
@@ -63,28 +62,30 @@ export const DataAccessRequestReviewTable = hh(
       this.setState({ showModal: false });
     };
 
-    handleAccessPageChange = page => {
+    handlePageChange = page => {
       this.setState(prev => {
-        prev.currentDarPage = page;
+        prev.currentPage = page;
         return prev;
       });
     };
 
-    handleAccessSizeChange = size => {
+    handlePageSizeChange = size => {
       this.setState(prev => {
-        prev.darLimit = size;
-        prev.currentDarPage = 1;
+        prev.pageLimit = size;
+        prev.currentPage = 1;
         return prev;
       });
     };
 
-    handleSearchDar = (query) => {
-      this.setState({ searchDarText: query });
+    handleSearch = (query) => {
+      this.setState({ searchText: query });
     };
 
     searchTable = (query) => (row) => {
+      const searchFields = ['frontEndId', 'dac', 'projectTitle'];
       if (query) {
-        let text = JSON.stringify(row);
+        const searchObj = _.pick(row, searchFields);
+        let text = JSON.stringify(searchObj);
         return text.toLowerCase().includes(query.toLowerCase());
       }
       return true;
@@ -136,7 +137,7 @@ export const DataAccessRequestReviewTable = hh(
 
     render() {
 
-      const { darLimit, searchDarText } = this.state;
+      const { pageLimit, searchText } = this.state;
       const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
       const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
       const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
@@ -159,9 +160,9 @@ export const DataAccessRequestReviewTable = hh(
               [
                 h(SearchBox,
                   {
-                    id: 'chairConsoleAccess',
-                    searchHandler: this.handleSearchDar,
-                    pageHandler: this.handleAccessPageChange,
+                    id: 'DataAccessRequestReviewTable',
+                    searchHandler: this.handleSearch,
+                    pageHandler: this.handlePageChange,
                     color: 'access',
                   }),
               ]),
@@ -201,10 +202,10 @@ export const DataAccessRequestReviewTable = hh(
 
             hr({ className: 'table-head-separator' }),
 
-            this.state.electionsList.access.filter(
-              this.searchTable(searchDarText))
-              .slice((this.state.currentDarPage - 1) * darLimit,
-                this.state.currentDarPage * darLimit)
+            this.state.darList.filter(
+              this.searchTable(searchText))
+              .slice((this.state.currentPage - 1) * pageLimit,
+                this.state.currentPage * pageLimit)
               .map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowAccess' }, [
@@ -304,12 +305,11 @@ export const DataAccessRequestReviewTable = hh(
               }),
             PaginatorBar({
               name: 'access',
-              total: this.state.electionsList.access.filter(
-                this.searchTable(searchDarText)).length,
-              limit: darLimit,
-              currentPage: this.state.currentDarPage,
-              onPageChange: this.handleAccessPageChange,
-              changeHandler: this.handleAccessSizeChange,
+              total: this.state.darList.filter(this.searchTable(searchText)).length,
+              limit: pageLimit,
+              currentPage: this.state.currentPage,
+              onPageChange: this.handlePageChange,
+              changeHandler: this.handlePageSizeChange,
             }),
           ]),
         ],
