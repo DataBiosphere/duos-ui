@@ -125,6 +125,15 @@ export const DataAccessRequestReviewTable = hh(
       this.props.history.push(`access_collect/${electionId}/${referenceId}`);
     };
 
+    makeTableCell = (id, name, classPrefix, title, value) => {
+      return div({
+        id: id,
+        name: name,
+        className: classPrefix + ' cell-body text',
+        title: title,
+      }, [value]);
+    };
+
     render() {
 
       const { darLimit, searchDarText } = this.state;
@@ -199,24 +208,28 @@ export const DataAccessRequestReviewTable = hh(
               .map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowAccess' }, [
-                    div({
-                      id: pendingCase.frontEndId,
-                      name: 'darId',
-                      className: twoColumnClass + ' cell-body text',
-                      title: pendingCase.frontEndId,
-                    }, [pendingCase.frontEndId]),
-                    div({
-                      id: pendingCase.frontEndId + '_projectTitle',
-                      name: 'projectTitle',
-                      className: threeColumnClass + ' cell-body text',
-                      title: pendingCase.projectTitle,
-                    }, [pendingCase.projectTitle]),
-                    div({
-                      id: pendingCase.frontEndId + '_dacName',
-                      name: 'dacName',
-                      className: twoColumnClass + ' cell-body text',
-                      title: _.get(pendingCase, 'dac.name', ''),
-                    }, [_.get(pendingCase, 'dac.name', '- -')]),
+
+                    this.makeTableCell(
+                      pendingCase.frontEndId,
+                      'darId',
+                      twoColumnClass,
+                      pendingCase.frontEndId,
+                      pendingCase.frontEndId
+                    ),
+                    this.makeTableCell(
+                      pendingCase.frontEndId + '_projectTitle',
+                      'projectTitle',
+                      threeColumnClass,
+                      pendingCase.projectTitle,
+                      pendingCase.projectTitle
+                    ),
+                    this.makeTableCell(
+                      pendingCase.frontEndId + '_dacName',
+                      'dacName',
+                      twoColumnClass,
+                      _.get(pendingCase, 'dac.name', ''),
+                      _.get(pendingCase, 'dac.name', '- -')
+                    ),
                     div({
                       isRendered: pendingCase.electionStatus !== 'Final',
                       className: twoColumnClass + ' cell-body f-center',
@@ -245,11 +258,13 @@ export const DataAccessRequestReviewTable = hh(
                           ' cell-body text f-center empty',
                     }, []),
 
-                    div({
-                      id: pendingCase.frontEndId + '_logged',
-                      name: 'loggedAccess',
-                      className: oneColumnClass + ' cell-body text f-center',
-                    }, [pendingCase.logged]),
+                    this.makeTableCell(
+                      pendingCase.frontEndId + '_logged',
+                      'loggedAccess',
+                      oneColumnClass + " f-center ",
+                      pendingCase.logged,
+                      pendingCase.logged
+                    ),
 
                     div({
                       isRendered: this.isAccessCollectEnabled(pendingCase),
