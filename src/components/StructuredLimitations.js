@@ -1,9 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, span, a, i, hh } from "react-hyperscript-helpers";
+import { div, span, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
-import { Files } from '../libs/ajax';
-import { download } from '../libs/utils';
+import { DownloadLink } from './DownloadLink';
 
 const ROOT = {
   fontFamily: 'Montserrat',
@@ -30,43 +29,7 @@ const BOLD = {
   fontWeight: Theme.font.weight.semibold,
 };
 
-const ICON = {
-  color: Theme.palette.link,
-  marginRight: '6px',
-};
-
 export const StructuredLimitations = hh(class StructuredLimitations extends React.PureComponent {
-  /**
-   * converts the given string to the desired use restrictions object
-   * this will be deleted once we implement returning the JSON object from the API
-   */
-  toObject = content => {
-    const lines = content.split('\n');
-    lines.shift(); // gets rid of that "Samples are restricted..." line
-    const formatObject = {
-      primary: [],
-      secondary: []
-    };
-
-    lines.forEach(line => {
-      let code, description;
-      const { primary, secondary } = formatObject;
-      const primaryCodes = ["NRES", "GRU", "HMB", "DS", "POA"];
-      if (line.includes('[')) {
-        // separate code between brackets from rest of statement
-        const arr = line.split(' [');
-        code = arr[1].substring(0, arr[1].indexOf(']')); // text between brackets
-        description = arr[0];
-        primaryCodes.includes(code) ? primary.push({ code, description }) : secondary.push({ code, description });
-      } else {
-        code = null;
-        description = line;
-        secondary.push({ code, description });
-      }
-    });
-    return formatObject;
-  };
-
   /**
    * takes a JSON object of the structure { primary: [...], secondary: [...] } and returns HTML elements
    */
@@ -80,47 +43,28 @@ export const StructuredLimitations = hh(class StructuredLimitations extends Reac
             span({ style: BOLD }, code === null ? '' : code + ' '),
             span({ style: TEXT }, [description, '\n'])]);
         });
-        return span({ style: BOLD, key }, [`${_.startCase(key)}:\n`, listRestrictions]);
+        return div({ style: { ...BOLD, margin: '8px 0px' }, key }, [`${_.startCase(key)}:\n`, listRestrictions]);
       };
     });
     return formatted;
   };
 
   /**
-   * downloads the data use letter for this dataset
+   * renders the download links passed in as props
    */
-  downloadDUL = () => {
-    const { referenceId, dulName } = this.props.consentElection;
-    Files.getDulFile(referenceId, dulName);
+  makeLinks = (labels, functions) => {
+    return _.map(labels, (label, i) => {
+      return DownloadLink({ key: i, label, onDownload: functions[i] });
+    });
   };
 
   render() {
-    const { darInfo, consentElection } = this.props;
-    const mrDUL = JSON.stringify(consentElection.useRestriction, null, 2);
+    const { content, labels, functions } = this.props;
 
     return div({ style: ROOT }, [
       div({ style: HEADER }, 'Data Use Structured Limitations'),
-      div({ style: TEXT }, this.format(this.toObject(darInfo.structuredLimitations))),
-      div({ style: { margin: '8px 0px' } }, [
-        a({
-          id: 'download-dul',
-          onClick: () => download('machine-readable-DUL.json', mrDUL)
-        },
-          [
-            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-            'DUL machine-readable format'
-          ])
-      ]),
-      div([
-        a({
-          id: 'download-letter',
-          onClick: () => this.downloadDUL()
-        },
-          [
-            i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-            'Data Use Letter'
-          ])
-      ])
+      div({ style: TEXT }, this.format(content)),
+      div(this.makeLinks(labels, functions)),
     ]);
   }
 });

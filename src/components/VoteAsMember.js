@@ -12,6 +12,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
     return div({ id: 'member-vote' }, [
       VoteQuestion({
         id: 'access-vote',
+        isRendered: vote,
         label: 'Question 1:',
         question: 'Should data access be granted to this applicant?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
