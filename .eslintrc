@@ -36,6 +36,7 @@
     "no-unreachable": "warn",
     "no-await-in-loop": "warn",
     "no-console": "warn",
-    "array-bracket-spacing": "warn"
+    "array-bracket-spacing": "warn",
+    "object-curly-spacing": ["warn", "always"]
   }
 }
