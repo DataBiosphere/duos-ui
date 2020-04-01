@@ -1889,3 +1889,21 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   background-color: rgba(0,96,159, 0.9);
   color: #ffffff;
 }
+
+/***************************************************Notifications*/
+
+.noty_theme__duos {
+  font-family: 'Montserrat';
+  padding: 10px;
+  color: #FFFFFF;
+  border-radius: 5px;
+  margin: 6px 0px;
+}
+
+.noty_type__error {
+  background-color: #DB3214;
+}
+
+.noty_type__success {
+  background-color: #00928A;
+}

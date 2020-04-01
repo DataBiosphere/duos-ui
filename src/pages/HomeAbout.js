@@ -1,5 +1,6 @@
 import { Component } from 'react';
-import { div, hr, h1, h3, p, img } from 'react-hyperscript-helpers';
+import { a, div, h, hr, h1, h3, p, span, img } from 'react-hyperscript-helpers';
+import Mailto from 'react-protected-mailto';
 
 // export const HomeAbout = hh(
 class HomeAbout extends Component {
@@ -7,33 +8,88 @@ class HomeAbout extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showModal: false
+      showModal: false,
     };
   }
 
   render() {
 
     return (
-      div({ className: "row home" }, [
-        div({ className: "col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
-          h1({ className: "home-title" }, ["Data Use Oversight System"]),
-          div({ className: "home-title-description" }, ["A semi-automated management service for compliant secondary use of human genomics data"]),
-          hr({ className: "home-line" }),
-          div({ className: "home-sections home-sections-table" }, [
-            img({ src: "/images/home_icon_about.svg", className: "home-sections-icon", alt: "About icon" }),
-            div({ className: "home-sections-title" }, [
-              h3({}, ["About"]),
-              p({ className: "home-sections-description" }, ["Overview of the system and development"]),
-              div({ className: "home-content" }, [
-                p({}, ["Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have restrictions such as “only available for cancer use” or “only available for the study of pediatric diseases,” deduced from the original biospecimen collection consent form, which must be respected when accessing data. So far, these data use restrictions have not yet been made machine readable, requiring the investment of significant human effort to enable researchers to reuse data."]),
-                p({}, ["As part of our efforts to enhance collaborative research, the Broad Institute has recently developed the “Data Use Oversight System” which is its first attempt to semi-automate and efficiently manage sharing of human subjects datasets. The goal of this system is to ensure that data use restrictions are respected while also efficiently enabling appropriate data reuse."]),
-                p({}, ["The development of this system stemmed from the experience of the Broad’s Office of Research Subject Protection, project management teams, and researchers at Broad in sharing and reusing human subjects data as part of large scale aggregation efforts. One such example is the Exome Aggregation Consortium (ExAC) in which 26 researchers collaborated and shared over 80 human subjects datasets to perform aggregated analysis of >90K exomes, resulting in a valuable resource for clinical interpretation of genomic data . A major challenge to that effort, however, was managing secondary data use restrictions; data use oversight across dozens of datasets is not automated and does not scale."]),
-                p({}, ["To overcome this challenge and enable efficient discovery and reuse of existing human subjects datasets in future projects, we developed a software service that attempts to mimic, in an automated fashion, the data oversight process currently in place at dbGAP. To this end, the system includes interfaces to capture and transform data use restrictions and data access requests to machine readable consent codes ( MRCC; most of which are included in Dyke et al. 2015 ) . These codes were defined based on reviewing ~200 data use restrictions at Broad. The system triggers a matching algorithm that uses Web Ontology Language (OWL) and the MRCC to reason whether data access should be granted given the research purpose and the data restrictions.. The algorithm also identifies cases where manual review by a data access committee (DAC) is required. It automatically triggers this process and provides interfaces for the DAC to efficiently evaluate data access requests online."]),
-                p({}, ["To evaluate the feasibility of using consent codes to manage secondary data use restrictions, we recently launched a pilot trial of the system that is overseen by Partners’ Healthcare IRB. During this pilot, a DAC comprised of experts in data use oversight (from the NIH, Partners’ IRB, Sage Bionetworks and Broad) will evaluate data access requests in parallel with our system. This will allow us to improve the algorithm and the consent codes using experts’ feedback."])
+      div({className: 'row home'}, [
+        div(
+          {className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12'},
+          [
+            h1({className: 'home-title'}, ['Data Use Oversight System']),
+            hr({className: 'home-line'}),
+            div({className: 'home-sections home-sections-table'}, [
+              img({
+                src: '/images/home_icon_about.svg',
+                className: 'home-sections-icon',
+                alt: 'About icon',
+              }),
+              div({className: 'home-sections-title'}, [
+                h3({}, ['DUOS']),
+                p({className: 'home-sections-description'},
+                  ['A semi-automated management service for compliant secondary use of human genomics data']),
+                div({className: 'home-content'}, [
+                  p({},
+                    ['Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.']),
+                  p({},
+                    ['As part of our efforts to enhance collaborative research, the Broad Institute developed the “Data Use Oversight System” (DUOS) to semi-automate and efficiently manage compliant sharing of human subjects data. DUOS\' objective is two-fold, to enhance data access committee\'s confidence that data use restrictions are respected while efficiently enabling appropriate data access.']),
+                  p({},
+                    ['To better enable the use of existing human subjects datasets in future projects, DUOS mimics, in a semi-automated fashion, the data access request review processes common to DACs globally, like those in dbGaP. To this end, the system includes interfaces to capture and structure data use restrictions and data access requests as machine-readable data use terms based on the GA4GH\'s Data Use Ontology. With these machine-readable terms for dataset\'s use limitations and data access requests established, DUOS is able to trigger a matching algorithm to reason if data access should be granted given the research purpose and the data restrictions, serving as a decision support tool for DACs using DUOS.']),
+                  p({},
+                    ['To evaluate the feasibility of using machine readable data use terms to interpret data use restrictions and access requests, we are piloting a trial of DUOS overseen by Partners’ Healthcare IRB. During the pilot, DACs comprised of governmental and non-governmental data custodians will pilot the use of DUOS, its ability to structure use limitations and access requests, and the accuracy of the DUOS algorithm. This aids us in improving the DUOS algorithm and providing feedback on the GA4GH Data Use Ontology based on experts’ feedback.']),
+                ]),
+
+                div({className: 'home-content'}, [
+                  h3({}, ['Library Card']),
+                  p({className: 'home-sections-description'},
+                    ['An innovative and simplified approach to data access agreements']),
+                  p({},
+                    ['Currently, when a researcher makes a data access request they are not only required to obtain approval from the data access committee (DAC) which oversees the data, but also from their home instiution\'s Signing Official, who approves their request and acknowledges the acceptance of organizational liability in the case of data misuse. Estimates show Signing Officials were required to approve at least 50,000 DARs in 2019 in the US. Based on feedback from numerous Signing Officials we understand Signing Officials primary concern in the approval of data access requests (DARs) to be primarily an endorsement or authorization of the researcher, rather than the proposed research.']),
+                  img({
+                    src: '/images/lc-only-process.png',
+                    className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic',
+                    alt: 'About icon',
+                  }),
+                  p({},
+                    ['To alleviate this burden on Signing Officials, DUOS is offering Signing Offficals the opportunity to pre-authorize researchers to submit DARs to DACs using DUOS, via our DUOS Library Card Agreement. This agreement allows a Signing Official to pre-authorize researchers from their instutions for a 1 year renewable term.']),
+                  div({style: { marginTop: '2rem', marginBottom: '2rem' },},
+                    [a({
+                      id: 'link_downloadAgreement',
+                      href: 'DUOS_LibraryCardAgreementTemplate_3.28.20.pdf',
+                      target: '_blank',
+                      className: 'btn-secondary btn-download-pdf hover-color',
+                      style: { paddingBottom: '1rem' },
+                    }, [
+                      span({className: 'glyphicon glyphicon-download'}),
+                      'Download DUOS Library Card Agreement'])
+                    ]),
+                ]),
+                p({style: {fontWeight: '500'}}, [
+                  'To issue your researchers this Library Card pre-authorization, please sign and send the DUOS Library Card Agreement (above) along with a list of the first and last name, and eRA Commmons ID of each researcher you will issue this privilege, to: ',
+                  h(Mailto, {email: 'DUOS-support@broadinstitute.zendesk.com'}),
+                  p({style: {fontWeight: '400'}},
+                    ['Please note, this agreement is non-negotiable.']),
+                  div({className: 'home-content'}, [
+                    h3({}, ['DUOS & Library Card']),
+                    p({className: 'home-sections-description'},
+                      ['Bringing the two together for a data access revolution']),
+                    p({style: {fontWeight: '400'}},
+                      ['The current data access request process incurs delays from and unncessary burden on Signing Officials and is further slowed by providing data access committees (DACs) with ambiguous and non-compatible terms which they are obligated to interpret and evaluate to maintain compliance.']),
+                    img({
+                      src: '/images/duos-lc-process.png',
+                      className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic',
+                      alt: 'About icon',
+                    }),
+                    p({style: {fontWeight: '450'}},
+                      ['Combined, the DUOS Library Card Agreement and DUOS system significantly alleviate the burden of work on Signing Officials and DACs while enhancing their compliant function and expediting appropriate access for researchers. ']),
+                  ]),
+                ]),
               ]),
             ]),
           ]),
-        ]),
       ])
     );
   }
