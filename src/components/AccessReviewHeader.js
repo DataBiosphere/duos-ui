@@ -1,5 +1,5 @@
 import React from 'react';
-import { div, button, hh } from "react-hyperscript-helpers";
+import { div, button, img, hh } from "react-hyperscript-helpers";
 import { Theme } from '../libs/theme';
 import { Storage } from "../libs/storage";
 import { Navigation } from "../libs/utils";
@@ -55,12 +55,12 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
             }
           },
           [
-            div({
+            img({
               id: 'lock-icon',
+              src: '/images/lock-icon.png',
               style: {
-                width: '50px',
-                height: '50px',
-                backgroundColor: '#eeeeee',
+                width: '60px',
+                height: '60px',
                 marginRight: '16px'
               }
             }),
