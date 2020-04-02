@@ -6,7 +6,9 @@ executors:
       - image: google/cloud-sdk
   node:
     docker:
-      - image: circleci/node:13
+      - image: cypress/base:10.16.3
+        environment:
+          TERM: xterm
 
 commands:
   push-env:
@@ -113,20 +115,30 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run: npm install --silent
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run: npm run cypress:verify
+      - run: cp config/dev.json public/config.json
+      - run: CI=false npm run build --silent
       - save_cache:
-          key: deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
           paths:
             - ~/.npm
-      - run: npm test
+            - ~/.cache
+      - run:
+          name: Start server
+          command: npx http-server ./build -p 3000
+          background: true
+      - run: npm run cypress:run
   build-dev:
     executor: node
     steps:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: cp config/dev.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -144,7 +156,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: cp config/staging.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
@@ -163,7 +175,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - attach_workspace:
           at: .
       - push-env:
@@ -186,7 +198,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - deps2-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - attach_workspace:
           at: .
       - push-env:
