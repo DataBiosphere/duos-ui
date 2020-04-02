@@ -1603,7 +1603,7 @@ class DataAccessRequestApplication extends Component {
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                       label({ className: 'control-label rp-title-question' }, [
-                        '4.1 Data Access Agreement',
+                        '4.1 DUOS Library Card Data Access Agreement',
                         div({ isRendered: this.state.formData.checkCollaborator !== true, className: 'display-inline' }, ['*']),
                         div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)'])
                       ])
@@ -1612,44 +1612,24 @@ class DataAccessRequestApplication extends Component {
                     div({ className: 'row no-margin' }, [
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                         label({ className: 'control-label default-color' },
-                          ['1. Download the Data Access Agreement template and have your organization\'s Signing Official sign it'])
+                          ['By submitting this data access request, you agree to comply with all terms relevant to Authorized Users put forth in the agreement.'])
                       ]),
 
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                         a({
-                          id: 'link_downloadAgreement', href: 'BroadDataAccessAgreement.pdf', target: '_blank',
+                          id: 'link_downloadAgreement', href: 'DUOS_LibraryCardAgreementTemplate_3.28.20_PIaacknowledgement.pdf', target: '_blank',
                           className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                         }, [
                           span({ className: 'glyphicon glyphicon-download' }),
-                          'Download Agreement Template'
+                          'DUOS Library Card Agreement'
                         ])
                       ]),
 
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                        label({ className: 'control-label default-color' },
-                          ['2. Upload your template of the Data Access Agreement signed by your organization\'s Signing Official']),
                         p({ className: 'rp-agreement' },
-                          ['By uploading and submitting the Data Access Agreement with your Data Access Request application you agree to comply with all terms put forth in the agreement.'])
-                      ]),
-
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                        div({
-                          style: { paddingTop: 7 },
-                          className: 'fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                        }, [
-                          span({ className: 'glyphicon glyphicon-upload' }),
-                          'Upload S.O. Signed Agreement',
-                          input({ id: 'uploadFile', type: 'file', onChange: this.handleFileChange, className: 'upload', required: true })
-                        ])
-                      ]),
-                      p({ id: 'txt_uploadFile', className: 'fileName daa', isRendered: this.state.file.name !== '' || this.state.formData.nameDAA }, [
-                        'Your currently uploaded Data Access Agreement: ',
-                        span({ className: 'italic normal' }, [this.state.file.name !== '' ? this.state.file.name : this.state.formData.nameDAA])
-                      ]),
-                      span({
-                        className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span',
-                        isRendered: step4.uploadFile.invalid && showValidationMessages
-                      }, ['Required field'])
+                          ['For your request to be reviewed, your Signing Official must authorize you by sending a signed Library Card data access agreement']),
+                        a({ href: 'https://duos.broadinstitute.org/home_about', target: '_blank' }, '(instructions here)')
+                      ])
                     ]),
 
                     div({ className: 'row no-margin' }, [
