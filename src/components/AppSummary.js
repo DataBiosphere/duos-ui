@@ -24,8 +24,8 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
    * downloads the data use letter for this dataset
    */
   downloadDUL = () => {
-    const { referenceId, dulName } = this.props.consent;
-    Files.getDulFile(referenceId, dulName);
+    const { consentId, dulName } = this.props.consent;
+    Files.getDulFile(consentId, dulName);
   };
 
   render() {
