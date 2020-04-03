@@ -251,22 +251,18 @@ workflows:
           requires:
             - test
           filters:
-#            TODO: Revert these changes when functionality is complete
-#            tags:
-#              only: /^staging.*/
+            tags:
+              only: /^staging.*/
             branches:
-#              ignore: /.*/
-              only: DUOS-462
+              ignore: /.*/
       - deploy-staging:
           requires:
             - build-staging
           filters:
-#            TODO: Revert these changes when functionality is complete
-#            tags:
-#              only: /^staging.*/
+            tags:
+              only: /^staging.*/
             branches:
-#              ignore: /.*/
-              only: DUOS-462
+              ignore: /.*/
       - deploy-production:
           filters:
             tags:
