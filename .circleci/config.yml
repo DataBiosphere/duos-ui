@@ -50,8 +50,9 @@ commands:
             docker build -t ${APPLICATION_NAME} .
             docker tag ${APPLICATION_NAME} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
-            docker push gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
-            gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${ENV} -q
+#            TODO: Update duos-deploy with these changes as well
+            docker push gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}-${ENV}
+            gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} -q
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:latest -q
   deploy-env:
     description: "Deploy commit to GCR"
@@ -251,18 +252,22 @@ workflows:
           requires:
             - test
           filters:
-            tags:
-              only: /^staging.*/
+#            TODO: Revert these changes when functionality is complete
+#            tags:
+#              only: /^staging.*/
             branches:
-              ignore: /.*/
+#              ignore: /.*/
+              only: DUOS-462
       - deploy-staging:
           requires:
             - build-staging
           filters:
-            tags:
-              only: /^staging.*/
+#            TODO: Revert these changes when functionality is complete
+#            tags:
+#              only: /^staging.*/
             branches:
-              ignore: /.*/
+#              ignore: /.*/
+              only: DUOS-462
       - deploy-production:
           filters:
             tags:

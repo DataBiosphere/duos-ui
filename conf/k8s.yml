@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: ${APPLICATION_NAME}
-          image: gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
+          image: gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}-${ENV}
           imagePullPolicy: Always
       dnsPolicy: ClusterFirst
       restartPolicy: Always
