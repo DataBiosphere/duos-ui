@@ -48,9 +48,8 @@ commands:
           name: Docker build/push to GCR
           command: |
             docker build -t ${APPLICATION_NAME} .
-            docker tag ${APPLICATION_NAME} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
+            docker tag ${APPLICATION_NAME} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}-${ENV}
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
-#            TODO: Update duos-deploy with these changes as well
             docker push gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}-${ENV}
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} -q
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:latest -q
