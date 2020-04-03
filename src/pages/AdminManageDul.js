@@ -106,8 +106,18 @@ class AdminManageDul extends Component {
   };
 
   componentDidMount = async () => {
-    await this.getConsentManage();
     await this.getDACs();
+    await this.getConsentManage();
+    const updatedDulList = _.map(this.state.electionsList.dul, dul => {
+      if (dul.dacId !== null) {
+        dul.dac = _.findLast(this.state.dacList, (d) => { return d.dacId === dul.dacId; });
+      }
+      return dul;
+    });
+    this.setState(prev => {
+      prev.electionsList.dul = updatedDulList;
+      return prev;
+    });
   };
 
   removeDul = (consentId) => {
