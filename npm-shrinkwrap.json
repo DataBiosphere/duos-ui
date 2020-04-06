@@ -9042,7 +9042,7 @@
       "dependencies": {
         "acorn": {
           "version": "6.4.1",
-          "resolved": "https://registry.npmjs.org/acorn/-/acorn-5.7.4.tgz",
+          "resolved": "https://registry.npmjs.org/acorn/-/acorn-6.4.1.tgz",
           "integrity": "sha512-1D++VG7BhrtvQpNbBzovKNc1FLGGEE/oGe7b9xJm/RFHMBeUaUGpluV9RLjZa47YFdPcDAenEYuq9pQPcMdLJg=="
         }
       }
@@ -10096,7 +10096,7 @@
       "dependencies": {
         "minimist": {
           "version": "1.2.2",
-          "resolved": "https://registry.npmjs.org/minimist/-/minimist-0.0.8.tgz",
+          "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.2.tgz",
           "integrity": "sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0="
         }
       }
@@ -17084,7 +17084,7 @@
         },
         "yargs-parser": {
           "version": "13.1.2",
-          "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-11.1.1.tgz",
+          "resolved": "https://registry.npmjs.org/yargs-parser/-/yargs-parser-13.1.2.tgz",
           "integrity": "sha512-C6kB/WJDiaxONLJQnF8ccx9SEeoTTLek8RVbaOIsrAUS8VrBEXfmeSnCZxygc+XC2sNMBIwOOnfcxiynjHsVSQ==",
           "requires": {
             "camelcase": "^5.0.0",
