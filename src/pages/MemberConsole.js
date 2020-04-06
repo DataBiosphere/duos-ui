@@ -96,8 +96,8 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
-    const newDarUiEnabled = Config.getFeatureFlag('newDarUi');
+  openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
+    const newDarUiEnabled = await Config.getFeatureFlag('newDarUi');
     const pathStart = newDarUiEnabled ? "new_access_review" : "access_review";
     if (rpVoteId !== null) {
       this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
