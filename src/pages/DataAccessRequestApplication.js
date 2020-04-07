@@ -1617,7 +1617,7 @@ class DataAccessRequestApplication extends Component {
 
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                         a({
-                          id: 'link_downloadAgreement', href: 'DUOS_LibraryCardAgreementTemplate_3.28.20_PIaacknowledgement.pdf', target: '_blank',
+                          id: 'link_downloadAgreement', href: 'DUOS_LibraryCardAgreementTemplate_3.28.20_PIacknowledgement.pdf', target: '_blank',
                           className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                         }, [
                           span({ className: 'glyphicon glyphicon-download' }),
@@ -1628,7 +1628,7 @@ class DataAccessRequestApplication extends Component {
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                         p({ className: 'rp-agreement' },
                           ['For your request to be reviewed, your Signing Official must authorize you by sending a signed Library Card data access agreement']),
-                        a({ href: 'https://duos.broadinstitute.org/home_about', target: '_blank' }, '(instructions here)')
+                        a({ href: '/home_about', target: '_blank' }, '(instructions here)')
                       ])
                     ]),
 
