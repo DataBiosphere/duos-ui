@@ -264,6 +264,8 @@ workflows:
             branches:
               ignore: /.*/
       - deploy-production:
+          requires:
+            - test
           filters:
             tags:
               only: /^production.*/
