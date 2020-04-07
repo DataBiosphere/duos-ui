@@ -1,5 +1,6 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
+import { Config } from './config';
 
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
@@ -71,4 +72,11 @@ export const Notifications = {
       theme: 'duos',
     }).show();
   },
+};
+
+export const NavigationUtils = {
+  accessReviewPath: async () => {
+    const newDarUiEnabled = await Config.getFeatureFlag('newDarUi');
+    return newDarUiEnabled ? "new_access_review" : "access_review";
+  }
 };
