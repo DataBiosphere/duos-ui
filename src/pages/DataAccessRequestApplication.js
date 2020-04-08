@@ -458,21 +458,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   verifyStep4() {
-    let isDAAInvalid = false;
-    if (!this.isValid(this.state.file.name) && !this.state.formData.checkCollaborator) {
-      this.setState(prev => {
-        prev.step4.uploadFile.invalid = true;
-        prev.showValidationMessages = true;
-        return prev;
-      });
-      isDAAInvalid = true;
-    } else {
-      this.setState(prev => {
-        prev.step4.uploadFile.invalid = false;
-        return prev;
-      });
-    }
-    return isDAAInvalid;
+    return false;
   }
 
   verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
@@ -1603,9 +1589,7 @@ class DataAccessRequestApplication extends Component {
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                       label({ className: 'control-label rp-title-question' }, [
-                        '4.1 DUOS Library Card Data Access Agreement',
-                        div({ isRendered: this.state.formData.checkCollaborator !== true, className: 'display-inline' }, ['*']),
-                        div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)'])
+                        '4.1 DUOS Library Card Data Access Agreement'
                       ])
                     ]),
 
