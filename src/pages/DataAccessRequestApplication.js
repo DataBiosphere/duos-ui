@@ -458,21 +458,7 @@ class DataAccessRequestApplication extends Component {
   }
 
   verifyStep4() {
-    let isDAAInvalid = false;
-    if (!this.isValid(this.state.file.name) && !this.state.formData.checkCollaborator) {
-      this.setState(prev => {
-        prev.step4.uploadFile.invalid = true;
-        prev.showValidationMessages = true;
-        return prev;
-      });
-      isDAAInvalid = true;
-    } else {
-      this.setState(prev => {
-        prev.step4.uploadFile.invalid = false;
-        return prev;
-      });
-    }
-    return isDAAInvalid;
+    return false;
   }
 
   verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
