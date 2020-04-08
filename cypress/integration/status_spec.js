@@ -15,9 +15,8 @@ describe('Status', function() {
     cy.contains('Status').click();
     headers.forEach((h) => {
       cy.contains(h).parent().children().next('svg')
-        .should('have.class', 'rmi-checkbox-marked-circle-outline');
-      cy.contains(h).parent().children().next('svg')
-        .should('have.attr', 'fill', 'green');
+        .should('have.attr', 'fill')
+        .and('match', /(red|green)/);
     });
   });
 
