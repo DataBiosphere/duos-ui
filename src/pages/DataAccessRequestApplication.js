@@ -10,6 +10,7 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { TypeOfResearch } from './dar_application/TypeOfResearch';
 
 import './DataAccessRequestApplication.css';
 
@@ -35,25 +36,25 @@ class DataAccessRequestApplication extends Component {
       completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
-      step: 1,
+      step: 2,
       formData: {
         datasets: [],
         dar_code: null,
         checkCollaborator: false,
         rus: '',
         non_tech_rus: '',
-        other: '',
-        othertext: '',
         linkedIn: '',
         orcid: '',
-        ontologies: [],
         onegender: '',
-        diseases: '',
         methods: '',
         controls: '',
         population: '',
-        hmb: '',
-        poa: '',
+        hmb: false,
+        poa: false,
+        diseases: false,
+        ontologies: [],
+        other: false,
+        othertext: '',
         forProfit: '',
         gender: '',
         pediatric: '',
@@ -616,14 +617,6 @@ class DataAccessRequestApplication extends Component {
     }
   }
 
-
-  onOntologiesChange = (data, action) => {
-    this.setState(prev => {
-      prev.formData.ontologies = data;
-      return prev;
-    });
-  };
-
   onDatasetsChange = (data, action) => {
     this.setState(prev => {
       prev.formData.datasets = data;
@@ -645,20 +638,70 @@ class DataAccessRequestApplication extends Component {
 
   };
 
-  searchOntologies(query, callback) {
-    let options = [];
-    DAR.getAutoCompleteOT(query).then(
-      items => {
-        options = items.map(function(item) {
-          return {
-            key: item.id,
-            value: item.id,
-            label: item.label,
-            item: item
-          };
-        });
-        callback(options);
-      });
+  setHmb = () => {
+    this.setState(prev => {
+      prev.formData.hmb = true;
+      prev.formData.poa = false;
+      prev.formData.diseases = false;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      prev.ontologies = [];
+      return prev;
+    });
+  };
+
+  setPoa = () => {
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = true;
+      prev.formData.diseases = false;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      prev.ontologies = [];
+      return prev;
+    });
+  };
+
+  setDiseases = () => {
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = false;
+      prev.formData.diseases = true;
+      prev.formData.other = false;
+      prev.formData.othertext = '';
+      return prev;
+    });
+  };
+
+  onOntologiesChange = (data) => {
+    this.setState(prev => {
+      prev.ontologies = data;
+      return prev;
+    });
+  };
+
+  setOther = () => {
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = false;
+      prev.formData.diseases = false;
+      prev.formData.other = true;
+      prev.ontologies = [];
+      return prev;
+    });
+  };
+
+  setOtherText = (e) => {
+    const value = e.target.value;
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = false;
+      prev.formData.diseases = false;
+      prev.formData.other = true;
+      prev.formData.othertext = value;
+      prev.ontologies = [];
+      return prev;
+    });
   };
 
   back = (e) => {
@@ -670,19 +713,23 @@ class DataAccessRequestApplication extends Component {
     const {
       orcid = '',
       researcherGate = '',
-      othertext = '',
       checkCollaborator = false,
-      other = false,
-      poa = false,
+      dar_code,
       hmb = false,
+      poa = false,
+      diseases = false,
+      other = false,
+      othertext = '',
       population = false,
       forProfit = false,
       controls = false,
       methods = false,
-      diseases = false,
       linkedIn = '',
       investigator = ''
     } = this.state.formData;
+    const { ontologies } = this.state;
+
+    console.log("Form Data before returning from render: " + JSON.stringify(this.state.formData));
 
     const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3, step4 } = this.state;
 
@@ -1032,149 +1079,21 @@ class DataAccessRequestApplication extends Component {
                     div(
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: hmb,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkHmb',
-                            type: 'checkbox',
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'hmb',
-                            disabled: (this.state.formData.dar_code !== null),
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkHmb',
-                          }, [
-                            span({},
-                              ['2.3.1 Health/medical/biomedical research: ']),
-                            'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
-                          ]),
-                        ]),
-                      ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: poa,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkPoa',
-                            type: 'checkbox',
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'poa',
-                            disabled: (this.state.formData.dar_code !== null),
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkPoa',
-                          }, [
-                            span({},
-                              ['2.3.2 Population origins or ancestry research: ']),
-                            'The outcome of this study is expected to provide new knowledge about the origins of a certain population or its ancestry.',
-                          ]),
-                        ]),
-                      ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: diseases,
-                            onChange: this.handleCheckboxChange,
-                            name: 'diseases',
-                            id: 'checkDiseases',
-                            type: 'checkbox',
-                            className: 'checkbox-inline rp-checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkDiseases',
-                          }, [
-                            span({}, ['2.3.3 Disease-related studies: ']),
-                            'The primary purpose of the research is to learn more about a particular disease or disorder (e.g., type 2 diabetes), a trait (e.g., blood pressure), or a set of related conditions (e.g., autoimmune diseases, psychiatric disorders).',
-                          ]),
-                        ]),
-                      ]),
-
-                    div({className: 'form-group'}, [
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          label({className: 'control-label rp-title-question'},
-                            [
-                              span({},
-                                ['If you selected Disease-related Studies, please select the disease area(s) this study focuses on in the box below.']),
-                            ]),
-                        ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group'},
-                        [
-                          h(AsyncSelect, {
-                            id: 'sel_diseases',
-                            isDisabled: this.state.formData.dar_code !== null,
-                            isMulti: true,
-                            loadOptions: (
-                              query, callback) => this.searchOntologies(query,
-                              callback),
-                            onChange: (option) => this.onOntologiesChange(
-                              option),
-                            value: this.state.formData.ontologies,
-                            placeholder: 'Please enter one or more diseases',
-                            className: 'select-autocomplete',
-                            classNamePrefix: 'select',
-                          }),
-                        ]),
-                    ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: other,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkOther',
-                            type: 'checkbox',
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'other',
-                            disabled: (this.state.formData.dar_code !== null),
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkOther',
-                          }, [span({}, ['2.3.4 Other:'])]),
-                        ]),
-                      ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-
-                        textarea({
-                          value: othertext,
-                          onChange: this.handleChange,
-                          name: 'othertext',
-                          id: 'inputOtherText',
-                          maxLength: '512',
-                          rows: '2',
-                          required: this.state.formData.other,
-                          className: step2.inputOther.invalid &&
-                          this.state.formData.other && showValidationMessages ?
-                            ' required-field-error form-control' :
-                            'form-control',
-                          placeholder: 'Please specify if selected (max. 512 characters)',
-                          disabled: this.state.formData.dar_code !== null ||
-                            this.state.formData.other !== true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: step2.inputOther.invalid &&
-                            this.state.formData.other && showValidationMessages,
-                        }, ['Required field']),
+                        TypeOfResearch({
+                          hmb: hmb,
+                          hmbHandler: this.setHmb,
+                          poa: poa,
+                          poaHandler: this.setPoa,
+                          diseases: diseases,
+                          diseasesHandler: this.setDiseases,
+                          disabled: (dar_code !== null),
+                          ontologies: ontologies,
+                          ontologiesHandler: this.onOntologiesChange,
+                          other: other,
+                          otherHandler: this.setOther,
+                          otherText: othertext,
+                          otherTextHandler: this.setOtherText
+                        })
                       ]),
 
                     div({className: 'form-group'}, [
