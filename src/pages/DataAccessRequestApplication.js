@@ -36,7 +36,7 @@ class DataAccessRequestApplication extends Component {
       completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
-      step: 2,
+      step: 1,
       formData: {
         datasets: [],
         dar_code: null,
@@ -54,7 +54,7 @@ class DataAccessRequestApplication extends Component {
         diseases: false,
         ontologies: [],
         other: false,
-        othertext: '',
+        otherText: '',
         forProfit: '',
         gender: '',
         pediatric: '',
@@ -279,9 +279,6 @@ class DataAccessRequestApplication extends Component {
     const field = e.target.name;
     const value = e.target.checked;
     this.setState(prev => {
-      if (field === 'other' && value === false) {
-        prev.formData.othertext = '';
-      }
       prev.formData[field] = value;
       return prev;
     }, () => this.checkValidations());
@@ -668,7 +665,7 @@ class DataAccessRequestApplication extends Component {
       prev.formData.poa = false;
       prev.formData.diseases = true;
       prev.formData.other = false;
-      prev.formData.othertext = '';
+      prev.formData.otherText = '';
       return prev;
     });
   };
@@ -694,12 +691,7 @@ class DataAccessRequestApplication extends Component {
   setOtherText = (e) => {
     const value = e.target.value;
     this.setState(prev => {
-      prev.formData.hmb = false;
-      prev.formData.poa = false;
-      prev.formData.diseases = false;
-      prev.formData.other = true;
-      prev.formData.othertext = value;
-      prev.ontologies = [];
+      prev.formData.otherText = value;
       return prev;
     });
   };
@@ -719,7 +711,7 @@ class DataAccessRequestApplication extends Component {
       poa = false,
       diseases = false,
       other = false,
-      othertext = '',
+      otherText = '',
       population = false,
       forProfit = false,
       controls = false,
@@ -728,8 +720,6 @@ class DataAccessRequestApplication extends Component {
       investigator = ''
     } = this.state.formData;
     const { ontologies } = this.state;
-
-    console.log("Form Data before returning from render: " + JSON.stringify(this.state.formData));
 
     const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3, step4 } = this.state;
 
@@ -1091,7 +1081,7 @@ class DataAccessRequestApplication extends Component {
                           ontologiesHandler: this.onOntologiesChange,
                           other: other,
                           otherHandler: this.setOther,
-                          otherText: othertext,
+                          otherText: otherText,
                           otherTextHandler: this.setOtherText
                         })
                       ]),
