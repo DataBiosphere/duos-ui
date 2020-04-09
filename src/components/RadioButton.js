@@ -61,7 +61,6 @@ export const RadioButton = (props) => {
           }),
           span({
             style: props.defaultChecked ? checkedStyle : uncheckedStyle,
-            // onClick: props.onClick
           }),
         ]),
         div({style: {marginLeft: '3rem'}}, [

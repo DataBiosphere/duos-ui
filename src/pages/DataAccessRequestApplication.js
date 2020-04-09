@@ -635,6 +635,10 @@ class DataAccessRequestApplication extends Component {
 
   };
 
+  /**
+   * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
+   */
+
   setHmb = () => {
     this.setState(prev => {
       prev.formData.hmb = true;
