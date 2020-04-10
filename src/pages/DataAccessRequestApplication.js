@@ -238,8 +238,6 @@ class DataAccessRequestApplication extends Component {
       this.verifyStep2();
     } else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
-    } else if (this.state.showValidationMessages === true && this.state.step === 4) {
-      this.verifyStep4();
     }
   };
 
@@ -310,8 +308,7 @@ class DataAccessRequestApplication extends Component {
     let invalidStep1 = this.verifyStep1();
     let invalidStep2 = this.verifyStep2();
     let invalidStep3 = this.verifyStep3();
-    let invalidStep4 = this.verifyStep4();
-    if (!invalidStep1 && !invalidStep2 && !invalidStep3 && !invalidStep4) {
+    if (!invalidStep1 && !invalidStep2 && !invalidStep3) {
       this.setState({ showDialogSubmit: true });
     }
   };
@@ -406,10 +403,6 @@ class DataAccessRequestApplication extends Component {
       });
     }
     return invalid;
-  }
-
-  verifyStep4() {
-    return false;
   }
 
   partialSave = (e) => {
