@@ -11,6 +11,7 @@ import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
+import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
 
@@ -23,7 +24,6 @@ class DataAccessRequestApplication extends Component {
     super(props);
     this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
     this.setShowDialogSave = this.setShowDialogSave.bind(this);
-    this.verifyCheckboxes = this.verifyCheckboxes.bind(this);
     this.state = {
       nihValid: false,
       disableOkBtn: false,
@@ -86,24 +86,7 @@ class DataAccessRequestApplication extends Component {
         inputInvestigator: {
           invalid: false
         },
-        inputTitle: {
-          invalid: false
-        },
         inputNih: {
-          invalid: false
-        }
-      },
-      step2: {
-        inputDatasets: {
-          invalid: false
-        },
-        inputRUS: {
-          invalid: false
-        },
-        inputNonTechRUS: {
-          invalid: false
-        },
-        inputOther: {
           invalid: false
         }
       },
@@ -112,15 +95,9 @@ class DataAccessRequestApplication extends Component {
           invalid: false
         }
       },
-      step4: {
-        uploadFile: {
-          invalid: false
-        }
-      },
       problemSavingRequest: false
     };
 
-    this.handleFileChange = this.handleFileChange.bind(this);
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
@@ -237,15 +214,6 @@ class DataAccessRequestApplication extends Component {
     });
   }
 
-  handleFileChange(event) {
-    if (event.target.files !== undefined && event.target.files[0]) {
-      let file = event.target.files[0];
-      this.setState({
-        file: file
-      });
-    }
-  };
-
   handleOpenModal() {
     this.setState({ showModal: true });
   };
@@ -305,6 +273,7 @@ class DataAccessRequestApplication extends Component {
       return prev;
     }, () => this.checkValidations());
   };
+
   step1 = (e) => {
     this.setState(prev => {
       prev.step = 1;
@@ -356,17 +325,11 @@ class DataAccessRequestApplication extends Component {
   };
 
   verifyStep1() {
-    let isTitleInvalid = false,
-      isResearcherInvalid = false,
+    let isResearcherInvalid = false,
       isInvestigatorInvalid = false,
-      isDAAInvalid = false,
       showValidationMessages = false,
       isNihInvalid = !this.state.nihValid;
 
-    if (!this.isValid(this.state.formData.projectTitle)) {
-      isTitleInvalid = true;
-      showValidationMessages = true;
-    }
     if (!this.isValid(this.state.formData.researcher)) {
       isResearcherInvalid = true;
       showValidationMessages = true;
@@ -379,9 +342,7 @@ class DataAccessRequestApplication extends Component {
       && !this.isValid(this.state.formData.linkedIn)
       && !this.isValid(this.state.formData.researcherGate)
       && !this.isValid(this.state.formData.orcid)
-      && !this.state.nihValid
-      && !this.isValid(this.state.formData.uploadFile)) {
-      isDAAInvalid = true;
+      && !this.state.nihValid) {
       isNihInvalid = true;
       showValidationMessages = true;
     }
@@ -392,11 +353,9 @@ class DataAccessRequestApplication extends Component {
       showValidationMessages = true;
     }
     this.setState(prev => {
-      prev.step1.inputTitle.invalid = isTitleInvalid;
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
       prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
       prev.step1.inputNih.invalid = isNihInvalid;
-      prev.step4.uploadFile.invalid = isDAAInvalid;
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
       return prev;
     });
@@ -404,18 +363,12 @@ class DataAccessRequestApplication extends Component {
   };
 
   verifyStep2() {
-    let isDatasetsInvalid = false, isRusInvalid = false, isSummaryInvalid = false;
-    if (this.state.formData.datasets.length === 0) {
-      isDatasetsInvalid = true;
-    }
-    if (!this.isValid(this.state.formData.rus)) {
-      isRusInvalid = true;
-    }
-    if (!this.isValid(this.state.formData.non_tech_rus)) {
-      isSummaryInvalid = true;
-    }
-    let isCheckboxesInvalid = this.verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid);
-    return isDatasetsInvalid || isRusInvalid || isSummaryInvalid || isCheckboxesInvalid;
+    const datasetsInvalid = fp.isEmpty(this.state.formData.datasets);
+    const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
+    const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
+    const rusInvalid = fp.isEmpty(this.state.formData.rus);
+    const summaryInvalid = fp.isEmpty(this.state.formData.non_tech_rus);
+    return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
   isGenderValid(gender, onegender) {
@@ -458,39 +411,6 @@ class DataAccessRequestApplication extends Component {
   verifyStep4() {
     return false;
   }
-
-  verifyCheckboxes(isDatasetsInvalid, isRusInvalid, isSummaryInvalid) {
-    if (this.state.formData.controls !== true &&
-      this.state.formData.population !== true &&
-      this.state.formData.forProfit !== true &&
-      this.state.formData.diseases !== true &&
-      this.state.formData.methods !== true &&
-      this.state.formData.hmb !== true &&
-      this.state.formData.poa !== true &&
-      this.state.formData.other !== true) {
-      this.setState(prev => {
-        prev.atLeastOneCheckboxChecked = false;
-        prev.showValidationMessages = true;
-        prev.step2.inputRUS.invalid = isRusInvalid;
-        prev.step2.inputNonTechRUS.invalid = isSummaryInvalid;
-        prev.step2.inputDatasets.invalid = isDatasetsInvalid;
-        return prev;
-      });
-      return true;
-    } else {
-      this.setState(prev => {
-        prev.atLeastOneCheckboxChecked = true;
-        prev.step2.inputRUS.invalid = isRusInvalid;
-        prev.step2.inputNonTechRUS.invalid = isSummaryInvalid;
-        prev.step2.inputDatasets.invalid = isDatasetsInvalid;
-        if (prev.showValidationMessages === false) {
-          prev.showValidationMessages = isRusInvalid || isSummaryInvalid || isDatasetsInvalid;
-        }
-        return prev;
-      });
-      return false;
-    }
-  };
 
   partialSave = (e) => {
     this.setState({ showDialogSave: true });
@@ -639,6 +559,16 @@ class DataAccessRequestApplication extends Component {
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
    */
 
+  isTypeOfResearchInvalid = () => {
+    const valid = (
+      this.state.formData.hmb === true ||
+      this.state.formData.poa === true ||
+      (this.state.formData.diseases === true && !fp.isEmpty(this.state.ontologies)) ||
+      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
+    );
+    return !valid;
+  };
+
   setHmb = () => {
     this.setState(prev => {
       prev.formData.hmb = true;
@@ -726,7 +656,7 @@ class DataAccessRequestApplication extends Component {
     const { ontologies } = this.state;
 
     const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3, step4 } = this.state;
-
+    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const genderLabels = ['Female', 'Male'];
     const genderValues = ['F', 'M'];
 
@@ -1005,13 +935,16 @@ class DataAccessRequestApplication extends Component {
                         loadingMessage: () => this.state.optionMessage,
                         classNamePrefix: 'select',
                         placeholder: 'Dataset Name, Sample Collection ID, or PI',
-                        className: step2.inputDatasets.invalid && showValidationMessages ?
+                        className: (fp.isEmpty(this.state.formData.datasets) && showValidationMessages) ?
                           ' required-select-error select-autocomplete' :
                           'select-autocomplete'
 
                       }),
-                      span({ className: 'cancel-color required-field-error-span', isRendered: step2.inputDatasets.invalid && showValidationMessages },
-                        ['Required field'])
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.datasets) && showValidationMessages,
+                      },
+                      ['Required field']),
                     ])
                   ]),
 
@@ -1035,8 +968,7 @@ class DataAccessRequestApplication extends Component {
                           maxLength: '256',
                           value: this.state.formData.projectTitle,
                           onChange: this.handleChange,
-                          className: step1.inputTitle.invalid &&
-                          showValidationMessages ?
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
@@ -1044,8 +976,7 @@ class DataAccessRequestApplication extends Component {
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: step1.inputTitle.invalid &&
-                              showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
                         },
                         ['Required field']),
                       ]),
@@ -1058,16 +989,20 @@ class DataAccessRequestApplication extends Component {
                         label({className: 'control-label rp-title-question'}, [
                           '2.3 Type of Research* ',
                           span({},
-                            ['Please select one of the following opitons.']),
+                            ['Please select one of the following options.']),
                         ]),
                       ]),
-                    div({className: 'row no-margin'}, [
+                    div({
+                      style: {'marginLeft': '15px'},
+                      className: 'row'
+                    }, [
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: !atLeastOneCheckboxChecked &&
-                          showValidationMessages,
-                        style: {'marginLeft': '15px'},
-                      }, ['At least one of the following fields is required']),
+                        isRendered: isTypeOfResearchInvalid && showValidationMessages,
+                      }, [
+                        'One of the following fields is required.', br(),
+                        'Disease related studies require a disease selection.', br(),
+                        'Other studies require additional details.'])
                     ]),
 
                     div(
@@ -1100,14 +1035,6 @@ class DataAccessRequestApplication extends Component {
                               span({}, ['Select all applicable options.']),
                             ]),
                         ]),
-                      div({className: 'row no-margin'}, [
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: !atLeastOneCheckboxChecked &&
-                            showValidationMessages,
-                          style: {'marginLeft': '15px'},
-                        }, ['At least one of the following fields is required']),
-                      ]),
                     ]),
 
                     div(
@@ -1232,8 +1159,7 @@ class DataAccessRequestApplication extends Component {
                         onChange: this.handleChange,
                         name: 'rus',
                         id: 'inputRUS',
-                        className: step2.inputRUS.invalid &&
-                        showValidationMessages ?
+                        className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
                           ' required-field-error form-control' :
                           'form-control',
                         rows: '6',
@@ -1243,8 +1169,7 @@ class DataAccessRequestApplication extends Component {
                       }),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: step2.inputRUS.invalid &&
-                            showValidationMessages,
+                        isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
                       },
                       ['Required field']),
                     ]),
@@ -1269,8 +1194,7 @@ class DataAccessRequestApplication extends Component {
                         onChange: this.handleChange,
                         name: 'non_tech_rus',
                         id: 'inputNonTechRUS',
-                        className: step2.inputNonTechRUS.invalid &&
-                        showValidationMessages ?
+                        className: (fp.isEmpty(this.state.formData.non_tech_rus) && showValidationMessages) ?
                           'required-field-error form-control' :
                           'form-control',
                         rows: '3',
@@ -1281,8 +1205,7 @@ class DataAccessRequestApplication extends Component {
                       span(
                         {
                           className: 'cancel-color required-field-error-span',
-                          isRendered: step2.inputNonTechRUS.invalid &&
-                            showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.formData.non_tech_rus) && showValidationMessages,
                         },
                         ['Required field']),
                     ]),
