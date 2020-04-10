@@ -1,5 +1,5 @@
 import {div, input, label, span} from 'react-hyperscript-helpers';
-import _ from 'lodash/fp';
+import { _ as fp } from 'lodash/fp';
 
 export const RadioButton = (props) => {
 
@@ -28,7 +28,7 @@ export const RadioButton = (props) => {
     border: '1px solid #999999',
   };
 
-  const checkedStyle = _.merge(uncheckedStyle, {
+  const checkedStyle = fp.merge(uncheckedStyle, {
     boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
     backgroundColor: '#2196F3',
     border: '2px solid white',
