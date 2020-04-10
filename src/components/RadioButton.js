@@ -1,5 +1,5 @@
 import {div, input, label, span} from 'react-hyperscript-helpers';
-import { _ as fp } from 'lodash/fp';
+import * as fp from 'lodash/fp';
 
 export const RadioButton = (props) => {
 

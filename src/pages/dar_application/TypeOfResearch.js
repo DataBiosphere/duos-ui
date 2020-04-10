@@ -3,7 +3,7 @@ import {RadioButton} from '../../components/RadioButton';
 import {Component} from 'react';
 import AsyncSelect from 'react-select/async/dist/react-select.esm';
 import {DAR} from '../../libs/ajax';
-import _ from 'lodash/fp';
+import * as fp from 'lodash/fp';
 
 export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
@@ -33,9 +33,22 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
       padding: '6px 12px',
       width: '100%',
     };
-
     if (props.other) {
-      otherTextStyle = _.merge(otherTextStyle, {backgroundColor: 'white'});
+      otherTextStyle = fp.merge(otherTextStyle, {backgroundColor: '#fff'});
+    } else {
+      otherTextStyle = fp.merge(otherTextStyle, {cursor: 'not-allowed'});
+    }
+
+    let ontologySelectionStyle = {};
+    if (!props.diseases) {
+      ontologySelectionStyle = fp.merge(ontologySelectionStyle, {
+        control: styles => ({
+          ...styles,
+          border: '1px solid #999',
+          backgroundColor: '#eee',
+          cursor: 'not-allowed',
+        }),
+      });
     }
 
     return (
@@ -98,9 +111,11 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
             style: {
               marginBottom: '2rem',
               color: '#777',
+              cursor: props.diseases ? 'pointer' : 'not-allowed',
             },
           }, [
             h(AsyncSelect, {
+              styles: ontologySelectionStyle,
               id: 'sel_diseases',
               isDisabled: !props.diseases,
               isMulti: true,
@@ -108,7 +123,6 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
               onChange: (option) => props.ontologiesHandler(option),
               value: props.ontologies,
               placeholder: 'Please enter one or more diseases',
-              className: 'select-autocomplete',
               classNamePrefix: 'select',
             }),
           ]),
