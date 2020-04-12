@@ -13,7 +13,8 @@ import { DAR, Election, Email, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
-
+import { StructuredDarRp } from '../components/StructuredDarRp';
+import { DataUseTranslation } from '../libs/dataUseTranslation';
 
 class AccessCollect extends Component {
 
@@ -27,8 +28,8 @@ class AccessCollect extends Component {
     this.handlerReminder = this.handlerReminder(this);
   }
 
-  componentDidMount() {
-    this.loadData();
+  async componentDidMount() {
+    await this.loadData();
   }
 
   initialState() {
@@ -85,7 +86,8 @@ class AccessCollect extends Component {
       voteAccessList: [],
       rpVoteAccessList: [],
 
-      darInfo: Models.dar
+      darInfo: Models.dar,
+      translatedDataUse: null
     };
   };
 
@@ -296,14 +298,13 @@ class AccessCollect extends Component {
   };
 
   async findDar() {
-    DAR.describeDar(this.props.match.params.referenceId).then(
-      darInfo => {
-        this.setState(prev => {
-          prev.darInfo = darInfo;
-          return prev;
-        });
-      }
-    );
+    const darInfo = await DAR.describeDar(this.props.match.params.referenceId);
+    const translatedDataUse = await DataUseTranslation.translateDarInfo(darInfo);
+    this.setState(prev => {
+      prev.darInfo = darInfo;
+      prev.translatedDataUse = translatedDataUse;
+      return prev;
+    });
   };
 
   getRPGraphData(type, reviewVote) {
@@ -636,10 +637,13 @@ class AccessCollect extends Component {
                 div({ className: 'panel-heading cm-boxhead access-color' }, [
                   h4({}, ['Structured Research Purpose'])
                 ]),
-                div({
-                  id: 'panel_structuredPurpose', className: 'panel-body cm-boxbody translated-restriction',
-                  dangerouslySetInnerHTML: { __html: this.state.userestriction }
-                }, [])
+                div({ style: {paddingLeft: '2rem'}}, [
+                  StructuredDarRp({
+                    translatedDataUse: this.state.translatedDataUse,
+                    headerStyle: { display: 'none' },
+                    textStyle: { color: '#777777' }
+                  })
+                ]),
               ])
             ]),
 
