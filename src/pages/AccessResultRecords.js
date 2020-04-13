@@ -13,6 +13,7 @@ import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
+import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 
 
@@ -359,7 +360,7 @@ class AccessResultRecords extends Component {
               StructuredDarRp({
                 darInfo: this.state.darInfo,
                 headerStyle: { display: 'none' },
-                textStyle: { color: '#777777' }
+                textStyle: Theme.legacy
               })
             ]),
             a({

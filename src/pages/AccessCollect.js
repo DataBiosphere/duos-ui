@@ -14,6 +14,7 @@ import { DAR, Election, Email, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
+import { Theme } from '../libs/theme';
 
 class AccessCollect extends Component {
 
@@ -637,7 +638,7 @@ class AccessCollect extends Component {
                   StructuredDarRp({
                     darInfo: this.state.darInfo,
                     headerStyle: { display: 'none' },
-                    textStyle: { color: '#777777' }
+                    textStyle: Theme.legacy
                   })
                 ]),
               ])

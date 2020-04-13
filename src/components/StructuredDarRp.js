@@ -34,7 +34,7 @@ export const StructuredDarRp = hh(class StructuredDarRp extends React.PureCompon
    * takes a JSON object of the structure { primary: [...], secondary: [...] } and returns HTML elements
    */
   format = translatedDataUse => {
-    const formatted = ld.map(ld.keys(translatedDataUse), key => {
+    return ld.map(ld.keys(translatedDataUse), key => {
       const restrictions = translatedDataUse[key];
       if (!ld.isEmpty(restrictions)) {
         const listRestrictions = ld.map(restrictions, (restriction, i) => {
@@ -46,7 +46,6 @@ export const StructuredDarRp = hh(class StructuredDarRp extends React.PureCompon
         return div({ style: { ...BOLD, margin: '8px 0px' }, key }, [`${ld.startCase(key)}:\n`, listRestrictions]);
       }
     });
-    return formatted;
   };
 
   render() {
@@ -57,6 +56,7 @@ export const StructuredDarRp = hh(class StructuredDarRp extends React.PureCompon
     }
     if (!ld.isEmpty(textStyle)) {
       ld.merge(TEXT, textStyle);
+      ld.merge(BOLD, textStyle);
     }
 
     return div({ style: ROOT }, [

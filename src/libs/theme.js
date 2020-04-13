@@ -27,4 +27,9 @@ export const Theme = {
       title: '34px',
     }
   },
+  legacy: {
+    color: '#777777',
+    fontFamily: '\'Roboto\', sans-serif',
+    fontSize: '15px'
+  }
 };

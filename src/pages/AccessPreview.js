@@ -8,6 +8,7 @@ import { PageHeading } from '../components/PageHeading';
 import { StructuredDarRp } from '../components/StructuredDarRp';
 import { DAR, Files } from '../libs/ajax';
 import { Models } from '../libs/models';
+import { Theme } from '../libs/theme';
 
 
 class AccessPreview extends Component {
@@ -296,7 +297,7 @@ class AccessPreview extends Component {
                   StructuredDarRp({
                     darInfo: this.state.darInfo,
                     headerStyle: { display: 'none' },
-                    textStyle: { color: '#777777' }
+                    textStyle: Theme.legacy
                   })
                 ]),
               ])

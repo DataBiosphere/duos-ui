@@ -11,6 +11,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
+import { Theme } from '../libs/theme';
 import { Navigation } from '../libs/utils';
 
 
@@ -490,7 +491,7 @@ class AccessReview extends Component {
                   StructuredDarRp({
                     darInfo: this.state.darInfo,
                     headerStyle: { display: 'none' },
-                    textStyle: { color: '#777777' }
+                    textStyle: Theme.legacy
                   })
                 ])
               ])
