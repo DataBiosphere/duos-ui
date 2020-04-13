@@ -605,7 +605,7 @@ class AccessCollect extends Component {
 
         div({ className: 'row no-margin' }, [
           CollapsiblePanel({
-            // isRendered: this.state.hasUseRestriction,
+            isRendered: this.state.hasUseRestriction,
             id: 'rpCollectVotes',
             onClick: this.toggleQ1,
             color: 'access',
