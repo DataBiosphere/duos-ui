@@ -39,7 +39,7 @@ export const DataUseTranslation = {
      */
     if (darInfo.poa || darInfo.population || darInfo.popmigration) {
       const dataUseElement = {
-        code: 'NPOA',
+        code: 'POA',
         description: 'The dataset will be used for the study of Population Origins/Migration patterns.',
       };
       dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
@@ -64,21 +64,21 @@ export const DataUseTranslation = {
 
     if (darInfo.methods) {
       const dataUseElement = {
-        code: 'NMDS',
+        code: 'MDS',
         description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
     if (darInfo.controls) {
       const dataUseElement = {
-        code: 'NCTRL',
+        code: 'CTRL',
         description: 'The reason for this request is to increase the number of controls available for a comparison group.',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
     if (darInfo.forProfit) {
       const dataUseElement = {
-        code: '',
+        code: 'NCU',
         description: 'The dataset will be used in a study related to a commercial purpose.',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
