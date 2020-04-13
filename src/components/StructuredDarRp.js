@@ -1,6 +1,7 @@
 import React from 'react';
 import * as ld from 'lodash';
 import { div, span, hh } from "react-hyperscript-helpers";
+import { DataUseTranslation } from '../libs/dataUseTranslation';
 import { Theme } from '../libs/theme';
 
 const ROOT = {
@@ -49,7 +50,8 @@ export const StructuredDarRp = hh(class StructuredDarRp extends React.PureCompon
   };
 
   render() {
-    const { translatedDataUse, headerStyle, textStyle} = this.props;
+    const { darInfo, headerStyle, textStyle} = this.props;
+    const translatedDataUse = DataUseTranslation.translateDarInfo(darInfo);
     if (!ld.isEmpty(headerStyle)) {
       ld.merge(HEADER, headerStyle);
     }

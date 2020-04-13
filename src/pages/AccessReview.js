@@ -6,6 +6,7 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
+import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { DAR, Election, Files, Votes } from '../libs/ajax';
 import { Models } from '../libs/models';
@@ -159,7 +160,6 @@ class AccessReview extends Component {
       prev.consentName = consent.name;
       prev.consentId = consent.consentId;
       prev.darInfo = darInfo;
-      prev.darInfo.sDar = election.translatedUseRestriction;
       prev.election = election;
       prev.rpVote = rpVote;
       if (election.useRestriction !== null && rpVote !== null) {
@@ -486,10 +486,13 @@ class AccessReview extends Component {
                 div({ className: 'panel-heading cm-boxhead access-color' }, [
                   h4({}, ['Structured Research Purpose'])
                 ]),
-                div({
-                  id: 'panel_structuredDul', className: 'panel-body cm-boxbody translated-restriction',
-                  dangerouslySetInnerHTML: { __html: this.state.darInfo.sDar }
-                }, [])
+                div({id: 'panel_structuredDul', className: 'panel-body cm-boxbody translated-restriction'}, [
+                  StructuredDarRp({
+                    darInfo: this.state.darInfo,
+                    headerStyle: { display: 'none' },
+                    textStyle: { color: '#777777' }
+                  })
+                ])
               ])
             ]),
 

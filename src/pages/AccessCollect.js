@@ -8,13 +8,12 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
+import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { DAR, Election, Email, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
-import { StructuredDarRp } from '../components/StructuredDarRp';
-import { DataUseTranslation } from '../libs/dataUseTranslation';
 
 class AccessCollect extends Component {
 
@@ -86,8 +85,7 @@ class AccessCollect extends Component {
       voteAccessList: [],
       rpVoteAccessList: [],
 
-      darInfo: Models.dar,
-      translatedDataUse: null
+      darInfo: Models.dar
     };
   };
 
@@ -299,10 +297,8 @@ class AccessCollect extends Component {
 
   async findDar() {
     const darInfo = await DAR.describeDar(this.props.match.params.referenceId);
-    const translatedDataUse = await DataUseTranslation.translateDarInfo(darInfo);
     this.setState(prev => {
       prev.darInfo = darInfo;
-      prev.translatedDataUse = translatedDataUse;
       return prev;
     });
   };
@@ -608,7 +604,7 @@ class AccessCollect extends Component {
 
         div({ className: 'row no-margin' }, [
           CollapsiblePanel({
-            isRendered: this.state.hasUseRestriction,
+            // isRendered: this.state.hasUseRestriction,
             id: 'rpCollectVotes',
             onClick: this.toggleQ1,
             color: 'access',
@@ -639,7 +635,7 @@ class AccessCollect extends Component {
                 ]),
                 div({ style: {paddingLeft: '2rem'}}, [
                   StructuredDarRp({
-                    translatedDataUse: this.state.translatedDataUse,
+                    darInfo: this.state.darInfo,
                     headerStyle: { display: 'none' },
                     textStyle: { color: '#777777' }
                   })

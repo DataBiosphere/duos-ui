@@ -5,6 +5,7 @@ import { Alert } from '../components/Alert';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
+import { StructuredDarRp } from '../components/StructuredDarRp';
 import { DAR, Files } from '../libs/ajax';
 import { Models } from '../libs/models';
 
@@ -41,14 +42,6 @@ class AccessPreview extends Component {
     this.setState(prev => {
       prev.dar_id = this.props.match.params.referenceId;
     });
-
-    DAR.getDarFields(referenceId, 'translated_restriction').then(
-      data => {
-        this.setState(prev => {
-          prev.rp = data.translated_restriction;
-        });
-      }
-    );
 
     DAR.getDarConsent(referenceId).then(
       consent => {
@@ -299,10 +292,13 @@ class AccessPreview extends Component {
                 div({ className: 'panel-heading cm-boxhead access-color' }, [
                   h4({}, ['Structured Research Purpose'])
                 ]),
-                div({
-                  id: 'panel_structuredPurpose', className: 'panel-body cm-boxbody translated-restriction',
-                  dangerouslySetInnerHTML: { __html: this.state.rp }
-                }, [])
+                div({ style: {paddingLeft: '2rem'}}, [
+                  StructuredDarRp({
+                    darInfo: this.state.darInfo,
+                    headerStyle: { display: 'none' },
+                    textStyle: { color: '#777777' }
+                  })
+                ]),
               ])
             ])
           ])
