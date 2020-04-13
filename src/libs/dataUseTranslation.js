@@ -2,16 +2,6 @@ import * as fp from 'lodash/fp';
 
 export const DataUseTranslation = {
 
-  dataUseSummary: {
-    primary: [],
-    secondary: [],
-  },
-
-  dataUseElement: {
-    code: '',
-    description: '',
-  },
-
   /**
    * Translates a raw data access request into an ontology service compatible
    * DataUseSummary object that reflects a Data Access Request instead of a Consent.
@@ -21,7 +11,10 @@ export const DataUseTranslation = {
    * @returns {{primary: [{code: '', description: ''}], secondary: [{code: '', description: ''}]}}
    */
   translateDarInfo: (darInfo) => {
-    let dataUseSummary = DataUseTranslation.dataUseSummary;
+    let dataUseSummary = {
+      primary: [],
+      secondary: [],
+    };
 
     // Primary Codes
 
@@ -51,19 +44,18 @@ export const DataUseTranslation = {
       };
       dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
     }
-    if (darInfo.diseases && !fp.isEmpty(darInfo.dataUse) && !fp.isEmpty(darInfo.dataUse.ontologies)) {
-      const diseases = fp.map('label')(darInfo.dataUse.ontologies);
-      const diseaseString = diseases.length > 1 ? fp.join('; ')(diseases) : diseases[0];
+    if (darInfo.diseases && !fp.isEmpty(darInfo.diseases)) {
+      const diseaseString = darInfo.diseases.length > 1 ? fp.join('; ')(darInfo.diseases) : darInfo.diseases[0];
       const dataUseElement = {
         code: 'DS',
         description: 'Disease-related studies: ' + diseaseString
       };
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
+      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(dataUseElement));
     }
-    if (!fp.isEmpty(darInfo.other)) {
+    if (darInfo.other) {
       const dataUseElement = {
         code: 'OTHER',
-        description: darInfo.otherText,
+        description: fp.isEmpty(darInfo.otherText) ? "Not provided" : darInfo.otherText,
       };
       dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
     }
