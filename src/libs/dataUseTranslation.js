@@ -45,7 +45,8 @@ export const DataUseTranslation = {
       dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
     }
     if (darInfo.diseases && !fp.isEmpty(darInfo.diseases)) {
-      const diseaseString = darInfo.diseases.length > 1 ? fp.join('; ')(darInfo.diseases) : darInfo.diseases[0];
+      const diseaseArray = darInfo.diseases.sort();
+      const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
       const dataUseElement = {
         code: 'DS',
         description: 'Disease-related studies: ' + diseaseString
