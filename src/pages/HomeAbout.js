@@ -35,12 +35,12 @@ class HomeAbout extends Component {
                 h3({}, ["Library Card"]),
                 p({ className: "home-sections-description" }, ["An innovative and simplified approach to data access agreements"]),
                 p({}, ["Currently, when a researcher makes a data access request they are not only required to obtain approval from the data access committee (DAC) which oversees the data, but also from their home instiution's Signing Official, who approves their request and acknowledges the acceptance of organizational liability in the case of data misuse. Estimates show Signing Officials were required to approve at least 50,000 DARs in 2019 in the US. Based on feedback from numerous Signing Officials we understand Signing Officials primary concern in the approval of data access requests (DARs) to be primarily an endorsement or authorization of the researcher, rather than the proposed research."]),
-                img({ src: "/images/LC_only_process.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "About icon" }),
+                img({ src: "/images/lc_only_process.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "About icon" }),
                 p({}, ["To alleviate this burden on Signing Officials, DUOS is offering Signing Offficals the opportunity to pre-authorize researchers to submit DARs to DACs using DUOS, via our DUOS Library Card Agreement. This agreement allows a Signing Official to pre-authorize researchers from their instutions for a 1 year renewable term."]),
                 div({ className: 'col-lg-12 col-md-12 col-md-12 col-md-12 rp-group' }, [
                   p({}, []),
                   a({
-                    id: 'link_downloadAgreement', href: 'DUOS_LibraryCardAgreementTemplate_3.28.20.pdf', target: '_blank',
+                    id: 'link_downloadAgreement', href: 'duos_librarycardagreementtemplate_3.28.20.pdf', target: '_blank',
                     className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                   }, [
                     span({ className: 'glyphicon glyphicon-download' }),
@@ -56,7 +56,7 @@ class HomeAbout extends Component {
                   h3({}, ["DUOS & Library Card"]),
                   p( { className: "home-sections-description" }, ["Bringing the two together for a data access revolution"]),
                   p( {style: { fontWeight: '400' }}, ["The current data access request process incurs delays from and unncessary burden on Signing Officials and is further slowed by providing data access committees (DACs) with ambiguous and non-compatible terms which they are obligated to interpret and evaluate to maintain compliance."]),
-                  img({ src: "/images/DUOS_LC_Process.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "About icon" }),
+                  img({ src: "/images/duos_lc_process.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "About icon" }),
                   p( {style: { fontWeight: '450' }}, ["Combined, the DUOS Library Card Agreement and DUOS system significantly alleviate the burden of work on Signing Officials and DACs while enhancing their compliant function and expediting appropriate access for researchers. "]),
                 ]),
 
