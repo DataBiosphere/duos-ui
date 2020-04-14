@@ -67,7 +67,7 @@ class HomeAbout extends Component {
                   span({}, []),
                   a({ href: 'https://blog.primr.org/is-your-data-sharing-consent-language-transparent-and-machine-readable/', target: '_blank' }, 'GA4GH\'s Machine Readable Consent Form Initiative'),
                   p( {style: { fontWeight: '400' }}, ["This initiative provides standard data sharing language for IRBs, funders, and investigators to use in their consent forms, based on the Data Use Ontology (DUO)."]),
-                  img({ src: "/images/machine readable consent forms.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "About icon" }),
+                  img({ src: "/images/machine_readable_consent_forms.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "About icon" }),
                   p( {style: { fontWeight: '400' }}, ["By using these machine readable consent form clauses, IRBs, funders, and investigators establish how their dataset(s) may be used, specifically the data use limitations, according to the international DUO standard - removing the need for latter interpretation of the consent forms, and greatly aiding DACs in reviewing DARs for the dataset(s)."]),
                 ]),
               ]),
