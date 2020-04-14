@@ -556,7 +556,7 @@ class DataAccessRequestApplication extends Component {
     const valid = (
       this.state.formData.hmb === true ||
       this.state.formData.poa === true ||
-      (this.state.formData.diseases === true && !fp.isEmpty(this.state.ontologies)) ||
+      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
       (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
     );
     return !valid;
@@ -569,7 +569,7 @@ class DataAccessRequestApplication extends Component {
       prev.formData.diseases = false;
       prev.formData.other = false;
       prev.formData.otherText = '';
-      prev.ontologies = [];
+      prev.formData.ontologies = [];
       return prev;
     });
   };
@@ -581,7 +581,7 @@ class DataAccessRequestApplication extends Component {
       prev.formData.diseases = false;
       prev.formData.other = false;
       prev.formData.otherText = '';
-      prev.ontologies = [];
+      prev.formData.ontologies = [];
       return prev;
     });
   };
@@ -599,7 +599,7 @@ class DataAccessRequestApplication extends Component {
 
   onOntologiesChange = (data) => {
     this.setState(prev => {
-      prev.ontologies = data;
+      prev.formData.ontologies = data;
       return prev;
     });
   };
@@ -610,7 +610,7 @@ class DataAccessRequestApplication extends Component {
       prev.formData.poa = false;
       prev.formData.diseases = false;
       prev.formData.other = true;
-      prev.ontologies = [];
+      prev.formData.ontologies = [];
       return prev;
     });
   };
@@ -918,7 +918,7 @@ class DataAccessRequestApplication extends Component {
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       h(AsyncSelect, {
                         id: 'sel_datasets',
-                        key: this.state.formData.datasets.value,
+                        key: fp.isEmpty(this.state.formData.datasets) ? null : this.state.formData.datasets.value,
                         isDisabled: this.state.formData.dar_code !== null,
                         isMulti: true,
                         loadOptions: (query, callback) => this.searchDataSets(query, callback),
@@ -1024,7 +1024,7 @@ class DataAccessRequestApplication extends Component {
                         [
                           label({className: 'control-label rp-title-question'},
                             [
-                              '2.4 Research Designations* ',
+                              '2.4 Research Designations ',
                               span({}, ['Select all applicable options.']),
                             ]),
                         ]),
