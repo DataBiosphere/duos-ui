@@ -1,8 +1,6 @@
 import fileDownload from 'js-file-download';
-import filter from 'lodash/filter';
+import * as ld from 'lodash';
 import * as fp from 'lodash/fp';
-import get from 'lodash/get';
-import head from 'lodash/head';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
@@ -60,11 +58,12 @@ export const Consent = {
     return await res.json();
   },
 
-  findDataUseLetterForConsent: async consentId => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
+  // TODO: Remove unused endpoint from consent
+  // findDataUseLetterForConsent: async consentId => {
+  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return res.json();
+  // },
 
   findConsentManage: async () => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
@@ -179,11 +178,12 @@ export const DAC = {
     return res.json();
   },
 
-  membership: async (dacId) => {
-    const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
+  // TODO: Remove unused endpoint from consent
+  // membership: async (dacId) => {
+  //   const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return res.json();
+  // },
 
   autocompleteUsers: async (term) => {
     const url = `${await Config.getApiUrl()}/dac/users/${term}`;
@@ -233,8 +233,6 @@ export const DAR = {
     const summaryDar = await summaryDarRes.json();
 
     let darInfo = Models.dar;
-    // Workaround for DUOS-461 until the backend API is updated.
-    // Get the research purpose directly from the DAR instead of the summary.
     const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
     const rawDar = await rawDarRes.json();
     darInfo.hmb = rawDar.hmb;
@@ -256,7 +254,6 @@ export const DAR = {
     darInfo.nothealth = rawDar.nothealth;
     darInfo.hasDiseases = !fp.isEmpty(rawDar.diseases) && rawDar.diseases;
     darInfo.diseases = summaryDar.diseases;
-    // darInfo.rus = summaryDar.rus; // Revert this change when API is updated.
     darInfo.rus = rawDar.rus;
     darInfo.researcherId = summaryDar.userId;
     darInfo.darCode = summaryDar.darCode;
@@ -281,10 +278,10 @@ export const DAR = {
     }
     darInfo.datasets = summaryDar.datasets;
     darInfo.researcherProperties = summaryDar.researcherProperties;
-    const isThePI = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
-    const havePI = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
-    const profileName = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
-    const piName = get(head(filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
+    const isThePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
+    const havePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
+    const profileName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
+    const piName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
     darInfo.pi = isThePI ? profileName : piName;
     darInfo.havePI = havePI || isThePI;
     darInfo.profileName = profileName;
@@ -547,11 +544,12 @@ export const Election = {
     return getFile(url, 'datasetVotesSummary.txt');
   },
 
-  findElection: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
+  // TODO: Remove unused endpoint from consent
+  // findElection: async (consentId) => {
+  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return res.json();
+  // },
 
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
@@ -603,11 +601,12 @@ export const Election = {
     return await res.json();
   },
 
-  findInvalidConsentRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/consent/invalid`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
+  // TODO: Remove unused endpoint from consent
+  // findInvalidConsentRestriction: async () => {
+  //   const url = `${await Config.getApiUrl()}/consent/invalid`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return await res.json();
+  // },
 
   findReviewedDRs: async () => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/closed`;
@@ -955,16 +954,17 @@ export const Researcher = {
 
 export const StatFiles = {
 
-  getFile: async fileType => {
-    const url = `${await Config.getApiUrl()}/consent/cases/summary/file?fileType=${fileType}`;
-    let fileName = null;
-    if (fileType === 'TranslateDUL') {
-      fileName = "summary.txt";
-    } else if (fileType === 'DataAccess') {
-      fileName = "DAR_summary.txt";
-    }
-    return getFile(url, fileName);
-  },
+  // TODO: Remove unused endpoint from consent
+  // getFile: async fileType => {
+  //   const url = `${await Config.getApiUrl()}/consent/cases/summary/file?fileType=${fileType}`;
+  //   let fileName = null;
+  //   if (fileType === 'TranslateDUL') {
+  //     fileName = "summary.txt";
+  //   } else if (fileType === 'DataAccess') {
+  //     fileName = "DAR_summary.txt";
+  //   }
+  //   return getFile(url, fileName);
+  // },
 
   getDARsReport: async (reportType, fileName) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${reportType}`;
@@ -1038,11 +1038,12 @@ export const User = {
 
 export const Votes = {
 
-  getAllVotes: async (consentId) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/vote`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
+  // TODO: Remove unused endpoint from consent
+  // getAllVotes: async (consentId) => {
+  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/vote`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return res.json();
+  // },
 
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
@@ -1094,11 +1095,12 @@ export const Votes = {
   },
 
 
-  findDar: async (requestId, voteId) => {
-    const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
+  // TODO: Remove unused endpoint from consent
+  // findDar: async (requestId, voteId) => {
+  //   const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
+  //   const res = await fetchOk(url, Config.authOpts());
+  //   return await res.json();
+  // },
 
   updateDarVote: async (requestId, vote) => {
     const postObject = {};
