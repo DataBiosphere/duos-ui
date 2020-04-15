@@ -791,7 +791,7 @@ class DataAccessRequestApplication extends Component {
                         onChange: this.handleCheckboxChange
                       }),
                       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-                        ['I am a collaborator of the PI/Data Custodian for the selected dataset(s)'])
+                        ['I am an NIH Intramural researcher (NIH email required) and/or collaborator of the PI/Data Custodian for the selected dataset(s)'])
                     ]),
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
