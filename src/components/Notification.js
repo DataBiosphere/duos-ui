@@ -8,10 +8,10 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ReportIcon from '@material-ui/icons/Report';
 
 export const Notification = (props) => {
-  const {banner} = props;
-  let bannerDiv = div({style: {display: 'none'}}, []);
+  const {notificationData} = props;
+  let notificationDiv = div({style: {display: 'none'}}, []);
 
-  if (!fp.isEmpty(banner)) {
+  if (!fp.isEmpty(notificationData)) {
     const iconStyle = {
       marginRight: '2rem',
       verticalAlign: 'middle',
@@ -19,7 +19,7 @@ export const Notification = (props) => {
       width: 30,
     };
     let icon;
-    switch (banner.level) {
+    switch (notificationData.level) {
       case 'success':
         icon = <CheckCircleIcon fill={'#3c763d'} style={ iconStyle } />;
         break;
@@ -36,15 +36,15 @@ export const Notification = (props) => {
         icon = <InfoIcon fill={'#3c763d'} style={ iconStyle } />;
         break;
     }
-    const content = <ReactMarkdown source={banner.message} linkTarget={'_blank'} className={'underlined'}/>;
-    bannerDiv = div({
+    const content = <ReactMarkdown source={notificationData.message} linkTarget={'_blank'} className={'underlined'}/>;
+    notificationDiv = div({
       style: {padding: '.5rem', paddingTop: '1.5rem'},
-      className: 'row no-margin alert alert-' + banner.level,
+      className: 'row no-margin alert alert-' + notificationData.level,
     }, [
-      div({style: {display: 'inline', float: 'left', marginTop: '-.5rem'}}, [icon]),
-      div({style: {display: 'inline', paddingTop: '1.5rem'}}, [content]),
+      div({style: {display: 'inline', float: 'left', paddingLeft: '.5rem'}}, [icon]),
+      div({style: {display: 'inline', paddingTop: '1.25rem'}}, [content]),
     ]);
   }
 
-  return bannerDiv;
+  return notificationDiv;
 };

@@ -466,7 +466,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       div({ className: 'container' }, [
         div({ className: 'row no-margin' }, [
           div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
-            Notification({banner: this.state.notificationData}),
+            Notification({notificationData: this.state.notificationData}),
             PageHeading({
               id: 'researcherProfile',
               color: 'common',

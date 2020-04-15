@@ -713,7 +713,7 @@ class DataAccessRequestApplication extends Component {
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin' }, [
-            Notification({banner: this.state.notificationData}),
+            Notification({notificationData: this.state.notificationData}),
             div({
               className: (this.state.formData.dar_code !== null ?
                 'col-lg-10 col-md-9 col-sm-9 ' :

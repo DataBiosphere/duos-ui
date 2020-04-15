@@ -2,9 +2,9 @@ import * as fp from 'lodash/fp';
 import {Config} from './config';
 import $ from 'jquery';
 
-// https://storage.googleapis.com/broad-duos-banners/{{env}}_banners.json
+// https://storage.googleapis.com/broad-duos-banners/{{env}}_notifications.json
 const gcs = 'https://storage.googleapis.com/broad-duos-banners';
-const bannerFileName = 'banners.json';
+const bannerFileName = 'notifications.json';
 
 export const NotificationService = {
 
