@@ -4,6 +4,8 @@ import {Storage} from './storage';
 
 export const Config = {
 
+  getEnv: async () => (await getConfig()).env,
+
   getApiUrl: async () => (await getConfig()).apiUrl,
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,

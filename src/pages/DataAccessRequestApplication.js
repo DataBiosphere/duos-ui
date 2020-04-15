@@ -6,9 +6,11 @@ import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
+import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
+import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 
 import './DataAccessRequestApplication.css';
@@ -137,6 +139,11 @@ class DataAccessRequestApplication extends Component {
     await this.init();
     this.props.history.push('/dar_application');
     ReactTooltip.rebuild();
+    const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+    this.setState(prev => {
+      prev.notificationData = notificationData;
+      return prev;
+    });
   }
 
   async init() {
@@ -706,6 +713,7 @@ class DataAccessRequestApplication extends Component {
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin' }, [
+            Notification({banner: this.state.notificationData}),
             div({
               className: (this.state.formData.dar_code !== null ?
                 'col-lg-10 col-md-9 col-sm-9 ' :
