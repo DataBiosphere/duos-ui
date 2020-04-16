@@ -1,10 +1,10 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, a, span, button, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-import { Storage } from "../libs/storage";
-import { Notifications } from "../libs/utils";
-import { Votes, Election } from '../libs/ajax';
+import { div, a, span, button, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import { Storage } from '../../libs/storage';
+import { Notifications } from '../../libs/utils';
+import {Votes, Election, Match} from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -67,7 +67,21 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     }
     catch (e) {
       Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
-    };
+    }
+  };
+
+  /**
+   * Gets the automated algorithm match information for this DAR election.
+   * This is called when VoteAsChair mounts.
+   */
+  getMatchData = async () => {
+    const { consent, election } = this.props;
+    try {
+      const matchData = await Match.findMatch(consent.consentId, election.referenceId);
+      this.setState({ matchData: matchData });
+    } catch (e) {
+      Notifications.showError({ text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}` });
+    }
   };
 
   /**
@@ -87,7 +101,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     }
     catch (e) {
       Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
-    };
+    }
   };
 
   /**
@@ -104,21 +118,21 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       voteClone = _.cloneDeep(vote);
     } else if (isRpVote) {
       voteClone = _.cloneDeep(rpVote);
-    };
+    }
 
     if (voteStatus !== null) {
       voteClone.vote = voteStatus;
-    };
+    }
     if (!_.isUndefined(rationale)) {
       voteClone.rationale = rationale;
-    }; // rationale can be null!
+    } // rationale can be null!
 
     // set state of vote or rpVote depending on vote ID
     const stateObj = isAccessVote ? { vote: voteClone }
       : isRpVote ? { rpVote: voteClone }
         : {};
     this.setState(stateObj);
-  }
+  };
 
   /**
    * updates the final vote object in state
@@ -130,13 +144,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
     if (voteStatus !== null) {
       voteClone.vote = voteStatus;
-    };
+    }
     if (!_.isUndefined(rationale)) {
       voteClone.rationale = rationale;
-    }; // rationale can be null!
+    } // rationale can be null!
 
     this.setState({ finalVote: voteClone });
-  }
+  };
 
   // checks if required fields are completed before posting votes
   submitMemberVote = () => {
@@ -147,13 +161,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.submitVote(rpVote);
       } else {
         this.setState({ alert: 'incomplete' });
-      };
+      }
     } else {
       if (vote.vote !== null) {
         this.submitVote(vote);
       } else {
         this.setState({ alert: 'incomplete' });
-      };
+      }
     }
   };
 
@@ -165,7 +179,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       this.closeElection();
     } else {
       this.setState({ alert: 'incomplete' });
-    };
+    }
   };
 
   // posts the supplied vote for this DAR
@@ -214,14 +228,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       default:
         msg = '';
         type = 'primary';
-    };
+    }
     return span({ style: { textTransform: 'none', color: Theme.palette[type] } }, msg);
   };
 
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
-    const { vote, rpVote, finalVote, alert } = this.state;
+    const { vote, rpVote, finalVote, alert, matchData } = this.state;
 
     return div({ style: ROOT },
       [
@@ -231,14 +245,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
             style: voteAsChair ? TAB_UNSELECTED : TAB_SELECTED,
             onClick: () => selectChair(false),
           },
-            [span({ style: { opacity: '70%' } }, "Vote As Member")]),
+          [span({ style: { opacity: '70%' } }, 'Vote As Member')]),
           a({
             id: 'vote-as-chair',
             isRendered: isChairPerson,
             style: voteAsChair ? TAB_SELECTED : TAB_UNSELECTED,
             onClick: () => selectChair(true),
           },
-            [span({ style: { opacity: '70%' } }, "Vote As Chair")])
+          [span({ style: { opacity: '70%' } }, 'Vote As Chair')])
         ]),
         div({ style: voteAsChair ? VOTE_CHAIR : VOTE_MEMBER, },
           [
@@ -252,7 +266,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
             VoteAsChair({
               isRendered: isChairPerson && voteAsChair,
               getVotes: this.getVotesAsChair,
+              getMatchData: this.getMatchData,
               onUpdate: this.updateChairVote,
+              matchData,
               finalVote,
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
@@ -263,9 +279,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
                 style: alert === 'success' ? { backgroundColor: Theme.palette.success } : {},
                 onClick: voteAsChair ? this.submitChairVote : this.submitMemberVote,
               },
-                ["Vote",
-                  alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })
-                ]
+              ['Vote',
+                alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })
+              ]
               )
             ]),
           ]

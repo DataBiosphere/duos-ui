@@ -1,12 +1,13 @@
 import React from 'react';
-import { div, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-import { Files } from '../libs/ajax';
-import { download } from '../libs/utils';
+import { div, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import { Files } from '../../libs/ajax';
+import { download } from '../../libs/utils';
 import { ApplicationSection } from './ApplicationSection';
-import { StructuredRp } from './StructuredRp';
+import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { StructuredLimitations } from './StructuredLimitations';
 import { ApplicantInfo } from './ApplicantInfo';
+import {DownloadLink} from '../../components/DownloadLink';
 
 const SUBHEADER = {
   margin: '32px 0px',
@@ -36,27 +37,28 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
 
     return div({ id: 'app-summary' },
       [
-        div({ style: SUBHEADER }, "Application summary"),
-        div({ style: { display: "flex" } }, [
+        div({ style: SUBHEADER }, 'Application summary'),
+        div({ style: { display: 'flex' } }, [
           div(
             {
-              id: "structured-rp",
+              id: 'structured-rp',
               style: {
-                width: "50%",
+                width: '50%',
                 padding: '24px 48px 24px 0px'
               }
             },
-            [StructuredRp({
-              content: darInfo.dataUse,
-              labels: ["DAR machine-readable format"],
-              functions: [() => download('machine-readable-DAR.json', mrDAR)]
-            })]
+            [
+              StructuredDarRp({darInfo: darInfo}),
+              div({},[
+                DownloadLink({ label: 'DAR machine-readable format', onDownload: () => download('machine-readable-DAR.json', mrDAR) })
+              ])
+            ]
           ),
           div(
             {
-              id: "dusl",
+              id: 'dusl',
               style: {
-                width: "50%",
+                width: '50%',
                 padding: '24px',
                 backgroundColor: Theme.palette.background.highlighted,
                 borderRadius: '9px',
@@ -64,21 +66,21 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
             },
             [StructuredLimitations({
               content: darInfo.translatedDataUse,
-              labels: ["DUL machine-readable format", "Data Use Letter"],
+              labels: ['DUL machine-readable format', 'Data Use Letter'],
               functions: [() => download('machine-readable-DUL.json', mrDUL), this.downloadDUL]
             })]
           )
         ]),
         div(
           {
-            id: "rp",
+            id: 'rp',
             style: { margin: '32px 0px' },
           },
           [ApplicationSection({ header: 'Research Purpose', content: darInfo.rus, headerColor: Theme.palette.primary, })]
         ),
         div(
           {
-            id: "applicant",
+            id: 'applicant',
           },
           [ApplicantInfo({
             content: {

@@ -1,8 +1,8 @@
 import React from 'react';
-import { div, button, img, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-import { Storage } from "../libs/storage";
-import { Navigation } from "../libs/utils";
+import { div, button, img, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import { Storage } from '../../libs/storage';
+import { Navigation } from '../../libs/utils';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -29,7 +29,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
       this.props.history.push(`/access_review/${referenceId}/${voteId}/${rpVoteId}`);
     } else {
       this.props.history.push(`/access_review/${referenceId}/${voteId}`);
-    };
+    }
   };
 
   render() {

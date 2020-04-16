@@ -1,9 +1,9 @@
 import React from 'react';
-import { div, span, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-import { Files } from '../libs/ajax';
+import { div, span, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import { Files } from '../../libs/ajax';
 import { AppSummary } from './AppSummary';
-import { DownloadLink } from './DownloadLink';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const SECTION = {
   fontFamily: 'Montserrat',
@@ -34,7 +34,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
       div({ id: 'header', style: SECTION }, [
         div({ style: { minWidth: '50%' } }, [
           span({ style: HEADER_BOLD }, darInfo.projectTitle),
-          span({ style: HEADER }, " | " + darInfo.darCode)
+          span({ style: HEADER }, ' | ' + darInfo.darCode)
         ]),
         DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
       ]),
