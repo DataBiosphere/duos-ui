@@ -40,7 +40,7 @@ class AccessReviewV2 extends React.PureComponent {
     const { history, match } = this.props;
     const ids = match.params;
 
-    return div({ isRendered: darInfo != null, id: 'container', style: { width: '1500px', margin: 'auto' } },
+    return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
       [
         div(
           {
