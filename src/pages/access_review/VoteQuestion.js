@@ -70,7 +70,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           rows: '5',
           placeholder: 'OPTIONAL: Describe your rationale or add comments here',
           onChange: e => this.setVote(null, e.target.value),
-          value: vote === null ? null : vote.rationale, // rationale will be displayed if vote was previously submitted
+          value: fp.isEmpty(vote) || fp.isEmpty(vote.rationale) ? '' : vote.rationale, // rationale will be displayed if vote was previously submitted
         })
       ]);
   }
