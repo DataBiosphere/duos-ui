@@ -4,7 +4,6 @@
   "ontologyApiUrl": "https://consent-ontology.dsde-staging.broadinstitute.org/",
   "clientId": "1087760099392-t0nb61ehicbeuqkeftvql765ncu1707r.apps.googleusercontent.com",
   "firecloudUrl": "https://firecloud-orchestration.dsde-staging.broadinstitute.org/",
-  "gwasUrl": "",
   "nihUrl": "http://mock-nih.dev.test.firecloud.org/link-nih-account/index.html",
   "features": {}
 }
