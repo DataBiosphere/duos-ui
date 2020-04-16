@@ -22,7 +22,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      viewMatchResults: true
+      viewMatchResults: false
     };
   }
   componentDidMount() {
@@ -35,16 +35,19 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
       prev.viewMatchResults = !prev.viewMatchResults;
       return prev;
     });
+    // Changing state here doesn't trigger a re-render, need to force update.
+    this.forceUpdate();
   };
 
   formatMatchData = (matchData) => {
     const failure = JSON.stringify(fp.getOr('false')('failed')(matchData)).toLowerCase() === 'true';
     const vote = JSON.stringify(fp.getOr('false')('match')(matchData)).toLowerCase() === 'true';
     const voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
+    const createDateString = moment(fp.get('createDate')(matchData)).format('YYYY-MM-DD');
     const style = { marginLeft: '2rem', fontWeight: 'normal', textTransform: 'none' };
     return div({}, [
       div({},['Vote:', span({style: style}, [voteString])]),
-      div({},['Date:', span({style: style}, [moment(fp.get('createDate')(matchData)).format('YYYY-MM-DD')])]),
+      div({},['Date:', span({style: style}, [createDateString])]),
     ]);
   };
 
@@ -65,7 +68,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
           span({ className: 'glyphicon glyphicon-menu-down', style: { marginLeft: '6px' } })
         ])
       ]),
-      div({style: {display: this.state.viewMatchResults ? 'block' : 'none'}}, [
+      div({ style: {display: this.state.viewMatchResults ? 'block' : 'none'} }, [
         this.formatMatchData(matchData)
       ])
     ]);
