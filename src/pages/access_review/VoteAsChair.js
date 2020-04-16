@@ -1,6 +1,6 @@
 import React from 'react';
-import { div, a, span, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
+import { div, a, span, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
 
 const LINK = {
@@ -34,7 +34,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
       }),
       div({ style: LINK_SECTION }, [
         a({ style: LINK }, [
-          "View DUOS algorithm decision",
+          'View DUOS algorithm decision',
           span({ className: 'glyphicon glyphicon-menu-down', style: { marginLeft: '6px' } })
         ])
       ]),

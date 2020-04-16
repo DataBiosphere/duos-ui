@@ -28,7 +28,7 @@ import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeHelp from './pages/HomeHelp';
 import InvalidRestrictions from './pages/InvalidRestrictions';
-import AccessReviewV2 from './pages/AccessReviewV2';
+import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import ManageOntologies from './pages/ManageOntologies';
 import MemberConsole from './pages/MemberConsole';
 import NotFound from './pages/NotFound';

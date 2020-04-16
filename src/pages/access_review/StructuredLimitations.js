@@ -1,8 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, span, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-import { DownloadLink } from './DownloadLink';
+import { div, span, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const ROOT = {
   fontFamily: 'Montserrat',

@@ -1,9 +1,9 @@
-import React from "react";
-import { div } from "react-hyperscript-helpers";
-import { DarApplication } from '../components/DarApplication';
-import { AccessReviewHeader } from '../components/AccessReviewHeader';
-import { DacVotePanel } from '../components/DacVotePanel';
-import { DAR } from '../libs/ajax';
+import React from 'react';
+import { div } from 'react-hyperscript-helpers';
+import { DarApplication } from './DarApplication';
+import { AccessReviewHeader } from './AccessReviewHeader';
+import { DacVotePanel } from './DacVotePanel';
+import { DAR } from '../../libs/ajax';
 
 const SECTION = {
   margin: '16px',
@@ -23,7 +23,7 @@ class AccessReviewV2 extends React.PureComponent {
 
   selectChair = (selected) => {
     this.setState({ voteAsChair: selected });
-  }
+  };
 
   componentDidMount() {
     this.darReviewAccess();
@@ -40,7 +40,7 @@ class AccessReviewV2 extends React.PureComponent {
     const { history, match } = this.props;
     const ids = match.params;
 
-    return div({ isRendered: darInfo != null, id: "container", style: { width: '1500px', margin: 'auto' } },
+    return div({ isRendered: darInfo != null, id: 'container', style: { width: '1500px', margin: 'auto' } },
       [
         div(
           {
@@ -48,23 +48,23 @@ class AccessReviewV2 extends React.PureComponent {
           },
           [AccessReviewHeader({ history, match })]
         ),
-        div({ id: "body", style: { display: "flex" } }, [
+        div({ id: 'body', style: { display: 'flex' } }, [
           div(
             {
-              id: "vote",
+              id: 'vote',
               style: {
                 ...SECTION,
-                width: "30%",
+                width: '30%',
               }
             },
             [DacVotePanel({ ids, election, voteAsChair, selectChair: this.selectChair })]
           ),
           div(
             {
-              id: "application",
+              id: 'application',
               style: {
                 ...SECTION,
-                width: "70%",
+                width: '70%',
               }
             },
             [DarApplication({ voteAsChair, darInfo, election, consent, ids })]

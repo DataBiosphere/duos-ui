@@ -1,18 +1,19 @@
 import React from 'react';
-import { div, textarea, fieldset, h, input, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
+import { div, textarea, fieldset, h, input, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import * as fp from 'lodash/fp';
 
 const HEADER = {
   fontSize: Theme.font.size.header,
   lineHeight: Theme.font.leading.regular,
   textTransform: 'none',
   margin: '16px 0px',
-}
+};
 
 const FADED = {
   opacity: '70%',
   margin: '8px 0px',
-}
+};
 
 const INPUT = {
   backgroundColor: '#ffffff',
@@ -22,15 +23,15 @@ const INPUT = {
   padding: '8px',
   width: '100%',
   resize: 'none',
-}
+};
 
 export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
 
   setVote = (voteStatus, rationale) => {
     const { vote, updateVote } = this.props;
-    if (rationale === "") {
+    if (fp.isEmpty(rationale)) {
       rationale = null;
-    };
+    }
     updateVote(vote.voteId, voteStatus, rationale);
   };
 
@@ -40,7 +41,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
       [
         div({ style: FADED }, label),
         div({ style: HEADER }, question),
-        div({ style: FADED }, "Your vote*"),
+        div({ style: FADED }, 'Your vote*'),
         fieldset([
           input({
             type: 'radio',
@@ -51,7 +52,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           h('label', {
             htmlFor: id + '-yes',
             style: { margin: '8px' },
-          }, "Yes"),
+          }, 'Yes'),
           input({
             type: 'radio',
             id: id + '-no',
@@ -61,13 +62,13 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           h('label', {
             htmlFor: id + '-no',
             style: { margin: '8px' },
-          }, "No")
+          }, 'No')
         ]),
-        div({ style: FADED }, "Rationale"),
+        div({ style: FADED }, 'Rationale'),
         textarea({
           style: INPUT,
           rows: '5',
-          placeholder: "OPTIONAL: Describe your rationale or add comments here",
+          placeholder: 'OPTIONAL: Describe your rationale or add comments here',
           onChange: e => this.setVote(null, e.target.value),
           value: vote === null ? null : vote.rationale, // rationale will be displayed if vote was previously submitted
         })

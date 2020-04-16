@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { div, a, i } from "react-hyperscript-helpers";
+import { div, a, i } from 'react-hyperscript-helpers';
 import { Theme } from '../libs/theme';
 
 const ROOT = {
@@ -18,9 +18,9 @@ export const DownloadLink = props => {
       id: _.kebabCase(label),
       onClick: () => onDownload()
     },
-      [
-        i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-        label,
-      ])
+    [
+      i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
+      label,
+    ])
   ]);
 };
