@@ -46,7 +46,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
     const createDateString = moment(fp.get('createDate')(matchData)).format('YYYY-MM-DD');
     const style = { marginLeft: '2rem', fontWeight: 'normal', textTransform: 'none' };
     return div({}, [
-      div({},['Vote:', span({style: style}, [voteString])]),
+      div({},['DUOS Algorithm Decision:', span({style: style}, [voteString])]),
       div({},['Date:', span({style: style}, [createDateString])]),
     ]);
   };
