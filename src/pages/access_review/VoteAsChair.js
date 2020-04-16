@@ -68,7 +68,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
           span({ className: 'glyphicon glyphicon-menu-down', style: { marginLeft: '6px' } })
         ])
       ]),
-      div({ style: {display: this.state.viewMatchResults ? 'block' : 'none'} }, [
+      div({ style: {color: this.state.viewMatchResults ? 'inherit' : 'transparent'} }, [
         this.formatMatchData(matchData)
       ])
     ]);
