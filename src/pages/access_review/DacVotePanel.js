@@ -4,7 +4,7 @@ import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
-import { Votes, Election } from '../../libs/ajax';
+import {Votes, Election, Match} from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -67,6 +67,20 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     }
     catch (e) {
       Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
+    }
+  };
+
+  /**
+   * Gets the automated algorithm match information for this DAR election.
+   * This is called when VoteAsChair mounts.
+   */
+  getMatchData = async () => {
+    const { consent, election } = this.props;
+    try {
+      const matchData = await Match.findMatch(consent.consentId, election.referenceId);
+      this.setState({ matchData: matchData });
+    } catch (e) {
+      Notifications.showError({ text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}` });
     }
   };
 
@@ -221,7 +235,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
-    const { vote, rpVote, finalVote, alert } = this.state;
+    const { vote, rpVote, finalVote, alert, matchData } = this.state;
 
     return div({ style: ROOT },
       [
@@ -252,7 +266,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
             VoteAsChair({
               isRendered: isChairPerson && voteAsChair,
               getVotes: this.getVotesAsChair,
+              getMatchData: this.getMatchData,
               onUpdate: this.updateChairVote,
+              matchData,
               finalVote,
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
