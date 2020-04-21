@@ -169,6 +169,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.setState({ alert: 'incomplete' });
       }
     }
+    this.props.updateVote();
   };
 
   // checks if required fields are completed before posting votes
@@ -180,6 +181,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     } else {
       this.setState({ alert: 'incomplete' });
     }
+    this.props.updateVote();
   };
 
   // posts the supplied vote for this DAR

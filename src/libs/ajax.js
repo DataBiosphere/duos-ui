@@ -223,8 +223,12 @@ export const DAR = {
     const darInfo = await DAR.describeDar(darId);
     const election = await Election.findElectionByDarId(darId);
     const consent = await DAR.getDarConsent(darId);
+    // AccessElectionReview contains the DAC vote information for DAR requests against a consented dataset
+    const accessElectionReview = await Election.findDataAccessElectionReview(election.electionId, false);
+    // RPElectionReview contains the DAC vote information for whether the Research Purpose was properly structured.
+    const rpElectionReview = await Election.findRPElectionReview(election.electionId, false);
     darInfo.translatedDataUse = await DAR.translateDataUse(consent.dataUse);
-    return { darInfo, election, consent };
+    return { darInfo, election, consent, accessElectionReview, rpElectionReview };
   },
 
   describeDar: async (darId) => {

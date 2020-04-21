@@ -3,7 +3,9 @@ import { div, span, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Files } from '../../libs/ajax';
 import { AppSummary } from './AppSummary';
+import { VoteSummary } from './VoteSummary';
 import { DownloadLink } from '../../components/DownloadLink';
+import * as fp from 'lodash/fp';
 
 const SECTION = {
   fontFamily: 'Montserrat',
@@ -29,7 +31,9 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, election, consent } = this.props;
+    const { voteAsChair, darInfo, election, consent, ids, accessElectionReview, rpElectionReview} = this.props;
+    const accessReviewVotes = fp.map('vote')(fp.get( 'reviewVote')(accessElectionReview));
+    const rpReviewVotes = fp.map('vote')(fp.get( 'reviewVote')(rpElectionReview));
     return div([
       div({ id: 'header', style: SECTION }, [
         div({ style: { minWidth: '50%' } }, [
@@ -38,7 +42,16 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         ]),
         DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
       ]),
-      div({ id: 'votes-summary', isRendered: voteAsChair }),
+      VoteSummary({
+        question: 'Should data access be granted to this application?',
+        questionNumber: '1',
+        votes: accessReviewVotes
+      }),
+      VoteSummary({
+        question: 'Was the research purpose accurately converted to a structured format?',
+        questionNumber: '2',
+        votes: rpReviewVotes
+      }),
       AppSummary({ darInfo, election, consent })
     ]);
   }

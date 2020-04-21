@@ -3,7 +3,7 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import { DAR } from '../../libs/ajax';
+import {DAR, Election} from '../../libs/ajax';
 
 const SECTION = {
   margin: '16px',
@@ -17,7 +17,7 @@ class AccessReviewV2 extends React.PureComponent {
 
   initialState() {
     return {
-      voteAsChair: false,
+      voteAsChair: true, // TODO: Revert this
     };
   }
 
@@ -25,18 +25,22 @@ class AccessReviewV2 extends React.PureComponent {
     this.setState({ voteAsChair: selected });
   };
 
+  updateVote = () => {
+    this.darReviewAccess();
+  }
+
   componentDidMount() {
     this.darReviewAccess();
   }
 
   async darReviewAccess() {
     const { darId } = this.props.match.params;
-    const { darInfo, election, consent } = await DAR.describeDarWithElectionInfo(darId);
-    this.setState({ darInfo, election, consent });
+    const { darInfo, election, consent, accessElectionReview, rpElectionReview } = await DAR.describeDarWithElectionInfo(darId);
+    this.setState({ darInfo, election, consent, accessElectionReview, rpElectionReview });
   }
 
   render() {
-    const { voteAsChair, darInfo, election, consent } = this.state;
+    const { voteAsChair, darInfo, election, consent, accessElectionReview, rpElectionReview } = this.state;
     const { history, match } = this.props;
     const ids = match.params;
 
@@ -57,7 +61,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ ids, darInfo, election, consent, voteAsChair, selectChair: this.selectChair })]
+            [DacVotePanel({ ids, darInfo, election, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
           ),
           div(
             {
@@ -67,7 +71,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '70%',
               }
             },
-            [DarApplication({ voteAsChair, darInfo, election, consent, ids })]
+            [DarApplication({ voteAsChair, darInfo, election, consent, ids, accessElectionReview, rpElectionReview })]
           )
         ])
       ]

@@ -15,7 +15,7 @@ const HEADER = {
   fontSize: Theme.font.size.header,
   lineHeight: Theme.font.leading.regular,
   fontWeight: Theme.font.weight.semibold,
-  color: Theme.palette.hightlighted,
+  color: Theme.palette.highlighted,
 };
 
 const TEXT = {
