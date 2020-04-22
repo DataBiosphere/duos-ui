@@ -4,7 +4,7 @@ import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
-import {Votes, Election, Match} from '../../libs/ajax';
+import { Votes, Election, Match } from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 

@@ -3,7 +3,7 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import {DAR, Election} from '../../libs/ajax';
+import { DAR } from '../../libs/ajax';
 
 const SECTION = {
   margin: '16px',

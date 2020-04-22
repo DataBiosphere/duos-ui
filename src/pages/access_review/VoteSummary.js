@@ -1,7 +1,8 @@
 import React from 'react';
-import {a, div, h, hh} from 'react-hyperscript-helpers';
-import {Theme} from '../../libs/theme';
-import {Chart} from 'react-google-charts';
+import { a, div, h, hh } from 'react-hyperscript-helpers';
+import { Email } from '../../libs/ajax';
+import { Theme } from '../../libs/theme';
+import { Chart } from 'react-google-charts';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
 
@@ -111,7 +112,6 @@ export const VoteSummary = hh(
     memberVote = (vote) => {
       const voteString = fp.isNull(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
       const createDateString = fp.isNull(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
-      const reminderString = vote.vote.isReminderSent ? '' : 'Send Reminder';
       return div({
         style: {
           borderRadius: 9,
@@ -145,8 +145,13 @@ export const VoteSummary = hh(
           textAlign: 'right',
           flexShrink: '0',
           fontWeight: Theme.font.weight.regular}
-        }, [a({href: '#'}, [reminderString])])
+        }, [a({onClick: () => this.sendReminder(vote.vote.voteId)}, ['Send Reminder'])])
       ]);
+    };
+
+    sendReminder = async (voteId) => {
+      console.log(voteId);
+      return await Email.sendReminderEmail(voteId);
     };
 
     render() {

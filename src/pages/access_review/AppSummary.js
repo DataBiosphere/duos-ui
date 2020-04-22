@@ -7,7 +7,7 @@ import { ApplicationSection } from './ApplicationSection';
 import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { StructuredLimitations } from './StructuredLimitations';
 import { ApplicantInfo } from './ApplicantInfo';
-import {DownloadLink} from '../../components/DownloadLink';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const SUBHEADER = {
   margin: '32px 0px',
