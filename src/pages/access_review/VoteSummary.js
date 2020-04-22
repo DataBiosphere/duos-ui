@@ -1,8 +1,9 @@
 import React from 'react';
-import {div, h, hh, hr} from 'react-hyperscript-helpers';
+import {div, h, hh} from 'react-hyperscript-helpers';
 import {Theme} from '../../libs/theme';
 import {Chart} from 'react-google-charts';
 import * as fp from 'lodash/fp';
+import * as moment from 'moment';
 
 const STYLE = {
   color: Theme.palette.primary,
@@ -80,6 +81,7 @@ export const VoteSummary = hh(
           height: 150,
           width: 275,
           padding: '1rem',
+          margin: '.5rem'
         },
       }, [
         div({}, [
@@ -94,7 +96,7 @@ export const VoteSummary = hh(
       ]);
     };
 
-    getVoteData = (votes) => {
+    voteChart = (votes) => {
       const positiveVotes = fp.filter(['vote', true])(votes).length;
       const negativeVotes = fp.filter(['vote', false])(votes).length;
       const pendingVotes = fp.filter(['vote', null])(votes).length;
@@ -106,7 +108,9 @@ export const VoteSummary = hh(
       ];
     };
 
-    getMemberVoteBox = (vote) => {
+    memberVote = (vote) => {
+      const voteString = fp.isEmpty(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
+      const createDateString = fp.isEmpty(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
       return div({
         style: {
           borderRadius: 9,
@@ -114,19 +118,26 @@ export const VoteSummary = hh(
           height: 150,
           width: 275,
           padding: 0,
-          margin: '1rem'
+          margin: '.5rem'
         },
       }, [
-        div({style: {padding: '1rem'}}, [vote.displayName]),
-        div({style: {padding: 0, borderTop: '#BABEC1'}}, [hr({style: {borderTop: '#BABEC1'}})]),
-        div({style: {padding: '1rem'}}, [
-          'Vote: ', vote.vote
+        div({style: {fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [vote.displayName]),
+        div({style: {margin: 0, padding: 0, borderTop: '1px solid #BABEC1', height: 0}}, []),
+        div({style: {fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [
+          div({style: {display: 'flex', flexWrap: 'wrap'}}, [
+            div({style:{padding: '0 1rem 1rem 0'}}, ['VOTE: ']),
+            div({style:{padding: '0 1rem 1rem 0', fontWeight: Theme.font.weight.regular}}, [voteString]),
+            div({style:{padding: '0 1rem 1rem 0'}}, ['DATE: ']),
+            div({style:{fontWeight: Theme.font.weight.regular}}, [createDateString]),
+          ]),
+          div({padding: '0 1rem 1rem 0'}, ['RATIONALE: ']),
+          div({style:{fontWeight: Theme.font.weight.regular}}, [vote.vote.rationale]),
         ]),
       ]);
     };
 
     render() {
-      const data = this.getVoteData(this.props.votes);
+      const data = this.voteChart(fp.map('vote')(this.props.votes));
       const options = {
         ...baseOptions, ...{
           slices: {
@@ -151,7 +162,7 @@ export const VoteSummary = hh(
           },
           [
             this.voteResultsBox(data, options),
-            fp.map(this.getMemberVoteBox)(this.props.votes),
+            fp.map(this.memberVote)(this.props.votes),
           ])
         ]),
       ])
