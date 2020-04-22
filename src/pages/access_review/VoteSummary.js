@@ -109,8 +109,8 @@ export const VoteSummary = hh(
     };
 
     memberVote = (vote) => {
-      const voteString = fp.isEmpty(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
-      const createDateString = fp.isEmpty(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
+      const voteString = fp.isNull(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
+      const createDateString = fp.isNull(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
       return div({
         style: {
           borderRadius: 9,
@@ -126,7 +126,7 @@ export const VoteSummary = hh(
         div({style: {fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [
           div({style: {display: 'flex', flexWrap: 'wrap'}}, [
             div({style:{padding: '0 1rem 1rem 0'}}, ['VOTE: ']),
-            div({style:{padding: '0 1rem 1rem 0', fontWeight: Theme.font.weight.regular}}, [voteString]),
+            div({style:{padding: '0 1rem 1rem 0', fontWeight: Theme.font.weight.regular, minWidth: '7rem'}}, [voteString]),
             div({style:{padding: '0 1rem 1rem 0'}}, ['DATE: ']),
             div({style:{fontWeight: Theme.font.weight.regular}}, [createDateString]),
           ]),
