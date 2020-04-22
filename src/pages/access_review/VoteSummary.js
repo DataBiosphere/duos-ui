@@ -1,6 +1,7 @@
 import React from 'react';
 import { a, div, h, hh } from 'react-hyperscript-helpers';
 import { Email } from '../../libs/ajax';
+import { Notifications } from '../../libs/utils';
 import { Theme } from '../../libs/theme';
 import { Chart } from 'react-google-charts';
 import * as fp from 'lodash/fp';
@@ -113,6 +114,7 @@ export const VoteSummary = hh(
       const voteString = fp.isNull(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
       const createDateString = fp.isNull(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
       return div({
+        key: vote.vote.voteId,
         style: {
           borderRadius: 9,
           backgroundColor: '#DFE8EE',
@@ -145,13 +147,17 @@ export const VoteSummary = hh(
           textAlign: 'right',
           flexShrink: '0',
           fontWeight: Theme.font.weight.regular}
-        }, [a({onClick: () => this.sendReminder(vote.vote.voteId)}, ['Send Reminder'])])
+        }, [a({onClick: () => this.sendReminder(vote)}, ['Send Reminder'])])
       ]);
     };
 
-    sendReminder = async (voteId) => {
-      console.log(voteId);
-      return await Email.sendReminderEmail(voteId);
+    sendReminder = async (vote) => {
+      const response = await Email.sendReminderEmail(vote.vote.voteId);
+      if (response.status === 200) {
+        Notifications.showSuccess({text: `Reminder email sent to: ${vote.email}`});
+      } else {
+        Notifications.showError({ text: `Unable to send reminder email: ${response.status}` });
+      }
     };
 
     render() {
