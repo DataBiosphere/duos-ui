@@ -118,7 +118,8 @@ export const VoteSummary = hh(
           height: 150,
           width: 275,
           padding: 0,
-          margin: '.5rem'
+          margin: '.5rem',
+          overflow: 'scroll'
         },
       }, [
         div({style: {fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [vote.displayName]),
