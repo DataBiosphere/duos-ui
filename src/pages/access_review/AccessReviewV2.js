@@ -17,7 +17,7 @@ class AccessReviewV2 extends React.PureComponent {
 
   initialState() {
     return {
-      voteAsChair: true, // TODO: Revert this
+      voteAsChair: false,
     };
   }
 
