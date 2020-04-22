@@ -9,7 +9,7 @@ import * as fp from 'lodash/fp';
 
 const SECTION = {
   fontFamily: 'Montserrat',
-  margin: '16px 0px 5px 0px',
+  margin: '2rem 0 2rem 0',
   color: Theme.palette.primary,
   display: 'flex',
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import {div, h, hh} from 'react-hyperscript-helpers';
+import {a, div, h, hh} from 'react-hyperscript-helpers';
 import {Theme} from '../../libs/theme';
 import {Chart} from 'react-google-charts';
 import * as fp from 'lodash/fp';
@@ -78,7 +78,7 @@ export const VoteSummary = hh(
         style: {
           borderRadius: 9,
           backgroundColor: '#D3E9EC',
-          height: 150,
+          height: 160,
           width: 275,
           padding: '1rem',
           margin: '.5rem'
@@ -111,29 +111,41 @@ export const VoteSummary = hh(
     memberVote = (vote) => {
       const voteString = fp.isNull(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
       const createDateString = fp.isNull(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
+      const reminderString = vote.vote.isReminderSent ? '' : 'Send Reminder';
       return div({
         style: {
           borderRadius: 9,
           backgroundColor: '#DFE8EE',
-          height: 150,
+          height: 160,
           width: 275,
           padding: 0,
           margin: '.5rem',
-          overflow: 'scroll'
+          overflow: 'scroll',
+          display: 'flex',
+          flexDirection: 'column'
         },
       }, [
-        div({style: {fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [vote.displayName]),
-        div({style: {margin: 0, padding: 0, borderTop: '1px solid #BABEC1', height: 0}}, []),
-        div({style: {fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [
+        div({style: {flex: '1 0 auto', fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [vote.displayName]),
+        div({style: {flex: '1 0 auto', margin: 0, padding: 0, borderTop: '1px solid #BABEC1', height: 0}}, []),
+        div({style: {flex: '1 0 auto', fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [
           div({style: {display: 'flex', flexWrap: 'wrap'}}, [
             div({style:{padding: '0 1rem 1rem 0'}}, ['VOTE: ']),
             div({style:{padding: '0 1rem 1rem 0', fontWeight: Theme.font.weight.regular, minWidth: '7rem'}}, [voteString]),
             div({style:{padding: '0 1rem 1rem 0'}}, ['DATE: ']),
             div({style:{fontWeight: Theme.font.weight.regular}}, [createDateString]),
           ]),
-          div({padding: '0 1rem 1rem 0'}, ['RATIONALE: ']),
-          div({style:{fontWeight: Theme.font.weight.regular}}, [vote.vote.rationale]),
+
+          div({style: {}}, [
+            div({style: {flex: '1 0 auto', padding: '0 1rem 1rem 0'}}, ['RATIONALE: ']),
+            div({style: {flex: '1 0 auto', fontWeight: Theme.font.weight.regular}}, [vote.vote.rationale]),
+          ]),
         ]),
+        div({style: {
+          padding: '1rem',
+          textAlign: 'right',
+          flexShrink: '0',
+          fontWeight: Theme.font.weight.regular}
+        }, [a({href: '#'}, [reminderString])])
       ]);
     };
 
