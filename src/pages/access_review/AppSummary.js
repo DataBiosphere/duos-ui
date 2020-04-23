@@ -7,7 +7,7 @@ import { ApplicationSection } from './ApplicationSection';
 import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { StructuredLimitations } from './StructuredLimitations';
 import { ApplicantInfo } from './ApplicantInfo';
-import {DownloadLink} from '../../components/DownloadLink';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const SUBHEADER = {
   margin: '32px 0px',
@@ -30,9 +30,9 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
   };
 
   render() {
-    const { darInfo, election, consent } = this.props;
+    const { darInfo, accessElection, consent } = this.props;
     const { pi, profileName, institution, department, city, country } = darInfo;
-    const mrDAR = JSON.stringify(election.useRestriction, null, 2);
+    const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
 
     return div({ id: 'app-summary' },

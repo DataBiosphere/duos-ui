@@ -58,6 +58,8 @@ export const Notifications = {
     layout: 'bottomRight',
     timeout: '3500',
     progressBar: false,
+    type: 'error',
+    theme: 'duos',
   },
   /**
    * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
@@ -68,8 +70,18 @@ export const Notifications = {
       text: 'Something went wrong. Please try again.',
       ...Notifications.defaultNotification,
       ...props,
-      type: 'error',
-      theme: 'duos',
+    }).show();
+  },
+  /**
+   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
+   * See https://ned.im/noty/#/options for more customization options.
+   */
+  showSuccess: props => {
+    return new Noty({
+      text: 'Congratulations',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'success',
     }).show();
   },
 };

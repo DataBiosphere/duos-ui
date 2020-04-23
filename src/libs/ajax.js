@@ -219,12 +219,11 @@ export const DAC = {
 
 export const DAR = {
 
-  describeDarWithElectionInfo: async (darId) => {
+  describeDarWithConsent: async (darId) => {
     const darInfo = await DAR.describeDar(darId);
-    const election = await Election.findElectionByDarId(darId);
     const consent = await DAR.getDarConsent(darId);
     darInfo.translatedDataUse = await DAR.translateDataUse(consent.dataUse);
-    return { darInfo, election, consent };
+    return { darInfo, consent };
   },
 
   describeDar: async (darId) => {

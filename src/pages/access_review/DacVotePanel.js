@@ -4,7 +4,7 @@ import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
-import {Votes, Election, Match} from '../../libs/ajax';
+import { Votes, Election, Match } from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -60,7 +60,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   getVotesAsChair = async () => {
     this.setState({ alert: '' });
-    const { electionId } = this.props.election;
+    const { electionId } = this.props.accessElection;
     try {
       const finalVote = await Votes.getDarFinalAccessVote(electionId);
       this.setState({ finalVote });
@@ -75,9 +75,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * This is called when VoteAsChair mounts.
    */
   getMatchData = async () => {
-    const { consent, election } = this.props;
+    const { consent, accessElection } = this.props;
     try {
-      const matchData = await Match.findMatch(consent.consentId, election.referenceId);
+      const matchData = await Match.findMatch(consent.consentId, accessElection.referenceId);
       this.setState({ matchData: matchData });
     } catch (e) {
       Notifications.showError({ text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}` });
@@ -169,6 +169,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.setState({ alert: 'incomplete' });
       }
     }
+    this.props.updateVote();
   };
 
   // checks if required fields are completed before posting votes
@@ -180,6 +181,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     } else {
       this.setState({ alert: 'incomplete' });
     }
+    this.props.updateVote();
   };
 
   // posts the supplied vote for this DAR
@@ -202,11 +204,11 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // closes the election for this DAR
   async closeElection() {
-    const { election } = this.props;
-    const electionClone = _.cloneDeep(election);
+    const { accessElection } = this.props;
+    const electionClone = _.cloneDeep(accessElection);
     electionClone.status = 'Closed';
     try {
-      await Election.updateElection(election.electionId, electionClone);
+      await Election.updateElection(accessElection.electionId, electionClone);
     }
     catch (e) {
       Notifications.showError({ text: `Something went wrong. Error code: ${e.status}` });
