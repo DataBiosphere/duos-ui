@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
@@ -59,15 +59,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
-    this.setState({ alert: '' });
-    const { electionId } = this.props.accessElection;
-    try {
-      const finalVote = await Votes.getDarFinalAccessVote(electionId);
-      this.setState({ finalVote });
-    }
-    catch (e) {
-      Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
-    }
+    const { accessElection, rpElection } = this.props;
+    this.setState({
+      alert: '',
+      accessElection: accessElection,
+      rpElection: rpElection
+    });
   };
 
   /**
@@ -115,15 +112,15 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     let voteClone;
 
     if (isAccessVote) {
-      voteClone = _.cloneDeep(vote);
+      voteClone = fp.cloneDeep(vote);
     } else if (isRpVote) {
-      voteClone = _.cloneDeep(rpVote);
+      voteClone = fp.cloneDeep(rpVote);
     }
 
     if (voteStatus !== null) {
       voteClone.vote = voteStatus;
     }
-    if (!_.isUndefined(rationale)) {
+    if (!fp.isUndefined(rationale)) {
       voteClone.rationale = rationale;
     } // rationale can be null!
 
@@ -132,24 +129,6 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       : isRpVote ? { rpVote: voteClone }
         : {};
     this.setState(stateObj);
-  };
-
-  /**
-   * updates the final vote object in state
-   * this is called when changes are made to input buttons/fields
-   */
-  updateChairVote = (voteStatus, rationale) => {
-    const { finalVote } = this.state;
-    const voteClone = _.cloneDeep(finalVote);
-
-    if (voteStatus !== null) {
-      voteClone.vote = voteStatus;
-    }
-    if (!_.isUndefined(rationale)) {
-      voteClone.rationale = rationale;
-    } // rationale can be null!
-
-    this.setState({ finalVote: voteClone });
   };
 
   // checks if required fields are completed before posting votes
@@ -172,20 +151,78 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     this.props.updateVote();
   };
 
-  // checks if required fields are completed before posting votes
-  submitChairVote = () => {
-    const { finalVote } = this.state;
-    if (finalVote.vote !== null) {
-      this.submitVote(finalVote);
-      this.closeElection();
-    } else {
-      this.setState({ alert: 'incomplete' });
+  /**
+   * updates the election's final vote information in state
+   * this is called when changes are made to input buttons/fields
+   */
+  updateChairVotes = (id, option, rationale) => {
+    console.log("id: " + id);
+    console.log("option: " + option);
+    console.log("rationale: " + rationale);
+    const { accessElection, rpElection } = this.state;
+    if (accessElection.electionId === id) {
+      const accessElectionClone = fp.cloneDeep(accessElection);
+      accessElectionClone.finalVote = option;
+      accessElectionClone.finalAccessVote = option;
+      accessElectionClone.rationale = rationale;
+      this.setState({
+        accessOption: option,
+        accessRationale: rationale,
+        accessElection: accessElectionClone
+      });
+    }
+    if (rpElection.electionId === id) {
+      const rpElectionClone = fp.cloneDeep(rpElection);
+      rpElectionClone.finalVote = option;
+      rpElectionClone.finalAccessVote = option;
+      rpElectionClone.rationale = rationale;
+      this.setState({
+        rpElection: rpElectionClone,
+        rpOption: option,
+        rpRationale: rationale,
+      });
+    }
+  };
+
+  /**
+   * Submits the final vote information for the elections in state.
+   * This sets BOTH the `finalVote` and `finalAccessVote` values for each election.
+   */
+  submitChairVote = async () => {
+    const { accessElection, rpElection } = this.state;
+    try {
+      const { accessOption, accessRationale } = this.state;
+      if (!fp.isNull(accessOption)) {
+        const accessClone = fp.cloneDeep(accessElection);
+        accessClone.finalAccessVote = accessOption;
+        accessClone.finalVote = accessOption;
+        accessClone.rationale = accessRationale;
+        const updatedElection = await Election.updateElection(accessElection.electionId, accessClone);
+        console.log(JSON.stringify(updatedElection));
+      }
+    }
+    catch (e) {
+      Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
+    }
+    try {
+      const { rpOption, rpRationale } = this.state;
+      if (!fp.isNull(rpOption)) {
+        const rpClone = fp.cloneDeep(rpElection);
+        rpClone.finalAccessVote = rpOption;
+        rpClone.finalVote = rpOption;
+        rpClone.rationale = rpRationale;
+        const updatedElection = await Election.updateElection(rpElection.electionId, rpClone);
+        console.log(JSON.stringify(updatedElection));
+      }
+    }
+    catch (e) {
+      Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
     }
     this.props.updateVote();
   };
 
   // posts the supplied vote for this DAR
-  async submitVote(vote) {
+  submitVote = async (vote) => {
     const { darId } = this.props.ids;
     try {
       if (vote.type === 'FINAL') {
@@ -203,9 +240,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   // closes the election for this DAR
-  async closeElection() {
+  closeElection = async () => {
     const { accessElection } = this.props;
-    const electionClone = _.cloneDeep(accessElection);
+    const electionClone = fp.cloneDeep(accessElection);
     electionClone.status = 'Closed';
     try {
       await Election.updateElection(accessElection.electionId, electionClone);
@@ -237,7 +274,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
-    const { vote, rpVote, finalVote, alert, matchData } = this.state;
+    const { vote, rpVote, alert, matchData } = this.state;
+    let { accessElection, rpElection } = this.state;
+    console.log(JSON.stringify(accessElection));
+    if (fp.isUndefined(accessElection)) { let { accessElection } = this.props; }
+    if (fp.isUndefined(rpElection)) { let { rpElection } = this.props; }
+    console.log(JSON.stringify(accessElection));
 
     return div({ style: ROOT },
       [
@@ -269,9 +311,10 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               isRendered: isChairPerson && voteAsChair,
               getVotes: this.getVotesAsChair,
               getMatchData: this.getMatchData,
-              onUpdate: this.updateChairVote,
+              onUpdate: this.updateChairVotes,
               matchData,
-              finalVote,
+              accessElection,
+              rpElection,
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),

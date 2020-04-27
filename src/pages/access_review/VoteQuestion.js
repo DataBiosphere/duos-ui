@@ -28,15 +28,16 @@ const INPUT = {
 export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
 
   setVote = (voteStatus, rationale) => {
-    const { vote, updateVote } = this.props;
+    const { updateVote, voteId } = this.props;
     if (fp.isEmpty(rationale)) {
       rationale = null;
     }
-    updateVote(vote.voteId, voteStatus, rationale);
+    updateVote(voteId, voteStatus, rationale);
   };
 
   render() {
-    const { label, question, vote, id } = this.props;
+    const { label, question, id, rationale, selectedOption } = this.props;
+
     return div({ style: { marginBottom: '24px' } },
       [
         div({ style: FADED }, label),
@@ -47,7 +48,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
             type: 'radio',
             id: id + '-yes',
             onChange: () => this.setVote(true),
-            checked: vote === null ? false : vote.vote === true, // field will be checked if vote was previously submitted
+            checked: selectedOption === null ? false : selectedOption === true, // field will be checked if vote was previously submitted
           }),
           h('label', {
             htmlFor: id + '-yes',
@@ -57,7 +58,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
             type: 'radio',
             id: id + '-no',
             onChange: () => this.setVote(false),
-            checked: vote === null ? false : vote.vote === false,
+            checked: selectedOption === null ? false : selectedOption === false,
           }),
           h('label', {
             htmlFor: id + '-no',
@@ -70,7 +71,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           rows: '5',
           placeholder: 'OPTIONAL: Describe your rationale or add comments here',
           onChange: e => this.setVote(null, e.target.value),
-          value: fp.isEmpty(vote) || fp.isEmpty(vote.rationale) ? '' : vote.rationale, // rationale will be displayed if vote was previously submitted
+          value: rationale
         })
       ]);
   }

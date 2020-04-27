@@ -52,15 +52,25 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   render() {
-    const { finalVote, onUpdate, matchData } = this.props;
+    const { onUpdate, matchData, accessElection, rpElection } = this.props;
     return div({ id: 'chair-vote' }, [
       VoteQuestion({
-        id: 'final-question',
-        isRendered: finalVote,
-        label: 'Final Question:',
-        question: 'Does the DAC grant this researcher permission to access the data?',
-        updateVote: (id, selectedOption, rationale) => onUpdate(selectedOption, rationale),
-        vote: finalVote,
+        id: 'access-vote',
+        label: 'Question 1:',
+        question: 'Should data access be granted to this applicant?',
+        updateVote: (accessId, accessOption, accessRationale) => onUpdate(accessId, accessOption, accessRationale),
+        voteId: accessElection.electionId,
+        rationale: fp.isNull(accessElection) ? null : accessElection.rationale,
+        selectedOption: fp.isNull(accessElection) ? null : accessElection.finalVote,
+      }),
+      VoteQuestion({
+        id: 'rp-vote',
+        label: 'Question 2:',
+        question: 'Was the research purpose accurately converted to a structured format?',
+        updateVote: (rpId, rpOption, rpRationale) => onUpdate(rpId, rpOption, rpRationale),
+        voteId: rpElection.electionId,
+        rationale: fp.isNull(rpElection) ? null : rpElection.rationale,
+        selectedOption: fp.isNull(rpElection) ? null : rpElection.finalVote,
       }),
       div({ style: LINK_SECTION }, [
         a({ style: LINK, onClick: this.toggleMatchData }, [

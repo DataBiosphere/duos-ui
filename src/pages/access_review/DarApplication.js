@@ -31,7 +31,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, ids, accessElectionReview, rpElectionReview} = this.props;
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview} = this.props;
     const accessVotes = fp.get( 'reviewVote')(accessElectionReview);
     const rpVotes = fp.get( 'reviewVote')(rpElectionReview);
     return div([

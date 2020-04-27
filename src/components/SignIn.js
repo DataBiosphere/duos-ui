@@ -20,7 +20,7 @@ export const SignIn = hh(class SignIn extends Component {
     this.getGoogleClientId();
   }
 
-  async getGoogleClientId() {
+  getGoogleClientId = async () => {
     const clientKey = `${ await Config.getGoogleClientId() }`;
     this.setState(prev => {
       prev.clientId = clientKey;
@@ -28,7 +28,7 @@ export const SignIn = hh(class SignIn extends Component {
     });
   }
 
-  async getUser() {
+  getUser = async () => {
     return await User.getByEmail(Storage.getGoogleData().profileObj.email);
   }
 

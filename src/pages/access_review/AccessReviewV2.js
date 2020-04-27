@@ -17,7 +17,7 @@ class AccessReviewV2 extends React.PureComponent {
 
   initialState() {
     return {
-      voteAsChair: false,
+      voteAsChair: true, // TODO: Revert
     };
   }
 
@@ -51,7 +51,7 @@ class AccessReviewV2 extends React.PureComponent {
   }
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview } = this.state;
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElection, rpElectionReview } = this.state;
     const { history, match } = this.props;
     const ids = match.params;
 
@@ -72,7 +72,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ ids, darInfo, accessElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
+            [DacVotePanel({ ids, darInfo, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
           ),
           div(
             {
@@ -82,7 +82,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '70%',
               }
             },
-            [DarApplication({ voteAsChair, darInfo, accessElection, consent, ids, accessElectionReview, rpElectionReview })]
+            [DarApplication({ voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview })]
           )
         ])
       ]

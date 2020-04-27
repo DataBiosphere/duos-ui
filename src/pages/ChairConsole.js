@@ -8,7 +8,7 @@ import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NavigationUtils, USER_ROLES } from '../libs/utils';
-import { Config } from '../libs/config';
+// import { Config } from '../libs/config';
 
 
 export const ChairConsole = hh(class ChairConsole extends Component {
