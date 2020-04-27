@@ -95,6 +95,9 @@ class HomeAbout extends Component {
                         p( {style: { fontWeight: '400' }}, ["This initiative provides standard data sharing language for IRBs, funders, and investigators to use in their consent forms, based on the Data Use Ontology (DUO)."]),
                         img({ src: "/images/machine_readable_consent_forms.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "machine readable consent icons" }),
                         p( {style: { fontWeight: '400' }}, ["By using these machine readable consent form clauses, IRBs, funders, and investigators establish how their dataset(s) may be used, specifically the data use limitations, according to the international DUO standard - removing the need for latter interpretation of the consent forms, and greatly aiding DACs in reviewing DARs for the dataset(s)."]),
+                        p ({style: {fontWeight: '450'}}, ['The GA4GH Consent Machine Readable Consent Clauses guidance is now open for public review and comment!']),
+                        span ({style: {fontWeight: '400'}}, ['To read the guidance for integrating the GA4GH Data Use Ontology terms in your conseent form, and/or provide feedback visit the Machine Readable Consent Clause link on the ']),
+                        a({ href: 'https://www.ga4gh.org/', target: '_blank' }, 'GA4GH homepage')
                       ]),
 
                   ]),
