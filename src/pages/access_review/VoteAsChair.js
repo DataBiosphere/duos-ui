@@ -35,7 +35,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
       prev.viewMatchResults = !prev.viewMatchResults;
       return prev;
     });
-    // Changing state here doesn't trigger a re-render, need to force update.
+    // Changing state here doesn't trigger a re-render hence the need to force update.
     this.forceUpdate();
   };
 
@@ -53,25 +53,34 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
 
   render() {
     const { onUpdate, matchData, accessElection, rpElection } = this.props;
-    return div({ id: 'chair-vote' }, [
+    const accessVoteQuestion = fp.isNil(accessElection) ?
+      div({}, []) :
       VoteQuestion({
         id: 'access-vote',
         label: 'Question 1:',
         question: 'Should data access be granted to this applicant?',
         updateVote: (accessId, accessOption, accessRationale) => onUpdate(accessId, accessOption, accessRationale),
         voteId: accessElection.electionId,
-        rationale: fp.isNull(accessElection) ? null : accessElection.rationale,
-        selectedOption: fp.isNull(accessElection) ? null : accessElection.finalVote,
-      }),
+        rationale: accessElection.finalRationale,
+        selectedOption: accessElection.finalVote,
+      });
+    const rpVoteQuestion = fp.isNil(rpElection) ?
+      div({}, []) :
       VoteQuestion({
         id: 'rp-vote',
         label: 'Question 2:',
         question: 'Was the research purpose accurately converted to a structured format?',
         updateVote: (rpId, rpOption, rpRationale) => onUpdate(rpId, rpOption, rpRationale),
         voteId: rpElection.electionId,
-        rationale: fp.isNull(rpElection) ? null : rpElection.rationale,
-        selectedOption: fp.isNull(rpElection) ? null : rpElection.finalVote,
-      }),
+        rationale: rpElection.finalRationale,
+        selectedOption: rpElection.finalVote,
+      });
+    return div({ id: 'chair-vote' }, [
+      div({},[
+        "If you post this vote the Election will be closed with current results."
+      ]),
+      accessVoteQuestion,
+      rpVoteQuestion,
       div({ style: LINK_SECTION }, [
         a({ style: LINK, onClick: this.toggleMatchData }, [
           'View DUOS algorithm decision',

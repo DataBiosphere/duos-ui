@@ -55,15 +55,17 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   /**
-   * gets data for final access vote
+   * gets final access vote data for the access and rp elections
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
-    const { accessElection, rpElection } = this.props;
+    const { accessElection, rpElection, accessElectionReview, rpElectionReview } = this.props;
     this.setState({
       alert: '',
       accessElection: accessElection,
-      rpElection: rpElection
+      rpElection: rpElection,
+      accessElectionReview: accessElectionReview,
+      rpElectionReview: rpElectionReview
     });
   };
 
@@ -120,7 +122,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     if (voteStatus !== null) {
       voteClone.vote = voteStatus;
     }
-    if (!fp.isUndefined(rationale)) {
+    if (!fp.isNil(rationale)) {
       voteClone.rationale = rationale;
     } // rationale can be null!
 
@@ -164,7 +166,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       const accessElectionClone = fp.cloneDeep(accessElection);
       accessElectionClone.finalVote = option;
       accessElectionClone.finalAccessVote = option;
-      accessElectionClone.rationale = rationale;
+      accessElectionClone.finalRationale = rationale;
+      console.log(JSON.stringify(accessElectionClone));
       this.setState({
         accessOption: option,
         accessRationale: rationale,
@@ -175,7 +178,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       const rpElectionClone = fp.cloneDeep(rpElection);
       rpElectionClone.finalVote = option;
       rpElectionClone.finalAccessVote = option;
-      rpElectionClone.rationale = rationale;
+      rpElectionClone.finalRationale = rationale;
+      console.log(JSON.stringify(rpElectionClone));
       this.setState({
         rpElection: rpElectionClone,
         rpOption: option,
@@ -192,11 +196,11 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { accessElection, rpElection } = this.state;
     try {
       const { accessOption, accessRationale } = this.state;
-      if (!fp.isNull(accessOption)) {
+      if (!fp.isNil(accessOption)) {
         const accessClone = fp.cloneDeep(accessElection);
         accessClone.finalAccessVote = accessOption;
         accessClone.finalVote = accessOption;
-        accessClone.rationale = accessRationale;
+        accessClone.finalRationale = accessRationale;
         const updatedElection = await Election.updateElection(accessElection.electionId, accessClone);
         console.log(JSON.stringify(updatedElection));
       }
@@ -206,11 +210,11 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     }
     try {
       const { rpOption, rpRationale } = this.state;
-      if (!fp.isNull(rpOption)) {
+      if (!fp.isNil(rpOption)) {
         const rpClone = fp.cloneDeep(rpElection);
         rpClone.finalAccessVote = rpOption;
         rpClone.finalVote = rpOption;
-        rpClone.rationale = rpRationale;
+        rpClone.finalRationale = rpRationale;
         const updatedElection = await Election.updateElection(rpElection.electionId, rpClone);
         console.log(JSON.stringify(updatedElection));
       }
@@ -241,7 +245,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // closes the election for this DAR
   closeElection = async () => {
-    const { accessElection } = this.props;
+    const { accessElection } = this.state;
     const electionClone = fp.cloneDeep(accessElection);
     electionClone.status = 'Closed';
     try {
@@ -275,11 +279,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { isChairPerson } = Storage.getCurrentUser();
     const { voteAsChair, selectChair } = this.props;
     const { vote, rpVote, alert, matchData } = this.state;
-    let { accessElection, rpElection } = this.state;
-    console.log(JSON.stringify(accessElection));
-    if (fp.isUndefined(accessElection)) { let { accessElection } = this.props; }
-    if (fp.isUndefined(rpElection)) { let { rpElection } = this.props; }
-    console.log(JSON.stringify(accessElection));
+    let { accessElectionReview, rpElectionReview } = this.state;
+    const accessElection = fp.get('election')(accessElectionReview);
+    const rpElection = fp.get('election')(rpElectionReview);
 
     return div({ style: ROOT },
       [

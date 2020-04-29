@@ -17,7 +17,7 @@ class AccessReviewV2 extends React.PureComponent {
 
   initialState() {
     return {
-      voteAsChair: true, // TODO: Revert
+      voteAsChair: true,    // TODO: Revert
     };
   }
 
@@ -41,10 +41,11 @@ class AccessReviewV2 extends React.PureComponent {
     const accessElection = await Election.findElectionById(accessVote.electionId);
     const accessElectionReview = await Election.findDataAccessElectionReview(accessVote.electionId, false);
 
-    // RP Election Information
+    // RP Election Information.
+    // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
     const rpVote = await Votes.getDarVote(darId, rpVoteId);
     const rpElection = await Election.findElectionById(rpVote.electionId);
-    const rpElectionReview = await Election.findRPElectionReview(rpVote.electionId, false);
+    const rpElectionReview = await Election.findRPElectionReview(accessElection.electionId, false);
 
     const { darInfo, consent } = await DAR.describeDarWithConsent(darId);
     this.setState({ darId, voteId, rpVoteId, accessVote, accessElection, rpVote, rpElection, darInfo, consent, accessElectionReview, rpElectionReview });
@@ -72,7 +73,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ ids, darInfo, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
+            [DacVotePanel({ ids, darInfo, accessElection, rpElection, consent, voteAsChair, accessElectionReview, rpElectionReview, selectChair: this.selectChair, updateVote: this.updateVote })]
           ),
           div(
             {

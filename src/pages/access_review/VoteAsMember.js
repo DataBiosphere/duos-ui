@@ -17,9 +17,9 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
         label: 'Question 1:',
         question: 'Should data access be granted to this applicant?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
-        voteId: fp.isNull(vote) ? null : vote.voteId,
-        rationale: fp.isNull(vote) ? null : vote.rationale,
-        selectedOption:fp.isNull(vote) ? null : vote.vote,
+        voteId: fp.isNil(vote) ? null : vote.voteId,
+        rationale: fp.isNil(vote) ? null : vote.rationale,
+        selectedOption:fp.isNil(vote) ? null : vote.vote,
       }),
       VoteQuestion({
         id: 'rp-vote',
@@ -27,9 +27,9 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
         label: 'Question 2:',
         question: 'Was the research purpose accurately converted to a structured format?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
-        voteId: fp.isNull(rpVote) ? null : rpVote.voteId,
-        rationale: fp.isNull(rpVote) ? null : rpVote.rationale,
-        selectedOption: fp.isNull(rpVote) ? null : rpVote.vote,
+        voteId: fp.isNil(rpVote) ? null : rpVote.voteId,
+        rationale: fp.isNil(rpVote) ? null : rpVote.rationale,
+        selectedOption: fp.isNil(rpVote) ? null : rpVote.vote,
       }),
     ]);
   }
