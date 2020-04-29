@@ -73,7 +73,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ ids, darInfo, accessElection, rpElection, consent, voteAsChair, accessElectionReview, rpElectionReview, selectChair: this.selectChair, updateVote: this.updateVote })]
+            [DacVotePanel({ ids, darInfo, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
           ),
           div(
             {

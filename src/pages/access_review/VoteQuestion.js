@@ -27,11 +27,23 @@ const INPUT = {
 
 export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      voteStatus: null,
+      rationale: ''
+    };
+  }
+
   setVote = (voteStatus, rationale) => {
     const { updateVote, voteId } = this.props;
-    if (fp.isEmpty(rationale)) {
+    if (fp.isNil(rationale)) {
       rationale = null;
     }
+    this.setState({
+      voteStatus: voteStatus,
+      rationale: rationale
+    });
     updateVote(voteId, voteStatus, rationale);
   };
 
@@ -47,7 +59,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           input({
             type: 'radio',
             id: id + '-yes',
-            onChange: () => this.setVote(true),
+            onChange: () => this.setVote(true, this.state.rationale),
             checked: selectedOption === null ? false : selectedOption === true, // field will be checked if vote was previously submitted
           }),
           h('label', {
@@ -57,7 +69,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           input({
             type: 'radio',
             id: id + '-no',
-            onChange: () => this.setVote(false),
+            onChange: () => this.setVote(false, this.state.rationale),
             checked: selectedOption === null ? false : selectedOption === false,
           }),
           h('label', {
@@ -70,7 +82,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           style: INPUT,
           rows: '5',
           placeholder: 'OPTIONAL: Describe your rationale or add comments here',
-          onChange: e => this.setVote(null, e.target.value),
+          onChange: e => this.setVote(this.state.voteStatus, e.target.value),
           value: rationale
         })
       ]);

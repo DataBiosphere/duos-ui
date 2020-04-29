@@ -61,7 +61,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
         question: 'Should data access be granted to this applicant?',
         updateVote: (accessId, accessOption, accessRationale) => onUpdate(accessId, accessOption, accessRationale),
         voteId: accessElection.electionId,
-        rationale: accessElection.finalRationale,
+        rationale: fp.isNil(accessElection.finalRationale) ? '' : accessElection.finalRationale,
         selectedOption: accessElection.finalVote,
       });
     const rpVoteQuestion = fp.isNil(rpElection) ?
@@ -72,13 +72,10 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
         question: 'Was the research purpose accurately converted to a structured format?',
         updateVote: (rpId, rpOption, rpRationale) => onUpdate(rpId, rpOption, rpRationale),
         voteId: rpElection.electionId,
-        rationale: rpElection.finalRationale,
+        rationale: fp.isNil(rpElection.finalRationale) ? '' : rpElection.finalRationale,
         selectedOption: rpElection.finalVote,
       });
     return div({ id: 'chair-vote' }, [
-      div({},[
-        "If you post this vote the Election will be closed with current results."
-      ]),
       accessVoteQuestion,
       rpVoteQuestion,
       div({ style: LINK_SECTION }, [
