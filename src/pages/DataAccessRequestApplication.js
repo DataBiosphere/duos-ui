@@ -799,7 +799,7 @@ class DataAccessRequestApplication extends Component {
                         onChange: this.handleCheckboxChange
                       }),
                       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-                        ['I am an NIH Intramural researcher (NIH email required) and/or collaborator of the PI/Data Custodian for the selected dataset(s)'])
+                        ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
                     ]),
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
@@ -808,7 +808,9 @@ class DataAccessRequestApplication extends Component {
                         div({ isRendered: this.state.formData.checkCollaborator !== true, className: 'display-inline' }, ['*']),
                         div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
                         span({ className: 'default-color' },
-                          ['Please authenticate your eRA Commons account. Other profiles are optional:'])
+                          ['Please autenticate with ',
+                          a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
+                        ])
                       ])
                     ]),
 
