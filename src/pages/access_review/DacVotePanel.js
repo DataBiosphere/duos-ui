@@ -2,7 +2,6 @@ import React from 'react';
 import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
-import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
 import { Votes, Election, Match } from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
@@ -59,9 +58,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
-    const { accessElection, rpElection } = this.props;
+    const { memberVotes, chairVotes, finalVotes, agreementVotes, accessElection, rpElection } = this.props;
     this.setState({
       alert: '',
+      memberVotes: memberVotes,
+      chairVotes: chairVotes,
+      finalVotes: finalVotes,
+      agreementVotes: agreementVotes,
       accessElection: accessElection,
       rpElection: rpElection
     });
@@ -186,34 +189,34 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * This sets BOTH the `finalVote` and `finalAccessVote` values for each election.
    */
   submitChairVote = async () => {
-    const { accessElection, rpElection } = this.state;
-    try {
-      const { accessOption, accessRationale } = this.state;
-      if (!fp.isNil(accessOption)) {
-        const accessClone = fp.cloneDeep(accessElection);
-        accessClone.finalAccessVote = accessOption;
-        accessClone.finalVote = accessOption;
-        accessClone.finalRationale = accessRationale;
-        const updatedElection = await Election.updateElection(accessElection.electionId, accessClone);
-      }
-    }
-    catch (e) {
-      Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
-    }
-    try {
-      const { rpOption, rpRationale } = this.state;
-      if (!fp.isNil(rpOption)) {
-        const rpClone = fp.cloneDeep(rpElection);
-        rpClone.finalAccessVote = rpOption;
-        rpClone.finalVote = rpOption;
-        rpClone.finalRationale = rpRationale;
-        const updatedElection = await Election.updateElection(rpElection.electionId, rpClone);
-      }
-    }
-    catch (e) {
-      Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
-    }
-    this.props.updateVote();
+    // const { accessElection, rpElection } = this.state;
+    // try {
+    //   const { accessOption, accessRationale } = this.state;
+    //   if (!fp.isNil(accessOption)) {
+    //     const accessClone = fp.cloneDeep(accessElection);
+    //     accessClone.finalAccessVote = accessOption;
+    //     accessClone.finalVote = accessOption;
+    //     accessClone.finalRationale = accessRationale;
+    //     await Election.updateElection(accessElection.electionId, accessClone);
+    //   }
+    // }
+    // catch (e) {
+    //   Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
+    // }
+    // try {
+    //   const { rpOption, rpRationale } = this.state;
+    //   if (!fp.isNil(rpOption)) {
+    //     const rpClone = fp.cloneDeep(rpElection);
+    //     rpClone.finalAccessVote = rpOption;
+    //     rpClone.finalVote = rpOption;
+    //     rpClone.finalRationale = rpRationale;
+    //     await Election.updateElection(rpElection.electionId, rpClone);
+    //   }
+    // }
+    // catch (e) {
+    //   Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
+    // }
+    // this.props.updateVote();
   };
 
   // posts the supplied vote for this DAR
@@ -221,6 +224,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { darId } = this.props.ids;
     try {
       if (vote.type === 'FINAL') {
+        // TODO: This might need to be in the chair vote section. Members cannot
+        // submit a final access vote.
         await Votes.updateFinalAccessDarVote(darId, vote);
       } else if (vote.createDate === null) {
         await Votes.postDarVote(darId, vote);
@@ -267,47 +272,66 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   render() {
-    const { isChairPerson } = Storage.getCurrentUser();
-    const { voteAsChair, selectChair } = this.props;
-    const { accessElection, rpElection, vote, rpVote, alert, matchData } = this.state;
+    const { isUserChairForDataset, voteAsChair, selectChair } = this.props;
+    const { memberVotes, chairVotes, finalVotes, agreementVotes, accessElection, rpElection, vote, rpVote, alert, matchData } = this.state;
+
+    const chairAccessVote = fp.first(fp.isNil(accessElection) ? {} : fp.filter({ electionId: accessElection.electionId })(chairVotes));
+    const chairRpVote = fp.first(fp.isNil(rpElection) ? {} : fp.filter({ electionId: rpElection.electionId })(chairVotes));
+
+    const memberAccessVote = fp.first(fp.isNil(accessElection) ? {} : fp.filter({ electionId: accessElection.electionId })(memberVotes));
+    const memberRpVote = fp.first(fp.isNil(rpElection) ? {} : fp.filter({ electionId: rpElection.electionId })(memberVotes));
+
+    console.log(JSON.stringify(chairAccessVote));
+    console.log(JSON.stringify(chairRpVote));
+    console.log(JSON.stringify(memberAccessVote));
+    console.log(JSON.stringify(memberRpVote));
+
+    console.log(JSON.stringify(memberVotes));
+    console.log(JSON.stringify(chairVotes));
 
     return div({ style: ROOT },
       [
         div({ id: 'tabs', style: { display: 'flex' } }, [
           a({
             id: 'vote-as-member',
-            style: voteAsChair ? TAB_UNSELECTED : TAB_SELECTED,
+            style: (isUserChairForDataset && voteAsChair) ? TAB_UNSELECTED : TAB_SELECTED,
             onClick: () => selectChair(false),
           },
           [span({ style: { opacity: '70%' } }, 'Vote As Member')]),
           a({
             id: 'vote-as-chair',
-            isRendered: isChairPerson,
-            style: voteAsChair ? TAB_SELECTED : TAB_UNSELECTED,
+            isRendered: isUserChairForDataset,
+            style: (isUserChairForDataset && voteAsChair) ? TAB_SELECTED : TAB_UNSELECTED,
             onClick: () => selectChair(true),
           },
-          [span({ style: { opacity: '70%' } }, 'Vote As Chair')])
+          [span({
+            isRendered: isUserChairForDataset,
+            style: { opacity: '70%' }
+          }, 'Vote As Chair')])
         ]),
-        div({ style: voteAsChair ? VOTE_CHAIR : VOTE_MEMBER, },
+        div({ style: (isUserChairForDataset && voteAsChair) ? VOTE_CHAIR : VOTE_MEMBER, },
           [
             VoteAsMember({
-              isRendered: !voteAsChair,
+              isRendered: (!isUserChairForDataset && !voteAsChair),
               getVotes: this.getVotesAsMember,
               onUpdate: this.updateMemberVote,
               vote,
               rpVote,
             }),
-            VoteAsChair({
-              isRendered: isChairPerson && voteAsChair,
-              getVotes: this.getVotesAsChair,
-              getMatchData: this.getMatchData,
-              onUpdate: this.updateChairVotes,
-              matchData,
-              accessElection,
-              rpElection,
-            }),
-            div({},[
-              "Completing these votes also closes the election with current results."
+            div({
+              isRendered: (isUserChairForDataset && voteAsChair)
+            }, [
+              VoteAsChair({
+                getVotes: this.getVotesAsChair,
+                getMatchData: this.getMatchData,
+                onUpdate: this.updateChairVotes,
+                matchData,
+                chairAccessVote,
+                chairRpVote
+              }),
+              div({},[
+                "Completing these votes also closes the election with current results."
+              ]),
             ]),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),
@@ -315,7 +339,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
                 id: 'vote',
                 className: 'button-contained',
                 style: alert === 'success' ? { backgroundColor: Theme.palette.success } : {},
-                onClick: voteAsChair ? this.submitChairVote : this.submitMemberVote,
+                onClick: (isUserChairForDataset && voteAsChair) ? this.submitChairVote : this.submitMemberVote,
               },
               ['Vote',
                 alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })

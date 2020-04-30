@@ -140,6 +140,17 @@ export const Consent = {
 
 export const DAC = {
 
+  // TODO: These three API calls should be consolidated in Consent.
+  isUserChairForDataset: async (dacUserId, dataSetId) => {
+    const dacs = await DAC.list();
+    const chairpersonDacs = fp.filter({dacUserId: dacUserId })(dacs.chairpersons);
+    const chairpersonDacDatasets = await fp.map((d) => {
+      return DAC.datasets(d.dacId);
+    })(chairpersonDacs);
+    const datasetsInChairpersonDacs = fp.filter({dataSetId: dataSetId} )(chairpersonDacDatasets);
+    return !fp.isEmpty(datasetsInChairpersonDacs);
+  },
+
   list: async () => {
     const url = `${await Config.getApiUrl()}/dac`;
     const res = await fetchOk(url, Config.authOpts());
@@ -1078,6 +1089,17 @@ export const Votes = {
 
   getDarFinalAccessVote: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/final`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  /**
+   * Get all votes for a DAR election. Retrieves both Access and RP election votes
+   * @param requestId
+   * @returns {Promise<List<Vote>>}
+   */
+  getDarVotes: async (requestId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },

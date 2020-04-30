@@ -83,7 +83,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           rows: '5',
           placeholder: 'OPTIONAL: Describe your rationale or add comments here',
           onChange: e => this.setVote(this.state.voteStatus, e.target.value),
-          value: rationale
+          value: fp.isNil(rationale) ? '' : rationale
         })
       ]);
   }
