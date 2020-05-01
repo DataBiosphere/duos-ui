@@ -61,15 +61,15 @@ class AccessReviewV2 extends React.PureComponent {
   }
 
   render() {
-    const { isUserChairForDataset, allVotes, voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElection, rpElectionReview } = this.state;
+    const { isUserChairForDataset, allVotes, voteAsChair, darInfo, darId, accessElection, consent, accessElectionReview, rpElection, rpElectionReview } = this.state;
     const { history, match } = this.props;
     const ids = match.params;
 
     const currentUser = Storage.getCurrentUser();
     const memberVotes = fp.filter({ type: 'DAC', dacUserId: currentUser.dacUserId })(allVotes);
     const chairVotes = fp.filter({ type: 'Chairperson', dacUserId: currentUser.dacUserId })(allVotes);
-    const finalVotes = fp.filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
-    const agreementVotes = fp.filter({ type: 'Agreement', dacUserId: currentUser.dacUserId })(allVotes);
+    // const finalVotes = fp.filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
+    // const agreementVotes = fp.filter({ type: 'Agreement', dacUserId: currentUser.dacUserId })(allVotes);
 
     return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
       [
@@ -88,7 +88,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ isUserChairForDataset, memberVotes, chairVotes, finalVotes, agreementVotes, ids, darInfo, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
+            [DacVotePanel({ isUserChairForDataset, memberVotes, chairVotes, darId, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
           ),
           div(
             {

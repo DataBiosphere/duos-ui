@@ -206,7 +206,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // posts the supplied vote for this DAR
   submitVote = async (vote) => {
-    const { darId } = this.props.ids;
+    const { darId } = this.props;
     try {
       if (vote.type === 'FINAL') {
         // TODO: This might need to be in the chair vote section. Members cannot
@@ -259,18 +259,6 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { isUserChairForDataset, voteAsChair, selectChair } = this.props;
     const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData } = this.state;
-
-    // console.log(JSON.stringify(chairVotes));
-    // console.log("Chair Access Vote");
-    // console.log(JSON.stringify(chairAccessVote));
-    // console.log("Chair RP Vote");
-    // console.log(JSON.stringify(chairRpVote));
-
-    // console.log(JSON.stringify(memberVotes));
-    // console.log("Member Access Vote");
-    // console.log(JSON.stringify(memberAccessVote));
-    // console.log("Member RP Vote");
-    // console.log(JSON.stringify(memberRpVote));
 
     return div({ style: ROOT },
       [
