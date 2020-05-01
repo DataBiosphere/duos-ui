@@ -152,68 +152,56 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   /**
-   * updates the election's final vote information in state
+   * updates the election's chairperson vote information in state
    * this is called when changes are made to input buttons/fields
    */
-  updateChairVotes = (id, option, rationale) => {
-    const { accessElection, rpElection } = this.props;
-    if (accessElection.electionId === id) {
-      const accessElectionClone = fp.cloneDeep(accessElection);
-      accessElectionClone.finalVote = option;
-      accessElectionClone.finalAccessVote = option;
-      accessElectionClone.finalRationale = rationale;
-      this.setState({
-        accessOption: option,
-        accessRationale: rationale,
-        accessElection: accessElectionClone
-      });
+  updateChairVotes = (voteId, voteStatus, rationale) => {
+    const { chairAccessVote, chairRpVote } = this.state;
+    const isAccessVote = voteId === chairAccessVote.voteId;
+    const isRpVote = voteId === chairRpVote.voteId;
+    let voteClone;
+
+    if (isAccessVote) {
+      voteClone = fp.cloneDeep(chairAccessVote);
+    } else if (isRpVote) {
+      voteClone = fp.cloneDeep(chairRpVote);
     }
-    if (rpElection.electionId === id) {
-      const rpElectionClone = fp.cloneDeep(rpElection);
-      rpElectionClone.finalVote = option;
-      rpElectionClone.finalAccessVote = option;
-      rpElectionClone.finalRationale = rationale;
-      this.setState({
-        rpElection: rpElectionClone,
-        rpOption: option,
-        rpRationale: rationale,
-      });
+
+    if (voteStatus !== null) {
+      voteClone.vote = voteStatus;
     }
+    if (!fp.isNil(rationale)) {
+      voteClone.rationale = rationale;
+    } // rationale can be null!
+
+    // set state of vote or rpVote depending on vote ID
+    const stateObj = isAccessVote ? { chairAccessVote: voteClone }
+      : isRpVote ? { chairRpVote: voteClone }
+        : {};
+    this.setState(stateObj);
   };
 
   /**
-   * Submits the final vote information for the elections in state.
-   * This sets BOTH the `finalVote` and `finalAccessVote` values for each election.
+   * Submits the chair vote information for the elections in state.
+   * this is called when changes are made to input buttons/fields
    */
   submitChairVote = async () => {
-    // const { accessElection, rpElection } = this.state;
-    // try {
-    //   const { accessOption, accessRationale } = this.state;
-    //   if (!fp.isNil(accessOption)) {
-    //     const accessClone = fp.cloneDeep(accessElection);
-    //     accessClone.finalAccessVote = accessOption;
-    //     accessClone.finalVote = accessOption;
-    //     accessClone.finalRationale = accessRationale;
-    //     await Election.updateElection(accessElection.electionId, accessClone);
-    //   }
-    // }
-    // catch (e) {
-    //   Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
-    // }
-    // try {
-    //   const { rpOption, rpRationale } = this.state;
-    //   if (!fp.isNil(rpOption)) {
-    //     const rpClone = fp.cloneDeep(rpElection);
-    //     rpClone.finalAccessVote = rpOption;
-    //     rpClone.finalVote = rpOption;
-    //     rpClone.finalRationale = rpRationale;
-    //     await Election.updateElection(rpElection.electionId, rpClone);
-    //   }
-    // }
-    // catch (e) {
-    //   Notifications.showError({ text: `The vote could not be logged. Error code: ${e.status}` });
-    // }
-    // this.props.updateVote();
+    const { chairAccessVote, chairRpVote } = this.state;
+    if (chairRpVote) {
+      if (chairAccessVote.vote !== null && chairRpVote.vote !== null) {
+        this.submitVote(chairAccessVote);
+        this.submitVote(chairRpVote);
+      } else {
+        this.setState({ alert: 'incomplete' });
+      }
+    } else {
+      if (chairAccessVote.vote !== null) {
+        this.submitVote(chairAccessVote);
+      } else {
+        this.setState({ alert: 'incomplete' });
+      }
+    }
+    this.props.updateVote();
   };
 
   // posts the supplied vote for this DAR

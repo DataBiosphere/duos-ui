@@ -4,6 +4,7 @@ import { VoteQuestion } from './VoteQuestion';
 import * as fp from 'lodash/fp';
 
 export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
+
   componentDidMount() {
     this.props.getVotes();
   };
