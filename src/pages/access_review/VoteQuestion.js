@@ -30,8 +30,8 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      voteStatus: null,
-      rationale: ''
+      voteStatus: props.selectedOption,
+      rationale: props.rationale
     };
   }
 
