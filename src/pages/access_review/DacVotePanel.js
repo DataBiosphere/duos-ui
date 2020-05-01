@@ -64,16 +64,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
-    const { finalVotes, agreementVotes, chairVotes, accessElection, rpElection } = this.props;
-    // Final and Agreement vote refer to the Collect Vote and Final Vote decisions.
+    const { finalVotes, chairVotes, accessElection, rpElection } = this.props;
     const chairFinalVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(finalVotes);
-    const chairAgreementVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(agreementVotes);
     const chairAccessVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(chairVotes);
     const chairRpVote = fp.isNil(rpElection) ? {} : fp.find({ electionId: rpElection.electionId })(chairVotes);
     this.setState({
       alert: '',
       chairFinalVote: chairFinalVote,
-      chairAgreementVote: chairAgreementVote,
       chairAccessVote: chairAccessVote,
       chairRpVote: chairRpVote,
     });
@@ -193,7 +190,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when changes are made to input buttons/fields
    */
   submitChairVote = async () => {
-    const { chairFinalVote, chairAgreementVote, chairAccessVote, chairRpVote } = this.state;
+    const { accessElection, rpElection } = this.props;
+    const { chairFinalVote, chairAccessVote, chairRpVote } = this.state;
     if (chairRpVote) {
       if (!fp.isNil(chairAccessVote.vote) && !fp.isNil(chairRpVote.vote)) {
         this.submitVote(chairAccessVote);
@@ -203,10 +201,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         chairFinalVote.rationale = chairAccessVote.rationale;
         this.submitVote(chairFinalVote);
 
-        // TODO: Figure out the right API call to make this happen.
-        chairAgreementVote.vote = chairAccessVote.vote;
-        chairAgreementVote.rationale = chairAccessVote.rationale;
-        // this.submitVote(chairAgreementVote);
+        await this.closeElection(accessElection, chairAccessVote.vote, chairAccessVote.rationale);
+        await this.closeElection(rpElection, chairRpVote.vote, chairRpVote.rationale);
       } else {
         this.setState({ alert: 'incomplete' });
       }
@@ -240,12 +236,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   // closes the election for this DAR
-  closeElection = async () => {
-    const { accessElection } = this.state;
-    const electionClone = fp.cloneDeep(accessElection);
+  closeElection = async (election, vote, rationale) => {
+    const electionClone = fp.cloneDeep(election);
     electionClone.status = 'Closed';
+    electionClone.finalVote = vote;
+    electionClone.finalAccessVote = vote;
+    electionClone.finalRationale = rationale;
     try {
-      await Election.updateElection(accessElection.electionId, electionClone);
+      await Election.updateElection(electionClone.electionId, electionClone);
     }
     catch (e) {
       Notifications.showError({ text: `Something went wrong. Error code: ${e.status}` });
