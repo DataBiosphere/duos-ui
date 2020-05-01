@@ -301,21 +301,15 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               vote: memberAccessVote,
               rpVote: memberRpVote,
             }),
-            div({
-              isRendered: voteAsChair
-            }, [
-              VoteAsChair({
-                getVotes: this.getVotesAsChair,
-                getMatchData: this.getMatchData,
-                onUpdate: this.updateChairVotes,
-                matchData: matchData,
-                vote: chairAccessVote,
-                rpVote: chairRpVote
-              }),
-              div({},[
-                "Completing these votes also closes the election with current results."
-              ]),
-            ]),
+            VoteAsChair({
+              isRendered: voteAsChair,
+              getVotes: this.getVotesAsChair,
+              getMatchData: this.getMatchData,
+              onUpdate: this.updateChairVotes,
+              matchData: matchData,
+              vote: chairAccessVote,
+              rpVote: chairRpVote
+            }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),
               button({
