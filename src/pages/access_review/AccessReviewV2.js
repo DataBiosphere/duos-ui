@@ -71,7 +71,6 @@ class AccessReviewV2 extends React.PureComponent {
     const finalVotes = fp.filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
     const agreementVotes = fp.filter({ type: 'Agreement', dacUserId: currentUser.dacUserId })(allVotes);
 
-    console.log(JSON.stringify(allVotes));
     return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
       [
         div(

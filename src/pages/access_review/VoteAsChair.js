@@ -52,28 +52,28 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   render() {
-    const { chairAccessVote, chairRpVote, onUpdate, matchData} = this.props;
-    const accessVoteQuestion = fp.isNil(chairAccessVote) ?
+    const { vote, rpVote, onUpdate, matchData} = this.props;
+    const accessVoteQuestion = fp.isNil(vote) ?
       div({}, []) :
       VoteQuestion({
         id: 'access-vote',
         label: 'Question 1:',
         question: 'Should data access be granted to this applicant?',
         updateVote: (accessId, accessOption, accessRationale) => onUpdate(accessId, accessOption, accessRationale),
-        voteId: chairAccessVote.voteId,
-        rationale: fp.isNil(chairAccessVote.rationale) ? '' : chairAccessVote.rationale,
-        selectedOption: chairAccessVote.vote,
+        voteId: vote.voteId,
+        rationale: fp.isNil(vote.rationale) ? '' : vote.rationale,
+        selectedOption: vote.vote,
       });
-    const rpVoteQuestion = fp.isNil(chairRpVote) ?
+    const rpVoteQuestion = fp.isNil(rpVote) ?
       div({}, []) :
       VoteQuestion({
         id: 'rp-vote',
         label: 'Question 2:',
         question: 'Was the research purpose accurately converted to a structured format?',
         updateVote: (rpId, rpOption, rpRationale) => onUpdate(rpId, rpOption, rpRationale),
-        voteId: chairRpVote.voteId,
-        rationale: fp.isNil(chairRpVote.rationale) ? '' : chairRpVote.rationale,
-        selectedOption: chairRpVote.vote,
+        voteId: rpVote.voteId,
+        rationale: fp.isNil(rpVote.rationale) ? '' : rpVote.rationale,
+        selectedOption: rpVote.vote,
       });
     return div({ id: 'chair-vote' }, [
       accessVoteQuestion,

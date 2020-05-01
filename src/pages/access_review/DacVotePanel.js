@@ -49,7 +49,11 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     this.state = {
       vote: null,
       rpVote: null,
-      finalVote: null,
+      chairAccessVote: null,
+      chairRpVote: null,
+      memberAccessVote: null,
+      memberRpVote: null
+
     };
   };
 
@@ -58,15 +62,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsChair mounts
    */
   getVotesAsChair = async () => {
-    const { memberVotes, chairVotes, finalVotes, agreementVotes, accessElection, rpElection } = this.props;
+    const { chairVotes, accessElection, rpElection } = this.props;
+    const chairAccessVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(chairVotes);
+    const chairRpVote = fp.isNil(rpElection) ? {} : fp.find({ electionId: rpElection.electionId })(chairVotes);
     this.setState({
       alert: '',
-      memberVotes: memberVotes,
-      chairVotes: chairVotes,
-      finalVotes: finalVotes,
-      agreementVotes: agreementVotes,
-      accessElection: accessElection,
-      rpElection: rpElection
+      chairAccessVote: chairAccessVote,
+      chairRpVote: chairRpVote,
     });
   };
 
@@ -89,19 +91,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsMember mounts
    */
   getVotesAsMember = async () => {
-    this.setState({ alert: '' });
-    const { darId, voteId, rpVoteId } = this.props.ids;
-    try {
-      const vote = await Votes.getDarVote(darId, voteId);
-      this.setState({ vote });
-      if (rpVoteId) {
-        const rpVote = await Votes.getDarVote(darId, rpVoteId);
-        this.setState({ rpVote });
-      }
-    }
-    catch (e) {
-      Notifications.showError({ text: `Something went wrong trying to get the votes. Error code: ${e.status}` });
-    }
+    const { memberVotes, accessElection, rpElection } = this.props;
+    const memberAccessVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(memberVotes);
+    const memberRpVote = fp.isNil(rpElection) ? {} : fp.find({ electionId: rpElection.electionId })(memberVotes);
+    this.setState({
+      alert: '',
+      memberAccessVote: memberAccessVote,
+      memberRpVote: memberRpVote
+    });
   };
 
   /**
@@ -109,15 +106,15 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when changes are made to input buttons/fields
    */
   updateMemberVote = (voteId, voteStatus, rationale) => {
-    const { vote, rpVote } = this.state;
-    const isAccessVote = voteId === vote.voteId;
-    const isRpVote = voteId === rpVote.voteId;
+    const { memberAccessVote, memberRpVote } = this.state;
+    const isAccessVote = voteId === memberAccessVote.voteId;
+    const isRpVote = voteId === memberRpVote.voteId;
     let voteClone;
 
     if (isAccessVote) {
-      voteClone = fp.cloneDeep(vote);
+      voteClone = fp.cloneDeep(memberAccessVote);
     } else if (isRpVote) {
-      voteClone = fp.cloneDeep(rpVote);
+      voteClone = fp.cloneDeep(memberRpVote);
     }
 
     if (voteStatus !== null) {
@@ -128,25 +125,25 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     } // rationale can be null!
 
     // set state of vote or rpVote depending on vote ID
-    const stateObj = isAccessVote ? { vote: voteClone }
-      : isRpVote ? { rpVote: voteClone }
+    const stateObj = isAccessVote ? { memberAccessVote: voteClone }
+      : isRpVote ? { memberRpVote: voteClone }
         : {};
     this.setState(stateObj);
   };
 
   // checks if required fields are completed before posting votes
   submitMemberVote = () => {
-    const { vote, rpVote } = this.state;
-    if (rpVote) {
-      if (vote.vote !== null && rpVote.vote !== null) {
-        this.submitVote(vote);
-        this.submitVote(rpVote);
+    const { memberAccessVote, memberRpVote } = this.state;
+    if (memberRpVote) {
+      if (memberAccessVote.vote !== null && memberRpVote.vote !== null) {
+        this.submitVote(memberAccessVote);
+        this.submitVote(memberRpVote);
       } else {
         this.setState({ alert: 'incomplete' });
       }
     } else {
-      if (vote.vote !== null) {
-        this.submitVote(vote);
+      if (memberAccessVote.vote !== null) {
+        this.submitVote(memberAccessVote);
       } else {
         this.setState({ alert: 'incomplete' });
       }
@@ -159,7 +156,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when changes are made to input buttons/fields
    */
   updateChairVotes = (id, option, rationale) => {
-    const { accessElection, rpElection } = this.state;
+    const { accessElection, rpElection } = this.props;
     if (accessElection.electionId === id) {
       const accessElectionClone = fp.cloneDeep(accessElection);
       accessElectionClone.finalVote = option;
@@ -273,35 +270,33 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   render() {
     const { isUserChairForDataset, voteAsChair, selectChair } = this.props;
-    const { memberVotes, chairVotes, finalVotes, agreementVotes, accessElection, rpElection, vote, rpVote, alert, matchData } = this.state;
+    const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData } = this.state;
 
-    const chairAccessVote = fp.first(fp.isNil(accessElection) ? {} : fp.filter({ electionId: accessElection.electionId })(chairVotes));
-    const chairRpVote = fp.first(fp.isNil(rpElection) ? {} : fp.filter({ electionId: rpElection.electionId })(chairVotes));
+    // console.log(JSON.stringify(chairVotes));
+    // console.log("Chair Access Vote");
+    // console.log(JSON.stringify(chairAccessVote));
+    // console.log("Chair RP Vote");
+    // console.log(JSON.stringify(chairRpVote));
 
-    const memberAccessVote = fp.first(fp.isNil(accessElection) ? {} : fp.filter({ electionId: accessElection.electionId })(memberVotes));
-    const memberRpVote = fp.first(fp.isNil(rpElection) ? {} : fp.filter({ electionId: rpElection.electionId })(memberVotes));
-
-    console.log(JSON.stringify(chairAccessVote));
-    console.log(JSON.stringify(chairRpVote));
-    console.log(JSON.stringify(memberAccessVote));
-    console.log(JSON.stringify(memberRpVote));
-
-    console.log(JSON.stringify(memberVotes));
-    console.log(JSON.stringify(chairVotes));
+    // console.log(JSON.stringify(memberVotes));
+    // console.log("Member Access Vote");
+    // console.log(JSON.stringify(memberAccessVote));
+    // console.log("Member RP Vote");
+    // console.log(JSON.stringify(memberRpVote));
 
     return div({ style: ROOT },
       [
         div({ id: 'tabs', style: { display: 'flex' } }, [
           a({
             id: 'vote-as-member',
-            style: (isUserChairForDataset && voteAsChair) ? TAB_UNSELECTED : TAB_SELECTED,
+            style: voteAsChair ? TAB_UNSELECTED : TAB_SELECTED,
             onClick: () => selectChair(false),
           },
           [span({ style: { opacity: '70%' } }, 'Vote As Member')]),
           a({
             id: 'vote-as-chair',
             isRendered: isUserChairForDataset,
-            style: (isUserChairForDataset && voteAsChair) ? TAB_SELECTED : TAB_UNSELECTED,
+            style: voteAsChair ? TAB_SELECTED : TAB_UNSELECTED,
             onClick: () => selectChair(true),
           },
           [span({
@@ -309,25 +304,25 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
             style: { opacity: '70%' }
           }, 'Vote As Chair')])
         ]),
-        div({ style: (isUserChairForDataset && voteAsChair) ? VOTE_CHAIR : VOTE_MEMBER, },
+        div({ style: voteAsChair ? VOTE_CHAIR : VOTE_MEMBER, },
           [
             VoteAsMember({
-              isRendered: (!isUserChairForDataset && !voteAsChair),
+              isRendered: !voteAsChair,
               getVotes: this.getVotesAsMember,
               onUpdate: this.updateMemberVote,
-              vote,
-              rpVote,
+              vote: memberAccessVote,
+              rpVote: memberRpVote,
             }),
             div({
-              isRendered: (isUserChairForDataset && voteAsChair)
+              isRendered: voteAsChair
             }, [
               VoteAsChair({
                 getVotes: this.getVotesAsChair,
                 getMatchData: this.getMatchData,
                 onUpdate: this.updateChairVotes,
-                matchData,
-                chairAccessVote,
-                chairRpVote
+                matchData: matchData,
+                vote: chairAccessVote,
+                rpVote: chairRpVote
               }),
               div({},[
                 "Completing these votes also closes the election with current results."
