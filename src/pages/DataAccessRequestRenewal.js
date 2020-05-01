@@ -669,7 +669,7 @@ class DataAccessRequestRenewal extends Component {
     const profileSubmitted = span({}, [
       'Please make sure ',
       h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' is updated, as it will be submited with your DAR Application'
+      ' is updated, as it will be submited with your DAR Renewal'
     ]);
 
     return (
@@ -685,8 +685,8 @@ class DataAccessRequestRenewal extends Component {
             }, [
               PageHeading({
                 id: 'requestApplication', imgSrc: '/images/icon_add_access.png', iconSize: 'medium', color: 'access',
-                title: 'Data Access Request Application',
-                description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
+                title: 'Data Access Request Renewal',
+                description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate the renewal of your previously approved Data Access Request.'
               })
             ]),
             div({ isRendered: this.state.formData.dar_code !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
@@ -766,7 +766,7 @@ class DataAccessRequestRenewal extends Component {
                     Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
                   ]),
 
-                  h3({ className: 'rp-form-title access-color' }, ['PARTY TIME']),
+                  h3({ className: 'rp-form-title access-color' }, ['1. Researcher Identification']),
 
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
@@ -891,6 +891,304 @@ class DataAccessRequestRenewal extends Component {
                         className: 'cancel-color required-field-error-span', isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages)
                       }, ['Required field'])
                     ])
+                  ])
+                ]),
+
+                h3({ className: 'rp-form-title access-color' }, ['DAR Renewal - Progress Report']),
+
+                div({ className: 'form-group' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label rp-title-question' }, [
+                      '1.4 Progress Report* ',
+                      span({}, [
+                        'Please describe research progresses and intellectual properties resulting from analyzing the requested data in the box below. ',
+                        br(),
+                        'This is the second paragraph ',
+                        a({ target: '_blank', href: 'https://www.ncbi.nlm.nih.gov/books/NBK482114/' }, ['this is a link'], '.')
+                      ])
+                    ])
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    textarea({
+                      value: this.state.formData.rus, onChange: this.handleChange,
+                      name: 'rus',
+                      id: 'inputRUS',
+                      className: 'form-control',
+                      rows: '6',
+                      required: true,
+                      placeholder: 'Please limit your RUS to 2200 characters.',
+                      disabled: this.state.formData.dar_code !== null
+                    }),
+                  ])
+                ]),
+
+                div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
+                  label({ className: 'control-label rp-title-question' }, [
+                    '1.5 Publications',
+                    div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
+                    span({ className: 'default-color' },
+                      ['Please add publications resulting from the use of the requested datasets in the renewal application. Resulting publications from the requested dataset(s) should include the dbGaP accession number (i.e. PHS number) or DUOS ID if one is not aviaiable, and the recommended acknowledgment statement as described on the dbGaP study page. '])
+                  ])
+                ]),
+
+                div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
+                  label({ className: 'control-label' }, ['Title*']),
+                  input({
+                    type: 'text',
+                    name: 'linkedIn',
+                    id: 'inputLinkedIn',
+                    value: linkedIn,
+                    onChange: this.handleChange,
+                    disabled: false,
+                    className: 'form-control',
+                    required: true
+                  })
+                ]),
+
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+                    label({ className: 'control-label' }, ['Link*']),
+                    input({
+                      type: 'text',
+                      name: 'orcid',
+                      id: 'inputOrcid',
+                      value: orcid,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: 'form-control',
+                      required: true
+                    })
+                  ])
+                ]),
+
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+                    label({ className: 'control-label' }, ['Authors*']),
+                    input({
+                      type: 'text',
+                      name: 'orcid',
+                      id: 'inputOrcid',
+                      value: orcid,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: 'form-control',
+                      required: true
+                    })
+                  ]),
+
+                  div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+                    label({ className: 'control-label' }, ['Submitted Date*']),
+                    input({
+                      type: 'text',
+                      name: 'researcherGate',
+                      id: 'inputResearcherGate',
+                      value: researcherGate,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: 'form-control',
+                      required: true
+                    })
+                  ])
+                ]),
+
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  label({ className: 'control-label rp-choice-questions' },
+                    ['Did you cite the dataset(s) used in the publication?*'])
+                ]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  YesNoRadioGroup({
+                    value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
+                    required: true
+                  })
+                ]),
+
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label default-color' },
+                    )
+                  ]),
+
+                div(
+                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-group'},
+                  [
+                    span({},
+                      ['Please paste the citation used in your publication here*']),
+                    input({
+                      type: 'text',
+                      name: 'projectTitle',
+                      id: 'inputTitle',
+                      maxLength: '256',
+                      value: this.state.formData.projectTitle,
+                      onChange: this.handleChange,
+                      className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                        'form-control required-field-error' :
+                        'form-control',
+                      required: true,
+                      disabled: this.state.formData.dar_code !== null,
+                    }),
+                    span({
+                      className: 'cancel-color required-field-error-span',
+                      isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                    },
+                    ['Required field']),
+                  ]),
+
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    a({
+                      id: 'link_downloadAgreement', href: 'BroadDataAccessAgreement.pdf', target: '_blank',
+                      className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                    }, [
+                      span({ className: 'glyphicon glyphicon-download' }),
+                      'Add Another Publication'
+                    ])
+                  ])
+                ]),
+
+                div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
+                  label({ className: 'control-label rp-title-question' }, [
+                    '1.6 Presentations',
+                    div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
+                    span({ className: 'default-color' },
+                      ['Please add publications resulting from the use of the requested datasets in the renewal application. Resulting publications from the requested dataset(s) should include the dbGaP accession number (i.e. PHS number) or DUOS ID if one is not aviaiable, and the recommended acknowledgment statement as described on the dbGaP study page. '])
+                  ])
+                ]),
+
+                div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
+                  label({ className: 'control-label' }, ['Title*']),
+                  input({
+                    type: 'text',
+                    name: 'linkedIn',
+                    id: 'inputLinkedIn',
+                    value: linkedIn,
+                    onChange: this.handleChange,
+                    disabled: false,
+                    className: 'form-control',
+                    required: true
+                  })
+                ]),
+
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+                    label({ className: 'control-label' }, ['Link*']),
+                    input({
+                      type: 'text',
+                      name: 'orcid',
+                      id: 'inputOrcid',
+                      value: orcid,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: 'form-control',
+                      required: true
+                    })
+                  ])
+                ]),
+
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+                    label({ className: 'control-label' }, ['Authors*']),
+                    input({
+                      type: 'text',
+                      name: 'orcid',
+                      id: 'inputOrcid',
+                      value: orcid,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: 'form-control',
+                      required: true
+                    })
+                  ]),
+
+                  div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+                    label({ className: 'control-label' }, ['Presentation Date*']),
+                    input({
+                      type: 'text',
+                      name: 'researcherGate',
+                      id: 'inputResearcherGate',
+                      value: researcherGate,
+                      onChange: this.handleChange,
+                      disabled: false,
+                      className: 'form-control',
+                      required: true
+                    })
+                  ])
+                ]),
+
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  label({ className: 'control-label rp-choice-questions' },
+                    ['Did you cite the dataset(s) used in the publication?*'])
+                ]),
+                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                  YesNoRadioGroup({
+                    value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
+                    required: true
+                  })
+                ]),
+
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label default-color' },
+                    )
+                  ]),
+
+                div(
+                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-group'},
+                  [
+                    span({},
+                      ['Please paste the citation used in your presentation here*']),
+                    input({
+                      type: 'text',
+                      name: 'projectTitle',
+                      id: 'inputTitle',
+                      maxLength: '256',
+                      value: this.state.formData.projectTitle,
+                      onChange: this.handleChange,
+                      className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                        'form-control required-field-error' :
+                        'form-control',
+                      required: true,
+                      disabled: this.state.formData.dar_code !== null,
+                    }),
+                    span({
+                      className: 'cancel-color required-field-error-span',
+                      isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                    },
+                    ['Required field']),
+                  ]),
+
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    a({
+                      id: 'link_downloadAgreement', href: 'BroadDataAccessAgreement.pdf', target: '_blank',
+                      className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                    }, [
+                      span({ className: 'glyphicon glyphicon-download' }),
+                      'Add Another Presentation'
+                    ])
+                  ])
+                ]),
+
+                div({ className: 'form-group' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    label({ className: 'control-label rp-title-question' }, [
+                      '1.7 Data Management Incidents',
+                      span({}, [
+                        'Please describe any incidents related to mismanagement or misuse of the data below.'
+                      ])
+                    ])
+                  ]),
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                    textarea({
+                      value: this.state.formData.non_tech_rus,
+                      onChange: this.handleChange,
+                      name: 'non_tech_rus',
+                      id: 'inputNonTechRUS',
+                      className: 'form-control',
+                      rows: '3',
+                      required: false,
+                      placeholder: 'Please limit your non-technical summary to 1100 characters.',
+                      disabled: this.state.formData.dar_code !== null
+                    }),
                   ])
                 ]),
 
@@ -1483,7 +1781,7 @@ class DataAccessRequestRenewal extends Component {
                       div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
                         Alert({
                           id: 'problemSavingRequest', type: 'danger',
-                          title: 'Some errors occurred, Data Access Request Application couldn\'t be created.'
+                          title: 'Some errors occurred, Data Access Request Renewal couldn\'t be created.'
                         })
                       ])
                     ])
@@ -1504,7 +1802,7 @@ class DataAccessRequestRenewal extends Component {
                     ConfirmationDialog({
                       title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
                       color: 'access', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
-                    }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Application?'])]),
+                    }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Renewal?'])]),
                     h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
 
                     a({
