@@ -20,7 +20,7 @@ import './DataAccessRequestApplication.css';
 
 const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
 
-class DataAccessRequestApplication extends Component {
+class DatasetRegistration extends Component {
 
   constructor(props) {
     super(props);
@@ -115,7 +115,7 @@ class DataAccessRequestApplication extends Component {
 
   async componentDidMount() {
     await this.init();
-    this.props.history.push('/dar_application');
+    this.props.history.push('/dataset_registration');
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
@@ -766,7 +766,7 @@ class DataAccessRequestApplication extends Component {
                     Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
                   ]),
 
-                  h3({ className: 'rp-form-title access-color' }, ['1. Researcher Information']),
+                  h3({ className: 'rp-form-title access-color' }, ['PARTY TIME']),
 
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
@@ -799,7 +799,7 @@ class DataAccessRequestApplication extends Component {
                         onChange: this.handleCheckboxChange
                       }),
                       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-                        ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
+                        ['I am an NIH Intramural researcher (NIH email required) and/or collaborator of the PI/Data Custodian for the selected dataset(s)'])
                     ]),
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
@@ -808,9 +808,7 @@ class DataAccessRequestApplication extends Component {
                         div({ isRendered: this.state.formData.checkCollaborator !== true, className: 'display-inline' }, ['*']),
                         div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
                         span({ className: 'default-color' },
-                          ['Please autenticate with ',
-                          a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
-                        ])
+                          ['Please authenticate your eRA Commons account. Other profiles are optional:'])
                       ])
                     ]),
 
@@ -1524,4 +1522,4 @@ class DataAccessRequestApplication extends Component {
   }
 }
 
-export default DataAccessRequestApplication;
+export default DatasetRegistration;
