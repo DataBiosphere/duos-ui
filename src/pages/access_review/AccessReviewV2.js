@@ -40,14 +40,13 @@ class AccessReviewV2 extends React.PureComponent {
 
     // Access Election Information
     const accessVote = await Votes.getDarVote(darId, voteId);
-    const accessElection = await Election.findElectionById(accessVote.electionId);
     const accessElectionReview = await Election.findDataAccessElectionReview(accessVote.electionId, false);
+    const accessElection = fp.isNil(accessElectionReview) ? null : accessElectionReview.election;
 
     // RP Election Information. Can be null for manual review DARs.
     // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
-    const rpVote = fp.isNil(rpVoteId) ? null : await Votes.getDarVote(darId, rpVoteId);
-    const rpElection = fp.isNil(rpVoteId) ? null : await Election.findElectionById(rpVote.electionId);
     const rpElectionReview = fp.isNil(rpVoteId) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+    const rpElection = fp.isNil(rpElectionReview) ? null : rpElectionReview.election;
 
     const { darInfo, consent } = await DAR.describeDarWithConsent(darId);
 
