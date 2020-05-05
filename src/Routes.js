@@ -14,9 +14,11 @@ import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
 import { ChairConsole } from './pages/ChairConsole';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
+import DataAccessRequestRenewal from './pages/DataAccessRequestRenewal';
 import DataOwnerConsole from './pages/DataOwnerConsole';
 import DataOwnerReview from './pages/DataOwnerReview';
 import DatasetCatalog from './pages/DatasetCatalog';
+import DatasetRegistration from './pages/DatasetRegistration';
 import DulCollect from './pages/DulCollect';
 import DulPreview from './pages/DulPreview';
 import DulResultRecords from './pages/DulResultRecords';
@@ -28,7 +30,7 @@ import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeHelp from './pages/HomeHelp';
 import InvalidRestrictions from './pages/InvalidRestrictions';
-import AccessReviewV2 from './pages/AccessReviewV2';
+import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import ManageOntologies from './pages/ManageOntologies';
 import MemberConsole from './pages/MemberConsole';
 import NotFound from './pages/NotFound';
@@ -62,6 +64,8 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/help_reports" component={HelpReports} props={props} rolesAllowed={[USER_ROLES.all]} />

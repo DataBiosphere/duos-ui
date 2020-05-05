@@ -58,7 +58,7 @@ class HomeAbout extends Component {
                   div({style: { marginTop: '2rem', marginBottom: '2rem' },},
                     [a({
                       id: 'link_downloadAgreement',
-                      href: 'DUOS_LibraryCardAgreementTemplate_3.28.20.pdf',
+                      href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf',
                       target: '_blank',
                       className: 'btn-secondary btn-download-pdf hover-color',
                       style: { paddingBottom: '1rem' },
@@ -85,6 +85,21 @@ class HomeAbout extends Component {
                     }),
                     p({style: {fontWeight: '450'}},
                       ['Combined, the DUOS Library Card Agreement and DUOS system significantly alleviate the burden of work on Signing Officials and DACs while enhancing their compliant function and expediting appropriate access for researchers. ']),
+
+                      div({ className: "home-content" }, [
+                        h3({}, ["Machine Readable Consent Forms & DUOS"]),
+                        p( { className: "home-sections-description" }, ["Standardizing data sharing language for expedited and compliant sharing"]),
+                        p( {style: { fontWeight: '400' }}, ["To date, many consent forms contain ambiguous or region-specific data sharing language, making widespread data sharing and aggregation of datasets difficult or near impossible."]),
+                        span({}, []),
+                        a({ href: 'https://blog.primr.org/is-your-data-sharing-consent-language-transparent-and-machine-readable/', target: '_blank' }, 'GA4GH\'s Machine Readable Consent Form Initiative'),
+                        p( {style: { fontWeight: '400' }}, ["This initiative provides standard data sharing language for IRBs, funders, and investigators to use in their consent forms, based on the Data Use Ontology (DUO)."]),
+                        img({ src: "/images/machine_readable_consent_forms.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "machine readable consent icons" }),
+                        p( {style: { fontWeight: '400' }}, ["By using these machine readable consent form clauses, IRBs, funders, and investigators establish how their dataset(s) may be used, specifically the data use limitations, according to the international DUO standard - removing the need for latter interpretation of the consent forms, and greatly aiding DACs in reviewing DARs for the dataset(s)."]),
+                        p ({style: {fontWeight: '450'}}, ['The GA4GH Consent Machine Readable Consent Clauses guidance is now open for public review and comment!']),
+                        span ({style: {fontWeight: '400'}}, ['To read the guidance for integrating the GA4GH Data Use Ontology terms in your conseent form, and/or provide feedback visit the Machine Readable Consent Clause link on the ']),
+                        a({ href: 'https://www.ga4gh.org/', target: '_blank' }, 'GA4GH homepage')
+                      ]),
+
                   ]),
                 ]),
               ]),

@@ -7,7 +7,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { USER_ROLES } from '../libs/utils';
+import { NavigationUtils, USER_ROLES } from '../libs/utils';
 import { Config } from '../libs/config';
 
 
@@ -117,9 +117,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
   };
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
-    const newDarUiEnabled = Config.getFeatureFlag('newDarUi');
-    const pathStart = newDarUiEnabled ? "new_access_review" : "access_review";
+  openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
+    const pathStart = await NavigationUtils.accessReviewPath();
     if (rpVoteId !== null) {
       this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
     } else {

@@ -9,11 +9,13 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
+import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
+import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 
 
@@ -431,7 +433,6 @@ class FinalAccessReview extends Component {
     }
 
     this.setState({
-      sDar: electionReview.election.translatedUseRestriction,
       mrDAR: JSON.stringify(electionReview.election.useRestriction, null, 2),
       status: electionReview.election.status,
       voteAccessList: this.chunk(electionReview.reviewVote, 2),
@@ -613,7 +614,13 @@ class FinalAccessReview extends Component {
 
               div({ className: 'row dar-summary' }, [
                 div({ className: 'control-label access-color' }, ['Structured Research Purpose']),
-                div({ className: 'response-label', dangerouslySetInnerHTML: { __html: this.state.sDar } }, []),
+                div({ className: 'response-label' }, [
+                  StructuredDarRp({
+                    darInfo: this.state.darInfo,
+                    headerStyle: { display: 'none' },
+                    textStyle: Theme.legacy
+                  })
+                ]),
                 a({
                   isRendered: this.state.hasUseRestriction === true, onClick: () => Utils.download('machine-readable-DAR.json', this.state.mrDAR),
                   className: 'italic hover-color'
@@ -971,8 +978,8 @@ class FinalAccessReview extends Component {
           title: 'Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?',
           isDisabled: false,
           agreementData: agreementData,
-          voteStatus: this.state.voteAgreement.vote,
-          rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
+          voteStatus: _.isEmpty(this.state.voteAgreement) ? null : this.state.voteAgreement.vote,
+          rationale: _.isEmpty(this.state.voteAgreement) ? null : this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
           showAlert: this.state.showQ2Alert,
           alertMessage: this.state.alertQ2Message,
           action: { label: 'Vote', handler: this.logVoteAgreement },

@@ -1,8 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, span, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
-import { DownloadLink } from './DownloadLink';
+import { div, span, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
+import { DownloadLink } from '../../components/DownloadLink';
 
 const ROOT = {
   fontFamily: 'Montserrat',
@@ -15,7 +15,7 @@ const HEADER = {
   fontSize: Theme.font.size.header,
   lineHeight: Theme.font.leading.regular,
   fontWeight: Theme.font.weight.semibold,
-  color: Theme.palette.hightlighted,
+  color: Theme.palette.highlighted,
 };
 
 const TEXT = {

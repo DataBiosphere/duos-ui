@@ -1,7 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
-import { div, hh } from "react-hyperscript-helpers";
-import { Theme } from '../libs/theme';
+import { div, hh } from 'react-hyperscript-helpers';
+import { Theme } from '../../libs/theme';
 
 const HEADER = {
   margin: '10px 0px',
@@ -33,7 +33,7 @@ export const ApplicantInfo = hh(class ApplicantInfo extends React.PureComponent 
   render() {
     const { content } = this.props;
     return div({ style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
-      div({ style: HEADER }, "Applicant Information"),
+      div({ style: HEADER }, 'Applicant Information'),
       div({ style: { display: 'flex', justifyContent: 'space-between' } }, this.format(content)),
     ]);
   }

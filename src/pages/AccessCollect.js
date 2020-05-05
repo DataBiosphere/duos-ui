@@ -8,12 +8,13 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
+import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { DAR, Election, Email, Files } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
-
+import { Theme } from '../libs/theme';
 
 class AccessCollect extends Component {
 
@@ -27,8 +28,8 @@ class AccessCollect extends Component {
     this.handlerReminder = this.handlerReminder(this);
   }
 
-  componentDidMount() {
-    this.loadData();
+  async componentDidMount() {
+    await this.loadData();
   }
 
   initialState() {
@@ -296,14 +297,11 @@ class AccessCollect extends Component {
   };
 
   async findDar() {
-    DAR.describeDar(this.props.match.params.referenceId).then(
-      darInfo => {
-        this.setState(prev => {
-          prev.darInfo = darInfo;
-          return prev;
-        });
-      }
-    );
+    const darInfo = await DAR.describeDar(this.props.match.params.referenceId);
+    this.setState(prev => {
+      prev.darInfo = darInfo;
+      return prev;
+    });
   };
 
   getRPGraphData(type, reviewVote) {
@@ -636,10 +634,13 @@ class AccessCollect extends Component {
                 div({ className: 'panel-heading cm-boxhead access-color' }, [
                   h4({}, ['Structured Research Purpose'])
                 ]),
-                div({
-                  id: 'panel_structuredPurpose', className: 'panel-body cm-boxbody translated-restriction',
-                  dangerouslySetInnerHTML: { __html: this.state.userestriction }
-                }, [])
+                div({ style: {paddingLeft: '2rem'}}, [
+                  StructuredDarRp({
+                    darInfo: this.state.darInfo,
+                    headerStyle: { display: 'none' },
+                    textStyle: Theme.legacy
+                  })
+                ]),
               ])
             ]),
 

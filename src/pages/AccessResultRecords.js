@@ -7,11 +7,13 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
-import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
+import { StructuredDarRp } from '../components/StructuredDarRp';
 
+import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
+import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 
 
@@ -125,7 +127,7 @@ class AccessResultRecords extends Component {
 
   render() {
 
-    const { darInfo, hasUseRestriction, sDAR, mrDAR, sDUL, mrDUL, showRPaccordion } = this.state;
+    const { darInfo, hasUseRestriction, mrDAR, sDUL, mrDUL, showRPaccordion } = this.state;
 
     const backButton = div({ className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
       a({ id: 'btn_back', onClick: this.goBack, className: 'btn-primary btn-back' }, [
@@ -161,7 +163,7 @@ class AccessResultRecords extends Component {
 
         div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
 
-          this.renderApplicationSummary(darInfo, sDAR, mrDAR),
+          this.renderApplicationSummary(darInfo, mrDAR),
 
           this.renderDataUseLimitation(sDUL, mrDUL)
 
@@ -338,7 +340,7 @@ class AccessResultRecords extends Component {
     );
   }
 
-  renderApplicationSummary(darInfo, sDAR, mrDAR) {
+  renderApplicationSummary(darInfo, mrDAR) {
 
     return (
       div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
@@ -354,7 +356,13 @@ class AccessResultRecords extends Component {
 
           div({ isRendered: this.state.hasUseRestriction, className: 'row dar-summary' }, [
             div({ className: 'control-label access-color' }, ['Structured Research Purpose']),
-            div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: sDAR } }, []),
+            div({ className: 'response-label translated-restriction'}, [
+              StructuredDarRp({
+                darInfo: this.state.darInfo,
+                headerStyle: { display: 'none' },
+                textStyle: Theme.legacy
+              })
+            ]),
             a({
               onClick: () => Utils.download('machine-readable-DAR.json', mrDAR),
               filename: 'machine-readable-DAR.json',
@@ -691,7 +699,6 @@ class AccessResultRecords extends Component {
 
     // this data is used to construct structured_ files
     const mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
-    const sDAR = electionReview.election.translatedUseRestriction;
 
     this.setState({
       electionAccess: electionAccess,
@@ -699,7 +706,6 @@ class AccessResultRecords extends Component {
       voteAccessList: voteAccessList,
       chartDataAccess: chartDataAccess,
       voteAgreement: voteAgreement,
-      sDAR: sDAR,
       mrDAR: mrDAR
     });
   }

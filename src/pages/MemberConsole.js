@@ -7,7 +7,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { Config } from '../libs/config';
+import { NavigationUtils } from '../libs/utils';
 
 class MemberConsole extends Component {
 
@@ -96,9 +96,8 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => (e) => {
-    const newDarUiEnabled = Config.getFeatureFlag('newDarUi');
-    const pathStart = newDarUiEnabled ? "new_access_review" : "access_review";
+  openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
+    const pathStart = await NavigationUtils.accessReviewPath();
     if (rpVoteId !== null) {
       this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
     } else {

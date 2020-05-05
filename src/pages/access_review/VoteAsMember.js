@@ -1,5 +1,5 @@
 import React from 'react';
-import { div, hh } from "react-hyperscript-helpers";
+import { div, hh } from 'react-hyperscript-helpers';
 import { VoteQuestion } from './VoteQuestion';
 
 export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {

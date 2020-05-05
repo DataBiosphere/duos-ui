@@ -8,6 +8,8 @@ import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { NotificationService } from '../libs/notificationService';
+import { Notification } from '../components/Notification';
 
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
@@ -30,6 +32,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.getResearcherProfile();
     ReactTooltip.rebuild();
     this.props.history.push('profile');
+    const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+    this.setState(prev => {
+      prev.notificationData = notificationData;
+      return prev;
+    });
   }
 
   initialState() {
@@ -459,6 +466,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       div({ className: 'container' }, [
         div({ className: 'row no-margin' }, [
           div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
+            Notification({notificationData: this.state.notificationData}),
             PageHeading({
               id: 'researcherProfile',
               color: 'common',
