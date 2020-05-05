@@ -2,6 +2,7 @@ import React from 'react';
 import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
+import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
 import { Votes, Election, Match } from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
@@ -176,7 +177,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     }
     if (!fp.isNil(rationale)) {
       voteClone.rationale = rationale;
-    } // rationale can be null!
+    }
 
     // set state of vote or rpVote depending on vote ID
     const stateObj = isAccessVote ? { chairAccessVote: voteClone }
@@ -212,6 +213,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       } else {
         this.setState({ alert: 'incomplete' });
       }
+    }
+    const user = Storage.getCurrentUser();
+    if (user.isChairPerson) {
+      this.props.history.push(`chair_console`);
+    } else {
+      this.props.history.push(`member_console`);
     }
     this.props.updateVote();
   };
@@ -270,7 +277,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   render() {
-    const { isUserChairForDataset, voteAsChair, selectChair } = this.props;
+    const { voteAsChair, selectChair, chairVotes } = this.props;
     const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData } = this.state;
 
     return div({ style: ROOT },
@@ -284,12 +291,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
           [span({ style: { opacity: '70%' } }, 'Vote As Member')]),
           a({
             id: 'vote-as-chair',
-            isRendered: isUserChairForDataset,
+            isRendered: !fp.isEmpty(chairVotes),
             style: voteAsChair ? TAB_SELECTED : TAB_UNSELECTED,
             onClick: () => selectChair(true),
           },
           [span({
-            isRendered: isUserChairForDataset,
+            isRendered: !fp.isEmpty(chairVotes),
             style: { opacity: '70%' }
           }, 'Vote As Chair')])
         ]),
@@ -317,7 +324,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
                 id: 'vote',
                 className: 'button-contained',
                 style: alert === 'success' ? { backgroundColor: Theme.palette.success } : {},
-                onClick: (isUserChairForDataset && voteAsChair) ? this.submitChairVote : this.submitMemberVote,
+                onClick: (!fp.isEmpty(chairVotes) && voteAsChair) ? this.submitChairVote : this.submitMemberVote,
               },
               ['Vote',
                 alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })

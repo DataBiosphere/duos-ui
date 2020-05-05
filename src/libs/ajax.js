@@ -140,26 +140,6 @@ export const Consent = {
 
 export const DAC = {
 
-  /**
-   * TODO: These multiple API calls should be consolidated in Consent.
-   * Iterate over the user's DACs for chairperson status.
-   * Then look for the datasets in the DACs to see if the user has chair access for the specific dataset.
-   * @param dacUserId User's id
-   * @param dataSetId Dataset id
-   * @returns {Promise<boolean>}
-   */
-  isUserChairForDataset: async (dacUserId, dataSetId) => {
-    const dacs = await DAC.list();
-    const chairpersonDacs = fp.filter(
-      (dac) => fp.filter({"dacUserId":dacUserId})(fp.get('chairpersons')(dac))
-    )(dacs);
-    const chairpersonDacDatasets = await Promise.all(fp.flatMap((d) => {
-      return DAC.datasets(fp.get('dacId')(d));
-    })(chairpersonDacs));
-    const datasetsInChairpersonDacs = fp.filter({dataSetId: dataSetId} )(fp.flatten(chairpersonDacDatasets));
-    return !fp.isEmpty(datasetsInChairpersonDacs);
-  },
-
   list: async () => {
     const url = `${await Config.getApiUrl()}/dac`;
     const res = await fetchOk(url, Config.authOpts());
