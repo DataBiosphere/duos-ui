@@ -1083,7 +1083,8 @@ export const Votes = {
   },
 
   /**
-   * Get all votes for a DAR election. Retrieves both Access and RP election votes
+   * Get all votes for a DAR election. Retrieves Chair and Member Access and RP
+   * votes as well as Final and Agreement election votes.
    * @param requestId
    * @returns {Promise<List<Vote>>}
    */

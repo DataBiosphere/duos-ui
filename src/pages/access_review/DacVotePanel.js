@@ -194,7 +194,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   submitChairVote = async () => {
     const { history, accessElection, rpElection } = this.props;
     const { chairFinalVote, chairAccessVote, chairRpVote } = this.state;
-    if (chairRpVote) {
+    // If an RP vote exists, we need to submit both votes to complete the election.
+    // If not, only the access vote is required.
+    if (!fp.isNil(chairRpVote)) {
       if (!fp.isNil(chairAccessVote.vote) && !fp.isNil(chairRpVote.vote)) {
         this.submitVote(chairAccessVote);
         this.submitVote(chairRpVote);
@@ -209,8 +211,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.setState({ alert: 'incomplete' });
       }
     } else {
-      if (!fp.isNil(chairAccessVote.vote)) {
+      if (!fp.isNil(chairAccessVote) && !fp.isNil(chairAccessVote.vote)) {
         this.submitVote(chairAccessVote);
+        chairFinalVote.vote = chairAccessVote.vote;
+        chairFinalVote.rationale = chairAccessVote.rationale;
+        this.submitVote(chairFinalVote);
+        await this.closeElection(accessElection, chairAccessVote.vote, chairAccessVote.rationale);
       } else {
         this.setState({ alert: 'incomplete' });
       }

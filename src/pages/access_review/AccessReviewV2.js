@@ -3,7 +3,7 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import { DAC, DAR, Election, Votes } from '../../libs/ajax';
+import { DAR, Election, Votes } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import * as fp from 'lodash/fp';
 
