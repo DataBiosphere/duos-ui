@@ -27,7 +27,7 @@ class AdminManageDac extends Component {
       showMembersModal: false,
       value: '',
       limit: limit,
-      dacList: [],
+      dacs: [],
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
@@ -43,15 +43,33 @@ class AdminManageDac extends Component {
     this.closeViewMembersModal = this.closeViewMembersModal.bind(this);
   }
 
-  async componentDidMount() {
-    const dacs = _.sortBy(await DAC.list(), 'name');
-    this.setState(prev => {
-      prev.currentPage = 1;
-      prev.dacList = dacs;
-      return prev;
-    }, () => {
-      ReactTooltip.rebuild();
-    });
+  componentDidMount() {
+    this.fetchDacList();
+  };
+
+  fetchDacList = async () => {
+    this._asyncRequest = DAC.list().then(
+      dacs => {
+        this._asyncRequest = null;
+        let sorted = _.sortBy(dacs, 'name');
+        if (this.state.descendingOrder) {
+          sorted = _.reverse(sorted);
+        }
+        this.setState(prev => {
+          prev.currentPage = 1;
+          prev.dacs = sorted;
+          return prev;
+        }, () => {
+          ReactTooltip.rebuild();
+        });
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    if (this._asyncRequest) {
+      this._asyncRequest.cancel();
+    }
   }
 
   handlePageChange = page => {
@@ -88,21 +106,19 @@ class AdminManageDac extends Component {
   async okAddDacModal() {
     // Necessary due to the delay in adding/removing N users in addition to updating the DAC information.
     await sleep(500);
-    const dacs = await DAC.list();
+    this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
-      prev.dacList = dacs;
       return prev;
     });
   }
 
   async closeAddDacModal() {
-    const dacs = await DAC.list();
+    this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
-      prev.dacList = dacs;
       return prev;
     });
   }
@@ -155,12 +171,12 @@ class AdminManageDac extends Component {
   };
 
   sort = (sortField, descendingOrder = false) => (event) => {
-    let sorted = _.sortBy(this.state.dacList, sortField);
+    let sorted = _.sortBy(this.state.dacs, sortField);
     if (descendingOrder) {
       sorted = _.reverse(sorted);
     }
     this.setState(prev => {
-      prev.dacList = sorted;
+      prev.dacs = sorted;
       prev.descendingOrder = !prev.descendingOrder;
       return prev;
     });
@@ -209,7 +225,7 @@ class AdminManageDac extends Component {
 
           hr({ className: 'table-head-separator' }),
 
-          this.state.dacList.filter(this.searchTable(searchDacText))
+          this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map((dac, eIndex) => {
               return (h(Fragment, { key: dac.dacId }, [
@@ -264,7 +280,7 @@ class AdminManageDac extends Component {
               );
             }),
           PaginatorBar({
-            total: this.state.dacList.filter(this.searchTable(searchDacText)).length,
+            total: this.state.dacs.filter(this.searchTable(searchDacText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,
