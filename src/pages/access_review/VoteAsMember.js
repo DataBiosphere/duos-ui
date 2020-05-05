@@ -14,7 +14,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
     return div({ id: 'member-vote' }, [
       VoteQuestion({
         id: 'access-vote',
-        isRendered: vote,
+        isRendered: !fp.isNil(vote),
         label: 'Question 1:',
         question: 'Should data access be granted to this applicant?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
@@ -24,7 +24,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
       }),
       VoteQuestion({
         id: 'rp-vote',
-        isRendered: rpVote,
+        isRendered: !fp.isNil(rpVote),
         label: 'Question 2:',
         question: 'Was the research purpose accurately converted to a structured format?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),

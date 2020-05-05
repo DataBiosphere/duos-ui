@@ -66,9 +66,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   getVotesAsChair = async () => {
     const { finalVotes, chairVotes, accessElection, rpElection } = this.props;
-    const chairFinalVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(finalVotes);
-    const chairAccessVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(chairVotes);
-    const chairRpVote = fp.isNil(rpElection) ? {} : fp.find({ electionId: rpElection.electionId })(chairVotes);
+    const chairFinalVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(finalVotes);
+    const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
+    const chairRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(chairVotes);
     this.setState({
       alert: '',
       chairFinalVote: chairFinalVote,
@@ -97,8 +97,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   getVotesAsMember = async () => {
     const { memberVotes, accessElection, rpElection } = this.props;
-    const memberAccessVote = fp.isNil(accessElection) ? {} : fp.find({ electionId: accessElection.electionId })(memberVotes);
-    const memberRpVote = fp.isNil(rpElection) ? {} : fp.find({ electionId: rpElection.electionId })(memberVotes);
+    const memberAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(memberVotes);
+    const memberRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(memberVotes);
     this.setState({
       alert: '',
       memberAccessVote: memberAccessVote,
