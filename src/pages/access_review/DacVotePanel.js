@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Storage } from '../../libs/storage';
-import { Notifications } from '../../libs/utils';
+import { Navigation, Notifications } from '../../libs/utils';
 import { Votes, Election, Match } from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
@@ -112,8 +112,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   updateMemberVote = (voteId, voteStatus, rationale) => {
     const { memberAccessVote, memberRpVote } = this.state;
-    const isAccessVote = voteId === memberAccessVote.voteId;
-    const isRpVote = voteId === memberRpVote.voteId;
+    const isAccessVote = voteId === (fp.isNil(memberAccessVote) ? null : memberAccessVote.voteId);
+    const isRpVote = voteId === (fp.isNil(memberRpVote) ? null : memberRpVote.voteId);
     let voteClone;
 
     if (isAccessVote) {
@@ -140,14 +140,15 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   submitMemberVote = () => {
     const { memberAccessVote, memberRpVote } = this.state;
     if (memberRpVote) {
-      if (memberAccessVote.vote !== null && memberRpVote.vote !== null) {
+      if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote) &&
+          !fp.isNil(memberRpVote) && !fp.isNil(memberRpVote.vote)) {
         this.submitVote(memberAccessVote);
         this.submitVote(memberRpVote);
       } else {
         this.setState({ alert: 'incomplete' });
       }
     } else {
-      if (memberAccessVote.vote !== null) {
+      if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote)) {
         this.submitVote(memberAccessVote);
       } else {
         this.setState({ alert: 'incomplete' });
@@ -162,8 +163,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   updateChairVotes = (voteId, voteStatus, rationale) => {
     const { chairAccessVote, chairRpVote } = this.state;
-    const isAccessVote = voteId === chairAccessVote.voteId;
-    const isRpVote = voteId === chairRpVote.voteId;
+    const isAccessVote = voteId === (fp.isNil(chairAccessVote) ? null : chairAccessVote.voteId);
+    const isRpVote = voteId === (fp.isNil(chairRpVote) ? null : chairRpVote.voteId);
     let voteClone;
 
     if (isAccessVote) {
@@ -191,7 +192,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when changes are made to input buttons/fields
    */
   submitChairVote = async () => {
-    const { accessElection, rpElection } = this.props;
+    const { history, accessElection, rpElection } = this.props;
     const { chairFinalVote, chairAccessVote, chairRpVote } = this.state;
     if (chairRpVote) {
       if (!fp.isNil(chairAccessVote.vote) && !fp.isNil(chairRpVote.vote)) {
@@ -214,13 +215,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.setState({ alert: 'incomplete' });
       }
     }
-    const user = Storage.getCurrentUser();
-    if (user.isChairPerson) {
-      this.props.history.push(`chair_console`);
-    } else {
-      this.props.history.push(`member_console`);
-    }
-    this.props.updateVote();
+    Navigation.back(Storage.getCurrentUser(), history);
   };
 
   // posts the supplied vote for this DAR
