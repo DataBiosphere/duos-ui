@@ -9,7 +9,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC } from '../libs/ajax';
 import { sleep } from '../libs/utils';
-import _ from 'lodash';
+import * as ld from 'lodash';
 
 
 const limit = 10;
@@ -51,9 +51,9 @@ class AdminManageDac extends Component {
     this._asyncRequest = DAC.list().then(
       dacs => {
         this._asyncRequest = null;
-        let sorted = _.sortBy(dacs, 'name');
+        let sorted = ld.sortBy(dacs, 'name');
         if (this.state.descendingOrder) {
-          sorted = _.reverse(sorted);
+          sorted = ld.reverse(sorted);
         }
         this.setState(prev => {
           prev.currentPage = 1;
@@ -171,9 +171,9 @@ class AdminManageDac extends Component {
   };
 
   sort = (sortField, descendingOrder = false) => (event) => {
-    let sorted = _.sortBy(this.state.dacs, sortField);
+    let sorted = ld.sortBy(this.state.dacs, sortField);
     if (descendingOrder) {
-      sorted = _.reverse(sorted);
+      sorted = ld.reverse(sorted);
     }
     this.setState(prev => {
       prev.dacs = sorted;
