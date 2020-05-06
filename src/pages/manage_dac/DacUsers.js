@@ -19,7 +19,7 @@ export const DacUsers = hh(class DacUsers extends Component {
     };
   }
 
-  onRemove = (dacId, dacUserId, type) => {
+  onRemove = (dacId, dacUserId, role) => {
     if (this.state.removedIds.includes(dacUserId)) {
       this.setState(prev => {
         prev.removedIds = ld.difference(prev.removedIds, [dacUserId]);
@@ -31,15 +31,15 @@ export const DacUsers = hh(class DacUsers extends Component {
         return prev;
       });
     }
-    this.state.removeHandler(dacId, dacUserId, type);
+    this.state.removeHandler(dacId, dacUserId, role);
   };
 
   columnClass = () => {
     return this.state.removeButton ? 'col-md-4' : 'col-md-6';
   };
 
-  makeRow = (u, type) => {
-    const roleTitle = (type === CHAIR) ? 'Chairperson' : 'Member';
+  makeRow = (u, role) => {
+    const roleTitle = (role === CHAIR) ? 'Chairperson' : 'Member';
     const isRemoved = this.state.removedIds.includes(u.dacUserId);
     const rowStyle = isRemoved ?
       { borderBottom: '1px solid white', padding: '.75rem 0 .75rem 0', backgroundColor: 'lightgray', opacity: .5, borderRadius: 5 } :
@@ -57,7 +57,7 @@ export const DacUsers = hh(class DacUsers extends Component {
         a({
           style: { display: 'inline' },
           role: 'button',
-          onClick: () => this.onRemove(this.state.dac.dacId, u.dacUserId, type),
+          onClick: () => this.onRemove(this.state.dac.dacId, u.dacUserId, role),
           className: 'btn cell-button cancel-color'
         }, [buttonMessage])
       ])

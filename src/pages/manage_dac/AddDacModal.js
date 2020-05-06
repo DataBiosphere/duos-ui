@@ -1,9 +1,10 @@
-import _ from 'lodash';
+import * as ld from 'lodash';
 import { Component } from 'react';
 import { div, form, h, hh, input, label, textarea } from 'react-hyperscript-helpers';
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax';
 import { Models } from '../../libs/models';
+import { serialPromises } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
 import { BaseModal } from '../../components/BaseModal';
 import { DacUsers } from './DacUsers';
@@ -39,20 +40,30 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       } else {
         currentDac = await DAC.create(currentDac.name, currentDac.description);
       }
-      Promise.all(
+      // Order here is important. Since users cannot have multiple roles in the
+      // same DAC, we have to make sure we remove users before re-adding any
+      // back in a different role.
+      // Chairs are a special case since we cannot remove all chairs from a DAC
+      // so we handle that case first.
+      Promise.resolve(
         [
-          _.map(this.state.chairIdsToRemove, (id) => {
-            return DAC.removeDacChair(currentDac.dacId, id);
-          }),
-          _.map(this.state.memberIdsToRemove, (id) => {
+          // For each chair we're adding, we need to remove member status
+          ld.map(this.state.chairIdsToAdd, (id) => {
             return DAC.removeDacMember(currentDac.dacId, id);
           }),
-          _.map(this.state.chairIdsToAdd, (id) => {
+          // Then add them as a chair:
+          ld.map(this.state.chairIdsToAdd, (id) => {
             return DAC.addDacChair(currentDac.dacId, id);
           }),
-          _.map(this.state.memberIdsToAdd, (id) => {
+          ld.map(this.state.chairIdsToRemove, (id) => {
+            return DAC.removeDacChair(currentDac.dacId, id);
+          }),
+          ld.map(this.state.memberIdsToRemove, (id) => {
+            return DAC.removeDacMember(currentDac.dacId, id);
+          }),
+          ld.map(this.state.memberIdsToAdd, (id) => {
             return DAC.addDacMember(currentDac.dacId, id);
-          })
+          }),
         ]
       ).then(() => {
         this.props.onOKRequest('addDac');
@@ -86,10 +97,10 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     //    * minus any new members selected (you shouldn't be both a chair and a member)
     //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
-    const invalidChairs = _.difference(
-      _.union(
-        _.map(this.state.dac.chairpersons, 'dacUserId'),
-        _.map(this.state.dac.members, 'dacUserId'),
+    const invalidChairs = ld.difference(
+      ld.union(
+        ld.map(this.state.dac.chairpersons, 'dacUserId'),
+        ld.map(this.state.dac.members, 'dacUserId'),
         this.state.memberIdsToAdd),
       this.state.memberIdsToRemove,
       this.state.chairIdsToRemove);
@@ -103,10 +114,10 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     //    * minus any new chairs selected (you shouldn't be both a chair and a member)
     //    * plus any members that are slated for removal
     //    * plus any chairs that are slated for removal
-    const invalidMembers = _.difference(
-      _.union(
-        _.map(this.state.dac.members, 'dacUserId'),
-        _.map(this.state.dac.chairpersons, 'dacUserId'),
+    const invalidMembers = ld.difference(
+      ld.union(
+        ld.map(this.state.dac.members, 'dacUserId'),
+        ld.map(this.state.dac.chairpersons, 'dacUserId'),
         this.state.chairIdsToAdd),
       this.state.memberIdsToRemove,
       this.state.chairIdsToRemove);
@@ -116,7 +127,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   userSearch = (invalidUserIds, query, callback) => {
     DAC.autocompleteUsers(query).then(
       items => {
-        const filteredUsers = _.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
+        const filteredUsers = ld.filter(items, item => { return !invalidUserIds.includes(item.dacUserId); });
         const options = filteredUsers.map(function(item) {
           return {
             key: item.dacUserId,
@@ -134,7 +145,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
 
   onChairSearchChange = (data) => {
     this.setState(prev => {
-      prev.chairIdsToAdd = _.map(data, 'item.dacUserId');
+      prev.chairIdsToAdd = ld.map(data, 'item.dacUserId');
       prev.chairsSelectedOptions = data;
       prev.dirtyFlag = true;
       return prev;
@@ -143,7 +154,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
 
   onMemberSearchChange = (data) => {
     this.setState(prev => {
-      prev.memberIdsToAdd = _.map(data, 'item.dacUserId');
+      prev.memberIdsToAdd = ld.map(data, 'item.dacUserId');
       prev.membersSelectedOptions = data;
       prev.dirtyFlag = true;
       return prev;
@@ -192,18 +203,18 @@ export const AddDacModal = hh(class AddDacModal extends Component {
     }
   };
 
-  removeDacMember = (dacId, dacUserId, type) => {
-    switch (type) {
+  removeDacMember = (dacId, dacUserId, role) => {
+    switch (role) {
       case CHAIR:
         if (this.state.chairIdsToRemove.includes(dacUserId)) {
           this.setState(prev => {
-            prev.chairIdsToRemove = _.difference(prev.chairIdsToRemove, [dacUserId]);
+            prev.chairIdsToRemove = ld.difference(prev.chairIdsToRemove, [dacUserId]);
             prev.dirtyFlag = true;
             return prev;
           });
         } else {
           this.setState(prev => {
-            prev.chairIdsToRemove = _.union(prev.chairIdsToRemove, [dacUserId]);
+            prev.chairIdsToRemove = ld.union(prev.chairIdsToRemove, [dacUserId]);
             prev.dirtyFlag = true;
             return prev;
           });
@@ -212,13 +223,13 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       case MEMBER:
         if (this.state.memberIdsToRemove.includes(dacUserId)) {
           this.setState(prev => {
-            prev.memberIdsToRemove = _.difference(prev.memberIdsToRemove, [dacUserId]);
+            prev.memberIdsToRemove = ld.difference(prev.memberIdsToRemove, [dacUserId]);
             prev.dirtyFlag = true;
             return prev;
           });
         } else {
           this.setState(prev => {
-            prev.memberIdsToRemove = _.union(prev.memberIdsToRemove, [dacUserId]);
+            prev.memberIdsToRemove = ld.union(prev.memberIdsToRemove, [dacUserId]);
             prev.dirtyFlag = true;
             return prev;
           });
