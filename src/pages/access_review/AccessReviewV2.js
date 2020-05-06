@@ -4,6 +4,8 @@ import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
 import { DAR, Election, Votes } from '../../libs/ajax';
+import { Storage } from '../../libs/storage';
+import * as fp from 'lodash/fp';
 
 const SECTION = {
   margin: '16px',
@@ -38,22 +40,30 @@ class AccessReviewV2 extends React.PureComponent {
 
     // Access Election Information
     const accessVote = await Votes.getDarVote(darId, voteId);
-    const accessElection = await Election.findElectionById(accessVote.electionId);
     const accessElectionReview = await Election.findDataAccessElectionReview(accessVote.electionId, false);
+    const accessElection = fp.isNil(accessElectionReview) ? null : accessElectionReview.election;
 
-    // RP Election Information
-    const rpVote = await Votes.getDarVote(darId, rpVoteId);
-    const rpElection = await Election.findElectionById(rpVote.electionId);
-    const rpElectionReview = await Election.findRPElectionReview(rpVote.electionId, false);
+    // RP Election Information. Can be null for manual review DARs.
+    // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
+    const rpElectionReview = fp.isNil(rpVoteId) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+    const rpElection = fp.isNil(rpElectionReview) ? null : rpElectionReview.election;
 
     const { darInfo, consent } = await DAR.describeDarWithConsent(darId);
-    this.setState({ darId, voteId, rpVoteId, accessVote, accessElection, rpVote, rpElection, darInfo, consent, accessElectionReview, rpElectionReview });
+
+    // Vote information
+    const allVotes = await Votes.getDarVotes(darId);
+
+    this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview });
   }
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview } = this.state;
+    const { allVotes, voteAsChair, darInfo, darId, accessElection, consent, accessElectionReview, rpElection, rpElectionReview } = this.state;
     const { history, match } = this.props;
-    const ids = match.params;
+
+    const currentUser = Storage.getCurrentUser();
+    const memberVotes = fp.filter({ type: 'DAC', dacUserId: currentUser.dacUserId })(allVotes);
+    const chairVotes = fp.filter({ type: 'Chairperson', dacUserId: currentUser.dacUserId })(allVotes);
+    const finalVotes = fp.filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
 
     return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
       [
@@ -72,7 +82,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ ids, darInfo, accessElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
+            [DacVotePanel({ history, memberVotes, chairVotes, finalVotes, darId, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
           ),
           div(
             {
@@ -82,7 +92,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '70%',
               }
             },
-            [DarApplication({ voteAsChair, darInfo, accessElection, consent, ids, accessElectionReview, rpElectionReview })]
+            [DarApplication({ voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview })]
           )
         ])
       ]

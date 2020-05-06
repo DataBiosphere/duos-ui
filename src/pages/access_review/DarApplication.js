@@ -31,9 +31,9 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, ids, accessElectionReview, rpElectionReview} = this.props;
-    const accessVotes = fp.get( 'reviewVote')(accessElectionReview);
-    const rpVotes = fp.get( 'reviewVote')(rpElectionReview);
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview} = this.props;
+    const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get( 'reviewVote')(accessElectionReview);
+    const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get( 'reviewVote')(rpElectionReview);
     return div([
       div({ id: 'header', style: SECTION }, [
         div({ style: { minWidth: '50%' } }, [
@@ -43,13 +43,13 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
       ]),
       VoteSummary({
-        isRendered: voteAsChair,
+        isRendered: voteAsChair && !fp.isNil(accessVotes),
         question: 'Should data access be granted to this application?',
         questionNumber: '1',
         votes: accessVotes,
       }),
       VoteSummary({
-        isRendered: voteAsChair,
+        isRendered: voteAsChair && !fp.isNil(rpVotes),
         question: 'Was the research purpose accurately converted to a structured format?',
         questionNumber: '2',
         votes: rpVotes,

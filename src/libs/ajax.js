@@ -1082,6 +1082,18 @@ export const Votes = {
     return res.json();
   },
 
+  /**
+   * Get all votes for a DAR election. Retrieves Chair and Member Access and RP
+   * votes as well as Final and Agreement election votes.
+   * @param requestId
+   * @returns {Promise<List<Vote>>}
+   */
+  getDarVotes: async (requestId) => {
+    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
   postDarVote: async (requestId, vote) => {
     const postObject = {};
     postObject.vote = vote.vote;
