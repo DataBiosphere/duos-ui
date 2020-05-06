@@ -45,31 +45,43 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       // back in a different role.
       // Chairs are a special case since we cannot remove all chairs from a DAC
       // so we handle that case first.
-      Promise.resolve(
-        [
-          // For each chair we're adding, we need to remove member status
-          ld.map(this.state.chairIdsToAdd, (id) => {
-            return DAC.removeDacMember(currentDac.dacId, id);
-          }),
-          // Then add them as a chair:
-          ld.map(this.state.chairIdsToAdd, (id) => {
-            return DAC.addDacChair(currentDac.dacId, id);
-          }),
-          ld.map(this.state.chairIdsToRemove, (id) => {
-            return DAC.removeDacChair(currentDac.dacId, id);
-          }),
-          ld.map(this.state.memberIdsToRemove, (id) => {
-            return DAC.removeDacMember(currentDac.dacId, id);
-          }),
-          ld.map(this.state.memberIdsToAdd, (id) => {
-            return DAC.addDacMember(currentDac.dacId, id);
-          }),
-        ]
-      ).then(() => {
-        this.props.onOKRequest('addDac');
-      }).catch((err) => {
-        this.handleErrors(err);
-      });
+      let orderedOperations = [];
+      orderedOperations.push(ld.map(this.state.chairIdsToAdd, (id) => DAC.removeDacMember(currentDac.dacId, id)));
+      orderedOperations.push(ld.map(this.state.chairIdsToAdd, (id) => DAC.addDacChair(currentDac.dacId, id)));
+      orderedOperations.push(ld.map(this.state.chairIdsToRemove, (id) => DAC.removeDacChair(currentDac.dacId, id)));
+      orderedOperations.push(ld.map(this.state.memberIdsToRemove, (id) => DAC.removeDacMember(currentDac.dacId, id)));
+      orderedOperations.push(ld.map(this.state.memberIdsToAdd, (id) => DAC.addDacMember(currentDac.dacId, id)));
+
+      orderedOperations.reduce(
+        (promise, func) =>
+          promise.then(result => func().then(Array.prototype.concat.bind(result))), Promise.resolve([])
+      );
+
+      // Promise.resolve(
+      //   [
+      //     // For each chair we're adding, we need to remove member status
+      //     ld.map(this.state.chairIdsToAdd, (id) => {
+      //       return DAC.removeDacMember(currentDac.dacId, id);
+      //     }),
+      //     // Then add them as a chair:
+      //     ld.map(this.state.chairIdsToAdd, (id) => {
+      //       return DAC.addDacChair(currentDac.dacId, id);
+      //     }),
+      //     ld.map(this.state.chairIdsToRemove, (id) => {
+      //       return DAC.removeDacChair(currentDac.dacId, id);
+      //     }),
+      //     ld.map(this.state.memberIdsToRemove, (id) => {
+      //       return DAC.removeDacMember(currentDac.dacId, id);
+      //     }),
+      //     ld.map(this.state.memberIdsToAdd, (id) => {
+      //       return DAC.addDacMember(currentDac.dacId, id);
+      //     }),
+      //   ]
+      // ).then(() => {
+      //   this.props.onOKRequest('addDac');
+      // }).catch((err) => {
+      //   this.handleErrors(err);
+      // });
     } else {
       this.closeHandler();
     }
