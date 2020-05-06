@@ -1,7 +1,7 @@
-import _ from 'lodash';
+import * as ld from 'lodash';
 import { Component } from 'react';
 import { a, div, hh } from 'react-hyperscript-helpers';
-import { CHAIR, MEMBER } from './modals/AddDacModal';
+import { CHAIR, MEMBER } from './AddDacModal';
 
 
 const buttonPadding = { paddingTop: 6 };
@@ -17,31 +17,28 @@ export const DacUsers = hh(class DacUsers extends Component {
       removeHandler: props.removeButton ? props.removeHandler : () => {},
       removedIds: []
     };
-    this.onRemove = this.onRemove.bind(this);
-    this.columnClass = this.columnClass.bind(this);
-    this.makeRow = this.makeRow.bind(this);
   }
 
-  onRemove(dacId, dacUserId, type) {
+  onRemove = (dacId, dacUserId, type) => {
     if (this.state.removedIds.includes(dacUserId)) {
       this.setState(prev => {
-        prev.removedIds = _.difference(prev.removedIds, [dacUserId]);
+        prev.removedIds = ld.difference(prev.removedIds, [dacUserId]);
         return prev;
       });
     } else {
       this.setState(prev => {
-        prev.removedIds = _.union(prev.removedIds, [dacUserId]);
+        prev.removedIds = ld.union(prev.removedIds, [dacUserId]);
         return prev;
       });
     }
     this.state.removeHandler(dacId, dacUserId, type);
-  }
+  };
 
-  columnClass() {
+  columnClass = () => {
     return this.state.removeButton ? 'col-md-4' : 'col-md-6';
-  }
+  };
 
-  makeRow(u, type) {
+  makeRow = (u, type) => {
     const roleTitle = (type === CHAIR) ? 'Chairperson' : 'Member';
     const isRemoved = this.state.removedIds.includes(u.dacUserId);
     const rowStyle = isRemoved ?
@@ -65,7 +62,7 @@ export const DacUsers = hh(class DacUsers extends Component {
         }, [buttonMessage])
       ])
     ]);
-  }
+  };
 
   render() {
     return div({ style: {}, className: 'container-fluid' }, [
@@ -78,8 +75,8 @@ export const DacUsers = hh(class DacUsers extends Component {
           className: this.columnClass()
         }, '')
       ]),
-      _.flatMap(this.state.dac.chairpersons, (u) => { return this.makeRow(u, CHAIR); }),
-      _.flatMap(this.state.dac.members, (u) => { return this.makeRow(u, MEMBER); })
+      ld.flatMap(this.state.dac.chairpersons, (u) => { return this.makeRow(u, CHAIR); }),
+      ld.flatMap(this.state.dac.members, (u) => { return this.makeRow(u, MEMBER); })
     ]);
   }
 });

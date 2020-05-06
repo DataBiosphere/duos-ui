@@ -9,7 +9,7 @@ import AccessResultRecords from './pages/AccessResultRecords';
 import AccessReview from './pages/AccessReview';
 import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
-import AdminManageDac from './pages/AdminManageDac';
+import AdminManageDac from './pages/manage_dac/AdminManageDac';
 import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
 import { ChairConsole } from './pages/ChairConsole';

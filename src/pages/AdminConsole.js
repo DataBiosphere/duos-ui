@@ -3,7 +3,7 @@ import { div, hr } from 'react-hyperscript-helpers';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
 import { AddDulModal } from '../components/modals/AddDulModal';
-import { AddDacModal } from '../components/modals/AddDacModal';
+import { AddDacModal } from './manage_dac/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
