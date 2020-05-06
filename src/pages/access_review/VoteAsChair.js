@@ -19,12 +19,14 @@ const LINK_SECTION = {
 };
 
 export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
+
   constructor(props) {
     super(props);
     this.state = {
       viewMatchResults: false
     };
   }
+
   componentDidMount() {
     this.props.getVotes();
     this.props.getMatchData();
@@ -35,7 +37,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
       prev.viewMatchResults = !prev.viewMatchResults;
       return prev;
     });
-    // Changing state here doesn't trigger a re-render, need to force update.
+    // Changing state here doesn't trigger a re-render hence the need to force update.
     this.forceUpdate();
   };
 
@@ -52,16 +54,34 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   render() {
-    const { finalVote, onUpdate, matchData } = this.props;
-    return div({ id: 'chair-vote' }, [
+    const { vote, rpVote, onUpdate, matchData} = this.props;
+    const accessVoteQuestion = fp.isNil(vote) ?
+      div({}, []) :
       VoteQuestion({
-        id: 'final-question',
-        isRendered: finalVote,
-        label: 'Final Question:',
-        question: 'Does the DAC grant this researcher permission to access the data?',
-        updateVote: (id, selectedOption, rationale) => onUpdate(selectedOption, rationale),
-        vote: finalVote,
-      }),
+        id: 'access-vote',
+        isRendered: !fp.isNil(vote),
+        label: 'Question 1:',
+        question: 'Should data access be granted to this applicant?',
+        updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
+        voteId: fp.isNil(vote) ? null : vote.voteId,
+        rationale: fp.isNil(vote.rationale) ? '' : vote.rationale,
+        selectedOption: fp.isNil(vote) ? null : vote.vote,
+      });
+    const rpVoteQuestion = fp.isNil(rpVote) ?
+      div({}, []) :
+      VoteQuestion({
+        id: 'rp-vote',
+        isRendered: !fp.isNil(rpVote),
+        label: 'Question 2:',
+        question: 'Was the research purpose accurately converted to a structured format?',
+        updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
+        voteId: fp.isNil(rpVote) ? null : rpVote.voteId,
+        rationale: fp.isNil(rpVote.rationale) ? '' : rpVote.rationale,
+        selectedOption: fp.isNil(rpVote) ? null : rpVote.vote,
+      });
+    return div({ id: 'chair-vote' }, [
+      accessVoteQuestion,
+      rpVoteQuestion,
       div({ style: LINK_SECTION }, [
         a({ style: LINK, onClick: this.toggleMatchData }, [
           'View DUOS algorithm decision',
