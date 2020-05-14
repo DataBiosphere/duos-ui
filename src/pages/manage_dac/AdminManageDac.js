@@ -8,7 +8,6 @@ import { PageHeading } from '../../components/PageHeading';
 import { PaginatorBar } from '../../components/PaginatorBar';
 import { SearchBox } from '../../components/SearchBox';
 import { DAC } from '../../libs/ajax';
-import { sleep } from '../../libs/utils';
 import * as ld from 'lodash';
 
 
@@ -97,9 +96,7 @@ class AdminManageDac extends Component {
   };
 
   okAddDacModal = async () => {
-    // Necessary due to the delay in adding/removing N users in addition to updating the DAC information.
-    await sleep(500);
-    this.fetchDacList();
+    await this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
@@ -108,7 +105,7 @@ class AdminManageDac extends Component {
   };
 
   closeAddDacModal = async () => {
-    this.fetchDacList();
+    await this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;

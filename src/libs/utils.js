@@ -92,3 +92,17 @@ export const NavigationUtils = {
     return newDarUiEnabled ? "new_access_review" : "access_review";
   }
 };
+
+/**
+ * Serialize the execution of an array of promise functions
+ *
+ * See https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e
+ * @param funcs: List of functions that return a promise
+ * @returns Array of promise results
+ * @constructor
+ */
+export const PromiseSerial = funcs =>
+  funcs.reduce((promise, func) =>
+    promise.then(result =>
+      func().then(Array.prototype.concat.bind(result))),
+  Promise.resolve([]));

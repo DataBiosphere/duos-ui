@@ -4,6 +4,7 @@ import { div, form, h, hh, input, label, textarea } from 'react-hyperscript-help
 import AsyncSelect from 'react-select/async';
 import { DAC } from '../../libs/ajax';
 import { Models } from '../../libs/models';
+import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
 import { BaseModal } from '../../components/BaseModal';
 import { DacUsers } from './DacUsers';
@@ -45,26 +46,18 @@ export const AddDacModal = hh(class AddDacModal extends Component {
       // back in a different role.
       // Chairs are a special case since we cannot remove all chairs from a DAC
       // so we handle that case first.
-      let promise = new Promise(function(resolve, reject) {
-        setTimeout(() => resolve(1), 1000);
-      });
-      promise.then(() => {
-        const membersToRemove= this.state.chairIdsToAdd.concat(this.state.memberIdsToRemove);
-        ld.map(membersToRemove, (id) => DAC.removeDacMember(currentDac.dacId, id));
-      }).then(() => {
-        ld.map(this.state.chairIdsToAdd, (id) => DAC.addDacChair(currentDac.dacId, id));
-      }).then(() => {
-        // TODO: There is some sort of race condition on the server side that errors
-        // out if the chairs to remove are called too soon after having just added some.
-        ld.map(this.state.chairIdsToRemove, (id) => DAC.removeDacChair(currentDac.dacId, id));
-      }).then(() => {
-        ld.map(this.state.memberIdsToAdd, (id) => DAC.addDacMember(currentDac.dacId, id));
-      }).then(() => {
-        this.props.onOKRequest('addDac');
-      }).catch((err) => {
-        this.handleErrors(err);
-      });
-
+      const ops0 = this.state.chairIdsToAdd.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+      const ops1 = this.state.memberIdsToRemove.map(id => () => DAC.removeDacMember(currentDac.dacId, id));
+      const ops2 = this.state.chairIdsToAdd.map(id => () => DAC.addDacChair(currentDac.dacId, id));
+      const ops3 = this.state.chairIdsToRemove.map(id => () => DAC.removeDacChair(currentDac.dacId, id));
+      const ops4 = this.state.memberIdsToAdd.map(id => () => DAC.addDacMember(currentDac.dacId, id));
+      const allOperations = ops0.concat(ops1, ops2, ops3, ops4);
+      const responses = await PromiseSerial(allOperations);
+      const errorCodes = ld.filter(responses, r => JSON.stringify(r) !== '200');
+      if (!ld.isEmpty(errorCodes)) {
+        this.handleErrors("There was an error saving DAC member information. Please verify that the DAC is correct by viewing the current members.");
+      }
+      this.props.onOKRequest('addDac');
     } else {
       this.closeHandler();
     }
