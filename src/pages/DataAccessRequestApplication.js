@@ -655,7 +655,7 @@ class DataAccessRequestApplication extends Component {
     } = this.state.formData;
     const { ontologies } = this.state;
 
-    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3, step4 } = this.state;
+    const { problemSavingRequest, showValidationMessages,  step1, step3 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const genderLabels = ['Female', 'Male'];
     const genderValues = ['F', 'M'];
