@@ -55,21 +55,19 @@ export const ApplicantInfo = hh(
     };
 
     render() {
-      const {content, researcherProfile} = this.props;
+      const { content, researcherProfile } = this.props;
+      const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
       return div(
         {style: {fontFamily: 'Montserrat', color: Theme.palette.primary}}, [
           div({ style: HEADER }, 'Applicant Information'),
           div({ style: { display: 'flex', justifyContent: 'space-between' }},
             this.formatResearcherInfo(content)),
-          div({
-            isRendered: !ld.isNil(researcherProfile.libraryCards) &&
-                !ld.isEmpty(researcherProfile.libraryCards),
-          },
-          [
-            div({ style: HEADER }, 'Library Cards'),
-            div({ style: {display: 'flex', flexFlow: 'row wrap' } },
-              this.formatLibraryCard(researcherProfile.libraryCards)),
-          ]),
+          div({ isRendered: !ld.isEmpty(libraryCards) },
+            [
+              div({ style: HEADER }, 'Library Cards'),
+              div({ style: {display: 'flex', flexFlow: 'row wrap' } },
+                this.formatLibraryCard(libraryCards)),
+            ]),
         ]);
     }
   });
