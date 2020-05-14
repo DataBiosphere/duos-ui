@@ -1,11 +1,14 @@
 import { Component, Fragment } from 'react';
-import { div, hh, span, h, h4, label, button, ul, li, b } from 'react-hyperscript-helpers';
+import { div, hh, span, h, h4, label, button, ul, li, b, a } from 'react-hyperscript-helpers';
 import { Alert } from './Alert';
+import { StructuredDarRp } from './StructuredDarRp';
+import {Theme} from '../libs/theme';
+import * as Utils from '../libs/utils';
 import * as ld from 'lodash';
 
 export const ApplicationSummary = hh(class ApplicationSummary extends Component {
   render() {
-    const { darInfo, downloadDAR, researcherProfile } = this.props;
+    const { hasUseRestriction, mrDAR, darInfo, downloadDAR, researcherProfile } = this.props;
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
     return div({className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
       div({ className: 'panel-heading cm-boxhead access-color' }, [
@@ -92,6 +95,23 @@ export const ApplicationSummary = hh(class ApplicationSummary extends Component 
                 })
               ])
             ])
+          ]),
+
+          div({ isRendered: hasUseRestriction, className: 'row dar-summary' }, [
+            div({ className: 'control-label access-color' }, ['Structured Research Purpose']),
+            div({ className: 'response-label translated-restriction'}, [
+              StructuredDarRp({
+                darInfo: darInfo,
+                headerStyle: { display: 'none' },
+                textStyle: Theme.legacy
+              })
+            ]),
+            a({
+              isRendered: !ld.isNil(mrDAR),
+              onClick: () => Utils.download('machine-readable-DAR.json', mrDAR),
+              filename: 'machine-readable-DAR.json',
+              value: mrDAR, className: 'italic hover-color'
+            }, ['Download DAR machine-readable format'])
           ]),
 
           div({ className: 'row dar-summary' }, [

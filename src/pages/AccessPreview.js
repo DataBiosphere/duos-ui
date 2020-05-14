@@ -137,6 +137,8 @@ class AccessPreview extends Component {
 
               ApplicationSummary({
                 isRendered: !ld.isNil(this.state.darInfo) && !ld.isNil(this.state.researcherProfile),
+                mrDAR: null,
+                hasUseRestriction: this.state.hasUseRestriction,
                 darInfo: this.state.darInfo,
                 downloadDAR: this.downloadDAR,
                 researcherProfile: this.state.researcherProfile }),
