@@ -8,14 +8,14 @@ export const LibraryCards = hh(class LibraryCards extends PureComponent {
     const { libraryCards, style } = this.props;
     return div({ style: style }, [
       ld.isEmpty(libraryCards) ?
-        div({className: 'library-flag flag-disabled'}, [
-          div({className: 'library-icon'}),
-          span({className: 'library-label'}, 'None')
+        div({ className: 'library-flag flag-disabled' }, [
+          div({ className: 'library-icon' }),
+          span({ className: 'library-label' }, 'None')
         ]) :
         ld.map(libraryCards, card => {
           return div({ key: card, style: { margin: 1 }, className: 'library-flag flag-enabled' }, [
-            div({className: 'library-icon'}),
-            span({className: 'library-label'}, card)
+            div({ className: 'library-icon' }),
+            span({ className: 'library-label' }, card)
           ]);
         })
     ]);
