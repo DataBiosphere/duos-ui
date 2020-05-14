@@ -1,23 +1,13 @@
 import { PureComponent, Fragment } from 'react';
 import { div, hh, span, h, h4, label, button, ul, li, b, a } from 'react-hyperscript-helpers';
 import { Alert } from './Alert';
+import { LibraryCards } from './LibraryCards';
 import { StructuredDarRp } from './StructuredDarRp';
 import {Theme} from '../libs/theme';
 import * as Utils from '../libs/utils';
 import * as ld from 'lodash';
 
 export const ApplicationSummary = hh(class ApplicationSummary extends PureComponent {
-
-  formatLibraryCards = cards => {
-    return div({}, [
-      ld.map(cards, card => {
-        return div({ key: card, style: { marginBottom: 1 }, className: 'library-flag flag-enabled' }, [
-          div({className: 'library-icon'}),
-          span({className: 'library-label'}, card)
-        ]);
-      })
-    ]);
-  }
 
   render() {
     const { hasUseRestriction, mrDAR, darInfo, downloadDAR, researcherProfile } = this.props;
@@ -52,7 +42,10 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
           ]),
           div({ isRendered: !ld.isEmpty(libraryCards), className: 'row no-margin' }, [
             label({ className: 'control-label no-padding' }, ['Library Cards: ']),
-            this.formatLibraryCards(libraryCards)
+            LibraryCards({
+              style: {},
+              libraryCards: libraryCards
+            })
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['Institution: ']),

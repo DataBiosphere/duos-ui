@@ -26,18 +26,18 @@ export const ApplicantInfo = hh(
     formatResearcherInfo = content => {
       return ld.map(ld.keys(content), key => {
         return div({ key, style: { maxWidth: `${100 / 6}%` } }, [
-          div({style: BOLD}, ld.startCase(key)),
-          div({style: TEXT}, content[key]),
+          div({ style: BOLD }, ld.startCase(key)),
+          div({ style: TEXT }, content[key]),
         ]);
       });
     };
     formatLibraryCard = cards => {
       return ld.map(cards, (card) => {
-        return div({style: {margin: 3}}, [
+        return div({ style: { margin: 3 } }, [
           img({
             id: 'card_' + card,
             src: '/images/card.png',
-            style: {width: 51, height: 40},
+            style: { width: 51, height: 40 },
           }),
           div(
             {
@@ -58,14 +58,14 @@ export const ApplicantInfo = hh(
       const { content, researcherProfile } = this.props;
       const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
       return div(
-        {style: {fontFamily: 'Montserrat', color: Theme.palette.primary}}, [
+        { style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
           div({ style: HEADER }, 'Applicant Information'),
           div({ style: { display: 'flex', justifyContent: 'space-between' }},
             this.formatResearcherInfo(content)),
           div({ isRendered: !ld.isEmpty(libraryCards) },
             [
               div({ style: HEADER }, 'Library Cards'),
-              div({ style: {display: 'flex', flexFlow: 'row wrap' } },
+              div({ style: { display: 'flex', flexFlow: 'row wrap' } },
                 this.formatLibraryCard(libraryCards)),
             ]),
         ]);
