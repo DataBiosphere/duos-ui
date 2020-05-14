@@ -289,7 +289,7 @@ export const DAR = {
     const dataUseModel = fp.keys(darInfo.dataUse);
     dataUseModel.forEach(key => {
       const value = rawDar[key];
-      if (!fp.isUndefined(value)) {
+      if (!fp.isNil(value)) {
         darInfo.dataUse[key] = value;
       }
     });
@@ -946,8 +946,7 @@ export const Researcher = {
   getResearcherProfile: async userId => {
     const url = `${await Config.getApiUrl()}/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
-    const profile = await res.json();
-    return await profile;
+    return res.json();
   }
 };
 

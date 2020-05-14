@@ -30,7 +30,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
   };
 
   render() {
-    const { darInfo, accessElection, consent } = this.props;
+    const { darInfo, accessElection, consent, researcherProfile } = this.props;
     const { pi, profileName, institution, department, city, country } = darInfo;
     const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
@@ -83,6 +83,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
             id: 'applicant',
           },
           [ApplicantInfo({
+            researcherProfile: researcherProfile,
             content: {
               principalInvestigator: pi,
               researcher: profileName,

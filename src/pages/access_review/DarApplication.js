@@ -31,7 +31,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview} = this.props;
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile } = this.props;
     const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get( 'reviewVote')(accessElectionReview);
     const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get( 'reviewVote')(rpElectionReview);
     return div([
@@ -54,7 +54,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         questionNumber: '2',
         votes: rpVotes,
       }),
-      AppSummary({ darInfo, accessElection, consent })
+      AppSummary({ darInfo, accessElection, consent, researcherProfile })
     ]);
   }
 });
