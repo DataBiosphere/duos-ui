@@ -1,14 +1,11 @@
 import { Component } from 'react';
-import { a, br, div, fieldset, form, h, h3, hr, i, input, label, li, ol, p, small, span, textarea } from 'react-hyperscript-helpers';
+import { a, br, div, fieldset, form, h, h3, hr, i, input, label, small, span, textarea } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
-import AsyncSelect from 'react-select/async';
 import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { eRACommons } from '../components/eRACommons';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
@@ -45,8 +42,6 @@ class DatasetRegistration extends Component {
         checkCollaborator: false,
         rus: '',
         non_tech_rus: '',
-        linkedIn: '',
-        orcid: '',
         onegender: '',
         methods: '',
         controls: '',
@@ -68,10 +63,8 @@ class DatasetRegistration extends Component {
         popmigration: '',
         psychtraits: '',
         nothealth: '',
-        investigator: '',
         researcher: '',
         projectTitle: '',
-        researcherGate: '',
         isThePi: '',
         havePi: '',
         profileName: '',
@@ -143,18 +136,7 @@ class DatasetRegistration extends Component {
 
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
 
-    if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
-      formData.investigator = rpProperties.profileName;
-    } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
-      formData.investigator = '--';
-    } else {
-      formData.investigator = rpProperties.piName;
-    }
-
     if (formData.dar_code === null) {
-      formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
-      formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
-      formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
       formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
@@ -338,14 +320,7 @@ class DatasetRegistration extends Component {
       isResearcherInvalid = true;
       showValidationMessages = true;
     }
-    if (!this.isValid(this.state.formData.investigator)) {
-      isInvestigatorInvalid = true;
-      showValidationMessages = true;
-    }
     if (this.state.formData.checkCollaborator !== true
-      && !this.isValid(this.state.formData.linkedIn)
-      && !this.isValid(this.state.formData.researcherGate)
-      && !this.isValid(this.state.formData.orcid)
       && !this.state.nihValid) {
       isNihInvalid = true;
       showValidationMessages = true;
@@ -637,8 +612,6 @@ class DatasetRegistration extends Component {
   render() {
 
     const {
-      orcid = '',
-      researcherGate = '',
       checkCollaborator = false,
       dar_code,
       hmb = false,
@@ -650,15 +623,11 @@ class DatasetRegistration extends Component {
       forProfit = false,
       controls = false,
       methods = false,
-      linkedIn = '',
-      investigator = ''
     } = this.state.formData;
     const { ontologies } = this.state;
 
-    const { problemSavingRequest, showValidationMessages, atLeastOneCheckboxChecked, step1, step2, step3, step4 } = this.state;
+    const { problemSavingRequest, showValidationMessages, step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
-    const genderLabels = ['Female', 'Male'];
-    const genderValues = ['F', 'M'];
 
     const profileUnsubmitted = span({}, [
       'Please make sure ',
