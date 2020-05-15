@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { Component } from 'react';
 import { a, button, div, form, h, hh, hr, input, label, p, span, textarea } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
+import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
@@ -10,7 +11,7 @@ import { DAR, Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-
+import * as ld from 'lodash';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -116,6 +117,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
+      prev.researcherProfile = profile;
       let key;
       for (key in profile) {
         if (key === 'checkNotifications') {
@@ -459,8 +461,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   render() {
     let completed = this.state.profile.completed;
-    const showValidationMessages = this.state.showValidationMessages;
-
+    const { researcherProfile, showValidationMessages } = this.state;
+    const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
     return (
 
       div({ className: 'container' }, [
@@ -570,12 +572,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       onNihStatusUpdate: (nihValid) => {},
                       location: this.props.location
                     }),
-                    div({ className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12' }, [
-                      label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['NIH Library Card']),
-                      div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
-                        div({ className: 'library-icon' }),
-                        span({ className: 'library-label' }, 'Library Card')
-                      ])
+                    div({ className: '' }, [
+                      label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
+                      LibraryCards({
+                        style: { display: 'flex', flexFlow: 'row wrap' },
+                        isRendered: !ld.isNil(researcherProfile),
+                        libraryCards: libraryCards
+                      })
                     ])
                   ])
                 ]),

@@ -3,7 +3,7 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import { DAR, Election, Votes } from '../../libs/ajax';
+import { DAR, Election, Researcher, Votes } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import * as fp from 'lodash/fp';
 
@@ -53,11 +53,14 @@ class AccessReviewV2 extends React.PureComponent {
     // Vote information
     const allVotes = await Votes.getDarVotes(darId);
 
-    this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview });
+    // Researcher information
+    const researcherProfile = await Researcher.getResearcherProfile(darInfo.researcherId);
+
+    this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile });
   }
 
   render() {
-    const { allVotes, voteAsChair, darInfo, darId, accessElection, consent, accessElectionReview, rpElection, rpElectionReview } = this.state;
+    const { allVotes, voteAsChair, darInfo, darId, accessElection, consent, accessElectionReview, rpElection, rpElectionReview, researcherProfile } = this.state;
     const { history, match } = this.props;
 
     const currentUser = Storage.getCurrentUser();
@@ -93,7 +96,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '70%',
               }
             },
-            [DarApplication({ voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview })]
+            [DarApplication({ voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile })]
           )
         ])
       ]
