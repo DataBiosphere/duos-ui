@@ -1,14 +1,13 @@
 import { Component, Fragment } from 'react';
 import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { AddDacModal } from '../components/modals/AddDacModal';
-import { DacDatasetsModal } from '../components/modals/DacDatasetsModal';
-import { DacMembersModal } from '../components/modals/DacMembersModal';
-import { PageHeading } from '../components/PageHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
-import { SearchBox } from '../components/SearchBox';
-import { DAC } from '../libs/ajax';
-import { sleep } from '../libs/utils';
+import { AddDacModal } from './AddDacModal';
+import { DacDatasetsModal } from '../../components/modals/DacDatasetsModal';
+import { DacMembersModal } from './DacMembersModal';
+import { PageHeading } from '../../components/PageHeading';
+import { PaginatorBar } from '../../components/PaginatorBar';
+import { SearchBox } from '../../components/SearchBox';
+import { DAC } from '../../libs/ajax';
 import * as ld from 'lodash';
 
 
@@ -34,13 +33,6 @@ class AdminManageDac extends Component {
       selectedDac: {},
       selectedDatasets: []
     };
-
-    this.addDac = this.addDac.bind(this);
-    this.closeAddDacModal = this.closeAddDacModal.bind(this);
-    this.okAddDacModal = this.okAddDacModal.bind(this);
-
-    this.viewMembers = this.viewMembers.bind(this);
-    this.closeViewMembersModal = this.closeViewMembersModal.bind(this);
   }
 
   componentDidMount() {
@@ -87,7 +79,7 @@ class AdminManageDac extends Component {
     });
   };
 
-  editDac(selectedDac) {
+  editDac = (selectedDac) => {
     this.setState(prev => {
       prev.showDacModal = true;
       prev.isEditMode = true;
@@ -96,48 +88,46 @@ class AdminManageDac extends Component {
     });
   };
 
-  addDac() {
+  addDac = () => {
     this.setState({
       showDacModal: true,
       isEditMode: false
     });
-  }
+  };
 
-  async okAddDacModal() {
-    // Necessary due to the delay in adding/removing N users in addition to updating the DAC information.
-    await sleep(500);
-    this.fetchDacList();
+  okAddDacModal = async () => {
+    await this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
       return prev;
     });
-  }
+  };
 
-  async closeAddDacModal() {
-    this.fetchDacList();
+  closeAddDacModal = async () => {
+    await this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
       return prev;
     });
-  }
+  };
 
-  viewMembers(selectedDac) {
+  viewMembers = (selectedDac) => {
     this.setState(prev => {
       prev.showMembersModal = true;
       prev.selectedDac = selectedDac;
       return prev;
     });
-  }
+  };
 
-  closeViewMembersModal() {
+  closeViewMembersModal = () => {
     this.setState(prev => {
       prev.showMembersModal = false;
       prev.selectedDac = {};
       return prev;
     });
-  }
+  };
 
   viewDatasets = async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId);
