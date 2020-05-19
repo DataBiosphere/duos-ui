@@ -211,6 +211,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
         await this.closeElection(accessElection, chairAccessVote.vote, chairAccessVote.rationale);
         await this.closeElection(rpElection, chairRpVote.vote, chairRpVote.rationale);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         this.setState({ alert: 'incomplete' });
       }
@@ -224,11 +225,11 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         chairAgreementVote.rationale = chairAccessVote.rationale;
         this.submitVote(chairAgreementVote);
         await this.closeElection(accessElection, chairAccessVote.vote, chairAccessVote.rationale);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         this.setState({ alert: 'incomplete' });
       }
     }
-    Navigation.back(Storage.getCurrentUser(), history);
   };
 
   // posts the supplied vote for this DAR
