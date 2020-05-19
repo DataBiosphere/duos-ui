@@ -97,11 +97,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    * this is called when VoteAsMember mounts
    */
   getVotesAsMember = async () => {
-    const { memberVotes, accessElection, rpElection } = this.props;
+    const { chairVotes, memberVotes, accessElection, rpElection } = this.props;
+    const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
     const memberAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(memberVotes);
     const memberRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(memberVotes);
     this.setState({
       alert: '',
+      chairAccessVote: chairAccessVote,
       memberAccessVote: memberAccessVote,
       memberRpVote: memberRpVote
     });
@@ -139,18 +141,27 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // checks if required fields are completed before posting votes
   submitMemberVote = () => {
-    const { memberAccessVote, memberRpVote } = this.state;
+    const { history } = this.props;
+    const { chairAccessVote, memberAccessVote, memberRpVote } = this.state;
     if (memberRpVote) {
       if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote) &&
           !fp.isNil(memberRpVote) && !fp.isNil(memberRpVote.vote)) {
         this.submitVote(memberAccessVote);
         this.submitVote(memberRpVote);
+        // Navigate back if this member doesn't have chairperson votes to complete
+        if (fp.isNil(chairAccessVote)) {
+          Navigation.back(Storage.getCurrentUser(), history);
+        }
       } else {
         this.setState({ alert: 'incomplete' });
       }
     } else {
       if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote)) {
         this.submitVote(memberAccessVote);
+        // Navigate back if this member doesn't have chairperson votes to complete
+        if (fp.isNil(chairAccessVote)) {
+          Navigation.back(Storage.getCurrentUser(), history);
+        }
       } else {
         this.setState({ alert: 'incomplete' });
       }
@@ -194,45 +205,56 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   submitChairVote = async () => {
     const { history, accessElection, rpElection } = this.props;
-    const { chairAgreementVote, chairFinalVote, chairAccessVote, chairRpVote } = this.state;
+    const { chairFinalVote, chairAccessVote, chairRpVote } = this.state;
     // If an RP vote exists, we need to submit both votes to complete the election.
     // If not, only the access vote is required.
     if (!fp.isNil(chairRpVote)) {
       if (!fp.isNil(chairAccessVote.vote) && !fp.isNil(chairRpVote.vote)) {
-        this.submitVote(chairAccessVote);
-        this.submitVote(chairRpVote);
+        await this.submitVote(chairAccessVote);
+        await this.submitVote(chairRpVote);
 
         chairFinalVote.vote = chairAccessVote.vote;
         chairFinalVote.rationale = chairAccessVote.rationale;
-        this.submitVote(chairFinalVote);
-        chairAgreementVote.vote = chairAccessVote.vote;
-        chairAgreementVote.rationale = chairAccessVote.rationale;
-        this.submitVote(chairAgreementVote);
-
+        await this.submitVote(chairFinalVote);
+        await this.submitAgreementVote();
         await this.closeElection(accessElection, chairAccessVote.vote, chairAccessVote.rationale);
         await this.closeElection(rpElection, chairRpVote.vote, chairRpVote.rationale);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         this.setState({ alert: 'incomplete' });
       }
     } else {
       if (!fp.isNil(chairAccessVote) && !fp.isNil(chairAccessVote.vote)) {
-        this.submitVote(chairAccessVote);
+        await this.submitVote(chairAccessVote);
         chairFinalVote.vote = chairAccessVote.vote;
         chairFinalVote.rationale = chairAccessVote.rationale;
-        this.submitVote(chairFinalVote);
-        chairAgreementVote.vote = chairAccessVote.vote;
-        chairAgreementVote.rationale = chairAccessVote.rationale;
-        this.submitVote(chairAgreementVote);
+        await this.submitVote(chairFinalVote);
+        await this.submitAgreementVote();
         await this.closeElection(accessElection, chairAccessVote.vote, chairAccessVote.rationale);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         this.setState({ alert: 'incomplete' });
       }
     }
-    Navigation.back(Storage.getCurrentUser(), history);
+  };
+
+  /**
+   * Compares the chairperson's access vote to the matching algorithm decision.
+   * If they both are the same, then the agreement vote is TRUE. If they differ,
+   * the agreement vote is FALSE.
+   */
+  submitAgreementVote = async () => {
+    const { chairAgreementVote, chairAccessVote, matchData } = this.state;
+    if (!fp.isNil(fp.getOr(matchData, 'match', null))) {
+      chairAgreementVote.rationale = chairAccessVote.rationale;
+      chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
+      this.submitVote(chairAgreementVote);
+    }
   };
 
   // posts the supplied vote for this DAR
   submitVote = async (vote) => {
+    console.log(JSON.stringify(vote));
     const { darId } = this.props;
     try {
       if (vote.type === 'FINAL') {
