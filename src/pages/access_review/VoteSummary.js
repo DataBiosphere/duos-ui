@@ -134,10 +134,11 @@ export const VoteSummary = hh(
           div({style: {display: 'flex', flexWrap: 'wrap'}}, [
             div({style:{padding: '0 1rem 1rem 0'}}, ['VOTE: ']),
             div({style:{padding: '0 1rem 1rem 0', fontWeight: Theme.font.weight.regular, minWidth: '7rem'}}, [voteString]),
+          ]),
+          div({style: {display: 'flex', flexWrap: 'wrap'}}, [
             div({style:{padding: '0 1rem 1rem 0'}}, ['DATE: ']),
             div({style:{fontWeight: Theme.font.weight.regular}}, [createDateString]),
           ]),
-
           div({style: {}}, [
             div({style: {flex: '1 0 auto', padding: '0 1rem 1rem 0'}}, ['RATIONALE: ']),
             div({style: {flex: '1 0 auto', fontWeight: Theme.font.weight.regular}}, [vote.vote.rationale]),
