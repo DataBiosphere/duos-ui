@@ -122,7 +122,8 @@ export const VoteSummary = hh(
           width: 275,
           padding: 0,
           margin: '.5rem',
-          overflow: 'scroll',
+          overflowX: 'hidden',
+          overflowY: 'scroll',
           display: 'flex',
           flexDirection: 'column'
         },
