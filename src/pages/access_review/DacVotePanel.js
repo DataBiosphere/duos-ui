@@ -145,12 +145,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
           !fp.isNil(memberRpVote) && !fp.isNil(memberRpVote.vote)) {
         this.submitVote(memberAccessVote);
         this.submitVote(memberRpVote);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         this.setState({ alert: 'incomplete' });
       }
     } else {
       if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote)) {
         this.submitVote(memberAccessVote);
+        Navigation.back(Storage.getCurrentUser(), history);
       } else {
         this.setState({ alert: 'incomplete' });
       }
