@@ -139,6 +139,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // checks if required fields are completed before posting votes
   submitMemberVote = () => {
+    const { history } = this.props;
     const { memberAccessVote, memberRpVote } = this.state;
     if (memberRpVote) {
       if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote) &&
