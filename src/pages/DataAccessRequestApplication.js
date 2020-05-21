@@ -1423,56 +1423,50 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
                 fieldset({ disabled: this.state.formData.dar_code !== null }, [
 
-                  h3({ className: 'rp-form-title access-color' }, ['4. Data Use Agreements']),
+                  h3({ className: 'rp-form-title access-color' }, ['4.1 Data Use Agreements']),
 
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                       label({ className: 'control-label rp-title-question' }, [
-                        '4.1 DUOS Library Card Data Access Agreement'
+                        'DUOS Library Card Data Access Agreement & Attestation'
                       ])
                     ]),
 
                     div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                        label({ className: 'control-label default-color' },
-                          ['By submitting this data access request, you agree to comply with all terms relevant to Authorized Users put forth in the agreement.'])
-                      ]),
+                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                        span ({ className: 'rp-agreement rp-last-group' }, ['Under the National Institutes of Health (NIH) Genomic Data Sharing Policy, the Genomic Data User Code of Conduct sets forth principles for responsible management and use of large-scale genomic data and associated phenotypic data accessed through controlled access to NIHdesignated data repositories (e.g., the database of Genotypes and Phenotypes (dbGaP), repositories established as NIH Trusted Partners). Failure to abide by any term within this Code of Conduct may result in revocation of approved access to datasets obtained through these repositories. Investigators who are approved to access data agree to:']),
 
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                        a({
-                          id: 'link_downloadAgreement', href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf', target: '_blank',
-                          className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                        }, [
-                          span({ className: 'glyphicon glyphicon-download' }),
-                          'DUOS Library Card Agreement'
+                        ol({ className: 'rp-agreement rp-last-group' }, [
+                          li({}, ['Use datasets solely in connection with the research project described in the approved Data Access Request for each dataset']),
+                          li({}, ['Make no attempt to identify or contact individual participants or groups from whom data were collected, or generate information that could allow participants’ identities to be readily ascertained, without appropriate approvals from the submitting institutions;']),
+                          li({}, ['Maintain the confidentiality of the data and not distribute them to any entity or individual beyond those specified in the approved Data Access Request;']),
+                          li({}, ['Adhere to the NIH Security Best Practices for Controlled-Access Data Subject to the NIH Genomic Data Sharing Policy and ensure that only approved users can gain access to data files;']),
+                          li({}, ['Acknowledge the Intellectual Property terms as specified in the Library Card Agreement; ']),
+                          li({}, ['Provide appropriate acknowledgement in any dissemination of research findings including the investigator(s) who generated the data, the funding source, accession numbers of the dataset, and the data repository from which the data were accessed; and,']),
+                          li({}, ['Report any inadvertent data release, breach of data security, or other data management incidents in accordance with the terms specified in the Library Card Agreement. ']),
                         ])
                       ]),
 
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                        p({ className: 'rp-agreement' },
-                          ['For your request to be reviewed, your Signing Official must authorize you by sending a signed Library Card data access agreement']),
-                        a({ href: '/home_about', target: '_blank' }, '(instructions here)')
-                      ])
-                    ]),
+                      div({ className: 'row no-margin' }, [
+                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                          label({ className: 'control-label default-color' },
+                            ['By submitting this data access request, you agree to comply with all terms relevant to Authorized Users put forth in the agreement.'])
+                        ]),
 
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                        label({ className: 'control-label rp-title-question' }, ['4.2 Attestation Statement'])
-                      ]),
+                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                          a({
+                            id: 'link_downloadAgreement', href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf', target: '_blank',
+                            className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                          }, [
+                            span({ className: 'glyphicon glyphicon-download' }),
+                            'DUOS Library Card Agreement'
+                          ])
+                        ]),
 
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                        label({ className: 'control-label default-color' }, ['I attest to the following:']),
-
-                        ol({ className: 'rp-agreement rp-last-group' }, [
-                          li({}, ['Data will only be used for approved research']),
-                          li({},
-                            ['Data confidentiality will be protected and the investigator will never make any attempt at "re-identification"']),
-                          li({},
-                            ['All applicable laws, local institutional policies, and terms and procedures specific to the study’s data access policy will be followed.']),
-                          li({}, ['No attempts will be made to identify individual study participants from whom data were obtained.']),
-                          li({}, ['Data will not be sold or shared with third parties.']),
-                          li({},
-                            ['The contributing investigator(s) who conducted the original study and the funding organizations involved in supporting the original study will be acknowledged in publications resulting from the analysis of those data.'])
+                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                          p({ className: 'rp-agreement' },
+                            ['For your request to be reviewed, your Signing Official must authorize you by sending a signed Library Card data access agreement']),
+                          a({ href: '/home_about', target: '_blank' }, '(instructions here)')
                         ])
                       ])
                     ]),
