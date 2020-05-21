@@ -80,7 +80,7 @@ export const VoteSummary = hh(
         style: {
           borderRadius: 9,
           backgroundColor: '#D3E9EC',
-          height: 160,
+          height: 180,
           width: 275,
           padding: '1rem',
           margin: '.5rem'
@@ -118,7 +118,7 @@ export const VoteSummary = hh(
         style: {
           borderRadius: 9,
           backgroundColor: '#DFE8EE',
-          height: 160,
+          height: 180,
           width: 275,
           padding: 0,
           margin: '.5rem',
