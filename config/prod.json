@@ -5,5 +5,7 @@
   "clientId": "383345696373-epss75p24k6on93kq37ccse0n626ojal.apps.googleusercontent.com",
   "firecloudUrl": "https://api.firecloud.org/",
   "nihUrl": "https://shibboleth.dsde-prod.broadinstitute.org/link-nih-account",
-  "features": {}
+  "features": {
+    "newDarUi": true
+  }
 }
