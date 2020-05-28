@@ -119,6 +119,7 @@ jobs:
       - run:
           name: Install dependencies
           command: npm ci
+      - run: npm run docker-build:test
       - run: npm run cypress:verify
       - run: cp config/dev.json public/config.json
       - run: CI=false npm run build --silent
