@@ -115,6 +115,8 @@ jobs:
   test-docker:
     executor: node
     steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
       - checkout
       - restore_cache:
           keys:
