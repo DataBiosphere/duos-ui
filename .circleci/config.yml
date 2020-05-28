@@ -118,16 +118,8 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - checkout
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run: npm install
       - run: npm run docker-build:test
-      - save_cache:
-          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-          paths:
-            - ~/.npm
-            - ~/.cache
   test:
     executor: cypress
     steps:
