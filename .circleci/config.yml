@@ -4,11 +4,13 @@ executors:
   cloud-sdk:
     docker:
       - image: google/cloud-sdk
-  node:
+  cypress:
     docker:
       - image: cypress/base:10.16.3
         environment:
           TERM: xterm
+  node:
+    image: circleci/node:stretch
 
 commands:
   push-env:
@@ -109,8 +111,17 @@ commands:
             kubectl rollout status deployment/${APPLICATION_NAME}
 
 jobs:
-  test:
+  test-docker:
     executor: node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+      - run: npm install
+      - run: npm run docker-build:test
+  test:
+    executor: cypress
     steps:
       - checkout
       - restore_cache:
@@ -119,7 +130,6 @@ jobs:
       - run:
           name: Install dependencies
           command: npm ci
-      - run: npm run docker-build:test
       - run: npm run cypress:verify
       - run: cp config/dev.json public/config.json
       - run: CI=false npm run build --silent
@@ -134,7 +144,7 @@ jobs:
           background: true
       - run: npm run cypress:run
   build-dev:
-    executor: node
+    executor: cypress
     steps:
       - checkout
       - restore_cache:
@@ -152,7 +162,7 @@ jobs:
             - config
             - Dockerfile
   build-staging:
-    executor: node
+    executor: cypress
     steps:
       - checkout
       - restore_cache:
@@ -230,6 +240,12 @@ workflows:
   version: 2
   build-deploy:
     jobs:
+      - test-docker:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only: /.*/
       - test:
           filters:
             tags:
