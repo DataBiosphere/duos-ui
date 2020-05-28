@@ -477,8 +477,8 @@ export const DataSet = {
     a.click();
   },
 
-  deleteDataset: async (datasetObjectId, dacUserId) => {
-    const url = `${await Config.getApiUrl()}/dataset/${datasetObjectId}/${dacUserId}`;
+  deleteDataset: async (datasetObjectId) => {
+    const url = `${await Config.getApiUrl()}/dataset/${datasetObjectId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
