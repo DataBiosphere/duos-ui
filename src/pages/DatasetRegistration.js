@@ -49,7 +49,6 @@ class DatasetRegistration extends Component {
         hmb: false,
         poa: false,
         diseases: false,
-        ontologies: [],
         other: false,
         otherText: '',
         forProfit: '',
@@ -123,7 +122,6 @@ class DatasetRegistration extends Component {
     if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
       if (this.props.location.props.formData.dar_code !== undefined) {
         formData = this.props.location.props.formData;
-        formData.ontologies = this.getOntologies(formData);
       } else if (this.props.location.props.formData.datasetId !== undefined) {
         // set datasets sent by data set catalog
         formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
@@ -178,21 +176,6 @@ class DatasetRegistration extends Component {
     });
 
   };
-
-  getOntologies(formData) {
-    let ontologies = {};
-    if (formData.ontologies !== undefined && formData.ontologies !== null) {
-      ontologies = formData.ontologies.map(function(item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.label,
-          item: item
-        };
-      });
-    }
-    return ontologies;
-  }
 
   processDataSet(datasetIdList) {
     return datasetIdList.map(function(item) {
@@ -393,14 +376,7 @@ class DatasetRegistration extends Component {
 
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
       this.setState(prev => {
-        if (ontologies.length > 0) {
-          prev.formData.ontologies = ontologies;
-        }
         for (var key in prev.formData) {
           if (prev.formData[key] === '') {
             prev.formData[key] = undefined;
@@ -459,10 +435,6 @@ class DatasetRegistration extends Component {
       return prev;
     });
     if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
       let datasets = this.state.formData.datasets.map(function(item) {
         return {
           id: item.value,
@@ -471,7 +443,6 @@ class DatasetRegistration extends Component {
       });
       this.setState(prev => {
         prev.formData.datasetId = datasets;
-        prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
     } else {
@@ -538,7 +509,7 @@ class DatasetRegistration extends Component {
     const valid = (
       this.state.formData.hmb === true ||
       this.state.formData.poa === true ||
-      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
+      this.state.formData.diseases === true ||
       (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
     );
     return !valid;
@@ -551,7 +522,6 @@ class DatasetRegistration extends Component {
       prev.formData.diseases = false;
       prev.formData.other = false;
       prev.formData.otherText = '';
-      prev.formData.ontologies = [];
       return prev;
     });
   };
@@ -563,7 +533,6 @@ class DatasetRegistration extends Component {
       prev.formData.diseases = false;
       prev.formData.other = false;
       prev.formData.otherText = '';
-      prev.formData.ontologies = [];
       return prev;
     });
   };
@@ -579,20 +548,12 @@ class DatasetRegistration extends Component {
     });
   };
 
-  onOntologiesChange = (data) => {
-    this.setState(prev => {
-      prev.formData.ontologies = data;
-      return prev;
-    });
-  };
-
   setOther = () => {
     this.setState(prev => {
       prev.formData.hmb = false;
       prev.formData.poa = false;
       prev.formData.diseases = false;
       prev.formData.other = true;
-      prev.formData.ontologies = [];
       return prev;
     });
   };
@@ -624,7 +585,6 @@ class DatasetRegistration extends Component {
       controls = false,
       methods = false,
     } = this.state.formData;
-    const { ontologies } = this.state;
 
     const { problemSavingRequest, showValidationMessages, step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
@@ -1095,8 +1055,6 @@ class DatasetRegistration extends Component {
                           diseases: diseases,
                           diseasesHandler: this.setDiseases,
                           disabled: (dar_code !== null),
-                          ontologies: ontologies,
-                          ontologiesHandler: this.onOntologiesChange,
                           other: other,
                           otherHandler: this.setOther,
                           otherText: otherText,

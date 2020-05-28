@@ -7,22 +7,6 @@ import * as fp from 'lodash/fp';
 
 export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
-  searchOntologies = (query, callback) => {
-    let options = [];
-    DAR.getAutoCompleteOT(query).then(
-      items => {
-        options = items.map(function(item) {
-          return {
-            key: item.id,
-            value: item.id,
-            label: item.label,
-            item: item,
-          };
-        });
-        callback(options);
-      });
-  };
-
   render() {
     const props = this.props;
     let otherTextStyle = {
@@ -37,18 +21,6 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
       otherTextStyle = fp.merge(otherTextStyle, {backgroundColor: '#fff'});
     } else {
       otherTextStyle = fp.merge(otherTextStyle, {cursor: 'not-allowed'});
-    }
-
-    let ontologySelectionStyle = {};
-    if (!props.diseases) {
-      ontologySelectionStyle = fp.merge(ontologySelectionStyle, {
-        control: styles => ({
-          ...styles,
-          border: '1px solid #999',
-          backgroundColor: '#eee',
-          cursor: 'not-allowed',
-        }),
-      });
     }
 
     return (
@@ -106,26 +78,6 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
             },
           },
           ['If you selected Disease-related Studies, please select the disease area(s) this study focuses on in the box below.']),
-
-          div({
-            style: {
-              marginBottom: '2rem',
-              color: '#777',
-              cursor: props.diseases ? 'pointer' : 'not-allowed',
-            },
-          }, [
-            h(AsyncSelect, {
-              styles: ontologySelectionStyle,
-              id: 'sel_diseases',
-              isDisabled: !props.diseases,
-              isMulti: true,
-              loadOptions: (query, callback) => this.searchOntologies(query, callback),
-              onChange: (option) => props.ontologiesHandler(option),
-              value: props.ontologies,
-              placeholder: 'Please enter one or more diseases',
-              classNamePrefix: 'select',
-            }),
-          ]),
 
           RadioButton({
             style: {

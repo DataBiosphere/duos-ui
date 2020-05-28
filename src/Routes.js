@@ -31,7 +31,6 @@ import HomeAbout from './pages/HomeAbout';
 import HomeHelp from './pages/HomeHelp';
 import InvalidRestrictions from './pages/InvalidRestrictions';
 import AccessReviewV2 from './pages/access_review/AccessReviewV2';
-import ManageOntologies from './pages/ManageOntologies';
 import MemberConsole from './pages/MemberConsole';
 import NotFound from './pages/NotFound';
 import ResearcherConsole from './pages/ResearcherConsole';
@@ -70,7 +69,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/help_reports" component={HelpReports} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/invalid_restrictions" component={InvalidRestrictions} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/manage_ontologies" component={ManageOntologies} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/access_result_records/:referenceId/:electionId" component={AccessResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
