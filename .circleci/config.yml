@@ -118,7 +118,9 @@ jobs:
       - setup_remote_docker:
           docker_layer_caching: true
       - checkout
-      - run: npm install
+      - run: cp config/dev.json public/config.json
+      - run: npm install react-scripts --silent
+      - run: CI=false npm run build --silent
       - run: npm run docker-build:test
   test:
     executor: cypress
