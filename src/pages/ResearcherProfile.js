@@ -416,7 +416,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
 
   updateResearcher(profile) {
-    Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
+    const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+    Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone).then(resp => {
       this.saveUser().then(resp => {
         this.setState({ showDialogSubmit: false });
         this.props.history.push({ pathname: 'dataset_catalog' });
@@ -452,7 +453,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
-      Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profile);
+      const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+      Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
