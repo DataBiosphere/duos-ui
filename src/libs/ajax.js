@@ -6,14 +6,6 @@ import { Models } from './models';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
 
-// from Terra-ui ajax.js file
-// import * as qs from 'qs'
-// import { h } from 'react-hyperscript-helpers'
-// import { version } from 'src/data/clusters'
-// import { getUser } from 'src/libs/auth'
-// import { ajaxOverridesStore, requesterPaysBuckets, requesterPaysProjectStore, workspaceStore } from 'src/libs/state'
-// import * as Utils from 'src/libs/utils'
-
 const dataTemplate = {
   accessTotal: [
     ['Results', 'Votes'],
@@ -1145,41 +1137,6 @@ export const Votes = {
   }
 
 };
-
-// export const SupportUser = {
-//
-//   // If you are making changes to the Support Request Modal, make sure you test the following:
-//   // 1. Submit a ticket via Terra while signed in and signed out
-//   // 2. Check the tickets are generated on Zendesk
-//   // 3. Reply internally (as a Light Agent) and make sure an email is not sent
-//   // 4. Reply externally (ask one of the Comms team with Full Agent access) and make sure you receive an email
-//   createSupportRequest: ({ name, email, currUrl, subject, type, description, attachmentToken, emailAgreed, clinicalUser }) => {
-//     return fetchOk(
-//       // `https://support.terra.bio/api/v2/requests.json`, // Terra-ui
-//       `https://broadinstitute.zendesk.com/api/v2/requests.json`,
-//       _.merge({ signal, method: 'POST' }, jsonBody({
-//         request: {
-//           requester: { name, email },
-//           subject,
-//           // BEWARE changing the following ids or values! If you change them then you must thoroughly test.
-//           custom_fields: [
-//             { id: 360012744452, value: type },
-//             { id: 360007369412, value: description },
-//             { id: 360012744292, value: name },
-//             { id: 360012782111, value: email },
-//             { id: 360007369392, value: subject } // this isn't in Terra-ui
-//             // { id: 360018545031, value: emailAgreed }, // do we need this in DUOS?
-//             // { id: 360027463271, value: clinicalUser } // assume we don't need in DUOS
-//           ],
-//
-//           comment: {
-//             body: `${description}\n\n------------------\nSubmitted from: ${currUrl}`,
-//             uploads: [`${attachmentToken}`]
-//           }
-//         }
-//       })))
-//   }
-// }
 
 export const AuthenticateNIH = {
   fireCloudVerifyUser: async () => {
