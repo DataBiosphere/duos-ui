@@ -296,6 +296,12 @@ export const DAR = {
     return darInfo;
   },
 
+  translateDataUse: async dataUse => {
+    const url = `${await Config.getOntologyApiUrl()}translate/summary`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataUse), { method: 'POST' }]));
+    return await res.json();
+  },
+
   getPartialDarRequest: async darId => {
     const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -361,6 +367,12 @@ export const DAR = {
 
   getAutoCompleteDS: async partial => {
     const url = `${await Config.getApiUrl()}/dataset/autocomplete/${partial}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  },
+
+  getAutoCompleteOT: async partial => {
+    const url = `${await Config.getOntologyApiUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
