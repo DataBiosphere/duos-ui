@@ -7,7 +7,6 @@ import { AddDacModal } from './manage_dac/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
-import { AddOntologiesModal } from '../components/modals/AddOntologiesModal';
 import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
@@ -25,7 +24,6 @@ class AdminConsole extends Component {
       showAddDacModal: false,
       showAddUserModal: false,
       showAddDatasetModal: false,
-      showAddOntologiesModal: false,
       showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
@@ -91,13 +89,6 @@ class AdminConsole extends Component {
     });
   };
 
-  addOntologies = (e) => {
-    this.setState(prev => {
-      prev.showAddOntologiesModal = true;
-      return prev;
-    });
-  };
-
   async electionTimeout(e) {
     const timeOut = await ElectionTimeout.findApprovalExpirationTime();
     const isDataSetElection = await Election.isDataSetElectionOpen();
@@ -130,7 +121,6 @@ class AdminConsole extends Component {
         this.props.history.push(`dataset_catalog`);
         break;
       }
-      case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -142,7 +132,6 @@ class AdminConsole extends Component {
       case 'addDac': this.setState({ showAddDacModal: false }); break;
       case 'addUser': this.setState({ showAddUserModal: false }); break;
       case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
-      case 'addOntologies': this.setState({ showAddOntologiesModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -154,7 +143,6 @@ class AdminConsole extends Component {
       case 'addDac': this.setState(prev => { prev.showAddDacModal = false; return prev; }); break;
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
       case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
-      case 'addOntologies': this.setState(prev => { prev.showAddOntologiesModal = false; return prev; }); break;
       case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
     }
@@ -346,40 +334,6 @@ class AdminConsole extends Component {
                   iconName: 'invalid-restrictions',
                   iconSize: 'large',
                   unreviewedCases: 0
-                })
-              ])
-            ]),
-
-            div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_manageOntologies',
-                  url: '/manage_ontologies',
-                  color: 'common',
-                  title: 'Manage Ontologies',
-                  description: 'Select and manage Ontologies for index',
-                  iconName: 'manage-ontologies',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                })
-              ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_addOntologies',
-                  clickHandler: this.addOntologies,
-                  color: 'common',
-                  title: 'Add Ontologies',
-                  description: 'Store Ontologies for index',
-                  iconName: 'add-ontologies',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                }),
-                AddOntologiesModal({
-                  showModal: this.state.showAddOntologiesModal,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
                 })
               ])
             ])
