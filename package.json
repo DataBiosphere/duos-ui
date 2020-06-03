@@ -37,19 +37,22 @@
     "react-tabs": "3.1.1",
     "react-tooltip": "4.2.6",
     "set-value": "3.0.2",
-    "source-map-explorer": "2.4.2"
+    "source-map-explorer": "2.4.2",
+    "stackdriver-errors-js": "0.8.0"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build; npm run git:hash; npm run git:tag",
     "eject": "react-scripts eject",
     "test": "start-server-and-test start:ci http://localhost:3000  cypress:run",
     "start:ci": "BROWSER=none react-scripts start",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "cypress:verify": "cypress verify",
-    "docker-build:test": "docker-build test"
+    "docker-build:test": "docker-build test",
+    "git:hash": "sed -i -e \"s/git-hash/$(git rev-parse --short HEAD)/\" public/config.json",
+    "git:tag": "sed -i -e \"s/git-tag/$(git describe --abbrev=0 --tags)/\" public/config.json"
   },
   "devDependencies": {
     "acorn": "7.2.0",

@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import {Storage} from './storage';
-
+import { Storage } from './storage';
 
 export const Config = {
 
@@ -16,43 +15,61 @@ export const Config = {
 
   getGoogleClientId: async () => (await getConfig()).clientId,
 
+  getErrorApiKey: async () => (await getConfig()).errorApiKey,
+
+  getHash: async () => (await getConfig()).hash,
+
+  getTag: async () => (await getConfig()).tag,
+
   getFeatureFlag: async (featureName) => {
     const feature = _.get(await getConfig(), 'features', {});
     return _.get(feature, featureName, false);
+  },
+
+  getProject: async () => {
+    const env = await Config.getEnv();
+    switch (env) {
+      case 'prod':
+        return 'broad-duos-prod';
+      default:
+        return 'broad-duos-dev';
+    }
   },
 
   authOpts: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
-      'X-App-ID': 'DUOS'
-    }
+      'X-App-ID': 'DUOS',
+    },
   }),
 
   fileOpts: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
-    }
+      Accept: 'application/json',
+    },
   }),
 
   jsonBody: body => ({
     body: JSON.stringify(body),
-    headers: {'Content-Type': 'application/json'}
+    headers: {'Content-Type': 'application/json'},
   }),
 
   fileBody: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: '*/*'
-    }
+      Accept: '*/*',
+    },
   }),
 };
 
 const Token = {
   getToken: () => {
-    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-  }
+    return Storage.getGoogleData() !== null ?
+      Storage.getGoogleData().accessToken :
+      'token';
+  },
 };
 
 const loadConfig = _.memoize(async () => {

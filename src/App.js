@@ -9,6 +9,7 @@ import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
 import { Storage } from './libs/storage';
 import Routes from './Routes';
 
+import {StackdriverReporter} from './libs/stackdriverReporter';
 
 class App extends React.Component {
 
@@ -35,6 +36,7 @@ class App extends React.Component {
   async componentDidMount() {
     const isLogged = await Storage.userIsLogged();
     this.setState({ isLoggedIn: isLogged });
+    await StackdriverReporter.start();
   };
 
   signOut = () => {

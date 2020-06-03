@@ -4,6 +4,7 @@ import * as fp from 'lodash/fp';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
+import { StackdriverReporter } from './stackdriverReporter';
 import { Storage } from './storage';
 
 
@@ -1213,6 +1214,13 @@ const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   spinnerService.hideAll();
+  if (res.status >= 400) {
+    const msg = 'Error fetching response: '
+      .concat(JSON.stringify(args[0]))
+      .concat('Status: ')
+      .concat(res.status);
+    await StackdriverReporter.report(msg);
+  }
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
