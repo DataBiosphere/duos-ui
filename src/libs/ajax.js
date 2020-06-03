@@ -696,12 +696,6 @@ export const Files = {
     return getFile(url, fileName);
   },
 
-  getOntologyFile: async (fileName, fileUrl) => {
-    const encodeURI = encodeURIComponent(fileUrl);
-    const url = `${await Config.getApiUrl()}/ontology/file?fileUrl=${encodeURI}&fileName=${fileName}`;
-    return getFile(url, fileName);
-  },
-
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;
     return getFile(url, fileName);
@@ -754,55 +748,6 @@ export const Match = {
     } finally {
       return answer;
     }
-  }
-};
-
-export const Ontology = {
-
-  postOntologyFile: async (fileData) => {
-    var formData = new FormData();
-    var uuid = Ontology.guid();
-    var metadata = {};
-    metadata[uuid] = fileData.fileMetadata;
-    formData.append(uuid, fileData.file);
-    formData.append("metadata", JSON.stringify(metadata));
-
-    const url = `${await Config.getApiUrl()}/ontology`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    if (res.status === 204) {
-      return [];
-    }
-    return await res.json();
-  },
-
-  retrieveIndexedFiles: async () => {
-    const url = `${await Config.getApiUrl()}/ontology`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json().then((data) => { return data; });
-  },
-
-  deleteOntologyFile: async (fileUrl) => {
-    const url = `${await Config.getApiUrl()}/ontology`;
-    const obj = { fileUrl: fileUrl };
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(obj), { method: 'PUT' }]));
-    return await res.json();
-  },
-
-  getOntologyTypes: async () => {
-    const url = `${await Config.getApiUrl()}/ontology/types`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json();
-  },
-
-  guid: () => {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-      s4() + '-' + s4() + s4() + s4();
   }
 };
 
