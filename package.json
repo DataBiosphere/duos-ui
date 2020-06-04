@@ -62,7 +62,7 @@
     "handlebars": "4.7.6",
     "js-yaml": "3.14.0",
     "start-server-and-test": "1.11.0",
-    "typescript": "3.9.3"
+    "typescript": "3.9.5"
   },
   "comments": {
     "security-alerts": "handlebars and js-yaml are security related updates for indirect dependencies"
