@@ -37,8 +37,17 @@ export const StackdriverReporter = {
 
   report: async (msg) => {
     const user = Storage.getCurrentUser();
+    const formattedMsg = await StackdriverReporter.format(msg);
     errorHandler.setUser(ld.get(user, 'email', 'anonymous'));
-    errorHandler.report(msg);
+    errorHandler.report(formattedMsg);
   },
+
+  format: async (msg) => {
+    const env = await Config.getEnv();
+    return '['.concat(env)
+      .concat('] ')
+      .concat(msg)
+      .concat(' ');
+  }
 
 };

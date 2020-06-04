@@ -1,14 +1,14 @@
 {
   "env": "prod",
+  "tag": "git-tag",
+  "hash": "git-hash",
   "apiUrl": "https://consent.dsde-prod.broadinstitute.org/api",
   "ontologyApiUrl": "https://consent-ontology.dsde-prod.broadinstitute.org/",
   "clientId": "383345696373-epss75p24k6on93kq37ccse0n626ojal.apps.googleusercontent.com",
-  "errorApiKey": "",
+  "errorApiKey": "AIzaSyBFLIUf__4yxDpM9wFt3T4K_UX_VCu7tcQ",
   "firecloudUrl": "https://api.firecloud.org/",
   "nihUrl": "https://shibboleth.dsde-prod.broadinstitute.org/link-nih-account",
   "features": {
     "newDarUi": true
-  },
-  "tag": "git-tag",
-  "hash": "git-hash"
+  }
 }

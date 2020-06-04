@@ -1,5 +1,7 @@
 {
   "env": "local",
+  "tag": "git-tag",
+  "hash": "git-hash",
   "apiUrl": "https://local.broadinstitute.org:27443/api",
   "ontologyApiUrl": "https://local.broadinstitute.org:28443/",
   "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",
@@ -8,7 +10,5 @@
   "nihUrl": "http://mock-nih.dev.test.firecloud.org/link-nih-account/index.html",
   "features": {
     "newDarUi": true
-  },
-  "tag": "git-tag",
-  "hash": "git-hash"
+  }
 }

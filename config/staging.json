@@ -1,5 +1,7 @@
 {
   "env": "staging",
+  "tag": "git-tag",
+  "hash": "git-hash",
   "apiUrl": "https://consent.dsde-staging.broadinstitute.org/api",
   "ontologyApiUrl": "https://consent-ontology.dsde-staging.broadinstitute.org/",
   "clientId": "1087760099392-t0nb61ehicbeuqkeftvql765ncu1707r.apps.googleusercontent.com",
@@ -8,7 +10,5 @@
   "nihUrl": "http://mock-nih.dev.test.firecloud.org/link-nih-account/index.html",
   "features": {
     "newDarUi": true
-  },
-  "tag": "git-tag",
-  "hash": "git-hash"
+  }
 }

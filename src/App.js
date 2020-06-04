@@ -1,15 +1,15 @@
 import React from 'react';
-import { div, h } from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
+import { StackdriverReporter } from './libs/stackdriverReporter';
 import { Storage } from './libs/storage';
-import Routes from './Routes';
 
-import {StackdriverReporter} from './libs/stackdriverReporter';
+import Routes from './Routes';
 
 class App extends React.Component {
 

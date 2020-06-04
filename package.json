@@ -42,7 +42,7 @@
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
-    "start": "react-scripts start",
+    "start": "npm run git:hash; npm run git:tag; react-scripts start",
     "build": "react-scripts build; npm run git:hash; npm run git:tag",
     "eject": "react-scripts eject",
     "test": "start-server-and-test start:ci http://localhost:3000  cypress:run",
