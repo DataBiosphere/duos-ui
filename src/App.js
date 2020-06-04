@@ -1,5 +1,5 @@
 import React from 'react';
-import {div, h} from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
 import DuosFooter from './components/DuosFooter';
