@@ -16,7 +16,7 @@
     "moment": "2.26.0",
     "noty": "3.2.0-beta",
     "popper.js": "1.16.1",
-    "query-string": "6.12.1",
+    "query-string": "6.13.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-google-charts": "3.0.15",
