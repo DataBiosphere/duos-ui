@@ -27,7 +27,8 @@ const HEADER_BOLD = {
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
 
   downloadDAR = () => {
-    Files.getDARFile(this.props.ids.darId);
+    const { darId } = this.props;
+    Files.getDARFile(darId);
   };
 
   render() {
