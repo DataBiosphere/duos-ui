@@ -52,6 +52,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       file: {
         name: ''
       },
+      roles: [],
       profile: {
         checkNotifications: false,
         academicEmail: '',
@@ -117,6 +118,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
+      prev.roles = currentUser.roles;
       prev.researcherProfile = profile;
       let key;
       for (key in profile) {
@@ -429,6 +431,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const currentUser = Storage.getCurrentUser();
     currentUser.displayName = this.state.profile.profileName;
     currentUser.additionalEmail = this.state.additionalEmail;
+    currentUser.roles = this.state.roles;
     const payload = { updatedUser: currentUser };
     await User.update(payload, currentUser.dacUserId);
   };
