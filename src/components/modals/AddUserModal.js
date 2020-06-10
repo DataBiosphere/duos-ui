@@ -8,6 +8,7 @@ import { BaseModal } from '../BaseModal';
 
 
 const adminRole = { 'roleId': 4, 'name': USER_ROLES.admin };
+const researcherRole = { 'roleId': 5, 'name': USER_ROLES.researcher };
 
 export const AddUserModal = hh(class AddUserModal extends Component {
 
@@ -22,7 +23,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       invalidForm: true,
       submitted: false,
       alerts: [],
-      updatedRoles: [],
+      updatedRoles: [researcherRole],
       emailPreference: false
     };
 
@@ -37,7 +38,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     if (this.props.user) {
       const user = await User.getByEmail(this.props.user.email);
-      const updatedRoles = _.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };});
+      const updatedRoles = _.concat(_.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };}), researcherRole);
       this.setState({
           mode: 'Edit',
           displayName: user.displayName,
@@ -59,7 +60,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
           mode: 'Add',
           displayName: '',
           email: '',
-          updatedRoles: [],
+          updatedRoles: [researcherRole],
           emailPreference: false
         },
         () => {
@@ -132,7 +133,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const checkState = e.target.checked;
     // True? add admin role to state.updatedRoles
     // False? remove admin role from state.updatedRoles
-    let newRoles = [];
+    let newRoles = [researcherRole];
     if (checkState) {
       newRoles = _.concat(this.state.updatedRoles, adminRole);
     } else {
