@@ -38,7 +38,8 @@ export const AddUserModal = hh(class AddUserModal extends Component {
 
     if (this.props.user) {
       const user = await User.getByEmail(this.props.user.email);
-      const updatedRoles = _.concat(_.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };}), researcherRole);
+      const currentRoles = _.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };});
+      const updatedRoles = _.isEmpty(currentRoles) ? [researcherRole] : currentRoles;
       this.setState({
           mode: 'Edit',
           displayName: user.displayName,
