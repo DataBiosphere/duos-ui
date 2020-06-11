@@ -12,6 +12,7 @@ import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
+import {USER_ROLES} from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -52,6 +53,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       file: {
         name: ''
       },
+      roles: [],
       profile: {
         checkNotifications: false,
         academicEmail: '',
@@ -117,6 +119,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
+      if (_.isEmpty(currentUser.roles)) {
+        prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
+      } else {
+        prev.roles = currentUser.roles;
+      }
       prev.researcherProfile = profile;
       let key;
       for (key in profile) {
@@ -429,6 +436,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const currentUser = Storage.getCurrentUser();
     currentUser.displayName = this.state.profile.profileName;
     currentUser.additionalEmail = this.state.additionalEmail;
+    currentUser.roles = this.state.roles;
     const payload = { updatedUser: currentUser };
     await User.update(payload, currentUser.dacUserId);
   };
