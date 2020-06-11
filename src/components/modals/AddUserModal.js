@@ -41,37 +41,37 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       const currentRoles = _.map(user.roles, (ur) => {return { 'roleId': ur.roleId, 'name': ur.name };});
       const updatedRoles = _.isEmpty(currentRoles) ? [researcherRole] : currentRoles;
       this.setState({
-          mode: 'Edit',
-          displayName: user.displayName,
-          email: user.email,
-          user: user,
-          updatedRoles: updatedRoles,
-          emailPreference: user.emailPreference
-        },
-        () => {
-          let r1 = this.nameRef.current;
-          let r2 = this.emailRef.current;
-          this.setState({
-            displayNameValid: r1.validity.valid,
-            emailValid: r2.validity.valid
-          });
+        mode: 'Edit',
+        displayName: user.displayName,
+        email: user.email,
+        user: user,
+        updatedRoles: updatedRoles,
+        emailPreference: user.emailPreference
+      },
+      () => {
+        let r1 = this.nameRef.current;
+        let r2 = this.emailRef.current;
+        this.setState({
+          displayNameValid: r1.validity.valid,
+          emailValid: r2.validity.valid
         });
+      });
     } else {
       this.setState({
-          mode: 'Add',
-          displayName: '',
-          email: '',
-          updatedRoles: [researcherRole],
-          emailPreference: false
-        },
-        () => {
-          let r1 = this.nameRef.current;
-          let r2 = this.emailRef.current;
-          this.setState({
-            displayNameValid: r1.validity.valid,
-            emailValid: r2.validity.valid
-          });
+        mode: 'Add',
+        displayName: '',
+        email: '',
+        updatedRoles: [researcherRole],
+        emailPreference: false
+      },
+      () => {
+        let r1 = this.nameRef.current;
+        let r2 = this.emailRef.current;
+        this.setState({
+          displayNameValid: r1.validity.valid,
+          emailValid: r2.validity.valid
         });
+      });
     }
   }
 
@@ -172,114 +172,114 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     const validForm = displayNameValid && emailValid;
     return (
       BaseModal({
-          id: 'addUserModal',
-          showModal: this.props.showModal,
-          disableOkBtn: !validForm,
-          onRequestClose: this.closeHandler,
-          onAfterOpen: this.afterOpenHandler,
-          imgSrc: this.state.mode === 'Add' ? '/images/icon_add_user.png' : '/images/icon_edit_user.png',
-          color: 'common',
-          title: this.state.mode === 'Add' ? 'Add User' : 'Edit User',
-          description: this.state.mode === 'Add' ? 'Catalog a new User in the system' : 'Edit a User in the system',
-          action: { label: this.state.mode === 'Add' ? 'Add' : 'Save', handler: this.OKHandler }
-        },
-        [
-          form({ className: 'form-horizontal css-form', name: 'userForm', encType: 'multipart/form-data', onChange: this.formChange }, [
-            div({ className: 'form-group first-form-group' }, [
-              label({ id: 'lbl_name', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Name']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-                input({
-                  type: 'text',
-                  name: 'displayName',
-                  id: 'txt_name',
-                  className: 'form-control col-lg-12 vote-input',
-                  placeholder: 'User name',
-                  required: true,
-                  value: displayName,
-                  autoFocus: true,
-                  onChange: this.handleChange,
-                  ref: this.nameRef
-                })
-              ])
-            ]),
+        id: 'addUserModal',
+        showModal: this.props.showModal,
+        disableOkBtn: !validForm,
+        onRequestClose: this.closeHandler,
+        onAfterOpen: this.afterOpenHandler,
+        imgSrc: this.state.mode === 'Add' ? '/images/icon_add_user.png' : '/images/icon_edit_user.png',
+        color: 'common',
+        title: this.state.mode === 'Add' ? 'Add User' : 'Edit User',
+        description: this.state.mode === 'Add' ? 'Catalog a new User in the system' : 'Edit a User in the system',
+        action: { label: this.state.mode === 'Add' ? 'Add' : 'Save', handler: this.OKHandler }
+      },
+      [
+        form({ className: 'form-horizontal css-form', name: 'userForm', encType: 'multipart/form-data', onChange: this.formChange }, [
+          div({ className: 'form-group first-form-group' }, [
+            label({ id: 'lbl_name', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Name']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              input({
+                type: 'text',
+                name: 'displayName',
+                id: 'txt_name',
+                className: 'form-control col-lg-12 vote-input',
+                placeholder: 'User name',
+                required: true,
+                value: displayName,
+                autoFocus: true,
+                onChange: this.handleChange,
+                ref: this.nameRef
+              })
+            ])
+          ]),
 
-            div({ className: 'form-group' }, [
-              label({ id: 'lbl_email', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Google account id']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
-                input({
-                  type: 'email',
-                  name: 'email',
-                  id: 'txt_email',
-                  className: 'form-control col-lg-12 vote-input',
-                  placeholder: 'e.g. username@broadinstitute.org',
-                  required: true,
-                  value: email,
-                  onChange: this.handleChange,
-                  ref: this.emailRef
-                })
-              ])
-            ]),
+          div({ className: 'form-group' }, [
+            label({ id: 'lbl_email', className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Google account id']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8' }, [
+              input({
+                type: 'email',
+                name: 'email',
+                id: 'txt_email',
+                className: 'form-control col-lg-12 vote-input',
+                placeholder: 'e.g. username@broadinstitute.org',
+                required: true,
+                value: email,
+                onChange: this.handleChange,
+                ref: this.emailRef
+              })
+            ])
+          ]),
 
-            div({ className: 'form-group' }, [
-              label({ className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Role']),
-              div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold' }, [
-                div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                  div({ className: 'checkbox' }, [
-                    input({
-                      type: 'checkbox',
-                      id: 'chk_admin',
-                      checked: this.isAdmin(),
-                      className: 'checkbox-inline user-checkbox',
-                      onChange: this.adminChanged
-                    }),
-                    label({ id: 'lbl_admin', className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_admin' }, ['Admin'])
-                  ])
-                ])
-              ])
-            ]),
-            div({ className: 'form-group' }, [
-              div({
-                isRendered: this.isAdmin(),
-                className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
-                style: { 'paddingLeft': '30px' }
-              }, [
+          div({ className: 'form-group' }, [
+            label({ className: 'col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label common-color' }, ['Role']),
+            div({ className: 'col-lg-9 col-md-9 col-sm-9 col-xs-8 bold' }, [
+              div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
                 div({ className: 'checkbox' }, [
                   input({
-                    id: 'chk_emailPreference',
                     type: 'checkbox',
+                    id: 'chk_admin',
+                    checked: this.isAdmin(),
                     className: 'checkbox-inline user-checkbox',
-                    // If email preference is TRUE  -> disable checkbox is not checked
-                    // If email preference is FALSE -> disable checkbox is checked
-                    checked: !this.state.emailPreference,
-                    onChange: this.emailPreferenceChanged
+                    onChange: this.adminChanged
                   }),
-                  label({ className: 'regular-checkbox rp-choice-questions bold', htmlFor: 'chk_emailPreference' },
-                    ['Disable Admin email notifications'])
+                  label({ id: 'lbl_admin', className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_admin' }, ['Admin'])
                 ])
               ])
             ])
           ]),
-
-          div({ isRendered: this.state.emailValid === false && this.state.submitted === true }, [
-            Alert({
-              id: 'emailUsed', type: 'danger', title: 'Conflicts to resolve!',
-              description: 'There is a user already registered with this google account.'
-            })
-          ]),
-
-          div({ isRendered: this.state.alerts.length > 0 }, [
-            this.state.alerts.map((alert, ix) => {
-              return (
-                h(Fragment, { key: 'alert_' + ix }, [
-                  Alert({ id: 'modal_' + ix, type: alert.type, title: alert.title, description: alert.msg })
-                ])
-              );
-            })
-          ]),
-          div({ isRendered: false }, [
-            Alert({ id: 'modal', type: 'danger', title: alert.title, description: alert.msg })
+          div({ className: 'form-group' }, [
+            div({
+              isRendered: this.isAdmin(),
+              className: 'col-lg-9 col-lg-offset-3 col-md-9 col-md-offset-3 col-sm-9 col-sm-offset-3 col-xs-8 col-xs-offset-4',
+              style: { 'paddingLeft': '30px' }
+            }, [
+              div({ className: 'checkbox' }, [
+                input({
+                  id: 'chk_emailPreference',
+                  type: 'checkbox',
+                  className: 'checkbox-inline user-checkbox',
+                  // If email preference is TRUE  -> disable checkbox is not checked
+                  // If email preference is FALSE -> disable checkbox is checked
+                  checked: !this.state.emailPreference,
+                  onChange: this.emailPreferenceChanged
+                }),
+                label({ className: 'regular-checkbox rp-choice-questions bold', htmlFor: 'chk_emailPreference' },
+                  ['Disable Admin email notifications'])
+              ])
+            ])
           ])
+        ]),
+
+        div({ isRendered: this.state.emailValid === false && this.state.submitted === true }, [
+          Alert({
+            id: 'emailUsed', type: 'danger', title: 'Conflicts to resolve!',
+            description: 'There is a user already registered with this google account.'
+          })
+        ]),
+
+        div({ isRendered: this.state.alerts.length > 0 }, [
+          this.state.alerts.map((alert, ix) => {
+            return (
+              h(Fragment, { key: 'alert_' + ix }, [
+                Alert({ id: 'modal_' + ix, type: alert.type, title: alert.title, description: alert.msg })
+              ])
+            );
+          })
+        ]),
+        div({ isRendered: false }, [
+          Alert({ id: 'modal', type: 'danger', title: alert.title, description: alert.msg })
         ])
+      ])
     );
   }
 });
