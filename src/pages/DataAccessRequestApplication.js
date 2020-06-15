@@ -110,7 +110,6 @@ class DataAccessRequestApplication extends Component {
 
   async componentDidMount() {
     await this.init();
-    // this.props.history.push('/dar_application');
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
@@ -130,14 +129,11 @@ class DataAccessRequestApplication extends Component {
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
       Storage.removeData('dar_application');
     }
-    if (!fp.isNil(formData.dar_code)) {
-      formData.ontologies = this.getOntologies(formData);
-    }
-    // }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
-    formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
-    formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
+    formData.dar_code = fp.isNil(formData.dar_code) ? null : formData.dar_code;
+    formData.partial_dar_code = fp.isNil(formData.partial_dar_code) ? null : formData.partial_dar_code;
+    formData.ontologies = this.formatOntologyItems(formData);
 
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
 
@@ -149,30 +145,27 @@ class DataAccessRequestApplication extends Component {
       formData.investigator = rpProperties.piName;
     }
 
-    if (formData.dar_code === null) {
-      formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
-      formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
-      formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
-      formData.department = rpProperties.department != null ? rpProperties.department : '';
-      formData.division = rpProperties.division != null ? rpProperties.division : '';
-      formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
-      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
-      formData.city = rpProperties.city != null ? rpProperties.city : '';
-      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
-      formData.country = rpProperties.country != null ? rpProperties.country : '';
-      formData.state = rpProperties.state != null ? rpProperties.state : '';
-      formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-      formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
-      formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
-      formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
-      formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
-      formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
-      formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
-      formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
-    }
-
+    formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
+    formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
+    formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+    formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
+    formData.department = rpProperties.department != null ? rpProperties.department : '';
+    formData.division = rpProperties.division != null ? rpProperties.division : '';
+    formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
+    formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
+    formData.city = rpProperties.city != null ? rpProperties.city : '';
+    formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+    formData.country = rpProperties.country != null ? rpProperties.country : '';
+    formData.state = rpProperties.state != null ? rpProperties.state : '';
+    formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
+    formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
+    formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
+    formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
+    formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
+    formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
+    formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
+    formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
+    formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
     formData.userId = Storage.getCurrentUser().dacUserId;
 
     let completed = false;
@@ -192,10 +185,10 @@ class DataAccessRequestApplication extends Component {
 
   };
 
-  getOntologies(formData) {
-    let ontologies = {};
-    if (formData.ontologies !== undefined && formData.ontologies !== null) {
-      ontologies = formData.ontologies.map(function(item) {
+  formatOntologyItems = (formData) => {
+    let ontologyItems = [];
+    if (!fp.isNil(formData.ontologies)) {
+      ontologyItems = formData.ontologies.map(function(item) {
         return {
           key: item.id,
           value: item.id,
@@ -204,8 +197,8 @@ class DataAccessRequestApplication extends Component {
         };
       });
     }
-    return ontologies;
-  }
+    return ontologyItems;
+  };
 
   handleChange = (e) => {
     const field = e.target.name;
@@ -629,9 +622,9 @@ class DataAccessRequestApplication extends Component {
       controls = false,
       methods = false,
       linkedIn = '',
-      investigator = ''
+      investigator = '',
+      ontologies = []
     } = this.state.formData;
-    const { ontologies } = this.state;
 
     const { problemSavingRequest, showValidationMessages,  step1, step3 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
