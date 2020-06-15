@@ -1,6 +1,6 @@
 import * as ld from 'lodash';
 import { Component, Fragment } from 'react';
-import { a, b, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
+import { a, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
@@ -12,7 +12,6 @@ import { DAR, Election, Files, Match, Researcher, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
-import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 
 
