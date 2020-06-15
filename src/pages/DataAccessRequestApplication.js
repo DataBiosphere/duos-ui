@@ -169,7 +169,7 @@ class DataAccessRequestApplication extends Component {
     formData.userId = Storage.getCurrentUser().dacUserId;
 
     let completed = false;
-    if (formData.dar_code !== null) {
+    if (!fp.isNil(formData.dar_code)) {
       completed = '';
     } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
