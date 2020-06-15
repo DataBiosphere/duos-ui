@@ -24,8 +24,6 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
-    this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
-    this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.state = {
       nihValid: false,
       disableOkBtn: false,
@@ -34,7 +32,6 @@ class DataAccessRequestApplication extends Component {
       file: {
         name: ''
       },
-      showModal: false,
       completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
@@ -100,8 +97,6 @@ class DataAccessRequestApplication extends Component {
       problemSavingRequest: false
     };
 
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
   onNihStatusUpdate = (nihValid) => {
@@ -115,7 +110,7 @@ class DataAccessRequestApplication extends Component {
 
   async componentDidMount() {
     await this.init();
-    this.props.history.push('/dar_application');
+    // this.props.history.push('/dar_application');
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
@@ -125,17 +120,20 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
-    let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
-    Storage.removeData('dar_application');
-    if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
-      if (this.props.location.props.formData.dar_code !== undefined) {
-        formData = this.props.location.props.formData;
-        formData.ontologies = this.getOntologies(formData);
-      } else if (this.props.location.props.formData.datasetId !== undefined) {
-        // set datasets sent by data set catalog
-        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
-      }
+    const { dataRequestId } = this.props.match.params;
+    let formData = {};
+    if (!fp.isNil(dataRequestId)) {
+      DAR.getPartialDarRequest(dataRequestId).then(data => {
+        formData = data;
+      });
+    } else {
+      formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
+      Storage.removeData('dar_application');
     }
+    if (!fp.isNil(formData.dar_code)) {
+      formData.ontologies = this.getOntologies(formData);
+    }
+    // }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
@@ -177,9 +175,6 @@ class DataAccessRequestApplication extends Component {
 
     formData.userId = Storage.getCurrentUser().dacUserId;
 
-    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
-      formData.datasets = this.processDataSet(formData.datasetId);
-    }
     let completed = false;
     if (formData.dar_code !== null) {
       completed = '';
@@ -211,23 +206,6 @@ class DataAccessRequestApplication extends Component {
     }
     return ontologies;
   }
-
-  processDataSet(datasetIdList) {
-    return datasetIdList.map(function(item) {
-      return {
-        value: item.id,
-        label: item.concatenation
-      };
-    });
-  }
-
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  };
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  };
 
   handleChange = (e) => {
     const field = e.target.name;
@@ -470,7 +448,7 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-  setShowDialogSave(value) {
+  setShowDialogSave = (value) => {
     this.setState(prev => {
       prev.showDialogSave = value;
       prev.disableOkBtn = false;

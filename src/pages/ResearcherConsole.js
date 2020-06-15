@@ -114,16 +114,6 @@ class ResearcherConsole extends Component {
     this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
   };
 
-  resume = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
-
-    DAR.getPartialDarRequest(dataRequestId).then(
-      data => {
-        let formData = data;
-        this.props.history.push({ pathname: 'dar_application', props: { formData: formData } });
-      });
-  };
-
   deletePartialDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogDeletePDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
@@ -309,9 +299,14 @@ class ResearcherConsole extends Component {
                       div({ id: pdar.partial_dar_code + "_partialDate", name: "partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),
                       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                         button({
-                          id: pdar.partial_dar_code + "_btnResume", name: "btn_resume", className: "cell-button hover-color", onClick: this.resume,
-                          value: pdar.dataRequestId
-                        }, ["Resume"]),
+                          id: pdar.partial_dar_code + '_btnResume',
+                          name: 'btn_resume',
+                          className: 'cell-button hover-color',
+                        }, [
+                          h(Link, {
+                            to: 'dar_application/' + pdar.dataRequestId,
+                          }, ['Resume'])],
+                        ),
                       ]),
                     ]),
                     hr({ className: "table-body-separator" })
