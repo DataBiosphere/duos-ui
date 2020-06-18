@@ -626,7 +626,8 @@ class DataAccessRequestApplication extends Component {
       investigator = '',
       ontologies = []
     } = this.state.formData;
-
+    const { dataRequestId } = this.props.match.params;
+    const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1, step3 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const genderLabels = ['Female', 'Male'];
@@ -793,7 +794,7 @@ class DataAccessRequestApplication extends Component {
                     div({ className: 'row no-margin' }, [
                       eRACommons({
                         className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
-                        destination: 'dar_application',
+                        destination: eRACommonsDestination,
                         onNihStatusUpdate: this.onNihStatusUpdate,
                         location: this.props.location,
                         validationError: showValidationMessages
