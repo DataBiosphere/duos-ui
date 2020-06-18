@@ -488,6 +488,7 @@ class DataAccessRequestApplication extends Component {
 
   saveDAR(response) {
     let formData = this.state.formData;
+    formData.datasetId = fp.map('value')(formData.datasets);
     if (response !== null) {
       formData.urlDAA = response.urlDAA;
       formData.nameDAA = response.nameDAA;
@@ -780,8 +781,8 @@ class DataAccessRequestApplication extends Component {
                         div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
                         span({ className: 'default-color' },
                           ['Please autenticate with ',
-                          a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
-                        ])
+                            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
+                          ])
                       ])
                     ]),
 
