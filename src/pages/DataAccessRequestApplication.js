@@ -423,7 +423,6 @@ class DataAccessRequestApplication extends Component {
       }, () => {
         let formData = this.state.formData;
         // DAR datasetId needs to be a list of ids
-        // DAR datasets needs to be a list of datasets with populated information.
         formData.datasetId = fp.map('value')(formData.datasets);
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
@@ -469,14 +468,15 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
+      // DAR datasetId needs to be a list of ids
+      const datasetId = fp.map('value')(this.state.formData.datasets);
+      // DAR ontologies needs to be a list of id/labels.
+      const ontologies = fp.map((o) => {return {
+        id: o.key,
+        label: o.value
+      };})(this.state.formData.ontologies);
       this.setState(prev => {
-        // DAR datasetId needs to be a list of ids
-        // DAR datasets needs to be a list of datasets with populated information.
-        prev.formData.datasetId = fp.map('value')(this.state.formData.datasets);
+        prev.formData.datasetId = datasetId;
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
@@ -499,7 +499,6 @@ class DataAccessRequestApplication extends Component {
   saveDAR(response) {
     let formData = this.state.formData;
     // DAR datasetId needs to be a list of ids
-    // DAR datasets needs to be a list of datasets with populated information.
     formData.datasetId = fp.map('value')(formData.datasets);
     if (response !== null) {
       formData.urlDAA = response.urlDAA;
