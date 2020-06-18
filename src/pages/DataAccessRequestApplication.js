@@ -134,7 +134,7 @@ class DataAccessRequestApplication extends Component {
         };
       });
       formData.datasets = datasets;
-      formData.datasetId = fp.map('key')(datasets);
+      formData.datasetId = fp.map('value')(datasets);
     } else if (!fp.isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       DAR.getPartialDarRequest(dataRequestId).then(data => {
@@ -424,7 +424,7 @@ class DataAccessRequestApplication extends Component {
         let formData = this.state.formData;
         // DAR datasetId needs to be a list of ids
         // DAR datasets needs to be a list of datasets with populated information.
-        formData.datasetId = fp.map('key')(formData.datasets);
+        formData.datasetId = fp.map('value')(formData.datasets);
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
@@ -476,7 +476,7 @@ class DataAccessRequestApplication extends Component {
       this.setState(prev => {
         // DAR datasetId needs to be a list of ids
         // DAR datasets needs to be a list of datasets with populated information.
-        prev.formData.datasetId = fp.map('key')(this.state.formData.datasets);
+        prev.formData.datasetId = fp.map('value')(this.state.formData.datasets);
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
