@@ -435,12 +435,12 @@ class DataAccessRequestApplication extends Component {
           if (formData.dar_code !== undefined && formData.dar_code !== null) {
             DAR.updateDar(formData, formData.dar_code).then(response => {
               this.setState({ showDialogSubmit: false });
-              Navigation.back(Storage.getCurrentUser(), this.props.history);
+              Navigation.console(Storage.getCurrentUser(), this.props.history);
             });
           } else {
             DAR.postDataAccessRequest(formData).then(response => {
               this.setState({ showDialogSubmit: false });
-              Navigation.back(Storage.getCurrentUser(), this.props.history);
+              Navigation.console(Storage.getCurrentUser(), this.props.history);
             }).catch(e =>
               this.setState(prev => {
                 prev.problemSavingRequest = true;

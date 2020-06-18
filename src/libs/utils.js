@@ -39,6 +39,16 @@ export const Navigation = {
               : user.isAlumni ? '/summary_votes'
                 : '/';
     history.push(page);
+  },
+  console: (user, history) => {
+    const page = user.isChairPerson ? '/chair_console'
+      : user.isMember ? '/member_console'
+        : user.isAdmin ? '/admin_console'
+          : user.isResearcher ? '/researcher_console'
+            : user.isDataOwner ? '/data_owner_console'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
+    history.push(page);
   }
 };
 
