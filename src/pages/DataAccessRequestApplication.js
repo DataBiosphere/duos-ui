@@ -12,6 +12,7 @@ import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
+import { Navigation } from "../libs/utils";
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
 
@@ -121,11 +122,26 @@ class DataAccessRequestApplication extends Component {
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
-    if (!fp.isNil(dataRequestId)) {
+    // Handle the case where we get form data from the Data Catalog
+    if (!fp.isNil(fp.getOr(null)('location.props.formData')(this.props))) {
+      formData = this.props.location.props.formData;
+      let datasets = formData.datasetId.map(function(item) {
+        return {
+          key: item.id,
+          label: item.concatenation,
+          value: item.id,
+          item: item
+        };
+      });
+      formData.datasets = datasets;
+      formData.datasetId = fp.map('key')(datasets);
+    } else if (!fp.isNil(dataRequestId)) {
+      // Handle the case where we have an existing DAR id
       DAR.getPartialDarRequest(dataRequestId).then(data => {
         formData = data;
       });
     } else {
+      // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
       Storage.removeData('dar_application');
     }
@@ -134,9 +150,7 @@ class DataAccessRequestApplication extends Component {
     formData.dar_code = fp.isNil(formData.dar_code) ? null : formData.dar_code;
     formData.partial_dar_code = fp.isNil(formData.partial_dar_code) ? null : formData.partial_dar_code;
     formData.ontologies = this.formatOntologyItems(formData);
-
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
-
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
@@ -187,15 +201,17 @@ class DataAccessRequestApplication extends Component {
 
   formatOntologyItems = (formData) => {
     let ontologyItems = [];
-    if (!fp.isNil(formData.ontologies)) {
-      ontologyItems = formData.ontologies.map(function(item) {
+    // Filter null values. TODO: Possible bug in saving partial dars
+    let formDataOntologies = fp.pickBy(fp.identity)(formData.ontologies);
+    if (!fp.isNil(formDataOntologies) && !fp.isEmpty(formDataOntologies)) {
+      ontologyItems = fp.map((item) => {
         return {
           key: item.id,
           value: item.id,
           label: item.label,
-          item: item
+          item: { id: item.id, label: item.label }
         };
-      });
+      })(formDataOntologies);
     }
     return ontologyItems;
   };
@@ -406,11 +422,9 @@ class DataAccessRequestApplication extends Component {
         return prev;
       }, () => {
         let formData = this.state.formData;
-        let ds = [];
-        this.state.formData.datasets.forEach(dataset => {
-          ds.push(dataset.value);
-        });
-        formData.datasetId = ds;
+        // DAR datasetId needs to be a list of ids
+        // DAR datasets needs to be a list of datasets with populated information.
+        formData.datasetId = fp.map('key')(formData.datasets);
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
@@ -422,12 +436,12 @@ class DataAccessRequestApplication extends Component {
           if (formData.dar_code !== undefined && formData.dar_code !== null) {
             DAR.updateDar(formData, formData.dar_code).then(response => {
               this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
+              Navigation.back(Storage.getCurrentUser(), this.props.history);
             });
           } else {
             DAR.postDataAccessRequest(formData).then(response => {
               this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
+              Navigation.back(Storage.getCurrentUser(), this.props.history);
             }).catch(e =>
               this.setState(prev => {
                 prev.problemSavingRequest = true;
@@ -459,14 +473,10 @@ class DataAccessRequestApplication extends Component {
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       }
-      let datasets = this.state.formData.datasets.map(function(item) {
-        return {
-          id: item.value,
-          concatenation: item.label
-        };
-      });
       this.setState(prev => {
-        prev.formData.datasetId = datasets;
+        // DAR datasetId needs to be a list of ids
+        // DAR datasets needs to be a list of datasets with populated information.
+        prev.formData.datasetId = fp.map('key')(this.state.formData.datasets);
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
@@ -488,6 +498,8 @@ class DataAccessRequestApplication extends Component {
 
   saveDAR(response) {
     let formData = this.state.formData;
+    // DAR datasetId needs to be a list of ids
+    // DAR datasets needs to be a list of datasets with populated information.
     formData.datasetId = fp.map('value')(formData.datasets);
     if (response !== null) {
       formData.urlDAA = response.urlDAA;
@@ -496,12 +508,10 @@ class DataAccessRequestApplication extends Component {
     if (formData.partial_dar_code === null) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
-        this.props.history.push('researcher_console');
       });
     } else {
       DAR.updatePartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
-        this.props.history.push({ pathname: 'researcher_console' });
       });
     }
   }
