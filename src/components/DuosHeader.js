@@ -1,8 +1,9 @@
 import { Component } from 'react';
-import { a, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
+import { a, button, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
 import ResponsiveMenu from 'react-responsive-navbar';
 import { Link, withRouter } from 'react-router-dom';
 import { Storage } from '../libs/storage';
+import { SupportRequestModal } from './modals/SupportRequestModal';
 import './DuosHeader.css';
 
 
@@ -11,7 +12,8 @@ class DuosHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showHelpModal: false
+      showHelpModal: false,
+      showSupportRequestModal: false
     };
     this.signOut = this.signOut.bind(this);
   };
@@ -27,6 +29,13 @@ class DuosHeader extends Component {
       return prev;
     });
   };
+   
+  SupportRequestModal = (e) => {
+    this.setState(prev => {
+      prev.showSupportRequestModal = true;
+      return prev;
+    });
+  };
 
   okModal = () => {
     this.setState(prev => {
@@ -36,9 +45,26 @@ class DuosHeader extends Component {
     window.location = 'help_reports';
   };
 
+  okSupportRequestModal = () => {
+     
+    this.setState(prev => {
+      prev.showSupportRequestModal = false;
+      prev.currentPage = 1;
+      return prev;
+    });
+  };
+
   closeModal = () => {
     this.setState(prev => {
       prev.showHelpModal = false;
+      return prev;
+    });
+  };
+
+  closeSupportRequestModal = () => {
+    this.setState(prev => {
+      prev.showSupportRequestModal = false;
+      prev.currentPage = 1;
       return prev;
     });
   };
@@ -50,6 +76,10 @@ class DuosHeader extends Component {
     });
   };
 
+  afterSupportRequestModalOpen = () => {
+    this.setState(prev => { prev.showSupportRequestModal = false; return prev; });
+  };
+
   render() {
 
     let isChairPerson = false;
@@ -57,7 +87,6 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
 
@@ -101,7 +130,6 @@ class DuosHeader extends Component {
                       li({}, [a({ id: 'link_signOut', onClick: this.signOut }, ['Sign out'])])
                     ])
                   ]),
-
                   li({ isRendered: isAdmin }, [
                     h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
                   ]),
@@ -156,7 +184,21 @@ class DuosHeader extends Component {
 
                   li({}, [
                     h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
-                  ])
+                  ]),
+
+                  button({
+                    id: "btn_applyAcces",
+                    className: "contact-us-button",
+                    onClick: this.SupportRequestModal,
+                    "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
+                  }, ["Contact Us"]),
+                  SupportRequestModal({
+                    showModal: this.state.showSupportRequestModal,
+                    onOKRequest: this.okSupportRequestModal,
+                    onCloseRequest: this.closeSupportRequestModal,
+                    onAfterOpen: this.afterSupportRequestModalOpen,
+                    url: this.props.location.pathname
+                  }),
                 ]),
 
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
@@ -183,7 +225,20 @@ class DuosHeader extends Component {
                       div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
                       span({ className: 'navbar-duos-text' }, ['FAQs'])
                     ])
-                  ])
+                  ]),
+                  button({
+                    id: "btn_supportRequest",
+                    className: "contact-us-button",
+                    onClick: this.SupportRequestModal,
+                    "data-tip": "Need help? Contact us for some assistance", "data-for": "supportRequest"
+                  }, ["Contact Us"]),
+                  SupportRequestModal({
+                    showModal: this.state.showSupportRequestModal,
+                    onOKRequest: this.okSupportRequestModal,
+                    onCloseRequest: this.closeSupportRequestModal,
+                    onAfterOpen: this.afterSupportRequestModalOpen,
+                    url: this.props.location.pathname
+                  }),
                 ])
               ])
           })

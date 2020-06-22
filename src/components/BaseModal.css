@@ -80,3 +80,28 @@ textarea {
 .modal-footer button.default-background {
     color: #ffffff;
 }
+
+.select-wrapper .select {
+    display: inline-block;
+    font-family: 'Roboto', sans-serif;
+    padding: 5px;
+    border-radius: 2px;
+    border:0;
+  }
+  
+  .select-label {
+    font-size: 14px;
+    font-weight: 400;
+    margin-left: 10px;
+    display: inline-block;
+    font-family: 'Roboto', sans-serif;
+  }
+
+  .select-wrapper {
+    float: right;
+  }
+  
+  .show-results-wrapper,
+  .select-wrapper {
+    margin-top: 7px;
+  }
