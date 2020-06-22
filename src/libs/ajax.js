@@ -719,6 +719,22 @@ export const Summary = {
   }
 };
 
+export const Support = {
+
+  //fetchany
+  //Noty
+  createSupportRequest: async (ticket) => {
+    const res = await fetchOk(`https://broadinstitute.zendesk.com/api/v2/requests.json`, fp.mergeAll([Config.jsonBody(ticket), { method: 'POST' }]));
+    return await res.json();
+  },
+
+  //Create File Name
+  uploadAttachment: async (file) => {
+    const res = await fetchOk(`https://broadinstitute.zendesk.com/api/v2/uploads?filename=${file.name}`, fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
+    return (await res.json()).upload
+  },
+};
+
 export const Help = {
 
   findHelpMeReports: async (userId) => {
