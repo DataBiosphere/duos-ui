@@ -135,8 +135,16 @@ class DataAccessRequestApplication extends Component {
       formData.datasetId = fp.map('value')(datasets);
     } else if (!fp.isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
+      // Same endpoint works for any dataRequestId, not just partials.
       DAR.getPartialDarRequest(dataRequestId).then(data => {
         formData = data;
+        // Handle the case where the DAR is already submitted. We have to
+        // show the single dataset that was selected for this DAR and not
+        // all of the original datasets that may have been originally selected.
+        if (!fp.isNil(formData.dar_code)) {
+          const dsId = fp.get('datasetId')(formData)[0];
+          formData.datasets = fp.filter({value: dsId.toString()})(formData.datasets);
+        }
       });
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
