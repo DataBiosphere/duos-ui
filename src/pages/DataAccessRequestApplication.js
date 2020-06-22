@@ -74,8 +74,6 @@ class DataAccessRequestApplication extends Component {
         havePi: '',
         profileName: '',
         piName: '',
-        urlDAA: '',
-        nameDAA: '',
         pubmedId: '',
         scientificUrl: ''
       },
@@ -172,8 +170,6 @@ class DataAccessRequestApplication extends Component {
     formData.country = rpProperties.country != null ? rpProperties.country : '';
     formData.state = rpProperties.state != null ? rpProperties.state : '';
     formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-    formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
-    formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
     formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
     formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
     formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
@@ -191,9 +187,6 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
-      if (formData.nameDAA !== '') {
-        prev.file.name = formData.nameDAA;
-      }
       return prev;
     });
 
@@ -429,25 +422,14 @@ class DataAccessRequestApplication extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
-        DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-          formData.urlDAA = response.urlDAA;
-          formData.nameDAA = response.nameDAA;
-          if (formData.dar_code !== undefined && formData.dar_code !== null) {
-            DAR.updateDar(formData, formData.dar_code).then(response => {
-              this.setState({ showDialogSubmit: false });
-              Navigation.console(Storage.getCurrentUser(), this.props.history);
-            });
-          } else {
-            DAR.postDataAccessRequest(formData).then(response => {
-              this.setState({ showDialogSubmit: false });
-              Navigation.console(Storage.getCurrentUser(), this.props.history);
-            }).catch(e =>
-              this.setState(prev => {
-                prev.problemSavingRequest = true;
-                return prev;
-              }));
-          }
-        });
+        DAR.postDataAccessRequest(formData).then(response => {
+          this.setState({ showDialogSubmit: false });
+          Navigation.console(Storage.getCurrentUser(), this.props.history);
+        }).catch(e =>
+          this.setState(prev => {
+            prev.problemSavingRequest = true;
+            return prev;
+          }));
       });
     } else {
       this.setState({ showDialogSubmit: false });
@@ -486,24 +468,9 @@ class DataAccessRequestApplication extends Component {
   };
 
   savePartial() {
-
-    if (this.state.file !== undefined && this.state.file.name !== '') {
-      DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-        this.saveDAR(response);
-      });
-    } else {
-      this.saveDAR(null);
-    }
-  };
-
-  saveDAR(response) {
     let formData = this.state.formData;
     // DAR datasetId needs to be a list of ids
     formData.datasetId = fp.map('value')(formData.datasets);
-    if (response !== null) {
-      formData.urlDAA = response.urlDAA;
-      formData.nameDAA = response.nameDAA;
-    }
     if (formData.partial_dar_code === null) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
@@ -513,7 +480,7 @@ class DataAccessRequestApplication extends Component {
         this.setShowDialogSave(false);
       });
     }
-  }
+  };
 
   onDatasetsChange = (data, action) => {
     this.setState(prev => {
