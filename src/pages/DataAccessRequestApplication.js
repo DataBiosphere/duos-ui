@@ -475,13 +475,16 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-  savePartial() {
+  savePartial = () => {
     let formData = this.state.formData;
     // DAR datasetId needs to be a list of ids
     formData.datasetId = fp.map('value')(formData.datasets);
-    if (formData.partial_dar_code === null) {
+    // Make sure we navigate back to the current DAR after saving.
+    const { dataRequestId } = this.props.match.params;
+    if (fp.isNil(dataRequestId)) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
+        this.props.history.replace('/dar_application/' + resp.reference_id);
       });
     } else {
       DAR.updatePartialDarRequest(formData).then(resp => {
