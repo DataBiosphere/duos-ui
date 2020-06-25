@@ -1099,7 +1099,8 @@ export const AuthenticateNIH = {
 
   verifyNihToken: async (token) => {
     const url = `${await Config.getFireCloudUrl()}api/nih/callback`;
-    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
+    const payload = { jwt: token };
+    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(payload), { method: 'POST' }]));
     return await res.json();
   },
 

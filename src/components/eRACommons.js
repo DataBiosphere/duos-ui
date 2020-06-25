@@ -44,7 +44,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     }
     if (isFcUser) {
       const parsedToken = qs.parse(searchArg);
-      this.verifyToken(parsedToken).then(
+      await this.verifyToken(parsedToken).then(
         (decodedNihAccount) => {
           AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
             () => this.getResearcherProperties(),
@@ -102,8 +102,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   redirectToNihLogin = async () => {
-    const nihUrl = `${ await Config.getNihUrl() }?return-url=`;
-    window.location.href = nihUrl.concat(window.location.origin + '/' + this.props.destination + '?jwt=%3ctoken%3E');
+    const destination = window.location.origin + '/' + this.props.destination + '?nih-username-token=<token>';
+    const nihUrl = `${ await Config.getNihUrl() }?${qs.stringify({ 'return-url': destination })}`;
+    window.open(nihUrl, '_blank');
   };
 
   deleteNihAccount = async () => {
