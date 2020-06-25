@@ -1098,8 +1098,9 @@ export const AuthenticateNIH = {
   },
 
   verifyNihToken: async (token) => {
-    const url = `${await Config.getFireCloudUrl()}api/nih/callback`;
-    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
+    const url = `${await Config.getProfileUrl()}/shibboleth-token`;
+    const payload = fp.get('nih-username-token')(token);
+    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: payload }]));
     return await res.json();
   },
 
