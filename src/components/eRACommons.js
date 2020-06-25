@@ -44,7 +44,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     }
     if (isFcUser) {
       const parsedToken = qs.parse(searchArg);
-      await this.verifyToken(parsedToken).then(
+      this.verifyToken(parsedToken).then(
         (decodedNihAccount) => {
           AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
             () => this.getResearcherProperties(),
