@@ -9,14 +9,16 @@ import AccessResultRecords from './pages/AccessResultRecords';
 import AccessReview from './pages/AccessReview';
 import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
-import AdminManageDac from './pages/AdminManageDac';
+import AdminManageDac from './pages/manage_dac/AdminManageDac';
 import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
 import { ChairConsole } from './pages/ChairConsole';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
+import DataAccessRequestRenewal from './pages/DataAccessRequestRenewal';
 import DataOwnerConsole from './pages/DataOwnerConsole';
 import DataOwnerReview from './pages/DataOwnerReview';
 import DatasetCatalog from './pages/DatasetCatalog';
+import DatasetRegistration from './pages/DatasetRegistration';
 import DulCollect from './pages/DulCollect';
 import DulPreview from './pages/DulPreview';
 import DulResultRecords from './pages/DulResultRecords';
@@ -28,8 +30,7 @@ import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeHelp from './pages/HomeHelp';
 import InvalidRestrictions from './pages/InvalidRestrictions';
-import AccessReviewV2 from './pages/AccessReviewV2';
-import ManageOntologies from './pages/ManageOntologies';
+import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import MemberConsole from './pages/MemberConsole';
 import NotFound from './pages/NotFound';
 import ResearcherConsole from './pages/ResearcherConsole';
@@ -62,11 +63,12 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/help_reports" component={HelpReports} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/invalid_restrictions" component={InvalidRestrictions} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/manage_ontologies" component={ManageOntologies} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/access_result_records/:referenceId/:electionId" component={AccessResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />

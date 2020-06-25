@@ -2,13 +2,17 @@ import _ from 'lodash';
 import { Component } from 'react';
 import { a, button, div, form, h, hh, hr, input, label, p, span, textarea } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
+import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-
+import { NotificationService } from '../libs/notificationService';
+import { Notification } from '../components/Notification';
+import * as ld from 'lodash';
+import {USER_ROLES} from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -30,6 +34,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.getResearcherProfile();
     ReactTooltip.rebuild();
     this.props.history.push('profile');
+    const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+    this.setState(prev => {
+      prev.notificationData = notificationData;
+      return prev;
+    });
   }
 
   initialState() {
@@ -44,6 +53,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       file: {
         name: ''
       },
+      roles: [],
       profile: {
         checkNotifications: false,
         academicEmail: '',
@@ -109,6 +119,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
+      if (_.isEmpty(currentUser.roles)) {
+        prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
+      } else {
+        prev.roles = currentUser.roles;
+      }
+      prev.researcherProfile = profile;
       let key;
       for (key in profile) {
         if (key === 'checkNotifications') {
@@ -407,7 +423,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
 
   updateResearcher(profile) {
-    Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profile).then(resp => {
+    const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+    Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone).then(resp => {
       this.saveUser().then(resp => {
         this.setState({ showDialogSubmit: false });
         this.props.history.push({ pathname: 'dataset_catalog' });
@@ -419,6 +436,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const currentUser = Storage.getCurrentUser();
     currentUser.displayName = this.state.profile.profileName;
     currentUser.additionalEmail = this.state.additionalEmail;
+    currentUser.roles = this.state.roles;
     const payload = { updatedUser: currentUser };
     await User.update(payload, currentUser.dacUserId);
   };
@@ -443,7 +461,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
-      Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profile);
+      const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+      Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
@@ -452,13 +471,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   render() {
     let completed = this.state.profile.completed;
-    const showValidationMessages = this.state.showValidationMessages;
-
+    const { researcherProfile, showValidationMessages } = this.state;
+    const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
     return (
 
       div({ className: 'container' }, [
         div({ className: 'row no-margin' }, [
           div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
+            Notification({notificationData: this.state.notificationData}),
             PageHeading({
               id: 'researcherProfile',
               color: 'common',
@@ -562,12 +582,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       onNihStatusUpdate: (nihValid) => {},
                       location: this.props.location
                     }),
-                    div({ className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12' }, [
-                      label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['NIH Library Card']),
-                      div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
-                        div({ className: 'library-icon' }),
-                        span({ className: 'library-label' }, 'Library Card')
-                      ])
+                    div({ className: '' }, [
+                      label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
+                      LibraryCards({
+                        style: { display: 'flex', flexFlow: 'row wrap' },
+                        isRendered: !ld.isNil(researcherProfile),
+                        libraryCards: libraryCards
+                      })
                     ])
                   ])
                 ]),

@@ -27,4 +27,11 @@
   to { transform: rotate(360deg); }
 }
 
+/*
+  Fix for tooltip flicker on mouseover for react-google-charts
+  See https://stackoverflow.com/questions/37902708/google-charts-tooltip-flickering
+  And https://github.com/google/google-visualization-issues/issues/2162
+*/
+svg > g > g:last-child { pointer-events: none }
+
 /*///////////////////////////////////////////////////////AUX STYLES FOR NAVIGATION*/

@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import * as ld from 'lodash';
 import { Component, Fragment } from 'react';
-import { a, b, br, button, div, h, h3, h4, hr, i, label, li, span, ul } from 'react-hyperscript-helpers';
+import { a, b, br, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
-import { Alert } from '../components/Alert';
+import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -10,7 +10,7 @@ import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { DAR, Election, Files, Match, Votes } from '../libs/ajax';
+import { DAR, Election, Files, Match, Researcher, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
@@ -38,6 +38,7 @@ class FinalAccessReview extends Component {
         finalVote: null
       },
       darInfo: Models.dar,
+      researcherProfile: null,
       voteAccessList: [],
       rpVoteAccessList: [],
       voteList: [],
@@ -59,7 +60,18 @@ class FinalAccessReview extends Component {
 
   async loadData() {
     const hasUseRestrictionResp = await DAR.hasUseRestriction(this.state.referenceId);
-    const darInfo = await DAR.describeDar(this.state.referenceId);
+    await DAR.describeDar(this.state.referenceId).then(
+      darInfo => {
+        Researcher.getResearcherProfile(darInfo.researcherId).then(
+          researcherProfile => {
+            this.setState(prev => {
+              prev.darInfo = darInfo;
+              prev.researcherProfile = researcherProfile;
+              return prev;
+            });
+          });
+      }
+    );
 
     this.setState({
       path: 'final-access-review',
@@ -71,7 +83,6 @@ class FinalAccessReview extends Component {
       alertOn: null,
       alertsDAR: [],
       alertsAgree: [],
-      darInfo: darInfo
     }, () => {
       this.init();
     });
@@ -302,17 +313,6 @@ class FinalAccessReview extends Component {
     };
   };
 
-  download = (fileName, text) => {
-    const break_line = '\r\n \r\n';
-    text = break_line + text;
-    let blob = new Blob([text], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-  };
-
   downloadDAR = async (e) => {
     this.setState({
       loading: true
@@ -442,7 +442,6 @@ class FinalAccessReview extends Component {
     }
 
     this.setState({
-      sDar: electionReview.election.translatedUseRestriction,
       mrDAR: JSON.stringify(electionReview.election.useRestriction, null, 2),
       status: electionReview.election.status,
       voteAccessList: this.chunk(electionReview.reviewVote, 2),
@@ -581,7 +580,7 @@ class FinalAccessReview extends Component {
               color: 'access', title: 'Final voting for Data Access Review'
             }),
             DataAccessRequest({
-              isRendered: !_.isEmpty(this.state.darInfo.datasets),
+              isRendered: !ld.isEmpty(this.state.darInfo.datasets),
               dar: this.state.darInfo,
               consentName: this.state.consentName
             })
@@ -612,124 +611,13 @@ class FinalAccessReview extends Component {
 
         div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
 
-          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-            div({ className: 'panel-heading cm-boxhead access-color' }, [
-              h4({}, ['Application Summary'])
-            ]),
-            div({ id: 'rp', className: 'panel-body' }, [
-              div({ className: 'row dar-summary' }, [
-                div({ className: 'control-label access-color' }, ['Research Purpose']),
-                div({ className: 'response-label' }, [this.state.darInfo.rus])
-              ]),
-
-              div({ className: 'row dar-summary' }, [
-                div({ className: 'control-label access-color' }, ['Structured Research Purpose']),
-                div({ className: 'response-label', dangerouslySetInnerHTML: { __html: this.state.sDar } }, []),
-                a({
-                  isRendered: this.state.hasUseRestriction === true, onClick: () => this.download('machine-readable-DAR.json', this.state.mrDAR),
-                  className: 'italic hover-color'
-                }, ['Download DAR machine-readable format'])
-              ]),
-
-              div({ isRendered: this.state.darInfo.hasPurposeStatements === true, className: 'row dar-summary' }, [
-                div({ className: 'control-label access-color' }, ['Purpose Statement']),
-                div({ className: 'response-label' }, [
-                  ul({}, [
-                    this.state.darInfo.purposeStatements.map((purpose, rIndex) => {
-                      return h(Fragment, { key: 'ps_' + rIndex }, [
-                        li({ className: purpose.manualReview ? 'cancel-color' : '' }, [
-                          b({}, [purpose.title]), purpose.description
-                        ])
-                      ]);
-                    })
-                  ]),
-                  div({
-                    isRendered: this.state.darInfo.purposeManualReview === true && !this.state.darInfo.researchTypeManualReview === true,
-                    className: 'summary-alert'
-                  }, [
-                    Alert({
-                      id: 'purposeStatementManualReview', type: 'danger',
-                      title: 'This research involves studying a sensitive population and requires manual review.'
-                    })
-                  ])
-                ])
-              ]),
-
-              div({ className: 'row dar-summary' }, [
-                div({ className: 'control-label access-color' }, ['Type of Research']),
-                div({ className: 'response-label' }, [
-                  ul({}, [
-                    this.state.darInfo.researchType.map((type, rIndex) => {
-                      return h(Fragment, { key: 'rt_' + rIndex }, [
-                        li({ className: type.manualReview ? 'cancel-color' : '' }, [
-                          b({}, [type.title]), type.description
-                        ])
-                      ]);
-                    })
-                  ])
-                ])
-              ]),
-              div({ isRendered: this.state.darInfo.researchTypeManualReview === true, className: 'summary-alert' }, [
-                Alert({ id: 'researchTypeManualReview', type: 'danger', title: 'This research requires manual review.' })
-              ]),
-
-              div({ isRendered: this.state.darInfo.hasDiseases === true, className: 'row dar-summary' }, [
-                div({ className: 'control-label access-color' }, ['Disease area(s)']),
-                div({ className: 'response-label' }, [
-                  ul({}, [
-                    this.state.darInfo.diseases.map((disease, rIndex) => {
-                      return h(Fragment, { key: 'di_' + rIndex }, [
-                        li({}, [
-                          disease
-                        ])
-                      ]);
-                    })
-                  ])
-                ])
-              ]),
-              div({ isRendered: this.state.darInfo.havePI === true, className: 'row no-margin' }, [
-                label({ className: 'control-label access-color' }, ['Principal Investigator: ']),
-                span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.pi])
-              ]),
-              div({ className: 'row no-margin' }, [
-                label({ className: 'control-label access-color' }, ['Researcher: ']),
-                span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.profileName]),
-                div({ className: 'row no-margin' }, [
-                  label({ className: 'control-label no-padding' }, ['Status: ']),
-                  span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.status]),
-                  span({ isRendered: this.state.darInfo.hasAdminComment === true }, [
-                    label({ className: 'control-label no-padding' }, [' - Comments: ']),
-                    span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.adminComment])
-                  ])
-                ]),
-                div({ className: 'row no-margin' }, [
-                  label({ className: 'control-label no-padding' }, ['NIH Library Card: ']),
-                  div({ className: 'library-flag ' + (this.state.hasLibraryCard ? 'flag-enabled' : 'flag-disabled') }, [
-                    div({ className: 'library-icon' }),
-                    span({ className: 'library-label' }, 'Library Card')
-                  ])
-                ])
-              ]),
-              div({ className: 'row no-margin' }, [
-                label({ className: 'control-label access-color' }, ['Institution: ']),
-                span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.institution])
-              ]),
-              div({ className: 'row no-margin' }, [
-                label({ className: 'control-label access-color' }, ['Department: ']),
-                span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.department])
-              ]),
-              div({ className: 'row no-margin' }, [
-                label({ className: 'control-label access-color' }, ['City: ']),
-                span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.city])
-              ]),
-              div({ className: 'row no-margin' }, [
-                label({ className: 'control-label access-color' }, ['Country: ']),
-                span({ className: 'response-label', style: { 'paddingLeft': '5px' } }, [this.state.darInfo.country])
-              ]),
-              button({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color', onClick: this.downloadDAR },
-                ['Download Full Application'])
-            ])
-          ]),
+          ApplicationSummary({
+            isRendered: !ld.isNil(this.state.darInfo) && !ld.isNil(this.state.researcherProfile),
+            mrDAR: this.state.mrDAR,
+            hasUseRestriction: this.state.hasUseRestriction,
+            darInfo: this.state.darInfo,
+            downloadDAR: this.downloadDAR,
+            researcherProfile: this.state.researcherProfile }),
 
           div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
 
@@ -741,7 +629,7 @@ class FinalAccessReview extends Component {
                 div({ className: 'control-label dul-color' }, ['Structured Limitations']),
                 div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: this.state.sDul } }, []),
                 a({
-                  id: 'btn_downloadSDul', onClick: () => this.download('machine-readable-DUL.json', this.state.mrDUL),
+                  id: 'btn_downloadSDul', onClick: () => Utils.download('machine-readable-DUL.json', this.state.mrDUL),
                   className: 'italic hover-color'
                 }, ['Download DUL machine-readable format'])
               ])
@@ -982,8 +870,8 @@ class FinalAccessReview extends Component {
           title: 'Q2. Is the DAC decision consistent with the DUOS Matching Algorithm decision?',
           isDisabled: false,
           agreementData: agreementData,
-          voteStatus: this.state.voteAgreement.vote,
-          rationale: this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
+          voteStatus: ld.isEmpty(this.state.voteAgreement) ? null : this.state.voteAgreement.vote,
+          rationale: ld.isEmpty(this.state.voteAgreement) ? null : this.state.voteAgreement.rationale !== null ? this.state.voteAgreement.rationale : '',
           showAlert: this.state.showQ2Alert,
           alertMessage: this.state.alertQ2Message,
           action: { label: 'Vote', handler: this.logVoteAgreement },

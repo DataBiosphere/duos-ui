@@ -33,6 +33,27 @@ export const Models = {
     datasets: [],
     structuredRp: '',
     structuredLimitations: '',
+    dataUse: {
+      diseases: false,
+      methods: false,
+      controls: false,
+      population: false,
+      other: false,
+      otherText: "",
+      ontologies: [],
+      forProfit: false,
+      oneGender: false,
+      gender: null,
+      pediatric: false,
+      illegalbehave: false,
+      addiction: false,
+      sexualdiseases: false,
+      stigmatizediseases: false,
+      vulnerablepop: false,
+      popmigration: false,
+      psychtraits: false,
+      nothealth: false
+    }
   },
   error: { show: false, title: '', msg: [''] }
 };

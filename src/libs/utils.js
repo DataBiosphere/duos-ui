@@ -1,3 +1,7 @@
+import Noty from 'noty';
+import 'noty/lib/noty.css';
+import { Config } from './config';
+
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';
@@ -37,3 +41,68 @@ export const Navigation = {
     history.push(page);
   }
 };
+
+export const download = (fileName, text) => {
+  const break_line = '\r\n \r\n';
+  text = break_line + text;
+  let blob = new Blob([text], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url;
+  a.download = fileName + '-restriction';
+  a.click();
+};
+
+export const Notifications = {
+  defaultNotification: {
+    layout: 'bottomRight',
+    timeout: '3500',
+    progressBar: false,
+    type: 'error',
+    theme: 'duos',
+  },
+  /**
+   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
+   * See https://ned.im/noty/#/options for more customization options.
+   */
+  showError: props => {
+    return new Noty({
+      text: 'Something went wrong. Please try again.',
+      ...Notifications.defaultNotification,
+      ...props,
+    }).show();
+  },
+  /**
+   * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
+   * See https://ned.im/noty/#/options for more customization options.
+   */
+  showSuccess: props => {
+    return new Noty({
+      text: 'Congratulations',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'success',
+    }).show();
+  },
+};
+
+export const NavigationUtils = {
+  accessReviewPath: async () => {
+    const newDarUiEnabled = await Config.getFeatureFlag('newDarUi');
+    return newDarUiEnabled ? "new_access_review" : "access_review";
+  }
+};
+
+/**
+ * Serialize the execution of an array of promise functions
+ *
+ * See https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e
+ * @param funcs: List of functions that return a promise
+ * @returns Array of promise results
+ * @constructor
+ */
+export const PromiseSerial = funcs =>
+  funcs.reduce((promise, func) =>
+    promise.then(result =>
+      func().then(Array.prototype.concat.bind(result))),
+  Promise.resolve([]));

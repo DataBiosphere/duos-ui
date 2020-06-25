@@ -1,14 +1,14 @@
 import { Component, Fragment } from 'react';
 import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { AddDacModal } from '../components/modals/AddDacModal';
-import { DacDatasetsModal } from '../components/modals/DacDatasetsModal';
-import { DacMembersModal } from '../components/modals/DacMembersModal';
-import { PageHeading } from '../components/PageHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
-import { SearchBox } from '../components/SearchBox';
-import { DAC } from '../libs/ajax';
-import { sleep } from '../libs/utils';
+import { AddDacModal } from './AddDacModal';
+import { DacDatasetsModal } from '../../components/modals/DacDatasetsModal';
+import { DacMembersModal } from './DacMembersModal';
+import { PageHeading } from '../../components/PageHeading';
+import { PaginatorBar } from '../../components/PaginatorBar';
+import { SearchBox } from '../../components/SearchBox';
+import { DAC } from '../../libs/ajax';
+import * as ld from 'lodash';
 
 
 const limit = 10;
@@ -20,36 +20,48 @@ class AdminManageDac extends Component {
     super(props);
     this.state = {
       currentPage: 1,
+      descendingOrder: false,
       showDacModal: false,
       showDatasetsModal: false,
       showMembersModal: false,
       value: '',
       limit: limit,
-      dacList: [],
+      dacs: [],
       searchDUL: '',
       alertMessage: undefined,
       alertTitle: undefined,
       selectedDac: {},
       selectedDatasets: []
     };
-
-    this.addDac = this.addDac.bind(this);
-    this.closeAddDacModal = this.closeAddDacModal.bind(this);
-    this.okAddDacModal = this.okAddDacModal.bind(this);
-
-    this.viewMembers = this.viewMembers.bind(this);
-    this.closeViewMembersModal = this.closeViewMembersModal.bind(this);
   }
 
-  async componentDidMount() {
-    const dacs = await DAC.list();
-    this.setState(prev => {
-      prev.currentPage = 1;
-      prev.dacList = dacs;
-      return prev;
-    }, () => {
-      ReactTooltip.rebuild();
-    });
+  componentDidMount() {
+    this.fetchDacList();
+  };
+
+  fetchDacList = async () => {
+    this._asyncRequest = DAC.list().then(
+      dacs => {
+        this._asyncRequest = null;
+        let sorted = ld.sortBy(dacs, 'name');
+        if (this.state.descendingOrder) {
+          sorted = ld.reverse(sorted);
+        }
+        this.setState(prev => {
+          prev.currentPage = 1;
+          prev.dacs = sorted;
+          return prev;
+        }, () => {
+          ReactTooltip.rebuild();
+        });
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    if (this._asyncRequest) {
+      this._asyncRequest.cancel();
+    }
   }
 
   handlePageChange = page => {
@@ -67,7 +79,7 @@ class AdminManageDac extends Component {
     });
   };
 
-  editDac(selectedDac) {
+  editDac = (selectedDac) => {
     this.setState(prev => {
       prev.showDacModal = true;
       prev.isEditMode = true;
@@ -76,50 +88,46 @@ class AdminManageDac extends Component {
     });
   };
 
-  addDac() {
+  addDac = () => {
     this.setState({
       showDacModal: true,
       isEditMode: false
     });
-  }
+  };
 
-  async okAddDacModal() {
-    // Necessary due to the delay in adding/removing N users in addition to updating the DAC information.
-    await sleep(500);
-    const dacs = await DAC.list();
+  okAddDacModal = async () => {
+    await this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
-      prev.dacList = dacs;
       return prev;
     });
-  }
+  };
 
-  async closeAddDacModal() {
-    const dacs = await DAC.list();
+  closeAddDacModal = async () => {
+    await this.fetchDacList();
     this.setState(prev => {
       prev.showDacModal = false;
       prev.currentPage = 1;
-      prev.dacList = dacs;
       return prev;
     });
-  }
+  };
 
-  viewMembers(selectedDac) {
+  viewMembers = (selectedDac) => {
     this.setState(prev => {
       prev.showMembersModal = true;
       prev.selectedDac = selectedDac;
       return prev;
     });
-  }
+  };
 
-  closeViewMembersModal() {
+  closeViewMembersModal = () => {
     this.setState(prev => {
       prev.showMembersModal = false;
       prev.selectedDac = {};
       return prev;
     });
-  }
+  };
 
   viewDatasets = async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId);
@@ -150,6 +158,18 @@ class AdminManageDac extends Component {
       return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
+  };
+
+  sort = (sortField, descendingOrder = false) => (event) => {
+    let sorted = ld.sortBy(this.state.dacs, sortField);
+    if (descendingOrder) {
+      sorted = ld.reverse(sorted);
+    }
+    this.setState(prev => {
+      prev.dacs = sorted;
+      prev.descendingOrder = !prev.descendingOrder;
+      return prev;
+    });
   };
 
   render() {
@@ -184,7 +204,10 @@ class AdminManageDac extends Component {
         ]),
         div({ className: 'jumbotron table-box' }, [
           div({ className: 'grid-9-row' }, [
-            div({ className: 'col-2 cell-header common-color' }, ['DAC Name']),
+            div({ className: 'col-2 cell-header cell-sort common-color',
+              onClick: this.sort('name', !this.state.descendingOrder)}, [
+              'DAC Name',
+              span({ className: 'glyphicon sort-icon glyphicon-sort' })]),
             div({ className: 'col-3 cell-header common-color' }, ['DAC Description']),
             div({ className: 'col-2 cell-header common-color' }, ['DAC Datasets']),
             div({ className: 'col-2 cell-header f-center common-color' }, ['Actions'])
@@ -192,62 +215,62 @@ class AdminManageDac extends Component {
 
           hr({ className: 'table-head-separator' }),
 
-          this.state.dacList.filter(this.searchTable(searchDacText))
+          this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map((dac, eIndex) => {
               return (h(Fragment, { key: dac.dacId }, [
+                div({
+                  id: dac.dacId,
+                  className: 'grid-9-row tableRow'
+                }, [
                   div({
-                    id: dac.dacId,
-                    className: 'grid-9-row tableRow'
+                    id: dac.dacId + '_dacName',
+                    name: 'name',
+                    className: 'col-2 cell-body text bold',
+                    title: dac.name
+                  }, [dac.name]),
+                  div({
+                    id: dac.dacId + '_dacDescription',
+                    name: 'dacDescription',
+                    className: 'col-3 cell-body text',
+                    title: dac.description
+                  }, [dac.description]),
+                  div({
+                    className: 'col-2 cell-body'
                   }, [
-                    div({
-                      id: dac.dacId + '_dacName',
-                      name: 'name',
-                      className: 'col-2 cell-body text bold',
-                      title: dac.name
-                    }, [dac.name]),
-                    div({
-                      id: dac.dacId + '_dacDescription',
-                      name: 'dacDescription',
-                      className: 'col-3 cell-body text',
-                      title: dac.description
-                    }, [dac.description]),
-                    div({
-                      className: 'col-2 cell-body'
-                    }, [
-                      button({
-                        id: dac.dacId + '_dacDatasets',
-                        name: 'dacDatasets',
-                        className: 'cell-button hover-color',
-                        style: actionButtonStyle,
-                        onClick: () => this.viewDatasets(dac)
-                      }, ['View'])
-                    ]),
-                    div({
-                      className: 'col-2 cell-body f-center'
-                    }, [
-                      button({
-                        id: dac.dacId + '_btnViewDAC',
-                        name: 'btn_viewDac',
-                        className: 'cell-button hover-color',
-                        style: actionButtonStyle,
-                        onClick: () => this.viewMembers(dac)
-                      }, ['View']),
-                      button({
-                        id: dac.dacId + '_btnEditDAC',
-                        name: 'btn_editDac',
-                        className: 'cell-button hover-color',
-                        style: actionButtonStyle,
-                        onClick: () => this.editDac(dac)
-                      }, ['Edit'])
-                    ])
+                    button({
+                      id: dac.dacId + '_dacDatasets',
+                      name: 'dacDatasets',
+                      className: 'cell-button hover-color',
+                      style: actionButtonStyle,
+                      onClick: () => this.viewDatasets(dac)
+                    }, ['View'])
                   ]),
-                  hr({ className: 'table-body-separator' })
-                ])
+                  div({
+                    className: 'col-2 cell-body f-center'
+                  }, [
+                    button({
+                      id: dac.dacId + '_btnViewDAC',
+                      name: 'btn_viewDac',
+                      className: 'cell-button hover-color',
+                      style: actionButtonStyle,
+                      onClick: () => this.viewMembers(dac)
+                    }, ['View']),
+                    button({
+                      id: dac.dacId + '_btnEditDAC',
+                      name: 'btn_editDac',
+                      className: 'cell-button hover-color',
+                      style: actionButtonStyle,
+                      onClick: () => this.editDac(dac)
+                    }, ['Edit'])
+                  ])
+                ]),
+                hr({ className: 'table-body-separator' })
+              ])
               );
             }),
           PaginatorBar({
-            total: this.state.dacList.filter(this.searchTable(searchDacText)).length,
+            total: this.state.dacs.filter(this.searchTable(searchDacText)).length,
             limit: this.state.limit,
             pageCount: this.pageCount,
             currentPage: this.state.currentPage,

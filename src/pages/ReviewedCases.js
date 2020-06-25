@@ -32,7 +32,7 @@ class ReviewedCases extends Component {
     this.state = {
       showModal: false,
       dulLimit: 5,
-      accessLimit: 5,
+      darLimit: 5,
       currentDulPage: 1,
       currentAccessPage: 1,
       descendantOrder: false,
@@ -267,7 +267,7 @@ class ReviewedCases extends Component {
 
           this.state.electionsList.access
             .filter(this.searchTable(searchDarText))
-            .slice((currentAccessPage - 1) * this.state.accessLimit, currentAccessPage * this.state.accessLimit).map((election, rIndex) => {
+            .slice((currentAccessPage - 1) * this.state.darLimit, currentAccessPage * this.state.darLimit).map((election, rIndex) => {
             return h(Fragment, { key: rIndex }, [
               div({ className: 'grid-row tableRowAccess' }, [
                 div({ id: election.displayId + '_darId', name: 'darId', className: 'col-2 cell-body text', title: 'this.election.displayId ' },
@@ -298,7 +298,7 @@ class ReviewedCases extends Component {
           PaginatorBar({
             name: 'access',
             total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
-            limit: this.state.accessLimit,
+            limit: this.state.darLimit,
             pageCount: this.accessPageCount,
             currentPage: this.state.currentAccessPage,
             onPageChange: this.handleDarPageChange,

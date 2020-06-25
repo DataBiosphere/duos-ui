@@ -1,60 +1,65 @@
-import _ from 'lodash/fp';
+import _ from 'lodash';
 import {Storage} from './storage';
 
 
 export const Config = {
 
-    getApiUrl: async () => (await getConfig()).apiUrl,
+  getEnv: async () => (await getConfig()).env,
 
-    getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
+  getApiUrl: async () => (await getConfig()).apiUrl,
 
-    getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
+  getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
-    getNihUrl: async () => (await getConfig()).nihUrl,
+  getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
 
-    getGoogleClientId: async () => (await getConfig()).clientId,
+  getNihUrl: async () => (await getConfig()).nihUrl,
 
-    getFeatureFlag: async (featureName) => _.get((await getConfig()).features, featureName, false),
+  getGoogleClientId: async () => (await getConfig()).clientId,
 
-    authOpts: (token = Token.getToken()) => ({
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json',
-            'X-App-ID': 'DUOS'
-        }
-    }),
+  getFeatureFlag: async (featureName) => {
+    const feature = _.get(await getConfig(), 'features', {});
+    return _.get(feature, featureName, false);
+  },
 
-    fileOpts: (token = Token.getToken()) => ({
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json'
-        }
-    }),
+  authOpts: (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json',
+      'X-App-ID': 'DUOS'
+    }
+  }),
 
-    jsonBody: body => ({
-        body: JSON.stringify(body),
-        headers: {'Content-Type': 'application/json'}
-    }),
+  fileOpts: (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/json'
+    }
+  }),
 
-    fileBody: (token = Token.getToken()) => ({
-        headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: '*/*'
-        }
-    }),
+  jsonBody: body => ({
+    body: JSON.stringify(body),
+    headers: {'Content-Type': 'application/json'}
+  }),
+
+  fileBody: (token = Token.getToken()) => ({
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: '*/*'
+    }
+  }),
 };
 
 const Token = {
-    getToken: () => {
-        return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-    }
+  getToken: () => {
+    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
+  }
 };
 
 const loadConfig = _.memoize(async () => {
-    const res = await fetch('/config.json');
-    return res.json();
+  const res = await fetch('/config.json');
+  return res.json();
 });
 
 const getConfig = async () => {
-    return await loadConfig();
+  return await loadConfig();
 };
