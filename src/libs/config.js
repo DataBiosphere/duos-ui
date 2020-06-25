@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import {Storage} from './storage';
 
-
 export const Config = {
 
   getEnv: async () => (await getConfig()).env,
@@ -11,6 +10,8 @@ export const Config = {
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
   getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
+
+  getProfileUrl: async () => (await getConfig()).profileUrl,
 
   getNihUrl: async () => (await getConfig()).nihUrl,
 
@@ -25,34 +26,36 @@ export const Config = {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: 'application/json',
-      'X-App-ID': 'DUOS'
-    }
+      'X-App-ID': 'DUOS',
+    },
   }),
 
   fileOpts: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: 'application/json'
-    }
+      Accept: 'application/json',
+    },
   }),
 
   jsonBody: body => ({
     body: JSON.stringify(body),
-    headers: {'Content-Type': 'application/json'}
+    headers: {'Content-Type': 'application/json'},
   }),
 
   fileBody: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
-      Accept: '*/*'
-    }
+      Accept: '*/*',
+    },
   }),
 };
 
 const Token = {
   getToken: () => {
-    return Storage.getGoogleData() !== null ? Storage.getGoogleData().accessToken : 'token';
-  }
+    return Storage.getGoogleData() !== null ?
+      Storage.getGoogleData().accessToken :
+      'token';
+  },
 };
 
 const loadConfig = _.memoize(async () => {

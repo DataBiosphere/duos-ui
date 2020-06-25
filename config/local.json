@@ -5,6 +5,7 @@
   "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",
   "firecloudUrl": "https://firecloud-orchestration.dsde-dev.broadinstitute.org/",
   "gwasUrl": "",
+  "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
   "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
   "features": {
     "newDarUi": true
