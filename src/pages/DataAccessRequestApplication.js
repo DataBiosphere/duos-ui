@@ -12,6 +12,7 @@ import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
+import { Navigation } from "../libs/utils";
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
 
@@ -24,8 +25,6 @@ class DataAccessRequestApplication extends Component {
 
   constructor(props) {
     super(props);
-    this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
-    this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.state = {
       nihValid: false,
       disableOkBtn: false,
@@ -34,7 +33,6 @@ class DataAccessRequestApplication extends Component {
       file: {
         name: ''
       },
-      showModal: false,
       completed: '',
       showDialogSubmit: false,
       showDialogSave: false,
@@ -76,8 +74,6 @@ class DataAccessRequestApplication extends Component {
         havePi: '',
         profileName: '',
         piName: '',
-        urlDAA: '',
-        nameDAA: '',
         pubmedId: '',
         scientificUrl: ''
       },
@@ -100,8 +96,6 @@ class DataAccessRequestApplication extends Component {
       problemSavingRequest: false
     };
 
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
   onNihStatusUpdate = (nihValid) => {
@@ -115,7 +109,6 @@ class DataAccessRequestApplication extends Component {
 
   async componentDidMount() {
     await this.init();
-    this.props.history.push('/dar_application');
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
@@ -125,24 +118,45 @@ class DataAccessRequestApplication extends Component {
   }
 
   async init() {
-    let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
-    Storage.removeData('dar_application');
-    if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
-      if (this.props.location.props.formData.dar_code !== undefined) {
-        formData = this.props.location.props.formData;
-        formData.ontologies = this.getOntologies(formData);
-      } else if (this.props.location.props.formData.datasetId !== undefined) {
-        // set datasets sent by data set catalog
-        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
-      }
+    const { dataRequestId } = this.props.match.params;
+    let formData = {};
+    // Handle the case where we get form data from the Data Catalog
+    if (!fp.isNil(fp.getOr(null)('location.props.formData')(this.props))) {
+      formData = this.props.location.props.formData;
+      let datasets = formData.datasetId.map(function(item) {
+        return {
+          key: item.id,
+          label: item.concatenation,
+          value: item.id,
+          item: item
+        };
+      });
+      formData.datasets = datasets;
+      formData.datasetId = fp.map('value')(datasets);
+    } else if (!fp.isNil(dataRequestId)) {
+      // Handle the case where we have an existing DAR id
+      // Same endpoint works for any dataRequestId, not just partials.
+      DAR.getPartialDarRequest(dataRequestId).then(data => {
+        formData = data;
+        // Handle the case where the DAR is already submitted. We have to
+        // show the single dataset that was selected for this DAR and not
+        // all of the original datasets that may have been originally selected.
+        if (!fp.isNil(formData.dar_code)) {
+          const dsId = fp.get('datasetId')(formData)[0];
+          formData.datasets = fp.filter({value: dsId.toString()})(formData.datasets);
+        }
+      });
+    } else {
+      // Lastly, try to get the form data from local storage and clear out whatever was there previously
+      formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
+      Storage.removeData('dar_application');
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
-    formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
-    formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
-
+    formData.dar_code = fp.isNil(formData.dar_code) ? null : formData.dar_code;
+    formData.partial_dar_code = fp.isNil(formData.partial_dar_code) ? null : formData.partial_dar_code;
+    formData.ontologies = this.formatOntologyItems(formData);
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
-
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
@@ -151,37 +165,29 @@ class DataAccessRequestApplication extends Component {
       formData.investigator = rpProperties.piName;
     }
 
-    if (formData.dar_code === null) {
-      formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
-      formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
-      formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
-      formData.department = rpProperties.department != null ? rpProperties.department : '';
-      formData.division = rpProperties.division != null ? rpProperties.division : '';
-      formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
-      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
-      formData.city = rpProperties.city != null ? rpProperties.city : '';
-      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
-      formData.country = rpProperties.country != null ? rpProperties.country : '';
-      formData.state = rpProperties.state != null ? rpProperties.state : '';
-      formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-      formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
-      formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
-      formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
-      formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
-      formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
-      formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
-      formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
-    }
-
+    formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
+    formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
+    formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+    formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
+    formData.department = rpProperties.department != null ? rpProperties.department : '';
+    formData.division = rpProperties.division != null ? rpProperties.division : '';
+    formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
+    formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
+    formData.city = rpProperties.city != null ? rpProperties.city : '';
+    formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+    formData.country = rpProperties.country != null ? rpProperties.country : '';
+    formData.state = rpProperties.state != null ? rpProperties.state : '';
+    formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
+    formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
+    formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
+    formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
+    formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
+    formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
+    formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
     formData.userId = Storage.getCurrentUser().dacUserId;
 
-    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
-      formData.datasets = this.processDataSet(formData.datasetId);
-    }
     let completed = false;
-    if (formData.dar_code !== null) {
+    if (!fp.isNil(formData.dar_code)) {
       completed = '';
     } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
@@ -189,44 +195,26 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
-      if (formData.nameDAA !== '') {
-        prev.file.name = formData.nameDAA;
-      }
       return prev;
     });
 
   };
 
-  getOntologies(formData) {
-    let ontologies = {};
-    if (formData.ontologies !== undefined && formData.ontologies !== null) {
-      ontologies = formData.ontologies.map(function(item) {
+  formatOntologyItems = (formData) => {
+    let ontologyItems = [];
+    // Filter null values. TODO: Possible bug in saving partial dars
+    let formDataOntologies = fp.pickBy(fp.identity)(formData.ontologies);
+    if (!fp.isNil(formDataOntologies) && !fp.isEmpty(formDataOntologies)) {
+      ontologyItems = fp.map((item) => {
         return {
           key: item.id,
           value: item.id,
           label: item.label,
-          item: item
+          item: { id: item.id, label: item.label }
         };
-      });
+      })(formDataOntologies);
     }
-    return ontologies;
-  }
-
-  processDataSet(datasetIdList) {
-    return datasetIdList.map(function(item) {
-      return {
-        value: item.id,
-        label: item.concatenation
-      };
-    });
-  }
-
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  };
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
+    return ontologyItems;
   };
 
   handleChange = (e) => {
@@ -435,42 +423,28 @@ class DataAccessRequestApplication extends Component {
         return prev;
       }, () => {
         let formData = this.state.formData;
-        let ds = [];
-        this.state.formData.datasets.forEach(dataset => {
-          ds.push(dataset.value);
-        });
-        formData.datasetId = ds;
+        // DAR datasetId needs to be a list of ids
+        formData.datasetId = fp.map('value')(formData.datasets);
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
           return prev;
         });
-        DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-          formData.urlDAA = response.urlDAA;
-          formData.nameDAA = response.nameDAA;
-          if (formData.dar_code !== undefined && formData.dar_code !== null) {
-            DAR.updateDar(formData, formData.dar_code).then(response => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
-            });
-          } else {
-            DAR.postDataAccessRequest(formData).then(response => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
-            }).catch(e =>
-              this.setState(prev => {
-                prev.problemSavingRequest = true;
-                return prev;
-              }));
-          }
-        });
+        DAR.postDataAccessRequest(formData).then(response => {
+          this.setState({ showDialogSubmit: false });
+          Navigation.console(Storage.getCurrentUser(), this.props.history);
+        }).catch(e =>
+          this.setState(prev => {
+            prev.problemSavingRequest = true;
+            return prev;
+          }));
       });
     } else {
       this.setState({ showDialogSubmit: false });
     }
   };
 
-  setShowDialogSave(value) {
+  setShowDialogSave = (value) => {
     this.setState(prev => {
       prev.showDialogSave = value;
       prev.disableOkBtn = false;
@@ -484,18 +458,15 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
-      let datasets = this.state.formData.datasets.map(function(item) {
-        return {
-          id: item.value,
-          concatenation: item.label
-        };
-      });
+      // DAR datasetId needs to be a list of ids
+      const datasetId = fp.map('value')(this.state.formData.datasets);
+      // DAR ontologies needs to be a list of id/labels.
+      const ontologies = fp.map((o) => {return {
+        id: o.key,
+        label: o.value
+      };})(this.state.formData.ontologies);
       this.setState(prev => {
-        prev.formData.datasetId = datasets;
+        prev.formData.datasetId = datasetId;
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
@@ -504,35 +475,23 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-  savePartial() {
-
-    if (this.state.file !== undefined && this.state.file.name !== '') {
-      DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-        this.saveDAR(response);
-      });
-    } else {
-      this.saveDAR(null);
-    }
-  };
-
-  saveDAR(response) {
+  savePartial = () => {
     let formData = this.state.formData;
-    if (response !== null) {
-      formData.urlDAA = response.urlDAA;
-      formData.nameDAA = response.nameDAA;
-    }
-    if (formData.partial_dar_code === null) {
+    // DAR datasetId needs to be a list of ids
+    formData.datasetId = fp.map('value')(formData.datasets);
+    // Make sure we navigate back to the current DAR after saving.
+    const { dataRequestId } = this.props.match.params;
+    if (fp.isNil(dataRequestId)) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
-        this.props.history.push('researcher_console');
+        this.props.history.replace('/dar_application/' + resp.reference_id);
       });
     } else {
       DAR.updatePartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
-        this.props.history.push({ pathname: 'researcher_console' });
       });
     }
-  }
+  };
 
   onDatasetsChange = (data, action) => {
     this.setState(prev => {
@@ -651,10 +610,11 @@ class DataAccessRequestApplication extends Component {
       controls = false,
       methods = false,
       linkedIn = '',
-      investigator = ''
+      investigator = '',
+      ontologies = []
     } = this.state.formData;
-    const { ontologies } = this.state;
-
+    const { dataRequestId } = this.props.match.params;
+    const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1, step3 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const genderLabels = ['Female', 'Male'];
@@ -809,8 +769,8 @@ class DataAccessRequestApplication extends Component {
                         div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
                         span({ className: 'default-color' },
                           ['Please autenticate with ',
-                          a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
-                        ])
+                            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
+                          ])
                       ])
                     ]),
 
@@ -821,7 +781,7 @@ class DataAccessRequestApplication extends Component {
                     div({ className: 'row no-margin' }, [
                       eRACommons({
                         className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
-                        destination: 'dar_application',
+                        destination: eRACommonsDestination,
                         onNihStatusUpdate: this.onNihStatusUpdate,
                         location: this.props.location,
                         validationError: showValidationMessages
