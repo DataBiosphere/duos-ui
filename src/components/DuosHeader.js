@@ -30,7 +30,7 @@ class DuosHeader extends Component {
     });
   };
    
-  SupportRequestModal = (e) => {
+  supportRequestModal = (e) => {
     this.setState(prev => {
       prev.showSupportRequestModal = true;
       return prev;
@@ -100,6 +100,21 @@ class DuosHeader extends Component {
     }
 
     let helpLink = isAdmin ? '/help_reports' : '/home_help';
+
+    const contactUsButton = button({
+      id: "btn_applyAcces",
+      className: "contact-us-button",
+      onClick: this.supportRequestModal,
+      "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
+    }, ["Contact Us"])
+    
+    const supportrequestModal = SupportRequestModal({
+      showModal: this.state.showSupportRequestModal,
+      onOKRequest: this.okSupportRequestModal,
+      onCloseRequest: this.closeSupportRequestModal,
+      onAfterOpen: this.afterSupportRequestModalOpen,
+      url: this.props.location.pathname
+    })
 
     return (
 
@@ -185,20 +200,7 @@ class DuosHeader extends Component {
                   li({}, [
                     h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
                   ]),
-
-                  button({
-                    id: "btn_applyAcces",
-                    className: "contact-us-button",
-                    onClick: this.SupportRequestModal,
-                    "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
-                  }, ["Contact Us"]),
-                  SupportRequestModal({
-                    showModal: this.state.showSupportRequestModal,
-                    onOKRequest: this.okSupportRequestModal,
-                    onCloseRequest: this.closeSupportRequestModal,
-                    onAfterOpen: this.afterSupportRequestModalOpen,
-                    url: this.props.location.pathname
-                  }),
+                  contactUsButton, supportrequestModal
                 ]),
 
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
@@ -226,19 +228,7 @@ class DuosHeader extends Component {
                       span({ className: 'navbar-duos-text' }, ['FAQs'])
                     ])
                   ]),
-                  button({
-                    id: "btn_supportRequest",
-                    className: "contact-us-button",
-                    onClick: this.SupportRequestModal,
-                    "data-tip": "Need help? Contact us for some assistance", "data-for": "supportRequest"
-                  }, ["Contact Us"]),
-                  SupportRequestModal({
-                    showModal: this.state.showSupportRequestModal,
-                    onOKRequest: this.okSupportRequestModal,
-                    onCloseRequest: this.closeSupportRequestModal,
-                    onAfterOpen: this.afterSupportRequestModalOpen,
-                    url: this.props.location.pathname
-                  }),
+                  contactUsButton, supportrequestModal
                 ])
               ])
           })
