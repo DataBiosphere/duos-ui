@@ -11,7 +11,7 @@
     "inquirer": "7.3.0",
     "jquery": "3.5.1",
     "js-file-download": "0.4.12",
-    "lodash": "4.17.15",
+    "lodash": "4.17.18",
     "mixin-deep": "2.0.1",
     "moment": "2.27.0",
     "noty": "3.2.0-beta",
