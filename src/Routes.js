@@ -36,7 +36,6 @@ import NotFound from './pages/NotFound';
 import ResearcherConsole from './pages/ResearcherConsole';
 import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
-import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
@@ -67,7 +66,6 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
