@@ -160,6 +160,12 @@ class DuosHeader extends Component {
                     ])
                   ]),
                   li({}, [
+                    h(Link, { id: 'link_NHGRIpilot', className: 'navbar-duos-link', to: '/NHGRIpilotinfo' }, [
+                      div({ className: 'navbar-duos-icon navbar-duos-icon-about' }),
+                      span({ className: 'navbar-duos-text' }, ['NHGRI Pilot Info'])
+                    ])
+                  ]),
+                  li({}, [
                     h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/home_help' }, [
                       div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
                       span({ className: 'navbar-duos-text' }, ['Help'])
