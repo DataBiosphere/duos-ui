@@ -61,7 +61,7 @@
     "eslint-plugin-react": "7.20.3",
     "handlebars": "4.7.6",
     "js-yaml": "3.14.0",
-    "start-server-and-test": "1.11.0",
+    "start-server-and-test": "1.11.2",
     "typescript": "3.9.6"
   },
   "comments": {
