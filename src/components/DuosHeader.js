@@ -13,9 +13,16 @@ class DuosHeader extends Component {
     super(props);
     this.state = {
       showHelpModal: false,
-      showSupportRequestModal: false
+      showSupportRequestModal: false,
+      hover: false
     };
     this.signOut = this.signOut.bind(this);
+    this.toggleHover = () => {
+      this.setState(prev => {
+        prev.hover = !this.state.hover;
+        return prev;
+      });
+    }
   };
 
   signOut = () => {
@@ -100,14 +107,23 @@ class DuosHeader extends Component {
     }
 
     let helpLink = isAdmin ? '/help_reports' : '/home_help';
-
+    const contactUsIcon = isLogged ? '' : (this.state.hover ? img({src: '/images/navbar_icon_contact_us_hover.svg', style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}}) : img({src: '/images/navbar_icon_contact_us.svg', style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}}))
+    const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us'])
     const contactUsButton = button({
       id: "btn_applyAcces",
-      className: "contact-us-button",
+      style: {
+        color: this.state.hover ? '#2FA4E7' : '#ffffff',
+        fontSize: '15px',
+        fontWeight: '500',
+        background: 'transparent',
+        border: 'none',
+        outline: 'none',
+      },
+      onMouseEnter: this.toggleHover,
+      onMouseLeave: this.toggleHover,
       onClick: this.supportRequestModal,
       "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
-    }, ["Contact Us"])
-    
+    }, [ contactUsIcon, contactUsText])
     const supportrequestModal = SupportRequestModal({
       showModal: this.state.showSupportRequestModal,
       onOKRequest: this.okSupportRequestModal,
