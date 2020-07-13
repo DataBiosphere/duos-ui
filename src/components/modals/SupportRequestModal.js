@@ -4,33 +4,27 @@ import { SupportRequestBaseModal } from '../SupportRequestBaseModal';
 import { Alert } from '../Alert';
 import { Support} from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
+import { Notifications } from '../../libs/utils';
 
 export const SupportRequestModal = hh(class SupportRequestModal extends Component {
   constructor(props) {
     super(props);
-    const isLogged = Storage.userIsLogged();
-    const name = isLogged ? Storage.getCurrentUser().displayName : '';
-    const first_name = isLogged ? ', ' + name.split(' ')[0] : '';
-    const email = isLogged ? Storage.getCurrentUser().email : '';
-    const valid = isLogged ? true : false;
-    const height = isLogged ? '550px': '700px';
-    const top = isLogged ? '400px': '1';
     this.state = {
-      name: name,
-      isLogged: isLogged,
+      name: Storage.userIsLogged() ? Storage.getCurrentUser().displayName : '',
+      isLogged: Storage.userIsLogged(),
       type: 'question',
       subject: '',
       description: '',
       attachment: '',
-      email: email,
-      first_name: first_name,
-      height: height,
-      top: top,
-      valid: valid
+      email: Storage.userIsLogged() ? Storage.getCurrentUser().email : '',
+      first_name: Storage.userIsLogged() ? Storage.getCurrentUser().displayName.split(' ')[0] : '',
+      height: Storage.userIsLogged() ? '550px': '700px',
+      top: Storage.userIsLogged() ? '400px': '1',
+      valid: Storage.userIsLogged()
     };
 
     this.closeHandler = () => {
-      //TODO: 'Support request canceled' that goes away after a few seconds.
+      Notifications.showInformation({text: `Support request canceled`, layout: 'topRight', timeout: 1500});
       this.props.onCloseRequest('support');
     };
 
@@ -40,36 +34,23 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
     };
 
     this.OKHandler = async () => {
-        const ticket = {};
-        
-        const token =  this.state.attachment != '' ? await Support.uploadAttachment(this.state.attachment): '';
-        ticket.request = {
-          requester: { name: this.state.name, email: this.state.email },
-          subject: this.state.subject,
-          // BEWARE changing the following ids or values! If you change them then you must thoroughly test.
-          custom_fields: [
-            { id: 360012744452, value: this.state.type},
-            { id: 360007369412, value: this.state.description},
-            { id: 360012744292, value: this.state.name},
-            { id: 360012782111, value: this.state.email },
-            { id: 360018545031, value: this.state.email }
-          ],
-          comment: {
-            body: this.state.description + '\n\n------------------\nSubmitted from: ' + this.props.url,
-            uploads: [token.token]
-          },
-          ticket_form_id: 360000669472
-        };
-        await Support.createSupportRequest(ticket);
-        
-        await this.setState(prev => {
-          prev.type = 'question';
-          prev.subject = '';
-          prev.description = '';
-          prev.attachment = '';
-          return prev;
-        });
-        this.props.onOKRequest('support');
+      const attachmentToken =  this.state.attachment !== '' ? await Support.uploadAttachment(this.state.attachment): '';
+      const ticket = Support.createTicket(this.state.name, this.state.type, this.state.email, this.state.subject, this.state.description, attachmentToken, this.props.url);
+      const response = await Support.createSupportRequest(ticket);
+      if (response.status === 201) {
+        Notifications.showSuccess({text: `Sent Successfully`, layout: 'topRight', timeout: 1500});
+      } else {
+        Notifications.showError({ text: `ERROR ${response.status} : Unable To Send`, layout: 'topRight'});
+      }
+
+      await this.setState(prev => {
+        prev.type = 'question';
+        prev.subject = '';
+        prev.description = '';
+        prev.attachment = '';
+        return prev;
+      });
+      this.props.onOKRequest('support');
     };
 
     this.nameChangeHandler = (e) => {

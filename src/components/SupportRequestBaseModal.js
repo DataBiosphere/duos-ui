@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { button, div, h, span, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import './BaseModal.css';
 import { PageSubHeading } from './PageSubHeading';
 
 
@@ -53,14 +52,16 @@ export const SupportRequestBaseModal = hh(class SupportRequestBaseModal extends 
           contentLabel: "Modal"
         }, [
 
-            div({ className: "modal-header" }, [
-              button({ type: "button", className: "modal-close-btn close", onClick: this.props.onRequestClose }, [
+            div({ style: { width: '100%', padding: '0 15px 5px 15px'} 
+          }, [
+              button({ type: "button", style: { position: 'absolute', top: '20px', right: '20px'}, className: "close", onClick: this.props.onRequestClose }, [
                 span({ className: "glyphicon glyphicon-remove default-color" }),
               ]),
               PageSubHeading({ id: this.props.id, imgSrc: this.props.imgSrc, color: this.props.color, iconSize: this.props.iconSize, title: this.props.title, description: this.props.description }),
             ]),
 
-            div({ className: "modal-content" }, [ this.props.children
+            div({ style: { width: '100%', padding: '10px 15px', outline: '0'} 
+             }, [ this.props.children
             ]),
 
             div({ className: "modal-footer" }, [
