@@ -22,7 +22,7 @@ class DuosHeader extends Component {
         prev.hover = !this.state.hover;
         return prev;
       });
-    }
+    };
   };
 
   signOut = () => {
@@ -36,7 +36,7 @@ class DuosHeader extends Component {
       return prev;
     });
   };
-   
+
   supportRequestModal = (e) => {
     this.setState(prev => {
       prev.showSupportRequestModal = true;
@@ -107,8 +107,8 @@ class DuosHeader extends Component {
     }
 
     let helpLink = isAdmin ? '/help_reports' : '/home_help';
-    const contactUsIcon = isLogged ? '' : (this.state.hover ? img({src: '/images/navbar_icon_contact_us_hover.svg', style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}}) : img({src: '/images/navbar_icon_contact_us.svg', style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}}))
-    const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us'])
+    const contactUsIcon = isLogged ? '' : (this.state.hover ? img({src: '/images/navbar_icon_contact_us_hover.svg', style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}}) : img({src: '/images/navbar_icon_contact_us.svg', style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}}));
+    const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
     const contactUsButton = button({
       id: "btn_applyAcces",
       style: {
@@ -123,14 +123,14 @@ class DuosHeader extends Component {
       onMouseLeave: this.toggleHover,
       onClick: this.supportRequestModal,
       "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
-    }, [ contactUsIcon, contactUsText])
+    }, [contactUsIcon, contactUsText]);
     const supportrequestModal = SupportRequestModal({
       showModal: this.state.showSupportRequestModal,
       onOKRequest: this.okSupportRequestModal,
       onCloseRequest: this.closeSupportRequestModal,
       onAfterOpen: this.afterSupportRequestModalOpen,
       url: this.props.location.pathname
-    })
+    });
 
     return (
 
