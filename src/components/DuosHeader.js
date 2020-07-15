@@ -53,7 +53,6 @@ class DuosHeader extends Component {
   };
 
   okSupportRequestModal = () => {
-     
     this.setState(prev => {
       prev.showSupportRequestModal = false;
       prev.currentPage = 1;
