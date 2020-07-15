@@ -34,7 +34,16 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
     };
 
     this.OKHandler = async () => {
-      const attachmentToken =  this.state.attachment !== '' ? await Support.uploadAttachment(this.state.attachment): '';
+      const attachmentToken = '';
+      if(this.state.attachment !== ''){
+        const attachmentToken = [];
+        for (var i = 0; i < this.state.attachment.length; i++)
+        {
+          const token = await Support.uploadAttachment(this.state.attachment[i]);
+          attachmentToken.push(token.token);
+        }
+      }
+      //const attachmentToken =  this.state.attachment !== '' ? await Support.uploadAttachment(this.state.attachment): '';
       const ticket = Support.createTicket(this.state.name, this.state.type, this.state.email, this.state.subject, this.state.description, attachmentToken, this.props.url);
       const response = await Support.createSupportRequest(ticket);
       if (response.status === 201) {
@@ -86,7 +95,7 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
     };
 
     this.attachmentChangeHandler = (e) => {
-      const file = e.target.files[0];
+      const file = e.target.files;
       this.setState(prev => {
         prev.attachment = file;
         return prev;
@@ -128,7 +137,7 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
         ]),
         div({ className: 'form-group first-form-group' }, [
           label({ id: 'lbl_type', className: 'common-color' }, ['Type *']),
-          select({id: 'txt_question', className: 'col-lg-12 select-wrapper', value: this.state.type, onChange: this.typeChangeHandler, required: true}, [
+          select({id: 'txt_question', className: 'col-lg-12 select-wrapper form-control', value: this.state.type, onChange: this.typeChangeHandler, required: true}, [
             option({ value: 'question'} , ['Question']),
             option({ value: 'bug'}, ['Bug']),
             option({ value: 'feature_request'}, ['Feature Request'])
@@ -141,7 +150,7 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
         ]),
         div({ className: 'form-group first-form-group' }, [
           label({ id: 'lbl_attachment', className: 'common-color' }, ['Attachment']),
-          input({ type: 'file', id: 'txt_attachment', placeholder: 'Attach a file?', className: 'form-control col-lg-12 vote-input common-color', onChange: this.attachmentChangeHandler, ref: 'fileUpload', required: false }),
+          input({ type: 'file', id: 'txt_attachment', placeholder: 'Drag or Click', className: 'form-control col-lg-12 vote-input common-color', onChange: this.attachmentChangeHandler, ref: 'fileUpload', required: false, multiple: true }),
         ]),
         !this.state.isLogged && div({ className: 'form-group first-form-group' }, [
           label({ id: 'lbl_email', className: 'common-color' }, ['Contact email *']),
