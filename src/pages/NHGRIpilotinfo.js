@@ -21,11 +21,6 @@ class NHGRIpilotinfo extends Component {
             h1({className: 'home-title'}, ['NHGRI AnVIL Data Access Pilot with DUOS & Library Cards']),
             hr({className: 'home-line'}),
             div({className: 'home-sections home-sections-table'}, [
-              img({
-                src: '/images/home_icon_about.svg',
-                className: 'home-sections-icon',
-                alt: 'About icon',
-              }),
               div({className: 'home-sections-title'}, [
                 h3({}, ['Background']),
                 div({className: 'home-content'}, [
@@ -39,19 +34,20 @@ class NHGRIpilotinfo extends Component {
 
                 div({className: 'home-content'}, [
                   h3({}, ['Instructions for Researchers']),
-                  p({style: {fontWeight: '500'}},
+                  div({style: {fontWeight: '500'}},
                     ['How do I obtain a Library Card?']),
                   p({},
                     ['To obtain a Library Card, you will need your Signing Official to approve you via the process highlighted in the ‘Instructions for Signing Officials’ below. To confirm if you have been issued a Library Card, you can check Your Profile in DUOS, where they will be displayed.']),
-                  p({style: {fontWeight: '500'}},
-                    ['How do I request access to genomic data via DUOS?']),
-                ]),
-
-                p({}, [
-                  'First, you will need to identify the datasets you would like to request via the DUOS Dataset Catalog. Select the datasets you would like to request, and click ‘Apply for Access’. You will then be taken to the DUOS Data Access Request (DAR) Application. Complete the necessary fields on all steps of the application, making sure to read the Data Use Certification and Code of Conduct, and reviewing the data use limitations for the datasets you request. You will be required to have a Library Card issued by your Signing Official in order to submit your DAR. When ready, you can click ‘Submit’ and your DAR will be sent to the appropriate data access committee(s). You will be able to track the status of your DAR via your DUOS Researcher Console.',
-                p({}, [
-                  'Please note,  in addition to submitting your DAR via DUOS, for the near-term you will also be required to submit your DAR via the standard dbGAP DAR processes with the same DAR information including a matching request for the same datasets.']),
-
+                  div({style: {fontWeight: '500'}},
+                    ['How do I request access to genmoic data via DUOS?']),
+                  p({},
+                    ['First, you will need to identify the datasets you would like to request via the DUOS Dataset Catalog. Select the datasets you would like to request, and click ‘Apply for Access’. You will then be taken to the DUOS Data Access Request (DAR) Application. Complete the necessary fields on all steps of the application, making sure to read the Data Use Certification and Code of Conduct, and reviewing the data use limitations for the datasets you request. You will be required to have a Library Card issued by your Signing Official in order to submit your DAR. When ready, you can click ‘Submit’ and your DAR will be sent to the appropriate data access committee(s). You will be able to track the status of your DAR via your DUOS Researcher Console.']),
+                  div({style: {fontWeight: '500'}},
+                    ['What is the Library Card Agreement?']),
+                  p({},
+                    ['The Library Card Agreement is an evolution of the NIH Data Use Certification, which is currently signed by both Signing Officials and investigators in the submission of individual DARs to dbGaP. The current NIH Data Use Certification is signed for each of an individual investigators’ unique DAR submissions. Meaning, if 5 investigators from an institution submit 5 DARs, the Signing Official is required to review and sign 25 NIH Data Use Certifications.']),
+                  p({},
+                    ['The Library Card Agreement allows Signing Officials to pre-authorize any number of investigators to submit DARs directly to the DAC; meaning those 25 signatures would be replaced by a single annual signature by which the Signing Official pre-authorizes a list of investigators from their institution.']),
 
                   div({className: 'home-content'}, [
                     h3({}, ['Instructions for Signing Officials (SOs)']),
