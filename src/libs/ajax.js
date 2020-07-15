@@ -731,7 +731,7 @@ export const Support = {
       ],
       comment: {
         body: description + '\n\n------------------\nSubmitted from: ' + url,
-        uploads: [attachmentToken.token]
+        uploads: attachmentToken
       },
       ticket_form_id: 360000669472
     };
