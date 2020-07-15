@@ -24,6 +24,7 @@ import DulPreview from './pages/DulPreview';
 import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
+import FAQs from './pages/FAQs';
 import FinalAccessReview from './pages/FinalAccessReview';
 import HelpReports from './pages/HelpReports';
 import Home from './pages/Home';
@@ -47,6 +48,7 @@ const Routes = (props) => (
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
+    <Route path="/FAQs" component={FAQs} />
     <Route path="/home_help" component={HomeHelp} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/election404" component={Election404} />

@@ -203,10 +203,10 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
 
           div({ className: 'jumbotron table-box' }, [
             div({ className: 'row no-margin' }, [
-              div({ className: twoColumnClass + ' cell-header datset-color' }, ['User Name']),
+              div({ className: twoColumnClass + ' cell-header dataset-color' }, ['User Name']),
               div({ className: twoColumnClass + ' cell-header dataset-color' }, ['Google ID']),
               div({ className: twoColumnClass + ' cell-header dataset-color' }, ['Library Card(s)']),
-              div({ className: threeColumnClass + ' cell-header f-center dataset-color' }, [
+              div({ className: twoColumnClass + ' cell-header f-center dataset-color' }, [
                 'Library Card Actions',
                 div({ isRendered: this.state.totalDulPendingVotes > 0, id: 'dulPendingVoteCases', className: 'pcases-small-tag' }, [
                   this.state.totalDulPendingVotes
@@ -218,54 +218,24 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
 
             hr({ className: 'table-head-separator' }),
 
-            this.state.electionsList.dul.filter(this.searchTable(searchDulText))
-              .slice((this.state.currentDulPage - 1) * dulLimit, this.state.currentDulPage * dulLimit)
-              .map((pendingCase, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({ className: 'row no-margin tableRowDul' }, [
-                    div({
-                      id: pendingCase.frontEndId, name: 'consentId', className: twoColumnClass + ' cell-body text',
-                      title: pendingCase.frontEndId
-                    }, [pendingCase.frontEndId]),
-                    div({
-                      id: pendingCase.frontEndId + '_consentGroup', name: 'consentGroup',
-                      className: threeColumnClass + ' cell-body text ' + (!pendingCase.consentGroupName ? 'empty' : ''),
-                      title: pendingCase.consentGroupName, dangerouslySetInnerHTML: { __html: pendingCase.consentGroupName }
-                    }, []),
-                    div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
-                      title: _.get(pendingCase, 'dac.name', '')
-                    }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({ className: twoColumnClass + ' cell-body f-center' }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnVote',
-                        name: 'btn_voteDul',
-                        onClick: this.openDULReview(pendingCase.voteId, pendingCase.referenceId),
-                        className: 'cell-button ' + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
-                      }, [
-                        span({ isRendered: pendingCase.alreadyVoted === false }, ['Issue/Remove']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Issue/Remove'])
-                      ])
-                    ]),
+            div({ className: 'row no-margin' }, [
+              div({ className: twoColumnClass }, ['Carol Smith']),
+              div({ className: twoColumnClass }, ['csmith1212@jnj.org']),
+              div({ className: twoColumnClass }, ['[Broad], [NIH]']),
+              div({ className: twoColumnClass + ' cell header cancel-color'}, ['[Issue/Remove]']),
+              div({ className: twoColumnClass }, ['PI']),
+              div({ className: oneColumnClass }, ['4'])
+            ]),
 
-                    div({
-                      id: pendingCase.frontEndId + '_logged', name: 'loggedDul',
-                      className: oneColumnClass + ' cell-body text f-center'
-                    }, [pendingCase.logged]),
+            div({ className: 'row no-margin' }, [
+              div({ className: twoColumnClass }, ['Jaime Gonzalez']),
+              div({ className: twoColumnClass }, ['jgonzalez1212@jnj.org']),
+              div({ className: twoColumnClass }, ['[Broad]']),
+              div({ className: twoColumnClass + ' cell header cancel-color'}, ['[Issue/Remove]']),
+              div({ className: twoColumnClass }, ['Lab Staff']),
+              div({ className: oneColumnClass }, ['3'])
+            ]),
 
-                    div({ isRendered: this.isDuLCollectEnabled(pendingCase), className: twoColumnClass + ' cell-body f-center' }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnCollect', name: 'btn_collectDul', onClick: this.openDulCollect(pendingCase.referenceId),
-                        className: 'cell-button cancel-color'
-                      }, ['Collect Votes'])
-                    ]),
-                    div({
-                      isRendered: pendingCase.alreadyVoted === false, className: twoColumnClass + ' cell-body text empty f-center'
-                    }, [])
-                  ]),
-                  hr({ className: 'table-body-separator' })
-                ]);
-              }),
             PaginatorBar({
               name: 'dul',
               total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
@@ -302,74 +272,16 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
 
             hr({ className: 'table-head-separator' }),
 
-            this.state.electionsList.access.filter(this.searchTable(searchDarText))
-              .slice((this.state.currentDarPage - 1) * darLimit, this.state.currentDarPage * darLimit)
-              .map((pendingCase, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({ className: 'row no-margin tableRowAccess' }, [
-                    div({
-                      id: pendingCase.frontEndId, name: 'darId', className: twoColumnClass + ' cell-body text',
-                      title: pendingCase.frontEndId
-                    }, [pendingCase.frontEndId]),
-                    div({
-                      id: pendingCase.frontEndId + '_projectTitle', name: 'projectTitle',
-                      className: threeColumnClass + ' cell-body text', title: pendingCase.projectTitle
-                    }, [pendingCase.projectTitle]),
-                    div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
-                      title: _.get(pendingCase, 'dac.name', '')
-                    }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({ isRendered: pendingCase.electionStatus !== 'Final', className: twoColumnClass + ' cell-body f-center' }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnVote',
-                        name: 'btn_voteAccess',
-                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
-                        className: 'cell-button ' + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
-                      }, [
-                        span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Edit'])
-                      ])
-                    ]),
-                    div({
-                      isRendered: pendingCase.electionStatus === 'Final',
-                      className: twoColumnClass + ' cell-body text f-center empty'
-                    }, []),
+            div({ className: 'row no-margin' }, [
+              div({ className: twoColumnClass }, ['DAR-192']),
+              div({ className: threeColumnClass }, ['Variant based determinants of microcellular function']),
+              div({ className: twoColumnClass }, ['03/21/2020']),
+              div({ className: twoColumnClass }, ['Dr. Peter Gabriel']),
+              div({ className: oneColumnClass }, ['Broad DAC']),
+              div({ className: oneColumnClass }, ['In Review']),
+              div({ className: oneColumnClass }, ['[Closeout]']),
+            ]),
 
-                    div({
-                      id: pendingCase.frontEndId + '_logged', name: 'loggedAccess',
-                      className: oneColumnClass + ' cell-body text f-center'
-                    }, [pendingCase.logged]),
-
-                    div({
-                      isRendered: this.isAccessCollectEnabled(pendingCase),
-                      className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnCollect',
-                        name: 'btn_collectAccess',
-                        onClick: this.openAccessCollect(pendingCase.referenceId, pendingCase.electionId),
-                        className: 'cell-button cancel-color'
-                      }, ['Collect Votes'])
-                    ]),
-                    div({
-                      isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
-                      className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnFinal',
-                        name: 'btn_finalAccess',
-                        onClick: this.openFinalAccessReview(pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId),
-                        className: 'cell-button cancel-color'
-                      }, ['Close Project'])
-                    ]),
-                    div({
-                      isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
-                      className: twoColumnClass + ' cell-body text f-center empty'
-                    }, [])
-                  ]),
-                  hr({ className: 'table-body-separator' })
-                ]);
-              }),
             PaginatorBar({
               name: 'access',
               total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,

@@ -126,6 +126,13 @@ class DuosHeader extends Component {
                     h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
                   ]),
 
+                  li({}, [
+                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
+                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
+                      span({ className: 'navbar-duos-text' }, ['FAQs'])
+                    ])
+                  ]),
+                  
                   li({ className: 'dropdown', isRendered: isAdmin }, [
                     a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
                       div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
@@ -163,6 +170,12 @@ class DuosHeader extends Component {
                     h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/home_help' }, [
                       div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
                       span({ className: 'navbar-duos-text' }, ['Help'])
+                    ])
+                  ]),
+                  li({}, [
+                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
+                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
+                      span({ className: 'navbar-duos-text' }, ['FAQs'])
                     ])
                   ])
                 ])
