@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, h, hr, h1, h3, p, span, img } from 'react-hyperscript-helpers';
+import { div, hr, h1, h3, p } from 'react-hyperscript-helpers';
 
 // export const HomeAbout = hh(
 class NHGRIpilotinfo extends Component {
