@@ -1,6 +1,5 @@
 import { Component } from 'react';
-import { a, div, h, hr, h1, h3, p, span, img } from 'react-hyperscript-helpers';
-import Mailto from 'react-protected-mailto';
+import { div, hr, h1, h3, p } from 'react-hyperscript-helpers';
 
 // export const HomeAbout = hh(
 class FAQs extends Component {

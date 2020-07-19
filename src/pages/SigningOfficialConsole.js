@@ -1,13 +1,13 @@
 import _ from 'lodash';
-import { Component, Fragment } from 'react';
-import { button, div, h, hh, hr, a, span } from 'react-hyperscript-helpers';
-import { PageHeading } from '../components/PageHeading';
-import { PageSubHeading } from '../components/PageSubHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
-import { SearchBox } from '../components/SearchBox';
-import { PendingCases } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-import { NavigationUtils, USER_ROLES } from '../libs/utils';
+import {Component} from 'react';
+import {a, div, h, hh, hr, span} from 'react-hyperscript-helpers';
+import {PageHeading} from '../components/PageHeading';
+import {PageSubHeading} from '../components/PageSubHeading';
+import {PaginatorBar} from '../components/PaginatorBar';
+import {SearchBox} from '../components/SearchBox';
+import {PendingCases} from '../libs/ajax';
+import {Storage} from '../libs/storage';
+import {NavigationUtils, USER_ROLES} from '../libs/utils';
 
 export const SigningOfficialConsole = hh(class ChairConsole extends Component {
 
@@ -195,9 +195,9 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
                 className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
                 onClick: this.addUser
               }, [
-                  div({ className: "all-icons add-user_white" }),
-                  span({}, ["Add Users"]),
-                ]),
+                div({className: 'all-icons add-user_white'}),
+                span({}, ['Add Users']),
+              ]),
             ])
           ]),
 

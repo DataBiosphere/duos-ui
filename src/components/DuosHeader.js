@@ -132,7 +132,7 @@ class DuosHeader extends Component {
                       span({ className: 'navbar-duos-text' }, ['FAQs'])
                     ])
                   ]),
-                  
+
                   li({ className: 'dropdown', isRendered: isAdmin }, [
                     a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
                       div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
