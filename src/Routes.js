@@ -37,6 +37,7 @@ import ResearcherConsole from './pages/ResearcherConsole';
 import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import ReviewedCases from './pages/ReviewedCases';
+import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
 
@@ -49,6 +50,7 @@ const Routes = (props) => (
     <Route path="/home_help" component={HomeHelp} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/election404" component={Election404} />
+    <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dac" component={AdminManageDac} props={props} rolesAllowed={[USER_ROLES.admin]} />
