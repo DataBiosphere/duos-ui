@@ -24,6 +24,7 @@ import DulPreview from './pages/DulPreview';
 import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
+import FAQs from './pages/FAQs';
 import FinalAccessReview from './pages/FinalAccessReview';
 import HelpReports from './pages/HelpReports';
 import Home from './pages/Home';
@@ -36,6 +37,7 @@ import NotFound from './pages/NotFound';
 import ResearcherConsole from './pages/ResearcherConsole';
 import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
+import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
 import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
 import { Status } from './pages/Status';
@@ -47,6 +49,7 @@ const Routes = (props) => (
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
+    <Route path="/FAQs" component={FAQs} />
     <Route path="/home_help" component={HomeHelp} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/election404" component={Election404} />
@@ -68,6 +71,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
