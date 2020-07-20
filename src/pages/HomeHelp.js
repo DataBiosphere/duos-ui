@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, h1, h2, h3, span, p, img, h, svg, circle, a } from 'react-hyperscript-helpers';
+import { div, hr, h1, h2, span, p, img, h, svg, circle, a } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 
 class HomeHelp extends Component {
@@ -55,7 +55,7 @@ class HomeHelp extends Component {
               div({ className: "home-content" }, [
                 p({}, [
                   "These questions and more are answered on our ",
-                  span({ classname: "bold" }, [a( { href: '/FAQs', target: '_blank' }, 'FAQ page') ])
+                  span({ classname: "bold" }, [a( { href: '/FAQs', target: '_blank' }, 'FAQ page')])
                 ])
               ]),
 
@@ -79,8 +79,6 @@ class HomeHelp extends Component {
     );
   }
 
-  showData(data) {
-  }
 }
 
 export default HomeHelp;
