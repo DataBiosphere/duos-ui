@@ -1,10 +1,11 @@
-import { Component } from 'react';
+import React, { Component } from 'react';
 import { div, form, input, label, textarea, hh, select, option } from 'react-hyperscript-helpers';
 import { SupportRequestBaseModal } from '../SupportRequestBaseModal';
 import { Alert } from '../Alert';
 import { Support} from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
+import Dropzone from 'react-dropzone';
 
 export const SupportRequestModal = hh(class SupportRequestModal extends Component {
   constructor(props) {
@@ -110,6 +111,20 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
         return prev;
       });
     };
+
+
+    this.getUploadParams = () => {
+      return { url: 'https://httpbin.org/post' }
+    };
+  
+    this.handleChangeStatus = ({ meta }, status) => {
+      console.log(status, meta)
+    };
+  
+    this.handleSubmit = (files, allFiles) => {
+      console.log(files.map(f => f.meta))
+      allFiles.forEach(f => f.remove())
+    };
   }
 
   render() {
@@ -137,10 +152,10 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
         ]),
         div({ className: 'form-group first-form-group' }, [
           label({ id: 'lbl_type', className: 'common-color' }, ['Type *']),
-          select({id: 'txt_question', className: 'col-lg-12 select-wrapper form-control', value: this.state.type, onChange: this.typeChangeHandler, required: true}, [
-            option({ value: 'question'} , ['Question']),
-            option({ value: 'bug'}, ['Bug']),
-            option({ value: 'feature_request'}, ['Feature Request'])
+              select({id: 'txt_question', className: 'col-lg-12 select-wrapper form-control', value: this.state.type, onChange: this.typeChangeHandler, required: true}, [
+                option({ value: 'question'} , ['Question']),
+                option({ value: 'bug'}, ['Bug']),
+                option({ value: 'feature_request'}, ['Feature Request'])
           ]),  
         ]),
         div({ className: 'form-group first-form-group' }, [
@@ -148,6 +163,20 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
           input({ id: 'txt_subject', placeholder:'Enter a subject', rows: '5', className: 'form-control col-lg-12 vote-input', onChange: this.subjectChangeHandler, required: true }),
           textarea({ id: 'txt_description', placeholder:'Enter a description', rows: '5', className: 'form-control col-lg-12 vote-input', onChange: this.descriptionChangeHandler, required: true }),
         ]),
+        <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)} 
+        onChangeStatus={this.andleChangeStatus}
+        onSubmit={this.handleSubmit}
+        styles={{ backgroundColor: 'grey', dropzone: { minHeight: 200, maxHeight: 250, backgroundColor: 'grey' } }}>
+        {({getRootProps, getInputProps}) => (
+          <section>
+            <div {...getRootProps()}>
+              <input {...getInputProps()} />
+              <p>Drag 'n' drop some files here, or click to select files</p>
+            </div>
+          </section>
+        )}
+      </Dropzone>
+        ,
         div({ className: 'form-group first-form-group' }, [
           label({ id: 'lbl_attachment', className: 'common-color' }, ['Attachment']),
           input({ type: 'file', id: 'txt_attachment', placeholder: 'Drag or Click', className: 'form-control col-lg-12 vote-input common-color', onChange: this.attachmentChangeHandler, ref: 'fileUpload', required: false, multiple: true }),
