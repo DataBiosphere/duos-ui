@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { div, form, input, label, textarea, hh, select, option } from 'react-hyperscript-helpers';
+import { div, form, input, label, textarea, hh, select, option, section } from 'react-hyperscript-helpers';
 import { SupportRequestBaseModal } from '../SupportRequestBaseModal';
 import { Alert } from '../Alert';
 import { Support} from '../../libs/ajax';
@@ -114,16 +114,16 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
 
 
     this.getUploadParams = () => {
-      return { url: 'https://httpbin.org/post' }
+      return { url: 'https://httpbin.org/post' };
     };
-  
+
     this.handleChangeStatus = ({ meta }, status) => {
-      console.log(status, meta)
+      console.log(status, meta);
     };
-  
+
     this.handleSubmit = (files, allFiles) => {
-      console.log(files.map(f => f.meta))
-      allFiles.forEach(f => f.remove())
+      console.log(files.map(f => f.meta));
+      allFiles.forEach(f => f.remove());
     };
   }
 
@@ -144,52 +144,119 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
         action: { label: 'Submit', handler: this.OKHandler },
       },
 
-    [
-      form({ className: 'form-horizontal css-form', name: 'zendeskTicketForm', noValidate: true, encType: 'multipart/form-data' }, [
-        !this.state.isLogged && div({ className: 'form-group first-form-group' }, [
-          label({ id: 'lbl_name', className: 'common-color' }, ['Name *']),
-          input({ id: 'txt_name', placeholder:'What should we call you?', value: this.state.name, className: 'form-control col-lg-12', onChange: this.nameChangeHandler, required: true }),
+      [
+        form({
+          className: 'form-horizontal css-form',
+          name: 'zendeskTicketForm',
+          noValidate: true,
+          encType: 'multipart/form-data',
+        }, [
+          !this.state.isLogged &&
+            div({className: 'form-group first-form-group'}, [
+              label({id: 'lbl_name', className: 'common-color'}, ['Name *']),
+              input({
+                id: 'txt_name',
+                placeholder: 'What should we call you?',
+                value: this.state.name,
+                className: 'form-control col-lg-12',
+                onChange: this.nameChangeHandler,
+                required: true,
+              }),
+            ]),
+          div({className: 'form-group first-form-group'}, [
+            label({id: 'lbl_type', className: 'common-color'}, ['Type *']),
+            select({
+              id: 'txt_question',
+              className: 'col-lg-12 select-wrapper form-control',
+              value: this.state.type,
+              onChange: this.typeChangeHandler,
+              required: true,
+            }, [
+              option({value: 'question'}, ['Question']),
+              option({value: 'bug'}, ['Bug']),
+              option({value: 'feature_request'}, ['Feature Request']),
+            ]),
+          ]),
+          div({className: 'form-group first-form-group'}, [
+            label({id: 'lbl_description', className: 'common-color'},
+              ['How can we help you' + this.state.first_name + '? *']),
+            input({
+              id: 'txt_subject',
+              placeholder: 'Enter a subject',
+              rows: '5',
+              className: 'form-control col-lg-12 vote-input',
+              onChange: this.subjectChangeHandler,
+              required: true,
+            }),
+            textarea({
+              id: 'txt_description',
+              placeholder: 'Enter a description',
+              rows: '5',
+              className: 'form-control col-lg-12 vote-input',
+              onChange: this.descriptionChangeHandler,
+              required: true,
+            }),
+          ]),
+          <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)}
+            onChangeStatus={this.handleChangeStatus}
+            onSubmit={this.handleSubmit}
+            styles={{
+              backgroundColor: 'grey',
+              dropzone: {
+                minHeight: 200,
+                maxHeight: 250,
+                backgroundColor: 'grey',
+              },
+            }}>
+            {({getRootProps, getInputProps}) => (
+              section({style: {backgroundColor: 'grey'}}, [
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  <p>Drag 'n' drop some files here, or click to select
+                    files</p>
+                </div>
+              ])
+
+            )}
+          </Dropzone>
+          ,
+          div({className: 'form-group first-form-group'}, [
+            label({id: 'lbl_attachment', className: 'common-color'},
+              ['Attachment']),
+            input({
+              type: 'file',
+              id: 'txt_attachment',
+              placeholder: 'Drag or Click',
+              className: 'form-control col-lg-12 vote-input common-color',
+              onChange: this.attachmentChangeHandler,
+              ref: 'fileUpload',
+              required: false,
+              multiple: true,
+            }),
+          ]),
+          !this.state.isLogged &&
+            div({className: 'form-group first-form-group'}, [
+              label({id: 'lbl_email', className: 'common-color'},
+                ['Contact email *']),
+              input({
+                id: 'txt_email',
+                className: 'form-control col-lg-12 vote-input',
+                placeholder: 'Enter a email',
+                value: this.state.email,
+                onChange: this.emailChangeHandler,
+                required: true,
+              }),
+            ]),
         ]),
-        div({ className: 'form-group first-form-group' }, [
-          label({ id: 'lbl_type', className: 'common-color' }, ['Type *']),
-              select({id: 'txt_question', className: 'col-lg-12 select-wrapper form-control', value: this.state.type, onChange: this.typeChangeHandler, required: true}, [
-                option({ value: 'question'} , ['Question']),
-                option({ value: 'bug'}, ['Bug']),
-                option({ value: 'feature_request'}, ['Feature Request'])
-          ]),  
+        div({isRendered: false}, [
+          Alert({
+            id: 'modal',
+            type: 'danger',
+            title: alert.title,
+            description: alert.msg,
+          }),
         ]),
-        div({ className: 'form-group first-form-group' }, [
-          label({ id: 'lbl_description', className: 'common-color' }, ['How can we help you' + this.state.first_name + '? *']),
-          input({ id: 'txt_subject', placeholder:'Enter a subject', rows: '5', className: 'form-control col-lg-12 vote-input', onChange: this.subjectChangeHandler, required: true }),
-          textarea({ id: 'txt_description', placeholder:'Enter a description', rows: '5', className: 'form-control col-lg-12 vote-input', onChange: this.descriptionChangeHandler, required: true }),
-        ]),
-        <Dropzone onDrop={acceptedFiles => console.log(acceptedFiles)} 
-        onChangeStatus={this.andleChangeStatus}
-        onSubmit={this.handleSubmit}
-        styles={{ backgroundColor: 'grey', dropzone: { minHeight: 200, maxHeight: 250, backgroundColor: 'grey' } }}>
-        {({getRootProps, getInputProps}) => (
-          <section>
-            <div {...getRootProps()}>
-              <input {...getInputProps()} />
-              <p>Drag 'n' drop some files here, or click to select files</p>
-            </div>
-          </section>
-        )}
-      </Dropzone>
-        ,
-        div({ className: 'form-group first-form-group' }, [
-          label({ id: 'lbl_attachment', className: 'common-color' }, ['Attachment']),
-          input({ type: 'file', id: 'txt_attachment', placeholder: 'Drag or Click', className: 'form-control col-lg-12 vote-input common-color', onChange: this.attachmentChangeHandler, ref: 'fileUpload', required: false, multiple: true }),
-        ]),
-        !this.state.isLogged && div({ className: 'form-group first-form-group' }, [
-          label({ id: 'lbl_email', className: 'common-color' }, ['Contact email *']),
-          input({ id: 'txt_email', className: 'form-control col-lg-12 vote-input',  placeholder:'Enter a email', value: this.state.email, onChange: this.emailChangeHandler, required: true }),
-        ]),
-      ]),
-      div({ isRendered: false }, [
-        Alert({ id: 'modal', type: 'danger', title: alert.title, description: alert.msg })
       ])
-    ])
     );
   }
 });
