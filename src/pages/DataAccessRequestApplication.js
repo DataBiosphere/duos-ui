@@ -120,20 +120,7 @@ class DataAccessRequestApplication extends Component {
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
-    // Handle the case where we get form data from the Data Catalog
-    if (!fp.isNil(fp.getOr(null)('location.props.formData')(this.props))) {
-      formData = this.props.location.props.formData;
-      let datasets = formData.datasetId.map(function(item) {
-        return {
-          key: item.id,
-          label: item.concatenation,
-          value: item.id,
-          item: item
-        };
-      });
-      formData.datasets = datasets;
-      formData.datasetId = fp.map('value')(datasets);
-    } else if (!fp.isNil(dataRequestId)) {
+    if (!fp.isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       DAR.getPartialDarRequest(dataRequestId).then(data => {
