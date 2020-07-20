@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import {Component} from 'react';
 import {a, div, h, hh, hr, span} from 'react-hyperscript-helpers';
 import {PageHeading} from '../components/PageHeading';
@@ -7,7 +6,6 @@ import {PaginatorBar} from '../components/PaginatorBar';
 import {SearchBox} from '../components/SearchBox';
 import {PendingCases} from '../libs/ajax';
 import {Storage} from '../libs/storage';
-import {NavigationUtils, USER_ROLES} from '../libs/utils';
 
 export const SigningOfficialConsole = hh(class ChairConsole extends Component {
 
@@ -90,61 +88,6 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
         });
       }
     );
-  }
-
-  openDULReview = (voteId, referenceId) => (e) => {
-    this.props.history.push(`dul_review/${voteId}/${referenceId}`);
-  };
-
-  isDuLCollectEnabled = (pendingCase) => {
-    const pendingCaseDulCollectStatus = (pendingCase.alreadyVoted === true);
-    const dacId = _.get(pendingCase, 'dac.dacId', 0);
-    // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
-    if (dacId === 0) { return pendingCaseDulCollectStatus; }
-    const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
-    return (!_.isEmpty(dacChairRoles)) && pendingCaseDulCollectStatus;
-  };
-
-  openDulCollect = (consentId) => (e) => {
-    this.props.history.push(`dul_collect/${consentId}`);
-  };
-
-  openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
-  };
-
-  openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
-    const pathStart = await NavigationUtils.accessReviewPath();
-    if (rpVoteId !== null) {
-      this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
-    } else {
-      this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
-    }
-  };
-
-  isAccessCollectEnabled = (pendingCase) => {
-    const pendingCaseAccessCollectStatus =
-      (pendingCase.alreadyVoted === true) &&
-      (!pendingCase.isFinalVote) &&
-      (pendingCase.electionStatus !== 'Final');
-    const dacId = _.get(pendingCase, 'dac.dacId', 0);
-    // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
-    if (dacId === 0) { return pendingCaseAccessCollectStatus; }
-    const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
-    return (!_.isEmpty(dacChairRoles)) && pendingCaseAccessCollectStatus;
-  };
-
-  openAccessCollect = (referenceId, electionId) => (e) => {
-    this.props.history.push(`access_collect/${electionId}/${referenceId}`);
-  };
-
-
-  handleOpenModal = () => {
-    this.setState({ showModal: true });
-  }
-
-  handleCloseModal = () => {
-    this.setState({ showModal: false });
   }
 
   handleSearchDul = (query) => {
