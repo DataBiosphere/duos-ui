@@ -12,12 +12,9 @@ import { SearchBox } from '../components/SearchBox';
 import { DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
-
 class DatasetCatalog extends Component {
 
   currentUser = {};
-
-  USER_ID = Storage.getCurrentUser().dacUserId;
 
   constructor(props) {
     super(props);
@@ -65,7 +62,7 @@ class DatasetCatalog extends Component {
       dataSetList: { catalog: catalog },
       currentPage: 1
     });
- }
+  }
 
   componentDidMount() {
 
@@ -100,13 +97,28 @@ class DatasetCatalog extends Component {
   }
 
   async exportToRequest() {
-    let listToExport = [];
-    this.state.dataSetList.catalog.filter(row => row.checked).forEach(dataset => {
-      listToExport.push(dataset.dataSetId);
-    });
-
-    const formData = await DAR.partialDarFromCatalogPost(this.USER_ID, listToExport);
-    this.props.history.push({ pathname: 'dar_application', props: { formData: formData } });
+    let datasets = [];
+    let datasetIdList = [];
+    this.state.dataSetList.catalog.filter(row => row.checked)
+      .forEach(dataset => {
+        const dsNameProp = find(dataset.properties, {propertyName: 'Dataset Name'});
+        const label = dsNameProp.propertyValue;
+        datasets.push({
+          key: dataset.dataSetId,
+          value: dataset.dataSetId,
+          label: label,
+          concatenation: label,
+        });
+        datasetIdList.push(dataset.dataSetId);
+      });
+    const darBody = {
+      userId: Storage.getCurrentUser().dacUserId,
+      datasets: datasets,
+      datasetId: datasetIdList
+    };
+    const formData = await DAR.postPartialDarRequest(darBody);
+    const referenceId = formData.reference_id;
+    this.props.history.push({ pathname: 'dar_application/' + referenceId });
   };
 
   associate() {
