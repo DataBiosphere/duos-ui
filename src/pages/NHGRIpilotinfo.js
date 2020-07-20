@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { div, hr, h1, h3, p } from 'react-hyperscript-helpers';
 
-// export const HomeAbout = hh(
 class NHGRIpilotinfo extends Component {
 
   constructor(props) {
