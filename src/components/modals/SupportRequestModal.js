@@ -203,10 +203,10 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
           div({className: 'form-group first-form-group'}, [
             label({id: 'lbl_attachment', className: 'common-color'},
               ['Attachment']),
-              <Dropzone onDrop={acceptedFiles => this.attachmentChangeHandler(acceptedFiles)}>
+            <Dropzone onDrop={acceptedFiles => this.attachmentChangeHandler(acceptedFiles)}>
               {({ isDragActive, openUploader, getRootProps, getInputProps}) => (
                 section({ style: {backgroundColor: this.state.attachment.length !== 0 ? 'transparent' : (isDragActive ? '#6898c1' : '#ebecee') , fontSize: 14, lineHeight: '30px', paddingLeft: '1rem', display: 'flex', alignItems: 'center', border: this.state.attachment.length === 0 ? '1px dashed' : 'none'
-              }}, [
+                }}, [
                   <div {...getRootProps()}>
                     <input {...getInputProps()} />
                     <p>{this.state.attachment.length === 0 ? 'Drag or Click to attach a files' : (this.state.attachment.length === 1 ? this.state.attachment[0].name : this.state.attachment.length + " files selected")}</p>
