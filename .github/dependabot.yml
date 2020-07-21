@@ -2,7 +2,8 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
-    schedule: "daily"
+    schedule:
+      interval: "daily"
     target-branch: "develop"
     reviewers:
       - "rushtong"
@@ -14,7 +15,8 @@ updates:
       prefix: "dependency"
   - package-ecosystem: docker
     directory: "/"
-    schedule: "daily"
+    schedule:
+      interval: "daily"
     target-branch: "develop"
     reviewers:
       - "rushtong"
