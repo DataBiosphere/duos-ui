@@ -320,12 +320,6 @@ export const DAR = {
     return await res.json();
   },
 
-  partialDarFromCatalogPost: async (userId, datasetIds) => {
-    const url = `${await Config.getApiUrl()}/dar/partial/datasetCatalog?userId=${userId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(datasetIds), { method: 'POST' }]));
-    return await res.json();
-  },
-
   deletePartialDarRequest: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
