@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, h1, h3, span, p, img, h } from 'react-hyperscript-helpers';
+import { div, hr, h1, h2, span, p, img, h, svg, circle, a } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 
 class HomeHelp extends Component {
@@ -23,12 +23,53 @@ class HomeHelp extends Component {
           div({ className: "home-sections home-sections-table" }, [
             img({ src: "/images/home_icon_help.svg", className: "home-sections-icon", alt: "Help icon" }),
             div({ className: "home-sections-title" }, [
-              h3({}, ["Help"]),
-              p({ className: "home-sections-description" }, ["Admin contact information"]),
+              h2({style: {fontWeight: '750'}}, ["Need help?"]),
+
               div({ className: "home-content" }, [
                 p({}, [
-                  "Need help? Please contact: ",
-                  span({ className: "bold" }, [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })])
+                  "Have a question about...",
+                ])
+              ]),
+
+              div({ className: 'home-content-references' }, [
+                svg({ height: '14', width: '14' }, [
+                  circle({ cx: '7', cy: '7', r: '7', fill: '#016798' }, [])
+                ]),
+                span({}, ['How to submit a data access request?']),
+              ]),
+
+              div({ className: 'home-content-references' }, [
+                svg({ height: '14', width: '14' }, [
+                  circle({ cx: '7', cy: '7', r: '7', fill: '#e34420' }, [])
+                ]),
+                span({}, ['When will you receive a response on your request from the data access committee?'])
+              ]),
+
+              div({ className: 'home-content-references' }, [
+                svg({ height: '14', width: '14' }, [
+                  circle({ cx: '7', cy: '7', r: '7', fill: '#52098f' }, [])
+                ]),
+                span({}, ['What is a Library Card and how do I get one?'])
+              ]),
+
+              div({ className: "home-content" }, [
+                p({}, [
+                  "These questions and more are answered on our ",
+                  span({ classname: "bold" }, [a( { href: '/FAQs', target: '_blank' }, 'FAQ page')])
+                ])
+              ]),
+
+              div({ className: "home-content" }, [
+                p({}, [
+                  "If you need assistance accessing data in Terra for which you were already approved in DUOS, please contact: ",
+                  span( [h(Mailto, { email: 'terra-support@broadinstitute.zendesk.com' })])
+                ])
+              ]),
+
+              div({ className: "home-content" }, [
+                p({}, [
+                  "If you still have questions after reviewing out FAQ page, please contact us at: ",
+                  span( [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })])
                 ])
               ])
             ])
@@ -38,8 +79,6 @@ class HomeHelp extends Component {
     );
   }
 
-  showData(data) {
-  }
 }
 
 export default HomeHelp;
