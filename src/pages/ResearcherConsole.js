@@ -141,8 +141,8 @@ class ResearcherConsole extends Component {
             PageHeading({
               id: "researcherConsole",
               color: "common",
-              title: "Welcome " + currentUser.displayName + "!",
-              description: "These are your Data Access Request cases"
+              title: "Welcome to your Researcher Console, " + currentUser.displayName + "!",
+              description: "Your Data Access Requests are below"
             }),
             hr({ className: "section-separator" }),
           ]),
@@ -154,8 +154,8 @@ class ResearcherConsole extends Component {
                   id: "researcherConsoleAccess",
                   imgSrc: "/images/icon_access.png",
                   color: "access",
-                  title: "Data Access Request cases",
-                  description: "List of your Requests for Data Access"
+                  title: "Your Data Access Requests",
+                  description: "List of your Data Access Requests"
                 }),
               ]),
 
