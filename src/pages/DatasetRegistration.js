@@ -668,40 +668,9 @@ class DatasetRegistration extends Component {
 
           div({ className: 'row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin' }, [
 
-            a({
-              id: 'btn_step_1',
-              onClick: this.step1,
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 dataset-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 1 ? 'active' : '')
-            }, [
-              small({}, ['Step 1']),
-              'Dataset Information',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ]),
-
-            a({
-              id: 'btn_step_2',
-              onClick: this.step2,
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 dataset-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 2 ? 'active' : '')
-            }, [
-              small({}, ['Step 2']),
-              'Data Use Declaration',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ]),
-
-            a({
-              id: 'btn_step_4',
-              onClick: this.step4,
-              className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 dataset-color jumbotron box-vote multi-step-title '
-                + (this.state.step === 4 ? 'active' : '')
-            }, [
-              small({}, ['Step 3']),
-              'Dataset Registration Agreements',
-              span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' }, [])
-            ])
           ])
         ]),
+
         form({ name: 'form', 'noValidate': true }, [
           div({ id: 'form-views' }, [
 
@@ -1040,151 +1009,62 @@ class DatasetRegistration extends Component {
                                     ]),
                 ]),
 
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_next', onClick: this.step2, className: 'btn-primary f-right dataset-background' }, [
-                      'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-                    ]),
 
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'btn-secondary f-right dataset-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
-            ]),
-
-            div({ isRendered: this.state.step === 2 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  h3({ className: 'rp-form-title dataset-color' }, ['2. Data Access Request']),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question dataset-color'}, [
-                          '2.1 Primary Data Use Terms* ',
-                          span({},
-                            ['Please select one of the following options.']),
-                        ]),
-                      ]),
-                    div({
-                      style: {'marginLeft': '15px'},
-                      className: 'row'
-                    }, [
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: isTypeOfResearchInvalid && showValidationMessages,
-                      }, [
-                        'One of the following fields is required.', br(),
-                        'Disease related studies require a disease selection.', br(),
-                        'Other studies require additional details.'])
-                    ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        TypeOfResearch({
-                          hmb: hmb,
-                          hmbHandler: this.setHmb,
-                          poa: poa,
-                          poaHandler: this.setPoa,
-                          diseases: diseases,
-                          diseasesHandler: this.setDiseases,
-                          disabled: (dar_code !== null),
-                          ontologies: ontologies,
-                          ontologiesHandler: this.onOntologiesChange,
-                          other: other,
-                          otherHandler: this.setOther,
-                          otherText: otherText,
-                          otherTextHandler: this.setOtherText
-                        })
-                      ]),
+                    h3({ className: 'rp-form-title dataset-color' }, ['2. Data Access Request']),
 
                     div({className: 'form-group'}, [
                       div(
                         {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                         [
-                          label({className: 'control-label rp-title-question dataset-color'},
-                            [
-                              '2.4 Secondary Data Use Terms ',
-                              span({}, ['Select all applicable options.']),
-                            ]),
-                        ]),
-                    ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: methods,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkMethods',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'methods',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkMethods',
-                          }, [
+                          label({className: 'control-label rp-title-question dataset-color'}, [
+                            '2.1 Primary Data Use Terms* ',
                             span({},
-                              ['2.4.1 No methods development or validation studies (NMDS): ']),
-                            'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
-                          ]),
-                        ]),
+                              ['Please select one of the following options.']),
+
+
+                      div({
+                        style: {'marginLeft': '15px'},
+                        className: 'row'
+                      }, [
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: isTypeOfResearchInvalid && showValidationMessages,
+                        }, [
+                          'One of the following fields is required.', br(),
+                          'Disease related studies require a disease selection.', br(),
+                          'Other studies require additional details.'])
                       ]),
 
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: controls,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkControls',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'controls',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkControls',
-                          }, [
-                            span({}, ['2.4.2 Genetic Studies Only (GSO): ']),
-                            'Use is limited to genetic studies only',
-                          ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          TypeOfResearch({
+                            hmb: hmb,
+                            hmbHandler: this.setHmb,
+                            poa: poa,
+                            poaHandler: this.setPoa,
+                            diseases: diseases,
+                            diseasesHandler: this.setDiseases,
+                            disabled: (dar_code !== null),
+                            ontologies: ontologies,
+                            ontologiesHandler: this.onOntologiesChange,
+                            other: other,
+                            otherHandler: this.setOther,
+                            otherText: otherText,
+                            otherTextHandler: this.setOtherText
+                          })
                         ]),
-                      ]),
 
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: population,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkPopulation',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'population',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkPopulation',
-                          }, [
-                            span({},
-                              ['2.4.3 Publication Required (PUB): ']),
-                            'Approved users are required to make results of studies using the data available to the larger scientific community.',
+                      div({className: 'form-group'}, [
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            label({className: 'control-label rp-title-question dataset-color'},
+                              [
+                                '2.4 Secondary Data Use Terms ',
+                                span({}, ['Select all applicable options.']),
+                              ]),
                           ]),
-                        ]),
                       ]),
 
                       div(
@@ -1192,21 +1072,44 @@ class DatasetRegistration extends Component {
                         [
                           div({className: 'checkbox'}, [
                             input({
-                              checked: population,
+                              checked: methods,
                               onChange: this.handleCheckboxChange,
-                              id: 'checkPopulation',
+                              id: 'checkMethods',
                               type: 'checkbox',
                               disabled: (this.state.formData.dar_code !== null),
                               className: 'checkbox-inline rp-checkbox',
-                              name: 'population',
+                              name: 'methods',
                             }),
                             label({
                               className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkPopulation',
+                              htmlFor: 'checkMethods',
                             }, [
-                              span({},
-                                ['2.4.4 Collaboration Required (COL): ']),
-                              'Approved users are required to collaborate with the primary study investigators',
+                              span({ classname: 'access-color'},
+                                ['2.4.1 No methods development or validation studies (NMDS): ']),
+                              'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
+                            ]),
+                          ]),
+                        ]),
+
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              checked: controls,
+                              onChange: this.handleCheckboxChange,
+                              id: 'checkControls',
+                              type: 'checkbox',
+                              disabled: (this.state.formData.dar_code !== null),
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'controls',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkControls',
+                            }, [
+                              span({}, ['2.4.2 Genetic Studies Only (GSO): ']),
+                              'Use is limited to genetic studies only',
                             ]),
                           ]),
                         ]),
@@ -1229,32 +1132,8 @@ class DatasetRegistration extends Component {
                               htmlFor: 'checkPopulation',
                             }, [
                               span({},
-                                ['2.4.5 Ethics Approval Required (IRB): ']),
-                              'Approved users are required to provide documentation of local IRB/REB approval.',
-                            ]),
-                          ]),
-                        ]),
-
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              checked: population,
-                              onChange: this.handleCheckboxChange,
-                              id: 'checkPopulation',
-                              type: 'checkbox',
-                              disabled: (this.state.formData.dar_code !== null),
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'population',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkPopulation',
-                            }, [
-                              span({},
-                                ['2.4.6 Geographic Restriction (GS-) ']),
-                              'Use limited to be within the specified geographic area',
+                                ['2.4.3 Publication Required (PUB): ']),
+                              'Approved users are required to make results of studies using the data available to the larger scientific community.',
                             ]),
                           ]),
                         ]),
@@ -1277,8 +1156,56 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkPopulation',
                               }, [
                                 span({},
-                                  ['2.4.7 Publication Moratorium (MOR) ']),
-                                'Approved users are required to withhold from publishing until the specified date',
+                                  ['2.4.4 Collaboration Required (COL): ']),
+                                'Approved users are required to collaborate with the primary study investigators',
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: population,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkPopulation',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'population',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkPopulation',
+                              }, [
+                                span({},
+                                  ['2.4.5 Ethics Approval Required (IRB): ']),
+                                'Approved users are required to provide documentation of local IRB/REB approval.',
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: population,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkPopulation',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'population',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkPopulation',
+                              }, [
+                                span({},
+                                  ['2.4.6 Geographic Restriction (GS-) ']),
+                                'Use limited to be within the specified geographic area',
                               ]),
                             ]),
                           ]),
@@ -1301,108 +1228,111 @@ class DatasetRegistration extends Component {
                                   htmlFor: 'checkPopulation',
                                 }, [
                                   span({},
-                                    ['2.4.8 No Populations Origins or Ancestry Research (NPOA)']),
-                                  'Use for Populations, Origins, or Ancestry Research is prohibited',
+                                    ['2.4.7 Publication Moratorium (MOR) ']),
+                                  'Approved users are required to withhold from publishing until the specified date',
                                 ]),
                               ]),
                             ]),
 
+                            div(
+                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                              [
+                                div({className: 'checkbox'}, [
+                                  input({
+                                    checked: population,
+                                    onChange: this.handleCheckboxChange,
+                                    id: 'checkPopulation',
+                                    type: 'checkbox',
+                                    disabled: (this.state.formData.dar_code !== null),
+                                    className: 'checkbox-inline rp-checkbox',
+                                    name: 'population',
+                                  }),
+                                  label({
+                                    className: 'regular-checkbox rp-choice-questions',
+                                    htmlFor: 'checkPopulation',
+                                  }, [
+                                    span({},
+                                      ['2.4.8 No Populations Origins or Ancestry Research (NPOA)']),
+                                    'Use for Populations, Origins, or Ancestry Research is prohibited',
+                                  ]),
+                                ]),
+                              ]),
+
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              checked: forProfit,
+                              onChange: this.handleCheckboxChange,
+                              id: 'checkForProfit',
+                              type: 'checkbox',
+                              disabled: (this.state.formData.dar_code !== null),
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'forProfit',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkForProfit',
+                            }, [
+                              span({},
+                                ['2.4.9 Non-Profit Use Only (NPU): ']),
+                              'The data cannot be used by for-profit organizations nor for commercial research purposes',
+                            ]),
+                          ]),
+                        ]),
+                    ]),
+                  ]),
+
+                  div({className: 'form-group'}, [
                     div(
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: forProfit,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkForProfit',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'forProfit',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkForProfit',
-                          }, [
-                            span({},
-                              ['2.4.9 Non-Profit Use Only (NPU): ']),
-                            'The data cannot be used by for-profit organizations nor for commercial research purposes',
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '2.5 Other Data Use Terms* ',
+                          span({}, [
+                            'If there are additional data use terms governing the future use of this dataset, please include them here.',
+                            br(),
+                            'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access request. If you have questions, please reach out to the DUOS support team ',
+                            a({
+                              target: '_blank',
+                              href: '/home_help',
+                            }, ['here'], '.'),
                           ]),
                         ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        textarea({
+                          value: this.state.formData.rus,
+                          onChange: this.handleChange,
+                          name: 'rus',
+                          id: 'inputRUS',
+                          className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
+                            ' required-field-error form-control' :
+                            'form-control',
+                          rows: '6',
+                          required: true,
+                          placeholder: 'Please limit your RUS to 2200 characters.',
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
+                        },
+                        ['Required field']),
                       ]),
                   ]),
                 ]),
 
-                div({className: 'form-group'}, [
-                  div(
-                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                    [
-                      label({className: 'control-label rp-title-question dataset-color'}, [
-                        '2.5 Other Data Use Terms* ',
-                        span({}, [
-                          'If there are additional data use terms governing the future use of this dataset, please include them here.',
-                          br(),
-                          'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access request. If you have questions, please reach out to the DUOS support team ',
-                          a({
-                            target: '_blank',
-                            href: '/home_help',
-                          }, ['here'], '.'),
-                        ]),
-                      ]),
-                    ]),
-                  div(
-                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                    [
-                      textarea({
-                        value: this.state.formData.rus,
-                        onChange: this.handleChange,
-                        name: 'rus',
-                        id: 'inputRUS',
-                        className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
-                          ' required-field-error form-control' :
-                          'form-control',
-                        rows: '6',
-                        required: true,
-                        placeholder: 'Please limit your RUS to 2200 characters.',
-                        disabled: this.state.formData.dar_code !== null,
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
-                      },
-                      ['Required field']),
-                    ]),
-                ]),
 
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_prev', onClick: this.step1, className: 'btn-primary f-left dataset-background' }, [
-                      span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
-                    ]),
-
-                    a({ id: 'btn_next', onClick: this.step3, className: 'btn-primary f-right dataset-background' }, [
-                      'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-                    ]),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'btn-secondary f-right dataset-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
-            ]),
-
-            div({ isRendered: this.state.step === 4 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  h3({ className: 'rp-form-title dataset-color' }, ['4. Dataset Registration Agreements']),
+                  h3({ className: 'rp-form-title dataset-color' }, ['3. Dataset Registration Agreements']),
 
                   div({ className: 'form-group' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                       label({ className: 'control-label rp-title-question dataset-color' }, [
-                        '4.1 DUOS Dataset Registration Agreement'
+                        '3.1 DUOS Dataset Registration Agreement'
                       ])
                     ]),
 
@@ -1448,36 +1378,33 @@ class DatasetRegistration extends Component {
                           id: 'problemSavingRequest', type: 'danger',
                           title: 'Some errors occurred, Data Access Request Application couldn\'t be created.'
                         })
+                      ]),
+
+
+                    div({ className: 'row no-margin' }, [
+                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+
+                        a({
+                          id: 'btn_submit', isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave,
+                          className: 'f-right btn-primary dataset-background bold'
+                        }, ['Register in DUOS!']),
+
+                        ConfirmationDialog({
+                          title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
+                          color: 'dataset', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
+                        }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Application?'])]),
+                        h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
+
+                        a({
+                          id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
+                          className: 'f-right btn-secondary dataset-color'
+                        }, ['Save'])
                       ])
                     ])
                   ])
                 ]),
-
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_prev', onClick: this.step3, className: 'f-left btn-primary dataset-background' }, [
-                      span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
-                    ]),
-
-                    a({
-                      id: 'btn_submit', isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave,
-                      className: 'f-right btn-primary dataset-background bold'
-                    }, ['Register in DUOS!']),
-
-                    ConfirmationDialog({
-                      title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
-                      color: 'dataset', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
-                    }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Application?'])]),
-                    h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'f-right btn-secondary dataset-color'
-                    }, ['Save'])
-                  ])
-                ])
               ])
-            ])
+            ]),
           ])
         ])
       ])
