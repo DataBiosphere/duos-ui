@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, br, div, fieldset, form, h, h3, hr, i, input, label, small, span, textarea } from 'react-hyperscript-helpers';
+import { a, br, div, fieldset, form, h, h3, hr, i, input, label, span, textarea } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
@@ -239,28 +239,6 @@ class DatasetRegistration extends Component {
     }, () => this.checkValidations());
   };
 
-  handleRadioChange = (e, field, value) => {
-    if (value === 'true') {
-      value = true;
-    } else if (value === 'false') {
-      value = false;
-    }
-    this.setState(prev => {
-      if (field === 'onegender' && value === false) {
-        prev.formData.gender = '';
-      }
-      prev.formData[field] = value;
-      return prev;
-    }, () => this.checkValidations());
-  };
-
-  handleGenderChange = (e, value) => {
-    this.setState(prev => {
-      prev.formData.gender = value;
-      return prev;
-    }, () => this.checkValidations());
-  };
-
   step1 = (e) => {
     this.setState(prev => {
       prev.step = 1;
@@ -269,25 +247,9 @@ class DatasetRegistration extends Component {
     window.scrollTo(0, 0);
   };
 
-  step2 = (e) => {
-    this.setState(prev => {
-      prev.step = 2;
-      return prev;
-    });
-    window.scrollTo(0, 0);
-  };
-
   step3 = (e) => {
     this.setState(prev => {
       prev.step = 3;
-      return prev;
-    });
-    window.scrollTo(0, 0);
-  };
-
-  step4 = (e) => {
-    this.setState(prev => {
-      prev.step = 4;
       return prev;
     });
     window.scrollTo(0, 0);
@@ -509,27 +471,6 @@ class DatasetRegistration extends Component {
     }
   }
 
-  onDatasetsChange = (data, action) => {
-    this.setState(prev => {
-      prev.formData.datasets = data;
-      return prev;
-    }, () => this.checkValidations());
-  };
-
-  searchDataSets(query, callback) {
-    DAR.getAutoCompleteDS(query).then(items => {
-      let options = items.map(function(item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.concatenation
-        };
-      });
-      callback(options);
-    });
-
-  };
-
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
    */
@@ -748,395 +689,395 @@ class DatasetRegistration extends Component {
                         },
                         ['Required field']),
                       ])
-                    ]),
+                  ]),
 
-                    div({className: 'form-group'}, [
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          label({className: 'control-label rp-title-question dataset-color'}, [
-                            '1.3 Dataset Repository URL* ',
-                            span({},
-                              ['Please provide the URL at which approved requestors can access the data']),
-                          ]),
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.3 Dataset Repository URL* ',
+                          span({},
+                            ['Please provide the URL at which approved requestors can access the data']),
                         ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                        [
-                          input({
-                            type: 'text',
-                            name: 'projectTitle',
-                            id: 'inputTitle',
-                            maxLength: '256',
-                            value: this.state.formData.projectTitle,
-                            onChange: this.handleChange,
-                            className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                              'form-control required-field-error' :
-                              'form-control',
-                            required: true,
-                            disabled: this.state.formData.dar_code !== null,
-                          }),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.4 Data Type* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.5 Species* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.6 Phenotype/Indication* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.7 # of Participants* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.8 Dataset Description* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.9 Data Access Committee* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question dataset-color'}, [
+                          '1.10 Publication Reference* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'projectTitle',
+                          id: 'inputTitle',
+                          maxLength: '256',
+                          value: this.state.formData.projectTitle,
+                          onChange: this.handleChange,
+                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                          disabled: this.state.formData.dar_code !== null,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
+                  ]),
+                ]),
+
+
+                h3({ className: 'rp-form-title dataset-color' }, ['2. Data Access Request']),
+
+                div({className: 'form-group'}, [
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      label({className: 'control-label rp-title-question dataset-color'}, [
+                        '2.1 Primary Data Use Terms* ',
+                        span({},
+                          ['Please select one of the following options.']),
+
+
+                        div({
+                          style: {'marginLeft': '15px'},
+                          className: 'row'
+                        }, [
                           span({
                             className: 'cancel-color required-field-error-span',
-                            isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                          },
-                          ['Required field']),
-                        ])
-                      ]),
+                            isRendered: isTypeOfResearchInvalid && showValidationMessages,
+                          }, [
+                            'One of the following fields is required.', br(),
+                            'Disease related studies require a disease selection.', br(),
+                            'Other studies require additional details.'])
+                        ]),
 
-                      div({className: 'form-group'}, [
                         div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
-                            label({className: 'control-label rp-title-question dataset-color'}, [
-                              '1.4 Data Type* ',
-                            ]),
+                            TypeOfResearch({
+                              hmb: hmb,
+                              hmbHandler: this.setHmb,
+                              poa: poa,
+                              poaHandler: this.setPoa,
+                              diseases: diseases,
+                              diseasesHandler: this.setDiseases,
+                              disabled: (dar_code !== null),
+                              ontologies: ontologies,
+                              ontologiesHandler: this.onOntologiesChange,
+                              other: other,
+                              otherHandler: this.setOther,
+                              otherText: otherText,
+                              otherTextHandler: this.setOtherText
+                            })
                           ]),
-                        div(
-                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                          [
-                            input({
-                              type: 'text',
-                              name: 'projectTitle',
-                              id: 'inputTitle',
-                              maxLength: '256',
-                              value: this.state.formData.projectTitle,
-                              onChange: this.handleChange,
-                              className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                'form-control required-field-error' :
-                                'form-control',
-                              required: true,
-                              disabled: this.state.formData.dar_code !== null,
-                            }),
-                            span({
-                              className: 'cancel-color required-field-error-span',
-                              isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                            },
-                            ['Required field']),
-                          ])
-                        ]),
 
                         div({className: 'form-group'}, [
                           div(
                             {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                             [
-                              label({className: 'control-label rp-title-question dataset-color'}, [
-                                '1.5 Species* ',
-                              ]),
-                            ]),
-                          div(
-                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                            [
-                              input({
-                                type: 'text',
-                                name: 'projectTitle',
-                                id: 'inputTitle',
-                                maxLength: '256',
-                                value: this.state.formData.projectTitle,
-                                onChange: this.handleChange,
-                                className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                  'form-control required-field-error' :
-                                  'form-control',
-                                required: true,
-                                disabled: this.state.formData.dar_code !== null,
-                              }),
-                              span({
-                                className: 'cancel-color required-field-error-span',
-                                isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                              },
-                              ['Required field']),
-                            ])
-                          ]),
-
-                          div({className: 'form-group'}, [
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                label({className: 'control-label rp-title-question dataset-color'}, [
-                                  '1.6 Phenotype/Indication* ',
-                                ]),
-                              ]),
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                              [
-                                input({
-                                  type: 'text',
-                                  name: 'projectTitle',
-                                  id: 'inputTitle',
-                                  maxLength: '256',
-                                  value: this.state.formData.projectTitle,
-                                  onChange: this.handleChange,
-                                  className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                    'form-control required-field-error' :
-                                    'form-control',
-                                  required: true,
-                                  disabled: this.state.formData.dar_code !== null,
-                                }),
-                                span({
-                                  className: 'cancel-color required-field-error-span',
-                                  isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                                },
-                                ['Required field']),
-                              ])
-                            ]),
-
-                            div({className: 'form-group'}, [
-                              div(
-                                {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                              label({className: 'control-label rp-title-question dataset-color'},
                                 [
-                                  label({className: 'control-label rp-title-question dataset-color'}, [
-                                    '1.7 # of Participants* ',
-                                  ]),
+                                  '2.4 Secondary Data Use Terms ',
+                                  span({}, ['Select all applicable options.']),
                                 ]),
-                              div(
-                                {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                                [
-                                  input({
-                                    type: 'text',
-                                    name: 'projectTitle',
-                                    id: 'inputTitle',
-                                    maxLength: '256',
-                                    value: this.state.formData.projectTitle,
-                                    onChange: this.handleChange,
-                                    className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                      'form-control required-field-error' :
-                                      'form-control',
-                                    required: true,
-                                    disabled: this.state.formData.dar_code !== null,
-                                  }),
-                                  span({
-                                    className: 'cancel-color required-field-error-span',
-                                    isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                                  },
-                                  ['Required field']),
-                                ])
-                              ]),
-
-                              div({className: 'form-group'}, [
-                                div(
-                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                  [
-                                    label({className: 'control-label rp-title-question dataset-color'}, [
-                                      '1.8 Dataset Description* ',
-                                    ]),
-                                  ]),
-                                div(
-                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                                  [
-                                    input({
-                                      type: 'text',
-                                      name: 'projectTitle',
-                                      id: 'inputTitle',
-                                      maxLength: '256',
-                                      value: this.state.formData.projectTitle,
-                                      onChange: this.handleChange,
-                                      className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                        'form-control required-field-error' :
-                                        'form-control',
-                                      required: true,
-                                      disabled: this.state.formData.dar_code !== null,
-                                    }),
-                                    span({
-                                      className: 'cancel-color required-field-error-span',
-                                      isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                                    },
-                                    ['Required field']),
-                                  ])
-                                ]),
-
-                                div({className: 'form-group'}, [
-                                  div(
-                                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                    [
-                                      label({className: 'control-label rp-title-question dataset-color'}, [
-                                        '1.9 Data Access Committee* ',
-                                      ]),
-                                    ]),
-                                  div(
-                                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                                    [
-                                      input({
-                                        type: 'text',
-                                        name: 'projectTitle',
-                                        id: 'inputTitle',
-                                        maxLength: '256',
-                                        value: this.state.formData.projectTitle,
-                                        onChange: this.handleChange,
-                                        className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                          'form-control required-field-error' :
-                                          'form-control',
-                                        required: true,
-                                        disabled: this.state.formData.dar_code !== null,
-                                      }),
-                                      span({
-                                        className: 'cancel-color required-field-error-span',
-                                        isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                                      },
-                                      ['Required field']),
-                                    ])
-                                  ]),
-
-                                  div({className: 'form-group'}, [
-                                    div(
-                                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                      [
-                                        label({className: 'control-label rp-title-question dataset-color'}, [
-                                          '1.10 Publication Reference* ',
-                                        ]),
-                                      ]),
-                                    div(
-                                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                                      [
-                                        input({
-                                          type: 'text',
-                                          name: 'projectTitle',
-                                          id: 'inputTitle',
-                                          maxLength: '256',
-                                          value: this.state.formData.projectTitle,
-                                          onChange: this.handleChange,
-                                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                                            'form-control required-field-error' :
-                                            'form-control',
-                                          required: true,
-                                          disabled: this.state.formData.dar_code !== null,
-                                        }),
-                                        span({
-                                          className: 'cancel-color required-field-error-span',
-                                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                                        },
-                                        ['Required field']),
-                                      ])
-                                    ]),
-                ]),
-
-
-                    h3({ className: 'rp-form-title dataset-color' }, ['2. Data Access Request']),
-
-                    div({className: 'form-group'}, [
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          label({className: 'control-label rp-title-question dataset-color'}, [
-                            '2.1 Primary Data Use Terms* ',
-                            span({},
-                              ['Please select one of the following options.']),
-
-
-                      div({
-                        style: {'marginLeft': '15px'},
-                        className: 'row'
-                      }, [
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: isTypeOfResearchInvalid && showValidationMessages,
-                        }, [
-                          'One of the following fields is required.', br(),
-                          'Disease related studies require a disease selection.', br(),
-                          'Other studies require additional details.'])
-                      ]),
-
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          TypeOfResearch({
-                            hmb: hmb,
-                            hmbHandler: this.setHmb,
-                            poa: poa,
-                            poaHandler: this.setPoa,
-                            diseases: diseases,
-                            diseasesHandler: this.setDiseases,
-                            disabled: (dar_code !== null),
-                            ontologies: ontologies,
-                            ontologiesHandler: this.onOntologiesChange,
-                            other: other,
-                            otherHandler: this.setOther,
-                            otherText: otherText,
-                            otherTextHandler: this.setOtherText
-                          })
+                            ]),
                         ]),
 
-                      div({className: 'form-group'}, [
                         div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
-                            label({className: 'control-label rp-title-question dataset-color'},
-                              [
-                                '2.4 Secondary Data Use Terms ',
-                                span({}, ['Select all applicable options.']),
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: methods,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkMethods',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'methods',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkMethods',
+                              }, [
+                                span({ classname: 'access-color'},
+                                  ['2.4.1 No methods development or validation studies (NMDS): ']),
+                                'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
                               ]),
-                          ]),
-                      ]),
-
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              checked: methods,
-                              onChange: this.handleCheckboxChange,
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              disabled: (this.state.formData.dar_code !== null),
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({ classname: 'access-color'},
-                                ['2.4.1 No methods development or validation studies (NMDS): ']),
-                              'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
                             ]),
                           ]),
-                        ]),
 
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              checked: controls,
-                              onChange: this.handleCheckboxChange,
-                              id: 'checkControls',
-                              type: 'checkbox',
-                              disabled: (this.state.formData.dar_code !== null),
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'controls',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkControls',
-                            }, [
-                              span({}, ['2.4.2 Genetic Studies Only (GSO): ']),
-                              'Use is limited to genetic studies only',
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: controls,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkControls',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'controls',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkControls',
+                              }, [
+                                span({}, ['2.4.2 Genetic Studies Only (GSO): ']),
+                                'Use is limited to genetic studies only',
+                              ]),
                             ]),
                           ]),
-                        ]),
 
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              checked: population,
-                              onChange: this.handleCheckboxChange,
-                              id: 'checkPopulation',
-                              type: 'checkbox',
-                              disabled: (this.state.formData.dar_code !== null),
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'population',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkPopulation',
-                            }, [
-                              span({},
-                                ['2.4.3 Publication Required (PUB): ']),
-                              'Approved users are required to make results of studies using the data available to the larger scientific community.',
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: population,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkPopulation',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'population',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkPopulation',
+                              }, [
+                                span({},
+                                  ['2.4.3 Publication Required (PUB): ']),
+                                'Approved users are required to make results of studies using the data available to the larger scientific community.',
+                              ]),
                             ]),
                           ]),
-                        ]),
 
                         div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
@@ -1210,79 +1151,79 @@ class DatasetRegistration extends Component {
                             ]),
                           ]),
 
-                          div(
-                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                            [
-                              div({className: 'checkbox'}, [
-                                input({
-                                  checked: population,
-                                  onChange: this.handleCheckboxChange,
-                                  id: 'checkPopulation',
-                                  type: 'checkbox',
-                                  disabled: (this.state.formData.dar_code !== null),
-                                  className: 'checkbox-inline rp-checkbox',
-                                  name: 'population',
-                                }),
-                                label({
-                                  className: 'regular-checkbox rp-choice-questions',
-                                  htmlFor: 'checkPopulation',
-                                }, [
-                                  span({},
-                                    ['2.4.7 Publication Moratorium (MOR) ']),
-                                  'Approved users are required to withhold from publishing until the specified date',
-                                ]),
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: population,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkPopulation',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'population',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkPopulation',
+                              }, [
+                                span({},
+                                  ['2.4.7 Publication Moratorium (MOR) ']),
+                                'Approved users are required to withhold from publishing until the specified date',
                               ]),
-                            ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: population,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkPopulation',
-                                    type: 'checkbox',
-                                    disabled: (this.state.formData.dar_code !== null),
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'population',
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkPopulation',
-                                  }, [
-                                    span({},
-                                      ['2.4.8 No Populations Origins or Ancestry Research (NPOA)']),
-                                    'Use for Populations, Origins, or Ancestry Research is prohibited',
-                                  ]),
-                                ]),
-                              ]),
-
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              checked: forProfit,
-                              onChange: this.handleCheckboxChange,
-                              id: 'checkForProfit',
-                              type: 'checkbox',
-                              disabled: (this.state.formData.dar_code !== null),
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'forProfit',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkForProfit',
-                            }, [
-                              span({},
-                                ['2.4.9 Non-Profit Use Only (NPU): ']),
-                              'The data cannot be used by for-profit organizations nor for commercial research purposes',
                             ]),
                           ]),
-                        ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: population,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkPopulation',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'population',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkPopulation',
+                              }, [
+                                span({},
+                                  ['2.4.8 No Populations Origins or Ancestry Research (NPOA)']),
+                                'Use for Populations, Origins, or Ancestry Research is prohibited',
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: forProfit,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkForProfit',
+                                type: 'checkbox',
+                                disabled: (this.state.formData.dar_code !== null),
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'forProfit',
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkForProfit',
+                              }, [
+                                span({},
+                                  ['2.4.9 Non-Profit Use Only (NPU): ']),
+                                'The data cannot be used by for-profit organizations nor for commercial research purposes',
+                              ]),
+                            ]),
+                          ]),
+                      ]),
                     ]),
-                  ]),
 
                   div({className: 'form-group'}, [
                     div(
@@ -1327,58 +1268,58 @@ class DatasetRegistration extends Component {
                 ]),
 
 
-                  h3({ className: 'rp-form-title dataset-color' }, ['3. Dataset Registration Agreements']),
+                h3({ className: 'rp-form-title dataset-color' }, ['3. Dataset Registration Agreements']),
 
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                      label({ className: 'control-label rp-title-question dataset-color' }, [
-                        '3.1 DUOS Dataset Registration Agreement'
+                div({ className: 'form-group' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                    label({ className: 'control-label rp-title-question dataset-color' }, [
+                      '3.1 DUOS Dataset Registration Agreement'
+                    ])
+                  ]),
+
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                      label({ className: 'control-label default-color' },
+                        ['By submitting this dataset registration, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.'])
+                    ]),
+
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                      a({
+                        id: 'link_downloadAgreement', href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf', target: '_blank',
+                        className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
+                      }, [
+                        span({ className: 'glyphicon glyphicon-download' }),
+                        'DUOS Dataset Registration Agreement'
                       ])
                     ]),
 
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                        label({ className: 'control-label default-color' },
-                          ['By submitting this dataset registration, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.'])
-                      ]),
-
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                        a({
-                          id: 'link_downloadAgreement', href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf', target: '_blank',
-                          className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                        }, [
-                          span({ className: 'glyphicon glyphicon-download' }),
-                          'DUOS Dataset Registration Agreement'
-                        ])
-                      ]),
-
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-                        input({
-                          type: 'checkbox',
-                          id: 'chk_collaborator',
-                          name: 'checkCollaborator',
-                          className: 'checkbox-inline rp-checkbox',
-                          disabled: this.state.formData.dar_code !== null,
-                          checked: checkCollaborator,
-                          onChange: this.handleCheckboxChange
-                        }),
-                        label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-                          ['I would like this dataset to be made publicly available for data access requests via the DUOS Dataset Catalog'])
-                      ]),
-
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
+                      input({
+                        type: 'checkbox',
+                        id: 'chk_collaborator',
+                        name: 'checkCollaborator',
+                        className: 'checkbox-inline rp-checkbox',
+                        disabled: this.state.formData.dar_code !== null,
+                        checked: checkCollaborator,
+                        onChange: this.handleCheckboxChange
+                      }),
+                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
+                        ['I would like this dataset to be made publicly available for data access requests via the DUOS Dataset Catalog'])
                     ]),
 
-                    div({ className: 'row no-margin' }, [
-                      div({ isRendered: showValidationMessages, className: 'rp-alert' }, [
-                        Alert({ id: 'formErrors', type: 'danger', title: 'Please, complete all required fields.' })
-                      ]),
+                  ]),
 
-                      div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
-                        Alert({
-                          id: 'problemSavingRequest', type: 'danger',
-                          title: 'Some errors occurred, Data Access Request Application couldn\'t be created.'
-                        })
-                      ]),
+                  div({ className: 'row no-margin' }, [
+                    div({ isRendered: showValidationMessages, className: 'rp-alert' }, [
+                      Alert({ id: 'formErrors', type: 'danger', title: 'Please, complete all required fields.' })
+                    ]),
+
+                    div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
+                      Alert({
+                        id: 'problemSavingRequest', type: 'danger',
+                        title: 'Some errors occurred, Data Access Request Application couldn\'t be created.'
+                      })
+                    ]),
 
 
                     div({ className: 'row no-margin' }, [
