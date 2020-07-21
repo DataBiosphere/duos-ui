@@ -41,10 +41,15 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
       const attachmentToken = '';
       if(this.state.attachment !== ''){
         const attachmentToken = [];
+        const results = [];
         for (var i = 0; i < this.state.attachment.length; i++)
         {
-          const token = await Support.uploadAttachment(this.state.attachment[i]);
-          attachmentToken.push(token.token);
+          results.push(Support.uploadAttachment(this.state.attachment[i]));
+        }
+        const allToken = await Promise.all(results);
+        for (var t = 0; t < allToken.length; t++)
+        {
+          attachmentToken.push(allToken[t].token);
         }
       }
       //const attachmentToken =  this.state.attachment !== '' ? await Support.uploadAttachment(this.state.attachment): '';
