@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: "daily"
+    target-branch: "develop"
+    reviewers:
+      - "rushtong"
+    assignees:
+      - "rushtong"
+    labels:
+      - "dependency"
+    commit-message:
+      prefix: "dependency"
+  - package-ecosystem: docker
+    directory: "/"
+    schedule: "daily"
+    target-branch: "develop"
+    reviewers:
+      - "rushtong"
+    assignees:
+      - "rushtong"
+    labels:
+      - "dependency"
+      - "docker"
+    commit-message:
+      prefix: "dependency"
