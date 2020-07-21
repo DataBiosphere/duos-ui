@@ -11,6 +11,7 @@ updates:
       - "rushtong"
     labels:
       - "dependency"
+      - "npm"
     commit-message:
       prefix: "dependency"
   - package-ecosystem: docker
