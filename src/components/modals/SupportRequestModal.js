@@ -120,20 +120,6 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
         return prev;
       });
     };
-
-
-    this.getUploadParams = () => {
-      return { url: 'https://httpbin.org/post' };
-    };
-
-    this.handleChangeStatus = ({ meta }, status) => {
-      console.log(status, meta);
-    };
-
-    this.handleSubmit = (files, allFiles) => {
-      console.log(files.map(f => f.meta));
-      allFiles.forEach(f => f.remove());
-    };
   }
 
   render() {
@@ -217,9 +203,7 @@ export const SupportRequestModal = hh(class SupportRequestModal extends Componen
           div({className: 'form-group first-form-group'}, [
             label({id: 'lbl_attachment', className: 'common-color'},
               ['Attachment']),
-              <Dropzone onDrop={acceptedFiles => this.attachmentChangeHandler(acceptedFiles)}
-              onChangeStatus={this.handleChangeStatus}
-              onSubmit={this.handleSubmit}>
+              <Dropzone onDrop={acceptedFiles => this.attachmentChangeHandler(acceptedFiles)}>
               {({ isDragActive, openUploader, getRootProps, getInputProps}) => (
                 section({ style: {backgroundColor: this.state.attachment.length !== 0 ? 'transparent' : (isDragActive ? '#6898c1' : '#ebecee') , fontSize: 14, lineHeight: '30px', paddingLeft: '1rem', display: 'flex', alignItems: 'center', border: this.state.attachment.length === 0 ? '1px dashed' : 'none'
               }}, [
