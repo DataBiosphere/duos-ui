@@ -37,9 +37,14 @@ function App() {
       history.listen(trackPageView);
     };
 
-    Modal.setAppElement(document.getElementById('modal-root'));
-    initializeReactGA(history);
-    setUserIsLogged();
+    const initApp = async () => {
+      Modal.setAppElement(document.getElementById('modal-root'));
+      await initializeReactGA(history);
+      await setUserIsLogged();
+    };
+
+    initApp();
+
   }, [history]);
 
   const signOut = () => {
