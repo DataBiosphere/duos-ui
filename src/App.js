@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import ReactGA from 'react-ga';
 import { div, h } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
-import {useHistory} from 'react-router-dom'
+import {useHistory} from 'react-router-dom';
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
 import { Storage } from './libs/storage';
 import Routes from './Routes';
 
 function App() {
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   let history = useHistory();
 
@@ -20,6 +20,10 @@ function App() {
     ReactGA.initialize('UA-173273990-1', {
       titleCase: false
     });
+  };
+
+  const trackPageView = (location) => {
+    ReactGA.pageview(location.pathname + location.search);
   };
 
   useEffect(() => {
@@ -30,9 +34,10 @@ function App() {
 
     Modal.setAppElement(document.getElementById('modal-root'));
     initializeReactGA();
-    history.listen((location) => {
-      ReactGA.pageview(location.pathname + location.search);
-    });
+    //call trackPageView to register initial page load
+    trackPageView(history.location);
+    //pass trackPageView as callback function for url change listener
+    history.listen(trackPageView);
     setUserIsLogged();
   }, []);
 
