@@ -17,6 +17,8 @@ export const Config = {
 
   getGoogleClientId: async () => (await getConfig()).clientId,
 
+  getGAId: async () => (await getConfig()).gaId,
+
   getFeatureFlag: async (featureName) => {
     const feature = _.get(await getConfig(), 'features', {});
     return _.get(feature, featureName, false);

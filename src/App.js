@@ -3,6 +3,7 @@ import ReactGA from 'react-ga';
 import { div, h } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
+import { Config } from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 import {useHistory} from 'react-router-dom';
@@ -12,15 +13,8 @@ import { Storage } from './libs/storage';
 import Routes from './Routes';
 
 function App() {
-  const [loading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   let history = useHistory();
-
-  const initializeReactGA = () => {
-    ReactGA.initialize('UA-173273990-1', {
-      titleCase: false
-    });
-  };
 
   const trackPageView = (location) => {
     ReactGA.pageview(location.pathname + location.search);
@@ -32,14 +26,21 @@ function App() {
       setIsLoggedIn(isLogged);
     };
 
+    const initializeReactGA = async (history) => {
+      const gaId = await Config.getGAId();
+      ReactGA.initialize(gaId, {
+        titleCase: false
+      });
+      //call trackPageView to register initial page load
+      trackPageView(history.location);
+      //pass trackPageView as callback function for url change listener
+      history.listen(trackPageView);
+    };
+
     Modal.setAppElement(document.getElementById('modal-root'));
-    initializeReactGA();
-    //call trackPageView to register initial page load
-    trackPageView(history.location);
-    //pass trackPageView as callback function for url change listener
-    history.listen(trackPageView);
+    initializeReactGA(history);
     setUserIsLogged();
-  }, []);
+  }, [history]);
 
   const signOut = () => {
     Storage.setUserIsLogged(false);
@@ -60,7 +61,7 @@ function App() {
           h(Spinner, {
             name: 'mainSpinner', group: 'duos', loadingImage: '/images/loading-indicator.svg'
           }),
-          h(Routes, { onSignIn: signIn, isRendered: !loading, isLogged: isLoggedIn })
+          h(Routes, { onSignIn: signIn, isLogged: isLoggedIn })
         ])
       ]),
       h(DuosFooter, { isLogged: isLoggedIn })
