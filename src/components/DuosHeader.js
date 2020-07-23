@@ -1,11 +1,10 @@
 import { Component } from 'react';
 import { a, button, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
 import ResponsiveMenu from 'react-responsive-navbar';
-import { Link, withRouter } from 'react-router-dom';
-import { Storage } from '../libs/storage';
-import { SupportRequestModal } from './modals/SupportRequestModal';
+import {Link, withRouter} from 'react-router-dom';
+import {Storage} from '../libs/storage';
+import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
-
 
 class DuosHeader extends Component {
 
@@ -16,13 +15,13 @@ class DuosHeader extends Component {
       showSupportRequestModal: false,
       hover: false
     };
-    this.signOut = this.signOut.bind(this);
-    this.toggleHover = () => {
-      this.setState(prev => {
-        prev.hover = !this.state.hover;
-        return prev;
-      });
-    };
+  };
+
+  toggleHover = () => {
+    this.setState(prev => {
+      prev.hover = !this.state.hover;
+      return prev;
+    });
   };
 
   signOut = () => {
