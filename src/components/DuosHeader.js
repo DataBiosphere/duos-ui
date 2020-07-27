@@ -54,7 +54,6 @@ class DuosHeader extends Component {
   okSupportRequestModal = () => {
     this.setState(prev => {
       prev.showSupportRequestModal = false;
-      prev.currentPage = 1;
       return prev;
     });
   };
@@ -69,7 +68,6 @@ class DuosHeader extends Component {
   closeSupportRequestModal = () => {
     this.setState(prev => {
       prev.showSupportRequestModal = false;
-      prev.currentPage = 1;
       return prev;
     });
   };
@@ -79,10 +77,6 @@ class DuosHeader extends Component {
       prev.showHelpModal = false;
       return prev;
     });
-  };
-
-  afterSupportRequestModalOpen = () => {
-    this.setState(prev => { prev.showSupportRequestModal = false; return prev; });
   };
 
   render() {
@@ -126,7 +120,6 @@ class DuosHeader extends Component {
       showModal: this.state.showSupportRequestModal,
       onOKRequest: this.okSupportRequestModal,
       onCloseRequest: this.closeSupportRequestModal,
-      onAfterOpen: this.afterSupportRequestModalOpen,
       url: this.props.location.pathname
     });
 

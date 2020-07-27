@@ -736,7 +736,7 @@ export const Support = {
       ticket_form_id: 360000669472
     };
 
-    return ticket
+    return ticket;
 
   },
   createSupportRequest: async (ticket) => {
@@ -745,7 +745,7 @@ export const Support = {
   },
 
   uploadAttachment: async (file) => {
-    const res = await fetchOk(`https://broadinstitute.zendesk.com/api/v2/uploads?filename=Attachment`, fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
+    const res = await fetchAny(`https://broadinstitute.zendesk.com/api/v2/uploads?filename=Attachment`, fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
     return (await res.json()).upload
   },
 };

@@ -31,6 +31,7 @@ export const SupportRequestModal = hh(
         height: Storage.userIsLogged() ? '550px' : '700px',
         top: Storage.userIsLogged() ? '400px' : '1',
         valid: Storage.userIsLogged(),
+        validAttachment: true
       };
 
       this.closeHandler = () => {
@@ -39,50 +40,61 @@ export const SupportRequestModal = hh(
           layout: 'topRight',
           timeout: 1500,
         });
-        this.props.onCloseRequest('support');
-      };
-
-      this.afterOpenHandler = () => {
-        // call parent's after open handler
-        this.props.onAfterOpen('support');
-      };
-
-      this.OKHandler = async () => {
-        const attachmentToken = '';
-        if (this.state.attachment !== '') {
-          const attachmentToken = [];
-          const results = [];
-          for (var i = 0; i < this.state.attachment.length; i++) {
-            results.push(Support.uploadAttachment(this.state.attachment[i]));
-          }
-          const allToken = await Promise.all(results);
-          for (var t = 0; t < allToken.length; t++) {
-            attachmentToken.push(allToken[t].token);
-          }
-        }
-        //const attachmentToken =  this.state.attachment !== '' ? await Support.uploadAttachment(this.state.attachment): '';
-        const ticket = Support.createTicket(this.state.name, this.state.type,
-          this.state.email, this.state.subject, this.state.description,
-          attachmentToken, this.props.url);
-        const response = await Support.createSupportRequest(ticket);
-        if (response.status === 201) {
-          Notifications.showSuccess(
-            {text: `Sent Successfully`, layout: 'topRight', timeout: 1500});
-        } else {
-          Notifications.showError({
-            text: `ERROR ${response.status} : Unable To Send`,
-            layout: 'topRight',
-          });
-        }
-
-        await this.setState(prev => {
+        this.setState(prev => {
           prev.type = 'question';
           prev.subject = '';
           prev.description = '';
           prev.attachment = '';
           return prev;
         });
-        this.props.onOKRequest('support');
+        this.props.onCloseRequest('support');
+      };
+
+      this.OKHandler = async () => {
+        const attachmentToken = [];
+        if (this.state.attachment !== '') {
+          const results = [];
+          for (var i = 0; i < this.state.attachment.length; i++) {
+            results.push(Support.uploadAttachment(this.state.attachment[i]));
+          }
+          const allToken = await Promise.all(results);
+          for (var t = 0; t < allToken.length; t++) {
+            if (allToken[t].status !== 201) {
+              Notifications.showError({
+                text: ` Unable to add attachment`,
+                layout: 'topRight',
+              });
+              this.state.validAttachment = false;
+            }
+            if (this.state.validAttachment){
+              attachmentToken.push(allToken[t].token);
+            } 
+          }
+        }
+        if (this.state.validAttachment){
+          const ticket = Support.createTicket(this.state.name, this.state.type,
+            this.state.email, this.state.subject, this.state.description,
+            attachmentToken, this.props.url);
+          const response = await Support.createSupportRequest(ticket);
+          if (response.status === 201) {
+            Notifications.showSuccess(
+              {text: `Sent Successfully`, layout: 'topRight', timeout: 1500}
+            );
+            await this.setState(prev => {
+              prev.type = 'question';
+              prev.subject = '';
+              prev.description = '';
+              prev.attachment = '';
+              return prev;
+            });
+            this.props.onOKRequest('support');  
+          } else {
+            Notifications.showError({
+              text: `ERROR ${response.status} : Unable To Send`,
+              layout: 'topRight',
+            });
+          }
+        }
       };
 
       this.nameChangeHandler = (e) => {
@@ -184,8 +196,6 @@ export const SupportRequestModal = hh(
         div({}, [
           h(Modal, {
             isOpen: this.props.showModal,
-            onAfterOpen: () => {
-            },
             onRequestClose: this.closeHandler,
             style: customStyles,
             contentLabel: 'Modal',
