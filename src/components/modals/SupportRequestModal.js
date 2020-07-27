@@ -28,7 +28,7 @@ export const SupportRequestModal = hh(
         first_name: Storage.userIsLogged() ?
           Storage.getCurrentUser().displayName.split(' ')[0] :
           '',
-        height: Storage.userIsLogged() ? '550px' : '700px',
+        height: Storage.userIsLogged() ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px'),
         top: Storage.userIsLogged() ? '400px' : '1',
         valid: Storage.userIsLogged(),
         validAttachment: true
@@ -68,7 +68,7 @@ export const SupportRequestModal = hh(
             }
             if (this.state.validAttachment){
               attachmentToken.push(allToken[t].token);
-            } 
+            }
           }
         }
         if (this.state.validAttachment){
@@ -87,7 +87,7 @@ export const SupportRequestModal = hh(
               prev.attachment = '';
               return prev;
             });
-            this.props.onOKRequest('support');  
+            this.props.onOKRequest('support');
           } else {
             Notifications.showError({
               text: `ERROR ${response.status} : Unable To Send`,
@@ -151,9 +151,18 @@ export const SupportRequestModal = hh(
           return prev;
         });
       };
+
+      this.handleResize = () => {
+        this.setState(prev => {
+          prev.height =  Storage.userIsLogged() ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px');
+          return prev;
+        });
+      };
     }
 
     render() {
+      window.addEventListener('resize', this.handleResize);
+
       const customStyles = {
         overlay: {
           position: 'fixed',
@@ -168,9 +177,9 @@ export const SupportRequestModal = hh(
         },
 
         content: {
-          position: 'relative',
-          top: '0',
-          left: '0',
+          position: 'fixed',
+          top: '1',
+          left: '1',
           right: '0',
           bottom: '0',
           width: '400px',
@@ -270,7 +279,7 @@ export const SupportRequestModal = hh(
                 ]),
                 div({className: 'form-group first-form-group'}, [
                   label({id: 'lbl_description', className: 'common-color'},
-                    ['How can we help you' + this.state.first_name + '? *']),
+                    ['How can we help you ' + this.state.first_name + '? *']),
                   input({
                     id: 'txt_subject',
                     placeholder: 'Enter a subject',
@@ -370,3 +379,4 @@ export const SupportRequestModal = hh(
       );
     }
   });
+

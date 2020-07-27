@@ -746,7 +746,7 @@ export const Support = {
 
   uploadAttachment: async (file) => {
     const res = await fetchAny(`https://broadinstitute.zendesk.com/api/v2/uploads?filename=Attachment`, fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
-    return (await res.json()).upload
+    return (await res.json()).upload;
   },
 };
 
