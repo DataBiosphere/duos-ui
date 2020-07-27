@@ -100,7 +100,7 @@ class DuosHeader extends Component {
 
     let helpLink = isAdmin ? '/help_reports' : '/home_help';
     const contactUsSource = isLogged ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
-    const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}})
+    const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
     const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
     const contactUsButton = button({
       id: "btn_applyAcces",
