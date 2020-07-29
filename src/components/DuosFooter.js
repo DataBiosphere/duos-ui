@@ -1,11 +1,10 @@
 import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
 import { Storage } from '../libs/storage';
-import _ from 'lodash';
+import * as _ from 'lodash/fp';
 
-const DuosFooter = (props) => {
+function DuosFooter() {
   const user = Storage.getCurrentUser();
-
-  const isAdmin = props.isLogged ? Storage.getCurrentUser().isAdmin : false;
+  const isAdmin = _.isEmpty(user) ? false : user.isAdmin;
   const supportLink = isAdmin ? '/help_reports' : '/home_help';
 
   return (
