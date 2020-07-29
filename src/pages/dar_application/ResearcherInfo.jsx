@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Alert} from '../../components/Alert';
 import {Link} from 'react-router-dom';
 import { a, div, fieldset, h3, input, label, span } from 'react-hyperscript-helpers';
-import { eRACommons } from '../components/eRAcommons';
+import { eRACommons } from '../../components/eRACommons';
 
 const profileLink = <Link to={'/profile'} className={'hover-color'}>Your Profile</Link>;
 
