@@ -16,7 +16,7 @@ export default function ResearcherInfo(props) {
   // const [showValidationMessages, setShowValidationMessages] = useState(false);
   //NOTE: seems like we'll be passing in a lot of prop data to this individual component
   //raises question on whether or not it can be broken down further or if the prop data
-  const [checkCollaborator, setCheckCollaborator] = useState(props.collaborator);
+  const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [linkedIn, setLinkedIn] = useState(props.linkedIn);
   const [orcid, setOrcid] = useState(props.orcid);
   const [researcherGate, setResearcherGate] = useState(props.researcherGate);
@@ -111,9 +111,9 @@ export default function ResearcherInfo(props) {
               id: 'chk_collaborator',
               name: 'checkCollaborator',
               className: 'checkbox-inline rp-checkbox',
-              disabled: checkCollaborator !== null,
+              disabled: props.darCode !== null,
               checked: checkCollaborator,
-              onChange: (e) => formStateChange(setCheckCollaborator, 'checked')
+              onChange: (e) => formStateChange(setCheckCollaborator, 'checked', e)
             }),
             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
               ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
