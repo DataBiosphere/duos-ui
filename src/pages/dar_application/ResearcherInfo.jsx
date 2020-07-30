@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span } from 'react-hyperscript-helpers';
@@ -17,7 +17,11 @@ export default function ResearcherInfo(props) {
   //raises question on whether or not it can be broken down further or if data flow needs to be re-evaluated due to shift from monolith to compnents
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
 
-  //helper function to coordinate local state changes as well as updates to form data on the parent
+  useEffect(() => {
+    setCheckCollaborator(props.checkCollaborator);
+  }, [props.checkCollaborator]);
+
+    //helper function to coordinate local state changes as well as updates to form data on the parent
   const formStateChange = (stateVarSetter, attr, event) => {
     const name = event.target.name;
     const value = event.target[attr];
