@@ -11,11 +11,10 @@ const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to 
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated to be able to create a Data Access Request"]);
 
 export default function ResearcherInfo(props) {
-  //NOTE: showValidationMessages is updated on the parent function within the verify steps
-  //assumption is to keep those methods and value updates there and simply pass the value in as a prop
-  // const [showValidationMessages, setShowValidationMessages] = useState(false);
-  //NOTE: seems like we'll be passing in a lot of prop data to this individual component
-  //raises question on whether or not it can be broken down further or if the prop data
+  //NOTE: seems like we'll be passing in a lot of prop data to this individual component due to conditional rendering
+  //a lot of the variables needed are read only values (for step 1 at least), so they should remain props
+  //remainder are either update functions from the parent or prop values needed to initialize state values
+  //raises question on whether or not it can be broken down further or if data flow needs to be re-evaluated due to shift from monolith to compnents
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [linkedIn, setLinkedIn] = useState(props.linkedIn);
   const [orcid, setOrcid] = useState(props.orcid);
@@ -29,48 +28,6 @@ export default function ResearcherInfo(props) {
     props.formFieldChange(name, value);
     stateVarSetter(value);
   };
-  /*
-    props:
-      checkCollaborator: checkCollaborator,
-      completed: this.state.completed,
-      darCode: this.state.formData.dar_code,
-      eRACommonsDestination: eRACommonsDestination,
-      formFieldChange: this.formFieldChange,
-      invalidInvestigator: step1.inputInvestigator.invalid,
-      invalidResearcher: step1.inputResearcher.invalid,
-      investigator: investigator,
-      linkedIn: linkedIn,
-      location: this.props.location,
-      nihValid: this.state.nihValid,
-      onNihStatusUpdate: this.onNihStatusUpdate,
-      orcid: orcid,
-      partialSave: this.partialSave,
-      researcher: this.state.formData.researcher,
-      researcherGate: researcherGate,
-      showValidationMessages: showValidationMessages,
-      step2: this.step2
-
-
-    const (template, functions, etc.)
-      formStateChange()
-      profileUnsubmitted,
-      profileSubmitted
-      eRACommonsDestination -> value is a string determined by empty/non-empty status of dataRequestId
-
-    state
-      NOTE: for the four values below props have to be passed in to set preset values from existing records (partial or otherwise)
-      linkedIn
-      orcid
-      researcherGate
-      checkCollaborator
-
-      Other notes
-        - the ajax library needs to go. The constants defined there are services and should be declared as such within their own files
-        - the ajax library is importing all of jQuery just to execute async functions. We need to replace it with axios (slow conversion)
-        - based on the original code it seems nihValid is updated and read for rendering purposes on step 1 while the parent uses the value for data processing
-          -- might be a better idea to update the value on the parent and simply pass the value down to step 1 as a prop
-          -- can't use the formUpdate method because it's not a shallow key, it's nested deeper within step1
-  */
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -97,11 +54,11 @@ export default function ResearcherInfo(props) {
               id: 'inputResearcher',
               value: props.researcher,
               disabled: true,
-              className: props.researcherInvalid && props.showValidationMessages ? 'form-control required-field-error' : 'form-control',
+              className: props.invalidResearcher && props.showValidationMessages ? 'form-control required-field-error' : 'form-control',
               required: true
             }),
             span({
-              isRendered: (props.researcherInvalid) && (props.showValidationMessages), className: 'cancel-color required-field-error-span'
+              isRendered: (props.invalidResearcher) && (props.showValidationMessages), className: 'cancel-color required-field-error-span'
             }, ['Required field'])
           ]),
 
@@ -193,6 +150,7 @@ export default function ResearcherInfo(props) {
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             label({ className: 'control-label rp-title-question' }, [
               '1.3 Principal Investigator* ',
+              //NOTE: user doesn't actually type in the name, it's prefilled. Should I adjust phrasing?
               span({}, ['By typing in the name of the principal investigator, I certify that he or she is aware of this research study.'])
             ])
           ]),
