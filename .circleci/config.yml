@@ -135,10 +135,6 @@ jobs:
           keys:
             - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
       - run:
-          name: Test the install of trivy security tool
-          command: |
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin
-      - run:
           name: Install dependencies
           command: npm ci
       - run: npm run cypress:verify
