@@ -3,6 +3,7 @@ import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
+import isNil from 'lodash/fp/isNil';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 
@@ -11,10 +12,6 @@ const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to 
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
 
 export default function ResearcherInfo(props) {
-  //NOTE: seems like we'll be passing in a lot of prop data to this individual component due to conditional rendering
-  //a lot of the variables needed are read only values (for step 1 at least), so they should remain props
-  //remainder are either update functions from the parent or prop values needed to initialize state values
-  //raises question on whether or not it can be broken down further or if data flow needs to be re-evaluated due to shift from monolith to compnents
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
 
   useEffect(() => {
@@ -25,14 +22,13 @@ export default function ResearcherInfo(props) {
   const formStateChange = (stateVarSetter, attr, event) => {
     const name = event.target.name;
     const value = event.target[attr];
-    //NOTE: come up with a better name for this function, sounds too similar to formStateChange
     props.formFieldChange(name, value);
     stateVarSetter(value);
   };
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-      fieldset({ disabled: props.darCode !== null }, [
+      fieldset({ disabled: !isNil(props.darCode) }, [
 
         div({ isRendered: props.completed === false, className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
@@ -69,7 +65,7 @@ export default function ResearcherInfo(props) {
               id: 'chk_collaborator',
               name: 'checkCollaborator',
               className: 'checkbox-inline rp-checkbox',
-              disabled: props.darCode !== null,
+              disabled: !isNil(props.darCode),
               checked: checkCollaborator,
               onChange: (e) => formStateChange(setCheckCollaborator, 'checked', e)
             }),
@@ -145,7 +141,6 @@ export default function ResearcherInfo(props) {
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             label({ className: 'control-label rp-title-question' }, [
               '1.3 Principal Investigator* ',
-              //NOTE: user doesn't actually type in the name, it's prefilled. Should I adjust phrasing?
               span({}, ['By typing in the name of the principal investigator, I certify that he or she is aware of this research study.'])
             ])
           ]),
@@ -173,7 +168,7 @@ export default function ResearcherInfo(props) {
           ]),
 
           a({
-            id: 'btn_save', isRendered: props.darCode === null, onClick: props.partialSave,
+            id: 'btn_save', isRendered: isNil(props.darCode), onClick: props.partialSave,
             className: 'btn-secondary f-right access-color'
           }, ['Save'])
         ])
