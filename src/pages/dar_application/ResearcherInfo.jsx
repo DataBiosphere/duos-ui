@@ -6,13 +6,9 @@ import { eRACommons } from '../../components/eRACommons';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 
-const profileUnsubmitted = () => {
-  return span([`Please submit ${profileLink} to be able to create a Data Access Request`]);
-};
+const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
 
-const profileSubmitted = () => {
-  return span([`Please make sure ${profileLink} is updated to be able to create a Data Access Request`]);
-};
+const profileSubmitted = span(["Please make sure ", profileLink, " is updated to be able to create a Data Access Request"]);
 
 export default function ResearcherInfo(props) {
   //NOTE: showValidationMessages is updated on the parent function within the verify steps
