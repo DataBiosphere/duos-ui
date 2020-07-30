@@ -48,10 +48,15 @@ commands:
       - setup_remote_docker:
           docker_layer_caching: true
       - run:
-          name: Docker build/push to GCR
+          name: Install trivy security tool
+          command: |
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+      - run:
+          name: Docker build/push to GCR if there are not critical findings
           command: |
             docker build -t ${APPLICATION_NAME} .
             docker tag ${APPLICATION_NAME} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
+            trivy --exit-code 1 --severity CRITICAL --no-progress gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
             gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://gcr.io
             docker push gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}
             gcloud container images add-tag gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT} gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}-${ENV} -q
