@@ -137,7 +137,7 @@ class MemberConsole extends Component {
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
           PageHeading({
-            id: 'memberConsole', color: 'common', title: 'Welcome ' + currentUser.displayName + '!',
+            id: 'memberConsole', color: 'common', title: 'Welcome to your DAC Member Console, ' + currentUser.displayName + '!',
             description: 'These are your pending cases for review'
           }),
           hr({ className: 'section-separator' }),
