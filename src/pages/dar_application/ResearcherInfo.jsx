@@ -21,7 +21,7 @@ export default function ResearcherInfo(props) {
     setCheckCollaborator(props.checkCollaborator);
   }, [props.checkCollaborator]);
 
-    //helper function to coordinate local state changes as well as updates to form data on the parent
+  //helper function to coordinate local state changes as well as updates to form data on the parent
   const formStateChange = (stateVarSetter, attr, event) => {
     const name = event.target.name;
     const value = event.target[attr];
