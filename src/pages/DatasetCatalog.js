@@ -332,7 +332,7 @@ class DatasetCatalog extends Component {
                 iconSize: "large",
                 color: "dataset",
                 title: "Dataset Catalog",
-                description: "Use the table below to search and selects datasets you would like to request"
+                description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
             ]),
 
