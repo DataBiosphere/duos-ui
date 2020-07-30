@@ -8,7 +8,7 @@ const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Pro
 
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
 
-const profileSubmitted = span(["Please make sure ", profileLink, " is updated to be able to create a Data Access Request"]);
+const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
 
 export default function ResearcherInfo(props) {
   //NOTE: seems like we'll be passing in a lot of prop data to this individual component due to conditional rendering
@@ -16,9 +16,6 @@ export default function ResearcherInfo(props) {
   //remainder are either update functions from the parent or prop values needed to initialize state values
   //raises question on whether or not it can be broken down further or if data flow needs to be re-evaluated due to shift from monolith to compnents
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
-  const [linkedIn, setLinkedIn] = useState(props.linkedIn);
-  const [orcid, setOrcid] = useState(props.orcid);
-  const [researcherGate, setResearcherGate] = useState(props.researcherGate);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
   const formStateChange = (stateVarSetter, attr, event) => {
@@ -106,11 +103,9 @@ export default function ResearcherInfo(props) {
                 type: 'text',
                 name: 'linkedIn',
                 id: 'inputLinkedIn',
-                value: linkedIn,
-                onChange: (e) => formStateChange(setLinkedIn, 'value', e),
-                disabled: false,
+                value: props.linkedIn,
+                disabled: true,
                 className: 'form-control',
-                required: true
               })
             ])
           ]),
@@ -122,11 +117,9 @@ export default function ResearcherInfo(props) {
                 type: 'text',
                 name: 'orcid',
                 id: 'inputOrcid',
-                value: orcid,
-                onChange: (e) => formStateChange(setOrcid, 'value', e),
-                disabled: false,
+                value: props.orcid,
+                disabled: true,
                 className: 'form-control',
-                required: true
               })
             ]),
 
@@ -136,11 +129,9 @@ export default function ResearcherInfo(props) {
                 type: 'text',
                 name: 'researcherGate',
                 id: 'inputResearcherGate',
-                value: researcherGate,
-                onChange: (e) => formStateChange(setResearcherGate, 'value', e),
-                disabled: false,
+                value: props.researcherGate,
+                disabled: true,
                 className: 'form-control',
-                required: true
               })
             ])
           ])
