@@ -1,17 +1,17 @@
-import React, {useState} from 'react';
-import {Alert} from '../../components/Alert';
-import {Link} from 'react-router-dom';
-import { a, div, fieldset, h3, input, label, span } from 'react-hyperscript-helpers';
+import { useState } from 'react';
+import { Alert } from '../../components/Alert';
+import { Link } from 'react-router-dom';
+import { a, div, fieldset, h, h3, input, label, span } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 
-const profileLink = <Link to={'/profile'} className={'hover-color'}>Your Profile</Link>;
+const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 
 const profileUnsubmitted = () => {
-  return <span>Please submit {profileLink} to be able to create a Data Access Request</span>;
+  return span([`Please submit ${profileLink} to be able to create a Data Access Request`]);
 };
 
 const profileSubmitted = () => {
-  return <span>Please make sure {profileLink} is updated to be able to create a Data Access Request</span>;
+  return span([`Please make sure ${profileLink} is updated to be able to create a Data Access Request`]);
 };
 
 export default function ResearcherInfo(props) {
@@ -26,9 +26,9 @@ export default function ResearcherInfo(props) {
   const [researcherGate, setResearcherGate] = useState(props.researcherGate);
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
-  const formStateChange = (stateVar, stateVarSetter, attr, event) => {
-    const name = event.current.name;
-    const value = event.current[attr];
+  const formStateChange = (stateVarSetter, attr, event) => {
+    const name = event.target.name;
+    const value = event.target[attr];
     //NOTE: come up with a better name for this function, sounds too similar to formStateChange
     props.formFieldChange(name, value);
     stateVarSetter(value);
@@ -117,7 +117,7 @@ export default function ResearcherInfo(props) {
               className: 'checkbox-inline rp-checkbox',
               disabled: checkCollaborator !== null,
               checked: checkCollaborator,
-              onChange: formStateChange(checkCollaborator, setCheckCollaborator, 'checked')
+              onChange: (e) => formStateChange(setCheckCollaborator, 'checked')
             }),
             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
               ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
@@ -154,7 +154,7 @@ export default function ResearcherInfo(props) {
                 name: 'linkedIn',
                 id: 'inputLinkedIn',
                 value: linkedIn,
-                onChange: this.formStateChange(linkedIn, setLinkedIn, 'value'),
+                onChange: (e) => formStateChange(setLinkedIn, 'value', e),
                 disabled: false,
                 className: 'form-control',
                 required: true
@@ -170,7 +170,7 @@ export default function ResearcherInfo(props) {
                 name: 'orcid',
                 id: 'inputOrcid',
                 value: orcid,
-                onChange: formStateChange(orcid, setOrcid, 'value'),
+                onChange: (e) => formStateChange(setOrcid, 'value', e),
                 disabled: false,
                 className: 'form-control',
                 required: true
@@ -184,7 +184,7 @@ export default function ResearcherInfo(props) {
                 name: 'researcherGate',
                 id: 'inputResearcherGate',
                 value: researcherGate,
-                onChange: formStateChange(researcherGate, setResearcherGate, 'value'),
+                onChange: (e) => formStateChange(setResearcherGate, 'value', e),
                 disabled: false,
                 className: 'form-control',
                 required: true

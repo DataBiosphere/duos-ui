@@ -698,7 +698,7 @@ class DataAccessRequestApplication extends Component {
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
             div({ isRendered: this.state.step === 1 }, [
-              ResearcherInfo({
+              h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 completed: this.state.completed,
                 darCode: this.state.formData.dar_code,
@@ -717,7 +717,7 @@ class DataAccessRequestApplication extends Component {
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
                 step2: this.step2
-              })
+              }))
             ]),
 
             div({ isRendered: this.state.step === 2 }, [
