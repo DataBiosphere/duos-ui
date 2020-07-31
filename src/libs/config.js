@@ -44,6 +44,11 @@ export const Config = {
     headers: {'Content-Type': 'application/json'},
   }),
 
+  attachmentBody: body => ({
+    body: body,
+    headers: {'Content-Type': 'application/binary'}
+  }),
+
   fileBody: (token = Token.getToken()) => ({
     headers: {
       Authorization: `Bearer ${token}`,
