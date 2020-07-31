@@ -33,132 +33,132 @@ export const SupportRequestModal = hh(
         valid: Storage.userIsLogged(),
         validAttachment: true
       };
+    }
 
-      this.closeHandler = () => {
-        Notifications.showInformation({
-          text: `Support request canceled`,
-          layout: 'topRight',
-          timeout: 1500,
-        });
-        this.setState(prev => {
-          prev.type = 'question';
-          prev.subject = '';
-          prev.description = '';
-          prev.attachment = '';
-          return prev;
-        });
-        this.props.onCloseRequest('support');
-      };
+    closeHandler = () => {
+      Notifications.showInformation({
+        text: `Support request canceled`,
+        layout: 'topRight',
+        timeout: 1500,
+      });
+      this.setState(prev => {
+        prev.type = 'question';
+        prev.subject = '';
+        prev.description = '';
+        prev.attachment = '';
+        return prev;
+      });
+      this.props.onCloseRequest('support');
+    };
 
-      this.OKHandler = async () => {
-        const attachmentToken = [];
-        if (this.state.attachment !== '') {
-          const results = [];
-          for (var i = 0; i < this.state.attachment.length; i++) {
-            results.push(Support.uploadAttachment(this.state.attachment[i]));
-          }
-          const allToken = await Promise.all(results);
-          for (var t = 0; t < allToken.length; t++) {
-            if (allToken[t].status !== 201) {
-              Notifications.showError({
-                text: ` Unable to add attachment`,
-                layout: 'topRight',
-              });
-              this.state.validAttachment = false;
-            }
-            if (this.state.validAttachment){
-              attachmentToken.push(allToken[t].token);
-            }
-          }
+    OKHandler = async () => {
+      const attachmentToken = [];
+      if (this.state.attachment !== '') {
+        const results = [];
+        for (var i = 0; i < this.state.attachment.length; i++) {
+          results.push(Support.uploadAttachment(this.state.attachment[i]));
         }
-        if (this.state.validAttachment){
-          const ticket = Support.createTicket(this.state.name, this.state.type,
-            this.state.email, this.state.subject, this.state.description,
-            attachmentToken, this.props.url);
-          const response = await Support.createSupportRequest(ticket);
-          if (response.status === 201) {
-            Notifications.showSuccess(
-              {text: `Sent Successfully`, layout: 'topRight', timeout: 1500}
-            );
-            await this.setState(prev => {
-              prev.type = 'question';
-              prev.subject = '';
-              prev.description = '';
-              prev.attachment = '';
-              return prev;
-            });
-            this.props.onOKRequest('support');
-          } else {
+        const allToken = await Promise.all(results);
+        for (var t = 0; t < allToken.length; t++) {
+          if (allToken[t].status !== 201) {
             Notifications.showError({
-              text: `ERROR ${response.status} : Unable To Send`,
+              text: ` Unable to add attachment`,
               layout: 'topRight',
             });
+            this.state.validAttachment = false;
+          }
+          if (this.state.validAttachment){
+            attachmentToken.push(allToken[t].token);
           }
         }
-      };
+      }
+      if (this.state.validAttachment){
+        const ticket = Support.createTicket(this.state.name, this.state.type,
+          this.state.email, this.state.subject, this.state.description,
+          attachmentToken, this.props.url);
+        const response = await Support.createSupportRequest(ticket);
+        if (response.status === 201) {
+          Notifications.showSuccess(
+            {text: `Sent Successfully`, layout: 'topRight', timeout: 1500}
+          );
+          await this.setState(prev => {
+            prev.type = 'question';
+            prev.subject = '';
+            prev.description = '';
+            prev.attachment = '';
+            return prev;
+          });
+          this.props.onOKRequest('support');
+        } else {
+          Notifications.showError({
+            text: `ERROR ${response.status} : Unable To Send`,
+            layout: 'topRight',
+          });
+        }
+      }
+    };
 
-      this.nameChangeHandler = (e) => {
-        const nameText = e.target.value;
-        this.setState(prev => {
-          prev.name = nameText;
-          return prev;
-        });
-      };
+    nameChangeHandler = (e) => {
+      const nameText = e.target.value;
+      this.setState(prev => {
+        prev.name = nameText;
+        return prev;
+      });
+    };
 
-      this.typeChangeHandler = (e) => {
-        const typeText = e.target.value;
-        this.setState(prev => {
-          prev.type = typeText;
-          return prev;
-        });
-      };
+    typeChangeHandler = (e) => {
+      const typeText = e.target.value;
+      this.setState(prev => {
+        prev.type = typeText;
+        return prev;
+      });
+    };
 
-      this.subjectChangeHandler = (e) => {
-        const subjectText = e.target.value;
-        this.setState(prev => {
-          prev.subject = subjectText;
-          return prev;
-        });
-      };
+    subjectChangeHandler = (e) => {
+      const subjectText = e.target.value;
+      this.setState(prev => {
+        prev.subject = subjectText;
+        return prev;
+      });
+    };
 
-      this.descriptionChangeHandler = (e) => {
-        const descriptionText = e.target.value;
-        this.setState(prev => {
-          prev.description = descriptionText;
-          return prev;
-        });
-      };
+    descriptionChangeHandler = (e) => {
+      const descriptionText = e.target.value;
+      this.setState(prev => {
+        prev.description = descriptionText;
+        return prev;
+      });
+    };
 
-      this.attachmentChangeHandler = (e) => {
-        this.setState(prev => {
-          prev.attachment = e;
-          return prev;
-        });
-      };
+    attachmentChangeHandler = (e) => {
+      this.setState(prev => {
+        prev.attachment = e;
+        return prev;
+      });
+    };
 
-      this.attachmentCancel = () => {
-        this.setState(prev => {
-          prev.attachment = '';
-          return prev;
-        });
-      };
+    attachmentCancel = () => {
+      this.setState(prev => {
+        prev.attachment = '';
+        return prev;
+      });
+    };
 
-      this.emailChangeHandler = (e) => {
-        let emailText = e.target.value;
-        this.setState(prev => {
-          prev.email = emailText;
-          prev.valid = /.+@.+\.[A-Za-z]+$/.test(emailText) ? true : false;
-          return prev;
-        });
-      };
+    emailChangeHandler = (e) => {
+      let emailText = e.target.value;
+      this.setState(prev => {
+        prev.email = emailText;
+        prev.valid = /.+@.+\.[A-Za-z]+$/.test(emailText) ? true : false;
+        return prev;
+      });
+    };
 
-      this.handleResize = () => {
-        this.setState(prev => {
-          prev.height =  Storage.userIsLogged() ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px');
-          return prev;
-        });
-      };
-    }
+    handleResize = () => {
+      this.setState(prev => {
+        prev.height =  Storage.userIsLogged() ? (window.innerHeight < 550 ? window.innerHeight : '550px') : (window.innerHeight < 700 ? window.innerHeight : '700px');
+        return prev;
+      });
+    };
 
     render() {
       window.addEventListener('resize', this.handleResize);
@@ -180,8 +180,8 @@ export const SupportRequestModal = hh(
           position: 'fixed',
           top: '1',
           left: '1',
-          right: '0',
-          bottom: '0',
+          right: '20px',
+          bottom: '20px',
           width: '400px',
           height: this.state.height,
           background: 'rgb(255, 255, 255)',
