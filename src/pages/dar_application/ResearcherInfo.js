@@ -141,7 +141,7 @@ export default function ResearcherInfo(props) {
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             label({ className: 'control-label rp-title-question' }, [
               '1.3 Principal Investigator* ',
-              span({}, ['By typing in the name of the principal investigator, I certify that he or she is aware of this research study.'])
+              span({}, ['I certify that the principal investigator listed below is aware of this study'])
             ])
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
