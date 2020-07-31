@@ -12,7 +12,7 @@ export const HomeReadMore = hh(class HomeReadMore extends Component {
       content: get(this.props, 'content', [span({}, [''])]),
       moreContent: get(this.props, 'moreContent', [span({}, [''])]),
       className: get(this.props, 'className', ''),
-      style: get(this.props, 'style', {}),
+      style: get(this.props, 'style', { textAlign: 'center' }),
       readMoreText: get(this.props, 'readMoreText', 'Read More'),
       readLessText: get(this.props, 'readLessText', 'Read Less')
     };
@@ -46,8 +46,8 @@ export const HomeReadMore = hh(class HomeReadMore extends Component {
 
   render() {
     const readLink = this.state.expanded ?
-      a({ onClick: () => this.readLess() }, [this.state.readLessText]) :
-      a({ onClick: () => this.readMore() }, [this.state.readMoreText]);
+      a({ onClick: () => this.readLess(), style: this.state.style }, [this.state.readLessText]) :
+      a({ onClick: () => this.readMore(), style: this.state.style }, [this.state.readMoreText]);
     return div({}, [
       this.getContent(),
       readLink
