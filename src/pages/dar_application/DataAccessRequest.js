@@ -6,48 +6,6 @@ import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 
 export default function DataAccessRequest(props) {
-  /*
-    props
-      this.state.formData.dar_code -> darCode
-      this.state.formData.datasets -> datasets
-      this.onDatasetsChange -> onDatasetsChange
-      showValidationMessages -> showValidationMessages
-      this.state.formData.projectTitle -> projectTitle
-      isTypeOfResearchInvalid -> isTypeOfResearchInvalid
-      TypeOfResearch
-        -> component that has a lot of props going in it
-        -> makes no sense to pass the props to the children and then pass it to the child
-        -> initialize component on the parent, send the component as a prop to the child for rendering
-      projectTitle
-      methods
-      controls
-      population
-      forProfit
-      this.state.formData.rus -> rus
-      this.state.formData.non_tech_rus => nonTechRus
-
-      NOTE: rewrite the step functions to a generic back and forward function
-      has to be done on the parent, pass the functions (as needed) to the child components
-        this.step1 -> step1
-        this.step3 -> step3
-      this.partialSave -> partialSave
-
-      const
-        searchDataSets -> move from parent to child?
-        this.state.optionMessage -> string value, used to display as intermediate message during dataset search, only used for dataset search
-        //don't need to define as variable, just set it as value in AsyncSearch component
-
-      state
-        projectTitle
-        methods
-        controls
-        population
-        forProfit
-        rus
-        nonTechRus
-
-  */
-
   const [projectTitle, setProjectTitle] = useState(props.projectTitle);
   const [methods, setMethods] = useState(props.methods);
   const [controls, setControls] = useState(props.controls);
