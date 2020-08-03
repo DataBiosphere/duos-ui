@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useState } from 'react';
 import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -13,21 +13,6 @@ export default function DataAccessRequest(props) {
   const [forProfit, setForProfit] = useState(props.forProfit);
   const [rus, setRus] = useState(props.rus);
   const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
-
-  //NOTE: this useEffect hook is only present until the rest of the steps have been converted to functional components
-  //The end goal is for the components to subscribe parts of the larger data model stored in the parent and handle changes themselves without having props passed in
-  //Otherwise you end up with this situation where the component has to re-render twice per state variable (one for props, one to assign value to state)
-  //Can be done with Redux or Redux offshoot libraries or with React Context hooks
-  //Leaning towards Context hooks since we only have one data model (Redux would be overkill)
-  useEffect(() => {
-    setProjectTitle(props.projectTitle);
-    setMethods(props.methods);
-    setControls(props.controls);
-    setPopulation(props.population);
-    setForProfit(props.forProfit);
-    setRus(props.rus);
-    setNonTechRus(props.nonTechRus);
-  }, [props]);
 
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
