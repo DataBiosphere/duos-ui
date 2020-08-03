@@ -42,12 +42,23 @@ class Home extends Component {
       whiteSpace: 'pre-wrap'
     }
 
+    const description = {
+      color: '#1F3B50',
+      fontFamily: 'Montserrat',
+      fontSize: '14px',
+      textAlign: 'center',
+      textIndent: '10px',
+      whiteSpace: 'pre-wrap',
+      height: '40px',
+      padding: '10px 0'
+    }
+
     const paragraph = {
       color: '#1F3B50',
       padding: '0 10rem 2rem 10rem',
       fontFamily: 'Montserrat',
       fontSize: '14px',
-      textAlign: 'center',
+      textAlign: 'justify',
       textIndent: '10px',
       whiteSpace: 'pre-wrap'
     }
@@ -85,7 +96,7 @@ class Home extends Component {
             div({ style: { margin: '50px auto' }}, [
               h1({ style: header }, ['What is DUOS and how does it work?']),
               h3({ style: subHeader },
-                ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data by leveraging:']),
+                ['DUOS is a semi-automated data access management service which governs compliant secondary use of human genomics data:']),
               div({}, [
                 img({
                   className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
@@ -98,10 +109,20 @@ class Home extends Component {
           ]),
           div({ className: 'row' }, [
             div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
-              div({ className: 'col-lg-4 col-lg-offset-1' }, [
+            div({ className: 'col-lg-4 col-lg-offset-1'}, [
+                p({ style: header }, ['Are you a DAC member?']),
+                p({ style: description }, [
+                  'Click here to learn how DUOS is helping DACs efficiently manage data access and use compliance.']),
+                div({className:'row', style: { display: 'block', margin: 'auto auto', position: 'relative', left: '25%' }}, [
+                  button({ className: 'btn-primary', style: buttonStyle }, [
+                    a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
+                  ])
+                ])
+              ]),
+              div({ className: 'col-lg-4 col-lg-offset-2' }, [
                 p({ style: header }, ['Are you a researcher?']),
-                p({ style: {...paragraph, padding: '0'}}, [
-                  'Creating a DUOS account is quick and easy.\nLorem ipsum dolor sit amet, consectetur adipiscing.\nDuis aute irure dolor in reprehenderit.']),
+                p({ style: description }, [
+                  'Click here to register and start your data access request!']),
                   div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [
                     button({ className: 'btn-primary', style: buttonStyle }, [
                       a({
@@ -110,16 +131,6 @@ class Home extends Component {
                         }, ['REGISTER'])
                     ])
                   ])
-              ]),
-              div({ className: 'col-lg-4 col-lg-offset-2'}, [
-                p({ style: header }, ['Are you a DAC member?']),
-                p({ style: {...paragraph, padding: '0'}}, [
-                  'Learn how managing data access and\nlorem ipsum dolor sit amet, consectetur\nadipiscing elit.']),
-                div({className:'row', style: { display: 'block', margin: 'auto auto', position: 'relative', left: '25%' }}, [
-                  button({ className: 'btn-primary', style: buttonStyle }, [
-                    a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
-                  ])
-                ])
               ])
             ])
           ]),
@@ -130,7 +141,7 @@ class Home extends Component {
                 h3({ style: subHeader }, ['Overview of the system and development']),
                 HomeReadMore({
                   props: this.props,
-                  style: { fontFamily: 'Montserrat', fontSize: '14px', fontWeight: 500, textAlign: 'center', display: 'block' },
+                  style: { fontFamily: 'Montserrat', fontSize: '14px', fontWeight: 500, textAlign: 'justify', display: 'block' },
                   content: [
                     p({ style: paragraph }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
