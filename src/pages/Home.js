@@ -1,20 +1,18 @@
 import { Component } from 'react';
-import { a, button, circle, div, h, h1, h3, hr, img, p, span, svg } from 'react-hyperscript-helpers';
-import Mailto from 'react-protected-mailto';
+import { a, button, div, h, h1, h3, hr, img, p, span, svg } from 'react-hyperscript-helpers';
 import { SignIn } from '../components/SignIn';
 import { HomeReadMore } from '../components/HomeReadMore';
-import { Link } from 'react-router-dom';
 
 class Home extends Component {
 
   render() {
-  const homeTitle = {
+    const homeTitle = {
       color: '#FFFFFF',
       fontFamily: 'Montserrat',
       fontSize: '28px',
       fontWeight: 600,
       textAlign: 'center'
-    }
+    };
 
     const homeBannerDescription = {
       color: '#FFFFFF',
@@ -23,7 +21,7 @@ class Home extends Component {
       textAlign: 'center',
       whiteSpace: 'pre-wrap',
       padding: '0 10rem'
-    }
+    };
 
     const header = {
       color: '#1F3B50',
@@ -31,7 +29,7 @@ class Home extends Component {
       fontSize: '24px',
       fontWeight: 600,
       textAlign: 'center'
-    }
+    };
 
     const subHeader = {
       color: '#1F3B50',
@@ -40,7 +38,7 @@ class Home extends Component {
       textAlign: 'center',
       margin: '1rem 270px',
       whiteSpace: 'pre-wrap'
-    }
+    };
 
     const description = {
       color: '#1F3B50',
@@ -51,7 +49,7 @@ class Home extends Component {
       whiteSpace: 'pre-wrap',
       height: '40px',
       padding: '10px 0'
-    }
+    };
 
     const paragraph = {
       color: '#1F3B50',
@@ -61,7 +59,7 @@ class Home extends Component {
       textAlign: 'justify',
       textIndent: '10px',
       whiteSpace: 'pre-wrap'
-    }
+    };
 
     const buttonStyle = {
       borderRadius: '5px',
@@ -73,7 +71,7 @@ class Home extends Component {
       width: '50%',
       padding: '10px 20px',
       margin: '2rem auto'
-    }
+    };
 
     return (
 
@@ -107,31 +105,29 @@ class Home extends Component {
               ])
             ]),
           ]),
-          div({ className: 'row' }, [
-            div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
+          div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
             div({ className: 'col-lg-4 col-lg-offset-1'}, [
-                p({ style: header }, ['Are you a DAC member?']),
-                p({ style: description }, [
-                  'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
-                div({className:'row', style: { display: 'block', margin: 'auto auto', position: 'relative', left: '25%' }}, [
+              p({ style: header }, ['Are you a DAC member?']),
+              p({ style: description }, [
+                'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
+              div({className:'row', style: { display: 'block', margin: 'auto auto', position: 'relative', left: '25%' }}, [
+                button({ className: 'btn-primary', style: buttonStyle }, [
+                  a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
+                ])
+              ])
+            ]),
+            div({ className: 'col-lg-4 col-lg-offset-2' }, [
+              p({ style: header }, ['Are you a researcher?']),
+              p({ style: description }, [
+                'Click here to register and start your data access request!']),
+                div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [
                   button({ className: 'btn-primary', style: buttonStyle }, [
-                    a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
+                    a({
+                      href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
+                      style: { color: '#fff' }
+                      }, ['REGISTER'])
                   ])
                 ])
-              ]),
-              div({ className: 'col-lg-4 col-lg-offset-2' }, [
-                p({ style: header }, ['Are you a researcher?']),
-                p({ style: description }, [
-                  'Click here to register and start your data access request!']),
-                  div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [
-                    button({ className: 'btn-primary', style: buttonStyle }, [
-                      a({
-                        href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
-                        style: { color: '#fff' }
-                        }, ['REGISTER'])
-                    ])
-                  ])
-              ])
             ])
           ]),
           div({ className: 'row' }, [
