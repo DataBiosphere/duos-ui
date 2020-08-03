@@ -112,7 +112,7 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-lg-offset-1'}, [
                 p({ style: header }, ['Are you a DAC member?']),
                 p({ style: description }, [
-                  'Click here to learn how DUOS is helping DACs efficiently manage data access and use compliance.']),
+                  'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
                 div({className:'row', style: { display: 'block', margin: 'auto auto', position: 'relative', left: '25%' }}, [
                   button({ className: 'btn-primary', style: buttonStyle }, [
                     a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
@@ -135,7 +135,7 @@ class Home extends Component {
             ])
           ]),
           div({ className: 'row' }, [
-            div({ className: 'col-lg-10 col-lg-offset-1' }, [
+            div({ className: 'col-lg-8 col-lg-offset-2' }, [
               div({}, [
                 h1({ style: header }, ['About DUOS']),
                 h3({ style: subHeader }, ['Overview of the system and development']),
