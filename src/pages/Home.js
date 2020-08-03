@@ -59,7 +59,8 @@ class Home extends Component {
       fontWeight: 500,
       color: '#FFFFFF',
       width: '50%',
-      padding: '10px 20px'
+      padding: '10px 20px',
+      margin: '2rem auto'
     }
 
     return (
@@ -73,9 +74,9 @@ class Home extends Component {
               h1({ style: hometitle }, ['Data Use Oversight System']),
               div({ style: homebannerdescription }, ['Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ]),
-            div({ style: { height: '35px', padding: '2em 2em 0 0', display: 'inline-block', position: 'absolute', top: '1rem', right: '1rem'} }, [
-              span({ style: { color: '#FFFFFF'}}, ['Already registered?']),
-              SignIn({ props: this.props, onSignIn: () => this.props.onSignIn(), history: this.props.history })
+            div({ style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'} }, [
+              span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
+              SignIn({ props: this.props, onSignIn: () => this.props.onSignIn(), history: this.props.history, style: { position: 'relative', float: 'right'} })
               ]),
           ]),
           div({ className: 'row' }, [
@@ -94,12 +95,12 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-lg-offset-1' }, [
               p({ style: header }, ['Are you a researcher?']),
               p( { style: {...paragraph, margin: 'auto auto'} }, ['Creating a DUOS account is quick and easy.\nLorem ipsum dolor sit amet, consectetur adipiscing.\nDuis aute irure dolor in reprehenderit.']),
-                div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [button({ className: 'cell-button', style: buttonStyle }, ['REGISTER'])])
+                div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [button({ className: 'btn-primary', style: buttonStyle }, ['REGISTER'])])
             ]),
             div({ className: 'col-lg-4 col-lg-offset-2'}, [
               p({ style: header }, ['Are you a DAC member?']),
               p( { style: {...paragraph, margin: 'auto auto'} }, ['Learn how managing data access and\nlorem ipsum dolor sit amet, consectetur\nadipiscing elit.']),
-              div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [button({ className: 'cell-button', style: buttonStyle }, ['LEARN MORE'])])
+              div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [button({ className: 'btn-primary', style: buttonStyle }, ['LEARN MORE'])])
             ])
           ]),
           ]),
