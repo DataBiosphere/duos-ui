@@ -46,8 +46,8 @@ export const HomeReadMore = hh(class HomeReadMore extends Component {
 
   render() {
     const readLink = this.state.expanded ?
-      a({ onClick: () => this.readLess(), style: this.state.style }, [this.state.readLessText, span({className: 'glyphicon glyphicon-chevron-up', 'aria-hidden': 'true'})]) :
-      a({ onClick: () => this.readMore(), style: this.state.style }, [this.state.readMoreText, span({className: 'glyphicon glyphicon-chevron-down', 'aria-hidden': 'true'})]);
+      a({ onClick: () => this.readLess(), style: this.state.style }, [this.state.readLessText, span({className: 'glyphicon glyphicon-chevron-up', style: {padding: '0 1rem'}, 'aria-hidden': 'true'})]) :
+      a({ onClick: () => this.readMore(), style: this.state.style }, [this.state.readMoreText, span({className: 'glyphicon glyphicon-chevron-down', style: {padding: '0 1rem'}, 'aria-hidden': 'true'})]);
     return div({}, [
       this.getContent(),
       readLink
