@@ -18,14 +18,6 @@ export default function ResearcherInfo(props) {
     setCheckCollaborator(props.checkCollaborator);
   }, [props.checkCollaborator]);
 
-  //helper function to coordinate local state changes as well as updates to form data on the parent
-  const formStateChange = (stateVarSetter, attr, event) => {
-    const name = event.target.name;
-    const value = event.target[attr];
-    props.formFieldChange(name, value);
-    stateVarSetter(value);
-  };
-
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(props.darCode) }, [
@@ -67,7 +59,7 @@ export default function ResearcherInfo(props) {
               className: 'checkbox-inline rp-checkbox',
               disabled: !isNil(props.darCode),
               checked: checkCollaborator,
-              onChange: (e) => formStateChange(setCheckCollaborator, 'checked', e)
+              onChange: (e) => props.formStateChange(setCheckCollaborator, 'checked', e)
             }),
             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
               ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
@@ -163,7 +155,7 @@ export default function ResearcherInfo(props) {
 
       div({ className: 'row no-margin' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-          a({ id: 'btn_next', onClick: props.step2, className: 'btn-primary f-right access-background' }, [
+          a({ id: 'btn_next', onClick: props.nextPage, className: 'btn-primary f-right access-background' }, [
             'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
           ]),
 
