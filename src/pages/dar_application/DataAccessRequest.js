@@ -6,6 +6,19 @@ import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 
 export default function DataAccessRequest(props) {
+  const {
+    darCode,
+    datasets,
+    onDatasetsChange,
+    showValidationMessages,
+    formStateChange,
+    isTypeOfResearchInvalid,
+    TypeOfResearch,
+    nextPage,
+    prevPage,
+    partialSave
+  } = props;
+
   const [projectTitle, setProjectTitle] = useState(props.projectTitle);
   const [methods, setMethods] = useState(props.methods);
   const [controls, setControls] = useState(props.controls);
@@ -29,7 +42,7 @@ export default function DataAccessRequest(props) {
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-      fieldset({ disabled: !isNil(props.darCode) }, [
+      fieldset({ disabled: !isNil(darCode) }, [
 
         h3({ className: 'rp-form-title access-color' }, ['2. Data Access Request']),
 
@@ -44,24 +57,24 @@ export default function DataAccessRequest(props) {
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             h(AsyncSelect, {
               id: 'sel_datasets',
-              key: isEmpty(props.datasets) ? null : props.datasets.value,
-              isDisabled: !isNil(props.darCode),
+              key: isEmpty(datasets) ? null : datasets.value,
+              isDisabled: !isNil(darCode),
               isMulti: true,
               loadOptions: (query, callback) => searchDatasets(query, callback),
-              onChange: (option) => props.onDatasetsChange(option),
-              value: props.datasets,
+              onChange: (option) => onDatasetsChange(option),
+              value: datasets,
               noOptionsMessage: () => 'Start typing a Dataset Name, Sample Collection ID, or PI',
               loadingMessage: () => 'Start typing a Dataset Name, Sample Collection ID, or PI',
               classNamePrefix: 'select',
               placeholder: 'Dataset Name, Sample Collection ID, or PI',
-              className: (isEmpty(props.datasets) && props.showValidationMessages) ?
+              className: (isEmpty(datasets) && showValidationMessages) ?
                 ' required-select-error select-autocomplete' :
                 'select-autocomplete'
 
             }),
             span({
               className: 'cancel-color required-field-error-span',
-              isRendered: isEmpty(props.datasets) && props.showValidationMessages,
+              isRendered: isEmpty(datasets) && showValidationMessages,
             },
             ['Required field']),
           ])
@@ -86,16 +99,16 @@ export default function DataAccessRequest(props) {
                 id: 'inputTitle',
                 maxLength: '256',
                 defaultValue: projectTitle,
-                onBlur: (e) => props.formStateChange(setProjectTitle, 'value', e),
-                className: (isEmpty(projectTitle) && props.showValidationMessages) ?
+                onBlur: (e) => formStateChange(setProjectTitle, 'value', e),
+                className: (isEmpty(projectTitle) && showValidationMessages) ?
                   'form-control required-field-error' :
                   'form-control',
                 required: true,
-                disabled: props.darCode !== null,
+                disabled: darCode !== null,
               }),
               span({
                 className: 'cancel-color required-field-error-span',
-                isRendered: isEmpty(projectTitle) && props.showValidationMessages,
+                isRendered: isEmpty(projectTitle) && showValidationMessages,
               },
               ['Required field']),
             ]),
@@ -117,7 +130,7 @@ export default function DataAccessRequest(props) {
           }, [
             span({
               className: 'cancel-color required-field-error-span',
-              isRendered: props.isTypeOfResearchInvalid && props.showValidationMessages,
+              isRendered: isTypeOfResearchInvalid && showValidationMessages,
             }, [
               'One of the following fields is required.', br(),
               'Disease related studies require a disease selection.', br(),
@@ -126,7 +139,7 @@ export default function DataAccessRequest(props) {
 
           div(
             {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-            [props.TypeOfResearch]), //pass in this component as a prop
+            [TypeOfResearch]), //pass in this component as a prop
 
           div({className: 'form-group'}, [
             div(
@@ -146,10 +159,10 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: methods,
-                  onChange: (e) => props.formStateChange(setMethods, 'checked', e),
+                  onChange: (e) => formStateChange(setMethods, 'checked', e),
                   id: 'checkMethods',
                   type: 'checkbox',
-                  disabled: (props.darCode !== null),
+                  disabled: (darCode !== null),
                   className: 'checkbox-inline rp-checkbox',
                   name: 'methods',
                 }),
@@ -170,10 +183,10 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: controls,
-                  onChange: (e) => props.formStateChange(setControls, 'checked', e),
+                  onChange: (e) => formStateChange(setControls, 'checked', e),
                   id: 'checkControls',
                   type: 'checkbox',
-                  disabled: (!isNil(props.darCode)),
+                  disabled: (!isNil(darCode)),
                   className: 'checkbox-inline rp-checkbox',
                   name: 'controls',
                 }),
@@ -193,10 +206,10 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: population,
-                  onChange: (e) => props.formStateChange(setPopulation, 'checked', e),
+                  onChange: (e) => formStateChange(setPopulation, 'checked', e),
                   id: 'checkPopulation',
                   type: 'checkbox',
-                  disabled: !isNil(props.darCode),
+                  disabled: !isNil(darCode),
                   className: 'checkbox-inline rp-checkbox',
                   name: 'population',
                 }),
@@ -217,10 +230,10 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: forProfit,
-                  onChange: (e) => props.formStateChange(setForProfit, 'checked', e),
+                  onChange: (e) => formStateChange(setForProfit, 'checked', e),
                   id: 'checkForProfit',
                   type: 'checkbox',
-                  disabled: !isNil(props.darCode),
+                  disabled: !isNil(darCode),
                   className: 'checkbox-inline rp-checkbox',
                   name: 'forProfit',
                 }),
@@ -259,20 +272,20 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: rus,
-              onBlur: (e) => props.formStateChange(setRus, 'value', e),
+              onBlur: (e) => formStateChange(setRus, 'value', e),
               name: 'rus',
               id: 'inputRUS',
-              className: (isEmpty(rus) && props.showValidationMessages) ?
+              className: (isEmpty(rus) && showValidationMessages) ?
                 ' required-field-error form-control' :
                 'form-control',
               rows: '6',
               required: true,
               placeholder: 'Please limit your RUS to 2200 characters.',
-              disabled: !isNil(props.darCode),
+              disabled: !isNil(darCode),
             }),
             span({
               className: 'cancel-color required-field-error-span',
-              isRendered: isEmpty(rus) && props.showValidationMessages,
+              isRendered: isEmpty(rus) && showValidationMessages,
             },
             ['Required field']),
           ]),
@@ -294,21 +307,21 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: nonTechRus,
-              onBlur: (e) => props.formStateChange(setNonTechRus, 'value', e),
+              onBlur: (e) => formStateChange(setNonTechRus, 'value', e),
               name: 'non_tech_rus',
               id: 'inputNonTechRUS',
-              className: (isEmpty(nonTechRus) && props.showValidationMessages) ?
+              className: (isEmpty(nonTechRus) && showValidationMessages) ?
                 'required-field-error form-control' :
                 'form-control',
               rows: '3',
               required: true,
               placeholder: 'Please limit your non-technical summary to 1100 characters.',
-              disabled: !isNil(props.darCode),
+              disabled: !isNil(darCode),
             }),
             span(
               {
                 className: 'cancel-color required-field-error-span',
-                isRendered: isEmpty(nonTechRus) && props.showValidationMessages,
+                isRendered: isEmpty(nonTechRus) && showValidationMessages,
               },
               ['Required field']),
           ]),
@@ -316,16 +329,16 @@ export default function DataAccessRequest(props) {
 
       div({ className: 'row no-margin' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-          a({ id: 'btn_prev', onClick: props.prevPage, className: 'btn-primary f-left access-background' }, [
+          a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [
             span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
           ]),
 
-          a({ id: 'btn_next', onClick: props.nextPage, className: 'btn-primary f-right access-background' }, [
+          a({ id: 'btn_next', onClick: nextPage, className: 'btn-primary f-right access-background' }, [
             'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
           ]),
 
           a({
-            id: 'btn_save', isRendered: isNil(props.darCode), onClick: props.partialSave,
+            id: 'btn_save', isRendered: isNil(darCode), onClick: partialSave,
             className: 'btn-secondary f-right access-color'
           }, ['Save'])
         ])
