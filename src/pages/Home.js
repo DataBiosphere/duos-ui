@@ -36,7 +36,6 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '16px',
       textAlign: 'center',
-      margin: '1rem 270px',
       whiteSpace: 'pre-wrap'
     };
 
@@ -47,8 +46,7 @@ class Home extends Component {
       textAlign: 'center',
       textIndent: '10px',
       whiteSpace: 'pre-wrap',
-      height: '40px',
-      padding: '10px 0'
+      padding: '10px 30px',
     };
 
     const paragraph = {
@@ -57,8 +55,7 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '14px',
       textAlign: 'justify',
-      textIndent: '10px',
-      whiteSpace: 'pre-wrap'
+      textIndent: '10px'
     };
 
     const buttonStyle = {
@@ -68,8 +65,7 @@ class Home extends Component {
       fontSize: '16px',
       fontWeight: 500,
       color: '#FFFFFF',
-      width: '50%',
-      padding: '10px 20px',
+      padding: '0 5rem',
       margin: '2rem auto'
     };
 
@@ -78,9 +74,9 @@ class Home extends Component {
       div({ className: 'row' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin', style: { backgroundColor: 'white', height: '350px', position: 'relative' }}, [
-            img({ style: { height: 'inherit', minWidth: '100%', transform: 'scale(1.1,1)', zIndex: '-99' }, src: '/images/home_header_background.png'}),
-            div({ style: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
-              img({ style: { height: '80px', width: '300px', display: 'block', margin: 'auto auto' }, src: '/images/duos_logo.svg' }),
+            img({ style: { height: 'inherit', minWidth: '100%', transform: 'scale(1.1,1)' }, src: '/images/home_header_background.png'}),
+            div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
+              img({ style: { height: '80px', width: '300px', display: 'block', margin: 'auto auto', padding: '0 3rem' }, alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
               div({ style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and enhancing data access committee\'s workflows'])
@@ -106,21 +102,21 @@ class Home extends Component {
             ]),
           ]),
           div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
-            div({ className: 'col-lg-4 col-lg-offset-1'}, [
+            div({ className: 'col-lg-4 col-lg-offset-1 col-md-4 col-md-offset-1'}, [
               p({ style: header }, ['Are you a DAC member?']),
               p({ style: description }, [
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
-              div({className:'row', style: { display: 'block', margin: 'auto auto', position: 'relative', left: '25%' }}, [
+              div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyle }, [
                   a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
                 ])
               ])
             ]),
-            div({ className: 'col-lg-4 col-lg-offset-2' }, [
+            div({ className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
                 'Click here to register and start your data access request!']),
-                div({className:'row', style: {display: 'block', margin: 'auto auto', position: 'relative', left: '25%'}}, [
+                div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                   button({ className: 'btn-primary', style: buttonStyle }, [
                     a({
                       href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
@@ -131,13 +127,13 @@ class Home extends Component {
             ])
           ]),
           div({ className: 'row' }, [
-            div({ className: 'col-lg-8 col-lg-offset-2' }, [
+            div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2' }, [
               div({}, [
                 h1({ style: header }, ['About DUOS']),
                 h3({ style: subHeader }, ['Overview of the system and development']),
                 HomeReadMore({
                   props: this.props,
-                  style: { fontFamily: 'Montserrat', fontSize: '14px', fontWeight: 500, textAlign: 'justify', display: 'block' },
+                  style: { fontFamily: 'Montserrat', fontSize: '14px', fontWeight: 500, textAlign: 'center', display: 'block' },
                   content: [
                     p({ style: paragraph }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
