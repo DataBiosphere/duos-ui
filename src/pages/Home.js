@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { a, button, div, h1, h3, img, p, span } from 'react-hyperscript-helpers';
 import { SignIn } from '../components/SignIn';
-import { HomeReadMore } from '../components/HomeReadMore';
+import { ReadMore } from '../components/ReadMore';
 
 class Home extends Component {
 
@@ -97,7 +97,7 @@ class Home extends Component {
               div({ style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ]),
-            div({ style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
+            div({ isRendered: !this.props.isLogged, style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
               span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
               SignIn({ props: this.props, onSignIn: () => this.props.onSignIn(), history: this.props.history, style: { position: 'relative', float: 'right'}})
             ])
@@ -148,9 +148,9 @@ class Home extends Component {
               div({}, [
                 h1({ style: header }, ['About DUOS']),
                 h3({ style: subHeader }, ['Overview of the system and development']),
-                HomeReadMore({
+                ReadMore({
                   props: this.props,
-                  style: readMoreStyle ,
+                  readStyle: readMoreStyle ,
                   content: [
                     p({ style: paragraph }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
