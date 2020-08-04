@@ -264,7 +264,7 @@ class DataAccessRequestApplication extends Component {
     }, () => this.checkValidations());
   };
 
-//NOTE: use nextPage and previous page instead of having indiividual go to pages for each step
+//NOTE: use nextPage and previous page instead of having individual go to pages for each step
 nextPage = (e) => {
   this.setState(prev => {
     prev.step = prev.step + 1;
