@@ -622,7 +622,7 @@ prevPage = (e) => {
     const genderValues = ['F', 'M'];
 
     //NOTE: component is only here temporarily until component conversion has been complete
-    //ideally this, along with the other variable initializtion should be done with a useEffect hook
+    //ideally this, along with the other variable initialization should be done with a useEffect hook
     const TORComponent = TypeOfResearch({
       hmb: hmb,
       hmbHandler: this.setHmb,
