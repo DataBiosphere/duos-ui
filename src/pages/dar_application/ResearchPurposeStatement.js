@@ -5,13 +5,35 @@ import { YesNoRadioGroup} from '../../components/YesNoRadioGroup';
 
 export default function ResearchPurposeStatement(props) {
 
+  const {
+    addiction,
+    darCode,
+    formStateChange,
+    forProfit,
+    handleRadioChange,
+    illegalBehave,
+    invalidPurpose,
+    nextPage,
+    notHealth,
+    oneGender,
+    partialSave,
+    pediatric,
+    popMigration,
+    prevPage,
+    psychTraits,
+    sexualDiseases,
+    showValidationMessages,
+    stigmatizeDiseases,
+    vulnerablePop
+  } = props;
+
   const genderLabels = ['Female', 'Male'];
   const genderValues = ['F', 'M'];
   const [gender, setGender] = useState(props.gender);
 
   return(
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-      fieldset({ disabled: !isNil(props.darCode) }, [
+      fieldset({ disabled: !isNil(darCode) }, [
 
         h3({ className: 'rp-form-title access-color' }, ['3. Research Purpose Statement']),
 
@@ -22,7 +44,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'row no-margin' }, [
             span({
-              className: 'cancel-color required-field-error-span', isRendered: props.invalidPurpose && props.showValidationMessages,
+              className: 'cancel-color required-field-error-span', isRendered: invalidPurpose && showValidationMessages,
               style: { 'marginLeft': '15px' }
             }, ['All fields are required'])
           ]),
@@ -32,7 +54,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.forProfit, onChange: props.handleRadioChange, id: 'forProfit', name: 'forProfit',
+              value: forProfit, onChange: handleRadioChange, id: 'forProfit', name: 'forProfit',
               required: true
             })
           ]),
@@ -43,12 +65,12 @@ export default function ResearchPurposeStatement(props) {
 
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.oneGender, onChange: props.handleRadioChange, id: 'onegender', name: 'onegender',
+              value: oneGender, onChange: handleRadioChange, id: 'onegender', name: 'onegender',
               required: true
             }),
             div({
-              isRendered: props.oneGender === 'true' || props.oneGender === true,
-              className: 'multi-step-fields', disabled: !isNil(props.darCode)
+              isRendered: oneGender === 'true' || oneGender === true,
+              className: 'multi-step-fields', disabled: !isNil(darCode)
             }, [
               span({}, ['Please specify']),
               div({ className: 'radio-inline' }, [
@@ -56,7 +78,7 @@ export default function ResearchPurposeStatement(props) {
                   return (
                     label({
                       key: 'gender' + ix,
-                      onClick: (e) => props.formStateChange(setGender, {name: 'gender', value: genderValues[ix]}),
+                      onClick: (e) => formStateChange(setGender, {name: 'gender', value: genderValues[ix]}),
                       id: 'lbl_gender_' + ix,
                       htmlFor: 'rad_gender_' + ix,
                       className: 'radio-wrapper'
@@ -82,7 +104,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.pediatric, onChange: props.handleRadioChange, id: 'pediatric', name: 'pediatric', required: true
+              value: pediatric, onChange: handleRadioChange, id: 'pediatric', name: 'pediatric', required: true
             })
           ]),
 
@@ -92,7 +114,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.illegalBehave, onChange: props.handleRadioChange, id: 'illegalbehave', name: 'illegalbehave',
+              value: illegalBehave, onChange: handleRadioChange, id: 'illegalbehave', name: 'illegalbehave',
               required: true
             })
           ]),
@@ -103,7 +125,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.addiction, onChange: props.handleRadioChange, id: 'addiction', name: 'addiction', required: true
+              value: addiction, onChange: handleRadioChange, id: 'addiction', name: 'addiction', required: true
             })
           ]),
 
@@ -113,7 +135,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.sexualDiseases, onChange: props.handleRadioChange, id: 'sexualdiseases', name: 'sexualdiseases',
+              value: sexualDiseases, onChange: handleRadioChange, id: 'sexualdiseases', name: 'sexualdiseases',
               required: true
             })
           ]),
@@ -124,7 +146,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.stigmatizeDiseases, onChange: props.handleRadioChange, id: 'stigmatizediseases',
+              value: stigmatizeDiseases, onChange: handleRadioChange, id: 'stigmatizediseases',
               name: 'stigmatizediseases', required: true
             })
           ]),
@@ -136,7 +158,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.vulnerablePop, onChange: props.handleRadioChange, id: 'vulnerablepop', name: 'vulnerablepop',
+              value: vulnerablePop, onChange: handleRadioChange, id: 'vulnerablepop', name: 'vulnerablepop',
               required: true
             })
           ]),
@@ -147,7 +169,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.popMigration, onChange: props.handleRadioChange, id: 'popmigration', name: 'popmigration',
+              value: popMigration, onChange: handleRadioChange, id: 'popmigration', name: 'popmigration',
               required: true
             })
           ]),
@@ -158,7 +180,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             YesNoRadioGroup({
-              value: props.psychTraits, onChange: props.handleRadioChange, id: 'psychtraits', name: 'psychtraits',
+              value: psychTraits, onChange: handleRadioChange, id: 'psychtraits', name: 'psychtraits',
               required: true
             })
           ]),
@@ -169,7 +191,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group' }, [
             YesNoRadioGroup({
-              value: props.notHealth, onChange: props.handleRadioChange, id: 'nothealth', name: 'nothealth', required: true
+              value: notHealth, onChange: handleRadioChange, id: 'nothealth', name: 'nothealth', required: true
             })
           ])
         ])
@@ -177,16 +199,16 @@ export default function ResearchPurposeStatement(props) {
 
       div({ className: 'row no-margin' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-          a({ id: 'btn_prev', onClick: props.prevPage, className: 'btn-primary f-left access-background' }, [
+          a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [
             span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
           ]),
 
-          a({ id: 'btn_next', onClick: props.nextPage, className: 'btn-primary f-right access-background' }, [
+          a({ id: 'btn_next', onClick: nextPage, className: 'btn-primary f-right access-background' }, [
             'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
           ]),
 
           a({
-            id: 'btn_save', isRendered: isNil(props.darCode), onClick: props.partialSave,
+            id: 'btn_save', isRendered: isNil(darCode), onClick: partialSave,
             className: 'f-right btn-secondary access-color'
           }, ['Save'])
         ])

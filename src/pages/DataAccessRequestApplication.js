@@ -765,6 +765,7 @@ prevPage = (e) => {
             div({ isRendered: this.state.step === 3 }, [
               h(ResearchPurposeStatement, {
                 addiction: this.state.formData.addiction,
+                darCode: dar_code,
                 formStateChange: this.formStateChange,
                 forProfit: this.state.formData.forProfit,
                 gender: this.state.formData.gender,
@@ -780,6 +781,7 @@ prevPage = (e) => {
                 prevPage: this.prevPage,
                 psychTraits: this.state.formData.psychtraits,
                 sexualDiseases: this.state.formData.sexualdiseases,
+                showValidationMessages: showValidationMessages,
                 stigmatizeDiseases: this.state.formData.stigmatizediseases,
                 vulnerablePop: this.state.formData.vulnerablepop
               })
