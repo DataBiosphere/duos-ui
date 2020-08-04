@@ -37,11 +37,6 @@ class Home extends Component {
                 ])
               ])
             ]),
-            p({ style: { fontSize: 'larger', fontWeight: '500' } }, ['Are you a DAC member who wants to learn more about DUOS?']),
-            p({ style: { fontSize: 'large', fontWeight: '350' } }, ['Email us! ']),
-            p({ style: { fontSize: 'large', fontWeight: '500' } }, [
-              h(Mailto, { email: 'DUOS-support@broadinstitute.zendesk.com' })
-            ])
           ]),
 
           h3({}, ['What is DUOS?']),

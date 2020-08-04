@@ -69,7 +69,7 @@ function App() {
           h(Routes, { onSignIn: signIn, isLogged: isLoggedIn })
         ])
       ]),
-      h(DuosFooter, { isLogged: isLoggedIn })
+      DuosFooter()
     ])
   );
 }
