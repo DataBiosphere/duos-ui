@@ -23,6 +23,14 @@ class Home extends Component {
       padding: '0 10rem'
     };
 
+    const duosLogo = {
+      height: '80px',
+      width: '300px',
+      display: 'block',
+      margin: 'auto auto',
+      padding: '0 3rem'
+     };
+
     const header = {
       color: '#1F3B50',
       fontFamily: 'Montserrat',
@@ -69,6 +77,14 @@ class Home extends Component {
       margin: '2rem auto'
     };
 
+    const readMoreStyle = {
+      fontFamily: 'Montserrat',
+      fontSize: '14px',
+      fontWeight: 500,
+      textAlign: 'center',
+      display: 'block'
+    };
+
     return (
 
       div({ className: 'row' }, [
@@ -76,10 +92,10 @@ class Home extends Component {
           div({ className: 'row no-margin', style: { backgroundColor: 'white', height: '350px', position: 'relative' }}, [
             img({ style: { height: 'inherit', minWidth: '100%', transform: 'scale(1.1,1)' }, src: '/images/home_header_background.png'}),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
-              img({ style: { height: '80px', width: '300px', display: 'block', margin: 'auto auto', padding: '0 3rem' }, alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
+              img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
               div({ style: homeBannerDescription }, [
-                'Expediting data access for researchers, by facilitating and enhancing data access committee\'s workflows'])
+                'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ]),
             div({ style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
               span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
@@ -90,7 +106,7 @@ class Home extends Component {
             div({ style: { margin: '50px auto' }}, [
               h1({ style: header }, ['What is DUOS and how does it work?']),
               h3({ style: subHeader },
-                ['DUOS is a semi-automated data access management service which governs compliant secondary use of human genomics data:']),
+                ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
               div({}, [
                 img({
                   className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
@@ -133,7 +149,7 @@ class Home extends Component {
                 h3({ style: subHeader }, ['Overview of the system and development']),
                 HomeReadMore({
                   props: this.props,
-                  style: { fontFamily: 'Montserrat', fontSize: '14px', fontWeight: 500, textAlign: 'center', display: 'block' },
+                  style: readMoreStyle ,
                   content: [
                     p({ style: paragraph }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
