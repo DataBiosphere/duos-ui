@@ -3,40 +3,6 @@ import { a, div, fieldset, h3, input, label, span } from 'react-hyperscript-help
 import isNil from 'lodash/fp/isNil';
 import { YesNoRadioGroup} from '../../components/YesNoRadioGroup';
 
-/**
-  props
-    props.darCode -> darCode
-    step3.inputPurpose.invalid -> invalidPurpose
-    showValidationMessages -> showValidationMessages
-    this.state.formData.forProfit -> forProfit
-    this.state.formData.onegender -> oneGender
-
-    NOTE: need to review the two functions below to see if I can refactor them into current state/form change functions
-      this.handleGenderChange -> handleGenderChange (seems like I can just use the state change helper)
-      this.handleRadioChange -> handleRadioChange
-    this.nextPage -> nextPage
-    this.prevPage -> prevPage
-    this.state.formData.illegalbehave -> illegalBehave
-    this.state.formData.addiction -> addiction
-    this.state.formData.sexualdiseases -> sexualDiseases
-    this.state.formData.stigmatizediseases -> stigmatizeDisease
-    this.state.formData.vulnerablepop -> vulnerablePop
-    this.state.formData.popMigration -> popMigration
-    this.state.formData.psychtraits -> psychTraits
-    this.state.formData.nothealth -> notHealth
-    this.partialSave -> partialSave
-    this.state.formData.pediatric -> pediatric
-
-    const
-      genderLabels
-        -move from parent to this component
-
-  state (NOTE: maybe these can just exist as props? Need to do an analysis on YesNoGroup)
-    forProfit
-    oneGender
-    gender
-*/
-
 export default function ResearchPurposeStatement(props) {
 
   const genderLabels = ['Female', 'Male'];
