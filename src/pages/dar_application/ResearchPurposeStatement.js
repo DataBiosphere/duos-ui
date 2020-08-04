@@ -90,7 +90,7 @@ export default function ResearchPurposeStatement(props) {
                   return (
                     label({
                       key: 'gender' + ix,
-                      onClick: (e) => props.formStateChange(setGender, 'gender', genderValues[ix]), //NOTE: replace with formStateChange
+                      onClick: (e) => props.formStateChange(setGender, {name: 'gender', value: genderValues[ix]}),
                       id: 'lbl_gender_' + ix,
                       htmlFor: 'rad_gender_' + ix,
                       className: 'radio-wrapper'

@@ -94,9 +94,8 @@ class DataAccessRequestApplication extends Component {
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
-  formStateChange = (stateVarSetter, attr, event) => {
-    const name = event.target.name;
-    const value = event.target[attr];
+  formStateChange = (stateVarSetter, dataset) => {
+    const {name, value} = dataset;
     this.formFieldChange(name, value);
     stateVarSetter(value);
   };
@@ -768,6 +767,7 @@ prevPage = (e) => {
                 addiction: this.state.formData.addiction,
                 formStateChange: this.formStateChange,
                 forProfit: this.state.formData.forProfit,
+                gender: this.state.formData.gender,
                 handleRadioChange: this.handleRadioChange,
                 illegalBehave: this.state.formData.illegalbehave,
                 invalidPurpose: step3.inputPurposes.invalid,

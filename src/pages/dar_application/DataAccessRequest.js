@@ -86,7 +86,7 @@ export default function DataAccessRequest(props) {
                 id: 'inputTitle',
                 maxLength: '256',
                 defaultValue: projectTitle,
-                onBlur: (e) => props.formStateChange(setProjectTitle, 'value', e),
+                onBlur: (e) => props.formStateChange(setProjectTitle, {name: 'projectTitle', value: e.target.value }),
                 className: (isEmpty(projectTitle) && props.showValidationMessages) ?
                   'form-control required-field-error' :
                   'form-control',
@@ -146,7 +146,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: methods,
-                  onChange: (e) => props.formStateChange(setMethods, 'checked', e),
+                  onChange: (e) => props.formStateChange(setMethods, {name: 'methods', value: e.target.checked}),
                   id: 'checkMethods',
                   type: 'checkbox',
                   disabled: (props.darCode !== null),
@@ -170,7 +170,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: controls,
-                  onChange: (e) => props.formStateChange(setControls, 'checked', e),
+                  onChange: (e) => props.formStateChange(setControls, {name: 'controls', value: e.target.checked}),
                   id: 'checkControls',
                   type: 'checkbox',
                   disabled: (!isNil(props.darCode)),
@@ -193,7 +193,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: population,
-                  onChange: (e) => props.formStateChange(setPopulation, 'checked', e),
+                  onChange: (e) => props.formStateChange(setPopulation, {name:'population', value: e.target.checked}),
                   id: 'checkPopulation',
                   type: 'checkbox',
                   disabled: !isNil(props.darCode),
@@ -217,7 +217,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: forProfit,
-                  onChange: (e) => props.formStateChange(setForProfit, 'checked', e),
+                  onChange: (e) => props.formStateChange(setForProfit, {name: 'forProfit', value: e.target.checked}),
                   id: 'checkForProfit',
                   type: 'checkbox',
                   disabled: !isNil(props.darCode),
@@ -259,7 +259,7 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: rus,
-              onBlur: (e) => props.formStateChange(setRus, 'value', e),
+              onBlur: (e) => props.formStateChange(setRus, {name: 'rus', value: e.target.value}),
               name: 'rus',
               id: 'inputRUS',
               className: (isEmpty(rus) && props.showValidationMessages) ?
@@ -294,7 +294,7 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: nonTechRus,
-              onBlur: (e) => props.formStateChange(setNonTechRus, 'value', e),
+              onBlur: (e) => props.formStateChange(setNonTechRus, {name: 'non_tech_rus', value: e.target.value}),
               name: 'non_tech_rus',
               id: 'inputNonTechRUS',
               className: (isEmpty(nonTechRus) && props.showValidationMessages) ?

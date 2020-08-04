@@ -59,7 +59,7 @@ export default function ResearcherInfo(props) {
               className: 'checkbox-inline rp-checkbox',
               disabled: !isNil(props.darCode),
               checked: checkCollaborator,
-              onChange: (e) => props.formStateChange(setCheckCollaborator, 'checked', e)
+              onChange: (e) => props.formStateChange(setCheckCollaborator, {name: 'checkCollaborator', value: e.target.checked})
             }),
             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
               ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
