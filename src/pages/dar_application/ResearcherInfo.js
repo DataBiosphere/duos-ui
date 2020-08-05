@@ -12,7 +12,6 @@ const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to 
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
 
 export default function ResearcherInfo(props) {
-
   const {
     completed,
     darCode,
@@ -34,6 +33,10 @@ export default function ResearcherInfo(props) {
   } = props;
 
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
+
+  useEffect(() => {
+    setCheckCollaborator(props.checkCollaborator);
+  }, [props.checkCollaborator]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
