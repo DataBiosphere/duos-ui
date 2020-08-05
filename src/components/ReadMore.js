@@ -26,34 +26,19 @@ export const ReadMore = hh(class ReadMore extends Component {
   }
 
   getContent = () => {
-    if (this.state.inline) {
-      return this.getInlineContent();
-    }
-    else {
-      return this.getFormattedContent();
-    }
+    return this.state.inline ? this.getInlineContent() : this.getFormattedContent();
   };
 
   getInlineContent = () => {
-    if (this.state.expanded) {
-      return span({
-        className: this.state.className,
-        style: this.state.style,
-      }, this.state.content);
-    } else {
-      return span({
-        className: this.state.className,
-        style: this.state.style,
-      }, this.state.content.slice(0, this.state.charLimit) + ' ...');
-    }
+    const content = this.state.expanded ? this.state.content : this.state.content.slice(0, this.state.charLimit) + ' ...';
+    return span({
+      className: this.state.className,
+      style: this.state.style,
+    }, content);
   };
 
   getFormattedContent = () => {
-    if (this.state.expanded) {
-      return [...this.state.content, ...this.state.moreContent];
-    } else {
-      return this.state.content;
-    }
+    return this.state.expanded ? [...this.state.content, ...this.state.moreContent] : this.state.content;
   };
 
   readMore = () => {
@@ -71,14 +56,10 @@ export const ReadMore = hh(class ReadMore extends Component {
   };
 
   getReadLink = (fun, text, classes) => {
-    if (this.state.inline) {
-      return a({ onClick: () => fun() }, [text])
-    } else {
-      return a({ onClick: () => fun(), style: this.state.readStyle }, [
-        text,
-        span({className: classes, style: {padding: '0 1rem'}, 'aria-hidden': 'true'})
-      ])
-    }
+    const linkElements = this.state.inline ? [text] :
+      [text, span({className: classes, style: {padding: '0 1rem'}, 'aria-hidden': 'true'})];
+    const linkElementsStyle = this.state.inline ? {} : this.state.readStyle;
+    return a({ onClick: () => fun(), style: linkElementsStyle}, linkElements);
   }
 
   render() {
