@@ -6,6 +6,12 @@ import { ReadMore } from '../components/ReadMore';
 class Home extends Component {
 
   render() {
+    const {
+      isLogged,
+      onSignIn,
+      history
+    } = this.props;
+
     const homeTitle = {
       color: '#FFFFFF',
       fontFamily: 'Montserrat',
@@ -97,9 +103,9 @@ class Home extends Component {
               div({ style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ]),
-            div({ isRendered: !this.props.isLogged, style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
+            div({ isRendered: !isLogged, style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
               span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
-              SignIn({ props: this.props, onSignIn: () => this.props.onSignIn(), history: this.props.history, style: { position: 'relative', float: 'right'}})
+              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative', float: 'right'}})
             ])
           ]),
           div({ className: 'row' }, [
@@ -128,7 +134,7 @@ class Home extends Component {
                 ])
               ])
             ]),
-            div({ className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
+            div({ isRendered: !isLogged, className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
                 'Click here to start your data access request!']),
@@ -150,7 +156,7 @@ class Home extends Component {
                 h3({ style: subHeader }, ['Overview of the system and development']),
                 ReadMore({
                   props: this.props,
-                  readStyle: readMoreStyle ,
+                  readStyle: readMoreStyle,
                   content: [
                     p({ style: paragraph }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
