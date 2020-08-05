@@ -11,7 +11,6 @@ class DuosHeader extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      showHelpModal: false,
       showSupportRequestModal: false,
       hover: false
     };
@@ -29,26 +28,11 @@ class DuosHeader extends Component {
     this.props.onSignOut();
   };
 
-  helpModal = () => {
-    this.setState(prev => {
-      prev.showHelpModal = true;
-      return prev;
-    });
-  };
-
-  supportRequestModal = (e) => {
+  supportRequestModal = () => {
     this.setState(prev => {
       prev.showSupportRequestModal = true;
       return prev;
     });
-  };
-
-  okModal = () => {
-    this.setState(prev => {
-      prev.showHelpModal = false;
-      return prev;
-    });
-    window.location = 'help_reports';
   };
 
   okSupportRequestModal = () => {
@@ -58,23 +42,9 @@ class DuosHeader extends Component {
     });
   };
 
-  closeModal = () => {
-    this.setState(prev => {
-      prev.showHelpModal = false;
-      return prev;
-    });
-  };
-
   closeSupportRequestModal = () => {
     this.setState(prev => {
       prev.showSupportRequestModal = false;
-      return prev;
-    });
-  };
-
-  afterModalOpen = () => {
-    this.setState(prev => {
-      prev.showHelpModal = false;
       return prev;
     });
   };
@@ -98,7 +68,6 @@ class DuosHeader extends Component {
       isDataOwner = currentUser.isDataOwner;
     }
 
-    let helpLink = isAdmin ? '/help_reports' : '/home_help';
     const contactUsSource = isLogged ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
     const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
@@ -204,10 +173,6 @@ class DuosHeader extends Component {
                   li({}, [
                     h(Link, { id: 'link_datasetCatalog', isRendered: isLogged, to: '/dataset_catalog' }, ['Dataset Catalog'])
                   ]),
-
-                  li({}, [
-                    h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
-                  ]),
                   contactUsButton, supportrequestModal
                 ]),
 
@@ -222,12 +187,6 @@ class DuosHeader extends Component {
                     h(Link, { id: 'link_NHGRIpilot', className: 'navbar-duos-link', to: '/NHGRIpilotinfo' }, [
                       div({ className: 'navbar-duos-icon navbar-duos-icon-about' }),
                       span({ className: 'navbar-duos-text' }, ['NHGRI Pilot Info'])
-                    ])
-                  ]),
-                  li({}, [
-                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/home_help' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
-                      span({ className: 'navbar-duos-text' }, ['Help'])
                     ])
                   ]),
                   li({}, [

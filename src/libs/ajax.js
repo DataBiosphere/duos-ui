@@ -750,22 +750,6 @@ export const Support = {
   },
 };
 
-export const Help = {
-
-  findHelpMeReports: async (userId) => {
-    const url = `${await Config.getApiUrl()}/report/user/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  createHelpMeReport: async (report) => {
-    const url = `${await Config.getApiUrl()}/report`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(report), { method: 'POST' }]));
-    return await res.json();
-  }
-
-};
-
 export const Match = {
 
   findMatch: async (consentId, purposeId) => {
