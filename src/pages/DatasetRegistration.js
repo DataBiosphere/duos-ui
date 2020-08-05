@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import { a, br, div, fieldset, form, h, h3, hr, i, input, label, span, textarea } from 'react-hyperscript-helpers';
+import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
@@ -1235,10 +1236,7 @@ class DatasetRegistration extends Component {
                             'If there are additional data use terms governing the future use of this dataset, please include them here.',
                             br(),
                             'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access request. If you have questions, please reach out to the DUOS support team ',
-                            a({
-                              target: '_blank',
-                              href: '/home_help',
-                            }, ['here'], '.'),
+                            span( [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })]),
                           ]),
                         ]),
                       ]),

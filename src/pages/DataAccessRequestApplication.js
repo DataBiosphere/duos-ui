@@ -1,11 +1,10 @@
 import { Component } from 'react';
 import { a, br, div, fieldset, form, h, h3, hr, i, input, label, li, ol, p, small, span, textarea } from 'react-hyperscript-helpers';
-import { Link } from 'react-router-dom';
 import AsyncSelect from 'react-select/async';
 import ReactTooltip from 'react-tooltip';
+import ResearcherInfo from './dar_application/ResearcherInfo';
 import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { eRACommons } from '../components/eRACommons';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
@@ -96,6 +95,17 @@ class DataAccessRequestApplication extends Component {
       problemSavingRequest: false
     };
 
+  }
+
+  //NOTE: handleCheckboxChange and handleChange are pretty much the same function
+  //only difference is the attribute on event that you're accessing
+  //can easily turn it in a single function that accepts the value and name of field to change
+  //NOTE: this method only works for shallow field changes, need to address issue of nested attributes
+  formFieldChange = (field, value) => {
+    this.setState(state => {
+      state.formData[field] = value;
+      return state;
+    }, () => this.checkValidations());
   }
 
   onNihStatusUpdate = (nihValid) => {
@@ -606,21 +616,7 @@ class DataAccessRequestApplication extends Component {
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const genderLabels = ['Female', 'Male'];
     const genderValues = ['F', 'M'];
-
-    const profileUnsubmitted = span({}, [
-      'Please submit ',
-      h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' to be able to create a Data Access Request'
-    ]);
-
-    const profileSubmitted = span({}, [
-      'Please make sure ',
-      h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' is updated, as it will be submited with your DAR Application'
-    ]);
-
     return (
-
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin' }, [
@@ -701,161 +697,27 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
-
             div({ isRendered: this.state.step === 1 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
-                    Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
-                  ]),
-                  div({ isRendered: this.state.completed === true, className: 'rp-alert' }, [
-                    Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
-                  ]),
-
-                  h3({ className: 'rp-form-title access-color' }, ['1. Researcher Information']),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, ['1.1 Researcher*'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      input({
-                        type: 'text',
-                        name: 'researcher',
-                        id: 'inputResearcher',
-                        value: this.state.formData.researcher,
-                        disabled: true,
-                        className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                        required: true
-                      }),
-                      span({
-                        isRendered: (step1.inputResearcher.invalid) && (showValidationMessages), className: 'cancel-color required-field-error-span'
-                      }, ['Required field'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-                      input({
-                        type: 'checkbox',
-                        id: 'chk_collaborator',
-                        name: 'checkCollaborator',
-                        className: 'checkbox-inline rp-checkbox',
-                        disabled: this.state.formData.dar_code !== null,
-                        checked: checkCollaborator,
-                        onChange: this.handleCheckboxChange
-                      }),
-                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-                        ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '1.2 Researcher Identification',
-                        div({ isRendered: this.state.formData.checkCollaborator !== true, className: 'display-inline' }, ['*']),
-                        div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
-                        span({ className: 'default-color' },
-                          ['Please autenticate with ',
-                            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
-                          ])
-                      ])
-                    ]),
-
-                    span({
-                      isRendered: (showValidationMessages && !this.state.nihValid), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
-                    }, ['NIH eRA Authentication is required']),
-
-                    div({ className: 'row no-margin' }, [
-                      eRACommons({
-                        className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
-                        destination: eRACommonsDestination,
-                        onNihStatusUpdate: this.onNihStatusUpdate,
-                        location: this.props.location,
-                        validationError: showValidationMessages
-                      }),
-                      div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
-                        label({ className: 'control-label' }, ['LinkedIn Profile']),
-                        input({
-                          type: 'text',
-                          name: 'linkedIn',
-                          id: 'inputLinkedIn',
-                          value: linkedIn,
-                          onChange: this.handleChange,
-                          disabled: false,
-                          className: 'form-control',
-                          required: true
-                        })
-                      ])
-                    ]),
-
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-                        label({ className: 'control-label' }, ['ORCID iD']),
-                        input({
-                          type: 'text',
-                          name: 'orcid',
-                          id: 'inputOrcid',
-                          value: orcid,
-                          onChange: this.handleChange,
-                          disabled: false,
-                          className: 'form-control',
-                          required: true
-                        })
-                      ]),
-
-                      div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-                        label({ className: 'control-label' }, ['ResearchGate ID']),
-                        input({
-                          type: 'text',
-                          name: 'researcherGate',
-                          id: 'inputResearcherGate',
-                          value: researcherGate,
-                          onChange: this.handleChange,
-                          disabled: false,
-                          className: 'form-control',
-                          required: true
-                        })
-                      ])
-                    ])
-                  ]),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '1.3 Principal Investigator* ',
-                        span({}, ['By typing in the name of the principal investigator, I certify that he or she is aware of this research study.'])
-                      ])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      input({
-                        type: 'text',
-                        name: 'investigator',
-                        id: 'inputInvestigator',
-                        value: investigator,
-                        disabled: true,
-                        className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                        required: true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span', isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages)
-                      }, ['Required field'])
-                    ])
-                  ])
-                ]),
-
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_next', onClick: this.step2, className: 'btn-primary f-right access-background' }, [
-                      'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-                    ]),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'btn-secondary f-right access-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
+              h(ResearcherInfo, ({
+                checkCollaborator: checkCollaborator,
+                completed: this.state.completed,
+                darCode: this.state.formData.dar_code,
+                eRACommonsDestination: eRACommonsDestination,
+                formFieldChange: this.formFieldChange,
+                invalidInvestigator: step1.inputInvestigator.invalid,
+                invalidResearcher: step1.inputResearcher.invalid,
+                investigator: investigator,
+                linkedIn: linkedIn,
+                location: this.props.location,
+                nihValid: this.state.nihValid,
+                onNihStatusUpdate: this.onNihStatusUpdate,
+                orcid: orcid,
+                partialSave: this.partialSave,
+                researcher: this.state.formData.researcher,
+                researcherGate: researcherGate,
+                showValidationMessages: showValidationMessages,
+                step2: this.step2
+              }))
             ]),
 
             div({ isRendered: this.state.step === 2 }, [

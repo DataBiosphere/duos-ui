@@ -92,7 +92,7 @@ class DataOwnerConsole extends Component {
             PageHeading({
               id: "dataOwnerConsole",
               color: "common",
-              title: "Welcome " + currentUser.displayName + "!",
+              title: "Welcome to your Data Owner Console, " + currentUser.displayName + "!",
               description: "These are your pending cases for review"
             }),
             hr({ className: "section-separator" })

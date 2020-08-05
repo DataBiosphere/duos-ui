@@ -5,7 +5,6 @@ import * as _ from 'lodash/fp';
 function DuosFooter() {
   const user = Storage.getCurrentUser();
   const isAdmin = _.isEmpty(user) ? false : user.isAdmin;
-  const supportLink = isAdmin ? '/help_reports' : '/home_help';
 
   return (
     div({ className: "footer" }, [
@@ -15,7 +14,6 @@ function DuosFooter() {
           li({ className: "footer-links__item" }, ["\u00A9 Broad Institute"]),
           li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/privacy-policy" }, ["Privacy Policy"]),]),
           li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/terms-conditions" }, ["Terms of Service"]),]),
-          li({ className: "footer-links__item" }, [a({ href: supportLink }, ["Support"]),]),
           li({ className: 'footer-links__item' }, [a({ href: '/status' }, ['Status'])])
         ])
       ])
