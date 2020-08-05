@@ -26,10 +26,8 @@ import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
 import FAQs from './pages/FAQs';
 import FinalAccessReview from './pages/FinalAccessReview';
-import HelpReports from './pages/HelpReports';
 import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
-import HomeHelp from './pages/HomeHelp';
 import InvalidRestrictions from './pages/InvalidRestrictions';
 import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import MemberConsole from './pages/MemberConsole';
@@ -50,7 +48,6 @@ const Routes = (props) => (
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
     <Route path="/FAQs" component={FAQs} />
-    <Route path="/home_help" component={HomeHelp} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/election404" component={Election404} />
     <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
@@ -76,7 +73,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    <AuthenticatedRoute path="/help_reports" component={HelpReports} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/invalid_restrictions" component={InvalidRestrictions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/access_result_records/:referenceId/:electionId" component={AccessResultRecords} props={props}

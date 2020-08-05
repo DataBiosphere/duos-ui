@@ -1,19 +1,26 @@
 import { Component } from 'react';
-import { a, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
+import { a, button, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
 import ResponsiveMenu from 'react-responsive-navbar';
-import { Link, withRouter } from 'react-router-dom';
-import { Storage } from '../libs/storage';
+import {Link, withRouter} from 'react-router-dom';
+import {Storage} from '../libs/storage';
+import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
-
 
 class DuosHeader extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      showHelpModal: false
+      showSupportRequestModal: false,
+      hover: false
     };
-    this.signOut = this.signOut.bind(this);
+  };
+
+  toggleHover = () => {
+    this.setState(prev => {
+      prev.hover = !this.state.hover;
+      return prev;
+    });
   };
 
   signOut = () => {
@@ -21,31 +28,23 @@ class DuosHeader extends Component {
     this.props.onSignOut();
   };
 
-  helpModal = () => {
+  supportRequestModal = () => {
     this.setState(prev => {
-      prev.showHelpModal = true;
+      prev.showSupportRequestModal = true;
       return prev;
     });
   };
 
-  okModal = () => {
+  okSupportRequestModal = () => {
     this.setState(prev => {
-      prev.showHelpModal = false;
-      return prev;
-    });
-    window.location = 'help_reports';
-  };
-
-  closeModal = () => {
-    this.setState(prev => {
-      prev.showHelpModal = false;
+      prev.showSupportRequestModal = false;
       return prev;
     });
   };
 
-  afterModalOpen = () => {
+  closeSupportRequestModal = () => {
     this.setState(prev => {
-      prev.showHelpModal = false;
+      prev.showSupportRequestModal = false;
       return prev;
     });
   };
@@ -57,7 +56,6 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
 
@@ -70,7 +68,30 @@ class DuosHeader extends Component {
       isDataOwner = currentUser.isDataOwner;
     }
 
-    let helpLink = isAdmin ? '/help_reports' : '/home_help';
+    const contactUsSource = isLogged ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
+    const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
+    const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
+    const contactUsButton = button({
+      id: "btn_applyAcces",
+      style: {
+        color: this.state.hover ? '#2FA4E7' : '#ffffff',
+        fontSize: '15px',
+        fontWeight: '500',
+        background: 'transparent',
+        border: 'none',
+        outline: 'none',
+      },
+      onMouseEnter: this.toggleHover,
+      onMouseLeave: this.toggleHover,
+      onClick: this.supportRequestModal,
+      "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
+    }, [contactUsIcon, contactUsText]);
+    const supportrequestModal = SupportRequestModal({
+      showModal: this.state.showSupportRequestModal,
+      onOKRequest: this.okSupportRequestModal,
+      onCloseRequest: this.closeSupportRequestModal,
+      url: this.props.location.pathname
+    });
 
     return (
 
@@ -101,7 +122,6 @@ class DuosHeader extends Component {
                       li({}, [a({ id: 'link_signOut', onClick: this.signOut }, ['Sign out'])])
                     ])
                   ]),
-
                   li({ isRendered: isAdmin }, [
                     h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
                   ]),
@@ -153,10 +173,7 @@ class DuosHeader extends Component {
                   li({}, [
                     h(Link, { id: 'link_datasetCatalog', isRendered: isLogged, to: '/dataset_catalog' }, ['Dataset Catalog'])
                   ]),
-
-                  li({}, [
-                    h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
-                  ])
+                  contactUsButton, supportrequestModal
                 ]),
 
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
@@ -173,17 +190,12 @@ class DuosHeader extends Component {
                     ])
                   ]),
                   li({}, [
-                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/home_help' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
-                      span({ className: 'navbar-duos-text' }, ['Help'])
-                    ])
-                  ]),
-                  li({}, [
                     h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
                       div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
                       span({ className: 'navbar-duos-text' }, ['FAQs'])
                     ])
-                  ])
+                  ]),
+                  contactUsButton, supportrequestModal
                 ])
               ])
           })

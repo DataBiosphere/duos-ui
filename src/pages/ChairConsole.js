@@ -177,7 +177,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
           PageHeading({
-            id: 'chairConsole', color: 'common', title: 'Welcome ' + currentUser.displayName + '!',
+            id: 'chairConsole', color: 'common', title: 'Welcome to your DAC Chair Console, ' + currentUser.displayName + '!',
             description: 'These are your pending cases for review'
           }),
 
@@ -327,7 +327,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                         className: 'cell-button ' + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
                       }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Edit'])
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Log Final Vote'])
                       ])
                     ]),
                     div({
@@ -344,23 +344,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                       isRendered: this.isAccessCollectEnabled(pendingCase),
                       className: twoColumnClass + ' cell-body f-center'
                     }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnCollect',
-                        name: 'btn_collectAccess',
-                        onClick: this.openAccessCollect(pendingCase.referenceId, pendingCase.electionId),
-                        className: 'cell-button cancel-color'
-                      }, ['Collect Votes'])
                     ]),
                     div({
                       isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
                       className: twoColumnClass + ' cell-body f-center'
                     }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnFinal',
-                        name: 'btn_finalAccess',
-                        onClick: this.openFinalAccessReview(pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId),
-                        className: 'cell-button cancel-color'
-                      }, ['FINAL VOTE'])
                     ]),
                     div({
                       isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),

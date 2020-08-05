@@ -12,6 +12,26 @@ const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to 
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
 
 export default function ResearcherInfo(props) {
+  const {
+    completed,
+    darCode,
+    eRACommonsDestination,
+    formStateChange,
+    invalidInvestigator,
+    invalidResearcher,
+    investigator,
+    linkedIn,
+    location,
+    nihValid,
+    onNihStatusUpdate,
+    orcid,
+    partialSave,
+    researcher,
+    researcherGate,
+    showValidationMessages,
+    nextPage
+  } = props;
+
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
 
   useEffect(() => {
@@ -20,12 +40,12 @@ export default function ResearcherInfo(props) {
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-      fieldset({ disabled: !isNil(props.darCode) }, [
+      fieldset({ disabled: !isNil(darCode) }, [
 
-        div({ isRendered: props.completed === false, className: 'rp-alert' }, [
+        div({ isRendered: completed === false, className: 'rp-alert' }, [
           Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
         ]),
-        div({ isRendered: props.completed === true, className: 'rp-alert' }, [
+        div({ isRendered: completed === true, className: 'rp-alert' }, [
           Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
         ]),
 
@@ -41,13 +61,13 @@ export default function ResearcherInfo(props) {
               type: 'text',
               name: 'researcher',
               id: 'inputResearcher',
-              value: props.researcher,
+              value: researcher,
               disabled: true,
-              className: props.invalidResearcher && props.showValidationMessages ? 'form-control required-field-error' : 'form-control',
+              className: invalidResearcher && showValidationMessages ? 'form-control required-field-error' : 'form-control',
               required: true
             }),
             span({
-              isRendered: (props.invalidResearcher) && (props.showValidationMessages), className: 'cancel-color required-field-error-span'
+              isRendered: (invalidResearcher) && (showValidationMessages), className: 'cancel-color required-field-error-span'
             }, ['Required field'])
           ]),
 
@@ -57,9 +77,9 @@ export default function ResearcherInfo(props) {
               id: 'chk_collaborator',
               name: 'checkCollaborator',
               className: 'checkbox-inline rp-checkbox',
-              disabled: !isNil(props.darCode),
+              disabled: !isNil(darCode),
               checked: checkCollaborator,
-              onChange: (e) => props.formStateChange(setCheckCollaborator, {name: 'checkCollaborator', value: e.target.checked})
+              onChange: (e) => formStateChange(setCheckCollaborator, {name: 'checkCollaborator', value: e.target.checked})
             }),
             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
               ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
@@ -78,16 +98,16 @@ export default function ResearcherInfo(props) {
           ]),
 
           span({
-            isRendered: (props.showValidationMessages && !props.nihValid), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
+            isRendered: (showValidationMessages && !nihValid), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
           }, ['NIH eRA Authentication is required']),
 
           div({ className: 'row no-margin' }, [
             eRACommons({
               className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
-              destination: props.eRACommonsDestination,
-              onNihStatusUpdate: props.onNihStatusUpdate,
-              location: props.location,
-              validationError: props.showValidationMessages
+              destination: eRACommonsDestination,
+              onNihStatusUpdate: onNihStatusUpdate,
+              location: location,
+              validationError: showValidationMessages
             }),
             div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
               label({ className: 'control-label' }, ['LinkedIn Profile']),
@@ -95,7 +115,7 @@ export default function ResearcherInfo(props) {
                 type: 'text',
                 name: 'linkedIn',
                 id: 'inputLinkedIn',
-                value: props.linkedIn,
+                value: linkedIn,
                 disabled: true,
                 className: 'form-control',
               })
@@ -109,7 +129,7 @@ export default function ResearcherInfo(props) {
                 type: 'text',
                 name: 'orcid',
                 id: 'inputOrcid',
-                value: props.orcid,
+                value: orcid,
                 disabled: true,
                 className: 'form-control',
               })
@@ -121,7 +141,7 @@ export default function ResearcherInfo(props) {
                 type: 'text',
                 name: 'researcherGate',
                 id: 'inputResearcherGate',
-                value: props.researcherGate,
+                value: researcherGate,
                 disabled: true,
                 className: 'form-control',
               })
@@ -141,13 +161,13 @@ export default function ResearcherInfo(props) {
               type: 'text',
               name: 'investigator',
               id: 'inputInvestigator',
-              value: props.investigator,
+              value: investigator,
               disabled: true,
-              className: props.invalidInvestigator && props.showValidationMessages ? 'form-control required-field-error' : 'form-control',
+              className: invalidInvestigator && showValidationMessages ? 'form-control required-field-error' : 'form-control',
               required: true
             }),
             span({
-              className: 'cancel-color required-field-error-span', isRendered: (props.invalidInvestigator) && (props.showValidationMessages)
+              className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
             }, ['Required field'])
           ])
         ])
@@ -155,12 +175,12 @@ export default function ResearcherInfo(props) {
 
       div({ className: 'row no-margin' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-          a({ id: 'btn_next', onClick: props.nextPage, className: 'btn-primary f-right access-background' }, [
+          a({ id: 'btn_next', onClick: nextPage, className: 'btn-primary f-right access-background' }, [
             'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
           ]),
 
           a({
-            id: 'btn_save', isRendered: isNil(props.darCode), onClick: props.partialSave,
+            id: 'btn_save', isRendered: isNil(darCode), onClick: partialSave,
             className: 'btn-secondary f-right access-color'
           }, ['Save'])
         ])
