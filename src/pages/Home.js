@@ -89,8 +89,8 @@ class Home extends Component {
 
       div({ className: 'row' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-          div({ className: 'row no-margin', style: { backgroundColor: 'white', height: '350px', position: 'relative' }}, [
-            img({ style: { height: 'inherit', minWidth: '100%', transform: 'scale(1.1,1)' }, src: '/images/home_header_background.png'}),
+          div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
+            img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
@@ -131,13 +131,13 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
-                'Click here to register and start your data access request!']),
+                'Click here to start your data access request!']),
               div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyle }, [
                   a({
                     href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
                     style: { color: '#fff' }}, [
-                      'REGISTER'
+                    'REGISTER'
                   ])
                 ])
               ])
