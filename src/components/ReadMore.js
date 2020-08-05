@@ -57,16 +57,16 @@ export const ReadMore = hh(class ReadMore extends Component {
 
   getReadLink = (fun, text, classes) => {
     const {linkElements, linkElementsStyle} = this.state.inline ?
-    {linkElements: [text], linkElementsStyle: {}} :
-    {
-      linkElements: [
-        text,
-        span({
-          className: classes,
-          style: {padding: '0 1rem'},
-          'aria-hidden': 'true',
-        })], linkElementsStyle: this.state.readStyle,
-    };
+      {linkElements: [text], linkElementsStyle: {}} :
+      {
+        linkElements: [
+          text,
+          span({
+            className: classes,
+            style: {padding: '0 1rem'},
+            'aria-hidden': 'true',
+          })], linkElementsStyle: this.state.readStyle,
+      };
     return a({ onClick: () => fun(), style: linkElementsStyle}, linkElements);
   }
 
