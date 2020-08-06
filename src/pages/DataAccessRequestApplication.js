@@ -1,25 +1,21 @@
 import { Component } from 'react';
-import { a, br, div, fieldset, form, h, h3, hr, i, input, label, li, ol, p, small, span, textarea } from 'react-hyperscript-helpers';
-import { Link } from 'react-router-dom';
-import AsyncSelect from 'react-select/async';
+import { a, div, fieldset, form, h, h3, hr, i, label, li, ol, p, small, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
+import ResearcherInfo from './dar_application/ResearcherInfo';
+import DataAccessRequest from './dar_application/DataAccessRequest';
+import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
+import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { eRACommons } from '../components/eRACommons';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
 import { DAR, Researcher } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
-
-
-const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
 
 class DataAccessRequestApplication extends Component {
 
@@ -29,7 +25,6 @@ class DataAccessRequestApplication extends Component {
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
-      optionMessage: noOptionMessage,
       file: {
         name: ''
       },
@@ -96,6 +91,20 @@ class DataAccessRequestApplication extends Component {
       problemSavingRequest: false
     };
 
+  }
+
+  //helper function to coordinate local state changes as well as updates to form data on the parent
+  formStateChange = (stateVarSetter, dataset) => {
+    const {name, value} = dataset;
+    this.formFieldChange(name, value);
+    stateVarSetter(value);
+  };
+
+  formFieldChange = (field, value) => {
+    this.setState(state => {
+      state.formData[field] = value;
+      return state;
+    }, () => this.checkValidations());
   }
 
   onNihStatusUpdate = (nihValid) => {
@@ -253,6 +262,23 @@ class DataAccessRequestApplication extends Component {
       return prev;
     }, () => this.checkValidations());
   };
+
+//NOTE: use nextPage and previous page instead of having individual go to pages for each step
+nextPage = (e) => {
+  this.setState(prev => {
+    prev.step = prev.step + 1;
+    return prev;
+  });
+  window.scrollTo(0,0);
+}
+
+prevPage = (e) => {
+  this.setState(prev => {
+    prev.step = prev.step - 1;
+    return prev;
+  });
+  window.scrollTo(0,0);
+}
 
   step1 = (e) => {
     this.setState(prev => {
@@ -487,19 +513,6 @@ class DataAccessRequestApplication extends Component {
     }, () => this.checkValidations());
   };
 
-  searchDataSets(query, callback) {
-    DAR.getAutoCompleteDS(query).then(items => {
-      let options = items.map(function(item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.concatenation
-        };
-      });
-      callback(options);
-    });
-
-  };
 
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
@@ -604,23 +617,26 @@ class DataAccessRequestApplication extends Component {
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1, step3 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
-    const genderLabels = ['Female', 'Male'];
-    const genderValues = ['F', 'M'];
 
-    const profileUnsubmitted = span({}, [
-      'Please submit ',
-      h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' to be able to create a Data Access Request'
-    ]);
-
-    const profileSubmitted = span({}, [
-      'Please make sure ',
-      h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' is updated, as it will be submited with your DAR Application'
-    ]);
+    //NOTE: component is only here temporarily until component conversion has been complete
+    //ideally this, along with the other variable initializtion should be done with a useEffect hook
+    const TORComponent = TypeOfResearch({
+      hmb: hmb,
+      hmbHandler: this.setHmb,
+      poa: poa,
+      poaHandler: this.setPoa,
+      diseases: diseases,
+      diseasesHandler: this.setDiseases,
+      disabled: (dar_code !== null),
+      ontologies: ontologies,
+      ontologiesHandler: this.onOntologiesChange,
+      other: other,
+      otherHandler: this.setOther,
+      otherText: otherText,
+      otherTextHandler: this.setOtherText
+    });
 
     return (
-
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin' }, [
@@ -701,669 +717,74 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
-
             div({ isRendered: this.state.step === 1 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
-                    Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
-                  ]),
-                  div({ isRendered: this.state.completed === true, className: 'rp-alert' }, [
-                    Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
-                  ]),
-
-                  h3({ className: 'rp-form-title access-color' }, ['1. Researcher Information']),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, ['1.1 Researcher*'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      input({
-                        type: 'text',
-                        name: 'researcher',
-                        id: 'inputResearcher',
-                        value: this.state.formData.researcher,
-                        disabled: true,
-                        className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                        required: true
-                      }),
-                      span({
-                        isRendered: (step1.inputResearcher.invalid) && (showValidationMessages), className: 'cancel-color required-field-error-span'
-                      }, ['Required field'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-                      input({
-                        type: 'checkbox',
-                        id: 'chk_collaborator',
-                        name: 'checkCollaborator',
-                        className: 'checkbox-inline rp-checkbox',
-                        disabled: this.state.formData.dar_code !== null,
-                        checked: checkCollaborator,
-                        onChange: this.handleCheckboxChange
-                      }),
-                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
-                        ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '1.2 Researcher Identification',
-                        div({ isRendered: this.state.formData.checkCollaborator !== true, className: 'display-inline' }, ['*']),
-                        div({ isRendered: this.state.formData.checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
-                        span({ className: 'default-color' },
-                          ['Please autenticate with ',
-                            a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']),' in order to proceed. Your ORCID iD is optional.'
-                          ])
-                      ])
-                    ]),
-
-                    span({
-                      isRendered: (showValidationMessages && !this.state.nihValid), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
-                    }, ['NIH eRA Authentication is required']),
-
-                    div({ className: 'row no-margin' }, [
-                      eRACommons({
-                        className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
-                        destination: eRACommonsDestination,
-                        onNihStatusUpdate: this.onNihStatusUpdate,
-                        location: this.props.location,
-                        validationError: showValidationMessages
-                      }),
-                      div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
-                        label({ className: 'control-label' }, ['LinkedIn Profile']),
-                        input({
-                          type: 'text',
-                          name: 'linkedIn',
-                          id: 'inputLinkedIn',
-                          value: linkedIn,
-                          onChange: this.handleChange,
-                          disabled: false,
-                          className: 'form-control',
-                          required: true
-                        })
-                      ])
-                    ]),
-
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-                        label({ className: 'control-label' }, ['ORCID iD']),
-                        input({
-                          type: 'text',
-                          name: 'orcid',
-                          id: 'inputOrcid',
-                          value: orcid,
-                          onChange: this.handleChange,
-                          disabled: false,
-                          className: 'form-control',
-                          required: true
-                        })
-                      ]),
-
-                      div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
-                        label({ className: 'control-label' }, ['ResearchGate ID']),
-                        input({
-                          type: 'text',
-                          name: 'researcherGate',
-                          id: 'inputResearcherGate',
-                          value: researcherGate,
-                          onChange: this.handleChange,
-                          disabled: false,
-                          className: 'form-control',
-                          required: true
-                        })
-                      ])
-                    ])
-                  ]),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '1.3 Principal Investigator* ',
-                        span({}, ['By typing in the name of the principal investigator, I certify that he or she is aware of this research study.'])
-                      ])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      input({
-                        type: 'text',
-                        name: 'investigator',
-                        id: 'inputInvestigator',
-                        value: investigator,
-                        disabled: true,
-                        className: step1.inputInvestigator.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                        required: true
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span', isRendered: (step1.inputInvestigator.invalid) && (showValidationMessages)
-                      }, ['Required field'])
-                    ])
-                  ])
-                ]),
-
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_next', onClick: this.step2, className: 'btn-primary f-right access-background' }, [
-                      'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-                    ]),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'btn-secondary f-right access-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
+              h(ResearcherInfo, ({
+                checkCollaborator: checkCollaborator,
+                completed: this.state.completed,
+                darCode: this.state.formData.dar_code,
+                eRACommonsDestination: eRACommonsDestination,
+                formStateChange: this.formStateChange,
+                invalidInvestigator: step1.inputInvestigator.invalid,
+                invalidResearcher: step1.inputResearcher.invalid,
+                investigator: investigator,
+                linkedIn: linkedIn,
+                location: this.props.location,
+                nihValid: this.state.nihValid,
+                onNihStatusUpdate: this.onNihStatusUpdate,
+                orcid: orcid,
+                partialSave: this.partialSave,
+                researcher: this.state.formData.researcher,
+                researcherGate: researcherGate,
+                showValidationMessages: showValidationMessages,
+                nextPage: this.nextPage
+              }))
             ]),
 
             div({ isRendered: this.state.step === 2 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  h3({ className: 'rp-form-title access-color' }, ['2. Data Access Request']),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        '2.1 Select Dataset(s)*',
-                        span({},
-                          ['Please start typing the Dataset Name, Sample Collection ID, or PI of the dataset(s) for which you would like to request access:'])
-                      ])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      h(AsyncSelect, {
-                        id: 'sel_datasets',
-                        key: fp.isEmpty(this.state.formData.datasets) ? null : this.state.formData.datasets.value,
-                        isDisabled: this.state.formData.dar_code !== null,
-                        isMulti: true,
-                        loadOptions: (query, callback) => this.searchDataSets(query, callback),
-                        onChange: (option) => this.onDatasetsChange(option),
-                        value: this.state.formData.datasets,
-                        noOptionsMessage: () => this.state.optionMessage,
-                        loadingMessage: () => this.state.optionMessage,
-                        classNamePrefix: 'select',
-                        placeholder: 'Dataset Name, Sample Collection ID, or PI',
-                        className: (fp.isEmpty(this.state.formData.datasets) && showValidationMessages) ?
-                          ' required-select-error select-autocomplete' :
-                          'select-autocomplete'
-
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: fp.isEmpty(this.state.formData.datasets) && showValidationMessages,
-                      },
-                      ['Required field']),
-                    ])
-                  ]),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question'}, [
-                          '2.2 Descriptive Title of Project* ',
-                          span({},
-                            ['Please note that coordinated requests by collaborating institutions should each use the same title.']),
-                        ]),
-                      ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
-                          maxLength: '256',
-                          value: this.state.formData.projectTitle,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                          disabled: this.state.formData.dar_code !== null,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ]),
-                  ]),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question'}, [
-                          '2.3 Type of Research* ',
-                          span({},
-                            ['Please select one of the following options.']),
-                        ]),
-                      ]),
-                    div({
-                      style: {'marginLeft': '15px'},
-                      className: 'row'
-                    }, [
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: isTypeOfResearchInvalid && showValidationMessages,
-                      }, [
-                        'One of the following fields is required.', br(),
-                        'Disease related studies require a disease selection.', br(),
-                        'Other studies require additional details.'])
-                    ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        TypeOfResearch({
-                          hmb: hmb,
-                          hmbHandler: this.setHmb,
-                          poa: poa,
-                          poaHandler: this.setPoa,
-                          diseases: diseases,
-                          diseasesHandler: this.setDiseases,
-                          disabled: (dar_code !== null),
-                          ontologies: ontologies,
-                          ontologiesHandler: this.onOntologiesChange,
-                          other: other,
-                          otherHandler: this.setOther,
-                          otherText: otherText,
-                          otherTextHandler: this.setOtherText
-                        })
-                      ]),
-
-                    div({className: 'form-group'}, [
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          label({className: 'control-label rp-title-question'},
-                            [
-                              '2.4 Research Designations ',
-                              span({}, ['Select all applicable options.']),
-                            ]),
-                        ]),
-                    ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: methods,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkMethods',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'methods',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkMethods',
-                          }, [
-                            span({},
-                              ['2.4.1 Methods development and validation studies: ']),
-                            'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data (e.g., developing more powerful methods to detect epistatic, gene-environment, or other types of complex interactions in genome-wide association studies). Data will be used for developing and/or validating new methods.',
-                          ]),
-                        ]),
-                      ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: controls,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkControls',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'controls',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkControls',
-                          }, [
-                            span({}, ['2.4.2 Controls: ']),
-                            'The reason for this request is to increase the number of controls available for a comparison group (e.g., a case-control study).',
-                          ]),
-                        ]),
-                      ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: population,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkPopulation',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'population',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkPopulation',
-                          }, [
-                            span({},
-                              ['2.4.3 Population structure or normal variation studies: ']),
-                            'The primary purpose of the research is to understand variation in the general population (e.g., genetic substructure of a population).',
-                          ]),
-                        ]),
-                      ]),
-
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            checked: forProfit,
-                            onChange: this.handleCheckboxChange,
-                            id: 'checkForProfit',
-                            type: 'checkbox',
-                            disabled: (this.state.formData.dar_code !== null),
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'forProfit',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkForProfit',
-                          }, [
-                            span({},
-                              ['2.4.4 Commercial or For-Profit Purpose: ']),
-                            'The primary purpose of the research is exclusively or partially for a commercial purpose',
-                          ]),
-                        ]),
-                      ]),
-                  ]),
-                ]),
-
-                div({className: 'form-group'}, [
-                  div(
-                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                    [
-                      label({className: 'control-label rp-title-question'}, [
-                        '2.5 Research Use Statement (RUS)* ',
-                        span({}, [
-                          'A RUS is a brief description of the applicant’s proposed use of the dataset(s). The RUS will be reviewed by all parties responsible for data covered by this Data Access Request. Please note that if access is approved, you agree that the RUS, along with your name and institution, will be included on this website to describe your research project to the public.',
-                          br(),
-                          'Please enter your RUS in the area below. The RUS should be one or two paragraphs in length and include research objectives, the study design, and an analysis plan (including the phenotypic characteristics that will be tested for association with genetic variants). If you are requesting multiple datasets, please describe how you will use them. Examples of RUS can be found at ',
-                          a({
-                            target: '_blank',
-                            href: 'https://www.ncbi.nlm.nih.gov/books/NBK482114/',
-                          }, ['here'], '.'),
-                        ]),
-                      ]),
-                    ]),
-                  div(
-                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                    [
-                      textarea({
-                        value: this.state.formData.rus,
-                        onChange: this.handleChange,
-                        name: 'rus',
-                        id: 'inputRUS',
-                        className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
-                          ' required-field-error form-control' :
-                          'form-control',
-                        rows: '6',
-                        required: true,
-                        placeholder: 'Please limit your RUS to 2200 characters.',
-                        disabled: this.state.formData.dar_code !== null,
-                      }),
-                      span({
-                        className: 'cancel-color required-field-error-span',
-                        isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
-                      },
-                      ['Required field']),
-                    ]),
-                ]),
-
-                div({className: 'form-group'}, [
-                  div(
-                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                    [
-                      label({className: 'control-label rp-title-question'}, [
-                        '2.6 Non-Technical Summary* ',
-                        span({}, [
-                          'Please enter below a non-technical summary of your RUS suitable for understanding by the general public (written at a high school reading level or below).',
-                        ]),
-                      ]),
-                    ]),
-                  div(
-                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                    [
-                      textarea({
-                        value: this.state.formData.non_tech_rus,
-                        onChange: this.handleChange,
-                        name: 'non_tech_rus',
-                        id: 'inputNonTechRUS',
-                        className: (fp.isEmpty(this.state.formData.non_tech_rus) && showValidationMessages) ?
-                          'required-field-error form-control' :
-                          'form-control',
-                        rows: '3',
-                        required: true,
-                        placeholder: 'Please limit your non-technical summary to 1100 characters.',
-                        disabled: this.state.formData.dar_code !== null,
-                      }),
-                      span(
-                        {
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.non_tech_rus) && showValidationMessages,
-                        },
-                        ['Required field']),
-                    ]),
-                ]),
-
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_prev', onClick: this.step1, className: 'btn-primary f-left access-background' }, [
-                      span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
-                    ]),
-
-                    a({ id: 'btn_next', onClick: this.step3, className: 'btn-primary f-right access-background' }, [
-                      'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-                    ]),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'btn-secondary f-right access-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
+              h(DataAccessRequest, {
+                darCode: dar_code,
+                datasets: this.state.formData.datasets,
+                onDatasetsChange: this.onDatasetsChange,
+                showValidationMessages: showValidationMessages,
+                formStateChange: this.formStateChange,
+                projectTitle: this.state.formData.projectTitle,
+                isTypeOfResearchInvalid: isTypeOfResearchInvalid,
+                TypeOfResearch: TORComponent,
+                methods,
+                controls,
+                population,
+                forProfit,
+                rus: this.state.formData.rus,
+                nonTechRus: this.state.formData.non_tech_rus,
+                nextPage: this.nextPage,
+                prevPage: this.prevPage,
+                partialSave: this.partialSave
+              })
             ]),
 
             div({ isRendered: this.state.step === 3 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  h3({ className: 'rp-form-title access-color' }, ['3. Research Purpose Statement']),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question' },
-                        ['3.1 In order to ensure appropriate review, please answer the questions below:'])
-                    ]),
-                    div({ className: 'row no-margin' }, [
-                      span({
-                        className: 'cancel-color required-field-error-span', isRendered: step3.inputPurposes.invalid && showValidationMessages,
-                        style: { 'marginLeft': '15px' }
-                      }, ['All fields are required'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.1 Will this data be used exclusively or partially for a commercial purpose?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
-                        required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' }, ['3.1.2 Please indicate if this study is limited to one gender?'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.onegender, onChange: this.handleRadioChange, id: 'onegender', name: 'onegender',
-                        required: true
-                      }),
-                      div({
-                        isRendered: this.state.formData.onegender === 'true' || this.state.formData.onegender === true,
-                        className: 'multi-step-fields', disabled: (this.state.formData.dar_code !== null)
-                      }, [
-                        span({}, ['Please specify']),
-                        div({ className: 'radio-inline' }, [
-                          genderLabels.map((option, ix) => {
-                            return (
-                              label({
-                                key: 'gender' + ix,
-                                onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
-                                id: 'lbl_gender_' + ix,
-                                htmlFor: 'rad_gender_' + ix,
-                                className: 'radio-wrapper'
-                              }, [
-                                input({
-                                  type: 'radio',
-                                  id: 'rad_gender_' + ix,
-                                  name: this.state.name,
-                                  checked: this.state.formData.gender === genderValues[ix],
-                                  onChange: () => { }
-                                }),
-                                span({ className: 'radio-check' }),
-                                span({ className: 'radio-label' }, [genderLabels[ix]])
-                              ])
-                            );
-                          })
-                        ])
-                      ])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.3 Please indicate if this study is restricted to a  pediatric population (under the age of 18)?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.pediatric, onChange: this.handleRadioChange, id: 'pediatric', name: 'pediatric', required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.4 Does the research aim involve the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization)?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.illegalbehave, onChange: this.handleRadioChange, id: 'illegalbehave', name: 'illegalbehave',
-                        required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.5 Does the research aim involve the study of alcohol or drug abuse, or abuse of other addictive products?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.addiction, onChange: this.handleRadioChange, id: 'addiction', name: 'addiction', required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.6 Does the research aim involve the study of sexual preferences or sexually transmitted diseases?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.sexualdiseases, onChange: this.handleRadioChange, id: 'sexualdiseases', name: 'sexualdiseases',
-                        required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.7 Does the research aim involve the study of any stigmatizing illnesses?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.stigmatizediseases, onChange: this.handleRadioChange, id: 'stigmatizediseases',
-                        name: 'stigmatizediseases', required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.8 Does the study target a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or ["SIGNIFICANTLY"] economically or educationally disadvantaged persons)?'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.vulnerablepop, onChange: this.handleRadioChange, id: 'vulnerablepop', name: 'vulnerablepop',
-                        required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.9 Does the research aim involve the study of Population Origins/Migration patterns?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.popmigration, onChange: this.handleRadioChange, id: 'popmigration', name: 'popmigration',
-                        required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.10 Does the research aim involve the study of psychological traits, including intelligence, attention, emotion?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.psychtraits, onChange: this.handleRadioChange, id: 'psychtraits', name: 'psychtraits',
-                        required: true
-                      })
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-choice-questions' },
-                        ['3.1.11 Does the research correlate ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways that are not easily related to Health?'])
-                    ]),
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group' }, [
-                      YesNoRadioGroup({
-                        value: this.state.formData.nothealth, onChange: this.handleRadioChange, id: 'nothealth', name: 'nothealth', required: true
-                      })
-                    ])
-                  ])
-                ]),
-
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_prev', onClick: this.step2, className: 'btn-primary f-left access-background' }, [
-                      span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
-                    ]),
-
-                    a({ id: 'btn_next', onClick: this.step4, className: 'btn-primary f-right access-background' }, [
-                      'Next Step', span({ className: 'glyphicon glyphicon-chevron-right', 'aria-hidden': 'true' })
-                    ]),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'f-right btn-secondary access-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
+              h(ResearchPurposeStatement, {
+                addiction: this.state.formData.addiction,
+                darCode: dar_code,
+                formStateChange: this.formStateChange,
+                forProfit: this.state.formData.forProfit,
+                gender: this.state.formData.gender,
+                handleRadioChange: this.handleRadioChange,
+                illegalBehave: this.state.formData.illegalbehave,
+                invalidPurpose: step3.inputPurposes.invalid,
+                nextPage: this.nextPage,
+                notHealth: this.state.formData.nothealth,
+                oneGender: this.state.formData.onegender,
+                partialSave: this.partialSave,
+                pediatric: this.state.formData.pediatric,
+                popMigration: this.state.formData.popmigration,
+                prevPage: this.prevPage,
+                psychTraits: this.state.formData.psychtraits,
+                sexualDiseases: this.state.formData.sexualdiseases,
+                showValidationMessages: showValidationMessages,
+                stigmatizeDiseases: this.state.formData.stigmatizediseases,
+                vulnerablePop: this.state.formData.vulnerablepop
+              })
             ]),
 
             div({ isRendered: this.state.step === 4 }, [

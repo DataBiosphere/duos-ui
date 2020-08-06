@@ -158,7 +158,7 @@ class AdminConsole extends Component {
 
         div({ className: "container" }, [
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
-            PageHeading({ id: "adminConsole", color: "common", title: "Welcome " + currentUser.displayName + "!", description: "What would you like to do today?" }),
+            PageHeading({ id: "adminConsole", color: "common", title: "Welcome to your Admin Console, " + currentUser.displayName + "!", description: "What would you like to do today?" }),
             hr({ className: "section-separator" })
           ]),
 

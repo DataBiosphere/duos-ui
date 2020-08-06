@@ -17,6 +17,8 @@ export const Config = {
 
   getGoogleClientId: async () => (await getConfig()).clientId,
 
+  getGAId: async () => (await getConfig()).gaId,
+
   getFeatureFlag: async (featureName) => {
     const feature = _.get(await getConfig(), 'features', {});
     return _.get(feature, featureName, false);
@@ -40,6 +42,11 @@ export const Config = {
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: {'Content-Type': 'application/json'},
+  }),
+
+  attachmentBody: body => ({
+    body: body,
+    headers: {'Content-Type': 'application/binary'}
   }),
 
   fileBody: (token = Token.getToken()) => ({

@@ -1,5 +1,6 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
+import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
 
 export const formatDate = (dateval) => {
@@ -69,7 +70,7 @@ export const Notifications = {
     timeout: '3500',
     progressBar: false,
     type: 'error',
-    theme: 'duos',
+    theme: 'bootstrap-v3',
   },
   /**
    * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
@@ -92,6 +93,22 @@ export const Notifications = {
       ...Notifications.defaultNotification,
       ...props,
       type: 'success',
+    }).show();
+  },
+  showWarning: props => {
+    return new Noty({
+      text: 'Warning!',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'warning',
+    }).show();
+  },
+  showInformation: props => {
+    return new Noty({
+      text: 'Information',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'information',
     }).show();
   },
 };
