@@ -5,7 +5,7 @@ Have you read [Terra's Contributing Guide](https://github.com/DataBiosphere/terr
 I, the developer opening this PR, do solemnly pinky swear that:
 
 - [ ] PR is labeled with a Jira ticket number and includes a link to the ticket
-- [ ] PR is labeled with a risk modifier [no, low, medium, high] 
+- [ ] PR is labeled with a security risk modifier [no, low, medium, high] 
 - [ ] PR describes scope of changes
 
 In all cases:
