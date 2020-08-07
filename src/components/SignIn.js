@@ -140,8 +140,6 @@ export const SignIn = hh(class SignIn extends Component {
           clientId: this.state.clientId,
           onSuccess: this.responseGoogle,
           onFailure: this.forbidden,
-          icon: false,
-          buttonText: 'Start here!'
         }
       );
     }
