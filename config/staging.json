@@ -7,6 +7,7 @@
   "gwasUrl": "",
   "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
   "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
+  "powerBiUrl": "https://app.powerbi.com/view?r=eyJrIjoiYjZlMmQxZjQtMGEyOC00MmJmLTk2ODgtMGFjNWQ4OTNkNzIyIiwidCI6IjBjYjdhNjQwLTQ1YTItNGVkNi1iZTlmLTYzNTE5Zjg2ZTA0YiIsImMiOjN9",
   "gaId": "UA-159441671-2",
   "features": {
     "newDarUi": true
