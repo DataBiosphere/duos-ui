@@ -13,8 +13,8 @@ class HomeAbout extends Component {
   }
 
   async componentDidMount() {
-    // const powerBiUrl = await Config.getPowerBiUrl();
-    // this.setState({ powerBiUrl: powerBiUrl });
+    const powerBiUrl = await Config.getPowerBiUrl();
+    this.setState({ powerBiUrl: powerBiUrl });
   }
 
   render() {
