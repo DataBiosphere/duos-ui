@@ -1,11 +1,11 @@
 import { Component } from 'react';
-import { a, div, fieldset, form, h, h3, hr, i, label, li, ol, p, small, span} from 'react-hyperscript-helpers';
+import { a, div, form, h, hr, i, small, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
+import DataUseAgreements from './dar_application/DataUseAgreements';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
-import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
@@ -318,6 +318,11 @@ prevPage = (e) => {
     let invalidStep3 = this.verifyStep3();
     if (!invalidStep1 && !invalidStep2 && !invalidStep3) {
       this.setState({ showDialogSubmit: true });
+    } else {
+      this.setState(state => {
+        state.showValidationMessages = true;
+        return state;
+      });
     }
   };
 
@@ -619,7 +624,7 @@ prevPage = (e) => {
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
     //NOTE: component is only here temporarily until component conversion has been complete
-    //ideally this, along with the other variable initializtion should be done with a useEffect hook
+    //ideally this, along with the other variable initialization should be done with a useEffect hook
     const TORComponent = TypeOfResearch({
       hmb: hmb,
       hmbHandler: this.setHmb,
@@ -635,6 +640,20 @@ prevPage = (e) => {
       otherText: otherText,
       otherTextHandler: this.setOtherText
     });
+
+    const ConfirmationDialogComponent = ConfirmationDialog({
+      title: 'Data Request Confirmation',
+      disableOkBtn: this.state.disableOkBtn,
+      disableNoBtn: this.state.disableOkBtn,
+      color: 'access',
+      showModal: this.state.showDialogSubmit,
+      action: {
+        label: 'Yes',
+        handler: this.dialogHandlerSubmit
+      }
+    }, [div({
+      className: 'dialog-description'
+    }, ['Are you sure you want to send this Data Access Request Application?'])]);
 
     return (
       div({ className: 'container' }, [
@@ -788,96 +807,15 @@ prevPage = (e) => {
             ]),
 
             div({ isRendered: this.state.step === 4 }, [
-              div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
-
-                  h3({ className: 'rp-form-title access-color' }, ['4.1 Data Use Agreements']),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                      label({ className: 'control-label rp-title-question' }, [
-                        'DUOS Library Card Data Access Agreement & Attestation'
-                      ])
-                    ]),
-
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                        span ({ className: 'rp-agreement rp-last-group' }, ['Under the National Institutes of Health (NIH) Genomic Data Sharing Policy, the Genomic Data User Code of Conduct sets forth principles for responsible management and use of large-scale genomic data and associated phenotypic data accessed through controlled access to NIHdesignated data repositories (e.g., the database of Genotypes and Phenotypes (dbGaP), repositories established as NIH Trusted Partners). Failure to abide by any term within this Code of Conduct may result in revocation of approved access to datasets obtained through these repositories. Investigators who are approved to access data agree to:']),
-
-                        ol({ className: 'rp-agreement rp-last-group' }, [
-                          li({}, ['Use datasets solely in connection with the research project described in the approved Data Access Request for each dataset']),
-                          li({}, ['Make no attempt to identify or contact individual participants or groups from whom data were collected, or generate information that could allow participants’ identities to be readily ascertained, without appropriate approvals from the submitting institutions;']),
-                          li({}, ['Maintain the confidentiality of the data and not distribute them to any entity or individual beyond those specified in the approved Data Access Request;']),
-                          li({}, ['Adhere to the NIH Security Best Practices for Controlled-Access Data Subject to the NIH Genomic Data Sharing Policy and ensure that only approved users can gain access to data files;']),
-                          li({}, ['Acknowledge the Intellectual Property terms as specified in the Library Card Agreement; ']),
-                          li({}, ['Provide appropriate acknowledgement in any dissemination of research findings including the investigator(s) who generated the data, the funding source, accession numbers of the dataset, and the data repository from which the data were accessed; and,']),
-                          li({}, ['Report any inadvertent data release, breach of data security, or other data management incidents in accordance with the terms specified in the Library Card Agreement. ']),
-                        ])
-                      ]),
-
-                      div({ className: 'row no-margin' }, [
-                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                          label({ className: 'control-label default-color' },
-                            ['By submitting this data access request, you agree to comply with all terms relevant to Authorized Users put forth in the agreement.'])
-                        ]),
-
-                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                          a({
-                            id: 'link_downloadAgreement', href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf', target: '_blank',
-                            className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                          }, [
-                            span({ className: 'glyphicon glyphicon-download' }),
-                            'DUOS Library Card Agreement'
-                          ])
-                        ]),
-
-                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                          p({ className: 'rp-agreement' },
-                            ['For your request to be reviewed, your Signing Official must authorize you by sending a signed Library Card data access agreement']),
-                          a({ href: '/home_about', target: '_blank' }, '(instructions here)')
-                        ])
-                      ])
-                    ]),
-
-                    div({ className: 'row no-margin' }, [
-                      div({ isRendered: showValidationMessages, className: 'rp-alert' }, [
-                        Alert({ id: 'formErrors', type: 'danger', title: 'Please, complete all required fields.' })
-                      ]),
-
-                      div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
-                        Alert({
-                          id: 'problemSavingRequest', type: 'danger',
-                          title: 'Some errors occurred, Data Access Request Application couldn\'t be created.'
-                        })
-                      ])
-                    ])
-                  ])
-                ]),
-
-                div({ className: 'row no-margin' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                    a({ id: 'btn_prev', onClick: this.step3, className: 'f-left btn-primary access-background' }, [
-                      span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
-                    ]),
-
-                    a({
-                      id: 'btn_submit', isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave,
-                      className: 'f-right btn-primary access-background bold'
-                    }, ['Attest and Send']),
-
-                    ConfirmationDialog({
-                      title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
-                      color: 'access', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
-                    }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Application?'])]),
-                    h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
-
-                    a({
-                      id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
-                      className: 'f-right btn-secondary access-color'
-                    }, ['Save'])
-                  ])
-                ])
-              ])
+              h(DataUseAgreements, {
+                darCode: dar_code,
+                showValidationMessages,
+                problemSavingRequest,
+                attestAndSave: this.attestAndSave,
+                ConfirmationDialogComponent,
+                partialSave: this.partialSave,
+                prevPage: this.prevPage
+              })
             ])
           ])
         ])
