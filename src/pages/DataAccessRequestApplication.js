@@ -91,6 +91,8 @@ class DataAccessRequestApplication extends Component {
       problemSavingRequest: false
     };
 
+    this.goToStep = this.goToStep.bind(this);
+
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -280,37 +282,14 @@ prevPage = (e) => {
   window.scrollTo(0,0);
 }
 
-  step1 = (e) => {
+  goToStep = (step = 1, showValidationMessages = false) => {
     this.setState(prev => {
-      prev.step = 1;
+      prev.step = step;
+      prev.showValidationMessages = showValidationMessages
       return prev;
     });
     window.scrollTo(0, 0);
-  };
-
-  step2 = (e) => {
-    this.setState(prev => {
-      prev.step = 2;
-      return prev;
-    });
-    window.scrollTo(0, 0);
-  };
-
-  step3 = (e) => {
-    this.setState(prev => {
-      prev.step = 3;
-      return prev;
-    });
-    window.scrollTo(0, 0);
-  };
-
-  step4 = (e) => {
-    this.setState(prev => {
-      prev.step = 4;
-      return prev;
-    });
-    window.scrollTo(0, 0);
-  };
+  }
 
   attestAndSave = (e) => {
     let invalidStep1 = this.verifyStep1();
@@ -334,7 +313,8 @@ prevPage = (e) => {
     return isValid;
   };
 
-  verifyStep1() {
+  //NOTE: seperated out check functionality from state updates in original function so it can be used in other functions/components
+  step1InvalidChecks = () => {
     let isResearcherInvalid = false,
       isInvestigatorInvalid = false,
       showValidationMessages = false,
@@ -348,20 +328,32 @@ prevPage = (e) => {
       isInvestigatorInvalid = true;
       showValidationMessages = true;
     }
-    if (this.state.formData.checkCollaborator !== true
-      && !this.isValid(this.state.formData.linkedIn)
-      && !this.isValid(this.state.formData.researcherGate)
-      && !this.isValid(this.state.formData.orcid)
-      && !this.state.nihValid) {
+    if (this.state.formData.checkCollaborator !== true &&
+      !this.isValid(this.state.formData.linkedIn) &&
+      !this.isValid(this.state.formData.researcherGate) &&
+      !this.isValid(this.state.formData.orcid) &&
+      !this.state.nihValid) {
       isNihInvalid = true;
       showValidationMessages = true;
     }
     // DUOS-565: checkCollaborator : false and nihValid : false is an invalid combination
-    if (this.state.formData.checkCollaborator !== true
-      && !this.state.nihValid) {
+    if (this.state.formData.checkCollaborator !== true &&
+      !this.state.nihValid) {
       isNihInvalid = true;
       showValidationMessages = true;
     }
+
+    return { isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid };
+  };
+
+  //method to be passed to step 4 for error checks/messaging
+  step1InvalidResult(dataset) {
+    const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid} = dataset;
+    return isResearcherInvalid || isInvestigatorInvalid || showValidationMessages || isNihInvalid;
+  }
+
+  verifyStep1() {
+    const { isResearcherInvalid, isInvestigatorInvalid, isNihInvalid, showValidationMessages } = this.step1InvalidChecks();
     this.setState(prev => {
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
       prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
@@ -389,9 +381,8 @@ prevPage = (e) => {
     return isValidGender;
   }
 
-  verifyStep3() {
-    let invalid = false;
-    if (!(this.isValid(this.state.formData.forProfit) &&
+  step3InvalidResult = () => {
+    return !(this.isValid(this.state.formData.forProfit) &&
       this.isValid(this.state.formData.onegender) &&
       this.isGenderValid(this.state.formData.gender, this.state.formData.onegender) &&
       this.isValid(this.state.formData.pediatric) &&
@@ -402,7 +393,13 @@ prevPage = (e) => {
       this.isValid(this.state.formData.vulnerablepop) &&
       this.isValid(this.state.formData.popmigration) &&
       this.isValid(this.state.formData.psychtraits) &&
-      this.isValid(this.state.formData.nothealth))) {
+      this.isValid(this.state.formData.nothealth));
+  }
+
+
+  verifyStep3() {
+    let invalid = false;
+    if (this.step3InvalidResult()) {
       this.setState(prev => {
         prev.step3.inputPurposes.invalid = true;
         prev.showValidationMessages = true;
@@ -683,7 +680,7 @@ prevPage = (e) => {
 
             a({
               id: 'btn_step_1',
-              onClick: this.step1,
+              onClick: (e => this.goToStep(1, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 1 ? 'active' : '')
             }, [
@@ -694,7 +691,7 @@ prevPage = (e) => {
 
             a({
               id: 'btn_step_2',
-              onClick: this.step2,
+              onClick: (e => this.goToStep(2, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 2 ? 'active' : '')
             }, [
@@ -705,7 +702,7 @@ prevPage = (e) => {
 
             a({
               id: 'btn_step_3',
-              onClick: this.step3,
+              onClick: (e => this.goToStep(3, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 3 ? 'active' : '')
             }, [
@@ -716,7 +713,7 @@ prevPage = (e) => {
 
             a({
               id: 'btn_step_4',
-              onClick: this.step4,
+              onClick: (e => this.goToStep(4, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 4 ? 'active' : '')
             }, [
@@ -809,12 +806,15 @@ prevPage = (e) => {
             div({ isRendered: this.state.step === 4 }, [
               h(DataUseAgreements, {
                 darCode: dar_code,
-                showValidationMessages,
                 problemSavingRequest,
                 attestAndSave: this.attestAndSave,
                 ConfirmationDialogComponent,
                 partialSave: this.partialSave,
-                prevPage: this.prevPage
+                prevPage: this.prevPage,
+                step1Invalid: this.step1InvalidResult(this.step1InvalidChecks()),
+                step2Invalid: this.verifyStep2(),
+                step3Invalid: this.step3InvalidResult(),
+                goToStep: this.goToStep
               })
             ])
           ])

@@ -1,19 +1,51 @@
-import { a, div, fieldset, h, h3, label, li, ol, p, span} from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h3, label, li, ol, ul, p, span} from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import { Alert } from '../../components/Alert';
 import ReactTooltip from 'react-tooltip';
+
+const StepAlertTemplate = (props) => {
+  const ulLinkStyle = {
+    display: 'block',
+    fontSize: '1.8rem',
+    marginLeft: '7%',
+    marginTop: "1.5%"
+  };
+
+  return (
+    ul({style: ulLinkStyle}, [
+      li({isRendered: props.step1Invalid}, [
+        a({key: 'step1-alert', onClick: (e => props.goToStep(1, true))}, ['Step 1'])
+      ]),
+      li({isRendered: props.step2Invalid}, [
+        a({key: 'step2-alert', onClick: (e => props.goToStep(2, true))}, ['Step 2'])
+      ]),
+      li({isRendered: props.step3Invalid}, [
+        a({key: 'step3-alert', onClick: (e => props.goToStep(3, true))}, ['Step 3'])
+      ])
+    ])
+  );
+};
 
 export default function DataUseAgreements(props) {
 
   const {
     darCode,
-    showValidationMessages,
     problemSavingRequest,
     attestAndSave,
     ConfirmationDialogComponent,
     partialSave,
-    prevPage
+    prevPage,
+    step1Invalid,
+    step2Invalid,
+    step3Invalid,
+    goToStep
   } = props;
+
+  const showErrors = () => {
+    return step1Invalid || step2Invalid || step3Invalid;
+  };
+
+  const showValidationMessages = showErrors();
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -69,7 +101,12 @@ export default function DataUseAgreements(props) {
 
           div({ className: 'row no-margin' }, [
             div({ isRendered: showValidationMessages, className: 'rp-alert' }, [
-              Alert({ id: 'formErrors', type: 'danger', title: 'Please, complete all required fields.' })
+              Alert({
+                id: 'formErrors',
+                type: 'danger',
+                title: 'Please, complete all required fields for the following steps:',
+                description: h(StepAlertTemplate, {step1Invalid, step2Invalid, step3Invalid, goToStep})
+              })
             ]),
 
             div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
