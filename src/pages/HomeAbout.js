@@ -47,13 +47,15 @@ class HomeAbout extends Component {
                     ['To evaluate the feasibility of using machine readable data use terms to interpret data use restrictions and access requests, we are piloting a trial of DUOS overseen by Partners’ Healthcare IRB. During the pilot, DACs comprised of governmental and non-governmental data custodians will pilot the use of DUOS, its ability to structure use limitations and access requests, and the accuracy of the DUOS algorithm. This aids us in improving the DUOS algorithm and providing feedback on the GA4GH Data Use Ontology based on experts’ feedback.']),
                 ]),
                 div({}, [
-                   iframe({
-                     width: '600px',
-                     height: '373.5px',
-                     src: this.state.powerBiUrl,
-                     frameBorder: '0',
-                     allowFullScreen: true
-                   })
+                  h3({}, ['DUOS Stats']),
+                  div({ style: { overflow: 'hidden', paddingTop: '75%', position: 'relative' }}, [
+                    iframe({
+                      src: this.state.powerBiUrl,
+                      allowFullScreen: true,
+                      loading: 'lazy',
+                      style: { border: '0', height: '100%', left: '0', position: 'absolute', top: '0', width: '100%'}
+                    })
+                  ])
                 ]),
                 div({className: 'home-content'}, [
                   h3({}, ['Library Card']),
