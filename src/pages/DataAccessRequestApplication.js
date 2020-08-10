@@ -768,7 +768,6 @@ class DataAccessRequestApplication extends Component {
                 gender: this.state.formData.gender,
                 handleRadioChange: this.handleRadioChange,
                 illegalBehave: this.state.formData.illegalbehave,
-                invalidPurpose: step3.inputPurposes.invalid,
                 nextPage: this.nextPage,
                 notHealth: this.state.formData.nothealth,
                 oneGender: this.state.formData.onegender,
