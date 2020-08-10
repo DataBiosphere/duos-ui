@@ -215,14 +215,12 @@ class DataAccessRequestApplication extends Component {
     return ontologyItems;
   };
 
-  handleChange = (e) => {
-    const field = e.target.name;
-    const value = e.target.value;
-    this.setState(prev => {
-      prev.formData[field] = value;
-      return prev;
-    }, () => this.checkValidations());
-  };
+  updateShowValidationMessages = (value) => {
+    this.setState((state) => {
+      state.showValidationMessages = value;
+      return state;
+    });
+  }
 
   checkValidations() {
     if (this.state.showValidationMessages === true && this.state.step === 1) {
@@ -232,15 +230,6 @@ class DataAccessRequestApplication extends Component {
     } else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
     }
-  };
-
-  handleCheckboxChange = (e) => {
-    const field = e.target.name;
-    const value = e.target.checked;
-    this.setState(prev => {
-      prev.formData[field] = value;
-      return prev;
-    }, () => this.checkValidations());
   };
 
   handleRadioChange = (e, field, value) => {
@@ -258,34 +247,26 @@ class DataAccessRequestApplication extends Component {
     }, () => this.checkValidations());
   };
 
-  handleGenderChange = (e, value) => {
+  //NOTE: use nextPage and previous page instead of having individual go to pages for each step
+  nextPage = (e) => {
     this.setState(prev => {
-      prev.formData.gender = value;
+      prev.step = prev.step + 1;
       return prev;
-    }, () => this.checkValidations());
-  };
+    });
+    window.scrollTo(0,0);
+  }
 
-//NOTE: use nextPage and previous page instead of having individual go to pages for each step
-nextPage = (e) => {
-  this.setState(prev => {
-    prev.step = prev.step + 1;
-    return prev;
-  });
-  window.scrollTo(0,0);
-}
+  prevPage = (e) => {
+    this.setState(prev => {
+      prev.step = prev.step - 1;
+      return prev;
+    });
+    window.scrollTo(0,0);
+  }
 
-prevPage = (e) => {
-  this.setState(prev => {
-    prev.step = prev.step - 1;
-    return prev;
-  });
-  window.scrollTo(0,0);
-}
-
-  goToStep = (step = 1, showValidationMessages = false) => {
+  goToStep = (step = 1) => {
     this.setState(prev => {
       prev.step = step;
-      prev.showValidationMessages = showValidationMessages
       return prev;
     });
     window.scrollTo(0, 0);
@@ -313,7 +294,7 @@ prevPage = (e) => {
     return isValid;
   };
 
-  //NOTE: seperated out check functionality from state updates in original function so it can be used in other functions/components
+  //NOTE: seperated out check functionality from state updates in original function to make it easier to follow
   step1InvalidChecks = () => {
     let isResearcherInvalid = false,
       isInvestigatorInvalid = false,
@@ -814,6 +795,7 @@ prevPage = (e) => {
                 step1Invalid: this.step1InvalidResult(this.step1InvalidChecks()),
                 step2Invalid: this.verifyStep2(),
                 step3Invalid: this.step3InvalidResult(),
+                updateShowValidationMessages: this.updateShowValidationMessages,
                 goToStep: this.goToStep
               })
             ])

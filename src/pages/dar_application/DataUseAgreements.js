@@ -1,3 +1,5 @@
+
+import { useEffect } from 'react';
 import { a, div, fieldset, h, h3, label, li, ol, ul, p, span} from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import { Alert } from '../../components/Alert';
@@ -14,13 +16,13 @@ const StepAlertTemplate = (props) => {
   return (
     ul({style: ulLinkStyle}, [
       li({isRendered: props.step1Invalid}, [
-        a({key: 'step1-alert', onClick: (e => props.goToStep(1, true))}, ['Step 1'])
+        a({key: 'step1-alert', onClick: (e => props.goToStep(1))}, ['Step 1'])
       ]),
       li({isRendered: props.step2Invalid}, [
-        a({key: 'step2-alert', onClick: (e => props.goToStep(2, true))}, ['Step 2'])
+        a({key: 'step2-alert', onClick: (e => props.goToStep(2))}, ['Step 2'])
       ]),
       li({isRendered: props.step3Invalid}, [
-        a({key: 'step3-alert', onClick: (e => props.goToStep(3, true))}, ['Step 3'])
+        a({key: 'step3-alert', onClick: (e => props.goToStep(3))}, ['Step 3'])
       ])
     ])
   );
@@ -38,14 +40,15 @@ export default function DataUseAgreements(props) {
     step1Invalid,
     step2Invalid,
     step3Invalid,
+    updateShowValidationMessages,
+    showValidationMessages,
     goToStep
   } = props;
 
-  const showErrors = () => {
-    return step1Invalid || step2Invalid || step3Invalid;
-  };
-
-  const showValidationMessages = showErrors();
+  useEffect(() => {
+    const updatedStatus = step1Invalid || step2Invalid || step3Invalid;
+    updateShowValidationMessages(updatedStatus);
+  }, [updateShowValidationMessages, step1Invalid, step2Invalid, step3Invalid]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
