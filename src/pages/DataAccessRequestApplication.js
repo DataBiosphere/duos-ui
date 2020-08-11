@@ -598,7 +598,7 @@ class DataAccessRequestApplication extends Component {
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
-    const { problemSavingRequest, showValidationMessages,  step1, step3 } = this.state;
+    const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
     //NOTE: component is only here temporarily until component conversion has been complete
