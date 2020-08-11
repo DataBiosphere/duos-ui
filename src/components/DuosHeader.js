@@ -68,6 +68,13 @@ class DuosHeader extends Component {
       isDataOwner = currentUser.isDataOwner;
     }
 
+    const duosLogoImage = {
+      width: '140px',
+      height: '40px',
+      padding: '0',
+      margin: '12px 64px 0 0'
+    }
+
     const contactUsSource = isLogged ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
     const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
@@ -80,6 +87,8 @@ class DuosHeader extends Component {
         background: 'transparent',
         border: 'none',
         outline: 'none',
+        margin: '0 20px 0 0',
+        padding: '15px 0'
       },
       onMouseEnter: this.toggleHover,
       onMouseLeave: this.toggleHover,
@@ -98,7 +107,7 @@ class DuosHeader extends Component {
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         div({ className: 'row no-margin' }, [
           h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-            img({ style: {width: '140px', height: '40px'}, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
+            img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
           ]),
           h(ResponsiveMenu, {
             changeMenuOn: '767px',
