@@ -794,6 +794,7 @@ class DataAccessRequestApplication extends Component {
                 step1Invalid: this.step1InvalidResult(this.step1InvalidChecks()),
                 step2Invalid: this.verifyStep2(),
                 step3Invalid: this.step3InvalidResult(),
+                showValidationMessages,
                 updateShowValidationMessages: this.updateShowValidationMessages,
                 goToStep: this.goToStep
               })
