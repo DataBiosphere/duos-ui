@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { a, button, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
+import {Component} from 'react';
+import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import ResponsiveMenu from 'react-responsive-navbar';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
@@ -75,7 +75,7 @@ class DuosHeader extends Component {
       id: "btn_applyAcces",
       style: {
         color: this.state.hover ? '#2FA4E7' : '#ffffff',
-        fontSize: '15px',
+        fontSize: '12px',
         fontWeight: '500',
         background: 'transparent',
         border: 'none',
@@ -98,7 +98,7 @@ class DuosHeader extends Component {
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         div({ className: 'row no-margin' }, [
           h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-            img({ src: '/images/duos_logo.svg', alt: 'DUOS Logo' })
+            img({ style: {width: '140px', height: '40px'}, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
           ]),
           h(ResponsiveMenu, {
             changeMenuOn: '767px',
