@@ -82,7 +82,7 @@ class DuosHeader extends Component {
       id: "btn_applyAcces",
       style: {
         color: this.state.hover ? '#2FA4E7' : '#ffffff',
-        fontSize: '12px',
+        fontSize: '14px',
         fontWeight: '500',
         background: 'transparent',
         border: 'none',
@@ -156,10 +156,7 @@ class DuosHeader extends Component {
                   ]),
 
                   li({}, [
-                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
-                      span({ className: 'navbar-duos-text' }, ['FAQs'])
-                    ])
+                    h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])
                   ]),
 
                   li({ className: 'dropdown', isRendered: isAdmin }, [

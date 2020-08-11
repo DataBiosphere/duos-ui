@@ -27,7 +27,7 @@
 }
 
 .navbar-duos li a {
-  font-size: 12px;
+  font-size: 14px;
   color: #ffffff;
   transition: color 0.3s ease;
   cursor: pointer;
@@ -93,7 +93,7 @@
 
 .user-dropdown li a {
   margin: 0!important;
-  padding: 10px 15px 6px 15px!important;
+  padding: 10px 15px 10px 15px!important;
   color: #00609f !important;
   font-weight: normal !important;
   font-size: 12px;
