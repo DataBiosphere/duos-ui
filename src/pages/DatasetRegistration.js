@@ -952,7 +952,7 @@ class DatasetRegistration extends Component {
                 ]),
 
 
-                h3({ className: 'rp-form-title dataset-color' }, ['2. Data Access Request']),
+                h3({ className: 'rp-form-title dataset-color' }, ['2. Data Use Terms']),
 
                 div({className: 'form-group'}, [
                   div(
@@ -1231,7 +1231,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '2.5 Other Data Use Terms* ',
+                          '2.5 Other Data Use Terms ',
                           span({}, [
                             'If there are additional data use terms governing the future use of this dataset, please include them here.',
                             br(),
@@ -1253,7 +1253,7 @@ class DatasetRegistration extends Component {
                             'form-control',
                           rows: '6',
                           required: true,
-                          placeholder: 'Please limit your RUS to 2200 characters.',
+                          placeholder: 'Please limit your other data use terms to 1100 characters.',
                           disabled: this.state.formData.dar_code !== null,
                         }),
                         span({
