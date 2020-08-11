@@ -42,16 +42,11 @@ export default function ResearchPurposeStatement(props) {
         h3({ className: 'rp-form-title access-color' }, ['3. Research Purpose Statement']),
 
         div({ className: 'form-group' }, [
-
-          div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group row no-margin' }, [
-            label({ className: 'control-label rp-title-question' },
-              ['3.1 In order to ensure appropriate review, please answer the questions below:'])
-          ]),
-          div({ className: 'row no-margin' }, [
-            span({
-              className: 'cancel-color required-field-error-span', isRendered: showValidationMessages,
-              style: { 'marginLeft': '15px' }
-            }, ['All fields are required'])
+          div({className: 'row no-margin'}, [
+            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group row no-margin' }, [
+              label({ className: 'control-label rp-title-question' },
+                ['3.1 In order to ensure appropriate review, please answer the questions below:'])
+            ]),
           ]),
           div({className: 'radio-question-container row no-margin', style: {
             backgroundColor: showValidationMessages && forProfit.toString().length === 0 ? '#f3494930' : 'inherit'
