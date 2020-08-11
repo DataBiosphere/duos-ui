@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, button, div, form, h, hh, hr, input, label, p, span, textarea } from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
