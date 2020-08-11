@@ -43,20 +43,6 @@
   margin: 0 0 15px 0;
 }
 
-.navbar-duos-text {
-  display: inline;
-  vertical-align: text-bottom;
-}
-
-.navbar-duos-icon {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin: 0 8px 0 0;
-  transition: all 0.3s ease !important;
-  vertical-align: baseline;
-}
-
 .navbar-duos-icon-about {
   background: url('/images/navbar_icon_about.svg') no-repeat 0 0;
 }
@@ -106,12 +92,6 @@
   cursor: pointer;
 }
 
-.user-dropdown hr {
-  float: right;
-  margin: 0 !important;
-  width: 100%;
-}
-
 .navbar-open-icon,
 .navbar-close-icon {
   position: absolute;
@@ -132,7 +112,7 @@
 
 @media (min-width: 768px) {
   .obCBO {
-    padding: 0 0 0 120px;
+    padding: 0 0 0 204px;
   }
   .obCBO .navbar-public,
   .obCBO .navbar-logged {

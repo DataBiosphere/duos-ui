@@ -75,9 +75,29 @@ class DuosHeader extends Component {
       margin: '12px 64px 0 0'
     }
 
+    const navbarDuosIcon = {
+      display: 'inline-block',
+      width: '16px',
+      height: '16px',
+      margin: '0 8px 0 0',
+      transition: 'all 0.3s ease !important',
+      verticalAlign: 'baseline'
+    }
+
+    const navbarDuosText = {
+      display: 'inline',
+      verticalAlign: 'text-bottom'
+    }
+
+    const hrStyle = {
+      float: 'right',
+      margin: '0',
+      width: '100%'
+    }
+
     const contactUsSource = this.state.hover ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
-    const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
+    const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
     const contactUsButton = button({
       id: "btn_applyAcces",
       style: {
@@ -167,7 +187,7 @@ class DuosHeader extends Component {
                       li({}, [
                         h(Link, { id: 'link_statistics', to: '/summary_votes', className: 'f-left' }, ['Votes Statistics'])
                       ]),
-                      hr({}),
+                      hr({ style: hrStyle }),
                       li({}, [
                         h(Link, {
                           id: 'link_reviewedCases', to: '/reviewed_cases', className: 'f-left', isRendered: !(isDataOwner || isResearcher) || isAdmin
@@ -185,20 +205,20 @@ class DuosHeader extends Component {
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
                   li({}, [
                     h(Link, { id: 'link_about', className: 'navbar-duos-link', to: '/home_about' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-about' }),
-                      span({ className: 'navbar-duos-text' }, ['About'])
+                      div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
+                      span({ style: navbarDuosText }, ['About'])
                     ])
                   ]),
                   li({}, [
                     h(Link, { id: 'link_NHGRIpilot', className: 'navbar-duos-link', to: '/NHGRIpilotinfo' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-about' }),
-                      span({ className: 'navbar-duos-text' }, ['NHGRI Pilot Info'])
+                      div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
+                      span({ style: navbarDuosText }, ['NHGRI Pilot Info'])
                     ])
                   ]),
                   li({}, [
                     h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
-                      span({ className: 'navbar-duos-text' }, ['FAQs'])
+                      div({ className: 'navbar-duos-icon-help', style: navbarDuosIcon }),
+                      span({ style: navbarDuosText }, ['FAQs'])
                     ])
                   ]),
                   contactUsButton, supportrequestModal
