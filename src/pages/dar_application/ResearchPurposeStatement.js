@@ -30,6 +30,8 @@ export default function ResearchPurposeStatement(props) {
   const genderValues = ['F', 'M'];
   const [gender, setGender] = useState(props.gender);
 
+  const alertBackgroundColor = '#f3494930';
+
   //NOTE: inputs have both isEmpty and isNil checks
   //currently values are initialized as emptry strings as a way to maintain controlled inputs in components
   //however the inputs, when given a value, can either be a string (as seen with gender), or a boolean
@@ -49,7 +51,7 @@ export default function ResearchPurposeStatement(props) {
             ]),
           ]),
           div({className: 'radio-question-container row no-margin', style: {
-            backgroundColor: showValidationMessages && forProfit.toString().length === 0 ? '#f3494930' : 'inherit'
+            backgroundColor: showValidationMessages && forProfit.toString().length === 0 ? alertBackgroundColor : 'inherit'
           }}, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group ' }, [
               label({ className: 'control-label rp-choice-questions' },
@@ -68,7 +70,7 @@ export default function ResearchPurposeStatement(props) {
               showValidationMessages && (
                 (oneGender.toString().length === 0) ||
                 (oneGender && gender.toString().length === 0)
-              ) ? '#f3494930' : 'inherit'
+              ) ? alertBackgroundColor : 'inherit'
           }}, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               label({ className: 'control-label rp-choice-questions' }, ['3.1.2 Please indicate if this study is limited to one gender?'])
@@ -110,7 +112,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
 
           div({className: 'radio-question-container row no-margin', style: {
-            backgroundColor: showValidationMessages && pediatric.toString().length === 0 ? '#f3494930' : 'inherit'
+            backgroundColor: showValidationMessages && pediatric.toString().length === 0 ? alertBackgroundColor : 'inherit'
           }}, [
             div({
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
@@ -135,7 +137,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && illegalBehave.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && illegalBehave.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -161,7 +163,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && addiction.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && addiction.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -187,7 +189,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && sexualDiseases.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && sexualDiseases.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -212,7 +214,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && stigmatizeDiseases.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && stigmatizeDiseases.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -238,7 +240,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && vulnerablePop.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && vulnerablePop.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -264,7 +266,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && popMigration.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && popMigration.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -289,7 +291,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && psychTraits.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && psychTraits.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -315,7 +317,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && notHealth.toString().length === 0 ? '#f3494930' : 'inherit'
+              backgroundColor: showValidationMessages && notHealth.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
