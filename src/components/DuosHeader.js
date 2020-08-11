@@ -75,7 +75,7 @@ class DuosHeader extends Component {
       margin: '12px 64px 0 0'
     }
 
-    const contactUsSource = isLogged ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
+    const contactUsSource = this.state.hover ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
     const contactUsText = isLogged ? 'Contact Us': span({ className: 'navbar-duos-text' }, ['Contact Us']);
     const contactUsButton = button({
