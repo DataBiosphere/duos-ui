@@ -35,7 +35,8 @@ export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
       content: trimmedContent,
       className: 'row no-margin',
       style: { whiteSpace: 'pre-line' },
-      charLimit: 30
+      charLimit: 30,
+      inline: true
     });
   };
 

@@ -944,49 +944,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                label({ className: 'control-label rp-title-question default-color' }, [
-                  'Data Access Agreement ', span({ className: 'italic display-inline' }, ['(optional)']),
-                  span({ className: 'default-color' }, ['Data Access Agreement will be required for submission of a Data Access Request'])
-                ])
-              ]),
-
-              div({ isRendered: this.state.isResearcher, className: 'row no-margin' }, [
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                  label({ className: 'control-label default-color' },
-                    ['1. Download the Data Access Agreement template and have your organization\'s Signing Official sign it'])
-                ]),
-
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                  a({
-                    id: 'link_downloadAgreement', href: 'BroadDataAccessAgreement.pdf', target: '_blank',
-                    className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                  }, [
-                    span({ className: 'glyphicon glyphicon-download' }),
-                    'Download Agreement Template'
-                  ])
-                ]),
-
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                  label({ className: 'control-label default-color' },
-                    ['2. Upload your template of the Data Access Agreement signed by your organization\'s Signing Official'])
-                ]),
-
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                  div({
-                    style: { paddingTop: 7 }, className: 'fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                  }, [
-                    span({ className: 'glyphicon glyphicon-upload' }),
-                    'Upload S.O. Signed Agreement',
-                    input({ id: 'uploadFile', type: 'file', onChange: this.handleFileChange, className: 'upload' })
-                  ])
-                ]),
-                p({ id: 'txt_uploadFile', className: 'fileName daa', isRendered: this.state.file.name !== '' || this.state.profile.nameDAA !== '' }, [
-                  'Your currently uploaded Data Access Agreement: ',
-                  span({ className: 'italic normal' }, [this.state.file.name !== '' ? this.state.file.name : this.state.profile.nameDAA])
-                ])
-              ]),
-
               div({ className: 'row margin-top-20' }, [
                 div({ className: 'col-lg-4 col-md-6 col-sm-6 col-xs-6' }, [
                   div({ className: 'italic default-color' }, ['*Required field'])
