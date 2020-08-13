@@ -73,7 +73,7 @@ class DuosHeader extends Component {
       height: '40px',
       padding: '0',
       margin: '12px 64px 0 0'
-    }
+    };
 
     const navbarDuosIcon = {
       display: 'inline-block',
@@ -82,18 +82,18 @@ class DuosHeader extends Component {
       margin: '0 8px 0 0',
       transition: 'all 0.3s ease !important',
       verticalAlign: 'baseline'
-    }
+    };
 
     const navbarDuosText = {
       display: 'inline',
       verticalAlign: 'text-bottom'
-    }
+    };
 
     const hrStyle = {
       float: 'right',
       margin: '0',
       width: '100%'
-    }
+    };
 
     const contactUsSource = this.state.hover ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
