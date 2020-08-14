@@ -114,7 +114,7 @@ class DatasetCatalog extends Component {
     const darBody = {
       userId: Storage.getCurrentUser().dacUserId,
       datasets: datasets,
-      datasetIds: datasetIdList
+      datasetId: datasetIdList
     };
     const formData = await DAR.postPartialDarRequest(darBody);
     const referenceId = formData.reference_id;
@@ -169,31 +169,31 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openDelete = (datasetIds) => (e) => {
+  openDelete = (datasetId) => (e) => {
     this.setState({
       showDialogDelete: true,
-      datasetIds: datasetIds
+      datasetId: datasetId
     });
   };
 
-  openEnable = (datasetIds) => (e) => {
+  openEnable = (datasetId) => (e) => {
     this.setState({
       showDialogEnable: true,
-      datasetIds: datasetIds
+      datasetId: datasetId
     });
   };
 
-  openDisable = (datasetIds) => (e) => {
+  openDisable = (datasetId) => (e) => {
     this.setState({
       showDialogDisable: true,
-      datasetIds: datasetIds
+      datasetId: datasetId
     });
   };
 
   dialogHandlerDelete = (answer) => (e) => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.deleteDataset(this.state.datasetIds).then(resp => {
+      DataSet.deleteDataset(this.state.datasetId).then(resp => {
         this.getDatasets();
         this.setState({ showDialogDelete: false, disableOkButton: false });
       }).catch(error => {
@@ -212,7 +212,7 @@ class DatasetCatalog extends Component {
   dialogHandlerEnable = (answer) => (e) => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetIds, true).then(resp => {
+      DataSet.disableDataset(this.state.datasetId, true).then(resp => {
         this.getDatasets();
         this.setState({ showDialogEnable: false, disableOkButton: false });
       }).catch(error => {
@@ -232,7 +232,7 @@ class DatasetCatalog extends Component {
   dialogHandlerDisable = (answer) => (e) => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetIds, false).then(resp => {
+      DataSet.disableDataset(this.state.datasetId, false).then(resp => {
         this.getDatasets();
         this.setState({ showDialogDisable: false, disableOkButton: false });
       }).catch(error => {
