@@ -192,7 +192,7 @@ class DataAccessRequestApplication extends Component {
     }
     this.setState(prev => {
       prev.completed = completed;
-      prev.formData = formData;
+      prev.formData = fp.merge(prev.formData, formData);
       return prev;
     });
 
