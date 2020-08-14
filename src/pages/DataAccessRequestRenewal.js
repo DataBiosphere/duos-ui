@@ -44,7 +44,7 @@ class DataAccessRequestRenewal extends Component {
         darCode: null,
         checkCollaborator: false,
         rus: '',
-        non_tech_rus: '',
+        nonTechRus: '',
         linkedIn: '',
         orcid: '',
         oneGender: '',
@@ -371,7 +371,7 @@ class DataAccessRequestRenewal extends Component {
     const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
     const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
-    const summaryInvalid = fp.isEmpty(this.state.formData.non_tech_rus);
+    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
     return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
@@ -1179,9 +1179,9 @@ class DataAccessRequestRenewal extends Component {
                   ]),
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                     textarea({
-                      value: this.state.formData.non_tech_rus,
+                      value: this.state.formData.nonTechRus,
                       onChange: this.handleChange,
-                      name: 'non_tech_rus',
+                      name: 'nonTechRus',
                       id: 'inputNonTechRUS',
                       className: 'form-control',
                       rows: '3',
@@ -1489,11 +1489,11 @@ class DataAccessRequestRenewal extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       textarea({
-                        value: this.state.formData.non_tech_rus,
+                        value: this.state.formData.nonTechRus,
                         onChange: this.handleChange,
-                        name: 'non_tech_rus',
+                        name: 'nonTechRus',
                         id: 'inputNonTechRUS',
-                        className: (fp.isEmpty(this.state.formData.non_tech_rus) && showValidationMessages) ?
+                        className: (fp.isEmpty(this.state.formData.nonTechRus) && showValidationMessages) ?
                           'required-field-error form-control' :
                           'form-control',
                         rows: '3',
@@ -1504,7 +1504,7 @@ class DataAccessRequestRenewal extends Component {
                       span(
                         {
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.non_tech_rus) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.formData.nonTechRus) && showValidationMessages,
                         },
                         ['Required field']),
                     ]),

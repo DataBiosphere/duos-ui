@@ -37,7 +37,7 @@ class DataAccessRequestApplication extends Component {
         darCode: null,
         checkCollaborator: false,
         rus: '',
-        non_tech_rus: '',
+        nonTechRus: '',
         linkedIn: '',
         orcid: '',
         oneGender: '',
@@ -350,7 +350,7 @@ class DataAccessRequestApplication extends Component {
     const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
     const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
-    const summaryInvalid = fp.isEmpty(this.state.formData.non_tech_rus);
+    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
     return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
@@ -752,7 +752,7 @@ class DataAccessRequestApplication extends Component {
                 population,
                 forProfit,
                 rus: this.state.formData.rus,
-                nonTechRus: this.state.formData.non_tech_rus,
+                nonTechRus: this.state.formData.nonTechRus,
                 nextPage: this.nextPage,
                 prevPage: this.prevPage,
                 partialSave: this.partialSave

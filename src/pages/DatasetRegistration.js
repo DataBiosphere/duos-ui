@@ -42,7 +42,7 @@ class DatasetRegistration extends Component {
         darCode: null,
         checkCollaborator: false,
         rus: '',
-        non_tech_rus: '',
+        nonTechRus: '',
         oneGender: '',
         methods: '',
         controls: '',
@@ -309,7 +309,7 @@ class DatasetRegistration extends Component {
     const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
     const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
-    const summaryInvalid = fp.isEmpty(this.state.formData.non_tech_rus);
+    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
     return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
