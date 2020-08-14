@@ -1,4 +1,4 @@
-FROM nginx:1.19.1-alpine
+FROM nginx:1.19.2-alpine
 LABEL maintainer="grushton@broadinstitute.org"
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
