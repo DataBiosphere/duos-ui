@@ -9,7 +9,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
     super(props);
     this.state = {
       loading: true,
-      datasetIds: '',
+      datasetId: '',
       datasetName: '',
       description: '',
       dataType: '',
@@ -36,7 +36,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
 
     this.setState(property => {
       property.datasetName = dataSet.properties[0].propertyValue;
-      property.datasetIds = dataSet.alias;
+      property.datasetId = dataSet.alias;
       property.dataType = dataSet.properties[2].propertyValue;
       property.species = dataSet.properties[3].propertyValue;
       property.phenotype = dataSet.properties[4].propertyValue;
@@ -99,7 +99,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
           div({ className: "summary" }, [
             div({ className: "row" }, [
               label({ id: "lbl_datasetId", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Dataset ID"]),
-              div({ id: "txt_datasetId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.datasetIds]),
+              div({ id: "txt_datasetId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.datasetId]),
             ]),
 
             div({ className: "row" }, [
