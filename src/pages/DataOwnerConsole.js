@@ -130,7 +130,7 @@ class DataOwnerConsole extends Component {
                 return h(Fragment, { key: pendingCase.darCode }, [
                   div({ id: pendingCase.darCode, className: "row no-margin tableRow" }, [
 
-                    div({ id: pendingCase.darCode + "_dataSetId", name: "datasetIds", className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 cell-body text" }, [pendingCase.alias]),
+                    div({ id: pendingCase.darCode + "_dataSetId", name: "datasetId", className: "col-lg-2 col-md-2 col-sm-3 col-xs-3 cell-body text" }, [pendingCase.alias]),
                     div({ id: pendingCase.darCode + "_dataSetName", name: "datasetName", className: "col-lg-6 col-md-6 col-sm-5 col-xs-5 cell-body text" }, [pendingCase.dataSetName]),
                     div({ id: pendingCase.darCode + "_darCode", name: "darCode", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pendingCase.darCode]),
 
