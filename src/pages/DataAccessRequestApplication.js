@@ -329,8 +329,9 @@ class DataAccessRequestApplication extends Component {
 
   //method to be passed to step 4 for error checks/messaging
   step1InvalidResult(dataset) {
+    const checkCollaborator = this.state.formData.checkCollaborator;
     const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid} = dataset;
-    return isResearcherInvalid || isInvestigatorInvalid || showValidationMessages || isNihInvalid;
+    return isResearcherInvalid || isInvestigatorInvalid || showValidationMessages || (!checkCollaborator && isNihInvalid);
   }
 
   verifyStep1() {
