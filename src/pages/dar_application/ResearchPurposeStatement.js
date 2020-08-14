@@ -17,13 +17,13 @@ export default function ResearchPurposeStatement(props) {
     oneGender,
     partialSave,
     pediatric,
-    popMigration,
+    populationMigration,
     prevPage,
-    psychTraits,
+    psychiatricTraits,
     sexualDiseases,
     showValidationMessages,
-    stigmatizeDiseases,
-    vulnerablePop
+    stigmatizedDiseases,
+    vulnerablePopulation
   } = props;
 
   const genderLabels = ['Female', 'Male'];
@@ -214,7 +214,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && stigmatizeDiseases.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && stigmatizedDiseases.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -229,7 +229,7 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: stigmatizeDiseases,
+                value: stigmatizedDiseases,
                 onChange: handleRadioChange,
                 id: 'stigmatizedDiseases',
                 name: 'stigmatizedDiseases',
@@ -240,7 +240,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && vulnerablePop.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && vulnerablePopulation.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -255,7 +255,7 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: vulnerablePop,
+                value: vulnerablePopulation,
                 onChange: handleRadioChange,
                 id: 'vulnerablePopulation',
                 name: 'vulnerablePopulation',
@@ -266,7 +266,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && popMigration.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && populationMigration.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -281,7 +281,7 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: popMigration,
+                value: populationMigration,
                 onChange: handleRadioChange,
                 id: 'populationMigration',
                 name: 'populationMigration',
@@ -291,7 +291,7 @@ export default function ResearchPurposeStatement(props) {
           ]),
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && psychTraits.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && psychiatricTraits.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -306,7 +306,7 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: psychTraits,
+                value: psychiatricTraits,
                 onChange: handleRadioChange,
                 id: 'psychiatricTraits',
                 name: 'psychiatricTraits',

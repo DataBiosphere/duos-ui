@@ -773,13 +773,13 @@ class DataAccessRequestApplication extends Component {
                 oneGender: this.state.formData.oneGender,
                 partialSave: this.partialSave,
                 pediatric: this.state.formData.pediatric,
-                popMigration: this.state.formData.populationMigration,
+                populationMigration: this.state.formData.populationMigration,
                 prevPage: this.prevPage,
-                psychTraits: this.state.formData.psychiatricTraits,
+                psychiatricTraits: this.state.formData.psychiatricTraits,
                 sexualDiseases: this.state.formData.sexualDiseases,
                 showValidationMessages: showValidationMessages,
-                stigmatizeDiseases: this.state.formData.stigmatizedDiseases,
-                vulnerablePop: this.state.formData.vulnerablePopulation
+                stigmatizedDiseases: this.state.formData.stigmatizedDiseases,
+                vulnerablePopulation: this.state.formData.vulnerablePopulation
               })
             ]),
 
