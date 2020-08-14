@@ -40,7 +40,7 @@ class ResearcherReview extends Component {
         pubmedID: '',
         scientificURL: '',
         state: '',
-        zipcode: '',
+        zipCode: '',
         nameDAA: ''
       },
     };
@@ -222,7 +222,7 @@ class ResearcherReview extends Component {
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Zip/Postal Code"]),
-                div({ id: "lbl_profileZip", className: "control-data", name: "profileZip", readOnly: true}, [formData.zipcode]),
+                div({ id: "lbl_profileZip", className: "control-data", name: "profileZip", readOnly: true}, [formData.zipCode]),
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Country"]),

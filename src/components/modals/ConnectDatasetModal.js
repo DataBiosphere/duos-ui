@@ -36,8 +36,8 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
   }
 
   async getAvailableDataOwners(dataset) {
-    let datasetId = dataset.dataSetId;
-    const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetId);
+    let datasetIds = dataset.dataSetId;
+    const clients = await DatasetAssociation.getAssociatedAndToAssociateUsers(datasetIds);
     const availableClients = clients.not_associated_users.map(user => {
       return { id: `"${user.dacUserId}"` , name: user.displayName+" : "+user.email};
     });
@@ -50,7 +50,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
       prev.availableclients = availableClients;
       prev.selectedclients = selectedClients;
       prev.originalDataOwners = selectedClients.slice();
-      prev.datasetId = datasetId;
+      prev.datasetIds = datasetIds;
       prev.isUpdate = (!(clients.associated_users === undefined || clients.associated_users.length === 0));
       return prev;
     });
@@ -58,7 +58,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   OKHandler() {
     if (this.state.needsApprovalModified) {
-      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(response => {
+      DataSet.reviewDataSet(this.state.datasetIds, this.state.needsApproval).then(response => {
         this.createOrUpdateAssociations();
       }, (error) => {
         this.setState(prev => {
@@ -78,7 +78,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     if (this.state.isUpdate) {
-      DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(response => {
+      DatasetAssociation.updateDatasetAssociations(this.state.datasetIds, usersId).then(response => {
           this.props.onOKRequest('ConnectDatasetModal');
         }
       , (error) => {
@@ -88,7 +88,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
         });
       });
     } else {
-      DatasetAssociation.createDatasetAssociations(this.state.datasetId, usersId).then(response => {
+      DatasetAssociation.createDatasetAssociations(this.state.datasetIds, usersId).then(response => {
         this.props.onOKRequest('ConnectDatasetModal');
       }, (error) => {
         this.setState(prev => {

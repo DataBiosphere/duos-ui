@@ -39,11 +39,11 @@ class DatasetRegistration extends Component {
       step: 1,
       formData: {
         datasets: [],
-        dar_code: null,
+        darCode: null,
         checkCollaborator: false,
         rus: '',
         non_tech_rus: '',
-        onegender: '',
+        oneGender: '',
         methods: '',
         controls: '',
         population: '',
@@ -56,14 +56,14 @@ class DatasetRegistration extends Component {
         forProfit: '',
         gender: '',
         pediatric: '',
-        illegalbehave: '',
+        illegalBehavior: '',
         addiction: '',
-        sexualdiseases: '',
-        stigmatizediseases: '',
-        vulnerablepop: '',
-        popmigration: '',
-        psychtraits: '',
-        nothealth: '',
+        sexualDiseases: '',
+        stigmatizedDiseases: '',
+        vulnerablePopulation: '',
+        populationMigration: '',
+        psychiatricTraits: '',
+        notHealth: '',
         researcher: '',
         projectTitle: '',
         isThePi: '',
@@ -122,29 +122,29 @@ class DatasetRegistration extends Component {
     let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
     Storage.removeData('dar_application');
     if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
-      if (this.props.location.props.formData.dar_code !== undefined) {
+      if (this.props.location.props.formData.darCode !== undefined) {
         formData = this.props.location.props.formData;
         formData.ontologies = this.getOntologies(formData);
-      } else if (this.props.location.props.formData.datasetId !== undefined) {
+      } else if (this.props.location.props.formData.datasetIds !== undefined) {
         // set datasets sent by data set catalog
-        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetId);
+        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetIds);
       }
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
-    formData.dar_code = formData.dar_code === undefined ? null : formData.dar_code;
-    formData.partial_dar_code = formData.partial_dar_code === undefined ? null : formData.partial_dar_code;
+    formData.darCode = formData.darCode === undefined ? null : formData.darCode;
+    formData.partialDarCode = formData.partialDarCode === undefined ? null : formData.partialDarCode;
 
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
 
-    if (formData.dar_code === null) {
+    if (formData.darCode === null) {
       formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
       formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
       formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
       formData.city = rpProperties.city != null ? rpProperties.city : '';
-      formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+      formData.zipCode = rpProperties.zipCode != null ? rpProperties.zipCode : '';
       formData.country = rpProperties.country != null ? rpProperties.country : '';
       formData.state = rpProperties.state != null ? rpProperties.state : '';
       formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
@@ -160,11 +160,11 @@ class DatasetRegistration extends Component {
 
     formData.userId = Storage.getCurrentUser().dacUserId;
 
-    if (formData.dar_code !== null || formData.partial_dar_code !== null) {
-      formData.datasets = this.processDataSet(formData.datasetId);
+    if (formData.darCode !== null || formData.partialDarCode !== null) {
+      formData.datasets = this.processDataSet(formData.datasetIds);
     }
     let completed = false;
-    if (formData.dar_code !== null) {
+    if (formData.darCode !== null) {
       completed = '';
     } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
@@ -313,9 +313,9 @@ class DatasetRegistration extends Component {
     return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
-  isGenderValid(gender, onegender) {
+  isGenderValid(gender, oneGender) {
     let isValidGender = false;
-    if (onegender === false || (onegender === true && this.isValid(gender))) {
+    if (oneGender === false || (oneGender === true && this.isValid(gender))) {
       isValidGender = true;
     }
     return isValidGender;
@@ -324,17 +324,17 @@ class DatasetRegistration extends Component {
   verifyStep3() {
     let invalid = false;
     if (!(this.isValid(this.state.formData.forProfit) &&
-      this.isValid(this.state.formData.onegender) &&
-      this.isGenderValid(this.state.formData.gender, this.state.formData.onegender) &&
+      this.isValid(this.state.formData.oneGender) &&
+      this.isGenderValid(this.state.formData.gender, this.state.formData.oneGender) &&
       this.isValid(this.state.formData.pediatric) &&
-      this.isValid(this.state.formData.illegalbehave) &&
+      this.isValid(this.state.formData.illegalBehavior) &&
       this.isValid(this.state.formData.addiction) &&
-      this.isValid(this.state.formData.sexualdiseases) &&
-      this.isValid(this.state.formData.stigmatizediseases) &&
-      this.isValid(this.state.formData.vulnerablepop) &&
-      this.isValid(this.state.formData.popmigration) &&
-      this.isValid(this.state.formData.psychtraits) &&
-      this.isValid(this.state.formData.nothealth))) {
+      this.isValid(this.state.formData.sexualDiseases) &&
+      this.isValid(this.state.formData.stigmatizedDiseases) &&
+      this.isValid(this.state.formData.vulnerablePopulation) &&
+      this.isValid(this.state.formData.populationMigration) &&
+      this.isValid(this.state.formData.psychiatricTraits) &&
+      this.isValid(this.state.formData.notHealth))) {
       this.setState(prev => {
         prev.step3.inputPurposes.invalid = true;
         prev.showValidationMessages = true;
@@ -377,7 +377,7 @@ class DatasetRegistration extends Component {
         this.state.formData.datasets.forEach(dataset => {
           ds.push(dataset.value);
         });
-        formData.datasetId = ds;
+        formData.datasetIds = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
@@ -386,8 +386,8 @@ class DatasetRegistration extends Component {
         DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
           formData.urlDAA = response.urlDAA;
           formData.nameDAA = response.nameDAA;
-          if (formData.dar_code !== undefined && formData.dar_code !== null) {
-            DAR.updateDar(formData, formData.dar_code).then(response => {
+          if (formData.darCode !== undefined && formData.darCode !== null) {
+            DAR.updateDar(formData, formData.darCode).then(response => {
               this.setState({ showDialogSubmit: false });
               this.props.history.push('researcher_console');
             });
@@ -433,7 +433,7 @@ class DatasetRegistration extends Component {
         };
       });
       this.setState(prev => {
-        prev.formData.datasetId = datasets;
+        prev.formData.datasetIds = datasets;
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
@@ -459,7 +459,7 @@ class DatasetRegistration extends Component {
       formData.urlDAA = response.urlDAA;
       formData.nameDAA = response.nameDAA;
     }
-    if (formData.partial_dar_code === null) {
+    if (formData.partialDarCode === null) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
         this.props.history.push('researcher_console');
@@ -555,7 +555,7 @@ class DatasetRegistration extends Component {
 
     const {
       checkCollaborator = false,
-      dar_code,
+      darCode,
       hmb = false,
       poa = false,
       diseases = false,
@@ -590,9 +590,9 @@ class DatasetRegistration extends Component {
           div({ className: 'row no-margin' }, [
             Notification({notificationData: this.state.notificationData}),
             div({
-              className: (this.state.formData.dar_code !== null ?
+              className: (this.state.formData.darCode !== null ?
                 'col-lg-10 col-md-9 col-sm-9 ' :
-                this.state.formData.dar_code === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
+                this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
             }, [
               PageHeading({
                 id: 'requestApplication', imgSrc: '/images/icon_dataset_add.png', iconSize: 'medium', color: 'dataset',
@@ -600,7 +600,7 @@ class DatasetRegistration extends Component {
                 description: 'This is an easy way to register a dataset in DUOS!'
               })
             ]),
-            div({ isRendered: this.state.formData.dar_code !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
+            div({ isRendered: this.state.formData.darCode !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
               a({ id: 'btn_back', onClick: this.back, className: 'btn-primary btn-back' }, [
                 i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
               ])
@@ -626,7 +626,7 @@ class DatasetRegistration extends Component {
 
             div({ isRendered: this.state.step === 1 }, [
               div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.dar_code !== null }, [
+                fieldset({ disabled: this.state.formData.darCode !== null }, [
 
                   div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
                     Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
@@ -682,7 +682,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -716,7 +716,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -748,7 +748,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -780,7 +780,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -812,7 +812,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -844,7 +844,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -876,7 +876,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -908,7 +908,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -940,7 +940,7 @@ class DatasetRegistration extends Component {
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -987,7 +987,7 @@ class DatasetRegistration extends Component {
                               poaHandler: this.setPoa,
                               diseases: diseases,
                               diseasesHandler: this.setDiseases,
-                              disabled: (dar_code !== null),
+                              disabled: (darCode !== null),
                               ontologies: ontologies,
                               ontologiesHandler: this.onOntologiesChange,
                               other: other,
@@ -1018,7 +1018,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkMethods',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'methods',
                               }),
@@ -1042,7 +1042,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkControls',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'controls',
                               }),
@@ -1065,7 +1065,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkPopulation',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'population',
                               }),
@@ -1089,7 +1089,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkPopulation',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'population',
                               }),
@@ -1113,7 +1113,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkPopulation',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'population',
                               }),
@@ -1137,7 +1137,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkPopulation',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'population',
                               }),
@@ -1161,7 +1161,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkPopulation',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'population',
                               }),
@@ -1185,7 +1185,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkPopulation',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'population',
                               }),
@@ -1209,7 +1209,7 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkForProfit',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.dar_code !== null),
+                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'forProfit',
                               }),
@@ -1254,7 +1254,7 @@ class DatasetRegistration extends Component {
                           rows: '6',
                           required: true,
                           placeholder: 'Please limit your other data use terms to 1100 characters.',
-                          disabled: this.state.formData.dar_code !== null,
+                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
@@ -1297,7 +1297,7 @@ class DatasetRegistration extends Component {
                         id: 'chk_collaborator',
                         name: 'checkCollaborator',
                         className: 'checkbox-inline rp-checkbox',
-                        disabled: this.state.formData.dar_code !== null,
+                        disabled: this.state.formData.darCode !== null,
                         checked: checkCollaborator,
                         onChange: this.handleCheckboxChange
                       }),
@@ -1324,7 +1324,7 @@ class DatasetRegistration extends Component {
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
 
                         a({
-                          id: 'btn_submit', isRendered: this.state.formData.dar_code === null, onClick: this.attestAndSave,
+                          id: 'btn_submit', isRendered: this.state.formData.darCode === null, onClick: this.attestAndSave,
                           className: 'f-right btn-primary dataset-background bold'
                         }, ['Register in DUOS!']),
 
@@ -1335,7 +1335,7 @@ class DatasetRegistration extends Component {
                         h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
 
                         a({
-                          id: 'btn_save', isRendered: this.state.formData.dar_code === null, onClick: this.partialSave,
+                          id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: this.partialSave,
                           className: 'f-right btn-secondary dataset-color'
                         }, ['Save'])
                       ])

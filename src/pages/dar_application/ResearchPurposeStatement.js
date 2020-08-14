@@ -11,7 +11,7 @@ export default function ResearchPurposeStatement(props) {
     formStateChange,
     forProfit,
     handleRadioChange,
-    illegalBehave,
+    illegalBehavior,
     nextPage,
     notHealth,
     oneGender,
@@ -77,7 +77,7 @@ export default function ResearchPurposeStatement(props) {
             ]),
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               YesNoRadioGroup({
-                value: oneGender, onChange: handleRadioChange, id: 'onegender', name: 'onegender',
+                value: oneGender, onChange: handleRadioChange, id: 'oneGender', name: 'oneGender',
                 required: true
               }),
               div({
@@ -137,7 +137,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && illegalBehave.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && illegalBehavior.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -152,10 +152,10 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: illegalBehave,
+                value: illegalBehavior,
                 onChange: handleRadioChange,
-                id: 'illegalbehave',
-                name: 'illegalbehave',
+                id: 'illegalBehavior',
+                name: 'illegalBehavior',
                 required: true
               })
             ])
@@ -206,8 +206,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: sexualDiseases,
                 onChange: handleRadioChange,
-                id: 'sexualdiseases',
-                name: 'sexualdiseases',
+                id: 'sexualDiseases',
+                name: 'sexualDiseases',
                 required: true
               })
             ])
@@ -231,8 +231,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: stigmatizeDiseases,
                 onChange: handleRadioChange,
-                id: 'stigmatizediseases',
-                name: 'stigmatizediseases',
+                id: 'stigmatizedDiseases',
+                name: 'stigmatizedDiseases',
                 required: true
               })
             ]),
@@ -257,8 +257,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: vulnerablePop,
                 onChange: handleRadioChange,
-                id: 'vulnerablepop',
-                name: 'vulnerablepop',
+                id: 'vulnerablePopulation',
+                name: 'vulnerablePopulation',
                 required: true
               })
             ]),
@@ -283,8 +283,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: popMigration,
                 onChange: handleRadioChange,
-                id: 'popmigration',
-                name: 'popmigration',
+                id: 'populationMigration',
+                name: 'populationMigration',
                 required: true
               })
             ]),
@@ -308,8 +308,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: psychTraits,
                 onChange: handleRadioChange,
-                id: 'psychtraits',
-                name: 'psychtraits',
+                id: 'psychiatricTraits',
+                name: 'psychiatricTraits',
                 required: true
               })
             ]),
@@ -334,8 +334,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: notHealth,
                 onChange: handleRadioChange,
-                id: 'nothealth',
-                name: 'nothealth',
+                id: 'notHealth',
+                name: 'notHealth',
                 required: true
               })
             ])
