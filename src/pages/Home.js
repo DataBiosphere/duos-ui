@@ -123,7 +123,7 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
+          div({ isRendered: !isLogged, className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
             div({ className: 'col-lg-4 col-lg-offset-1 col-md-4 col-md-offset-1'}, [
               p({ style: header }, ['Are you a DAC member?']),
               p({ style: description }, [
@@ -134,7 +134,7 @@ class Home extends Component {
                 ])
               ])
             ]),
-            div({ isRendered: !isLogged, className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
+            div({ className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
                 'Click here to start your data access request!']),
@@ -149,7 +149,7 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ className: 'row' }, [
+          div({ className: 'row', style: { margin: '50px 0' } }, [
             div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2' }, [
               div({}, [
                 h1({ style: header }, ['About DUOS']),
