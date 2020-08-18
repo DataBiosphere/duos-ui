@@ -32,12 +32,12 @@ export const DataUseTranslation = {
      * population refers to question 2.3.2
      *      The outcome of this study is expected to provide new knowledge about the origins of a certain population or its ancestry.
      *      Code is clearly POA
-     * popmigration refers to question 3.1.9
+     * populationMigration refers to question 3.1.9
      *      Does the research aim involve the study of Population Origins/Migration patterns?
      *
      * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
      */
-    if (darInfo.poa || darInfo.population || darInfo.popmigration) {
+    if (darInfo.poa || darInfo.population || darInfo.populationMigration) {
       const dataUseElement = {
         code: 'POA',
         description: 'The dataset will be used for the study of Population Origins/Migration patterns.',
@@ -105,7 +105,7 @@ export const DataUseTranslation = {
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
-    if (darInfo.illegalbehave) {
+    if (darInfo.illegalBehavior) {
       const dataUseElement = {
         code: 'OTHER',
         description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
@@ -119,35 +119,35 @@ export const DataUseTranslation = {
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
-    if (darInfo.sexualdiseases) {
+    if (darInfo.sexualDiseases) {
       const dataUseElement = {
         code: 'OTHER',
         description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
-    if (darInfo.stigmatizediseases) {
+    if (darInfo.stigmatizedDiseases) {
       const dataUseElement = {
         code: 'OTHER',
         description: 'The dataset will be used for the study of stigmatizing illnesses.',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
-    if (darInfo.vulnerablepop) {
+    if (darInfo.vulnerablePopulation) {
       const dataUseElement = {
         code: 'OTHER',
         description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
-    if (darInfo.psychtraits) {
+    if (darInfo.psychiatricTraits) {
       const dataUseElement = {
         code: 'OTHER',
         description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
       };
       dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
     }
-    if (darInfo.nothealth) {
+    if (darInfo.notHealth) {
       const dataUseElement = {
         code: 'OTHER',
         description: 'The dataset will be used for the research that correlates  ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
