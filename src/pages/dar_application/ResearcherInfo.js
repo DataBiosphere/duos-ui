@@ -1,15 +1,118 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h3, input, label, span } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h3, input, label, span, table, tr, td } from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import isNil from 'lodash/fp/isNil';
+import isEmpty from 'lodash/fp/isEmpty';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
-
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
-
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
+
+//NOTE: remember to add parent callback to update collaborator state variable on parent component
+const CollaboratorList = (props) => {
+  //NOTE: need callback parent from props to update state list on parent container
+  //NOTE: need boolean list to keep track of edit view for individual list elements
+  //toggle value on edit click, remove from array when corresponding collaborator is deleted from list
+
+  const { formStateChange, collaboratorLabel, collaboratorKey } = props;
+
+  const [collaborators, setCollaborators] = useState(props.collaborators || []);
+  // const [editBoolArray, setEditBoolArray] = useState(new Array(collaborators.length).fill(false));
+  const [deleteBoolArray, setDeleteBoolArray] = useState(new Array(collaborators.length).fill(false));
+
+  //generic function that can be used on edit and delete
+  const toogleDeleteBool = (array, setter, index) => {
+    let arrayCopy = array.slice();
+    arrayCopy[index] = !arrayCopy[index];
+    setter(arrayCopy);
+  };
+
+  const updateAttribute = (index, key, value) => {
+    let collaboratorsCopy = Array.slice(collaborators);
+    collaboratorsCopy[index][key] = value;
+    setCollaborators()
+  }
+
+  const addCollaborator = () => {
+    setCollaborators([...collaborators, {name: '', email: ''}]);
+  };
+
+  const removeCollaborator = (index) => {
+    let deleteCopy = deleteBoolArray.slice();
+    let collaboratorCopy = collaborators.slice();
+
+    deleteCopy.splice(index, 1);
+    collaboratorCopy.splice(index, 1);
+    setDeleteBoolArray(deleteCopy);
+    setCollaborators(collaboratorCopy);
+  };
+
+
+  useEffect(() => {
+    return formStateChange(collaboratorKey, collaboratorLabel);
+  }, [formStateChange, collaboratorKey, collaboratorLabel]);
+
+  const collaboratorList = collaborators.map((collaborator, index) => 
+    div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+      div({ className: 'row no-margin'}, [
+        div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+          label({ className: 'control-label' }, [`${collaboratorLabel} + Name*`]),
+          input({
+            type: 'text',
+            name: `collaborator-${index}-name`,
+            value: collaborator.name || '',
+            className: 'name-input',
+            required: true,
+            onChange: (e) => updateAttribute(index, 'name', e.target.value)
+          })
+        ]),
+        div({ className: 'control-label' }, [
+          div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+            label({ className: 'control-label' }, [`${collaboratorLabel} + Title*`]),
+            input({
+              type: 'text',
+              name: `collaborator-${index}-title`,
+              value: collaborator.title || '',
+              className: 'title-input',
+              required: true,
+              onChange: (e) => updateAttribute(index, 'title', e.target.value)
+            })
+          ])
+        ])
+      ]),
+      div({ className: 'row no-margin'}, [
+        div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12' }, [
+          label({ className: 'control-label' }, [`${collaboratorLabel} + NIH eRA Commons ID*`]),
+          input({
+            type: 'text',
+            name: `collaborator-${index}-eraCommonsID`,
+            value: collaborator.eraCommonsId || '',
+            className: 'eraCommonsId-input',
+            required: true,
+            onChange: (e) => updateAttribute(index, 'eraCommonsId', e.target.value)
+          })
+        ])
+      ]),
+      div({ className: 'row no-margin'}, [
+        div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'}, [
+          label({ className: 'control-label' }, [`${collaboratorLabel} + Email*`]),
+          input({
+            type: 'text',
+            name: `collaborator-${index}-email`,
+            value: collaborator.eraCommonsId || '',
+            className: 'email-input',
+            required: true,
+            onChange: (e) => updateAttribute(index, 'email', e.target.value)
+          })
+        ])
+      ])
+    ])
+  );
+
+  return {collaboratorList};
+};
 
 export default function ResearcherInfo(props) {
   const {
@@ -17,9 +120,11 @@ export default function ResearcherInfo(props) {
     darCode,
     eRACommonsDestination,
     formStateChange,
+    internalCollaborators,
     invalidInvestigator,
     invalidResearcher,
     investigator,
+    labCollaborators,
     linkedIn,
     location,
     nihValid,
@@ -32,11 +137,21 @@ export default function ResearcherInfo(props) {
     nextPage
   } = props;
 
+  //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
+  const [otherCollaborators, setOtherCollaborators] = useState(props.otherCollaborators);
 
   useEffect(() => {
     setCheckCollaborator(props.checkCollaborator);
   }, [props.checkCollaborator]);
+
+  useEffect(() => {
+    setOtherCollaborators(props.otherCollaborators);
+  }, [props.otherCollaborators]);
+
+  useEffect(() => {
+    return formStateChange({name: 'otherCollaborators', value: otherCollaborators})
+  })
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -79,7 +194,7 @@ export default function ResearcherInfo(props) {
               className: 'checkbox-inline rp-checkbox',
               disabled: !isNil(darCode),
               checked: checkCollaborator,
-              onChange: (e) => formStateChange(setCheckCollaborator, {name: 'checkCollaborator', value: e.target.checked})
+              onChange: (e) => formStateChange({name: 'checkCollaborator', value: e.target.checked})
             }),
             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
               ['I am an NIH Intramural researcher (NIH email required), or internal collaborator of the PI for the selected dataset(s)'])
@@ -169,6 +284,20 @@ export default function ResearcherInfo(props) {
             span({
               className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
             }, ['Required field'])
+          ])
+        ]),
+
+        div({className: 'form-group'}, [
+          div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            label({className: "control-label rp-title-question"}, [
+              '1.4 Internal Lab Staff'
+            ],
+            //NOTE: format this line?
+            span('Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent level here.'))
+          ]),
+          h(CollaboratorList, {collaborators: labCollaborators, collaboratorKey: 'labCollaborators', collaboratorLabel: 'Internal Lab Staff'}),
+          div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group collaborator-buttons'}, [
+            //NOTE: add button should add collaborator, call parent state function to update formData
           ])
         ])
       ]),

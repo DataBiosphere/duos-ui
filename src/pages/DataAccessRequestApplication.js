@@ -70,7 +70,8 @@ class DataAccessRequestApplication extends Component {
         profileName: '',
         piName: '',
         pubmedId: '',
-        scientificUrl: ''
+        scientificUrl: '',
+        otherCollaborators: []
       },
       step1: {
         inputResearcher: {
@@ -96,10 +97,10 @@ class DataAccessRequestApplication extends Component {
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
-  formStateChange = (stateVarSetter, dataset) => {
+  formStateChange = (dataset) => {
     const {name, value} = dataset;
     this.formFieldChange(name, value);
-    stateVarSetter(value);
+    // stateVarSetter(value);
   };
 
   formFieldChange = (field, value) => {
@@ -730,6 +731,7 @@ class DataAccessRequestApplication extends Component {
                 nihValid: this.state.nihValid,
                 onNihStatusUpdate: this.onNihStatusUpdate,
                 orcid: orcid,
+                otherCollaborators: this.state.formData.otherCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
