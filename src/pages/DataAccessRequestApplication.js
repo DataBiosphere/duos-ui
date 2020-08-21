@@ -35,6 +35,8 @@ class DataAccessRequestApplication extends Component {
       formData: {
         datasets: [],
         dar_code: null,
+        labCollaborators: [],
+        internalCollaborators: [],
         checkCollaborator: false,
         rus: '',
         non_tech_rus: '',
