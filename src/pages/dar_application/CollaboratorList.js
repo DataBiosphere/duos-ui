@@ -191,7 +191,7 @@ export default function CollaboratorList(props) {
                 input({
                   type: "radio",
                   id: `rad-collaborator-${collaborator.uuid}-option-${option.value}`,
-                  checked: Boolean(collaborator.approverStatus) === Boolean(option.value),
+                  checked: collaborator.approverStatus === option.value,
                   name: `collaborator-${collaborator.uuid}-approver-status`,
                   value: option.value,
                   onChange: (e) => updateAttribute(index, 'approverStatus', option.value)
