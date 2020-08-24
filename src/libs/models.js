@@ -45,14 +45,14 @@ export const Models = {
       oneGender: false,
       gender: null,
       pediatric: false,
-      illegalbehave: false,
+      illegalBehavior: false,
       addiction: false,
-      sexualdiseases: false,
-      stigmatizediseases: false,
-      vulnerablepop: false,
-      popmigration: false,
-      psychtraits: false,
-      nothealth: false
+      sexualDiseases: false,
+      stigmatizedDiseases: false,
+      vulnerablePopulation: false,
+      populationMigration: false,
+      psychiatricTraits: false,
+      notHealth: false
     }
   },
   error: { show: false, title: '', msg: [''] }

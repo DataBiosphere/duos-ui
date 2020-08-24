@@ -1,8 +1,6 @@
 import { useState, useEffect} from 'react';
 import { a, div, input, label, span, p, i } from 'react-hyperscript-helpers';
 import { v4 as uuidV4} from 'uuid';
-import isEmpty from 'lodash/fp/isEmpty';
-import merge from 'lodash/fp/merge';
 
 export default function CollaboratorList(props) {
   const {formFieldChange, collaboratorLabel, collaboratorKey, showApproval } = props;
@@ -75,6 +73,10 @@ export default function CollaboratorList(props) {
   useEffect(() => {
     return formFieldChange({name: collaboratorKey, value: collaborators});
   }, [formFieldChange, collaboratorKey, collaborators]);
+
+  useEffect(() => {
+    setCollaborators(props.collaborators);
+  }, [props.collaborators])
 
   const ListItems = div({className: 'form-group row no-margin'}, [collaborators.map((collaborator, index) =>
     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: cardStyle, key: `collaborator-item-${collaborator.uuid}`}, [

@@ -11,19 +11,19 @@ export default function ResearchPurposeStatement(props) {
     formFieldChange,
     forProfit,
     handleRadioChange,
-    illegalBehave,
+    illegalBehavior,
     nextPage,
     notHealth,
     oneGender,
     partialSave,
     pediatric,
-    popMigration,
+    populationMigration,
     prevPage,
-    psychTraits,
+    psychiatricTraits,
     sexualDiseases,
     showValidationMessages,
-    stigmatizeDiseases,
-    vulnerablePop
+    stigmatizedDiseases,
+    vulnerablePopulation
   } = props;
 
   const genderLabels = ['Female', 'Male'];
@@ -82,7 +82,7 @@ export default function ResearchPurposeStatement(props) {
             ]),
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               YesNoRadioGroup({
-                value: oneGender, onChange: handleRadioChange, id: 'onegender', name: 'onegender',
+                value: oneGender, onChange: handleRadioChange, id: 'oneGender', name: 'oneGender',
                 required: true
               }),
               div({
@@ -142,7 +142,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && illegalBehave.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && illegalBehavior.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -157,10 +157,10 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: illegalBehave,
+                value: illegalBehavior,
                 onChange: handleRadioChange,
-                id: 'illegalbehave',
-                name: 'illegalbehave',
+                id: 'illegalBehavior',
+                name: 'illegalBehavior',
                 required: true
               })
             ])
@@ -211,15 +211,15 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: sexualDiseases,
                 onChange: handleRadioChange,
-                id: 'sexualdiseases',
-                name: 'sexualdiseases',
+                id: 'sexualDiseases',
+                name: 'sexualDiseases',
                 required: true
               })
             ])
           ]),
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && stigmatizeDiseases.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && stigmatizedDiseases.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -234,10 +234,10 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: stigmatizeDiseases,
+                value: stigmatizedDiseases,
                 onChange: handleRadioChange,
-                id: 'stigmatizediseases',
-                name: 'stigmatizediseases',
+                id: 'stigmatizedDiseases',
+                name: 'stigmatizedDiseases',
                 required: true
               })
             ]),
@@ -245,7 +245,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && vulnerablePop.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && vulnerablePopulation.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -260,10 +260,10 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: vulnerablePop,
+                value: vulnerablePopulation,
                 onChange: handleRadioChange,
-                id: 'vulnerablepop',
-                name: 'vulnerablepop',
+                id: 'vulnerablePopulation',
+                name: 'vulnerablePopulation',
                 required: true
               })
             ]),
@@ -271,7 +271,7 @@ export default function ResearchPurposeStatement(props) {
 
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && popMigration.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && populationMigration.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -286,17 +286,17 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: popMigration,
+                value: populationMigration,
                 onChange: handleRadioChange,
-                id: 'popmigration',
-                name: 'popmigration',
+                id: 'populationMigration',
+                name: 'populationMigration',
                 required: true
               })
             ]),
           ]),
           div({
             className: 'radio-question-container row no-margin', style: {
-              backgroundColor: showValidationMessages && psychTraits.toString().length === 0 ? alertBackgroundColor : 'inherit'
+              backgroundColor: showValidationMessages && psychiatricTraits.toString().length === 0 ? alertBackgroundColor : 'inherit'
             }
           }, [
             div({
@@ -311,10 +311,10 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
-                value: psychTraits,
+                value: psychiatricTraits,
                 onChange: handleRadioChange,
-                id: 'psychtraits',
-                name: 'psychtraits',
+                id: 'psychiatricTraits',
+                name: 'psychiatricTraits',
                 required: true
               })
             ]),
@@ -339,8 +339,8 @@ export default function ResearchPurposeStatement(props) {
               YesNoRadioGroup({
                 value: notHealth,
                 onChange: handleRadioChange,
-                id: 'nothealth',
-                name: 'nothealth',
+                id: 'notHealth',
+                name: 'notHealth',
                 required: true
               })
             ])

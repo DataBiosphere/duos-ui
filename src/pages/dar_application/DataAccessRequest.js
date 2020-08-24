@@ -314,9 +314,9 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: nonTechRus,
-              onBlur: (e) => formFieldChange({name: 'non_tech_rus', value: e.target.value}),
-              name: 'non_tech_rus',
-              id: 'inputNonTechRUS',
+              onBlur: (e) => formFieldChange({name: 'nonTechRus', value: e.target.value}),
+              name: 'nonTechRus',
+              id: 'inputNonTechRus',
               className: (isEmpty(nonTechRus) && showValidationMessages) ?
                 'required-field-error form-control' :
                 'form-control',

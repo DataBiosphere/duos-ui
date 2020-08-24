@@ -39,10 +39,10 @@ class DataAccessRequestApplication extends Component {
         internalCollaborators: [],
         checkCollaborator: false,
         rus: '',
-        non_tech_rus: '',
+        nonTechRus: '',
         linkedIn: '',
         orcid: '',
-        onegender: '',
+        oneGender: '',
         methods: '',
         controls: '',
         population: '',
@@ -55,14 +55,14 @@ class DataAccessRequestApplication extends Component {
         forProfit: '',
         gender: '',
         pediatric: '',
-        illegalbehave: '',
+        illegalBehavior: '',
         addiction: '',
-        sexualdiseases: '',
-        stigmatizediseases: '',
-        vulnerablepop: '',
-        popmigration: '',
-        psychtraits: '',
-        nothealth: '',
+        sexualDiseases: '',
+        stigmatizedDiseases: '',
+        vulnerablePopulation: '',
+        populationMigration: '',
+        psychiatricTraits: '',
+        notHealth: '',
         investigator: '',
         researcher: '',
         projectTitle: '',
@@ -138,8 +138,8 @@ class DataAccessRequestApplication extends Component {
         // Handle the case where the DAR is already submitted. We have to
         // show the single dataset that was selected for this DAR and not
         // all of the original datasets that may have been originally selected.
-        if (!fp.isNil(formData.dar_code)) {
-          const dsId = fp.get('datasetId')(formData)[0];
+        if (!fp.isNil(formData.darCode)) {
+          const dsId = fp.get('datasetIds')(formData)[0];
           formData.datasets = fp.filter({value: dsId.toString()})(formData.datasets);
         }
       });
@@ -150,8 +150,8 @@ class DataAccessRequestApplication extends Component {
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
-    formData.dar_code = fp.isNil(formData.dar_code) ? null : formData.dar_code;
-    formData.partial_dar_code = fp.isNil(formData.partial_dar_code) ? null : formData.partial_dar_code;
+    formData.darCode = fp.isNil(formData.darCode) ? null : formData.darCode;
+    formData.partialDarCode = fp.isNil(formData.partialDarCode) ? null : formData.partialDarCode;
     formData.ontologies = this.formatOntologyItems(formData);
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
@@ -171,7 +171,7 @@ class DataAccessRequestApplication extends Component {
     formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
     formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
     formData.city = rpProperties.city != null ? rpProperties.city : '';
-    formData.zipcode = rpProperties.zipcode != null ? rpProperties.zipcode : '';
+    formData.zipCode = rpProperties.zipCode != null ? rpProperties.zipCode : '';
     formData.country = rpProperties.country != null ? rpProperties.country : '';
     formData.state = rpProperties.state != null ? rpProperties.state : '';
     formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
@@ -184,7 +184,7 @@ class DataAccessRequestApplication extends Component {
     formData.userId = Storage.getCurrentUser().dacUserId;
 
     let completed = false;
-    if (!fp.isNil(formData.dar_code)) {
+    if (!fp.isNil(formData.darCode)) {
       completed = '';
     } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
@@ -238,7 +238,7 @@ class DataAccessRequestApplication extends Component {
       value = false;
     }
     this.setState(prev => {
-      if (field === 'onegender' && value === false) {
+      if (field === 'oneGender' && value === false) {
         prev.formData.gender = '';
       }
       prev.formData[field] = value;
@@ -350,13 +350,13 @@ class DataAccessRequestApplication extends Component {
     const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
     const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
-    const summaryInvalid = fp.isEmpty(this.state.formData.non_tech_rus);
+    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
     return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
-  isGenderValid(gender, onegender) {
+  isGenderValid(gender, oneGender) {
     let isValidGender = false;
-    if (onegender === false || (onegender === true && this.isValid(gender))) {
+    if (oneGender === false || (oneGender === true && this.isValid(gender))) {
       isValidGender = true;
     }
     return isValidGender;
@@ -364,17 +364,17 @@ class DataAccessRequestApplication extends Component {
 
   step3InvalidResult = () => {
     return !(this.isValid(this.state.formData.forProfit) &&
-      this.isValid(this.state.formData.onegender) &&
-      this.isGenderValid(this.state.formData.gender, this.state.formData.onegender) &&
+      this.isValid(this.state.formData.oneGender) &&
+      this.isGenderValid(this.state.formData.gender, this.state.formData.oneGender) &&
       this.isValid(this.state.formData.pediatric) &&
-      this.isValid(this.state.formData.illegalbehave) &&
+      this.isValid(this.state.formData.illegalBehavior) &&
       this.isValid(this.state.formData.addiction) &&
-      this.isValid(this.state.formData.sexualdiseases) &&
-      this.isValid(this.state.formData.stigmatizediseases) &&
-      this.isValid(this.state.formData.vulnerablepop) &&
-      this.isValid(this.state.formData.popmigration) &&
-      this.isValid(this.state.formData.psychtraits) &&
-      this.isValid(this.state.formData.nothealth));
+      this.isValid(this.state.formData.sexualDiseases) &&
+      this.isValid(this.state.formData.stigmatizedDiseases) &&
+      this.isValid(this.state.formData.vulnerablePopulation) &&
+      this.isValid(this.state.formData.populationMigration) &&
+      this.isValid(this.state.formData.psychiatricTraits) &&
+      this.isValid(this.state.formData.notHealth));
   }
 
 
@@ -419,8 +419,8 @@ class DataAccessRequestApplication extends Component {
         return prev;
       }, () => {
         let formData = this.state.formData;
-        // DAR datasetId needs to be a list of ids
-        formData.datasetId = fp.map('value')(formData.datasets);
+        // DAR datasetIds needs to be a list of ids
+        formData.datasetIds = fp.map('value')(formData.datasets);
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
@@ -454,15 +454,15 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     if (answer === true) {
-      // DAR datasetId needs to be a list of ids
-      const datasetId = fp.map('value')(this.state.formData.datasets);
+      // DAR datasetIds needs to be a list of ids
+      const datasetIds = fp.map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
       const ontologies = fp.map((o) => {return {
         id: o.key,
         label: o.value
       };})(this.state.formData.ontologies);
       this.setState(prev => {
-        prev.formData.datasetId = datasetId;
+        prev.formData.datasetIds = datasetIds;
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
@@ -473,8 +473,8 @@ class DataAccessRequestApplication extends Component {
 
   savePartial = () => {
     let formData = this.state.formData;
-    // DAR datasetId needs to be a list of ids
-    formData.datasetId = fp.map('value')(formData.datasets);
+    // DAR datasetIds needs to be a list of ids
+    formData.datasetIds = fp.map('value')(formData.datasets);
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = this.props.match.params;
     if (fp.isNil(dataRequestId)) {
@@ -577,12 +577,11 @@ class DataAccessRequestApplication extends Component {
   };
 
   render() {
-
     const {
       orcid = '',
       researcherGate = '',
       checkCollaborator = false,
-      dar_code,
+      darCode,
       hmb = false,
       poa = false,
       diseases = false,
@@ -594,6 +593,8 @@ class DataAccessRequestApplication extends Component {
       methods = false,
       linkedIn = '',
       investigator = '',
+      labCollaborators,
+      internalCollaborators,
       ontologies = []
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
@@ -610,7 +611,7 @@ class DataAccessRequestApplication extends Component {
       poaHandler: this.setPoa,
       diseases: diseases,
       diseasesHandler: this.setDiseases,
-      disabled: (dar_code !== null),
+      disabled: (darCode !== null),
       ontologies: ontologies,
       ontologiesHandler: this.onOntologiesChange,
       other: other,
@@ -639,9 +640,9 @@ class DataAccessRequestApplication extends Component {
           div({ className: 'row no-margin' }, [
             Notification({notificationData: this.state.notificationData}),
             div({
-              className: (this.state.formData.dar_code !== null ?
+              className: (this.state.formData.darCode !== null ?
                 'col-lg-10 col-md-9 col-sm-9 ' :
-                this.state.formData.dar_code === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
+                this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
             }, [
               PageHeading({
                 id: 'requestApplication', imgSrc: '/images/icon_add_access.png', iconSize: 'medium', color: 'access',
@@ -649,7 +650,7 @@ class DataAccessRequestApplication extends Component {
                 description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
               })
             ]),
-            div({ isRendered: this.state.formData.dar_code !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
+            div({ isRendered: this.state.formData.darCode !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
               a({ id: 'btn_back', onClick: this.back, className: 'btn-primary btn-back' }, [
                 i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
               ])
@@ -718,7 +719,7 @@ class DataAccessRequestApplication extends Component {
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 completed: this.state.completed,
-                darCode: this.state.formData.dar_code,
+                darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,
                 formFieldChange: this.formFieldChange,
                 invalidInvestigator: step1.inputInvestigator.invalid,
@@ -729,8 +730,8 @@ class DataAccessRequestApplication extends Component {
                 nihValid: this.state.nihValid,
                 onNihStatusUpdate: this.onNihStatusUpdate,
                 orcid: orcid,
-                internalCollaborators: this.state.formData.internalCollaborators,
-                labCollaborators: this.state.formData.labCollaborators,
+                internalCollaborators: internalCollaborators,
+                labCollaborators: labCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
@@ -741,7 +742,7 @@ class DataAccessRequestApplication extends Component {
 
             div({ isRendered: this.state.step === 2 }, [
               h(DataAccessRequest, {
-                darCode: dar_code,
+                darCode: darCode,
                 datasets: this.state.formData.datasets,
                 onDatasetsChange: this.onDatasetsChange,
                 showValidationMessages: showValidationMessages,
@@ -754,7 +755,7 @@ class DataAccessRequestApplication extends Component {
                 population,
                 forProfit,
                 rus: this.state.formData.rus,
-                nonTechRus: this.state.formData.non_tech_rus,
+                nonTechRus: this.state.formData.nonTechRus,
                 nextPage: this.nextPage,
                 prevPage: this.prevPage,
                 partialSave: this.partialSave
@@ -764,30 +765,30 @@ class DataAccessRequestApplication extends Component {
             div({ isRendered: this.state.step === 3 }, [
               h(ResearchPurposeStatement, {
                 addiction: this.state.formData.addiction,
-                darCode: dar_code,
+                darCode: darCode,
                 formFieldChange: this.formFieldChange,
                 forProfit: this.state.formData.forProfit,
                 gender: this.state.formData.gender,
                 handleRadioChange: this.handleRadioChange,
-                illegalBehave: this.state.formData.illegalbehave,
+                illegalBehavior: this.state.formData.illegalBehavior,
                 nextPage: this.nextPage,
-                notHealth: this.state.formData.nothealth,
-                oneGender: this.state.formData.onegender,
+                notHealth: this.state.formData.notHealth,
+                oneGender: this.state.formData.oneGender,
                 partialSave: this.partialSave,
                 pediatric: this.state.formData.pediatric,
-                popMigration: this.state.formData.popmigration,
+                populationMigration: this.state.formData.populationMigration,
                 prevPage: this.prevPage,
-                psychTraits: this.state.formData.psychtraits,
-                sexualDiseases: this.state.formData.sexualdiseases,
+                psychiatricTraits: this.state.formData.psychiatricTraits,
+                sexualDiseases: this.state.formData.sexualDiseases,
                 showValidationMessages: showValidationMessages,
-                stigmatizeDiseases: this.state.formData.stigmatizediseases,
-                vulnerablePop: this.state.formData.vulnerablepop
+                stigmatizedDiseases: this.state.formData.stigmatizedDiseases,
+                vulnerablePopulation: this.state.formData.vulnerablePopulation
               })
             ]),
 
             div({ isRendered: this.state.step === 4 }, [
               h(DataUseAgreements, {
-                darCode: dar_code,
+                darCode: darCode,
                 problemSavingRequest,
                 attestAndSave: this.attestAndSave,
                 ConfirmationDialogComponent,
