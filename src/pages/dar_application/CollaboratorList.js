@@ -48,13 +48,18 @@ export default function CollaboratorList(props) {
   };
 
   const addCollaborator = () => {
-    const updatedArray = [...collaborators, {
+    let newCollaborator = {
       email: '',
       name: '',
       eraCommonsId: '',
       title: '',
       uuid: uuidV4()
-    }];
+    };
+    if (props.showApproval) { 
+      newCollaborator.approverStatus = true;
+    }
+
+    const updatedArray = [...collaborators, newCollaborator];
     const deleteBoolCopy = [...deleteBoolArray, false];
     setCollaborators(updatedArray);
     setDeleteBoolArray(deleteBoolCopy);
@@ -67,6 +72,7 @@ export default function CollaboratorList(props) {
     deleteCopy.splice(index, 1);
     collaboratorCopy.splice(index, 1);
     setCollaborators(collaboratorCopy);
+    setDeleteBoolArray(deleteCopy);
   };
 
   useEffect(() => {
@@ -175,23 +181,23 @@ export default function CollaboratorList(props) {
           //YesNoRadioGroup can probably be refactored to handle this, the issue would be rewritting other uses of the component to match the updated form
           //Thus the YesNoRadioGroup refactor should be handled on a separate PR
           div({className: 'radio-inline'}, [
-            ['Yes', 'No'].map((option) =>
+            [{label:'Yes', value: true}, {label:'No', value: false}].map((option) =>
               label({
                 className: "radio-wrapper",
-                key: `collaborator-${collaborator.uuid}-option-${option}`,
-                id: `lbl-collaborator-${collaborator.uuid}-option-${option}`,
-                htmlFor: `rad-collaborator-${collaborator.uuid}-option-${option}`
+                key: `collaborator-${collaborator.uuid}-option-${option.value}`,
+                id: `lbl-collaborator-${collaborator.uuid}-option-${option.value}`,
+                htmlFor: `rad-collaborator-${collaborator.uuid}-option-${option.value}`
               }, [
                 input({
                   type: "radio",
-                  id: `rad-collaborator-${collaborator.uuid}-option-${option}`,
-                  checked: collaborator.approverStatus === option,
+                  id: `rad-collaborator-${collaborator.uuid}-option-${option.value}`,
+                  checked: Boolean(collaborator.approverStatus) === Boolean(option.value),
                   name: `collaborator-${collaborator.uuid}-approver-status`,
-                  value: option,
-                  onChange: (e) => updateAttribute(index, 'approverStatus', e.target.value)
+                  value: option.value,
+                  onChange: (e) => updateAttribute(index, 'approverStatus', option.value)
                 }),
                 span({ className: "radio-check"}),
-                span({ className: 'radio-label '}, [option])
+                span({ className: 'radio-label '}, [option.label])
               ])
             )
           ]),
