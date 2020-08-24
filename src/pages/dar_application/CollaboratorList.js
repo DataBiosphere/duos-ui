@@ -66,7 +66,6 @@ export default function CollaboratorList(props) {
 
     deleteCopy.splice(index, 1);
     collaboratorCopy.splice(index, 1);
-    setDeleteBoolArray(deleteCopy);
     setCollaborators(collaboratorCopy);
   };
 
@@ -76,7 +75,8 @@ export default function CollaboratorList(props) {
 
   useEffect(() => {
     setCollaborators(props.collaborators);
-  }, [props.collaborators])
+    setDeleteBoolArray(props.deleteBoolArray);
+  }, [props.collaborators, props.deleteBoolArray])
 
   const ListItems = div({className: 'form-group row no-margin'}, [collaborators.map((collaborator, index) =>
     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: cardStyle, key: `collaborator-item-${collaborator.uuid}`}, [
