@@ -58,8 +58,8 @@ export default function CollaboratorList(props) {
       uuid: uuidV4()
     }];
     const deleteBoolCopy = [...deleteBoolArray, false];
-    setDeleteBoolArray(deleteBoolCopy);
     setCollaborators(updatedArray);
+    setDeleteBoolArray(deleteBoolCopy);
   };
 
   const removeCollaborator = (index) => {

@@ -96,7 +96,7 @@ class DataAccessRequestApplication extends Component {
 
     this.goToStep = this.goToStep.bind(this);
     this.formFieldChange = this.formFieldChange.bind(this);
-
+    this.partialSave = this.partialSave.bind(this);
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
