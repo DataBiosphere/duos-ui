@@ -19,8 +19,8 @@
     "query-string": "6.13.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-ga": "^3.1.2",
     "react-dropzone": "11.0.3",
+    "react-ga": "^3.1.2",
     "react-google-charts": "3.0.15",
     "react-google-login": "5.1.21",
     "react-hyperscript-helpers": "2.0.0",
@@ -39,7 +39,8 @@
     "react-tabs": "3.1.1",
     "react-tooltip": "4.2.8",
     "set-value": "3.0.2",
-    "source-map-explorer": "2.4.2"
+    "source-map-explorer": "2.4.2",
+    "uuid": "^8.3.0"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",

@@ -8,7 +8,7 @@ export default function ResearchPurposeStatement(props) {
   const {
     addiction,
     darCode,
-    formStateChange,
+    formFieldChange,
     forProfit,
     handleRadioChange,
     illegalBehave,
@@ -90,7 +90,7 @@ export default function ResearchPurposeStatement(props) {
                     return (
                       label({
                         key: 'gender' + ix,
-                        onClick: (e) => formStateChange({name: 'gender', value: genderValues[ix]}),
+                        onClick: (e) => formFieldChange({name: 'gender', value: genderValues[ix]}),
                         id: 'lbl_gender_' + ix,
                         htmlFor: 'rad_gender_' + ix,
                         className: 'radio-wrapper'

@@ -11,7 +11,7 @@ export default function DataAccessRequest(props) {
     datasets,
     onDatasetsChange,
     showValidationMessages,
-    formStateChange,
+    formFieldChange,
     isTypeOfResearchInvalid,
     TypeOfResearch,
     nextPage,
@@ -38,6 +38,13 @@ export default function DataAccessRequest(props) {
       });
       callback(options);
     });
+  };
+
+  //function needed to update state for 2.4
+  const checkedStateChange = (dataset, setter) => {
+    const { value } = dataset;
+    setter(value);
+    formFieldChange(dataset);
   };
 
   return (
@@ -99,7 +106,7 @@ export default function DataAccessRequest(props) {
                 id: 'inputTitle',
                 maxLength: '256',
                 defaultValue: projectTitle,
-                onBlur: (e) => formStateChange({name: 'projectTitle', value: e.target.value}),
+                onBlur: (e) => formFieldChange({name: 'projectTitle', value: e.target.value}),
                 className: (isEmpty(projectTitle) && showValidationMessages) ?
                   'form-control required-field-error' :
                   'form-control',
@@ -159,7 +166,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: methods,
-                  onChange: (e) => formStateChange({name: 'methods', value: e.target.checked}),
+                  onChange: (e) => checkedStateChange({name: 'methods', value: e.target.checked}, setMethods),
                   id: 'checkMethods',
                   type: 'checkbox',
                   disabled: (darCode !== null),
@@ -183,7 +190,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: controls,
-                  onChange: (e) => formStateChange({name: 'controls', value: e.target.checked}),
+                  onChange: (e) => checkedStateChange({name: 'controls', value: e.target.checked}, setControls),
                   id: 'checkControls',
                   type: 'checkbox',
                   disabled: (!isNil(darCode)),
@@ -206,7 +213,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: population,
-                  onChange: (e) => formStateChange({name:'population', value: e.target.checked}),
+                  onChange: (e) => checkedStateChange({name:'population', value: e.target.checked}, setPopulation),
                   id: 'checkPopulation',
                   type: 'checkbox',
                   disabled: !isNil(darCode),
@@ -230,7 +237,7 @@ export default function DataAccessRequest(props) {
               div({className: 'checkbox'}, [
                 input({
                   checked: forProfit,
-                  onChange: (e) => formStateChange({name: 'forProfit', value: e.target.checked}),
+                  onChange: (e) => checkedStateChange({name: 'forProfit', value: e.target.checked}, setForProfit),
                   id: 'checkForProfit',
                   type: 'checkbox',
                   disabled: !isNil(darCode),
@@ -272,7 +279,7 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: rus,
-              onBlur: (e) => formStateChange({name: 'rus', value: e.target.value}),
+              onBlur: (e) => formFieldChange({name: 'rus', value: e.target.value}),
               name: 'rus',
               id: 'inputRUS',
               className: (isEmpty(rus) && showValidationMessages) ?
@@ -307,7 +314,7 @@ export default function DataAccessRequest(props) {
           [
             textarea({
               defaultValue: nonTechRus,
-              onBlur: (e) => formStateChange({name: 'non_tech_rus', value: e.target.value}),
+              onBlur: (e) => formFieldChange({name: 'non_tech_rus', value: e.target.value}),
               name: 'non_tech_rus',
               id: 'inputNonTechRUS',
               className: (isEmpty(nonTechRus) && showValidationMessages) ?

@@ -95,22 +95,18 @@ class DataAccessRequestApplication extends Component {
     };
 
     this.goToStep = this.goToStep.bind(this);
+    this.formFieldChange = this.formFieldChange.bind(this);
 
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
-  formStateChange = (dataset) => {
+  formFieldChange = (dataset) => {
     const {name, value} = dataset;
-    this.formFieldChange(name, value);
-    // stateVarSetter(value);
-  };
-
-  formFieldChange = (field, value) => {
     this.setState(state => {
-      state.formData[field] = value;
+      state.formData[name] = value;
       return state;
     }, () => this.checkValidations());
-  }
+  };
 
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
@@ -724,7 +720,7 @@ class DataAccessRequestApplication extends Component {
                 completed: this.state.completed,
                 darCode: this.state.formData.dar_code,
                 eRACommonsDestination: eRACommonsDestination,
-                formStateChange: this.formStateChange,
+                formFieldChange: this.formFieldChange,
                 invalidInvestigator: step1.inputInvestigator.invalid,
                 invalidResearcher: step1.inputResearcher.invalid,
                 investigator: investigator,
@@ -733,7 +729,8 @@ class DataAccessRequestApplication extends Component {
                 nihValid: this.state.nihValid,
                 onNihStatusUpdate: this.onNihStatusUpdate,
                 orcid: orcid,
-                otherCollaborators: this.state.formData.otherCollaborators,
+                internalCollaborators: this.state.formData.internalCollaborators,
+                labCollaborators: this.state.formData.labCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
@@ -748,7 +745,7 @@ class DataAccessRequestApplication extends Component {
                 datasets: this.state.formData.datasets,
                 onDatasetsChange: this.onDatasetsChange,
                 showValidationMessages: showValidationMessages,
-                formStateChange: this.formStateChange,
+                formFieldChange: this.formFieldChange,
                 projectTitle: this.state.formData.projectTitle,
                 isTypeOfResearchInvalid: isTypeOfResearchInvalid,
                 TypeOfResearch: TORComponent,
@@ -768,7 +765,7 @@ class DataAccessRequestApplication extends Component {
               h(ResearchPurposeStatement, {
                 addiction: this.state.formData.addiction,
                 darCode: dar_code,
-                formStateChange: this.formStateChange,
+                formFieldChange: this.formFieldChange,
                 forProfit: this.state.formData.forProfit,
                 gender: this.state.formData.gender,
                 handleRadioChange: this.handleRadioChange,
