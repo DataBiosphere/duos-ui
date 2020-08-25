@@ -480,7 +480,7 @@ class DataAccessRequestApplication extends Component {
     if (fp.isNil(dataRequestId)) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
-        this.props.history.replace('/dar_application/' + resp.reference_id);
+        this.props.history.replace('/dar_application/' + resp.referenceId);
       });
     } else {
       DAR.updatePartialDarRequest(formData).then(resp => {
