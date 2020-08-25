@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
-import { a, div, fieldset, h, h3, input, label, span, p, i } from 'react-hyperscript-helpers';
+import { a, div, fieldset, h, h3, input, label, span} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
 import isNil from 'lodash/fp/isNil';
 import CollaboratorList from './CollaboratorList';

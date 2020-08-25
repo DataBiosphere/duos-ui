@@ -34,7 +34,7 @@ class DataAccessRequestApplication extends Component {
       step: 1,
       formData: {
         datasets: [],
-        dar_code: null,
+        darCode: null,
         labCollaborators: [],
         internalCollaborators: [],
         checkCollaborator: false,
@@ -72,8 +72,7 @@ class DataAccessRequestApplication extends Component {
         profileName: '',
         piName: '',
         pubmedId: '',
-        scientificUrl: '',
-        otherCollaborators: []
+        scientificUrl: ''
       },
       step1: {
         inputResearcher: {
