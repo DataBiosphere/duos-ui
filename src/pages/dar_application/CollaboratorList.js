@@ -175,11 +175,6 @@ export default function CollaboratorList(props) {
             indication should be limited to individuals who the PI designates to download data and/or share the requested data with other Internal
             Lab Staff (i.e., staff members and trainees under the direct supervision of the PI)`
           ]),
-          //mapped output of yes and no radio buttons for the list
-          //YesNoRadioGroup is not used because it assumes only one instance of a question exists at a time
-          //this component requires the question to be rendered multiple times, therefore index needs to be passed to id and key
-          //YesNoRadioGroup can probably be refactored to handle this, the issue would be rewritting other uses of the component to match the updated form
-          //Thus the YesNoRadioGroup refactor should be handled on a separate PR
           div({className: 'radio-inline'}, [
             [{label:'Yes', value: true}, {label:'No', value: false}].map((option) =>
               label({
