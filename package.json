@@ -39,8 +39,8 @@
     "react-tabs": "3.1.1",
     "react-tooltip": "4.2.8",
     "set-value": "3.0.2",
-    "source-map-explorer": "2.4.2",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "source-map-explorer": "2.5.0"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
