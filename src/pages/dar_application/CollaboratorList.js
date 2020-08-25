@@ -11,23 +11,23 @@ export default function CollaboratorList(props) {
   //bootstrap v3 doesn't have outline-button styles, so I'll have to make my own
   const cancelDeleteButtonStyle = {
     flex: 1,
-    margin: "2px",
+    margin: '2px',
     border: '1px solid #d9534f',
     color: '#d9534f'
   }
 
   const cardStyle = {
-    padding: "3%",
-    border: "1px solid #c7c7c7",
+    padding: '3%',
+    border: '1px solid #c7c7c7',
     borderRadius: '5px',
     background: '#f0f4ff',
     boxShadow: 'rgb(234, 227, 227) -4px 6px 9px 0px',
-    marginBottom: "2%"
+    marginBottom: '2%'
   };
 
   const confirmDeleteButtonStyle = {
     flex: 1,
-    margin: "2px"
+    margin: '2px'
   };
 
   const deleteButtonControlStyle = {

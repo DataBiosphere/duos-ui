@@ -34,7 +34,7 @@ export default function ResearcherInfo(props) {
   } = props;
 
   const navButtonContainerStyle = {
-    marginTop: "5rem"
+    marginTop: '5rem'
   };
 
   //initial state variable assignment
