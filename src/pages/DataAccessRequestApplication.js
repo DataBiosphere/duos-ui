@@ -37,6 +37,7 @@ class DataAccessRequestApplication extends Component {
         darCode: null,
         labCollaborators: [],
         internalCollaborators: [],
+        externalCollaborators: [],
         checkCollaborator: false,
         rus: '',
         nonTechRus: '',
@@ -594,6 +595,7 @@ class DataAccessRequestApplication extends Component {
       investigator = '',
       labCollaborators,
       internalCollaborators,
+      externalCollaborators,
       ontologies = []
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
@@ -729,8 +731,9 @@ class DataAccessRequestApplication extends Component {
                 nihValid: this.state.nihValid,
                 onNihStatusUpdate: this.onNihStatusUpdate,
                 orcid: orcid,
-                internalCollaborators: internalCollaborators,
-                labCollaborators: labCollaborators,
+                internalCollaborators,
+                labCollaborators,
+                externalCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
