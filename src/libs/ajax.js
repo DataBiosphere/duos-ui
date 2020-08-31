@@ -5,7 +5,8 @@ import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
-
+import axios from 'axios';
+import { DataUseTranslation } from './dataUseTranslation';
 
 const dataTemplate = {
   accessTotal: [
@@ -228,12 +229,12 @@ export const DAR = {
 
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
-    const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
-    const summaryDar = await summaryDarRes.json();
+    const authOpts = Config.authOpts();
+    const rawDarRes = await axios.get(`${apiUrl}/dar/${darId}`, authOpts);
+    const rawDar = rawDarRes.data;
+    const researcher = await User.getByEmail(rawDar.academicEmail);
 
     let darInfo = Models.dar;
-    const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
-    const rawDar = await rawDarRes.json();
     darInfo.hmb = rawDar.hmb;
     darInfo.methods = rawDar.methods;
     darInfo.controls = rawDar.controls;
@@ -251,39 +252,45 @@ export const DAR = {
     darInfo.populationMigration = rawDar.populationMigration;
     darInfo.psychiatricTraits = rawDar.psychiatricTraits;
     darInfo.notHealth = rawDar.notHealth;
-    darInfo.hasDiseases = !fp.isEmpty(summaryDar.diseases);
-    darInfo.diseases = summaryDar.diseases;
+    darInfo.diseases = rawDar.ontologies || [];
+    darInfo.hasDiseases = !fp.isEmpty(darInfo.diseases);
     darInfo.rus = rawDar.rus;
-    darInfo.researcherId = summaryDar.userId;
-    darInfo.darCode = summaryDar.darCode;
-    darInfo.projectTitle = summaryDar.projectTitle;
-    darInfo.institution = summaryDar.institutionName;
-    darInfo.department = summaryDar.department;
-    darInfo.city = summaryDar.city;
-    darInfo.country = summaryDar.country;
-    darInfo.status = summaryDar.status;
-    darInfo.hasAdminComment = summaryDar.rationale != null;
-    darInfo.adminComment = summaryDar.rationale;
-    darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
+    darInfo.researcherId = rawDar.userId;
+    darInfo.darCode = rawDar.darCode;
+    darInfo.projectTitle = rawDar.projectTitle;
+    darInfo.institution = rawDar.institutionName;
+    darInfo.department = rawDar.department;
+    darInfo.city = rawDar.city;
+    darInfo.country = rawDar.country;
+    darInfo.status = rawDar.status;
+
+    //NOTE:does rationale need to come from researcher or current user (guessing researcher)?
+    darInfo.hasAdminComment = researcher.rationale != null;
+    darInfo.adminComment = researcher.rationale;
+    const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
+    const researchType = DataUseTranslation.generateResearchTypes(darInfo);
+    darInfo.hasPurposeStatements = purposeStatements && purposeStatements.length > 0;
     if (darInfo.hasPurposeStatements) {
-      darInfo.purposeStatements = summaryDar.purposeStatements;
+      darInfo.purposeStatements = purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
     } else {
       darInfo.purposeStatements = [];
     }
-    if (summaryDar.researchType.length > 0) {
-      darInfo.researchType = summaryDar.researchType;
+    if (researchType && researchType.length > 0) {
+      darInfo.researchType = researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
-    darInfo.datasets = summaryDar.datasets;
-    darInfo.researcherProperties = summaryDar.researcherProperties;
-    const isThePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
-    const havePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
-    const profileName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
-    const piName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
-    darInfo.pi = isThePI ? profileName : piName;
-    darInfo.havePI = havePI || isThePI;
-    darInfo.profileName = profileName;
+
+    darInfo.datasets = rawDar.datasets;
+    //NOTE: clarify assingment of these keys, I assume they refer to the researcher and not the current user?
+    // const isThePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
+    // const havePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
+    // const profileName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
+    // const piName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
+    darInfo.pi = rawDar.investigator;
+    darInfo.havePI = rawDar.havePI || rawDar.isThePI;
+    darInfo.profileName = researcher.displayName
+    
     // dataUse from Models.dar has properties denoting what research the data will be used for.
     // Get these properties directly from the DAR.
     const dataUseModel = fp.keys(darInfo.dataUse);
@@ -934,8 +941,8 @@ export const User = {
 
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   },
 
   list: async () => {

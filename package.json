@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "4.11.0",
     "@material-ui/icons": "4.9.1",
+    "axios": "^0.20.0",
     "bootstrap": "3.4.1",
     "chart.js": "2.9.3",
     "classnames": "2.2.6",
@@ -19,8 +20,8 @@
     "query-string": "6.13.1",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-ga": "^3.1.2",
     "react-dropzone": "11.0.3",
+    "react-ga": "^3.1.2",
     "react-google-charts": "3.0.15",
     "react-google-login": "5.1.21",
     "react-hyperscript-helpers": "2.0.0",
