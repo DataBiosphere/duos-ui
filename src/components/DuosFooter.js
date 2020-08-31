@@ -1,10 +1,6 @@
 import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
-import { Storage } from '../libs/storage';
-import * as _ from 'lodash/fp';
 
 function DuosFooter() {
-  const user = Storage.getCurrentUser();
-  const isAdmin = _.isEmpty(user) ? false : user.isAdmin;
 
   return (
     div({ className: "footer" }, [
