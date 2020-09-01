@@ -8,21 +8,21 @@ function DuosFooter() {
     clear: 'both',
     backgroundColor: '#000000',
     minHeight: '64px'
-  }
+  };
 
   const mainFooterStyle = {
     margin: '36px 0 0 0',
     display: 'block',
     width: '100%',
     padding: '0 20px'
-  }
+  };
 
   const footerLogoStyle = {
     float: 'left',
     height: '32px',
     marginTop: '15px',
     marginRight: '35px'
-  }
+  };
 
   return (
     div({ style: footerStyle }, [
