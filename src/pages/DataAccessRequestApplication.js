@@ -16,6 +16,7 @@ import { Navigation } from "../libs/utils";
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
+import { isEmpty } from 'lodash';
 
 class DataAccessRequestApplication extends Component {
 
@@ -73,7 +74,8 @@ class DataAccessRequestApplication extends Component {
         profileName: '',
         piName: '',
         pubmedId: '',
-        scientificUrl: ''
+        scientificUrl: '',
+        signingOfficial: ''
       },
       step1: {
         inputResearcher: {
@@ -329,8 +331,12 @@ class DataAccessRequestApplication extends Component {
   //method to be passed to step 4 for error checks/messaging
   step1InvalidResult(dataset) {
     const checkCollaborator = this.state.formData.checkCollaborator;
-    const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid} = dataset;
-    return isResearcherInvalid || isInvestigatorInvalid || showValidationMessages || (!checkCollaborator && isNihInvalid);
+    const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid, signingOfficial} = dataset;
+    return isResearcherInvalid
+      || isInvestigatorInvalid
+      || showValidationMessages
+      || (!checkCollaborator && isNihInvalid)
+      || isEmpty(signingOfficial);
   }
 
   verifyStep1() {
@@ -596,7 +602,8 @@ class DataAccessRequestApplication extends Component {
       labCollaborators,
       internalCollaborators,
       externalCollaborators,
-      ontologies = []
+      ontologies = [],
+      signingOfficial
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
@@ -738,7 +745,8 @@ class DataAccessRequestApplication extends Component {
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
-                nextPage: this.nextPage
+                nextPage: this.nextPage,
+                signingOfficial: signingOfficial
               }))
             ]),
 

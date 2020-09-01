@@ -5,6 +5,7 @@ import { a, div, fieldset, h, h3, input, label, span} from 'react-hyperscript-he
 import { eRACommons } from '../../components/eRACommons';
 import isNil from 'lodash/fp/isNil';
 import CollaboratorList from './CollaboratorList';
+import { isEmpty } from 'lodash';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
@@ -31,7 +32,7 @@ export default function ResearcherInfo(props) {
     researcher,
     researcherGate,
     showValidationMessages,
-    nextPage
+    nextPage,
   } = props;
 
   const navButtonContainerStyle = {
@@ -40,6 +41,11 @@ export default function ResearcherInfo(props) {
 
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
+  const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || '');
+
+  useEffect(() => {
+    setSigningOfficial(props.signingOfficial);
+  }, [props.signingOfficial]);
 
   useEffect(() => {
     setCheckCollaborator(props.checkCollaborator);
@@ -230,6 +236,28 @@ export default function ResearcherInfo(props) {
                 deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
                 showApproval: false})
             ])
+          ])
+        ]),
+        div({className: 'row no-margin'}, [
+          div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            label({className: "control-label rp-title-question"}, [
+              '1.6 Institutional Signing Official*',
+              span(['I certify the individual listed below is my Institutional Signing Official'])
+            ])
+          ]),
+          div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            input({
+              type: 'text',
+              defaultValue: signingOfficial,
+              name: 'signingOfficial',
+              required: true,
+              className: isEmpty(signingOfficial) && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+              onBlur: (e) => formFieldChange({name: 'signingOfficial', value: e.target.value})
+            }),
+            span({
+              isRendered: showValidationMessages && isEmpty(signingOfficial),
+              className: 'cancel-color required-field-error-span'
+            }, ['Required field'])
           ])
         ]),
         div({ className: 'form-group' }, [
