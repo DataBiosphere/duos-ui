@@ -1,5 +1,4 @@
 import fileDownload from 'js-file-download';
-import * as ld from 'lodash';
 import * as fp from 'lodash/fp';
 import { Config } from './config';
 import { Models } from './models';
@@ -289,8 +288,7 @@ export const DAR = {
     // const piName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
     darInfo.pi = rawDar.investigator;
     darInfo.havePI = rawDar.havePI || rawDar.isThePI;
-    darInfo.profileName = researcher.displayName
-    
+    darInfo.profileName = researcher.displayName;
     // dataUse from Models.dar has properties denoting what research the data will be used for.
     // Get these properties directly from the DAR.
     const dataUseModel = fp.keys(darInfo.dataUse);
