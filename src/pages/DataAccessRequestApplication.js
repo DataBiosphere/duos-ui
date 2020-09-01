@@ -35,6 +35,8 @@ class DataAccessRequestApplication extends Component {
       formData: {
         datasets: [],
         darCode: null,
+        labCollaborators: [],
+        internalCollaborators: [],
         checkCollaborator: false,
         rus: '',
         nonTechRus: '',
@@ -92,22 +94,18 @@ class DataAccessRequestApplication extends Component {
     };
 
     this.goToStep = this.goToStep.bind(this);
-
+    this.formFieldChange = this.formFieldChange.bind(this);
+    this.partialSave = this.partialSave.bind(this);
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
-  formStateChange = (stateVarSetter, dataset) => {
+  formFieldChange = (dataset) => {
     const {name, value} = dataset;
-    this.formFieldChange(name, value);
-    stateVarSetter(value);
-  };
-
-  formFieldChange = (field, value) => {
     this.setState(state => {
-      state.formData[field] = value;
+      state.formData[name] = value;
       return state;
     }, () => this.checkValidations());
-  }
+  };
 
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
@@ -481,7 +479,7 @@ class DataAccessRequestApplication extends Component {
     if (fp.isNil(dataRequestId)) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
-        this.props.history.replace('/dar_application/' + resp.reference_id);
+        this.props.history.replace('/dar_application/' + resp.referenceId);
       });
     } else {
       DAR.updatePartialDarRequest(formData).then(resp => {
@@ -578,7 +576,6 @@ class DataAccessRequestApplication extends Component {
   };
 
   render() {
-
     const {
       orcid = '',
       researcherGate = '',
@@ -595,6 +592,8 @@ class DataAccessRequestApplication extends Component {
       methods = false,
       linkedIn = '',
       investigator = '',
+      labCollaborators,
+      internalCollaborators,
       ontologies = []
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
@@ -721,7 +720,7 @@ class DataAccessRequestApplication extends Component {
                 completed: this.state.completed,
                 darCode: this.state.formData.darCode,
                 eRACommonsDestination: eRACommonsDestination,
-                formStateChange: this.formStateChange,
+                formFieldChange: this.formFieldChange,
                 invalidInvestigator: step1.inputInvestigator.invalid,
                 invalidResearcher: step1.inputResearcher.invalid,
                 investigator: investigator,
@@ -730,6 +729,8 @@ class DataAccessRequestApplication extends Component {
                 nihValid: this.state.nihValid,
                 onNihStatusUpdate: this.onNihStatusUpdate,
                 orcid: orcid,
+                internalCollaborators: internalCollaborators,
+                labCollaborators: labCollaborators,
                 partialSave: this.partialSave,
                 researcher: this.state.formData.researcher,
                 researcherGate: researcherGate,
@@ -744,7 +745,7 @@ class DataAccessRequestApplication extends Component {
                 datasets: this.state.formData.datasets,
                 onDatasetsChange: this.onDatasetsChange,
                 showValidationMessages: showValidationMessages,
-                formStateChange: this.formStateChange,
+                formFieldChange: this.formFieldChange,
                 projectTitle: this.state.formData.projectTitle,
                 isTypeOfResearchInvalid: isTypeOfResearchInvalid,
                 TypeOfResearch: TORComponent,
@@ -764,7 +765,7 @@ class DataAccessRequestApplication extends Component {
               h(ResearchPurposeStatement, {
                 addiction: this.state.formData.addiction,
                 darCode: darCode,
-                formStateChange: this.formStateChange,
+                formFieldChange: this.formFieldChange,
                 forProfit: this.state.formData.forProfit,
                 gender: this.state.formData.gender,
                 handleRadioChange: this.handleRadioChange,
