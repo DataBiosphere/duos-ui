@@ -17,7 +17,8 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '28px',
       fontWeight: 600,
-      textAlign: 'center'
+      textAlign: 'center',
+      padding: '0 5rem'
     };
 
     const homeBannerDescription = {
@@ -33,7 +34,7 @@ class Home extends Component {
       height: '80px',
       width: '300px',
       display: 'block',
-      margin: 'auto auto',
+      margin: '3rem auto',
       padding: '0 3rem'
     };
 
@@ -42,7 +43,8 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '24px',
       fontWeight: 600,
-      textAlign: 'center'
+      textAlign: 'center',
+      padding: '0 5rem'
     };
 
     const subHeader = {
@@ -50,7 +52,8 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '16px',
       textAlign: 'center',
-      whiteSpace: 'pre-wrap'
+      whiteSpace: 'pre-wrap',
+      padding: '0 5rem'
     };
 
     const description = {
@@ -65,7 +68,7 @@ class Home extends Component {
 
     const paragraph = {
       color: '#1F3B50',
-      padding: '0 10rem 2rem 10rem',
+      padding: '0 5rem 2rem 5rem',
       fontFamily: 'Montserrat',
       fontSize: '14px',
       textAlign: 'justify',
@@ -97,15 +100,15 @@ class Home extends Component {
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
+            div({ isRendered: !isLogged, style: { padding: '1em 1em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
+              span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
+              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative', float: 'right'}})
+            ]),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
-              div({ style: homeBannerDescription }, [
+              div({ className: 'hidden-xs hidden-sm', style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
-            ]),
-            div({ isRendered: !isLogged, style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
-              span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
-              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative', float: 'right'}})
             ])
           ]),
           div({ className: 'row' }, [
@@ -115,7 +118,7 @@ class Home extends Component {
                 ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
               div({}, [
                 img({
-                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                  className: 'col-lg-12 col-md-12 col-sm-12 hidden-xs',
                   style: { padding: '1rem 180px', margin: 'auto auto' },
                   alt: 'What is DUOS graphic',
                   src: '/images/duos_process_flow.png'
