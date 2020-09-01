@@ -3,6 +3,7 @@ import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
 function DuosFooter() {
 
   const footerStyle = {
+    position: 'relative',
     marginTop: '-100px',
     clear: 'both',
     backgroundColor: '#000000',
