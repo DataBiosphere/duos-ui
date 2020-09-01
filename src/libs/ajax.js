@@ -281,13 +281,9 @@ export const DAR = {
     }
 
     darInfo.datasets = rawDar.datasets;
-    //NOTE: clarify assingment of these keys, I assume they refer to the researcher and not the current user?
-    // const isThePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
-    // const havePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
-    // const profileName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
-    // const piName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
     darInfo.pi = rawDar.investigator;
     darInfo.havePI = rawDar.havePI || rawDar.isThePI;
+    //NOTE:Is this meant to display the researcher name?
     darInfo.profileName = researcher.displayName;
     // dataUse from Models.dar has properties denoting what research the data will be used for.
     // Get these properties directly from the DAR.
