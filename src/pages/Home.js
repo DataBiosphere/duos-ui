@@ -118,8 +118,8 @@ class Home extends Component {
                 ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
               div({}, [
                 img({
-                  className: 'col-lg-12 col-md-12 col-sm-12 hidden-xs',
-                  style: { padding: '1rem 180px', margin: 'auto auto' },
+                  className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 hidden-xs',
+                  style: { padding: '1rem 5rem', margin: 'auto 10rem' },
                   alt: 'What is DUOS graphic',
                   src: '/images/duos_process_flow.png'
                 })
