@@ -112,7 +112,7 @@ class Home extends Component {
             ])
           ]),
           div({ className: 'row' }, [
-            div({ style: { margin: '50px auto' }}, [
+            div({ style: { margin: '5rem auto' }}, [
               h1({ style: header }, ['What is DUOS and how does it work?']),
               h3({ style: subHeader },
                 ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
@@ -152,7 +152,7 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ className: 'row', style: { margin: '50px 0' } }, [
+          div({ className: 'row', style: { margin: 'auto auto 5rem auto' } }, [
             div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2' }, [
               div({}, [
                 h1({ style: header }, ['About DUOS']),
