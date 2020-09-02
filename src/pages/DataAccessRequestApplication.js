@@ -75,7 +75,8 @@ class DataAccessRequestApplication extends Component {
         piName: '',
         pubmedId: '',
         scientificUrl: '',
-        signingOfficial: ''
+        signingOfficial: '',
+        itDirector: ''
       },
       step1: {
         inputResearcher: {
@@ -603,7 +604,8 @@ class DataAccessRequestApplication extends Component {
       internalCollaborators,
       externalCollaborators,
       ontologies = [],
-      signingOfficial
+      signingOfficial = '',
+      itDirector = ''
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
@@ -746,7 +748,8 @@ class DataAccessRequestApplication extends Component {
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,
-                signingOfficial: signingOfficial
+                signingOfficial,
+                itDirector
               }))
             ]),
 

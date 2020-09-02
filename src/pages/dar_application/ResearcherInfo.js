@@ -32,7 +32,7 @@ export default function ResearcherInfo(props) {
     researcher,
     researcherGate,
     showValidationMessages,
-    nextPage,
+    nextPage
   } = props;
 
   const navButtonContainerStyle = {
@@ -42,14 +42,13 @@ export default function ResearcherInfo(props) {
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || '');
+  const [itDirector, setITDirector] = useState(props.itDirector || '');
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
-  }, [props.signingOfficial]);
-
-  useEffect(() => {
     setCheckCollaborator(props.checkCollaborator);
-  }, [props.checkCollaborator]);
+    setITDirector(props.itDirector);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -256,6 +255,28 @@ export default function ResearcherInfo(props) {
             }),
             span({
               isRendered: showValidationMessages && isEmpty(signingOfficial),
+              className: 'cancel-color required-field-error-span'
+            }, ['Required field'])
+          ])
+        ]),
+        div({className: 'row no-margin'}, [
+          div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            label({className: "control-label rp-title-question"}, [
+              '1.7 Information Technology (IT) Director*',
+              span(['I certify the individual listed below is my IT Director'])
+            ])
+          ]),
+          div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+            input({
+              type: 'text',
+              defaultValue: itDirector,
+              name: 'itDirector',
+              required: true,
+              className: isEmpty(itDirector) && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+              onBlur: (e) => formFieldChange({name: 'itDirector', value: e.target.value})
+            }),
+            span({
+              isRendered: showValidationMessages && isEmpty(itDirector),
               className: 'cancel-color required-field-error-span'
             }, ['Required field'])
           ])
