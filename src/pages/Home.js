@@ -107,7 +107,7 @@ class Home extends Component {
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
-              div({ className: 'hidden-xs hidden-sm', style: homeBannerDescription }, [
+              div({ className: 'hidden-xs', style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ])
           ]),
