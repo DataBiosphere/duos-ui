@@ -605,7 +605,13 @@ class DataAccessRequestApplication extends Component {
       externalCollaborators,
       ontologies = [],
       signingOfficial = '',
-      itDirector = ''
+      itDirector = '',
+      cloudRequested = '',
+      localRequested = '',
+      anvilUse = '',
+      providerName = '',
+      providerType = '',
+      providerDescription = ''
     } = this.state.formData;
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
@@ -749,7 +755,13 @@ class DataAccessRequestApplication extends Component {
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,
                 signingOfficial,
-                itDirector
+                itDirector,
+                providerType,
+                providerName,
+                cloudRequested,
+                localRequested,
+                anvilUse,
+                providerDescription
               }))
             ]),
 
