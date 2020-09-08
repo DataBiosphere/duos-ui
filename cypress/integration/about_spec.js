@@ -13,7 +13,7 @@ describe('About', function() {
     cy.visit('');
     cy.contains('About');
     cy.contains('About').click();
-    cy.contains('A semi-automated management service for compliant secondary use of human genomics data');
+    cy.contains('Data Use Oversight System');
   });
 
 });
