@@ -6,10 +6,10 @@ class HomeAbout extends Component {
   render() {
 
     const imageWrapper = {
-      padding: '0 5rem',
+      padding: '0 2rem',
       margin: '3rem 5rem 1rem',
-      maxHeight: '300px',
-      width: 'auto',
+      height: 'auto',
+      width: '100%',
       float: 'none'
     }
 
@@ -18,7 +18,10 @@ class HomeAbout extends Component {
       margin: '5rem auto',
       overflow: 'auto',
       textAlign: 'center',
-      color: '#1F3B50'
+      color: '#1F3B50',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
     }
 
     const aboutSectionTitle = {
@@ -28,27 +31,25 @@ class HomeAbout extends Component {
     }
 
     const aboutSectionBody = {
-      padding: '0 10rem',
+      padding: '0 5rem',
       margin: '3rem auto 1rem'
     }
 
     return (
       div({className: 'row home'}, [
         div({className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12'}, [
-          div({className: 'home-sections home-sections-table'}, [
+          div({}, [
             div({style: aboutSectionWrapper}, [
               h1({style: {fontWeight: '600'}}, ['Data Use Oversight System'])
             ]),
             div({style: aboutSectionWrapper}, [
               h3({style: aboutSectionTitle}, ['Current state of data access']),
-              div({}, [
-                img({
-                  src: '/images/about_current_access.png',
-                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-                  alt: 'Current state of data access',
-                  style: imageWrapper
-                })
-              ]),
+              img({
+                src: '/images/about_current_access.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Current state of data access',
+                style: imageWrapper
+              }),
               div({style: aboutSectionBody}, [
                 p({},
                   ['Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data.']),
@@ -65,15 +66,15 @@ class HomeAbout extends Component {
               ]),
             ]),
             div({style: aboutSectionWrapper}, [
-              div({style: {display: 'flex', alignItems: 'center'}}, [
+              div({style: {display: 'inline-block', alignItems: 'center'} ,className: 'row'}, [
                 img({
                   src: '/images/about_reducing_complexity.png',
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
                   alt: 'Reducing the complexity',
                 }),
                 h3({
                   style: aboutSectionTitle,
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'
                 }, ['Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes']),
               ]),
               div({style: aboutSectionBody}, [
@@ -88,14 +89,14 @@ class HomeAbout extends Component {
               ]),
             ]),
             div({style: aboutSectionWrapper}, [
-              div({style: {display: 'flex', alignItems: 'center'}}, [
+              div({className: 'row'}, [
                 h3({
                   style: aboutSectionTitle,
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'
                 }, ['Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology']),
                 img({
                   src: '/images/about_consent_ontology.png',
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
                   alt: 'GA4GH Data Use Ontology',
                 })
               ]),
@@ -131,15 +132,15 @@ class HomeAbout extends Component {
               ]),
             ]),
             div({style: aboutSectionWrapper}, [
-              div({style: {display: 'flex', alignItems: 'center'}}, [
+              div({className: 'row'}, [
                 img({
                   src: '/images/about_two_fold_approach.png',
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
                   alt: 'Two-fold approach to improving data access requests',
                 }),
                 h3({
                   style: {...aboutSectionTitle, textAlign: 'center'},
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'
                 }, ['A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests']),
               ]),
               div({style: aboutSectionBody}, [
@@ -152,14 +153,14 @@ class HomeAbout extends Component {
               ]),
             ]),
             div({style: aboutSectionWrapper}, [
-              div({style: {display: 'flex', alignItems: 'center'}}, [
+              div({className: 'row'}, [
                 h3({
                   style: {...aboutSectionTitle, textAlign: 'center'},
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'
                 }, ['Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency']),
                 img({
                   src: '/images/about_dacs_compare.png',
-                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
+                  className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12',
                   alt: 'Now DACs can compare',
                 }),
               ]),
