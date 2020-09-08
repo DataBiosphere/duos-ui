@@ -35,7 +35,7 @@ export default function ResearcherInfo(props) {
   } = props;
 
   const navButtonContainerStyle = {
-    marginTop: "5rem"
+    marginTop: '5rem'
   };
 
   //initial state variable assignment
@@ -178,7 +178,7 @@ export default function ResearcherInfo(props) {
                 className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
               }, ['Required field'])
             ])
-          ]) 
+          ])
         ]),
 
         div({className: 'form-group'}, [
