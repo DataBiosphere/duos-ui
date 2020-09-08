@@ -34,7 +34,7 @@ export default function CollaboratorList(props) {
     display: 'flex',
     justifyContent: 'flex-end'
   };
-
+  
   const toggleDeleteBool = (index, updatedBool) => {
     let deleteCopy = deleteBoolArray.slice();
     deleteCopy[index] = updatedBool;
