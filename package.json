@@ -20,7 +20,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-dropzone": "11.0.3",
-    "react-ga": "^3.1.2",
+    "react-ga": "3.1.2",
     "react-google-charts": "3.0.15",
     "react-google-login": "5.1.21",
     "react-hyperscript-helpers": "2.0.0",
@@ -37,10 +37,10 @@
     "react-scripts": "3.4.3",
     "react-select": "3.1.0",
     "react-tabs": "3.1.1",
-    "react-tooltip": "4.2.8",
+    "react-tooltip": "4.2.9",
     "set-value": "3.0.2",
-    "source-map-explorer": "2.4.2",
-    "uuid": "^8.3.0"
+    "uuid": "8.3.0",
+    "source-map-explorer": "2.5.0"
   },
   "scripts": {
     "analyze": "npm run build; source-map-explorer build/static/js/main.*",
@@ -55,7 +55,7 @@
     "docker-build:test": "docker-build test"
   },
   "devDependencies": {
-    "acorn": "7.4.0",
+    "acorn": "8.0.1",
     "cypress": "4.12.1",
     "docker-build": "2.2.0",
     "eslint": "6.8.0",
@@ -65,7 +65,7 @@
     "handlebars": "4.7.6",
     "js-yaml": "3.14.0",
     "start-server-and-test": "1.11.3",
-    "typescript": "3.9.7"
+    "typescript": "4.0.2"
   },
   "comments": {
     "security-alerts": "handlebars and js-yaml are security related updates for indirect dependencies"

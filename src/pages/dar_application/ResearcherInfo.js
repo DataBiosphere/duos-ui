@@ -39,7 +39,7 @@ export default function ResearcherInfo(props) {
   } = props;
 
   const navButtonContainerStyle = {
-    marginTop: "5rem"
+    marginTop: '5rem'
   };
 
   //initial state variable assignment
@@ -298,8 +298,15 @@ export default function ResearcherInfo(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
                 '1.8 Cloud Use Statement*',
-                //NOTE: add link and attach to the word 'AnVIL
-                span(['Will you perform all of your data storage and analysis for this project on the AnVIL?']),
+                span([
+                  'Will you perform all of your data storage and analysis for this project on the ',
+                  a({
+                    rel: "noopener noreferrer",
+                    href: "https://anvil.terra.bio/",
+                    target: "_blank"
+                  }, ['AnVIL']),
+                  '?'
+              ]),
                 [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
                   label({
                     className: 'radio-wrapper',
