@@ -186,7 +186,6 @@ export default function ResearcherInfo(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
                 '1.4 Internal Lab Staff',
-                //NOTE: format this line?
                 span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
                 that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
                 level here.`])
