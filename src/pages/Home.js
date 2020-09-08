@@ -17,7 +17,8 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '28px',
       fontWeight: 600,
-      textAlign: 'center'
+      textAlign: 'center',
+      padding: '0 5rem'
     };
 
     const homeBannerDescription = {
@@ -33,7 +34,7 @@ class Home extends Component {
       height: '80px',
       width: '300px',
       display: 'block',
-      margin: 'auto auto',
+      margin: '3rem auto',
       padding: '0 3rem'
     };
 
@@ -42,7 +43,8 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '24px',
       fontWeight: 600,
-      textAlign: 'center'
+      textAlign: 'center',
+      padding: '0 5rem'
     };
 
     const subHeader = {
@@ -50,7 +52,8 @@ class Home extends Component {
       fontFamily: 'Montserrat',
       fontSize: '16px',
       textAlign: 'center',
-      whiteSpace: 'pre-wrap'
+      whiteSpace: 'pre-wrap',
+      padding: '0 5rem'
     };
 
     const description = {
@@ -65,7 +68,7 @@ class Home extends Component {
 
     const paragraph = {
       color: '#1F3B50',
-      padding: '0 10rem 2rem 10rem',
+      padding: '0 5rem 2rem 5rem',
       fontFamily: 'Montserrat',
       fontSize: '14px',
       textAlign: 'justify',
@@ -97,26 +100,26 @@ class Home extends Component {
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
+            div({ isRendered: !isLogged, style: { padding: '1em 1em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
+              span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
+              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative', float: 'right'}})
+            ]),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
-              div({ style: homeBannerDescription }, [
+              div({ className: 'hidden-xs', style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
-            ]),
-            div({ isRendered: !isLogged, style: { padding: '2em 2em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
-              span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
-              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative', float: 'right'}})
             ])
           ]),
           div({ className: 'row' }, [
-            div({ style: { margin: '50px auto' }}, [
+            div({ style: { margin: '5rem auto' }}, [
               h1({ style: header }, ['What is DUOS and how does it work?']),
               h3({ style: subHeader },
                 ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
               div({}, [
                 img({
-                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-                  style: { padding: '1rem 180px', margin: 'auto auto' },
+                  className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 hidden-xs',
+                  style: { padding: '1rem 5rem', margin: 'auto 10rem' },
                   alt: 'What is DUOS graphic',
                   src: '/images/duos_process_flow.png'
                 })
@@ -149,7 +152,7 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ className: 'row', style: { margin: '50px 0' } }, [
+          div({ className: 'row', style: { margin: 'auto auto 5rem auto' } }, [
             div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2' }, [
               div({}, [
                 h1({ style: header }, ['About DUOS']),
@@ -158,15 +161,15 @@ class Home extends Component {
                   props: this.props,
                   readStyle: readMoreStyle,
                   content: [
-                    p({ style: paragraph }, [
+                    p({ style: paragraph, key: 'p-0' }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
                     ])
                   ],
                   moreContent: [
                     div({}, [
-                      p({ style: paragraph }, 'As part of our efforts to enhance collaborative research, the Broad Institute developed the “Data Use Oversight System” (DUOS) to semi-automate and efficiently manage compliant sharing of human subjects data. DUOS\' objective is two-fold, to enhance data access committee\'s confidence that data use restrictions are respected while efficiently enabling appropriate data access.'),
-                      p({ style: paragraph }, 'To better enable the use of existing human subjects datasets in future projects, DUOS mimics, in a semi-automated fashion, the data access request review processes common to DACs globally, like those in dbGaP. To this end, the system includes interfaces to capture and structure data use restrictions and data access requests as machine-readable data use terms based on the GA4GH\'s Data Use Ontology. With these machine-readable terms for dataset\'s use limitations and data access requests established, DUOS is able to trigger a matching algorithm to reason if data access should be granted given the research purpose and the data restrictions, serving as a decision support tool for DACs using DUOS.'),
-                      p({ style: paragraph }, 'To evaluate the feasibility of using machine readable data use terms to interpret data use restrictions and access requests, we are piloting a trial of DUOS overseen by Partners’ Healthcare IRB. During the pilot, DACs comprised of governmental and non-governmental data custodians will pilot the use of DUOS, its ability to structure use limitations and access requests, and the accuracy of the DUOS algorithm. This aids us in improving the DUOS algorithm and providing feedback on the GA4GH Data Use Ontology based on experts’ feedback.')
+                      p({ style: paragraph, key: 'p-1' }, 'As part of our efforts to enhance collaborative research, the Broad Institute developed the “Data Use Oversight System” (DUOS) to semi-automate and efficiently manage compliant sharing of human subjects data. DUOS\' objective is two-fold, to enhance data access committee\'s confidence that data use restrictions are respected while efficiently enabling appropriate data access.'),
+                      p({ style: paragraph, key: 'p-2' }, 'To better enable the use of existing human subjects datasets in future projects, DUOS mimics, in a semi-automated fashion, the data access request review processes common to DACs globally, like those in dbGaP. To this end, the system includes interfaces to capture and structure data use restrictions and data access requests as machine-readable data use terms based on the GA4GH\'s Data Use Ontology. With these machine-readable terms for dataset\'s use limitations and data access requests established, DUOS is able to trigger a matching algorithm to reason if data access should be granted given the research purpose and the data restrictions, serving as a decision support tool for DACs using DUOS.'),
+                      p({ style: paragraph, key: 'p-3' }, 'To evaluate the feasibility of using machine readable data use terms to interpret data use restrictions and access requests, we are piloting a trial of DUOS overseen by Partners’ Healthcare IRB. During the pilot, DACs comprised of governmental and non-governmental data custodians will pilot the use of DUOS, its ability to structure use limitations and access requests, and the accuracy of the DUOS algorithm. This aids us in improving the DUOS algorithm and providing feedback on the GA4GH Data Use Ontology based on experts’ feedback.')
                     ])
                   ]
                 })
