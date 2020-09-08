@@ -469,6 +469,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.setState({ showDialogSave: false });
   };
 
+  // When posting a user's researcher properties, library cards and entries are
+  // not valid properties for update.
   cloneProfile = (profile) => {
     return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
   }
