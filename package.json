@@ -20,7 +20,7 @@
     "react": "16.13.1",
     "react-dom": "16.13.1",
     "react-dropzone": "11.0.3",
-    "react-ga": "^3.1.2",
+    "react-ga": "3.1.2",
     "react-google-charts": "3.0.15",
     "react-google-login": "5.1.21",
     "react-hyperscript-helpers": "2.0.0",
@@ -39,7 +39,7 @@
     "react-tabs": "3.1.1",
     "react-tooltip": "4.2.9",
     "set-value": "3.0.2",
-    "uuid": "^8.3.0",
+    "uuid": "8.3.0",
     "source-map-explorer": "2.5.0"
   },
   "scripts": {

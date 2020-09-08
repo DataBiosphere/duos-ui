@@ -15,6 +15,7 @@ export default function ResearcherInfo(props) {
     completed,
     darCode,
     eRACommonsDestination,
+    externalCollaborators,
     formFieldChange,
     internalCollaborators,
     invalidInvestigator,
@@ -177,7 +178,7 @@ export default function ResearcherInfo(props) {
                 className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
               }, ['Required field'])
             ])
-          ]) 
+          ])
         ]),
 
         div({className: 'form-group'}, [
@@ -185,7 +186,6 @@ export default function ResearcherInfo(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
                 '1.4 Internal Lab Staff',
-                //NOTE: format this line?
                 span([`Please add Internal Lab Staff here. Internal Lab Staff are defined as users of data from this data access request, including any data 
                 that are downloaded or utilized in the cloud. Please do not list External Collaborators or Internal Collaborators at a PI or equivalent 
                 level here.`])
@@ -204,6 +204,7 @@ export default function ResearcherInfo(props) {
           ])
         ]),
 
+        //NOTE: External collaborators comes after Signing officials, Cloud use, and IT Official prompts, hence the numbering as 1.9
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
@@ -227,6 +228,33 @@ export default function ResearcherInfo(props) {
                 collaboratorLabel: 'Internal Collaborator',
                 deleteBoolArray: (new Array(internalCollaborators.length).fill(false)),
                 showApproval: false})
+            ])
+          ])
+        ]),
+        div({ className: 'form-group' }, [
+          div({ className: 'row no-margin' }, [
+            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+              label({ className: "control-label rp-title-question" }, [
+                '1.9 External Collaborators',
+                span([
+                  `Please list External collaborators here. External Collaboratos are not employees of the Requesting PI's institution and/or do not work
+                at the same location as the PI, and consequently must be independently approved to access controlled-access data subject to the GDS 
+                Policy. External Collaborators must be at the PI or equivalent level and are not required to have a Library Card in order to access data,
+                although it is encouraged. Note: External Collaborators must submit an independent DAR approved by their signing Official
+                to collaborate on this project. External Collaborators will be able to add their Lab Staff, as needed, via their independent DAR. Approval of
+                this DAR does not indicate approval of the External Collaborators listed.`
+                ])
+              ])
+            ]),
+            div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+              h(CollaboratorList, {
+                formFieldChange,
+                collaborators: externalCollaborators,
+                collaboratorKey: 'externalCollaborators',
+                collaboratorLabel: 'External Collaborator',
+                deleteBoolArray: (new Array(externalCollaborators.length).fill(false)),
+                showApproval: false
+              })
             ])
           ])
         ])
