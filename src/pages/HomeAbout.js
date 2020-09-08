@@ -166,26 +166,6 @@ class HomeAbout extends Component {
                   ['Having the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms, doesn’t just facilitate the DAC’s review - but given that the DUO terms are machine readable it means that we are able to use the DUOS algorithm to compare the permitted uses with the data access request instantly.']),
                 p({},
                   ['Currently, DACs using DUOS are able to review the algorithm’s suggested decision on comparing the permitted uses with the data access request prior to logging their final decision on a request.'])
-              ]),
-              div({style: aboutSectionWrapper}, [
-                img({
-                  src: '/images/about_two_fold_request.png',
-                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-                  alt: 'Current state of data access',
-                  style: imageWrapper
-                }),
-                h3({
-                  style: {
-                    ...aboutSectionTitle,
-                    textAlign: 'center'
-                  }
-                }, ['A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests']),
-                p({},
-                  ['The DUOS team is working actively on process, policy, and software improvements to reduce or remove each of these issues impact on research.']),
-                p({},
-                  ['To address the complexity of the domain-specific research proposals in each request, DUOS requires requesting investigators to structure their data access request using Data Use Ontology’s structured vocabulary.']),
-                p({},
-                  ['To assist with identifying the legitimacy of the researcher and the heavy administrative burden on Signing Officials, DUOS developed the Library Card Agreement (PDF) which is a single-signature, annually renewable data access agreement under which Signing Officials can pre-authorize any investigators from their institution to submit data access requests to any DAC using the DUOS system.'])
               ])
             ])
           ])
