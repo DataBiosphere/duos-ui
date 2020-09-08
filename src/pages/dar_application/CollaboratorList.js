@@ -11,30 +11,30 @@ export default function CollaboratorList(props) {
   //bootstrap v3 doesn't have outline-button styles, so I'll have to make my own
   const cancelDeleteButtonStyle = {
     flex: 1,
-    margin: "2px",
+    margin: '2px',
     border: '1px solid #d9534f',
     color: '#d9534f'
   }
 
   const cardStyle = {
-    padding: "3%",
-    border: "1px solid #c7c7c7",
+    padding: '3%',
+    border: '1px solid #c7c7c7',
     borderRadius: '5px',
     background: '#f0f4ff',
     boxShadow: 'rgb(234, 227, 227) -4px 6px 9px 0px',
-    marginBottom: "2%"
+    marginBottom: '2%'
   };
 
   const confirmDeleteButtonStyle = {
     flex: 1,
-    margin: "2px"
+    margin: '2px'
   };
 
   const deleteButtonControlStyle = {
     display: 'flex',
     justifyContent: 'flex-end'
   };
-  
+
   const toggleDeleteBool = (index, updatedBool) => {
     let deleteCopy = deleteBoolArray.slice();
     deleteCopy[index] = updatedBool;
@@ -55,7 +55,7 @@ export default function CollaboratorList(props) {
       title: '',
       uuid: uuidV4()
     };
-    if (props.showApproval) { 
+    if (props.showApproval) {
       newCollaborator.approverStatus = true;
     }
 
@@ -175,11 +175,6 @@ export default function CollaboratorList(props) {
             indication should be limited to individuals who the PI designates to download data and/or share the requested data with other Internal
             Lab Staff (i.e., staff members and trainees under the direct supervision of the PI)`
           ]),
-          //mapped output of yes and no radio buttons for the list
-          //YesNoRadioGroup is not used because it assumes only one instance of a question exists at a time
-          //this component requires the question to be rendered multiple times, therefore index needs to be passed to id and key
-          //YesNoRadioGroup can probably be refactored to handle this, the issue would be rewritting other uses of the component to match the updated form
-          //Thus the YesNoRadioGroup refactor should be handled on a separate PR
           div({className: 'radio-inline'}, [
             [{label:'Yes', value: true}, {label:'No', value: false}].map((option) =>
               label({
