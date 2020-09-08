@@ -55,7 +55,7 @@ export default function CollaboratorList(props) {
       title: '',
       uuid: uuidV4()
     };
-    if (props.showApproval) { 
+    if (props.showApproval) {
       newCollaborator.approverStatus = true;
     }
 
@@ -82,7 +82,7 @@ export default function CollaboratorList(props) {
   useEffect(() => {
     setCollaborators(props.collaborators);
     setDeleteBoolArray(props.deleteBoolArray);
-  }, [props.collaborators, props.deleteBoolArray])
+  }, [props.collaborators, props.deleteBoolArray]);
 
   const ListItems = div({className: 'form-group row no-margin'}, [collaborators.map((collaborator, index) =>
     div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: cardStyle, key: `collaborator-item-${collaborator.uuid}`}, [
@@ -105,7 +105,7 @@ export default function CollaboratorList(props) {
             style: confirmDeleteButtonStyle,
             role: "button",
             onClick: () => removeCollaborator(index)
-          },[ 'Delete Member']),
+          },['Delete Member']),
           div({
             isRendered: deleteBoolArray[index],
             className: 'cancel-delete-btn btn',
