@@ -306,7 +306,7 @@ export default function ResearcherInfo(props) {
                     target: "_blank"
                   }, ['AnVIL']),
                   '?'
-              ]),
+                ]),
                 [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
                   label({
                     className: 'radio-wrapper',
