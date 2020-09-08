@@ -1,5 +1,5 @@
 import {Component} from 'react';
-import {div, h3, p, img} from 'react-hyperscript-helpers';
+import {div, h1, h3, p, img} from 'react-hyperscript-helpers';
 
 class HomeAbout extends Component {
 
@@ -7,7 +7,7 @@ class HomeAbout extends Component {
 
     const imageWrapper = {
       padding: '0 5rem',
-      margin: '0 5rem',
+      margin: '3rem 5rem 1rem',
       maxHeight: '300px',
       width: 'auto',
       float: 'none'
@@ -27,21 +27,29 @@ class HomeAbout extends Component {
       padding: '0 5rem'
     }
 
+    const aboutSectionBody = {
+      padding: '0 10rem',
+      margin: '3rem auto 1rem'
+    }
+
     return (
       div({className: 'row home'}, [
         div({className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12'}, [
           div({className: 'home-sections home-sections-table'}, [
-            div({}, [
-              div({style: aboutSectionWrapper}, [
-                h3({style: {...aboutSectionTitle, textAlign: 'center'}}, ['Current state of data access']),
-                div({}, [
-                  img({
-                    src: '/images/about_current_access.png',
-                    className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-                    alt: 'Current state of data access',
-                    style: imageWrapper
-                  })
-                ]),
+            div({style: aboutSectionWrapper}, [
+              h1({style: {fontWeight: '600'}}, ['Data Use Oversight System'])
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({style: aboutSectionTitle}, ['Current state of data access']),
+              div({}, [
+                img({
+                  src: '/images/about_current_access.png',
+                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                  alt: 'Current state of data access',
+                  style: imageWrapper
+                })
+              ]),
+              div({style: aboutSectionBody}, [
                 p({},
                   ['Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data.']),
                 p({},
@@ -55,7 +63,9 @@ class HomeAbout extends Component {
                 p({},
                   ['We will start on the left of our diagram...'])
               ]),
-              div({style: {...aboutSectionWrapper, margin: 'auto auto', display: 'flex', alignItems: 'center'}}, [
+            ]),
+            div({style: aboutSectionWrapper}, [
+              div({style: {display: 'flex', alignItems: 'center'}}, [
                 img({
                   src: '/images/about_reducing_complexity.png',
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
@@ -66,7 +76,7 @@ class HomeAbout extends Component {
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
                 }, ['Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes']),
               ]),
-              div({style: aboutSectionWrapper}, [
+              div({style: aboutSectionBody}, [
                 p({},
                   ['Let’s look at the present issue with consent forms.']),
                 p({},
@@ -76,7 +86,9 @@ class HomeAbout extends Component {
                 p({},
                   ['The Data Use Ontology is an official GA4GH standard now referenced by genomics repositories in over 15 countries, is actively being adopted in the drafting of numerous consent forms by IRBs and investigators, and is an integral element of the Data Use Oversight System (DUOS) software.'])
               ]),
-              div({style: {...aboutSectionWrapper, margin: 'auto auto', display: 'flex', alignItems: 'center'}}, [
+            ]),
+            div({style: aboutSectionWrapper}, [
+              div({style: {display: 'flex', alignItems: 'center'}}, [
                 h3({
                   style: aboutSectionTitle,
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
@@ -87,23 +99,25 @@ class HomeAbout extends Component {
                   alt: 'GA4GH Data Use Ontology',
                 })
               ]),
-              div({style: aboutSectionWrapper}, [
+              div({style: aboutSectionBody}, [
                 p({},
                   ['Once the consent forms clearly distinguish permitted uses of the data using machine readable DUO terms, the data can be tagged and stored with its appropriate DUO terms. This enables investigators desiring to access the data to know up front whether or not they are likely to be granted access. Furthermore, having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.'])
               ]),
-              div({style: aboutSectionWrapper}, [
-                h3({
-                  style: {
-                    ...aboutSectionTitle,
-                    textAlign: 'center'
-                  }
-                }, ['Clarity of permitted data use helps, but complexity still lies in free-text data access requests']),
-                img({
-                  src: '/images/about_clarity_complexity.png',
-                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-                  alt: 'Complexity still lies in free-text data access requests',
-                  style: imageWrapper
-                }),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: {
+                  ...aboutSectionTitle,
+                  textAlign: 'center'
+                }
+              }, ['Clarity of permitted data use helps, but complexity still lies in free-text data access requests']),
+              img({
+                src: '/images/about_clarity_complexity.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Complexity still lies in free-text data access requests',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
                 p({},
                   ['Having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.']),
                 p({},
@@ -115,7 +129,9 @@ class HomeAbout extends Component {
                 p({},
                   ['Further, DACs and Signing Officials often sign and/or negotiate a unique data access agreement between their institutions for every single data access request submitted/approved.'])
               ]),
-              div({style: {...aboutSectionWrapper, margin: 'auto auto', display: 'flex', alignItems: 'center'}}, [
+            ]),
+            div({style: aboutSectionWrapper}, [
+              div({style: {display: 'flex', alignItems: 'center'}}, [
                 img({
                   src: '/images/about_two_fold_approach.png',
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6',
@@ -126,7 +142,7 @@ class HomeAbout extends Component {
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
                 }, ['A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests']),
               ]),
-              div({style: aboutSectionWrapper}, [
+              div({style: aboutSectionBody}, [
                 p({},
                   ['The DUOS team is working actively on process, policy, and software improvements to reduce or remove each of these issues impact on research.']),
                 p({},
@@ -134,7 +150,9 @@ class HomeAbout extends Component {
                 p({},
                   ['To assist with identifying the legitimacy of the researcher and the heavy administrative burden on Signing Officials, DUOS developed the Library Card Agreement (PDF) which is a single-signature, annually renewable data access agreement under which Signing Officials can pre-authorize any investigators from their institution to submit data access requests to any DAC using the DUOS system.'])
               ]),
-              div({style: {...aboutSectionWrapper, margin: 'auto auto', display: 'flex', alignItems: 'center'}}, [
+            ]),
+            div({style: aboutSectionWrapper}, [
+              div({style: {display: 'flex', alignItems: 'center'}}, [
                 h3({
                   style: {...aboutSectionTitle, textAlign: 'center'},
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6'
@@ -145,23 +163,25 @@ class HomeAbout extends Component {
                   alt: 'Now DACs can compare',
                 }),
               ]),
-              div({style: aboutSectionWrapper}, [
+              div({style: aboutSectionBody}, [
                 p({},
                   ['With those improvements to the data access request process in place, DACs are then able to compare the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms. This significantly expedites the DACs review of a data access. On top of this, the Signing Official is no longer required to take part in the review and submission of each DAR, nor does a unique data access agreement need to be signed. Removing these elements of the process further expedites the process.'])
               ]),
-              div({style: aboutSectionWrapper}, [
-                img({
-                  src: '/images/about_dacs_algorithm.png',
-                  className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-                  alt: 'Algorithm can offer suggested decisions to DACs',
-                  style: imageWrapper
-                }),
-                h3({
-                  style: {
-                    ...aboutSectionTitle,
-                    textAlign: 'center'
-                  }
-                }, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: {
+                  ...aboutSectionTitle,
+                  textAlign: 'center'
+                }
+              }, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
+              img({
+                src: '/images/about_dacs_algorithm.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Algorithm can offer suggested decisions to DACs',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
                 p({},
                   ['Having the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms, doesn’t just facilitate the DAC’s review - but given that the DUO terms are machine readable it means that we are able to use the DUOS algorithm to compare the permitted uses with the data access request instantly.']),
                 p({},
