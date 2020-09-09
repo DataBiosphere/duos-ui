@@ -43,7 +43,7 @@ class HomeAbout extends Component {
               h1({style: {fontWeight: '600'}}, ['Data Use Oversight System'])
             ]),
             div({style: aboutSectionWrapper}, [
-              h3({style: aboutSectionTitle}, ['Current state of data access']),
+              h3({style: aboutSectionTitle}, ['Current State of Data Access']),
               img({
                 src: '/images/about_current_access.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
@@ -107,10 +107,7 @@ class HomeAbout extends Component {
             ]),
             div({style: aboutSectionWrapper}, [
               h3({
-                style: {
-                  ...aboutSectionTitle,
-                  textAlign: 'center'
-                }
+                style: aboutSectionTitle
               }, ['Clarity of permitted data use helps, but complexity still lies in free-text data access requests']),
               img({
                 src: '/images/about_clarity_complexity.png',
@@ -139,7 +136,7 @@ class HomeAbout extends Component {
                   alt: 'Two-fold approach to improving data access requests',
                 }),
                 h3({
-                  style: {...aboutSectionTitle, textAlign: 'center'},
+                  style: aboutSectionTitle,
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'
                 }, ['A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests']),
               ]),
@@ -155,7 +152,7 @@ class HomeAbout extends Component {
             div({style: aboutSectionWrapper}, [
               div({className: 'row'}, [
                 h3({
-                  style: {...aboutSectionTitle, textAlign: 'center'},
+                  style: aboutSectionTitle,
                   className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12'
                 }, ['Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency']),
                 img({
@@ -170,12 +167,7 @@ class HomeAbout extends Component {
               ]),
             ]),
             div({style: aboutSectionWrapper}, [
-              h3({
-                style: {
-                  ...aboutSectionTitle,
-                  textAlign: 'center'
-                }
-              }, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
+              h3({style: aboutSectionTitle}, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
               img({
                 src: '/images/about_dacs_algorithm.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
