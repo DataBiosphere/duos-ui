@@ -8,7 +8,7 @@ export default function ResearchPurposeStatement(props) {
   const {
     addiction,
     darCode,
-    formStateChange,
+    formFieldChange,
     forProfit,
     handleRadioChange,
     illegalBehavior,
@@ -31,6 +31,11 @@ export default function ResearchPurposeStatement(props) {
   const [gender, setGender] = useState(props.gender);
 
   const alertBackgroundColor = '#f3494930';
+
+  const genderClickHandler = (genderValue) => {
+    formFieldChange({ name: 'gender', value: genderValue });
+    setGender(genderValue);
+  };
 
   //NOTE: inputs have both isEmpty and isNil checks
   //currently values are initialized as emptry strings as a way to maintain controlled inputs in components
@@ -90,7 +95,7 @@ export default function ResearchPurposeStatement(props) {
                     return (
                       label({
                         key: 'gender' + ix,
-                        onClick: (e) => formStateChange(setGender, {name: 'gender', value: genderValues[ix]}),
+                        onClick: (e) => genderClickHandler(genderValues[ix]),
                         id: 'lbl_gender_' + ix,
                         htmlFor: 'rad_gender_' + ix,
                         className: 'radio-wrapper'

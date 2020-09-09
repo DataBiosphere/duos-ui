@@ -423,7 +423,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
 
   updateResearcher(profile) {
-    const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+    const profileClone = this.cloneProfile(profile);
     Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone).then(resp => {
       this.saveUser().then(resp => {
         this.setState({ showDialogSubmit: false });
@@ -461,13 +461,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
-      const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+      const profileClone = this.cloneProfile(profile);
       Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
     this.setState({ showDialogSave: false });
   };
+
+  // When posting a user's researcher properties, library cards and entries are
+  // not valid properties for update.
+  cloneProfile = (profile) => {
+    return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+  }
 
   render() {
     let completed = this.state.profile.completed;
