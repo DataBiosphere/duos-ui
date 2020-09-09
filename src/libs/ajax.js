@@ -263,7 +263,6 @@ export const DAR = {
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
 
-    //NOTE:does rationale need to come from researcher or current user (guessing researcher)?
     darInfo.hasAdminComment = researcher.rationale != null;
     darInfo.adminComment = researcher.rationale;
     const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
@@ -283,7 +282,6 @@ export const DAR = {
     darInfo.datasets = rawDar.datasets;
     darInfo.pi = rawDar.investigator;
     darInfo.havePI = rawDar.havePI || rawDar.isThePI;
-    //NOTE:Is this meant to display the researcher name?
     darInfo.profileName = researcher.displayName;
     // dataUse from Models.dar has properties denoting what research the data will be used for.
     // Get these properties directly from the DAR.

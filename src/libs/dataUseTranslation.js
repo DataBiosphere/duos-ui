@@ -13,7 +13,7 @@ const translations = {
   },
   diseases: (diseases) => {
     const diseaseArray = diseases.sort();
-    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
+    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : 'N/A';
     return {
       code: 'DS',
       description: 'Disease-related studies: ' + diseaseString,
@@ -106,7 +106,7 @@ export const DataUseTranslation = {
    */
 
   //NOTE: backend categorization of purposeStatement/researchType differs from front-end primary/secondary designations
-  //Should the two categories be unified or are they distinct for a reason?
+  //Reminder to phase out purposeStatement/researchType as we transition to new front-end spec
   generatePurposeStatement: (darInfo) => {
     let statementArray = [];
     if(darInfo.forProfit) {
