@@ -141,7 +141,7 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
                 darInfo.diseases.map((disease, rIndex) => {
                   return h(Fragment, { key: rIndex }, [
                     li({ id: 'lbl_disease_' + rIndex }, [
-                      disease
+                      disease.label
                     ])
                   ]);
                 })

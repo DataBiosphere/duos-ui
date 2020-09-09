@@ -12,13 +12,18 @@ const translations = {
     manualReview: true
   },
   diseases: (diseases) => {
-    const diseaseArray = diseases.sort();
-    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : 'N/A';
+    const diseaseArray = diseases.sort().map(disease => disease.label);
+    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
     return {
       code: 'DS',
       description: 'Disease-related studies: ' + diseaseString,
       manualReview: false
     };
+  },
+  researchTypeDisease: {
+    code: 'DS',
+    description: 'The primary purpose of the research is to learn more about a particular disease or disorder, a trait, or a set of related conditions.',
+    manualReview: false
   },
   other: (otherText) => {
     return {
@@ -89,7 +94,7 @@ const translations = {
   },
   notHealth: {
     code: 'OTHER',
-    description: 'The dataset will be used for the research that correlates  ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
+    description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
     manualReview: true
   }
 };
@@ -110,47 +115,47 @@ export const DataUseTranslation = {
   generatePurposeStatement: (darInfo) => {
     let statementArray = [];
     if(darInfo.forProfit) {
-      fp.concat(statementArray)(translations.forProfit);
+      statementArray = fp.concat(statementArray)(translations.forProfit);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      fp.concat(statementArray)(translations.genderFemale);
+      statementArray = fp.concat(statementArray)(translations.genderFemale);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      fp.concat(statementArray)(translations.genderMale);
+      statementArray = fp.concat(statementArray)(translations.genderMale);
     }
 
     if(darInfo.illegalBehavior) {
-      fp.concat(statementArray)(translations.illegalBehavior);
+      statementArray = fp.concat(statementArray)(translations.illegalBehavior);
     }
 
     if(darInfo.addiction) {
-      fp.concat(statementArray)(translations.addiction);
+      statementArray = fp.concat(statementArray)(translations.addiction);
     }
 
     if(darInfo.sexualDiseases) {
-      fp.concat(statementArray)(translations.sexualDiseases);
+      statementArray = fp.concat(statementArray)(translations.sexualDiseases);
     }
 
     if(darInfo.stigmatizedDiseases) {
-      fp.concat(statementArray)(translations.stigmatizedDiseases);
+      statementArray = fp.concat(statementArray)(translations.stigmatizedDiseases);
     }
 
     if(darInfo.vulnerablePopulation) {
-      fp.concat(statementArray)(translations.vulnerablePopulation);
+      statementArray = fp.concat(statementArray)(translations.vulnerablePopulation);
     }
 
     if(darInfo.populationMigration || darInfo.poa || darInfo.population) {
-      fp.concat(statementArray)(translations.poa);
+      statementArray = fp.concat(statementArray)(translations.poa);
     }
 
     if(darInfo.psychiatricTraits) {
-      fp.concat(statementArray)(translations.psychiatricTraits);
+      statementArray = fp.concat(statementArray)(translations.psychiatricTraits);
     }
 
     if(darInfo.notHealth) {
-      fp.concat(statementArray)(translations.notHealth);
+      statementArray = fp.concat(statementArray)(translations.notHealth);
     }
 
     return statementArray;
@@ -160,28 +165,29 @@ export const DataUseTranslation = {
     let statementArray = [];
 
     if(darInfo.diseases) {
-      fp.uniq(fp.concat(statementArray)(translations.diseases(darInfo.diseases)));
+      statementArray = fp.concat(statementArray)(translations.researchTypeDisease);
     }
 
     if(darInfo.methods) {
-      fp.concat(statementArray)(translations.method);
+      statementArray = fp.concat(statementArray)(translations.method);
     }
 
     if(darInfo.controls) {
-      fp.concat(statementArray)(translations.controls);
+      statementArray = fp.concat(statementArray)(translations.controls);
     }
 
     if(darInfo.population || darInfo.poa) {
-      fp.concat(statementArray)(translations.poa);
+      statementArray = fp.concat(statementArray)(translations.poa);
     }
 
     if(darInfo.hmb) {
-      fp.concat(statementArray)(translations.hmb);
+      statementArray = fp.concat(statementArray)(translations.hmb);
     }
 
     if(darInfo.other) {
-      fp.concat(statementArray)(darInfo.otherText);
+      statementArray = fp.concat(statementArray)(darInfo.otherText);
     }
+    return statementArray;
   },
 
   translateDarInfo: (darInfo) => {
@@ -211,7 +217,8 @@ export const DataUseTranslation = {
       dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.poa);
     }
     if (darInfo.diseases && !fp.isEmpty(darInfo.diseases)) {
-      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(translations.diseases(darInfo)));
+      const diseaseTranslation = translations.diseases(fp.clone(darInfo.diseases));
+      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(diseaseTranslation));
     }
     if (darInfo.other) {
       dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.other(darInfo.otherText));
