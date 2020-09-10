@@ -217,8 +217,6 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-
-        //NOTE: External collaborators comes after Signing officials, Cloud use, and IT Official prompts, hence the numbering as 1.9
         div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
@@ -245,7 +243,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({className: 'form-group'}, [
+        div({className: 'form-group', isRendered: false}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
@@ -269,7 +267,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({className: 'form-group'}, [
+        div({className: 'form-group', isRendered: false}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
@@ -293,7 +291,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({className: 'form-group'}, [
+        div({className: 'form-group', isRendered: false}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
@@ -404,7 +402,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({ className: 'form-group' }, [
+        div({ className: 'form-group', isRendered: false }, [
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               label({ className: "control-label rp-title-question" }, [
