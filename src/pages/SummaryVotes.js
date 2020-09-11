@@ -91,7 +91,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
   getPowerBiDashboard() {
     Config.getPowerBiUrl().then(url => {
-      this.setState({powerBiUrl: url})
+      this.setState({powerBiUrl: url});
     })
   }
 
