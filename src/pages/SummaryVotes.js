@@ -28,7 +28,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
   componentDidMount() {
     this.getSummaryInfo();
     this.getPowerBiDashboard();
-
   }
 
   isAuthedToDownload() {
