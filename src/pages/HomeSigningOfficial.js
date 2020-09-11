@@ -7,10 +7,12 @@ class HomeSigningOfficial extends Component {
   render() {
 
     const imageWrapper = {
-      padding: '0 2rem',
+      padding: '5rem',
       margin: '3rem 5rem 1rem',
       height: 'auto',
-      width: '100%',
+      maxHeight: '300px',
+      width: 'auto',
+      maxWidth: '100%',
       float: 'none'
     };
 
