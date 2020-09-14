@@ -1,5 +1,104 @@
 import * as fp from 'lodash/fp';
 
+const translations = {
+  hmb: {
+    code: "HMB",
+    description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
+    manualReview: false
+  },
+  poa: {
+    code: 'POA',
+    desciption: 'The dataset will be used for the study of Population Origins/Migration patterns.',
+    manualReview: true
+  },
+  diseases: (diseases) => {
+    const diseaseArray = diseases.sort().map(disease => disease.label);
+    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
+    return {
+      code: 'DS',
+      description: 'Disease-related studies: ' + diseaseString,
+      manualReview: false
+    };
+  },
+  researchTypeDisease: {
+    code: 'DS',
+    description: 'The primary purpose of the research is to learn more about a particular disease or disorder, a trait, or a set of related conditions.',
+    manualReview: false
+  },
+  other: (otherText) => {
+    return {
+      code: 'OTHER',
+      description: fp.isEmpty(otherText) ? "Not provided" : otherText,
+      manualReview: true
+    };
+  },
+  methods: {
+    code: 'MDS',
+    description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
+    manualReview: false
+  },
+  controls: {
+    code: 'CTRL',
+    description: 'The reason for this request is to increase the number of controls available for a comparison group.',
+    manualReview: false
+  },
+  forProfit: {
+    code: 'NCU',
+    description: 'The dataset will be used in a study related to a commercial purpose.',
+    manualReview: false
+  },
+  genderFemale: {
+    code: 'POP-F',
+    description: 'The dataset will be used for the study of females.',
+    manualReview: false
+  },
+  genderMale: {
+    code: 'POP-M',
+    description: 'The dataset will be used for the study of males.',
+    manualReview: false
+  },
+  pediatric: {
+    code: 'POP-P',
+    description: 'The dataset will be used for the study of children.',
+    manualReview: false
+  },
+  illegalBehavior: {
+    code: 'OTHER',
+    description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
+    manualReview: true
+  },
+  addiction: {
+    code: 'OTHER',
+    description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.',
+    manualReview: true
+  },
+  sexualDiseases: {
+    code: 'OTHER',
+    description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
+    manualReview: true
+  },
+  stigmatizedDiseases: {
+    code: 'OTHER',
+    description: 'The dataset will be used for the study of stigmatizing illnesses.',
+    manualReview: true
+  },
+  vulnerablePopulation: {
+    code: 'OTHER',
+    description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
+    manualReview: true
+  },
+  psychiatricTraits: {
+    code: 'OTHER',
+    description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
+    manualReview: true
+  },
+  notHealth: {
+    code: 'OTHER',
+    description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
+    manualReview: true
+  }
+};
+
 export const DataUseTranslation = {
 
   /**
@@ -10,6 +109,87 @@ export const DataUseTranslation = {
    * @param darInfo
    * @returns {{primary: [{code: '', description: ''}], secondary: [{code: '', description: ''}]}}
    */
+
+  //NOTE: backend categorization of purposeStatement/researchType differs from front-end primary/secondary designations
+  //Reminder to phase out purposeStatement/researchType as we transition to new front-end spec
+  generatePurposeStatement: (darInfo) => {
+    let statementArray = [];
+    if(darInfo.forProfit) {
+      statementArray = fp.concat(statementArray)(translations.forProfit);
+    }
+
+    if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
+      statementArray = fp.concat(statementArray)(translations.genderFemale);
+    }
+
+    if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
+      statementArray = fp.concat(statementArray)(translations.genderMale);
+    }
+
+    if(darInfo.illegalBehavior) {
+      statementArray = fp.concat(statementArray)(translations.illegalBehavior);
+    }
+
+    if(darInfo.addiction) {
+      statementArray = fp.concat(statementArray)(translations.addiction);
+    }
+
+    if(darInfo.sexualDiseases) {
+      statementArray = fp.concat(statementArray)(translations.sexualDiseases);
+    }
+
+    if(darInfo.stigmatizedDiseases) {
+      statementArray = fp.concat(statementArray)(translations.stigmatizedDiseases);
+    }
+
+    if(darInfo.vulnerablePopulation) {
+      statementArray = fp.concat(statementArray)(translations.vulnerablePopulation);
+    }
+
+    if(darInfo.populationMigration || darInfo.poa || darInfo.population) {
+      statementArray = fp.concat(statementArray)(translations.poa);
+    }
+
+    if(darInfo.psychiatricTraits) {
+      statementArray = fp.concat(statementArray)(translations.psychiatricTraits);
+    }
+
+    if(darInfo.notHealth) {
+      statementArray = fp.concat(statementArray)(translations.notHealth);
+    }
+
+    return statementArray;
+  },
+
+  generateResearchTypes: (darInfo) => {
+    let statementArray = [];
+
+    if(darInfo.diseases) {
+      statementArray = fp.concat(statementArray)(translations.researchTypeDisease);
+    }
+
+    if(darInfo.methods) {
+      statementArray = fp.concat(statementArray)(translations.method);
+    }
+
+    if(darInfo.controls) {
+      statementArray = fp.concat(statementArray)(translations.controls);
+    }
+
+    if(darInfo.population || darInfo.poa) {
+      statementArray = fp.concat(statementArray)(translations.poa);
+    }
+
+    if(darInfo.hmb) {
+      statementArray = fp.concat(statementArray)(translations.hmb);
+    }
+
+    if(darInfo.other) {
+      statementArray = fp.concat(statementArray)(darInfo.otherText);
+    }
+    return statementArray;
+  },
+
   translateDarInfo: (darInfo) => {
     let dataUseSummary = {
       primary: [],
@@ -19,12 +199,8 @@ export const DataUseTranslation = {
     // Primary Codes
 
     if (darInfo.hmb) {
-      const dataUseElement = {
-        code: 'HMB',
-        description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
-      };
       dataUseSummary.primary = fp.concat(dataUseSummary.primary,
-        dataUseElement);
+        translations.hmb);
     }
     /**
      * TODO: Resolve confusion on consent/ontology/orsp sides
@@ -38,121 +214,56 @@ export const DataUseTranslation = {
      * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
      */
     if (darInfo.poa || darInfo.population || darInfo.populationMigration) {
-      const dataUseElement = {
-        code: 'POA',
-        description: 'The dataset will be used for the study of Population Origins/Migration patterns.',
-      };
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
+      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.poa);
     }
     if (darInfo.diseases && !fp.isEmpty(darInfo.diseases)) {
-      const diseaseArray = darInfo.diseases.sort();
-      const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
-      const dataUseElement = {
-        code: 'DS',
-        description: 'Disease-related studies: ' + diseaseString
-      };
-      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(dataUseElement));
+      const diseaseTranslation = translations.diseases(fp.clone(darInfo.diseases));
+      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(diseaseTranslation));
     }
     if (darInfo.other) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: fp.isEmpty(darInfo.otherText) ? "Not provided" : darInfo.otherText,
-      };
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(dataUseElement);
+      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.other(darInfo.otherText));
     }
 
     // Secondary Codes
 
     if (darInfo.methods) {
-      const dataUseElement = {
-        code: 'MDS',
-        description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.methods);
     }
     if (darInfo.controls) {
-      const dataUseElement = {
-        code: 'CTRL',
-        description: 'The reason for this request is to increase the number of controls available for a comparison group.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.controls);
     }
     if (darInfo.forProfit) {
-      const dataUseElement = {
-        code: 'NCU',
-        description: 'The dataset will be used in a study related to a commercial purpose.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.forProfit);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      const dataUseElement = {
-        code: 'POP-F',
-        description: 'The dataset will be used for the study of females.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.genderFemale);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      const dataUseElement = {
-        code: 'POP-M',
-        description: 'The dataset will be used for the study of males.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.genderFemale);
     }
     if (darInfo.pediatric) {
-      const dataUseElement = {
-        code: 'POP-P',
-        description: 'The dataset will  be used for the study of children.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.pediatric);
     }
     if (darInfo.illegalBehavior) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.illegalBehavior);
     }
     if (darInfo.addiction) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.addiction);
     }
     if (darInfo.sexualDiseases) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.sexualDiseases);
     }
     if (darInfo.stigmatizedDiseases) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for the study of stigmatizing illnesses.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.stigmatizedDiseases);
     }
     if (darInfo.vulnerablePopulation) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.vulnerablePopulation);
     }
     if (darInfo.psychiatricTraits) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.psychiatricTraits);
     }
     if (darInfo.notHealth) {
-      const dataUseElement = {
-        code: 'OTHER',
-        description: 'The dataset will be used for the research that correlates  ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
-      };
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(dataUseElement);
+      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.notHealth);
     }
 
     return dataUseSummary;
