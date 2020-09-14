@@ -63,7 +63,7 @@ class Home extends Component {
       textAlign: 'center',
       textIndent: '10px',
       whiteSpace: 'pre-wrap',
-      padding: '10px 30px',
+      padding: '10px 1rem',
     };
 
     const paragraph = {
@@ -127,7 +127,7 @@ class Home extends Component {
             ])
           ]),
           div({ isRendered: !isLogged, className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
-            div({ className: 'col-lg-4 col-lg-offset-1 col-md-4 col-md-offset-1'}, [
+            div({ className: 'col-lg-4 col-md-4'}, [
               p({ style: header }, ['Are you a DAC member?']),
               p({ style: description }, [
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
@@ -137,7 +137,17 @@ class Home extends Component {
                 ])
               ])
             ]),
-            div({ className: 'col-lg-4 col-lg-offset-2 col-md-4 col-md-offset-2' }, [
+            div({ className: 'col-lg-4 col-md-4 '}, [
+              p({ style: header }, ['Are you a Signing Official?']),
+              p({ style: description }, [
+                'Click here to learn learn more about DUOS\' innovative Library Card \ninitiative and how to issue a Library Card to your researchers']),
+              div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
+                button({ className: 'btn-primary', style: buttonStyle }, [
+                  a({href: 'home_signing_official', style: {color: '#fff'}}, ['LEARN MORE'])
+                ])
+              ])
+            ]),
+            div({ className: 'col-lg-4 col-md-4' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
                 'Click here to start your data access request!']),
