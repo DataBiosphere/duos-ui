@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { button, div, h3, hh, hr, span } from 'react-hyperscript-helpers';
+import {button, div, h3, hh, hr, iframe, span} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { StatsBox } from '../components/StatsBox';
 import { PendingCases, StatFiles, Summary } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
+import { Config } from '../libs/config';
 
 const authDownloadRoles = [USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member];
 
@@ -16,7 +17,8 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
     super(props);
     this.state = {
       showModal: false,
-      chartData: this.initialState()
+      chartData: this.initialState(),
+      powerBiUrl: ''
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -25,6 +27,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
 
   componentDidMount() {
     this.getSummaryInfo();
+    this.getPowerBiDashboard();
   }
 
   isAuthedToDownload() {
@@ -83,6 +86,12 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         prev.chartData = summaryData;
         return prev;
       });
+    });
+  }
+
+  getPowerBiDashboard() {
+    Config.getPowerBiUrl().then(url => {
+      this.setState({powerBiUrl: url});
     });
   }
 
@@ -238,6 +247,16 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             className: "result_chart"
           }),
         ]),
+        div({}, [
+          div({ style: { overflow: 'hidden', paddingTop: '75%', position: 'relative' }}, [
+            iframe({
+              src: this.state.powerBiUrl,
+              allowFullScreen: true,
+              loading: 'lazy',
+              style: { border: '0', height: '100%', left: '0', position: 'absolute', top: '0', width: '100%' }
+            })
+          ])
+        ])
       ])
     );
   }
