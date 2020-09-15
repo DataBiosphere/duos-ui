@@ -6,14 +6,14 @@ class HomeAbout extends Component {
   render() {
 
     const imageWrapper = {
-      padding: '5rem',
+      padding: '3rem',
       margin: '0 3rem',
       height: 'auto',
       maxHeight: '300px',
       width: 'auto',
       maxWidth: '100%',
       float: 'none'
-    }
+    };
 
     const aboutSectionWrapper = {
       fontFamily: 'Montserrat',
@@ -24,21 +24,21 @@ class HomeAbout extends Component {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center'
-    }
+    };
 
     const aboutSectionTitle = {
       fontWeight: '600',
       color: '#2899BC',
       padding: '0 5rem'
-    }
+    };
 
     const aboutSectionBody = {
       padding: '0 5rem',
-    }
+    };
 
     const paragraph = {
       padding: '1rem 0 0 0'
-    }
+    };
 
     return (
       div({className: 'row home'}, [
