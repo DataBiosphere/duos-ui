@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -46,6 +46,12 @@ export default function DataAccessRequest(props) {
     setter(value);
     formFieldChange(dataset);
   };
+
+  useEffect(() => {
+    setProjectTitle(props.projectTitle);
+    setRus(props.rus);
+    setNonTechRus(props.nonTechRus);
+  }, [props.rus, props.nonTechRus, props.projectTitle]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
