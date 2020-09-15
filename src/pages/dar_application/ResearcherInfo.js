@@ -49,7 +49,6 @@ export default function ResearcherInfo(props) {
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudRequested, setCloudRequested] = useState(props.cloudRequested || '');
   const [localRequested, setLocalRequested] = useState(props.localRequested || '');
-
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
     setCheckCollaborator(props.checkCollaborator);

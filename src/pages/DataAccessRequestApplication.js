@@ -302,7 +302,6 @@ class DataAccessRequestApplication extends Component {
       isInvestigatorInvalid = false,
       showValidationMessages = false,
       isNihInvalid = !this.state.nihValid;
-
     if (!this.isValid(this.state.formData.researcher)) {
       isResearcherInvalid = true;
       showValidationMessages = true;
@@ -332,12 +331,17 @@ class DataAccessRequestApplication extends Component {
   //method to be passed to step 4 for error checks/messaging
   step1InvalidResult(dataset) {
     const checkCollaborator = this.state.formData.checkCollaborator;
-    const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid, signingOfficial} = dataset;
+    //NOTE: add signingOfficial back as a constant when back-end functinoality is added
+    //NOTE: add check on cloud use statement as well
+    const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid} = dataset;
+
     return isResearcherInvalid
       || isInvestigatorInvalid
       || showValidationMessages
-      || (!checkCollaborator && isNihInvalid)
-      || isEmpty(signingOfficial);
+      || (!checkCollaborator && isNihInvalid);
+    //NOTE: add below check when re-instating signing official
+    //NOTE: also add in check on cloudUseStatement answers
+    // || isEmpty(signingOfficial);
   }
 
   verifyStep1() {
@@ -613,10 +617,15 @@ class DataAccessRequestApplication extends Component {
       providerType = '',
       providerDescription = ''
     } = this.state.formData;
+
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
+
+    const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
+    const step2Invalid = this.verifyStep2();
+    const step3Invalid = this.step3InvalidResult();
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
@@ -819,9 +828,9 @@ class DataAccessRequestApplication extends Component {
                 ConfirmationDialogComponent,
                 partialSave: this.partialSave,
                 prevPage: this.prevPage,
-                step1Invalid: this.step1InvalidResult(this.step1InvalidChecks()),
-                step2Invalid: this.verifyStep2(),
-                step3Invalid: this.step3InvalidResult(),
+                step1Invalid,
+                step2Invalid,
+                step3Invalid,
                 showValidationMessages,
                 updateShowValidationMessages: this.updateShowValidationMessages,
                 goToStep: this.goToStep
