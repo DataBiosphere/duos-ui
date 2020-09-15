@@ -967,12 +967,6 @@ export const User = {
     }
   },
 
-  updateMainFields: async (user, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
-    return res.json();
-  },
-
   registerUser: async () => {
     const url = `${await Config.getApiUrl()}/user`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
