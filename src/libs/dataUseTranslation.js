@@ -169,7 +169,7 @@ export const DataUseTranslation = {
     }
 
     if(darInfo.methods) {
-      statementArray = fp.concat(statementArray)(translations.method);
+      statementArray = fp.concat(statementArray)(translations.methods);
     }
 
     if(darInfo.controls) {
