@@ -165,15 +165,18 @@ class Home extends Component {
           div({ className: 'row', style: { margin: 'auto auto 5rem auto' } }, [
             div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2' }, [
               div({}, [
-                h1({ style: header }, ['About DUOS']),
-                h3({ style: subHeader }, ['Overview of the system and development']),
+                h1({ style: header }, ['Overview of DUOS']),
                 ReadMore({
                   props: this.props,
                   readStyle: readMoreStyle,
                   content: [
                     p({ style: paragraph, key: 'p-0' }, [
-                      'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.'
-                    ])
+                      'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data. With support from DUOS team members, the Global Alliance for Genomics and Health (GA4GH) published a solution for this ambiguous and inconsistent data sharing language in the form of their ',
+                      a({
+                        href: 'https://www.ga4gh.org/genomic-data-toolkit/regulatory-ethics-toolkit/#:~:text=Machine%20Readable%20Consent%20Guidance&text=Machine%20readable%20consent%20language%20is,to%20for%20their%20research%20purposes',
+                        target: '_blank'
+                      }, ['Machine Readable Consent Guidance.'])
+                    ]),
                   ],
                   moreContent: [
                     div({}, [
