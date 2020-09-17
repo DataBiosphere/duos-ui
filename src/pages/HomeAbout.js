@@ -50,7 +50,7 @@ class HomeAbout extends Component {
             div({style: aboutSectionWrapper}, [
               h3({style: aboutSectionTitle}, ['Current State of Data Access']),
               img({
-                src: '/images/about_current_access_v2.png',
+                src: '/images/about_current_access.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Current state of data access',
                 style: imageWrapper
@@ -113,7 +113,7 @@ class HomeAbout extends Component {
                 style: aboutSectionTitle
               }, ['Clarity of permitted data use helps, but complexity still lies in free-text data access requests']),
               img({
-                src: '/images/about_clarity_complexity_v2.png',
+                src: '/images/about_clarity_complexity.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Complexity still lies in free-text data access requests',
                 style: imageWrapper
@@ -157,7 +157,7 @@ class HomeAbout extends Component {
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
               }, ['Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency']),
               img({
-                src: '/images/about_dacs_compare_v2.png',
+                src: '/images/about_dacs_compare.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Now DACs can compare',
                 style: imageWrapper
@@ -170,7 +170,7 @@ class HomeAbout extends Component {
             div({style: aboutSectionWrapper}, [
               h3({style: aboutSectionTitle}, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
               img({
-                src: '/images/about_dacs_algorithm_v2.png',
+                src: '/images/about_dacs_algorithm.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Algorithm can offer suggested decisions to DACs',
                 style: imageWrapper
