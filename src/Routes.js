@@ -29,6 +29,7 @@ import FinalAccessReview from './pages/FinalAccessReview';
 import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
+import HomeDacInfo from "./pages/HomeDacInfo";
 import InvalidRestrictions from './pages/InvalidRestrictions';
 import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import MemberConsole from './pages/MemberConsole';
@@ -51,6 +52,7 @@ const Routes = (props) => (
     <Route path="/FAQs" component={FAQs} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />
+    <Route path="/home_dac_info" component={HomeDacInfo} />
     <Route path="/election404" component={Election404} />
     <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
