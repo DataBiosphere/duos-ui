@@ -231,7 +231,7 @@ export const DAR = {
     const authOpts = Config.authOpts();
     const rawDarRes = await axios.get(`${apiUrl}/dar/${darId}`, authOpts);
     const rawDar = rawDarRes.data;
-    const researcher = await User.getByEmail(rawDar.academicEmail);
+    const researcher = await User.getById(rawDar.userId);
 
     let darInfo = Models.dar;
     darInfo.hmb = rawDar.hmb;
@@ -933,6 +933,12 @@ export const User = {
 
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  getById: async id => {
+    const url = `${await Config.getApiUrl()}/user/${id}`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
