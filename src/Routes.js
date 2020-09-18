@@ -29,7 +29,7 @@ import FinalAccessReview from './pages/FinalAccessReview';
 import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
-import HomeDacInfo from "./pages/HomeDacInfo";
+import HomeDacInfo from './pages/HomeDacInfo';
 import InvalidRestrictions from './pages/InvalidRestrictions';
 import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import MemberConsole from './pages/MemberConsole';
