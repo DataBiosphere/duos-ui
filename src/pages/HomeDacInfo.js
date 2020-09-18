@@ -1,7 +1,5 @@
 import {Component} from 'react';
-import {a, button, div, h1, h3, img, p, span} from 'react-hyperscript-helpers';
-import {SignIn} from '../components/SignIn';
-import {ReadMore} from '../components/ReadMore';
+import {div, h1, h3, img, p, span} from 'react-hyperscript-helpers';
 
 class HomeDacInfo extends Component {
 
