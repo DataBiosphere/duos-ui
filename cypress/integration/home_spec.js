@@ -10,7 +10,8 @@ describe('Home', function() {
     cy.contains('Are you a DAC member?');
     cy.contains('Are you a Signing Official?');
     cy.contains('Are you a researcher?');
-    cy.contains('About DUOS');
+    cy.contains('Overview of DUOS');
+    cy.contains('Machine Readable Consent Guidance.');
   });
 
 });
