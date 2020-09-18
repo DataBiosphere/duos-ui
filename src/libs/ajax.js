@@ -931,6 +931,9 @@ export const StatFiles = {
 
 export const User = {
 
+  //DEPRECATION NOTE: consider this method deprecated, a user's email can change with their employment
+  //Therefore the possibility that the email registered to a DAR will differ from the researcher's current email, leading to invalid queries
+  //Instead, use getById for more predictable results
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
     const res = await axios.get(url, Config.authOpts());
