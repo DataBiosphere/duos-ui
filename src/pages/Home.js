@@ -133,7 +133,7 @@ class Home extends Component {
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
               div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyle }, [
-                  a({href: 'home_about', style: {color: '#fff'}}, ['LEARN MORE'])
+                  a({href: 'home_dac_info', style: {color: '#fff'}}, ['LEARN MORE'])
                 ])
               ])
             ]),
