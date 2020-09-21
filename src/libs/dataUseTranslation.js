@@ -28,7 +28,7 @@ const translations = {
   other: (otherText) => {
     return {
       code: 'OTHER',
-      description: fp.isEmpty(otherText) ? "Not provided" : otherText,
+      description: fp.isEmpty(otherText) ? "Other: Not provided" : otherText,
       manualReview: true
     };
   },
@@ -185,7 +185,7 @@ export const DataUseTranslation = {
     }
 
     if(darInfo.other) {
-      statementArray = fp.concat(statementArray)(darInfo.otherText);
+      statementArray = fp.concat(statementArray)(translations.other(darInfo.otherText));
     }
     return statementArray;
   },
