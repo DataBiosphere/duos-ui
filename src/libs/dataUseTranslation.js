@@ -1,31 +1,70 @@
 import * as fp from 'lodash/fp';
 
 //NOTE: need to incorporate the generic core statements and the prefixes into this data struct for universal use
+//NOTE: need to encapsulate values in true/false keys since there may be variations on what is expected for each attribute
+//NOTE: values that have no expected value for true or valse should have it be set to null for exclusion in processing
+const processedDiseaseString = (prefix, diseases) => {
+  const diseaseArray = diseases.sort().map(disease => disease.label);
+  const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
+  return {
+    description: prefix + diseaseString,
+    manualReview: false
+  };
+};
+
+//NOTE: will need to create a mapper or key check to point the equivalent keys across all references to the same front-end definition
+//Examples - forProfit, male, female, pediatric (and possible even more)
+//NOTE: need to understand the differences between NMDS and MDS and NCTRL and CTRL for categorization sake
+//NOTE: most likely will need to rewrite dependent components to use new interface
 const translations = {
   hmb: {
     code: "HMB",
-    description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
+    srp: {
+      description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.'
+    },
+    dul: {
+      true: {
+        description: 'Use is permitted for a health, medical, or biomedical research purpose'
+      },
+      false: null
+    },
     manualReview: false
   },
   poa: {
     code: 'POA',
-    desciption: 'The dataset will be used for the study of Population Origins/Migration patterns.',
+    srp: {
+      description: 'The primary aim of this research is for population, origin, or ancestry research',
+    },
+    dul: {
+      true: {
+        description: 'Use is limited to population, origin, or ancestry research'
+      },
+      false: null
+    },
     manualReview: true
   },
   diseases: (diseases) => {
-    const diseaseArray = diseases.sort().map(disease => disease.label);
-    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
     return {
       code: 'DS',
-      description: 'Disease-related studies: ' + diseaseString,
+      srp: {
+        description: processedDiseaseString('The primary aim of this research is for ', diseases)
+      },
+      dul: {
+        true: {
+          description: processedDiseaseString('Use is permitted for '),
+        },
+        false: null
+      },
       manualReview: false
     };
   },
+  //NOTE: figure out if this needs to be removed or not 
   researchTypeDisease: {
     code: 'DS',
     description: 'The primary purpose of the research is to learn more about a particular disease or disorder, a trait, or a set of related conditions.',
     manualReview: false
   },
+  //NOTE: need to know how to format this string for srp and dul
   other: (otherText) => {
     return {
       code: 'OTHER',
@@ -33,70 +72,195 @@ const translations = {
       manualReview: true
     };
   },
+  //srp only
   methods: {
     code: 'MDS',
-    description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
+    srp: {
+      description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
+    },
+    dul: null,
     manualReview: false
   },
+  //srp only
   controls: {
     code: 'CTRL',
-    description: 'The reason for this request is to increase the number of controls available for a comparison group.',
+    srp: {
+      description: 'The reason for this request is to increase the number of controls available for a comparison group.'
+    },
+    dul: null,
     manualReview: false
   },
   forProfit: {
     code: 'NCU',
-    description: 'The dataset will be used in a study related to a commercial purpose.',
+    srp:{
+      description: 'This research is not-for-profit and non-commercial.'
+    },
+    dul: {
+      true: {
+        description: 'Use is limited to not-for-profit and non-commercial.'
+      },
+      false: {
+        description: 'Use is not limited to not-for-profit and non-commercial.'
+      }
+    },
     manualReview: false
   },
   genderFemale: {
     code: 'POP-F',
-    description: 'The dataset will be used for the study of females.',
+    srp: {
+      description: 'This research is limited to studies about females.',
+    },
+    dul: {
+      true: {
+        description: 'Use is limited to studies about females.'
+      },
+      false: null
+    },
     manualReview: false
   },
   genderMale: {
     code: 'POP-M',
-    description: 'The dataset will be used for the study of males.',
+    srp: {
+      description: 'The dataset will be used for studies about males.'
+    },
+    dul: {
+      true: {
+        description: 'Use is limited to studies about males.'
+      },
+      false: null
+    },
     manualReview: false
   },
   pediatric: {
     code: 'POP-P',
-    description: 'The dataset will be used for the study of children.',
+    srp: {description: 'The dataset will be used for the study of children.'},
+    dul: {
+      true: {
+        description: 'The dataset will be used for pediatric research.'
+      },
+      false: null
+    },
     manualReview: false
   },
+  //srp only?
   illegalBehavior: {
     code: 'OTHER',
-    description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
+    srp: {description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).'},
+    dul: null,
     manualReview: true
   },
+  //srp only?
   addiction: {
     code: 'OTHER',
-    description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.',
+    srp: {description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.'},
+    dul: null,
     manualReview: true
   },
+  //srp only?
   sexualDiseases: {
     code: 'OTHER',
-    description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
+    srp: {description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.'},
+    dul: null,
     manualReview: true
   },
+  //srp only?
   stigmatizedDiseases: {
     code: 'OTHER',
-    description: 'The dataset will be used for the study of stigmatizing illnesses.',
+    srp: {description: 'The dataset will be used for the study of stigmatizing illnesses.'},
+    dul: null,
     manualReview: true
   },
+  //srp only?
   vulnerablePopulation: {
     code: 'OTHER',
-    description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
+    srp: {description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).'},
+    dul: null,
     manualReview: true
   },
+  //srp only?
   psychiatricTraits: {
     code: 'OTHER',
-    description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
+    srp: {description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.'},
+    dul: null,
     manualReview: true
   },
+  //srp only?
   notHealth: {
     code: 'OTHER',
-    description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
+    srp: {description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.'},
+    dul: null,
     manualReview: true
+  },
+  //dul only?
+  geneticStudiesOnly: {
+    code: 'GSO',
+    srp: {
+      description: 'This research includes genetic studies only.'
+    },
+    dul: {
+      true: {
+        description: 'Use is limited to genetic studies only'
+      },
+      false: null
+    },
+    //what is this value?
+    manualReview: false
+  },
+  publicationResults: {
+    code: 'PUB',
+    srp: {
+      description: 'The researcher will make results of studies using the data available to the larger scientific community'
+    },
+    dul: {
+      true: {
+        description: 'Use requires users to make results of studies using the data availbale to the larger scientific community.'
+      },
+      false: null
+    },
+    //what should this value be?
+    manualReview: false
+  },
+  collaboratorRequired: {
+    code: 'COL',
+    srp: {
+      description: 'The researcher will collaborate with the primary study investigators.'
+    },
+    dul: {
+      true: {
+        description: 'Use requires users to collaborate with the primary study investigators.'
+      },
+      false: null
+    },
+    //What should this value be?
+    manualReview: false
+  },
+  ethicsApprovalRequired: {
+    code: 'IRB',
+    srp: {
+      description: 'The researcher will provide documentation of local IRB/ERB approval.'
+    },
+    dul: {
+      true: {
+        description: 'Use requires users to provide documentation of local IRB/ERB approval.'
+      },
+      false: null
+    },
+    //what should this value be?
+    manualReview: false
+  },
+  geographicalRestriction: {
+    code: 'GS',
+    srp: {
+      description: 'The research is within a certain gepgraphic area'
+    },
+    dul: {
+      true: {
+        description: 'Use is limited to within a certain geographic area'
+      },
+      false: null
+    },
+    //what should this value be?
+    manualReview: false
   }
 };
 
