@@ -1,5 +1,6 @@
 import * as fp from 'lodash/fp';
 
+//NOTE: need to incorporate the generic core statements and the prefixes into this data struct for universal use
 const translations = {
   hmb: {
     code: "HMB",
@@ -269,4 +270,108 @@ export const DataUseTranslation = {
     return dataUseSummary;
   },
 
+};
+
+export const translatedUseStatements = function(darInfo, type) {
+  //singlePhrases will contain the core message that is shared by both sRP and DULs
+  //pronouns can be prefixed to these central definitions
+  const singlePhrases = {
+    nres: 'any purpose without restrictions.',
+    gru: 'any research purpose.',
+    hmb: 'a health, medical, or biomedical research purpose.',
+    ds: 'for reasearch on the specified disease(s).',
+    poa: 'population, origin, or ancestry research.',
+    mds: 'methods development research (e.g., development of software or algorithms).',
+    nmds: 'methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations.',
+    gso: 'genetic studies only.',
+    npu: 'not-for-profit and non-commercial.',
+    pub: 'make results of studies using the data available to the larger scientific community.',
+    col: 'collaborate with the primary study investigators',
+    irb: 'provide documentation of local IRB/ERB approval',
+    gs: 'within a certain geographic area',
+    mor: 'withold from publishing until the specified date',
+    rt: 'return derived/enriched data to the database/resource'
+  };
+
+  const prefixPhrases = {
+    nres: {
+      srp: null,
+      dul: 'Use is permited for '
+    },
+    gru: {
+      srp: null,
+      dul: 'Use is permitted for '
+    },
+    hmb: {
+      srp: 'The primary aim of this research is ',
+      dul: 'Use is permitted for '
+    },
+    ds: {
+      srp: 'The primary aim of this research is ',
+      dul: 'Use is permitted for '
+    },
+    poa: {
+      srp: 'The primary aim of this research is ',
+      dul: 'Use is limited to '
+    },
+    mds: {
+      dul: null,
+      srp: 'This research includes '
+    },
+    nmds: {
+      dul: 'Use for ',
+      srp: null
+    },
+    gso: {
+      dul: 'Use is limited to ',
+      srp: 'This research includes '
+    },
+    npu: {
+      dul: 'Use is limited to ',
+      srp: 'This research is '
+    },
+    pub: {
+      dul: 'Use requires user to ',
+      srp: 'The researcher will '
+    },
+    col: {
+      dul: 'Use requires users to ',
+      srp: 'The reseracher will '
+    },
+    irb: {
+      dul: 'Use requires users to ',
+      srp: 'The researcher will '
+    },
+    gs: {
+      dul: 'Use is limited to ',
+      srp: 'The research is '
+    },
+    mor: {
+      dul: 'Use requires users to ',
+      srp: 'The researcher will '
+    },
+    rt: {
+      dul: 'Use requires users to ',
+      srp: 'The researcher will '
+    }
+  };
+
+  const generateStatements = function (darInfo, type) {
+    if(!type || !darInfo) {return [];}
+
+    const keys = Object.keys(singlePhrases);
+    let returnStatements = [];
+    keys.forEach(key => {
+      if(prefixPhrases[key][type] && darInfo[key]) {
+        returnStatements.push({
+          description: prefixPhrases[key][type] + singlePhrases[key],
+          key: key
+        });
+      }
+    });
+
+    return returnStatements;
+  };
+
+  return generateStatements(darInfo, type);
 };

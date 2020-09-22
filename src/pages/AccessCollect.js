@@ -15,6 +15,7 @@ import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
+import { translatedUseStatements } from '../libs/dataUseTranslation';
 
 class AccessCollect extends Component {
 
@@ -30,6 +31,14 @@ class AccessCollect extends Component {
 
   async componentDidMount() {
     await this.loadData();
+  }
+
+  generateDULStatements() {
+    const restrictions = translatedUseStatements(this.state.darInfo, 'dul');
+    return restrictions.map((restriction) => {
+      debugger;
+      return div({className: 'response-label translated-restriction', key: restriction.key}, [restriction.description]);
+    });
   }
 
   initialState() {
@@ -235,7 +244,6 @@ class AccessCollect extends Component {
   async findDataAccessElectionReview() {
     let electionReview = await Election.findDataAccessElectionReview(this.props.match.params.electionId, false);
     this.getRPGraphData('access', electionReview.reviewVote);
-
     this.setState(prev => {
       prev.isQ1Expanded = true;
       prev.isQ2Expanded = false;
@@ -251,6 +259,7 @@ class AccessCollect extends Component {
       prev.dulName = electionReview.consent.dulName;
       prev.status = electionReview.election.status;
       prev.accessAlreadyVote = electionReview.election.finalVote !== null ? true : false;
+      //NOTE: What's with this logic? the variable isn't even used
       prev.userestriction = electionReview.election.translatedUseRestriction === null ?
         'This includes sensitive research objectives that requires manual review.' :
         electionReview.election.translatedUseRestriction;
@@ -360,7 +369,7 @@ class AccessCollect extends Component {
 
   render() {
 
-    const { translatedUseRestriction } = this.state;
+    const translatedDULComponent = this.generateDULStatements();
 
     return (
       div({ className: 'container container-wide' }, [
@@ -414,7 +423,7 @@ class AccessCollect extends Component {
                 div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
                   div({ className: 'row dar-summary' }, [
                     div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-                    div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
+                    div({ className: 'response-label translated-restriction'}, [translatedDULComponent])
                   ])
                 ])
               ])
