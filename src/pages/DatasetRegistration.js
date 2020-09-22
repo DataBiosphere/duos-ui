@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, br, div, fieldset, form, h, h3, hr, i, input, label, span, textarea } from 'react-hyperscript-helpers';
+import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
@@ -7,7 +7,7 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, Researcher } from '../libs/ajax';
+import { DataSet, Researcher } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
@@ -16,7 +16,7 @@ import * as fp from 'lodash/fp';
 import './DataAccessRequestApplication.css';
 
 
-const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
+// const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
 
 class DatasetRegistration extends Component {
 
@@ -40,10 +40,11 @@ class DatasetRegistration extends Component {
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
-      optionMessage: noOptionMessage,
+      // optionMessage: noOptionMessage,
       file: {
         name: ''
       },
+      properties: {},
       showModal: false,
       completed: '',
       showDialogSubmit: false,
@@ -229,35 +230,20 @@ class DatasetRegistration extends Component {
         return prev;
       }, () => {
         let formData = this.state.formData;
-        let ds = [];
-        // this.state.formData.datasets.forEach(dataset => {
-        //   ds.push(dataset.value);
-        // });
-        formData.datasetIds = ds;
         formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
           return prev;
         });
-        // DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-        //   formData.urlDAA = response.urlDAA;
-        //   formData.nameDAA = response.nameDAA;
-        //   if (formData.darCode !== undefined && formData.darCode !== null) {
-        //     DAR.updateDar(formData, formData.darCode).then(response => {
-        //       this.setState({ showDialogSubmit: false });
-        //       this.props.history.push('researcher_console');
-        //     });
-        //   } else {
-        //     DAR.postDataAccessRequest(formData).then(response => {
-        //       this.setState({ showDialogSubmit: false });
-        //       this.props.history.push('researcher_console');
-        //     }).catch(e =>
-        //       this.setState(prev => {
-        //         prev.problemSavingRequest = true;
-        //         return prev;
-        //       }));
-        //   }
-        // });
+        let otherFormData = this.state.otherFormData;
+        DataSet.postDatasetForm(otherFormData).then(resp => {
+          this.setState({ showDialogSubmit: false });
+          this.props.history.push('dataset_registration');
+        }).catch(e =>
+          this.setState(prev => {
+            prev.problemSavingRequest = true;
+            return prev;
+          }));
       });
     } else {
       this.setState({ showDialogSubmit: false });
@@ -282,14 +268,7 @@ class DatasetRegistration extends Component {
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       }
-      // let datasets = this.state.formData.datasets.map(function(item) {
-      //   return {
-      //     id: item.value,
-      //     concatenation: item.label
-      //   };
-      // });
       this.setState(prev => {
-        // prev.formData.datasetIds = datasets;
         prev.formData.ontologies = ontologies;
         return prev;
       }, () => this.savePartial());
@@ -299,33 +278,44 @@ class DatasetRegistration extends Component {
   };
 
   savePartial() {
-    if (this.state.file !== undefined && this.state.file.name !== '') {
-      DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-        this.saveDAR(response);
-      });
-    } else {
-      this.saveDAR(null);
-    }
+    let formData = this.state.formData;
+
+    DataSet.postDatasetForm(formData).then(resp => {
+      this.setShowDialogSave(false);
+      this.props.history.push('dataset_registration');
+    }).catch(e =>
+      this.setState(prev => {
+        prev.problemSavingRequest = true;
+        return prev;
+      }));
   };
 
-  saveDAR(response) {
-    let formData = this.state.formData;
-    if (response !== null) {
-      formData.urlDAA = response.urlDAA;
-      formData.nameDAA = response.nameDAA;
-    }
-    if (formData.partialDarCode === null) {
-      // DAR.postPartialDarRequest(formData).then(resp => {
-      //   this.setShowDialogSave(false);
-      //   this.props.history.push('researcher_console');
-      // });
-    } else {
-      // DAR.updatePartialDarRequest(formData).then(resp => {
-      //   this.setShowDialogSave(false);
-      //   this.props.history.push({ pathname: 'researcher_console' });
-      // });
-    }
-  }
+  // saveDataset(response) {
+  //   let formData = this.state.formData;
+  //   if (response !== null) {
+  //     formData.urlDAA = response.urlDAA;
+  //     formData.nameDAA = response.nameDAA;
+  //   }
+  //   if (formData.partialDarCode === null) {
+  //     DataSet.postDatasetForm(formData).then(resp => {
+  //       this.setShowDialogSave(false);
+  //       this.props.history.push('dataset_registration');
+  //     }).catch(e =>
+  //       this.setState(prev => {
+  //         prev.problemSavingRequest = true;
+  //         return prev;
+  //       }));
+  //   } else {
+  //     DataSet.postDatasetForm(formData).then(resp => {
+  //       this.setShowDialogSave(false);
+  //       this.props.history.push('dataset_registration');
+  //     }).catch(e =>
+  //       this.setState(prev => {
+  //         prev.problemSavingRequest = true;
+  //         return prev;
+  //       }));
+  //   }
+  // }
 
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
@@ -426,6 +416,19 @@ class DatasetRegistration extends Component {
       populationMigration = false
     } = this.state.formData;
     const { ontologies } = this.state;
+
+    const {
+      name = '',
+      collectionId = '',
+      type = '',
+      species = '',
+      phenotype = '',
+      nrParticipants = '',
+      description = '',
+      dbgap = '',
+      depositor = '',
+      pi = ''
+    } = this.state.properties;
 
     const { problemSavingRequest, showValidationMessages } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
