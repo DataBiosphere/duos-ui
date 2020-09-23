@@ -100,7 +100,6 @@ class DatasetRegistration extends Component {
     Storage.removeData('dataset_registration');
 
     formData.ontologies = this.getOntologies(formData);
-    console.log(formData.ontologies)
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
 
@@ -161,8 +160,30 @@ class DatasetRegistration extends Component {
     });
   };
 
+  validateRequiredFields(formData) {
+    return this.isValid(formData.researcher) &&
+      this.isValid(formData.datasetName) &&
+      this.isValid(formData.datasetRepoUrl) &&
+      this.isValid(formData.dataType) &&
+      this.isValid(formData.species) &&
+      this.isValid(formData.phenotype) &&
+      this.isValid(formData.nrParticipants) &&
+      this.isValid(formData.description);
+  };
+
   attestAndSave = (e) => {
-    this.setState({ showDialogSubmit: true });
+    this.setState( prev => {
+      let allValid = this.validateRequiredFields(prev.formData);
+      if (allValid) {
+        prev.showDialogSubmit = true;
+        prev.showValidationMessages = false;
+      }
+      else {
+        prev.showDialogSubmit = false;
+        prev.showValidationMessages = true;
+      }
+      return prev;
+   });
   };
 
   isValid(value) {
@@ -187,7 +208,6 @@ class DatasetRegistration extends Component {
           if (prev.formData[key] === '') {
             prev.formData[key] = undefined;
           }
-
         }
         return prev;
       }, () => {
@@ -197,15 +217,21 @@ class DatasetRegistration extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
-        let ds = this.formatFormData(formData);
-        DataSet.postDatasetForm(ds).then(resp => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.push('dataset_registration');
-        }).catch(e =>
-          this.setState(prev => {
-            prev.problemSavingRequest = true;
-            return prev;
-          }));
+
+        if (this.state.showValidationMessages) {
+          this.setState({showDialogSubmit: false});
+        }
+        else {
+          let ds = this.formatFormData(formData);
+          DataSet.postDatasetForm(ds).then(resp => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('dataset_registration');
+          }).catch(e =>
+            this.setState(prev => {
+              prev.problemSavingRequest = true;
+              return prev;
+            }));
+        }
       });
     } else {
       this.setState({ showDialogSubmit: false });
@@ -331,7 +357,6 @@ class DatasetRegistration extends Component {
 
   formatFormData = (data) => {
     let result = {};
-    console.log(data)
     result.datasetName = data.datasetName;
     result.consentId = data.consentId;
     result.translatedUseRestriction = data.translatedUseRestriction;
@@ -367,7 +392,9 @@ class DatasetRegistration extends Component {
     const { ontologies } = this.state;
 
     const { problemSavingRequest, showValidationMessages } = this.state;
-    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
+    const isTypeOfResearchInvalid = false;
+    // NOTE: set this to always false for now to submit dataset without consent info
+    // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
     const profileUnsubmitted = span({}, [
       'Please make sure ',
@@ -417,11 +444,11 @@ class DatasetRegistration extends Component {
                         id: 'inputResearcher',
                         value: this.state.formData.researcher,
                         disabled: true,
-                        className: showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                        className: (fp.isEmpty(this.state.formData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
                       }),
                       span({
-                        isRendered: (showValidationMessages), className: 'cancel-color required-field-error-span'
+                        isRendered: (fp.isEmpty(this.state.formData.researcher) && showValidationMessages), className: 'cancel-color required-field-error-span'
                       }, ['Required field'])
                     ])
                   ]),
@@ -579,7 +606,7 @@ class DatasetRegistration extends Component {
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.formData.phenotype) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -696,9 +723,7 @@ class DatasetRegistration extends Component {
                           maxLength: '256',
                           value: this.state.formData.pubRef,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.pubRef) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: 'form-control',
                           required: false,
                         })
                       ])
@@ -740,6 +765,7 @@ class DatasetRegistration extends Component {
                               poaHandler: this.setPoa,
                               diseases: diseases,
                               diseasesHandler: this.setDiseases,
+                              disabled: true,
                               ontologies: ontologies,
                               ontologiesHandler: this.onOntologiesChange,
                               other: other,
@@ -991,18 +1017,11 @@ class DatasetRegistration extends Component {
                           onChange: this.handleChange,
                           name: 'rus',
                           id: 'inputRUS',
-                          className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
-                            ' required-field-error form-control' :
-                            'form-control',
+                          className: 'form-control',
                           rows: '6',
-                          required: true,
+                          required: false,
                           placeholder: 'Please limit your other data use terms to 1100 characters.',
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ]),
                   ]),
                 ]),
