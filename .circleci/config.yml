@@ -120,8 +120,7 @@ jobs:
   test-docker:
     executor: node
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - setup_remote_docker
       - checkout
       - run: cp config/dev.json public/config.json
       - run: npm install react-scripts --silent
