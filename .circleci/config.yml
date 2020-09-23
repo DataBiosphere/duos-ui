@@ -45,8 +45,7 @@ commands:
             echo "$<< parameters.sa_key_name >>" > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             gcloud --quiet config set project ${GOOGLE_PROJECT}
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - setup_remote_docker
       - run:
           name: Install trivy security tool
           command: |
@@ -120,8 +119,7 @@ jobs:
   test-docker:
     executor: node
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
+      - setup_remote_docker
       - checkout
       - run: cp config/dev.json public/config.json
       - run: npm install react-scripts --silent
