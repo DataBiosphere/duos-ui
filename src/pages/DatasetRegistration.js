@@ -146,6 +146,7 @@ class DatasetRegistration extends Component {
     const value = e.target.value;
     this.setState(prev => {
       prev.formData[field] = value;
+      prev.disableOkBtn = false;
       return prev;
     });
   };
@@ -155,6 +156,7 @@ class DatasetRegistration extends Component {
     const value = e.target.checked;
     this.setState(prev => {
       prev.formData[field] = value;
+      prev.disableOkBtn = false;
       return prev;
     });
   };
@@ -199,12 +201,11 @@ class DatasetRegistration extends Component {
         DataSet.postDatasetForm(ds).then(resp => {
           this.setState({ showDialogSubmit: false });
           this.props.history.push('dataset_registration');
-        });
-          // .catch(e =>
-          // this.setState(prev => {
-          //   prev.problemSavingRequest = true;
-          //   return prev;
-          // }));
+        }).catch(e =>
+          this.setState(prev => {
+            prev.problemSavingRequest = true;
+            return prev;
+          }));
       });
     } else {
       this.setState({ showDialogSubmit: false });
