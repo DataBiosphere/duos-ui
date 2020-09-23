@@ -183,7 +183,7 @@ class DatasetRegistration extends Component {
         prev.showValidationMessages = true;
       }
       return prev;
-   });
+    });
   };
 
   isValid(value) {
