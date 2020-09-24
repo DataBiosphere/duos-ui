@@ -335,9 +335,9 @@ export const DataUseTranslation = {
       const value = dataUse[key];
       if(!isNil(value) && value) {
         if(key === 'diseaseRestrictions') {
-          restrictionStatements.push({key, description: consentTranslations.diseaseRestrictions(value)});
+          restrictionStatements.push(consentTranslations.diseaseRestrictions(value));
         } else {
-          restrictionStatements.push({key, description: consentTranslations[key]});
+          restrictionStatements.push(consentTranslations[key]);
         }
       }
     })(targetKeys);

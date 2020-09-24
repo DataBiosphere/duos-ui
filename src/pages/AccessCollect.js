@@ -10,7 +10,7 @@ import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { DAR, Election, Email, Files, Researcher } from '../libs/ajax';
+import { DAR, Election, Email, Files, Researcher, DataSet } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
@@ -34,6 +34,7 @@ class AccessCollect extends Component {
   }
 
   generateUseRestrictionStatements(dataUse) {
+    if(!dataUse) { return []; }
     return DataUseTranslation.translateDataUseRestrictions(dataUse)
       .map((restriction) => {
         return div({className: 'response-label translated-restriction', key: restriction.key}, [restriction.description]);
@@ -238,6 +239,15 @@ class AccessCollect extends Component {
     await this.findDataAccessElectionReview();
     await this.findRPElectionReview();
     await this.findDar();
+    await this.getDataset(this.state.election.dataSetId);
+  }
+
+  async getDataset(id) {
+    const dataset = await DataSet.getDataSetsByDatasetId(id);
+    this.setState((prev) => {
+      prev.dataUse = dataset.dataUse;
+      return prev;
+    });
   }
 
   async findDataAccessElectionReview() {
@@ -367,8 +377,7 @@ class AccessCollect extends Component {
   }
 
   render() {
-    const translatedDULComponent = this.generateUseRestrictionStatements();
-
+    const translatedDULComponent = this.generateUseRestrictionStatements(this.state.dataUse);
     return (
       div({ className: 'container container-wide' }, [
         div({ className: 'row no-margin' }, [
