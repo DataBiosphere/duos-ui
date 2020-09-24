@@ -1,266 +1,158 @@
-import * as fp from 'lodash/fp';
+import forEach from 'lodash/fp/forEach';
+import isNil from 'lodash/fp/isNil';
+import isEmpty from 'lodash/fp/isEmpty';
+import join from 'lodash/fp/join';
+import concat from 'lodash/fp/concat';
+import clone from 'lodash/fp/clone';
+import uniq from 'lodash/fp/uniq';
 
-//NOTE: need to incorporate the generic core statements and the prefixes into this data struct for universal use
-//NOTE: need to encapsulate values in true/false keys since there may be variations on what is expected for each attribute
-//NOTE: values that have no expected value for true or valse should have it be set to null for exclusion in processing
-const processedDiseaseString = (prefix, diseases) => {
-  const diseaseArray = diseases.sort().map(disease => disease.label);
-  const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
-  return {
-    description: prefix + diseaseString,
-    manualReview: false
-  };
-};
-
-//NOTE: will need to create a mapper or key check to point the equivalent keys across all references to the same front-end definition
-//Examples - forProfit, male, female, pediatric (and possible even more)
-//NOTE: need to understand the differences between NMDS and MDS and NCTRL and CTRL for categorization sake
-//NOTE: most likely will need to rewrite dependent components to use new interface
-const translations = {
+const srpTranslations = {
   hmb: {
     code: "HMB",
-    srp: {
-      description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.'
-    },
-    dul: {
-      true: {
-        description: 'Use is permitted for a health, medical, or biomedical research purpose'
-      },
-      false: null
-    },
+    description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
     manualReview: false
   },
   poa: {
     code: 'POA',
-    srp: {
-      description: 'The primary aim of this research is for population, origin, or ancestry research',
-    },
-    dul: {
-      true: {
-        description: 'Use is limited to population, origin, or ancestry research'
-      },
-      false: null
-    },
+    desciption: 'The dataset will be used for the study of Population Origins/Migration patterns.',
     manualReview: true
   },
   diseases: (diseases) => {
+    const diseaseArray = diseases.sort().map(disease => disease.label);
+    const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
     return {
       code: 'DS',
-      srp: {
-        description: processedDiseaseString('The primary aim of this research is for ', diseases)
-      },
-      dul: {
-        true: {
-          description: processedDiseaseString('Use is permitted for '),
-        },
-        false: null
-      },
+      description: 'Disease-related studies: ' + diseaseString,
       manualReview: false
     };
   },
-  //NOTE: figure out if this needs to be removed or not 
   researchTypeDisease: {
     code: 'DS',
     description: 'The primary purpose of the research is to learn more about a particular disease or disorder, a trait, or a set of related conditions.',
     manualReview: false
   },
-  //NOTE: need to know how to format this string for srp and dul
   other: (otherText) => {
     return {
       code: 'OTHER',
-      description: fp.isEmpty(otherText) ? "Other: Not provided" : otherText,
+      description: isEmpty(otherText) ? "Other: Not provided" : otherText,
       manualReview: true
     };
   },
-  //srp only
   methods: {
     code: 'MDS',
-    srp: {
-      description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
-    },
-    dul: null,
+    description: 'The primary purpose of the research is to develop and/or validate new methods for analyzing or interpreting data. Data will be used for developing and/or validating new methods.',
     manualReview: false
   },
-  //srp only
   controls: {
     code: 'CTRL',
-    srp: {
-      description: 'The reason for this request is to increase the number of controls available for a comparison group.'
-    },
-    dul: null,
+    description: 'The reason for this request is to increase the number of controls available for a comparison group.',
     manualReview: false
   },
   forProfit: {
     code: 'NCU',
-    srp:{
-      description: 'This research is not-for-profit and non-commercial.'
-    },
-    dul: {
-      true: {
-        description: 'Use is limited to not-for-profit and non-commercial.'
-      },
-      false: {
-        description: 'Use is not limited to not-for-profit and non-commercial.'
-      }
-    },
+    description: 'The dataset will be used in a study related to a commercial purpose.',
     manualReview: false
   },
   genderFemale: {
     code: 'POP-F',
-    srp: {
-      description: 'This research is limited to studies about females.',
-    },
-    dul: {
-      true: {
-        description: 'Use is limited to studies about females.'
-      },
-      false: null
-    },
+    description: 'The dataset will be used for the study of females.',
     manualReview: false
   },
   genderMale: {
     code: 'POP-M',
-    srp: {
-      description: 'The dataset will be used for studies about males.'
-    },
-    dul: {
-      true: {
-        description: 'Use is limited to studies about males.'
-      },
-      false: null
-    },
+    description: 'The dataset will be used for the study of males.',
     manualReview: false
   },
   pediatric: {
     code: 'POP-P',
-    srp: {description: 'The dataset will be used for the study of children.'},
-    dul: {
-      true: {
-        description: 'The dataset will be used for pediatric research.'
-      },
-      false: null
-    },
+    description: 'The dataset will be used for the study of children.',
     manualReview: false
   },
-  //srp only?
   illegalBehavior: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).'},
-    dul: null,
+    description: 'The dataset will be used for the study of illegal behaviors (violence, domestic abuse, prostitution, sexual victimization).',
     manualReview: true
   },
-  //srp only?
   addiction: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.'},
-    dul: null,
+    description: 'The dataset will be used for the study of alcohol or drug abuse, or abuse of other addictive products.',
     manualReview: true
   },
-  //srp only?
   sexualDiseases: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.'},
-    dul: null,
+    description: 'The dataset will be used for the study of sexual preferences or sexually transmitted diseases.',
     manualReview: true
   },
-  //srp only?
   stigmatizedDiseases: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for the study of stigmatizing illnesses.'},
-    dul: null,
+    description: 'The dataset will be used for the study of stigmatizing illnesses.',
     manualReview: true
   },
-  //srp only?
   vulnerablePopulation: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).'},
-    dul: null,
+    description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
     manualReview: true
   },
-  //srp only?
   psychiatricTraits: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.'},
-    dul: null,
+    description: 'The dataset will be used for the study of psychological traits, including intelligence, attention, emotion.',
     manualReview: true
   },
-  //srp only?
   notHealth: {
     code: 'OTHER',
-    srp: {description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.'},
-    dul: null,
+    description: 'The dataset will be used for the research that correlates ethnicity, race, or gender with genotypic or other phenotypic variables, for purposes beyond biomedical or health-related research, or in ways may not be easily related to Health.',
     manualReview: true
+  }
+};
+
+const consentTranslations = {
+  generalUse: {
+    code: 'GRU',
+    description: 'Use is permitted for any use'
   },
-  //dul only?
+  hmbResearch: {
+    code: 'HMB',
+    description: 'Use is permitted for a health, medical, or biomedical research purpose'
+  },
+  diseaseRestrictions: (restrictions) => {
+    if (restrictions.length < 1) { return 'Use is permitted for the specified disease(s): Not specified'; }
+    const restrictionList = restrictions.join(', ');
+    return {
+      code: 'DS',
+      description: `Use is permitted for the specified disease(s): ${restrictionList}`
+    };
+  },
+  populationOriginsAncestry: {
+    code: 'POA',
+    description: 'Use is limited to population, origin, or ancestry research'
+  },
+  methodsResearch: {
+    code: 'NMDS',
+    description: 'Use for methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations'
+  },
   geneticStudiesOnly: {
     code: 'GSO',
-    srp: {
-      description: 'This research includes genetic studies only.'
-    },
-    dul: {
-      true: {
-        description: 'Use is limited to genetic studies only'
-      },
-      false: null
-    },
-    //what is this value?
-    manualReview: false
+    description: 'Use is limited to genetic studies only'
+  },
+  commercialUse: {
+    code: 'NPU',
+    description: 'Use is limited to non-profit and non-commercial'
   },
   publicationResults: {
     code: 'PUB',
-    srp: {
-      description: 'The researcher will make results of studies using the data available to the larger scientific community'
-    },
-    dul: {
-      true: {
-        description: 'Use requires users to make results of studies using the data availbale to the larger scientific community.'
-      },
-      false: null
-    },
-    //what should this value be?
-    manualReview: false
+    description: 'Use requires users to make results of studies using the data available to the larger scientific community'
   },
   collaboratorRequired: {
     code: 'COL',
-    srp: {
-      description: 'The researcher will collaborate with the primary study investigators.'
-    },
-    dul: {
-      true: {
-        description: 'Use requires users to collaborate with the primary study investigators.'
-      },
-      false: null
-    },
-    //What should this value be?
-    manualReview: false
+    description: 'Use requires users to collaborate with the primary study investigators'
   },
   ethicsApprovalRequired: {
     code: 'IRB',
-    srp: {
-      description: 'The researcher will provide documentation of local IRB/ERB approval.'
-    },
-    dul: {
-      true: {
-        description: 'Use requires users to provide documentation of local IRB/ERB approval.'
-      },
-      false: null
-    },
-    //what should this value be?
-    manualReview: false
+    description: 'Use requires users to provide documentation of local IRB/ERB approval'
   },
-  geographicalRestriction: {
+  geographicalRestrictions: {
     code: 'GS',
-    srp: {
-      description: 'The research is within a certain gepgraphic area'
-    },
-    dul: {
-      true: {
-        description: 'Use is limited to within a certain geographic area'
-      },
-      false: null
-    },
-    //what should this value be?
-    manualReview: false
+    description: 'Use is limited to within a certain geographic area'
   }
 };
 
@@ -280,47 +172,47 @@ export const DataUseTranslation = {
   generatePurposeStatement: (darInfo) => {
     let statementArray = [];
     if(darInfo.forProfit) {
-      statementArray = fp.concat(statementArray)(translations.forProfit);
+      statementArray = concat(statementArray)(srpTranslations.forProfit);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      statementArray = fp.concat(statementArray)(translations.genderFemale);
+      statementArray = concat(statementArray)(srpTranslations.genderFemale);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      statementArray = fp.concat(statementArray)(translations.genderMale);
+      statementArray = concat(statementArray)(srpTranslations.genderMale);
     }
 
     if(darInfo.illegalBehavior) {
-      statementArray = fp.concat(statementArray)(translations.illegalBehavior);
+      statementArray = concat(statementArray)(srpTranslations.illegalBehavior);
     }
 
     if(darInfo.addiction) {
-      statementArray = fp.concat(statementArray)(translations.addiction);
+      statementArray = concat(statementArray)(srpTranslations.addiction);
     }
 
     if(darInfo.sexualDiseases) {
-      statementArray = fp.concat(statementArray)(translations.sexualDiseases);
+      statementArray = concat(statementArray)(srpTranslations.sexualDiseases);
     }
 
     if(darInfo.stigmatizedDiseases) {
-      statementArray = fp.concat(statementArray)(translations.stigmatizedDiseases);
+      statementArray = concat(statementArray)(srpTranslations.stigmatizedDiseases);
     }
 
     if(darInfo.vulnerablePopulation) {
-      statementArray = fp.concat(statementArray)(translations.vulnerablePopulation);
+      statementArray = concat(statementArray)(srpTranslations.vulnerablePopulation);
     }
 
     if(darInfo.populationMigration || darInfo.poa || darInfo.population) {
-      statementArray = fp.concat(statementArray)(translations.poa);
+      statementArray = concat(statementArray)(srpTranslations.poa);
     }
 
     if(darInfo.psychiatricTraits) {
-      statementArray = fp.concat(statementArray)(translations.psychiatricTraits);
+      statementArray = concat(statementArray)(srpTranslations.psychiatricTraits);
     }
 
     if(darInfo.notHealth) {
-      statementArray = fp.concat(statementArray)(translations.notHealth);
+      statementArray = concat(statementArray)(srpTranslations.notHealth);
     }
 
     return statementArray;
@@ -330,27 +222,27 @@ export const DataUseTranslation = {
     let statementArray = [];
 
     if(darInfo.diseases) {
-      statementArray = fp.concat(statementArray)(translations.researchTypeDisease);
+      statementArray = concat(statementArray)(srpTranslations.researchTypeDisease);
     }
 
     if(darInfo.methods) {
-      statementArray = fp.concat(statementArray)(translations.methods);
+      statementArray = concat(statementArray)(srpTranslations.methods);
     }
 
     if(darInfo.controls) {
-      statementArray = fp.concat(statementArray)(translations.controls);
+      statementArray = concat(statementArray)(srpTranslations.controls);
     }
 
     if(darInfo.population || darInfo.poa) {
-      statementArray = fp.concat(statementArray)(translations.poa);
+      statementArray = concat(statementArray)(srpTranslations.poa);
     }
 
     if(darInfo.hmb) {
-      statementArray = fp.concat(statementArray)(translations.hmb);
+      statementArray = concat(statementArray)(srpTranslations.hmb);
     }
 
     if(darInfo.other) {
-      statementArray = fp.concat(statementArray)(translations.other(darInfo.otherText));
+      statementArray = concat(statementArray)(srpTranslations.other(darInfo.otherText));
     }
     return statementArray;
   },
@@ -364,8 +256,8 @@ export const DataUseTranslation = {
     // Primary Codes
 
     if (darInfo.hmb) {
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary,
-        translations.hmb);
+      dataUseSummary.primary = concat(dataUseSummary.primary,
+        srpTranslations.hmb);
     }
     /**
      * TODO: Resolve confusion on consent/ontology/orsp sides
@@ -379,163 +271,78 @@ export const DataUseTranslation = {
      * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
      */
     if (darInfo.poa || darInfo.population || darInfo.populationMigration) {
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.poa);
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa);
     }
-    if (darInfo.diseases && !fp.isEmpty(darInfo.diseases)) {
-      const diseaseTranslation = translations.diseases(fp.clone(darInfo.diseases));
-      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(diseaseTranslation));
+    if (darInfo.diseases && !isEmpty(darInfo.diseases)) {
+      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.diseases));
+      dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation));
     }
     if (darInfo.other) {
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.other(darInfo.otherText));
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText));
     }
 
     // Secondary Codes
 
     if (darInfo.methods) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.methods);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods);
     }
     if (darInfo.controls) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.controls);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls);
     }
     if (darInfo.forProfit) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.forProfit);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.genderFemale);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.genderFemale);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
     }
     if (darInfo.pediatric) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.pediatric);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.pediatric);
     }
     if (darInfo.illegalBehavior) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.illegalBehavior);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.illegalBehavior);
     }
     if (darInfo.addiction) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.addiction);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.addiction);
     }
     if (darInfo.sexualDiseases) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.sexualDiseases);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.sexualDiseases);
     }
     if (darInfo.stigmatizedDiseases) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.stigmatizedDiseases);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases);
     }
     if (darInfo.vulnerablePopulation) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.vulnerablePopulation);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation);
     }
     if (darInfo.psychiatricTraits) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.psychiatricTraits);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits);
     }
     if (darInfo.notHealth) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.notHealth);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notHealth);
     }
 
     return dataUseSummary;
   },
 
-};
+  translateDataUseRestrictions: (dataUse) => {
+    if(!dataUse) {return [];}
 
-export const translatedUseStatements = function(darInfo, type) {
-  //singlePhrases will contain the core message that is shared by both sRP and DULs
-  //pronouns can be prefixed to these central definitions
-  const singlePhrases = {
-    nres: 'any purpose without restrictions.',
-    gru: 'any research purpose.',
-    hmb: 'a health, medical, or biomedical research purpose.',
-    ds: 'for reasearch on the specified disease(s).',
-    poa: 'population, origin, or ancestry research.',
-    mds: 'methods development research (e.g., development of software or algorithms).',
-    nmds: 'methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations.',
-    gso: 'genetic studies only.',
-    npu: 'not-for-profit and non-commercial.',
-    pub: 'make results of studies using the data available to the larger scientific community.',
-    col: 'collaborate with the primary study investigators',
-    irb: 'provide documentation of local IRB/ERB approval',
-    gs: 'within a certain geographic area',
-    mor: 'withold from publishing until the specified date',
-    rt: 'return derived/enriched data to the database/resource'
-  };
-
-  const prefixPhrases = {
-    nres: {
-      srp: null,
-      dul: 'Use is permited for '
-    },
-    gru: {
-      srp: null,
-      dul: 'Use is permitted for '
-    },
-    hmb: {
-      srp: 'The primary aim of this research is ',
-      dul: 'Use is permitted for '
-    },
-    ds: {
-      srp: 'The primary aim of this research is ',
-      dul: 'Use is permitted for '
-    },
-    poa: {
-      srp: 'The primary aim of this research is ',
-      dul: 'Use is limited to '
-    },
-    mds: {
-      dul: null,
-      srp: 'This research includes '
-    },
-    nmds: {
-      dul: 'Use for ',
-      srp: null
-    },
-    gso: {
-      dul: 'Use is limited to ',
-      srp: 'This research includes '
-    },
-    npu: {
-      dul: 'Use is limited to ',
-      srp: 'This research is '
-    },
-    pub: {
-      dul: 'Use requires user to ',
-      srp: 'The researcher will '
-    },
-    col: {
-      dul: 'Use requires users to ',
-      srp: 'The reseracher will '
-    },
-    irb: {
-      dul: 'Use requires users to ',
-      srp: 'The researcher will '
-    },
-    gs: {
-      dul: 'Use is limited to ',
-      srp: 'The research is '
-    },
-    mor: {
-      dul: 'Use requires users to ',
-      srp: 'The researcher will '
-    },
-    rt: {
-      dul: 'Use requires users to ',
-      srp: 'The researcher will '
-    }
-  };
-
-  const generateStatements = function (darInfo, type) {
-    if(!type || !darInfo) {return [];}
-
-    const keys = Object.keys(singlePhrases);
-    let returnStatements = [];
-    keys.forEach(key => {
-      if(prefixPhrases[key][type] && darInfo[key]) {
-        returnStatements.push({
-          description: prefixPhrases[key][type] + singlePhrases[key],
-          key: key
-        });
+    let restrictionStatements = [];
+    let targetKeys = Object.keys(consentTranslations);
+    forEach((key) => {
+      const value = dataUse[key];
+      if(!isNil(value) && value) {
+        if(key === 'diseaseRestrictions') {
+          restrictionStatements.push({key, description: consentTranslations.diseaseRestrictions(value)});
+        } else {
+          restrictionStatements.push({key, description: consentTranslations[key]});
+        }
       }
-    });
+    })(targetKeys);
 
-    return returnStatements;
-  };
+    return restrictionStatements;
+  }
 
-  return generateStatements(darInfo, type);
 };

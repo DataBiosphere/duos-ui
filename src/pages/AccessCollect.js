@@ -15,7 +15,7 @@ import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
-import { translatedUseStatements } from '../libs/dataUseTranslation';
+import { DataUseTranslation } from '../libs/dataUseTranslation';
 
 class AccessCollect extends Component {
 
@@ -33,12 +33,11 @@ class AccessCollect extends Component {
     await this.loadData();
   }
 
-  generateDULStatements() {
-    const restrictions = translatedUseStatements(this.state.darInfo, 'dul');
-    return restrictions.map((restriction) => {
-      debugger;
-      return div({className: 'response-label translated-restriction', key: restriction.key}, [restriction.description]);
-    });
+  generateUseRestrictionStatements(dataUse) {
+    return DataUseTranslation.translateDataUseRestrictions(dataUse)
+      .map((restriction) => {
+        return div({className: 'response-label translated-restriction', key: restriction.key}, [restriction.description]);
+      });
   }
 
   initialState() {
@@ -368,8 +367,7 @@ class AccessCollect extends Component {
   }
 
   render() {
-
-    const translatedDULComponent = this.generateDULStatements();
+    const translatedDULComponent = this.generateUseRestrictionStatements();
 
     return (
       div({ className: 'container container-wide' }, [
