@@ -15,7 +15,7 @@ import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
-import { DataUseTranslation } from '../libs/dataUseTranslation';
+import translatedDULComponent from '../components/TranslatedDULComponent';
 
 class AccessCollect extends Component {
 
@@ -31,14 +31,6 @@ class AccessCollect extends Component {
 
   async componentDidMount() {
     await this.loadData();
-  }
-
-  generateUseRestrictionStatements(dataUse) {
-    if(!dataUse) { return []; }
-    return DataUseTranslation.translateDataUseRestrictions(dataUse)
-      .map((restriction) => {
-        return div({className: 'response-label translated-restriction', key: restriction.key}, [restriction.description]);
-      });
   }
 
   initialState() {
@@ -74,6 +66,7 @@ class AccessCollect extends Component {
         ]
       },
       translatedUseRestriction: '',
+      dataUse: {},
       voteStatus: '',
       createDate: '',
       hasUseRestriction: false,
@@ -258,7 +251,6 @@ class AccessCollect extends Component {
       prev.isQ2Expanded = false;
       prev.consentName = electionReview.associatedConsent.name;
       prev.consentId = electionReview.consent.consentId;
-      prev.translatedUseRestriction = electionReview.consent.translatedUseRestriction;
       prev.electionType = 'access';
       prev.election = electionReview.election;
       prev.darOriginalFinalVote = electionReview.election.finalVote;
@@ -269,9 +261,9 @@ class AccessCollect extends Component {
       prev.status = electionReview.election.status;
       prev.accessAlreadyVote = electionReview.election.finalVote !== null ? true : false;
       //NOTE: What's with this logic? the variable isn't even used
-      prev.userestriction = electionReview.election.translatedUseRestriction === null ?
-        'This includes sensitive research objectives that requires manual review.' :
-        electionReview.election.translatedUseRestriction;
+      // prev.userestriction = electionReview.election.translatedUseRestriction === null ?
+      //   'This includes sensitive research objectives that requires manual review.' :
+        // electionReview.election.translatedUseRestriction;
       prev.voteAccessList = this.chunk(electionReview.reviewVote, 2);
       return prev;
     });
@@ -377,7 +369,6 @@ class AccessCollect extends Component {
   }
 
   render() {
-    const translatedDULComponent = this.generateUseRestrictionStatements(this.state.dataUse);
     return (
       div({ className: 'container container-wide' }, [
         div({ className: 'row no-margin' }, [
@@ -424,15 +415,7 @@ class AccessCollect extends Component {
                 researcherProfile: this.state.researcherProfile }),
 
               div({ className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-                div({ className: 'panel-heading cm-boxhead dul-color' }, [
-                  h4({}, ['Data Use Limitations'])
-                ]),
-                div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
-                  div({ className: 'row dar-summary' }, [
-                    div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-                    div({ className: 'response-label translated-restriction'}, [translatedDULComponent])
-                  ])
-                ])
+                translatedDULComponent({restrictions: this.state.dataUse})
               ])
             ]),
 
