@@ -5,12 +5,13 @@ import { a, button, div, form, h, input, label, span, table, tbody, td, th, thea
 import ReactTooltip from 'react-tooltip';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
-import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
+import TranslatedDulModal from '../components/modals/TranslatedDulModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { dataUseTranslaton } from '../libs/storage';
 
 class DatasetCatalog extends Component {
 
@@ -121,10 +122,6 @@ class DatasetCatalog extends Component {
     this.props.history.push({ pathname: 'dar_application/' + referenceId });
   };
 
-  associate() {
-
-  }
-
   openConnectDataset(dataset) {
     this.setState(prev => {
       prev.datasetConnect = dataset;
@@ -147,9 +144,9 @@ class DatasetCatalog extends Component {
     }, () => this.getDatasets());
   }
 
-  openTranslatedDUL = (translatedUseRestriction) => () => {
+  openTranslatedDUL = (dataUse) => {
     this.setState(prev => {
-      prev.translatedUseRestrictionModal = translatedUseRestriction;
+      prev.dataUse = dataUse;
       prev.showTranslatedDULModal = true;
       return prev;
     });
@@ -477,7 +474,7 @@ class DatasetCatalog extends Component {
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
                             a({
                               id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
-                              onClick: this.openTranslatedDUL(dataSet.translatedUseRestriction),
+                              onClick: (e) => this.openTranslatedDUL(dataSet.dataUse),
                               className: (!dataSet.active ? 'dataset-disabled' : 'enabled')
                             }, ['Translated Use Restriction'])
                           ]),
@@ -574,10 +571,10 @@ class DatasetCatalog extends Component {
               "data-tip": "Request Access for selected Datasets", "data-for": "tip_requestAccess"
             }, ["Apply for Access"])
           ]),
-          TranslatedDulModal({
+          h(TranslatedDulModal,{
             isRendered: this.state.showTranslatedDULModal,
             showModal: this.state.showTranslatedDULModal,
-            useRestriction: this.state.translatedUseRestrictionModal,
+            dataUse: this.state.dataUse,
             onOKRequest: this.okTranslatedDULModal,
             onCloseRequest: this.closeTranslatedDULModal
           }),
