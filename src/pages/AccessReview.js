@@ -13,6 +13,7 @@ import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
 import { Navigation } from '../libs/utils';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 
 class AccessReview extends Component {
@@ -176,6 +177,7 @@ class AccessReview extends Component {
     this.setState(prev => {
       prev.consentName = consent.name;
       prev.consentId = consent.consentId;
+      prev.dataUse = consent.dataUse;
       prev.election = election;
       prev.rpVote = rpVote;
       if (!ld.isNil(election) && !ld.isNil(election.useRestriction) && !ld.isNil(rpVote)) {
@@ -191,13 +193,11 @@ class AccessReview extends Component {
     Election.findConsentElectionByDarElection(vote.electionId).then(data => {
       if (data.dulName !== null && data.dulElection !== null) {
         this.setState({
-          dulName: data.dulName,
-          translatedUseRestriction: data.translatedUseRestriction
+          dulName: data.dulName
         });
       } else {
         this.setState({
-          dulName: consent.dulName,
-          translatedUseRestriction: consent.translatedUseRestriction
+          dulName: consent.dulName
         });
       }
     });
@@ -222,8 +222,8 @@ class AccessReview extends Component {
       hasLibraryCard: false,
       consentName: '',
       consentId: '',
+      dataUse: {},
       dulName: '',
-      translatedUseRestriction: '',
       isQ1Expanded: true,
       disableQ1Btn: false,
       isQ2Expanded: false,
@@ -323,14 +323,7 @@ class AccessReview extends Component {
                 div({ className: 'panel-heading cm-boxhead dul-color' }, [
                   h4({}, ['Data Use Limitations'])
                 ]),
-                div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
-                  div({ className: 'row dar-summary' }, [
-                    div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-                    div({
-                      className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction }
-                    }, [])
-                  ])
-                ])
+                TranslatedDULComponent({restrictions: this.state.dataUse})
               ])
             ]),
 

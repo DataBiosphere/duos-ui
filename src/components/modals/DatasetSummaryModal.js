@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { div, hr, label, hh } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DataSet, Consent } from '../../libs/ajax';
+import TranslatedDULComponent from '../TranslatedDULComponent';
 
 export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Component {
 
@@ -19,7 +20,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
       dataDepositor: '',
       pi: '',
       consentName: '',
-      translatedUseRestriction: '',
+      dataUse: {}
     };
 
     this.closeHandler = this.closeHandler.bind(this);
@@ -45,7 +46,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
       property.dataDepositor = dataSet.properties[8].propertyValue;
       property.pi = dataSet.properties[9].propertyValue;
       property.consentName = consent.name;
-      property.translatedUseRestriction = dataSet.translatedUseRestriction;
+      property.dataUse = consent.dataUse;
       property.loading = false;
       return property;
     });
@@ -151,9 +152,10 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
             div({ id: "txt_consentId", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label" }, [this.state.consentName]),
           ]),
 
+          //NOTE: test dataOwner view for this div
           div({ className: "row" }, [
             label({ id: "lbl_structured", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Structured Limitations"]),
-            div({ id: "txt_structured", className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label translated-restriction", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, []),
+            TranslatedDULComponent({restrictions: this.state.dataUse})
           ])
         ])
       ])
