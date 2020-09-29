@@ -364,13 +364,13 @@ export const SupportRequestModal = hh(
             }, [
               button({
                 id: 'btn_action',
-                className: 'col-lg-5 col-md-3 col-sm-4 col-xs-6 btn common-background',
+                className: 'btn common-background',
                 onClick: this.OKHandler,
                 disabled: disableOkBtn,
               }, ['Submit']),
               button({
                 id: 'btn_cancel',
-                className: 'col-lg-5 col-md-3 col-sm-4 col-xs-6 btn dismiss-background',
+                className: 'btn dismiss-background',
                 onClick: this.closeHandler,
               }, ['Cancel']),
             ]),
