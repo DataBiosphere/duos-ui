@@ -21,9 +21,6 @@ class AccessPreview extends Component {
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
-      consent: {
-        translatedUseRestriction: ''
-      },
       dataUse: {},
       darInfo: Models.dar,
       researcherProfile: null
@@ -49,7 +46,6 @@ class AccessPreview extends Component {
     DAR.getDarConsent(referenceId).then(
       consent => {
         this.setState(prev => {
-          prev.consent = consent;
           prev.dataUse = consent.dataUse;
           prev.consentName = consent.name;
         });
@@ -141,7 +137,7 @@ class AccessPreview extends Component {
                 downloadDAR: this.downloadDAR,
                 researcherProfile: this.state.researcherProfile }),
 
-              div({ 
+              div({
                 className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
                 isRendered: !ld.isEmpty(this.state.dataUse)
               }, [
