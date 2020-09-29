@@ -57,11 +57,20 @@ export const SupportRequestModal = hh(
       if (this.state.attachment !== '') {
         const results = [];
         for (var i = 0; i < this.state.attachment.length; i++) {
-          results.push(Support.uploadAttachment(this.state.attachment[i]));
+          try {
+            results.push(Support.uploadAttachment(this.state.attachment[i]));
+          } catch (e) {
+            Notifications.showError({
+              text: 'Unable to add attachment',
+              layout: 'topRight',
+            });
+            this.state.validAttachment = false;
+            break;
+          }
         }
         const allToken = await Promise.all(results);
         for (var t = 0; t < allToken.length; t++) {
-          if (!fp.hasIn('attachment.url')(allToken[t])) {
+          if (!fp.hasIn('token')(allToken[t])) {
             Notifications.showError({
               text: 'Unable to add attachment',
               layout: 'topRight',
