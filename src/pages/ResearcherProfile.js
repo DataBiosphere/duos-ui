@@ -7,7 +7,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { DAR, Researcher, User } from '../libs/ajax';
+import { Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
@@ -73,9 +73,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         researcherGate: '',
         scientificURL: '',
         state: '',
-        zipcode: '',
-        urlDAA: '',
-        nameDAA: ''
+        zipcode: ''
       },
       showRequired: false,
       invalidFields: {

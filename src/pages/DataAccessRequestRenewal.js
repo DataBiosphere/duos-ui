@@ -31,9 +31,6 @@ class DataAccessRequestRenewal extends Component {
       disableOkBtn: false,
       showValidationMessages: false,
       optionMessage: noOptionMessage,
-      file: {
-        name: ''
-      },
       showModal: false,
       completed: '',
       showDialogSubmit: false,
@@ -76,8 +73,6 @@ class DataAccessRequestRenewal extends Component {
         havePi: '',
         profileName: '',
         piName: '',
-        urlDAA: '',
-        nameDAA: '',
         pubmedId: '',
         scientificUrl: ''
       },
@@ -165,8 +160,6 @@ class DataAccessRequestRenewal extends Component {
       formData.country = rpProperties.country != null ? rpProperties.country : '';
       formData.state = rpProperties.state != null ? rpProperties.state : '';
       formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-      formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
-      formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
       formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
       formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
       formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
@@ -189,9 +182,6 @@ class DataAccessRequestRenewal extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
-      if (formData.nameDAA !== '') {
-        prev.file.name = formData.nameDAA;
-      }
       return prev;
     });
 
@@ -506,10 +496,6 @@ class DataAccessRequestRenewal extends Component {
 
   saveDAR(response) {
     let formData = this.state.formData;
-    if (response !== null) {
-      formData.urlDAA = response.urlDAA;
-      formData.nameDAA = response.nameDAA;
-    }
     if (formData.partialDarCode === null) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
