@@ -690,11 +690,6 @@ export const Files = {
   getDARFile: async (darId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
-  },
-
-  getDAAFile: async (researcherId, fileName) => {
-    const url = `${await Config.getApiUrl()}/dar/downloadDAA/${researcherId}`;
-    return getFile(url, fileName);
   }
 };
 
