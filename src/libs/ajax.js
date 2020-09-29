@@ -347,8 +347,9 @@ export const DAR = {
   },
 
   postDataAccessRequest: async dar => {
+    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await Config.getApiUrl()}/dar`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredDar), { method: 'POST' }]));
     return await res;
   },
 
