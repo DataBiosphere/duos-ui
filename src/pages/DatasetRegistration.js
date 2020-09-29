@@ -383,25 +383,21 @@ class DatasetRegistration extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
-        DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-          formData.urlDAA = response.urlDAA;
-          formData.nameDAA = response.nameDAA;
-          if (formData.darCode !== undefined && formData.darCode !== null) {
-            DAR.updateDar(formData, formData.darCode).then(response => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
-            });
-          } else {
-            DAR.postDataAccessRequest(formData).then(response => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
-            }).catch(e =>
-              this.setState(prev => {
-                prev.problemSavingRequest = true;
-                return prev;
-              }));
-          }
-        });
+        if (formData.darCode !== undefined && formData.darCode !== null) {
+          DAR.updateDar(formData, formData.darCode).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          });
+        } else {
+          DAR.postDataAccessRequest(formData).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          }).catch(e =>
+            this.setState(prev => {
+              prev.problemSavingRequest = true;
+              return prev;
+            }));
+        }
       });
     } else {
       this.setState({ showDialogSubmit: false });
@@ -443,14 +439,7 @@ class DatasetRegistration extends Component {
   };
 
   savePartial() {
-
-    if (this.state.file !== undefined && this.state.file.name !== '') {
-      DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-        this.saveDAR(response);
-      });
-    } else {
-      this.saveDAR(null);
-    }
+    this.saveDAR(null);
   };
 
   saveDAR(response) {

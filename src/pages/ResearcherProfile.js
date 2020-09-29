@@ -27,7 +27,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.saveProfile = this.saveProfile.bind(this);
     this.submit = this.submit.bind(this);
     this.saveUser = this.saveUser.bind(this);
-    this.handleFileChange = this.handleFileChange.bind(this);
   }
 
   async componentDidMount() {
@@ -50,9 +49,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       additionalEmail: '',
-      file: {
-        name: ''
-      },
       roles: [],
       profile: {
         checkNotifications: false,
@@ -159,15 +155,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.researcherFieldsValidation();
       }
     });
-  };
-
-  handleFileChange(event) {
-    if (event.target.files !== undefined && event.target.files[0]) {
-      let file = event.target.files[0];
-      this.setState({
-        file: file
-      });
-    }
   };
 
   researcherFieldsValidation() {
@@ -387,27 +374,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          if (this.state.file !== undefined && this.state.file.name !== '') {
-            DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-              profile.urlDAA = response.urlDAA;
-              profile.nameDAA = response.nameDAA;
-              this.saveProperties(profile);
-            });
-          } else {
-            this.saveProperties(profile);
-          }
-
+          this.saveProperties(profile);
         } else {
-          if (this.state.file !== undefined && this.state.file.name !== '') {
-            const existentDAAUrl = _.isNil(profile.urlDAA) ? '' : profile.urlDAA;
-            DAR.postDAA(this.state.file.name, this.state.file, existentDAAUrl).then(response => {
-              profile.urlDAA = response.urlDAA;
-              profile.nameDAA = response.nameDAA;
-              this.updateResearcher(profile);
-            });
-          } else {
-            this.updateResearcher(profile);
-          }
+          this.updateResearcher(profile);
         }
       } else {
         this.saveUser().then(resp => {
