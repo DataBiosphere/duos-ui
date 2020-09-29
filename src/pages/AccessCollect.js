@@ -15,7 +15,7 @@ import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
-import translatedDULComponent from '../components/TranslatedDULComponent';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class AccessCollect extends Component {
 
@@ -65,7 +65,6 @@ class AccessCollect extends Component {
           ['Pending', 0]
         ]
       },
-      translatedUseRestriction: '',
       dataUse: {},
       voteStatus: '',
       createDate: '',
@@ -260,10 +259,6 @@ class AccessCollect extends Component {
       prev.dulName = electionReview.consent.dulName;
       prev.status = electionReview.election.status;
       prev.accessAlreadyVote = electionReview.election.finalVote !== null ? true : false;
-      //NOTE: What's with this logic? the variable isn't even used
-      // prev.userestriction = electionReview.election.translatedUseRestriction === null ?
-      //   'This includes sensitive research objectives that requires manual review.' :
-        // electionReview.election.translatedUseRestriction;
       prev.voteAccessList = this.chunk(electionReview.reviewVote, 2);
       return prev;
     });
@@ -414,8 +409,11 @@ class AccessCollect extends Component {
                 downloadDAR: this.downloadDAR,
                 researcherProfile: this.state.researcherProfile }),
 
-              div({ className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-                translatedDULComponent({restrictions: this.state.dataUse})
+              div({
+                className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
+                isRendered: !ld.isEmpty(this.state.dataUse)
+              }, [
+                TranslatedDULComponent({restrictions: this.state.dataUse})
               ])
             ]),
 
