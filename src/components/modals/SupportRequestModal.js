@@ -8,6 +8,7 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
+import * as fp from 'lodash/fp';
 
 Modal.setAppElement('#root');
 
@@ -60,9 +61,9 @@ export const SupportRequestModal = hh(
         }
         const allToken = await Promise.all(results);
         for (var t = 0; t < allToken.length; t++) {
-          if (allToken[t].status !== 201) {
+          if (!fp.hasIn('attachment.url')(allToken[t])) {
             Notifications.showError({
-              text: ` Unable to add attachment`,
+              text: 'Unable to add attachment',
               layout: 'topRight',
             });
             this.state.validAttachment = false;
