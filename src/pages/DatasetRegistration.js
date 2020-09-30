@@ -29,9 +29,6 @@ class DatasetRegistration extends Component {
       disableOkBtn: false,
       showValidationMessages: false,
       optionMessage: noOptionMessage,
-      file: {
-        name: ''
-      },
       showModal: false,
       completed: '',
       showDialogSubmit: false,
@@ -70,8 +67,6 @@ class DatasetRegistration extends Component {
         havePi: '',
         profileName: '',
         piName: '',
-        urlDAA: '',
-        nameDAA: '',
         pubmedId: '',
         scientificUrl: ''
       },
@@ -148,8 +143,6 @@ class DatasetRegistration extends Component {
       formData.country = rpProperties.country != null ? rpProperties.country : '';
       formData.state = rpProperties.state != null ? rpProperties.state : '';
       formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-      formData.nameDAA = rpProperties.nameDAA != null ? rpProperties.nameDAA : '';
-      formData.urlDAA = rpProperties.urlDAA != null ? rpProperties.urlDAA : '';
       formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
       formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
       formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
@@ -172,9 +165,6 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.completed = completed;
       prev.formData = formData;
-      if (formData.nameDAA !== '') {
-        prev.file.name = formData.nameDAA;
-      }
       return prev;
     });
 
@@ -383,25 +373,21 @@ class DatasetRegistration extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
-        DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-          formData.urlDAA = response.urlDAA;
-          formData.nameDAA = response.nameDAA;
-          if (formData.darCode !== undefined && formData.darCode !== null) {
-            DAR.updateDar(formData, formData.darCode).then(response => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
-            });
-          } else {
-            DAR.postDataAccessRequest(formData).then(response => {
-              this.setState({ showDialogSubmit: false });
-              this.props.history.push('researcher_console');
-            }).catch(e =>
-              this.setState(prev => {
-                prev.problemSavingRequest = true;
-                return prev;
-              }));
-          }
-        });
+        if (formData.darCode !== undefined && formData.darCode !== null) {
+          DAR.updateDar(formData, formData.darCode).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          });
+        } else {
+          DAR.postDataAccessRequest(formData).then(response => {
+            this.setState({ showDialogSubmit: false });
+            this.props.history.push('researcher_console');
+          }).catch(e =>
+            this.setState(prev => {
+              prev.problemSavingRequest = true;
+              return prev;
+            }));
+        }
       });
     } else {
       this.setState({ showDialogSubmit: false });
@@ -443,22 +429,11 @@ class DatasetRegistration extends Component {
   };
 
   savePartial() {
-
-    if (this.state.file !== undefined && this.state.file.name !== '') {
-      DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-        this.saveDAR(response);
-      });
-    } else {
-      this.saveDAR(null);
-    }
+    this.saveDAR(null);
   };
 
   saveDAR(response) {
     let formData = this.state.formData;
-    if (response !== null) {
-      formData.urlDAA = response.urlDAA;
-      formData.nameDAA = response.nameDAA;
-    }
     if (formData.partialDarCode === null) {
       DAR.postPartialDarRequest(formData).then(resp => {
         this.setShowDialogSave(false);
