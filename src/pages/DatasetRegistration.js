@@ -29,9 +29,6 @@ class DatasetRegistration extends Component {
       disableOkBtn: false,
       showValidationMessages: false,
       optionMessage: noOptionMessage,
-      file: {
-        name: ''
-      },
       showModal: false,
       completed: '',
       showDialogSubmit: false,
