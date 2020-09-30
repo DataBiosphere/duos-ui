@@ -497,39 +497,80 @@ class AccessResultRecords extends Component {
       referenceId: referenceId
     });
 
-    Election.findElectionById(electionId).then(
-      darElection => {
-        this.setState({
-          darElection: darElection
-        });
-      }
-    );
+    //NOTE: the returned objects should be assigned to state
+    const electionAPICalls = async function(electionId) {
+      const darElection = await Election.findElectionById(electionId);
+      return {darElection};
+    };
 
-    DAR.describeDar(referenceId).then(
-      darInfo => {
-        Researcher.getResearcherProfile(darInfo.researcherId).then(
-          researcherProfile => {
-            this.setState(prev => {
-              prev.darInfo = darInfo;
-              prev.researcherProfile = researcherProfile;
-              return prev;
-            });
-          });
-      }
-    );
+    const darAPICalls = async function(electionId) {
+      const darInfo = await DAR.describeDar(referenceId);
+      const researcherProfile = await Researcher.getResearcherProfile(darInfo.researcherId);
+      return {darInfo, researcherProfile};
+    };
 
-    const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
-    const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
-    this.setState({
-      hasUseRestriction: hasUseRestriction
-    });
-    Votes.getDarFinalAccessVote(electionId).then(
-      data => {
-        this.setState({
-          finalDACVote: data
-        });
-      }
-    );
+
+    const finalDacVote = async function(electionId) {
+      const voteResponse = await Votes.getDarFinalAccessVote(electionId);
+      return {voteResponse};
+    };
+
+    //NOTE: these functions need to have flow controls to avoid side effects
+    //Can use election to get dataSetId, use that to get consent object
+
+    //NOTE: remove if the reated API call format works 
+    // const darElection = await Election.findElectionById(electionId);
+
+    // Election.findElectionById(electionId).then(
+    //   darElection => {
+    //     this.setState({
+    //       darElection: darElection
+    //     });
+    //   }
+    // );
+
+    //NOTE: remove if the individual API calls work well enough
+    // const darInfo = await DAR.describeDar(referenceId);
+    // const researcherProile = await Researcher.getResearcherProfile(darInfo.researcherId);
+
+    // DAR.describeDar(referenceId).then(
+    //   darInfo => {
+    //     Researcher.getResearcherProfile(darInfo.researcherId).then(
+    //       researcherProfile => {
+    //         this.setState(prev => {
+    //           prev.darInfo = darInfo;
+    //           prev.researcherProfile = researcherProfile;
+    //           return prev;
+    //         });
+    //       });
+    //   }
+    // );
+
+    //NOTE: isn't there dataUse tied to the darInfo return?
+    //NOTE: Why bother with this seperate use restriction call at all?
+    // const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
+    // const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
+    
+
+    // const finalDacVote = await Votes.getDarFinalAccessVote(electionId);
+    // this.setState({
+    //   hasUseRestriction: hasUseRestriction
+    // });
+    // Votes.getDarFinalAccessVote(electionId).then(
+    //   data => {
+    //     this.setState({
+    //       finalDACVote: data
+    //     });
+    //   }
+    // );
+
+    //NOTE: is electionReview really just formatted results from an election and consent api call?
+    //If so why bother with this? Just make inividual calls for Consent and Election and format the output here
+    const electionReviewCall = async (electionId) => {
+      const dataAccessReview = await Election.findDataAccessElectionReview(electionId, false);
+      const darData = this.showDarData(dataAccessReview);
+      const electionReview = await Election.findElectionReviewById(dataAccessReview.associatedConsent.electionId, dataAccessReview.associatedConsent.consentId);
+    };
 
 
     Election.findDataAccessElectionReview(electionId, false).then(
@@ -580,16 +621,26 @@ class AccessResultRecords extends Component {
     // this data is used to construct structured_ files
     const mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
 
-    this.setState({
+    // this.setState({
+    //   electionAccess: electionAccess,
+    //   status: status,
+    //   voteAccessList: voteAccessList,
+    //   chartDataAccess: chartDataAccess,
+    //   voteAgreement: voteAgreement,
+    //   mrDAR: mrDAR
+    // });
+
+    return {
       electionAccess: electionAccess,
       status: status,
       voteAccessList: voteAccessList,
       chartDataAccess: chartDataAccess,
       voteAgreement: voteAgreement,
       mrDAR: mrDAR
-    });
+    };
   }
 
+  //Needs to pull translatedUseRestriction from consent
   async showDULData(electionReview) {
     let election = electionReview.election;
     if (electionReview.election.finalRationale === null) {
