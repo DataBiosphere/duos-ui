@@ -26,10 +26,7 @@ class DatasetRegistration extends Component {
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
-      file: {
-        name: ''
-      },
-      properties: {},
+      optionMessage: noOptionMessage,
       showModal: false,
       showDialogSubmit: false,
       formData: {

@@ -1,8 +1,8 @@
 import { Component } from 'react';
-import { div, hr, label, form, textarea, a, span } from 'react-hyperscript-helpers';
+import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { User, Researcher, Files } from "../libs/ajax";
+import { User, Researcher } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherReview extends Component {
@@ -40,8 +40,7 @@ class ResearcherReview extends Component {
         pubmedID: '',
         scientificURL: '',
         state: '',
-        zipcode: '',
-        nameDAA: ''
+        zipcode: ''
       },
     };
   }
@@ -102,10 +101,6 @@ class ResearcherReview extends Component {
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialogOK: false });
     this.props.history.goBack();
-  };
-
-  downloadDAA() {
-    Files.getDAAFile(this.props.match.params.dacUserId, this.state.formData.nameDAA);
   };
 
   render() {
@@ -294,19 +289,6 @@ class ResearcherReview extends Component {
                   maxLength: "512",
                   readOnly: true
                 })
-              ])
-            ]),
-
-            div({isRendered: formData.nameDAA !== undefined, className: "row no-margin" }, [
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                label({ className: "control-label default-color" }, ["Data Access Agreement signed by the organization's Signing Official"])
-              ]),
-
-              div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group" }, [
-                a({ id: "link_downloadAgreement", onClick: () => this.downloadDAA(), className: "col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color" }, [
-                  span({ className: "glyphicon glyphicon-download" }),
-                  "Download S.O. Signed Agreement"
-                ])
               ])
             ])
           ])

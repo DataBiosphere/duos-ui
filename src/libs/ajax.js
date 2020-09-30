@@ -347,8 +347,9 @@ export const DAR = {
   },
 
   postDataAccessRequest: async dar => {
+    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await Config.getApiUrl()}/dar`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredDar), { method: 'POST' }]));
     return await res;
   },
 
@@ -424,13 +425,6 @@ export const DAR = {
     return manualReview;
   },
 
-  postDAA: async (fileName, file, existentFileUrl) => {
-    const url = `${await Config.getApiUrl()}/dar/storeDAA?fileName=${fileName}&existentFileUrl=${existentFileUrl}`;
-    let formData = new FormData();
-    formData.append("data", new Blob([file], { type: 'application/pdf' }));
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    return await res.json();
-  }
 };
 
 export const DataSet = {
@@ -703,11 +697,6 @@ export const Files = {
   getDARFile: async (darId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
-  },
-
-  getDAAFile: async (researcherId, fileName) => {
-    const url = `${await Config.getApiUrl()}/dar/downloadDAA/${researcherId}`;
-    return getFile(url, fileName);
   }
 };
 

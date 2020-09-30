@@ -8,6 +8,7 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
+import * as fp from 'lodash/fp';
 
 Modal.setAppElement('#root');
 
@@ -56,13 +57,22 @@ export const SupportRequestModal = hh(
       if (this.state.attachment !== '') {
         const results = [];
         for (var i = 0; i < this.state.attachment.length; i++) {
-          results.push(Support.uploadAttachment(this.state.attachment[i]));
+          try {
+            results.push(Support.uploadAttachment(this.state.attachment[i]));
+          } catch (e) {
+            Notifications.showError({
+              text: 'Unable to add attachment',
+              layout: 'topRight',
+            });
+            this.state.validAttachment = false;
+            break;
+          }
         }
         const allToken = await Promise.all(results);
         for (var t = 0; t < allToken.length; t++) {
-          if (allToken[t].status !== 201) {
+          if (!fp.hasIn('token')(allToken[t])) {
             Notifications.showError({
-              text: ` Unable to add attachment`,
+              text: 'Unable to add attachment',
               layout: 'topRight',
             });
             this.state.validAttachment = false;
@@ -364,13 +374,13 @@ export const SupportRequestModal = hh(
             }, [
               button({
                 id: 'btn_action',
-                className: 'col-lg-5 col-md-3 col-sm-4 col-xs-6 btn common-background',
+                className: 'btn common-background',
                 onClick: this.OKHandler,
                 disabled: disableOkBtn,
               }, ['Submit']),
               button({
                 id: 'btn_cancel',
-                className: 'col-lg-5 col-md-3 col-sm-4 col-xs-6 btn dismiss-background',
+                className: 'btn dismiss-background',
                 onClick: this.closeHandler,
               }, ['Cancel']),
             ]),
