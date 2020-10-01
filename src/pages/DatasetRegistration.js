@@ -27,25 +27,21 @@ class DatasetRegistration extends Component {
       showDialogSubmit: false,
       formData: {
         methods: '',
-        controls: '',
-        population: '',
+        genetic: '',
+        publication: '',
+        collaboration: '',
+        ethics: '',
+        geographic: '',
+        moratorium: '',
+        populationMigration: '',
+        forProfit: '',
         hmb: false,
         poa: false,
         diseases: false,
         ontologies: [],
         other: false,
         otherText: '',
-        forProfit: '',
-        pediatric: '',
-        illegalBehavior: '',
-        addiction: '',
-        sexualDiseases: '',
-        stigmatizedDiseases: '',
-        vulnerablePopulation: '',
-        populationMigration: '',
-        psychiatricTraits: '',
-        notHealth: '',
-        pubRef: ''
+        pubRef: '',
       },
       datasetData: {
         datasetName: '',
@@ -63,26 +59,12 @@ class DatasetRegistration extends Component {
         publicAccess: '',
         rus: ''
       },
-      consentData: {
-        consentId: '',
-        datasetId: '',
-        requiresManualReview: '',
-        useRestriction: '',
-        dataUseLetter: '',
-        name: '',
-        dulName: '',
-        translatedUseRestriction: '',
-        validRestriction: '',
-        dataUse: '',
-        consentGroupName: '',
-        dacId: ''
-      },
       problemSavingRequest: false
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  }
+  };
 
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
@@ -789,14 +771,14 @@ class DatasetRegistration extends Component {
                               input({
                                 checked: genetic,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkControls',
+                                id: 'checkGenetic',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'genetic',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkControls',
+                                htmlFor: 'checkGenetic',
                               }, [
                                 span({}, ['2.4.2 Genetic Studies Only (GSO): ']),
                                 'Use is limited to genetic studies only',
@@ -880,14 +862,14 @@ class DatasetRegistration extends Component {
                               input({
                                 checked: geographic,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkGeographic',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'geographic',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkGeographic',
                               }, [
                                 span({},
                                   ['2.4.6 Geographic Restriction (GS-) ']),
