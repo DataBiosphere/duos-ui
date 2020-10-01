@@ -489,126 +489,7 @@ class AccessResultRecords extends Component {
     );
   }
 
-  async loadData() {
-    const referenceId = this.props.match.params.referenceId;
-    const electionId = this.props.match.params.electionId;
-    this.setState({
-      electionId: electionId,
-      referenceId: referenceId
-    });
-
-    //NOTE: the returned objects should be assigned to state
-    const electionAPICalls = async function(electionId) {
-      const darElection = await Election.findElectionById(electionId);
-      return {darElection};
-    };
-
-    const darAPICalls = async function(electionId) {
-      const darInfo = await DAR.describeDar(referenceId);
-      const researcherProfile = await Researcher.getResearcherProfile(darInfo.researcherId);
-      return {darInfo, researcherProfile};
-    };
-
-
-    const finalDacVote = async function(electionId) {
-      const voteResponse = await Votes.getDarFinalAccessVote(electionId);
-      return {voteResponse};
-    };
-
-    //NOTE: these functions need to have flow controls to avoid side effects
-    //Can use election to get dataSetId, use that to get consent object
-
-    //NOTE: remove if the reated API call format works 
-    // const darElection = await Election.findElectionById(electionId);
-
-    // Election.findElectionById(electionId).then(
-    //   darElection => {
-    //     this.setState({
-    //       darElection: darElection
-    //     });
-    //   }
-    // );
-
-    //NOTE: remove if the individual API calls work well enough
-    // const darInfo = await DAR.describeDar(referenceId);
-    // const researcherProile = await Researcher.getResearcherProfile(darInfo.researcherId);
-
-    // DAR.describeDar(referenceId).then(
-    //   darInfo => {
-    //     Researcher.getResearcherProfile(darInfo.researcherId).then(
-    //       researcherProfile => {
-    //         this.setState(prev => {
-    //           prev.darInfo = darInfo;
-    //           prev.researcherProfile = researcherProfile;
-    //           return prev;
-    //         });
-    //       });
-    //   }
-    // );
-
-    //NOTE: isn't there dataUse tied to the darInfo return?
-    //NOTE: Why bother with this seperate use restriction call at all?
-    // const hasUseRestrictionResp = await DAR.hasUseRestriction(referenceId);
-    // const hasUseRestriction = hasUseRestrictionResp.hasUseRestriction;
-    
-
-    // const finalDacVote = await Votes.getDarFinalAccessVote(electionId);
-    // this.setState({
-    //   hasUseRestriction: hasUseRestriction
-    // });
-    // Votes.getDarFinalAccessVote(electionId).then(
-    //   data => {
-    //     this.setState({
-    //       finalDACVote: data
-    //     });
-    //   }
-    // );
-
-    //NOTE: is electionReview really just formatted results from an election and consent api call?
-    //If so why bother with this? Just make inividual calls for Consent and Election and format the output here
-    const electionReviewCall = async (electionId) => {
-      const dataAccessReview = await Election.findDataAccessElectionReview(electionId, false);
-      const darData = this.showDarData(dataAccessReview);
-      const electionReview = await Election.findElectionReviewById(dataAccessReview.associatedConsent.electionId, dataAccessReview.associatedConsent.consentId);
-    };
-
-
-    Election.findDataAccessElectionReview(electionId, false).then(
-      data => {
-        this.showDarData(data);
-        Election.findElectionReviewById(data.associatedConsent.electionId, data.associatedConsent.consentId).then(
-          data3 => {
-            this.setState({
-              electionReview: data3,
-              consentName: data.associatedConsent.name
-            });
-            this.showDULData(data3);
-            this.vaultVote(data3.consent.consentId);
-          });
-      });
-
-    const data2 = await Election.findRPElectionReview(electionId, false);
-    if (data2.election !== undefined) {
-      let electionRP = data2.election;
-      if (data2.election.finalRationale === null) {
-        electionRP.finalRationale = '';
-      }
-      this.setState({
-        electionRP: electionRP,
-        statusRP: data2.election.status,
-        rpVoteAccessList: this.chunk(data2.reviewVote, 2),
-        chartRP: this.getGraphData(data2.reviewVote),
-        showRPaccordion: true
-      });
-    } else {
-      this.setState({
-        showRPaccordion: false
-      });
-    }
-  }
-
-  async showDarData(electionReview) {
-
+  showDarData(electionReview) {
     let electionAccess = electionReview.election;
     if (electionReview.election.finalRationale === null) {
       electionAccess.finalRationale = '';
@@ -638,15 +519,14 @@ class AccessResultRecords extends Component {
       voteAgreement: voteAgreement,
       mrDAR: mrDAR
     };
-  }
+  };
 
-  //Needs to pull translatedUseRestriction from consent
   async showDULData(electionReview) {
     let election = electionReview.election;
     if (electionReview.election.finalRationale === null) {
       election.finalRationale = '';
     }
-    this.setState({
+    return {
       election: election,
       downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
@@ -655,29 +535,163 @@ class AccessResultRecords extends Component {
       chartDataDUL: this.getGraphData(electionReview.reviewVote),
       mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2),
       sDUL: electionReview.election.translatedUseRestriction
-    });
-  }
+    };
+  };
 
   async vaultVote(consentId) {
     const data = await Match.findMatch(consentId, this.state.electionAccess.referenceId);
+    let output = {};
 
     if (data.failed !== null && data.failed !== undefined && data.failed) {
-      this.setState({
+      output = {
         hideMatch: false,
         match: '-1',
         createDate: data.createDate
-      });
+      };
     } else if (data.match !== null && data.match !== undefined) {
-      this.setState({
+      output = {
         hideMatch: false,
         match: data.match,
         createDate: data.createDate
+      };
+    } else {
+      output = {
+        hideMatch: true
+      };
+    }
+    return output;
+  };
+
+  async electionAPICalls(electionId) {
+    const darElection = await Election.findElectionById(electionId);
+    return {
+      darElection
+    };
+  };
+
+  async darAPICalls (referenceId) {
+    const darInfo = await DAR.describeDar(referenceId);
+    const researcherProfile = await Researcher.getResearcherProfile(darInfo.researcherId);
+    return {
+      darInfo,
+      researcherProfile
+    };
+  };
+
+  //returns the most recent final vote
+  async finalDACVote(electionId) {
+    const voteResponse = await Votes.getDarFinalAccessVote(electionId);
+    return {
+      voteResponse
+    };
+  };
+
+  async electionReviewCall(electionId) {
+    let output = {
+      darData: null,
+      electionReview: null,
+      showDULData: null,
+      vaultVote: null
+    };
+    try{
+      const dataAccessElectionReview = await Election.findDataAccessElectionReview(electionId, false);
+      const darData = this.showDarData(dataAccessElectionReview);
+      const electionReview = await Election.findElectionReviewById(dataAccessElectionReview.associatedConsent.electionId, dataAccessElectionReview.associatedConsent.consentId);
+      const showDULData = this.showDULData(ld.cloneDeep(electionReview));
+      const vaultVote = this.vaultVote(electionReview.consent.consentId);
+      output = {
+        darData,
+        electionReview,
+        showDULData,
+        vaultVote
+      };
+    } catch(error) {
+      console.log(error);
+    }
+    return output;
+  };
+
+  async electionRPCall(electionId, finalStatus = false) {
+    let assignToState = {};
+    const rpElectionReviewResp = await Election.findRPElectionReview(electionId, false);
+    if (!ld.isEmpty(rpElectionReviewResp) && rpElectionReviewResp.election) {
+      let electionRP = rpElectionReviewResp.election;
+      if (ld.isNil(electionRP.finalRationale)) {
+        electionRP.finalRationale = '';
+      }
+      ld.assign(assignToState, {
+        electionRP: electionRP,
+        statusRP: rpElectionReviewResp.election.status,
+        rpVoteAccessList: this.chunk(rpElectionReviewResp.reviewVote, 2),
+        chartRP: this.getGraphData(rpElectionReviewResp.reviewVote),
+        showRPaccordion: true
       });
     } else {
-      this.setState({
-        hideMatch: true
+      ld.assign(assignToState, {
+        showRPaccordion: false
       });
     }
+
+    return assignToState;
+  };
+
+
+  async loadData() {
+    const referenceId = this.props.match.params.referenceId;
+    const electionId = this.props.match.params.electionId;
+
+    Promise.all([
+      this.electionAPICalls(electionId), //Election.findElectionById
+      this.darAPICalls(referenceId), //DAR.describeDar, Researcher.getResearcherProfile
+      this.finalDACVote(electionId), //Votes.getDarFinalAccessVote
+      this.electionReviewCall(electionId), //Election.findDataAccessElectionReview
+      this.electionRPCall(electionId, false) //Election.findRPElectionReview
+    ]).then(apiResults => {
+      const electionAPIResults = apiResults[0];
+      const darAPIResults = apiResults[1];
+      const finalDACVote = apiResults[2];
+      const electionReviewResults = apiResults[3];
+      const electionRPResults = apiResults[4];
+
+      //original has a 'hasUseRestriction', should this stay in the component or is it the same/derived from the sDUL attribute (translatedUseRestriction)?
+      //I don't think it's needed if I'm processing it on the front-end 
+
+      const assignToState = {
+        electionId,
+        referenceId,
+        darElection: electionAPIResults.darElection,
+        darInfo: darAPIResults.darInfo,
+        researcherProfile: darAPIResults.researcherProfile,
+        finalDACVote: finalDACVote.voteResponse,
+        electionReview: electionReviewResults.electionReview,
+        consentName: electionReviewResults.darData.associatedConsent.name,
+        election: electionReviewResults.showDULData.election,
+        downloadUrl: electionReviewResults.showDULData.downloadUrl,
+        dulName: electionReviewResults.showDULData.dulName,
+        status: electionReviewResults.showDULData.election.status,
+        voteList: electionReviewResults.showDULData.voteList,
+        chartDataDUL: electionReviewResults.showDULData.chartDataDUL,
+        mrDUL: electionReviewResults.showDULData.mrDUL,
+        sDUL: electionReviewResults.election.translatedUseRestriction, //target for removal, replace with dataUseTranslation service
+        hideMatch: electionReviewResults.vaultVote.hideMatch,
+        match: electionReviewResults.vaultVote.match,
+        createDate: electionReviewResults.vaultVote.createDate,
+        electionRP: electionRPResults.electionRP,
+        statusRP: electionRPResults.statusRP,
+        rpVoteAccessList: electionRPResults.rpVoteAccessList,
+        chartRP: electionRPResults.chartRP,
+        showRPaccordion: electionRPResults.showRPaccordian,
+      };
+
+      this.setState((state) => {
+        const updatedState = ld.assign(state, assignToState);
+        return updatedState;
+      });
+
+      //From here process results and assign them to state variable
+      //NOTE: need to make sure functions have been refactored/organized correctly
+      //NOTE: see if there's a way to simplify the election/vote requests and processing steps
+    }).catch(error => console.log(error));
   }
 }
 
