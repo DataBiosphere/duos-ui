@@ -60,6 +60,36 @@ class DatasetRegistration extends Component {
         dac: '',
         pubRef: ''
       },
+      datasetData: {
+        datasetName: '',
+        researcher: '',
+        collectionId: '',
+        pi: '',
+        datasetRepoUrl: '',
+        dataType: '',
+        species: '',
+        phenotype: '',
+        nrParticipants: '',
+        description: '',
+        dac: '',
+        consentId: '',
+        publicAccess: '',
+        rus: ''
+      },
+      consentData: {
+        consentId: '',
+        datasetId: '',
+        requiresManualReview: '',
+        useRestriction: '',
+        dataUseLetter: '',
+        name: '',
+        dulName: '',
+        translatedUseRestriction: '',
+        validRestriction: '',
+        dataUse: '',
+        consentGroupName: '',
+        dacId: ''
+      },
       problemSavingRequest: false
     };
 
@@ -83,17 +113,8 @@ class DatasetRegistration extends Component {
     const currentUser = await Storage.getCurrentUser();
     this.setState(prev => {
       prev.notificationData = notificationData;
-      prev.formData['researcher'] = currentUser.displayName;
+      prev.datasetData['researcher'] = currentUser.displayName;
       return prev;
-    });
-  }
-
-  processDataSet(datasetIdList) {
-    return datasetIdList.map(function(item) {
-      return {
-        value: item.id,
-        label: item.concatenation
-      };
     });
   }
 
@@ -109,7 +130,7 @@ class DatasetRegistration extends Component {
     const field = e.target.name;
     const value = e.target.value;
     this.setState(prev => {
-      prev.formData[field] = value;
+      prev.datasetData[field] = value;
       prev.disableOkBtn = false;
       return prev;
     });
@@ -138,7 +159,7 @@ class DatasetRegistration extends Component {
 
   attestAndSave = (e) => {
     this.setState( prev => {
-      let allValid = this.validateRequiredFields(prev.formData);
+      let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
         prev.showDialogSubmit = true;
         prev.showValidationMessages = false;
@@ -161,22 +182,15 @@ class DatasetRegistration extends Component {
 
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
       this.setState(prev => {
-        if (ontologies.length > 0) {
-          prev.formData.ontologies = ontologies;
-        }
-        for (var key in prev.formData) {
-          if (prev.formData[key] === '') {
-            prev.formData[key] = undefined;
+        for (var key in prev.datasetData) {
+          if (prev.datasetData[key] === '') {
+            prev.datasetData[key] = undefined;
           }
         }
         return prev;
       }, () => {
-        let formData = this.state.formData;
+        let formData = this.state.datasetData;
         this.setState(prev => {
           prev.disableOkBtn = true;
           return prev;
@@ -283,7 +297,7 @@ class DatasetRegistration extends Component {
 
   createProperties = () => {
     let properties = [];
-    let formData = this.state.formData;
+    let formData = this.state.datasetData;
 
     if (formData.datasetName) {
       properties.push({"propertyName": "Dataset Name", "propertyValue": formData.datasetName});
@@ -406,13 +420,13 @@ class DatasetRegistration extends Component {
                         type: 'text',
                         name: 'researcher',
                         id: 'inputResearcher',
-                        value: this.state.formData.researcher,
+                        value: this.state.datasetData.researcher,
                         disabled: true,
-                        className: (fp.isEmpty(this.state.formData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        className: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
                       }),
                       span({
-                        isRendered: (fp.isEmpty(this.state.formData.researcher) && showValidationMessages), className: 'cancel-color required-field-error-span'
+                        isRendered: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages), className: 'cancel-color required-field-error-span'
                       }, ['Required field'])
                     ])
                   ]),
@@ -435,16 +449,16 @@ class DatasetRegistration extends Component {
                           name: 'datasetName',
                           id: 'inputName',
                           maxLength: '256',
-                          value: this.state.formData.datasetName,
+                          value: this.state.datasetData.datasetName,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.datasetName) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.datasetName) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -468,16 +482,16 @@ class DatasetRegistration extends Component {
                           name: 'datasetRepoUrl',
                           id: 'inputRepoUrl',
                           maxLength: '256',
-                          value: this.state.formData.datasetRepoUrl,
+                          value: this.state.datasetData.datasetRepoUrl,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.datasetRepoUrl) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.datasetRepoUrl) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -499,16 +513,16 @@ class DatasetRegistration extends Component {
                           name: 'dataType',
                           id: 'inputDataType',
                           maxLength: '256',
-                          value: this.state.formData.dataType,
+                          value: this.state.datasetData.dataType,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.dataType) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.dataType) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -530,16 +544,16 @@ class DatasetRegistration extends Component {
                           name: 'species',
                           id: 'inputSpecies',
                           maxLength: '256',
-                          value: this.state.formData.species,
+                          value: this.state.datasetData.species,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.species) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.species) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.species) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.species) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -561,16 +575,16 @@ class DatasetRegistration extends Component {
                           name: 'phenotype',
                           id: 'inputPhenotype',
                           maxLength: '256',
-                          value: this.state.formData.phenotype,
+                          value: this.state.datasetData.phenotype,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.phenotype) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.phenotype) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -592,16 +606,16 @@ class DatasetRegistration extends Component {
                           name: 'nrParticipants',
                           id: 'inputParticipants',
                           maxLength: '256',
-                          value: this.state.formData.nrParticipants,
+                          value: this.state.datasetData.nrParticipants,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.nrParticipants) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.nrParticipants) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.nrParticipants) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.nrParticipants) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -623,16 +637,16 @@ class DatasetRegistration extends Component {
                           name: 'description',
                           id: 'inputDescription',
                           maxLength: '256',
-                          value: this.state.formData.description,
+                          value: this.state.datasetData.description,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.description) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.description) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -654,16 +668,16 @@ class DatasetRegistration extends Component {
                           name: 'dac',
                           id: 'inputDac',
                           maxLength: '256',
-                          value: this.state.formData.dac,
+                          value: this.state.datasetData.dac,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.dac) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.dac) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.dac) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.dac) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -685,7 +699,7 @@ class DatasetRegistration extends Component {
                           name: 'pubRef',
                           id: 'inputPubRef',
                           maxLength: '256',
-                          value: this.state.formData.pubRef,
+                          value: this.state.datasetData.pubRef,
                           onChange: this.handleChange,
                           className: 'form-control',
                           required: false,
@@ -977,7 +991,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         textarea({
-                          value: this.state.formData.rus,
+                          value: this.state.datasetData.rus,
                           onChange: this.handleChange,
                           name: 'rus',
                           id: 'inputRUS',
