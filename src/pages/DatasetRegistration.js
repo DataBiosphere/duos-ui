@@ -47,17 +47,6 @@ class DatasetRegistration extends Component {
         populationMigration: '',
         psychiatricTraits: '',
         notHealth: '',
-        researcher: '',
-        collectionId: '',
-        pi: '',
-        datasetName: '',
-        datasetRepoUrl: '',
-        dataType: '',
-        species: '',
-        phenotype: '',
-        nrParticipants: '',
-        description: '',
-        dac: '',
         pubRef: ''
       },
       datasetData: {
