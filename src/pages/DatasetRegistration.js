@@ -7,16 +7,13 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet, Researcher } from '../libs/ajax';
+import { DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
-
-
-// const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
 
 class DatasetRegistration extends Component {
 
@@ -26,7 +23,6 @@ class DatasetRegistration extends Component {
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
-      optionMessage: noOptionMessage,
       showModal: false,
       showDialogSubmit: false,
       formData: {
@@ -54,7 +50,6 @@ class DatasetRegistration extends Component {
         researcher: '',
         collectionId: '',
         pi: '',
-        dataCustodian: '',
         datasetName: '',
         datasetRepoUrl: '',
         dataType: '',
@@ -82,42 +77,15 @@ class DatasetRegistration extends Component {
   };
 
   async componentDidMount() {
-    await this.init();
     this.props.history.push('/dataset_registration');
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+    const currentUser = await Storage.getCurrentUser();
     this.setState(prev => {
       prev.notificationData = notificationData;
+      prev.formData['researcher'] = currentUser.displayName;
       return prev;
     });
-  }
-
-  async init() {
-    let formData = Storage.getData('dataset_registration') === null ? this.state.formData : Storage.getData('dataset_registration');
-    Storage.removeData('dataset_registration');
-
-    formData.ontologies = this.getOntologies(formData);
-    let currentUserId = Storage.getCurrentUser().dacUserId;
-    let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
-
-    formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : Storage.getCurrentUser().displayName ;
-
-    formData.userId = Storage.getCurrentUser().dacUserId;
-  };
-
-  getOntologies(formData) {
-    let ontologies = {};
-    if (formData.ontologies !== undefined && formData.ontologies !== null) {
-      ontologies = formData.ontologies.map(function(item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.label,
-          item: item
-        };
-      });
-    }
-    return ontologies;
   }
 
   processDataSet(datasetIdList) {
@@ -209,7 +177,6 @@ class DatasetRegistration extends Component {
         return prev;
       }, () => {
         let formData = this.state.formData;
-        formData.userId = Storage.getCurrentUser().dacUserId;
         this.setState(prev => {
           prev.disableOkBtn = true;
           return prev;
