@@ -26,8 +26,6 @@ class DatasetRegistration extends Component {
       showModal: false,
       showDialogSubmit: false,
       formData: {
-        rus: '',
-        nonTechRus: '',
         methods: '',
         controls: '',
         population: '',
@@ -171,7 +169,14 @@ class DatasetRegistration extends Component {
 
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
+      let ontologies = [];
+      for (let ontology of this.state.formData.ontologies) {
+        ontologies.push(ontology.item);
+      }
       this.setState(prev => {
+        if (ontologies.length > 0) {
+          prev.formData.ontologies = ontologies;
+        }
         for (var key in prev.datasetData) {
           if (prev.datasetData[key] === '') {
             prev.datasetData[key] = undefined;
