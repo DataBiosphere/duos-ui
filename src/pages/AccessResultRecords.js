@@ -502,15 +502,6 @@ class AccessResultRecords extends Component {
     // this data is used to construct structured_ files
     const mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
 
-    // this.setState({
-    //   electionAccess: electionAccess,
-    //   status: status,
-    //   voteAccessList: voteAccessList,
-    //   chartDataAccess: chartDataAccess,
-    //   voteAgreement: voteAgreement,
-    //   mrDAR: mrDAR
-    // });
-
     return {
       electionAccess: electionAccess,
       status: status,
@@ -533,8 +524,8 @@ class AccessResultRecords extends Component {
       status: electionReview.election.status,
       voteList: this.chunk(electionReview.reviewVote, 2),
       chartDataDUL: this.getGraphData(electionReview.reviewVote),
-      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2),
-      sDUL: electionReview.election.translatedUseRestriction
+      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2), //could this be calculated on the front-end?
+      sDUL: electionReview.election.translatedUseRestriction //target for removal since it'll be processed on the front=end
     };
   };
 
@@ -597,8 +588,8 @@ class AccessResultRecords extends Component {
       const dataAccessElectionReview = await Election.findDataAccessElectionReview(electionId, false);
       const darData = this.showDarData(dataAccessElectionReview);
       const electionReview = await Election.findElectionReviewById(dataAccessElectionReview.associatedConsent.electionId, dataAccessElectionReview.associatedConsent.consentId);
-      const showDULData = this.showDULData(ld.cloneDeep(electionReview));
-      const vaultVote = this.vaultVote(electionReview.consent.consentId);
+      const showDULData = await this.showDULData(ld.cloneDeep(electionReview));
+      const vaultVote = await this.vaultVote(electionReview.consent.consentId);
       output = {
         darData,
         electionReview,
@@ -644,8 +635,8 @@ class AccessResultRecords extends Component {
       this.electionAPICalls(electionId), //Election.findElectionById
       this.darAPICalls(referenceId), //DAR.describeDar, Researcher.getResearcherProfile
       this.finalDACVote(electionId), //Votes.getDarFinalAccessVote
-      this.electionReviewCall(electionId), //Election.findDataAccessElectionReview
-      this.electionRPCall(electionId, false) //Election.findRPElectionReview
+      this.electionReviewCall(electionId), //Election.findDataAccessElectionReview, Election.findElectionReviewById, Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul'
+      this.electionRPCall(electionId, false) //Election.findRPElectionReview(electionId, false (finalStatus))
     ]).then(apiResults => {
       const electionAPIResults = apiResults[0];
       const darAPIResults = apiResults[1];
@@ -654,8 +645,11 @@ class AccessResultRecords extends Component {
       const electionRPResults = apiResults[4];
 
       //original has a 'hasUseRestriction', should this stay in the component or is it the same/derived from the sDUL attribute (translatedUseRestriction)?
-      //I don't think it's needed if I'm processing it on the front-end 
+      //I don't think it's needed if I'm processing it on the front-end
 
+
+      //NOTE: lot of election calls, they seem to have different contexts and have extra stuff added to them
+      //NOTE: is there a way to figure out how to translate it all to CRUD methods?
       const assignToState = {
         electionId,
         referenceId,
