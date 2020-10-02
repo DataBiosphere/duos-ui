@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, br, div, fieldset, form, h, h3, hr, i, input, label, span, textarea } from 'react-hyperscript-helpers';
+import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
@@ -7,7 +7,7 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, Researcher } from '../libs/ajax';
+import { DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
@@ -15,83 +15,56 @@ import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
 
-
-const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
-
 class DatasetRegistration extends Component {
 
   constructor(props) {
     super(props);
-    this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
-    this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.state = {
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
-      optionMessage: noOptionMessage,
       showModal: false,
-      completed: '',
       showDialogSubmit: false,
-      showDialogSave: false,
-      step: 1,
       formData: {
-        datasets: [],
-        darCode: null,
-        checkCollaborator: false,
-        rus: '',
-        nonTechRus: '',
-        oneGender: '',
         methods: '',
-        controls: '',
-        population: '',
+        genetic: '',
+        publication: '',
+        collaboration: '',
+        ethics: '',
+        geographic: '',
+        moratorium: '',
+        populationMigration: '',
+        forProfit: '',
         hmb: false,
         poa: false,
         diseases: false,
         ontologies: [],
         other: false,
         otherText: '',
-        forProfit: '',
-        gender: '',
-        pediatric: '',
-        illegalBehavior: '',
-        addiction: '',
-        sexualDiseases: '',
-        stigmatizedDiseases: '',
-        vulnerablePopulation: '',
-        populationMigration: '',
-        psychiatricTraits: '',
-        notHealth: '',
+        pubRef: '',
+      },
+      datasetData: {
+        datasetName: '',
         researcher: '',
-        projectTitle: '',
-        isThePi: '',
-        havePi: '',
-        profileName: '',
-        piName: '',
-        pubmedId: '',
-        scientificUrl: ''
-      },
-      step1: {
-        inputResearcher: {
-          invalid: false
-        },
-        inputInvestigator: {
-          invalid: false
-        },
-        inputNih: {
-          invalid: false
-        }
-      },
-      step3: {
-        inputPurposes: {
-          invalid: false
-        }
+        collectionId: '',
+        pi: '',
+        datasetRepoUrl: '',
+        dataType: '',
+        species: '',
+        phenotype: '',
+        nrParticipants: '',
+        description: '',
+        dac: '',
+        consentId: '',
+        publicAccess: '',
+        rus: ''
       },
       problemSavingRequest: false
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  }
+  };
 
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
@@ -103,94 +76,14 @@ class DatasetRegistration extends Component {
   };
 
   async componentDidMount() {
-    await this.init();
     this.props.history.push('/dataset_registration');
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
+    const currentUser = await Storage.getCurrentUser();
     this.setState(prev => {
       prev.notificationData = notificationData;
+      prev.datasetData['researcher'] = currentUser.displayName;
       return prev;
-    });
-  }
-
-  async init() {
-    let formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
-    Storage.removeData('dar_application');
-    if (this.props.location.props !== undefined && this.props.location.props.formData !== undefined) {
-      if (this.props.location.props.formData.darCode !== undefined) {
-        formData = this.props.location.props.formData;
-        formData.ontologies = this.getOntologies(formData);
-      } else if (this.props.location.props.formData.datasetIds !== undefined) {
-        // set datasets sent by data set catalog
-        formData.datasets = this.processDataSet(this.props.location.props.formData.datasetIds);
-      }
-    }
-    let currentUserId = Storage.getCurrentUser().dacUserId;
-    let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
-    formData.darCode = formData.darCode === undefined ? null : formData.darCode;
-    formData.partialDarCode = formData.partialDarCode === undefined ? null : formData.partialDarCode;
-
-    formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
-
-    if (formData.darCode === null) {
-      formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
-      formData.department = rpProperties.department != null ? rpProperties.department : '';
-      formData.division = rpProperties.division != null ? rpProperties.division : '';
-      formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
-      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
-      formData.city = rpProperties.city != null ? rpProperties.city : '';
-      formData.zipCode = rpProperties.zipCode != null ? rpProperties.zipCode : '';
-      formData.country = rpProperties.country != null ? rpProperties.country : '';
-      formData.state = rpProperties.state != null ? rpProperties.state : '';
-      formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-      formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
-      formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
-      formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
-      formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
-      formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
-    }
-
-    formData.userId = Storage.getCurrentUser().dacUserId;
-
-    if (formData.darCode !== null || formData.partialDarCode !== null) {
-      formData.datasets = this.processDataSet(formData.datasetIds);
-    }
-    let completed = false;
-    if (formData.darCode !== null) {
-      completed = '';
-    } else if (rpProperties.completed !== undefined) {
-      completed = JSON.parse(rpProperties.completed);
-    }
-    this.setState(prev => {
-      prev.completed = completed;
-      prev.formData = formData;
-      return prev;
-    });
-
-  };
-
-  getOntologies(formData) {
-    let ontologies = {};
-    if (formData.ontologies !== undefined && formData.ontologies !== null) {
-      ontologies = formData.ontologies.map(function(item) {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.label,
-          item: item
-        };
-      });
-    }
-    return ontologies;
-  }
-
-  processDataSet(datasetIdList) {
-    return datasetIdList.map(function(item) {
-      return {
-        value: item.id,
-        label: item.concatenation
-      };
     });
   }
 
@@ -206,19 +99,10 @@ class DatasetRegistration extends Component {
     const field = e.target.name;
     const value = e.target.value;
     this.setState(prev => {
-      prev.formData[field] = value;
+      prev.datasetData[field] = value;
+      prev.disableOkBtn = false;
       return prev;
-    }, () => this.checkValidations());
-  };
-
-  checkValidations() {
-    if (this.state.showValidationMessages === true && this.state.step === 1) {
-      this.verifyStep1();
-    } else if (this.state.showValidationMessages === true && this.state.step === 2) {
-      this.verifyStep2();
-    } else if (this.state.showValidationMessages === true && this.state.step === 3) {
-      this.verifyStep3();
-    }
+    });
   };
 
   handleCheckboxChange = (e) => {
@@ -226,33 +110,35 @@ class DatasetRegistration extends Component {
     const value = e.target.checked;
     this.setState(prev => {
       prev.formData[field] = value;
-      return prev;
-    }, () => this.checkValidations());
-  };
-
-  step1 = (e) => {
-    this.setState(prev => {
-      prev.step = 1;
+      prev.disableOkBtn = false;
       return prev;
     });
-    window.scrollTo(0, 0);
   };
 
-  step3 = (e) => {
-    this.setState(prev => {
-      prev.step = 3;
-      return prev;
-    });
-    window.scrollTo(0, 0);
+  validateRequiredFields(formData) {
+    return this.isValid(formData.researcher) &&
+      this.isValid(formData.datasetName) &&
+      this.isValid(formData.datasetRepoUrl) &&
+      this.isValid(formData.dataType) &&
+      this.isValid(formData.species) &&
+      this.isValid(formData.phenotype) &&
+      this.isValid(formData.nrParticipants) &&
+      this.isValid(formData.description);
   };
 
   attestAndSave = (e) => {
-    let invalidStep1 = this.verifyStep1();
-    let invalidStep2 = this.verifyStep2();
-    let invalidStep3 = this.verifyStep3();
-    if (!invalidStep1 && !invalidStep2 && !invalidStep3) {
-      this.setState({ showDialogSubmit: true });
-    }
+    this.setState( prev => {
+      let allValid = this.validateRequiredFields(prev.datasetData);
+      if (allValid) {
+        prev.showDialogSubmit = true;
+        prev.showValidationMessages = false;
+      }
+      else {
+        prev.showDialogSubmit = false;
+        prev.showValidationMessages = true;
+      }
+      return prev;
+    });
   };
 
   isValid(value) {
@@ -261,87 +147,6 @@ class DatasetRegistration extends Component {
       isValid = true;
     }
     return isValid;
-  };
-
-  verifyStep1() {
-    let isResearcherInvalid = false,
-      isInvestigatorInvalid = false,
-      showValidationMessages = false,
-      isNihInvalid = !this.state.nihValid;
-
-    if (!this.isValid(this.state.formData.researcher)) {
-      isResearcherInvalid = true;
-      showValidationMessages = true;
-    }
-    if (this.state.formData.checkCollaborator !== true
-      && !this.state.nihValid) {
-      isNihInvalid = true;
-      showValidationMessages = true;
-    }
-    // DUOS-565: checkCollaborator : false and nihValid : false is an invalid combination
-    if (this.state.formData.checkCollaborator !== true
-      && !this.state.nihValid) {
-      isNihInvalid = true;
-      showValidationMessages = true;
-    }
-    this.setState(prev => {
-      prev.step1.inputResearcher.invalid = isResearcherInvalid;
-      prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
-      prev.step1.inputNih.invalid = isNihInvalid;
-      if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
-      return prev;
-    });
-    return showValidationMessages;
-  };
-
-  verifyStep2() {
-    const datasetsInvalid = fp.isEmpty(this.state.formData.datasets);
-    const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
-    const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
-    const rusInvalid = fp.isEmpty(this.state.formData.rus);
-    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
-    return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
-  };
-
-  isGenderValid(gender, oneGender) {
-    let isValidGender = false;
-    if (oneGender === false || (oneGender === true && this.isValid(gender))) {
-      isValidGender = true;
-    }
-    return isValidGender;
-  }
-
-  verifyStep3() {
-    let invalid = false;
-    if (!(this.isValid(this.state.formData.forProfit) &&
-      this.isValid(this.state.formData.oneGender) &&
-      this.isGenderValid(this.state.formData.gender, this.state.formData.oneGender) &&
-      this.isValid(this.state.formData.pediatric) &&
-      this.isValid(this.state.formData.illegalBehavior) &&
-      this.isValid(this.state.formData.addiction) &&
-      this.isValid(this.state.formData.sexualDiseases) &&
-      this.isValid(this.state.formData.stigmatizedDiseases) &&
-      this.isValid(this.state.formData.vulnerablePopulation) &&
-      this.isValid(this.state.formData.populationMigration) &&
-      this.isValid(this.state.formData.psychiatricTraits) &&
-      this.isValid(this.state.formData.notHealth))) {
-      this.setState(prev => {
-        prev.step3.inputPurposes.invalid = true;
-        prev.showValidationMessages = true;
-        return prev;
-      });
-      invalid = true;
-    } else {
-      this.setState(prev => {
-        prev.step3.inputPurposes.invalid = false;
-        return prev;
-      });
-    }
-    return invalid;
-  }
-
-  partialSave = (e) => {
-    this.setState({ showDialogSave: true });
   };
 
   dialogHandlerSubmit = (answer) => (e) => {
@@ -354,34 +159,27 @@ class DatasetRegistration extends Component {
         if (ontologies.length > 0) {
           prev.formData.ontologies = ontologies;
         }
-        for (var key in prev.formData) {
-          if (prev.formData[key] === '') {
-            prev.formData[key] = undefined;
+        for (var key in prev.datasetData) {
+          if (prev.datasetData[key] === '') {
+            prev.datasetData[key] = undefined;
           }
-
         }
         return prev;
       }, () => {
-        let formData = this.state.formData;
-        let ds = [];
-        this.state.formData.datasets.forEach(dataset => {
-          ds.push(dataset.value);
-        });
-        formData.datasetIds = ds;
-        formData.userId = Storage.getCurrentUser().dacUserId;
+        let formData = this.state.datasetData;
         this.setState(prev => {
           prev.disableOkBtn = true;
           return prev;
         });
-        if (formData.darCode !== undefined && formData.darCode !== null) {
-          DAR.updateDar(formData, formData.darCode).then(response => {
+
+        if (this.state.showValidationMessages) {
+          this.setState({showDialogSubmit: false});
+        }
+        else {
+          let ds = this.formatFormData(formData);
+          DataSet.postDatasetForm(ds).then(resp => {
             this.setState({ showDialogSubmit: false });
-            this.props.history.push('researcher_console');
-          });
-        } else {
-          DAR.postDataAccessRequest(formData).then(response => {
-            this.setState({ showDialogSubmit: false });
-            this.props.history.push('researcher_console');
+            this.props.history.push('dataset_registration');
           }).catch(e =>
             this.setState(prev => {
               prev.problemSavingRequest = true;
@@ -393,59 +191,6 @@ class DatasetRegistration extends Component {
       this.setState({ showDialogSubmit: false });
     }
   };
-
-  setShowDialogSave(value) {
-    this.setState(prev => {
-      prev.showDialogSave = value;
-      prev.disableOkBtn = false;
-      return prev;
-    });
-  };
-
-  dialogHandlerSave = (answer) => (e) => {
-    this.setState(prev => {
-      prev.disableOkBtn = true;
-      return prev;
-    });
-    if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
-      let datasets = this.state.formData.datasets.map(function(item) {
-        return {
-          id: item.value,
-          concatenation: item.label
-        };
-      });
-      this.setState(prev => {
-        prev.formData.datasetIds = datasets;
-        prev.formData.ontologies = ontologies;
-        return prev;
-      }, () => this.savePartial());
-    } else {
-      this.setShowDialogSave(false);
-    }
-  };
-
-  savePartial() {
-    this.saveDAR(null);
-  };
-
-  saveDAR(response) {
-    let formData = this.state.formData;
-    if (formData.partialDarCode === null) {
-      DAR.postPartialDarRequest(formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.push('researcher_console');
-      });
-    } else {
-      DAR.updatePartialDarRequest(formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.push({ pathname: 'researcher_console' });
-      });
-    }
-  }
 
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
@@ -526,33 +271,86 @@ class DatasetRegistration extends Component {
     this.props.history.goBack();
   };
 
+  createProperties = () => {
+    let properties = [];
+    let formData = this.state.datasetData;
+
+    if (formData.datasetName) {
+      properties.push({"propertyName": "Dataset Name", "propertyValue": formData.datasetName});
+    }
+    if (formData.collectionId) {
+      properties.push({"propertyName": "Sample Collection ID", "propertyValue": formData.collectionId});
+    }
+    if (formData.dataType) {
+      properties.push({"propertyName": "Data Type", "propertyValue": formData.dataType});
+    }
+    if (formData.species) {
+      properties.push({"propertyName": "Species", "propertyValue": formData.species});
+    }
+    if (formData.phenotype) {
+      properties.push({"propertyName": "Phenotype/Indication", "propertyValue": formData.phenotype});
+    }
+    if (formData.nrParticipants) {
+      properties.push({"propertyName": "# of participants", "propertyValue": formData.nrParticipants});
+    }
+    if (formData.description) {
+      properties.push({"propertyName": "Description", "propertyValue": formData.description});
+    }
+    if (formData.datasetRepoUrl) {
+      properties.push({"propertyName": "dbGAP", "propertyValue": formData.datasetRepoUrl});
+    }
+    if (formData.researcher) {
+      properties.push({"propertyName": "Data Depositor", "propertyValue": formData.researcher});
+    }
+    if (formData.pi) {
+      properties.push({"propertyName": "Principal Investigator(PI)", "propertyValue": formData.pi});
+    }
+
+    return properties;
+  }
+
+  formatFormData = (data) => {
+    let result = {};
+    result.datasetName = data.datasetName;
+    result.consentId = data.consentId;
+    result.translatedUseRestriction = data.translatedUseRestriction;
+    result.deletable = true;
+    result.active = true;
+    result.needsApproval = !data.publicAccess;
+    result.isAssociatedToDataOwners = true;
+    result.updateAssociationToDataOwnerAllowed = true;
+    result.properties = this.createProperties();
+
+    return result;
+  }
+
   render() {
 
     const {
-      checkCollaborator = false,
-      darCode,
+      publicAccess = false,
       hmb = false,
       poa = false,
       diseases = false,
       other = false,
       otherText = '',
-      population = false,
+      genetic = false,
       forProfit = false,
-      controls = false,
+      publication = false,
+      collaboration = false,
+      ethics = false,
+      geographic = false,
+      moratorium = false,
       methods = false,
+      populationMigration = false
     } = this.state.formData;
     const { ontologies } = this.state;
 
-    const { problemSavingRequest, showValidationMessages, step1 } = this.state;
-    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
+    const { problemSavingRequest, showValidationMessages } = this.state;
+    const isTypeOfResearchInvalid = false;
+    // NOTE: set this to always false for now to submit dataset without consent info
+    // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
     const profileUnsubmitted = span({}, [
-      'Please make sure ',
-      h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' is updated, as it will be linked to your dataset for future correspondence'
-    ]);
-
-    const profileSubmitted = span({}, [
       'Please make sure ',
       h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
       ' is updated, as it will be linked to your dataset for future correspondence'
@@ -565,49 +363,25 @@ class DatasetRegistration extends Component {
           div({ className: 'row no-margin' }, [
             Notification({notificationData: this.state.notificationData}),
             div({
-              className: (this.state.formData.darCode !== null ?
-                'col-lg-10 col-md-9 col-sm-9 ' :
-                this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
+              className: ( 'col-lg-12 col-md-12 col-sm-12 ' )
             }, [
               PageHeading({
                 id: 'requestApplication', imgSrc: '/images/icon_dataset_add.png', iconSize: 'medium', color: 'dataset',
                 title: 'Dataset Registration',
                 description: 'This is an easy way to register a dataset in DUOS!'
               })
-            ]),
-            div({ isRendered: this.state.formData.darCode !== null, className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
-              a({ id: 'btn_back', onClick: this.back, className: 'btn-primary btn-back' }, [
-                i({ className: 'glyphicon glyphicon-chevron-left' }), 'Back'
-              ])
             ])
           ]),
           hr({ className: 'section-separator' }),
-
-          div({ className: 'row fsi-row-lg-level fsi-row-md-level multi-step-buttons no-margin' }, [
-
-          ])
         ]),
 
         form({ name: 'form', 'noValidate': true }, [
           div({ id: 'form-views' }, [
-
-            ConfirmationDialog({
-              title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'dataset',
-              showModal: this.state.showDialogSave, action: { label: 'Yes', handler: this.dialogHandlerSave }
-            }, [
-              div({ className: 'dialog-description' },
-                ['Are you sure you want to save this Dataset Registration? Previous changes will be overwritten.'])
-            ]),
-
-            div({ isRendered: this.state.step === 1 }, [
+            div({}, [
               div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
-                fieldset({ disabled: this.state.formData.darCode !== null }, [
-
+                fieldset({}, [
                   div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
                     Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
-                  ]),
-                  div({ isRendered: this.state.completed === true, className: 'rp-alert' }, [
-                    Alert({ id: 'profileSubmitted', type: 'info', title: profileSubmitted })
                   ]),
 
                   h3({ className: 'rp-form-title dataset-color' }, ['1. Dataset Information']),
@@ -622,13 +396,13 @@ class DatasetRegistration extends Component {
                         type: 'text',
                         name: 'researcher',
                         id: 'inputResearcher',
-                        value: this.state.formData.researcher,
+                        value: this.state.datasetData.researcher,
                         disabled: true,
-                        className: step1.inputResearcher.invalid && showValidationMessages ? 'form-control required-field-error' : 'form-control',
+                        className: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
                       }),
                       span({
-                        isRendered: (step1.inputResearcher.invalid) && (showValidationMessages), className: 'cancel-color required-field-error-span'
+                        isRendered: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages), className: 'cancel-color required-field-error-span'
                       }, ['Required field'])
                     ])
                   ]),
@@ -648,20 +422,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'datasetName',
+                          id: 'inputName',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.datasetName,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -682,20 +455,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'datasetRepoUrl',
+                          id: 'inputRepoUrl',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.datasetRepoUrl,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -714,20 +486,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'dataType',
+                          id: 'inputDataType',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.dataType,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -746,20 +517,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'species',
+                          id: 'inputSpecies',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.species,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.species) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.species) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -778,20 +548,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'phenotype',
+                          id: 'inputPhenotype',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.phenotype,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -810,20 +579,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'nrParticipants',
+                          id: 'inputParticipants',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.nrParticipants,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.nrParticipants) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.nrParticipants) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -842,20 +610,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'description',
+                          id: 'inputDescription',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.description,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -874,20 +641,19 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'dac',
+                          id: 'inputDac',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.dac,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.datasetData.dac) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
                           required: true,
-                          disabled: this.state.formData.darCode !== null,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.datasetData.dac) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -898,7 +664,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.10 Publication Reference* ',
+                          '1.10 Publication Reference',
                         ]),
                       ]),
                     div(
@@ -906,22 +672,14 @@ class DatasetRegistration extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'projectTitle',
-                          id: 'inputTitle',
+                          name: 'pubRef',
+                          id: 'inputPubRef',
                           maxLength: '256',
-                          value: this.state.formData.projectTitle,
+                          value: this.state.datasetData.pubRef,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                          disabled: this.state.formData.darCode !== null,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                        },
-                        ['Required field']),
+                          className: 'form-control',
+                          required: false,
+                        })
                       ])
                   ]),
                 ]),
@@ -937,7 +695,6 @@ class DatasetRegistration extends Component {
                         '2.1 Primary Data Use Terms* ',
                         span({},
                           ['Please select one of the following options.']),
-
 
                         div({
                           style: {'marginLeft': '15px'},
@@ -962,7 +719,7 @@ class DatasetRegistration extends Component {
                               poaHandler: this.setPoa,
                               diseases: diseases,
                               diseasesHandler: this.setDiseases,
-                              disabled: (darCode !== null),
+                              disabled: true,
                               ontologies: ontologies,
                               ontologiesHandler: this.onOntologiesChange,
                               other: other,
@@ -993,7 +750,6 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkMethods',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'methods',
                               }),
@@ -1013,17 +769,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: controls,
+                                checked: genetic,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkControls',
+                                id: 'checkGenetic',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'controls',
+                                name: 'genetic',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkControls',
+                                htmlFor: 'checkGenetic',
                               }, [
                                 span({}, ['2.4.2 Genetic Studies Only (GSO): ']),
                                 'Use is limited to genetic studies only',
@@ -1036,17 +791,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: population,
+                                checked: publication,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkPublication',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'population',
+                                name: 'publication',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkPublication',
                               }, [
                                 span({},
                                   ['2.4.3 Publication Required (PUB): ']),
@@ -1060,17 +814,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: population,
+                                checked: collaboration,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkCollaboration',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'population',
+                                name: 'collaboration',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkCollaboration',
                               }, [
                                 span({},
                                   ['2.4.4 Collaboration Required (COL): ']),
@@ -1084,17 +837,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: population,
+                                checked: ethics,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkEthics',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'population',
+                                name: 'ethics',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkEthics',
                               }, [
                                 span({},
                                   ['2.4.5 Ethics Approval Required (IRB): ']),
@@ -1108,17 +860,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: population,
+                                checked: geographic,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkGeographic',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'population',
+                                name: 'geographic',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkGeographic',
                               }, [
                                 span({},
                                   ['2.4.6 Geographic Restriction (GS-) ']),
@@ -1132,17 +883,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: population,
+                                checked: moratorium,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkMoratorium',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'population',
+                                name: 'moratorium',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkMoratorium',
                               }, [
                                 span({},
                                   ['2.4.7 Publication Moratorium (MOR) ']),
@@ -1156,17 +906,16 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: population,
+                                checked: populationMigration,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulation',
+                                id: 'checkPopulationMigration',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'population',
+                                name: 'populationMigration',
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulation',
+                                htmlFor: 'checkPopulationMigration',
                               }, [
                                 span({},
                                   ['2.4.8 No Populations Origins or Ancestry Research (NPOA)']),
@@ -1184,7 +933,6 @@ class DatasetRegistration extends Component {
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkForProfit',
                                 type: 'checkbox',
-                                disabled: (this.state.formData.darCode !== null),
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'forProfit',
                               }),
@@ -1210,7 +958,7 @@ class DatasetRegistration extends Component {
                           span({}, [
                             'If there are additional data use terms governing the future use of this dataset, please include them here.',
                             br(),
-                            'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access request. If you have questions, please reach out to the DUOS support team ',
+                            'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access requests. If you have questions, please reach out to the DUOS support team ',
                             span( [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })]),
                           ]),
                         ]),
@@ -1219,23 +967,15 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         textarea({
-                          value: this.state.formData.rus,
+                          value: this.state.datasetData.rus,
                           onChange: this.handleChange,
                           name: 'rus',
                           id: 'inputRUS',
-                          className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
-                            ' required-field-error form-control' :
-                            'form-control',
+                          className: 'form-control',
                           rows: '6',
-                          required: true,
+                          required: false,
                           placeholder: 'Please limit your other data use terms to 1100 characters.',
-                          disabled: this.state.formData.darCode !== null,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ]),
                   ]),
                 ]),
@@ -1269,14 +1009,13 @@ class DatasetRegistration extends Component {
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
                       input({
                         type: 'checkbox',
-                        id: 'chk_collaborator',
-                        name: 'checkCollaborator',
+                        id: 'chk_publicAccess',
+                        name: 'publicAccess',
                         className: 'checkbox-inline rp-checkbox',
-                        disabled: this.state.formData.darCode !== null,
-                        checked: checkCollaborator,
+                        checked: publicAccess,
                         onChange: this.handleCheckboxChange
                       }),
-                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
+                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_publicAccess' },
                         ['I would like this dataset to be made publicly available for data access requests via the DUOS Dataset Catalog'])
                     ]),
 
@@ -1290,7 +1029,7 @@ class DatasetRegistration extends Component {
                     div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
                       Alert({
                         id: 'problemSavingRequest', type: 'danger',
-                        title: 'Some errors occurred, Data Access Request Application couldn\'t be created.'
+                        title: 'Some errors occurred, Dataset Registration couldn\'t be completed.'
                       })
                     ]),
 
@@ -1299,20 +1038,16 @@ class DatasetRegistration extends Component {
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
 
                         a({
-                          id: 'btn_submit', isRendered: this.state.formData.darCode === null, onClick: this.attestAndSave,
+                          id: 'btn_submit', onClick: this.attestAndSave,
                           className: 'f-right btn-primary dataset-background bold'
                         }, ['Register in DUOS!']),
 
                         ConfirmationDialog({
                           title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
                           color: 'dataset', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
-                        }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Application?'])]),
+                        }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit this Dataset Registration?'])]),
                         h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
 
-                        a({
-                          id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: this.partialSave,
-                          className: 'f-right btn-secondary dataset-color'
-                        }, ['Save'])
                       ])
                     ])
                   ])

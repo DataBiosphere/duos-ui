@@ -437,6 +437,12 @@ export const DataSet = {
     return await res.json();
   },
 
+  postDatasetForm: async (form) => {
+    const url = `${await Config.getApiUrl()}/dataset/v2`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(form), { method: 'POST' }]));
+    return await res.json();
+  },
+
   findDataSets: async dacUserId => {
     const url = `${await Config.getApiUrl()}/dataset?dacUserId=${dacUserId}`;
     const res = await fetchOk(url, Config.authOpts());
