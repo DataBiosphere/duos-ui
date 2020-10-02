@@ -534,8 +534,7 @@ class AccessResultRecords extends Component {
       status: electionReview.election.status,
       voteList: this.chunk(electionReview.reviewVote, 2),
       chartDataDUL: this.getGraphData(electionReview.reviewVote),
-      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2), //could this be calculated on the front-end?
-      sDUL: electionReview.election.translatedUseRestriction //target for removal since it'll be processed on the front=end
+      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2)
     };
   };
 
