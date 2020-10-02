@@ -1,4 +1,6 @@
 import * as ld from 'lodash';
+import { isEmpty } from 'lodash';
+import isNil from 'lodash/fp/isNil';
 import { Component, Fragment } from 'react';
 import { a, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
@@ -7,6 +9,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { DataAccessRequest } from '../components/DataAccessRequest';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 import { DAR, Election, Files, Match, Researcher, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -160,18 +163,25 @@ class AccessResultRecords extends Component {
         ]),
         hr({ className: 'section-separator' }),
 
-        div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-
+        div({
+          isRendered: !isNil(this.state.mrDUL) || !isNil(this.state.sDUL),
+          className: 'row fsi-row-lg-level fsi-row-md-level no-margin'
+        }, [
           ApplicationSummary({
             isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile),
             mrDAR: mrDAR,
             hasUseRestriction: hasUseRestriction,
             darInfo: darInfo,
             downloadDAR: this.downloadDAR,
-            researcherProfile: researcherProfile }),
+            researcherProfile: researcherProfile 
+          }),
 
-          this.renderDataUseLimitation(sDUL, mrDUL)
-
+          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
+            h(TranslatedDULComponent, {
+              mrDUL: this.state.mrDUL,
+              restrictions: this.state.dataUse
+            })
+          ])
         ]),
 
         hr({ className: 'section-separator' }),
@@ -348,7 +358,7 @@ class AccessResultRecords extends Component {
   renderDataUseLimitation(sDUL, mrDUL) {
 
     return (
-      div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
+      div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
 
         div({ className: 'panel-heading cm-boxhead dul-color' }, [
           h4({}, ['Data Use Limitations'])
@@ -644,12 +654,21 @@ class AccessResultRecords extends Component {
       const electionReviewResults = apiResults[3];
       const electionRPResults = apiResults[4];
 
-      //original has a 'hasUseRestriction', should this stay in the component or is it the same/derived from the sDUL attribute (translatedUseRestriction)?
-      //I don't think it's needed if I'm processing it on the front-end
-
+      //NOTE: need to add hasUseRestriction to the state object, but is there a way for me to pull it forward?
 
       //NOTE: lot of election calls, they seem to have different contexts and have extra stuff added to them
-      //NOTE: is there a way to figure out how to translate it all to CRUD methods?
+      //On top of that it just gets a bunch of other stuff (votes, consent) objects attached to it and returned as a seperate data structure
+      //Contextually the difference between each of these elections are not clear (TYPE is different, but what that entails is not obvious)
+      //Similar questions with the various votes (rpVotes, finalDACVote).
+
+      //The various consent objects seem to have the same data, they only really differ in timestamps, ids, and type
+      //Need to do a more thorough analysis of the above (larger sample size)
+
+      //NOTE: the component currently uses hasRestrictions, which I found out to simply be a check on the restrictions attribute on a DAR
+      //Basically all it does is check if a value exists and returns the bool value
+      //So all I've done is simply check that value myself from the describeDar return value rather than use the endpoint
+      const restrictions = darAPIResults.darInfo.restrictions;
+      const consent = electionReviewResults.electionReview.consent;
       const assignToState = {
         electionId,
         referenceId,
@@ -658,15 +677,16 @@ class AccessResultRecords extends Component {
         researcherProfile: darAPIResults.researcherProfile,
         finalDACVote: finalDACVote.voteResponse,
         electionReview: electionReviewResults.electionReview,
-        consentName: electionReviewResults.darData.associatedConsent.name,
+        consentName: consent.name,
         election: electionReviewResults.showDULData.election,
         downloadUrl: electionReviewResults.showDULData.downloadUrl,
         dulName: electionReviewResults.showDULData.dulName,
+        hasUseRestrictions: !isNil(restrictions) && !isEmpty(restrictions),
         status: electionReviewResults.showDULData.election.status,
         voteList: electionReviewResults.showDULData.voteList,
         chartDataDUL: electionReviewResults.showDULData.chartDataDUL,
         mrDUL: electionReviewResults.showDULData.mrDUL,
-        sDUL: electionReviewResults.election.translatedUseRestriction, //target for removal, replace with dataUseTranslation service
+        dataUse: consent.dataUse,
         hideMatch: electionReviewResults.vaultVote.hideMatch,
         match: electionReviewResults.vaultVote.match,
         createDate: electionReviewResults.vaultVote.createDate,
