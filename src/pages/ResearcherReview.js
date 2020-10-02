@@ -63,7 +63,7 @@ class ResearcherReview extends Component {
       researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
     }
 
-    let user = await User.findUserStatus(this.props.match.params.dacUserId);
+    let user = await User.getById(this.props.match.params.dacUserId);
 
     let status = null;
     if (user.status === 'approved') {

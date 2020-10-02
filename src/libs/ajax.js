@@ -981,14 +981,8 @@ export const User = {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
     return res.json();
-  },
-
-  findUserStatus: async userId => {
-    const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    const user = await res.json();
-    return user;
   }
+
 };
 
 export const Votes = {
