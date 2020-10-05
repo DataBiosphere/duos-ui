@@ -1,0 +1,16 @@
+on: [push, pull_request]
+name: cypress tests
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NPM Install
+        run: npm ci
+      - name: Copy Configs
+        run: cp config/dev.json public/config.json
+      - name: NPM Build
+        run: CI=false npm run build --silent
+      - name: Cypress run
+        uses: cypress-io/github-action@v2

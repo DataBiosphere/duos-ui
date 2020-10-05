@@ -125,29 +125,29 @@ jobs:
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
       - run: npm run docker-build:test
-  test:
-    executor: cypress
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run:
-          name: Install dependencies
-          command: npm ci
-      - run: npm run cypress:verify
-      - run: cp config/dev.json public/config.json
-      - run: CI=false npm run build --silent
-      - save_cache:
-          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-          paths:
-            - ~/.npm
-            - ~/.cache
-      - run:
-          name: Start server
-          command: npx http-server ./build -p 3000
-          background: true
-      - run: npm run cypress:run
+#  test:
+#    executor: cypress
+#    steps:
+#      - checkout
+#      - restore_cache:
+#          keys:
+#            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+#      - run:
+#          name: Install dependencies
+#          command: npm ci
+#      - run: npm run cypress:verify
+#      - run: cp config/dev.json public/config.json
+#      - run: CI=false npm run build --silent
+#      - save_cache:
+#          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
+#          paths:
+#            - ~/.npm
+#            - ~/.cache
+#      - run:
+#          name: Start server
+#          command: npx http-server ./build -p 3000
+#          background: true
+#      - run: npm run cypress:run
 
   build-dev:
     executor: cypress
@@ -252,15 +252,15 @@ workflows:
               only: /.*/
             branches:
               only: /.*/
-      - test:
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: /.*/
+#      - test:
+#          filters:
+#            tags:
+#              only: /.*/
+#            branches:
+#              only: /.*/
       - build-dev:
-          requires:
-            - test
+#          requires:
+#            - test
           filters:
             branches:
               only: /.*/
@@ -271,8 +271,8 @@ workflows:
             branches:
               only: develop
       - build-staging:
-          requires:
-            - test
+#          requires:
+#            - test
           filters:
             tags:
               only: /^staging.*/
@@ -287,8 +287,8 @@ workflows:
             branches:
               ignore: /.*/
       - deploy-production:
-          requires:
-            - test
+#          requires:
+#            - test
           filters:
             tags:
               only: /^production.*/
