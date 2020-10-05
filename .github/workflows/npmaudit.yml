@@ -1,6 +1,5 @@
-name: npm audit
 on: [push, pull_request]
-
+name: Audit npm packages on PRs
 jobs:
   scan:
     name: npm audit
