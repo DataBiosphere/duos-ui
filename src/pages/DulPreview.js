@@ -1,7 +1,9 @@
+import { isNil } from 'lodash';
 import { Component } from 'react';
-import { div, button, i, span, b, a, h4, hr } from 'react-hyperscript-helpers';
+import { div, button, i, span, b, a, h4, hr, h} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Consent, Election, Files } from '../libs/ajax';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulPreview extends Component {
 
@@ -22,19 +24,19 @@ class DulPreview extends Component {
 
   async electionReview() {
     const consentId = this.props.match.params.consentId;
-    let consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
+    let consent = (await Election.electionReviewResource(consentId, 'TranslateDUL')).consent;
 
-    if (consent.election !== undefined) {
-      this.setState({
-        consentPreview: consent.consent
-      });
-    } else {
-      Consent.findConsentById(consentId).then(resp => {
-        this.setState({
-          consentPreview: resp
-        });
-      });
+    if(isNil(consent.election)) {
+      consent = await Consent.findConsentById(consentId);
     }
+
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: consent});
+
+    this.setState(state => {
+      state.consentPreview = consent;
+      state.translatedDULStatements = translatedDULStatements;
+      return state;
+    });
   }
 
   componentDidMount() {
@@ -73,8 +75,8 @@ class DulPreview extends Component {
               onClick: this.back,
               className: "btn-primary btn-back"
             }, [
-                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-              ])
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 
@@ -91,20 +93,17 @@ class DulPreview extends Component {
               id: "panel_dul",
               className: "panel-body cm-boxbody"
             }, [
-                button({
-                  id: "btn_downloadDataUseLetter",
-                  className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-                  onClick: () => this.downloadDUL()
-                }, ["Download Data Use Letter"]),
-              ])
+              button({
+                id: "btn_downloadDataUseLetter",
+                className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
+                onClick: () => this.downloadDUL()
+              }, ["Download Data Use Letter"]),
+            ])
           ]),
 
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.consentPreview.translatedUseRestriction } }, [])
-          ]),
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes"},
+            [this.state.translatedDULStatements]
+          ),
         ]),
       ])
     );

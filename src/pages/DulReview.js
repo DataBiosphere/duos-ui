@@ -6,6 +6,7 @@ import { Votes, Election, Consent, Files } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
 import { Navigation } from "../libs/utils";
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulReview extends Component {
 
@@ -33,35 +34,31 @@ class DulReview extends Component {
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
-  async voteInfo() {
+  voteInfo() {
     const voteId = this.props.match.params.voteId;
     const consentId = this.props.match.params.consentId;
 
-    Votes.find(consentId, voteId).then(
-      vote => {
-        this.setState({
-          voteId: voteId,
-          vote: vote
-        });
-      }
-    );
+    const votesPromise = Votes.find(consentId, voteId);
+    const electionPromise = Election.findElectionByVoteId(voteId);
+    const consentPromise = Consent.findConsentById(consentId);
 
-    Election.findElectionByVoteId(voteId).then(
-      election => {
-        this.setState({
-          election: election
-        });
-      }
-    );
+    Promise.all(votesPromise, electionPromise, consentPromise)
+      .then((promiseResults) => {
+        const votes = promiseResults[0];
+        const elections = promiseResults[1];
+        const consent = promiseResults[2];
 
-    Consent.findConsentById(consentId).then(
-      consent => {
-        this.setState({
-          consent: consent,
-          consentName: consent.dulName
+        this.setState( prev => {
+          prev.votes = votes;
+          prev.elections = elections;
+          prev.consent = consent;
+          prev.consentName = consent.dulName;
+          return prev;
         });
-      }
-    );
+
+      }).catch((error) => {
+        console.log(error);
+      });
   };
 
   setEnableVoteButton() {
@@ -140,20 +137,7 @@ class DulReview extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-            ])
-          ]),
-
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction } }, [])
-          ]),
+            h(TranslatedDULComponent({restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL}))
         ]),
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [

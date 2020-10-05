@@ -7,6 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Config } from '../libs/config';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulResultRecords extends Component {
 
@@ -55,7 +56,6 @@ class DulResultRecords extends Component {
       dul: electionReview.election.dataUseLetter,
       downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
-      sDul: electionReview.election.translatedUseRestriction,
       finalRationale: electionReview.election.finalRationale,
 
       status: electionReview.election.status,
@@ -100,7 +100,7 @@ class DulResultRecords extends Component {
       hasUseRestriction: true,
       projectTitle: '',
       consentName: '',
-      sDul: '',
+      // translatedUseStatements: '',
       dulElection: {
         finalVote: '',
         finalRationale: '',
@@ -150,21 +150,26 @@ class DulResultRecords extends Component {
         hr({ className: "section-separator", style: { 'marginTop': '0' } }),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-            ])
-          ]),
+          h(TranslatedDULComponent, {
+            restrictions: this.electionReview.consent,
+            downloadDUL: this.downloadDUL
+          })
+          // div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+          //   div({ className: "panel-heading cm-boxhead dul-color" }, [
+          //     h4({}, ["Data Use Limitations"]),
+          //   ]),
+          //   div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
+          //     button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
+          //   ])
+          // ]),
 
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
-          ]),
+          // div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+          //   div({ className: "panel-heading cm-boxhead dul-color" }, [
+          //     h4({}, ["Structured Limitations"]),
+          //   ]),
+          //   div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.sDul } }, [])
+          // ]),
+
         ]),
 
         div({ className: "row no-margin" }, [
@@ -191,22 +196,22 @@ class DulResultRecords extends Component {
             title: "Data Access Committee Votes",
             expanded: this.state.isQ1Expanded
           }, [
-              this.state.dulVoteList.map((row, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-                    row.map((vm, vIndex) => {
-                      return h(Fragment, { key: vIndex }, [
-                        SingleResultBox({
-                          id: "dulSingleResult_" + vIndex,
-                          color: "dul",
-                          data: vm
-                        })
-                      ]);
-                    })
-                  ]),
-                ]);
-              })
-            ]),
+            this.state.dulVoteList.map((row, rIndex) => {
+              return h(Fragment, { key: rIndex }, [
+                div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+                  row.map((vm, vIndex) => {
+                    return h(Fragment, { key: vIndex }, [
+                      SingleResultBox({
+                        id: "dulSingleResult_" + vIndex,
+                        color: "dul",
+                        data: vm
+                      })
+                    ]);
+                  })
+                ]),
+              ]);
+            })
+          ]),
         ]),
       ])
     );

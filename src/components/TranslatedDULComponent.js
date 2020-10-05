@@ -22,7 +22,7 @@ export const generateUseRestrictionStatements = (dataUse) => {
 };
 
 export default function TranslatedDULComponent(props) {
-  const mrDULPartial = !isNil(props.mrDUL) ? button({
+  const machineReadableButton = !isNil(props.mrDUL) ? button({
     id: 'btn_downloadSDul',
     onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
     filename: 'machine-readable-DUL.json',
@@ -30,19 +30,29 @@ export default function TranslatedDULComponent(props) {
     className: 'btn-secondary btn-download-pdf hover-color'
   }, ['Download DUL machine-readable format']) : '';
 
-
-  const translatedDULStatements = generateUseRestrictionStatements(props.restrictions, props.mDUL);
+  const translatedDULStatements = generateUseRestrictionStatements(props.restrictions);
 
   return (
     div({className: 'translated-dul-component-container'}, [
       div({ className: 'panel-heading cm-boxhead dul-color' }, [
         h4({}, ['Data Use Limitations'])
       ]),
+      div({
+        id: "panel_dul",
+        className: "panel-body cm-boxbody",
+        isRendered: !isNil(props.downloadDUL) && !isEmpty(props.downloadDUL)
+      }, [
+        button({
+          id: "btn_downloadDataUseLetter",
+          className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
+          onClick: props.downloadDUL
+        }, ["Download Data Use Letter"]),
+      ]),
       div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
         div({ className: 'row dar-summary' }, [
           div({ className: 'control-label dul-color' }, ['Structured Limitations']),
           ul({className: 'response-label translated-restriction'}, [translatedDULStatements]),
-          mrDULPartial
+          machineReadableButton
         ])
       ])
     ])

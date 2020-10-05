@@ -7,6 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files, Email } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from '../libs/storage';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulCollect extends Component {
 
@@ -30,7 +31,6 @@ class DulCollect extends Component {
       prev.consentGroupName = election.consent.groupName;
       prev.consentName = election.consent.name;
       prev.dulName = election.consent.dulName;
-      prev.translatedUseRestriction = election.election.translatedUseRestriction;
       prev.projectTitle = election.election.projectTitle;
       prev.finalVote = election.election.finalVote;
       prev.finalRationale = election.election.finalRationale;
@@ -61,7 +61,6 @@ class DulCollect extends Component {
       hasUseRestriction: Boolean,
       projectTitle: '',
       consentName: '',
-      translatedUseRestriction: '',
       consentGroupName: null,
       finalVote: '',
       finalRationale: '',
@@ -176,6 +175,8 @@ class DulCollect extends Component {
       this.state.consentName
     ]);
 
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.election.consent.dataUse});
+
     return (
 
       div({ className: "container container-wide" }, [
@@ -193,11 +194,11 @@ class DulCollect extends Component {
         ConfirmationDialog({
           title: this.state.dialogTitle, color: 'dul', showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
         }, [
-            div({ className: "dialog-description" }, [
-              span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
-              span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
-            ]),
+          div({ className: "dialog-description" }, [
+            span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
+            span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
           ]),
+        ]),
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
 
         hr({ className: "section-separator", style: { 'marginTop': '0' } }),
@@ -214,10 +215,7 @@ class DulCollect extends Component {
           ]),
 
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
+            translatedDULStatements
           ]),
         ]),
 

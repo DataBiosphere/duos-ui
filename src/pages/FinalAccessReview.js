@@ -1,4 +1,5 @@
 import * as ld from 'lodash';
+import { apply, assign, isNil } from 'lodash/fp';
 import { Component, Fragment } from 'react';
 import { a, b, br, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
@@ -344,104 +345,83 @@ class FinalAccessReview extends Component {
     });
   };
 
-  init = async () => {
+  async init() {
+    const darFinalAccessVotePromise =  Votes.getDarFinalAccessVote(this.state.electionId);
+    const dataAccessElectionReviewPromise = Election.findDataAccessElectionReview(this.state.electionId, false);
+    const rpElectionReviewPromise = Election.findRPElectionReview(this.state.electionId, false);
 
-    // const vote = await
-    Votes.getDarFinalAccessVote(this.state.electionId).then(
-      vote => {
+    try {
+      let [darFinalAccessVote, dataAccessElectionReview, rpElectionReview] = await Promise.all([darFinalAccessVotePromise, dataAccessElectionReviewPromise, rpElectionReviewPromise]);
 
-        this.setState({
-          voteId: this.state.electionId,
-          vote: vote
-        });
+      //data1 = dataAccessElectionReview`
+      //data2 = rpElectionReview
 
-        if (vote.vote !== null) {
-          this.setState({
-            alreadyVote: true,
-            originalVote: vote.vote,
-            originalRationale: vote.rationale
-          });
-        } else {
-          this.setState({
-            alreadyVote: false
-          });
+      //darFinalAccessVote processing (data1)
+      let voteObj = {
+        vote: darFinalAccessVote,
+        voteId: this.state.electionId
+      };
+
+      if(!isNil(darFinalAccessVote.vote)) {
+        voteObj.alreadyVote = true;
+        voteObj.originalVote = darFinalAccessVote.vote;
+        voteObj.originalRationale = darFinalAccessVote.rationale;
+      } else {
+        voteObj.alreadyVote = false;
+      }
+
+      const showAccessDataObj = this.showAccessData(dataAccessElectionReview);
+      showAccessDataObj.consentName = dataAccessElectionReview.associatedConsent.name;
+
+      //data3 = electionReview processing
+      const electionReview = await Election.findElectionReviewById(
+        dataAccessElectionReview.associatedConsent.electionId,
+        dataAccessElectionReview.associatedConsent.consentId
+      );
+
+      const vaultVotePromise = this.vaultVote(electionReview.consent.consentId);
+      const dulDataPromise = this.showDULData(electionReview);
+      const [dulData, vaultVote] = await Promise.all([dulDataPromise, vaultVotePromise]);
+
+      //NOTE: need to make object for rpElectionReview results
+      //conditional processing for rpElectionReview (data2)
+      let rpElectionReviewObj = {};
+      if(!isNil(rpElectionReview.election)) {
+        let election = rpElectionReview.election;
+        rpElectionReview.electionRP = election;
+        rpElectionReview.statusRP = election.status;
+        if(isNil(election.finalRationale)) {
+          rpElectionReview.electionRP.finalRationale = '';
         }
       }
-    );
 
-    // const data1 = await
-    Election.findDataAccessElectionReview(this.state.electionId, false).then(
-      async data1 => {
-
-        await this.showAccessData(data1);
-        this.setState({
-          consentName: data1.associatedConsent.name
-        });
-
-        const data3 = await Election.findElectionReviewById(data1.associatedConsent.electionId, data1.associatedConsent.consentId);
-        this.setState({
-          electionReview: data3
-        });
-
-        await this.showDULData(data3);
-        await this.vaultVote(data3.consent.consentId);
-
+      this.setState(prev => {
+        prev = assign(prev, voteObj, showAccessDataObj, dulData, vaultVote, rpElectionReviewObj);
+        return prev;
       });
 
-    const data2 = await Election.findRPElectionReview(this.state.electionId, false);
-
-    if (data2.election !== undefined) {
-      this.setState({
-        electionRP: data2.election
-      });
-
-      if (data2.election.finalRationale === null) {
-        this.setState(prev => {
-          prev.electionRP.finalRationale = '';
-          return prev;
-        });
-      }
-
-      this.setState({
-        statusRP: data2.election.status,
-        rpVoteAccessList: this.chunk(data2.reviewVote, 2),
-        chartRP: this.getGraphData(data2.reviewVote),
-        showRPaccordion: true
-      });
-    } else {
-      this.setState({
-        electionRP: {},
-        rpVoteAccessList: [],
-        chartRP: { 'Total': [] },
-        showRPaccordion: false
-      });
+    } catch(error) {
+      console.log(error);
     }
-
-    this.setState({
-      loading: false
-    });
   };
 
   showAccessData = async (electionReview) => {
+    let applyToState = {};
     if (Boolean(electionReview.voteAgreement)) {
-      this.setState({
-        originalAgreementVote: electionReview.voteAgreement.vote,
-        originalAgreementRationale: electionReview.voteAgreement.rationale
-      });
+      applyToState.originalAgreementVote = electionReview.voteAgreement.vote;
+      applyToState.originalAgreementRationale = electionReview.voteAgreement.rationale;
     }
 
-    this.setState({
-      electionAccess: electionReview.election
-    });
-
-    if (electionReview.election.finalRationale === null) {
-      this.setState(prev => {
-        prev.electionAccess.finalRationale = '';
-        return prev;
-      });
+    applyToState.electionAccess = electionReview.election;
+    if(electionReview.election.finalRationale === null) {
+      applyToState.electionAccess.finalRationale = '';
     }
 
-    this.setState({
+    if (Boolean(electionReview.voteAgreement) && electionReview.voteAgreement.vote !== null) {
+      applyToState.agreementAlreadyVote = true;
+    }
+
+    applyToState = assign(applyToState, {
       mrDAR: JSON.stringify(electionReview.election.useRestriction, null, 2),
       status: electionReview.election.status,
       voteAccessList: this.chunk(electionReview.reviewVote, 2),
@@ -450,35 +430,26 @@ class FinalAccessReview extends Component {
       voteAgreementId: electionReview.election.referenceId
     });
 
-    if (Boolean(electionReview.voteAgreement) && electionReview.voteAgreement.vote !== null) {
-      this.setState({
-        agreementAlreadyVote: true
-      });
-    }
+    return applyToState;
   };
 
   showDULData = async (electionReview) => {
-    this.setState({
-      election: electionReview.election
-    });
-
-    if (electionReview.election.finalRationale === null) {
-      this.setState(prev => {
-        prev.election.finalRationale = '';
-        return prev;
-      });
-    }
-
-    this.setState({
+    let applyToState = {
       sDul: electionReview.election.translatedUseRestriction,
       mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2),
       downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
       status: electionReview.election.status,
       voteList: this.chunk(electionReview.reviewVote, 2),
-      chartDataDUL: this.getGraphData(electionReview.reviewVote)
-    });
+      chartDataDUL: this.getGraphData(electionReview.reviewVote),
+      election: electionReview.election
+    };
 
+    if(electionReview.election.finalRationale === null) {
+      applyToState.election.finalRationale = '';
+    }
+
+    return applyToState;
   };
 
   vaultVote = async (consentId) => {
