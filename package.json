@@ -56,7 +56,7 @@
     "docker-build:test": "docker-build test"
   },
   "devDependencies": {
-    "acorn": "8.0.2",
+    "acorn": "8.0.3",
     "cypress": "4.12.1",
     "docker-build": "2.2.0",
     "eslint": "6.8.0",
