@@ -1,6 +1,7 @@
 import * as ld from 'lodash';
-import { isEmpty } from 'lodash';
 import isNil from 'lodash/fp/isNil';
+import isEmpty from 'lodash/fp/isEmpty';
+import assign from 'lodash/fp/assign';
 import { Component, Fragment } from 'react';
 import { a, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
@@ -538,10 +539,9 @@ class AccessResultRecords extends Component {
     };
   };
 
-  async vaultVote(consentId) {
-    const data = await Match.findMatch(consentId, this.state.electionAccess.referenceId);
+  async vaultVote(consentId, referenceId) {
+    const data = await Match.findMatch(consentId, referenceId);
     let output = {};
-
     if (data.failed !== null && data.failed !== undefined && data.failed) {
       output = {
         hideMatch: false,
@@ -579,11 +579,9 @@ class AccessResultRecords extends Component {
   };
 
   //returns the most recent final vote
-  async finalDACVote(electionId) {
-    const voteResponse = await Votes.getDarFinalAccessVote(electionId);
-    return {
-      voteResponse
-    };
+  async getFinalDACVote(electionId) {
+    const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
+    return {finalDACVote};
   };
 
   async electionReviewCall(electionId) {
@@ -593,21 +591,20 @@ class AccessResultRecords extends Component {
       showDULData: null,
       vaultVote: null
     };
-    try{
-      const dataAccessElectionReview = await Election.findDataAccessElectionReview(electionId, false);
-      const darData = this.showDarData(dataAccessElectionReview);
-      const electionReview = await Election.findElectionReviewById(dataAccessElectionReview.associatedConsent.electionId, dataAccessElectionReview.associatedConsent.consentId);
-      const showDULData = await this.showDULData(ld.cloneDeep(electionReview));
-      const vaultVote = await this.vaultVote(electionReview.consent.consentId);
-      output = {
-        darData,
-        electionReview,
-        showDULData,
-        vaultVote
-      };
-    } catch(error) {
-      console.log(error);
-    }
+
+    const dataAccessElectionReview = await Election.findDataAccessElectionReview(electionId, false);
+    const darData = this.showDarData(dataAccessElectionReview);
+    const electionReview = await Election.findElectionReviewById(dataAccessElectionReview.associatedConsent.electionId, dataAccessElectionReview.associatedConsent.consentId);
+    const showDULDataPromise = await this.showDULData(electionReview);
+    const vaultVotePromise = await this.vaultVote(electionReview.consent.consentId, darData.electionAccess.referenceId);
+    const [vaultVote, showDULData] = await Promise.all([vaultVotePromise, showDULDataPromise]);
+    output = {
+      darData,
+      electionReview,
+      showDULData,
+      vaultVote
+    };
+
     return output;
   };
 
@@ -639,72 +636,75 @@ class AccessResultRecords extends Component {
   async loadData() {
     const referenceId = this.props.match.params.referenceId;
     const electionId = this.props.match.params.electionId;
+    let assignToState = {};
 
-    Promise.all([
+    const[electionAPIResults, darAPIResults, finalDACVote, electionReviewResults, electionRPResults] = await Promise.all([
       this.electionAPICalls(electionId), //Election.findElectionById
       this.darAPICalls(referenceId), //DAR.describeDar, Researcher.getResearcherProfile
-      this.finalDACVote(electionId), //Votes.getDarFinalAccessVote
+      this.getFinalDACVote(electionId), //Votes.getDarFinalAccessVote
       this.electionReviewCall(electionId), //Election.findDataAccessElectionReview, Election.findElectionReviewById, Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul'
       this.electionRPCall(electionId, false) //Election.findRPElectionReview(electionId, false (finalStatus))
-    ]).then(apiResults => {
-      const electionAPIResults = apiResults[0];
-      const darAPIResults = apiResults[1];
-      const finalDACVote = apiResults[2];
-      const electionReviewResults = apiResults[3];
-      const electionRPResults = apiResults[4];
+    ]);
 
-      //NOTE: need to add hasUseRestriction to the state object, but is there a way for me to pull it forward?
+    const {darData, electionReview, showDULData, vaultVote} = electionReviewResults;
+    const restrictions = darAPIResults.darInfo.restrictions;
+    const consent = electionReview.consent;
 
-      //NOTE: lot of election calls, they seem to have different contexts and have extra stuff added to them
-      //On top of that it just gets a bunch of other stuff (votes, consent) objects attached to it and returned as a seperate data structure
-      //Contextually the difference between each of these elections are not clear (TYPE is different, but what that entails is not obvious)
-      //Similar questions with the various votes (rpVotes, finalDACVote).
+    assignToState = Object.assign({}, darData, electionReview, showDULData, vaultVote, electionAPIResults, darAPIResults, finalDACVote, electionRPResults);
+    assignToState.hasUseRestrictions = !isNil(restrictions) && !isEmpty(restrictions);
+    assignToState.consentName = consent.name;
+    assignToState.dataUse = consent.dataUse;
+    //NOTE: need to add hasUseRestriction to the state object, but is there a way for me to pull it forward?
 
-      //The various consent objects seem to have the same data, they only really differ in timestamps, ids, and type
-      //Need to do a more thorough analysis of the above (larger sample size)
+    //NOTE: lot of election calls, they seem to have different contexts and have extra stuff added to them
+    //On top of that it just gets a bunch of other stuff (votes, consent) objects attached to it and returned as a seperate data structure
+    //Contextually the difference between each of these elections are not clear (TYPE is different, but what that entails is not obvious)
+    //Similar questions with the various votes (rpVotes, finalDACVote).
 
-      //NOTE: the component currently uses hasRestrictions, which I found out to simply be a check on the restrictions attribute on a DAR
-      //Basically all it does is check if a value exists and returns the bool value
-      //So all I've done is simply check that value myself from the describeDar return value rather than use the endpoint
-      const restrictions = darAPIResults.darInfo.restrictions;
-      const consent = electionReviewResults.electionReview.consent;
-      const assignToState = {
-        electionId,
-        referenceId,
-        darElection: electionAPIResults.darElection,
-        darInfo: darAPIResults.darInfo,
-        researcherProfile: darAPIResults.researcherProfile,
-        finalDACVote: finalDACVote.voteResponse,
-        electionReview: electionReviewResults.electionReview,
-        consentName: consent.name,
-        election: electionReviewResults.showDULData.election,
-        downloadUrl: electionReviewResults.showDULData.downloadUrl,
-        dulName: electionReviewResults.showDULData.dulName,
-        hasUseRestrictions: !isNil(restrictions) && !isEmpty(restrictions),
-        status: electionReviewResults.showDULData.election.status,
-        voteList: electionReviewResults.showDULData.voteList,
-        chartDataDUL: electionReviewResults.showDULData.chartDataDUL,
-        mrDUL: electionReviewResults.showDULData.mrDUL,
-        dataUse: consent.dataUse,
-        hideMatch: electionReviewResults.vaultVote.hideMatch,
-        match: electionReviewResults.vaultVote.match,
-        createDate: electionReviewResults.vaultVote.createDate,
-        electionRP: electionRPResults.electionRP,
-        statusRP: electionRPResults.statusRP,
-        rpVoteAccessList: electionRPResults.rpVoteAccessList,
-        chartRP: electionRPResults.chartRP,
-        showRPaccordion: electionRPResults.showRPaccordian,
-      };
+    //The various consent objects seem to have the same data, they only really differ in timestamps, ids, and type
+    //Need to do a more thorough analysis of the above (larger sample size)
 
-      this.setState((state) => {
-        const updatedState = ld.assign(state, assignToState);
-        return updatedState;
-      });
+    //NOTE: the component currently uses hasRestrictions, which I found out to simply be a check on the restrictions attribute on a DAR
+    //Basically all it does is check if a value exists and returns the bool value
+    //So all I've done is simply check that value myself from the describeDar return value rather than use the endpoint
 
-      //From here process results and assign them to state variable
-      //NOTE: need to make sure functions have been refactored/organized correctly
-      //NOTE: see if there's a way to simplify the election/vote requests and processing steps
-    }).catch(error => console.log(error));
+    //List of keys with mapped values
+    //   electionId,
+    //   referenceId,
+    //   darElection: electionAPIResults.darElection,
+    //   darInfo: darAPIResults.darInfo,
+    //   researcherProfile: darAPIResults.researcherProfile,
+    //   finalDACVote: finalDACVote.voteResponse,
+    //   electionReview: electionReviewResults.electionReview,
+    //   consentName: consent.name,
+    //   election: electionReviewResults.showDULData.election,
+    //   downloadUrl: electionReviewResults.showDULData.downloadUrl,
+    //   dulName: electionReviewResults.showDULData.dulName,
+    //   hasUseRestrictions: !isNil(restrictions) && !isEmpty(restrictions),
+    //   status: electionReviewResults.showDULData.election.status,
+    //   voteList: electionReviewResults.showDULData.voteList,
+    //   chartDataDUL: electionReviewResults.showDULData.chartDataDUL,
+    //   mrDUL: electionReviewResults.showDULData.mrDUL,
+    //   dataUse: consent.dataUse,
+    //   hideMatch: electionReviewResults.vaultVote.hideMatch,
+    //   match: electionReviewResults.vaultVote.match,
+    //   createDate: electionReviewResults.vaultVote.createDate,
+    //   electionRP: electionRPResults.electionRP,
+    //   statusRP: electionRPResults.statusRP,
+    //   rpVoteAccessList: electionRPResults.rpVoteAccessList,
+    //   chartRP: electionRPResults.chartRP,
+    //   showRPaccordion: electionRPResults.showRPaccordian,
+    //   electionAccess: electionReviewResults.darData.electionAccess,
+    // };
+
+    this.setState((state) => {
+      state = Object.assign({}, state, assignToState);
+      return state;
+    });
+
+    //From here process results and assign them to state variable
+    //NOTE: need to make sure functions have been refactored/organized correctly
+    //NOTE: see if there's a way to simplify the election/vote requests and processing steps
   }
 }
 

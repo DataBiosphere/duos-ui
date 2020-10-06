@@ -1,4 +1,4 @@
-import { div, ul, li, h4, button } from 'react-hyperscript-helpers';
+import { div, ul, li, h4, a, button } from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
 import * as Utils from '../libs/utils';
@@ -22,12 +22,12 @@ export const generateUseRestrictionStatements = (dataUse) => {
 };
 
 export default function TranslatedDULComponent(props) {
-  const machineReadableButton = !isNil(props.mrDUL) ? button({
+  const machineReadableLink = !isNil(props.mrDUL) ? a({
     id: 'btn_downloadSDul',
     onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
     filename: 'machine-readable-DUL.json',
     value: props.mrDUL,
-    className: 'btn-secondary btn-download-pdf hover-color'
+    className: 'italic hover-color'
   }, ['Download DUL machine-readable format']) : '';
 
   const translatedDULStatements = generateUseRestrictionStatements(props.restrictions);
@@ -52,7 +52,7 @@ export default function TranslatedDULComponent(props) {
         div({ className: 'row dar-summary' }, [
           div({ className: 'control-label dul-color' }, ['Structured Limitations']),
           ul({className: 'response-label translated-restriction'}, [translatedDULStatements]),
-          machineReadableButton
+          machineReadableLink
         ])
       ])
     ])
