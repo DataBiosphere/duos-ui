@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, h3, h } from 'react-hyperscript-helpers';
+import { div, i, span, b, a, hr, h4, h3, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
@@ -175,7 +175,7 @@ class DulCollect extends Component {
       this.state.consentName
     ]);
 
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.election.consent.dataUse});
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.election.consent.dataUse, downloadDUL: this.downloadDUL});
 
     return (
 
@@ -205,18 +205,7 @@ class DulCollect extends Component {
         h4({ className: "hint" }, ["Please review the Data Use Letter, Structured Limitations, and DAC votes to determine if the Data Use Limitations were appropriately converted to Structured Limitations"]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-            ])
-          ]),
-
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            translatedDULStatements
-          ]),
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [translatedDULStatements])
         ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [

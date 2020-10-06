@@ -30,7 +30,7 @@ class DulPreview extends Component {
       consent = await Consent.findConsentById(consentId);
     }
 
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: consent});
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: consent, downloadDUL: this.downloadDUL});
 
     this.setState(state => {
       state.consentPreview = consent;
@@ -85,25 +85,7 @@ class DulPreview extends Component {
         hr({ className: "section-separator" }),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({
-              id: "panel_dul",
-              className: "panel-body cm-boxbody"
-            }, [
-              button({
-                id: "btn_downloadDataUseLetter",
-                className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-                onClick: () => this.downloadDUL()
-              }, ["Download Data Use Letter"]),
-            ])
-          ]),
-
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes"},
-            [this.state.translatedDULStatements]
-          ),
+          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [this.state.translatedDULStatements])
         ]),
       ])
     );

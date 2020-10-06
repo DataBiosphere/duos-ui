@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, b, span, a, h4, hr, i, button } from 'react-hyperscript-helpers';
+import { div, b, span, a, h4, hr, i, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
@@ -34,7 +34,7 @@ class DulReview extends Component {
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
-  voteInfo() {
+  voteInfo = async () => {
     const voteId = this.props.match.params.voteId;
     const consentId = this.props.match.params.consentId;
 
@@ -42,23 +42,15 @@ class DulReview extends Component {
     const electionPromise = Election.findElectionByVoteId(voteId);
     const consentPromise = Consent.findConsentById(consentId);
 
-    Promise.all(votesPromise, electionPromise, consentPromise)
-      .then((promiseResults) => {
-        const votes = promiseResults[0];
-        const elections = promiseResults[1];
-        const consent = promiseResults[2];
+    const [votes, elections, consent] = await Promise.all(votesPromise, electionPromise, consentPromise);
 
-        this.setState( prev => {
-          prev.votes = votes;
-          prev.elections = elections;
-          prev.consent = consent;
-          prev.consentName = consent.dulName;
-          return prev;
-        });
-
-      }).catch((error) => {
-        console.log(error);
-      });
+    this.setState( prev => {
+      prev.votes = votes;
+      prev.elections = elections;
+      prev.consent = consent;
+      prev.consentName = consent.dulName;
+      return prev;
+    });
   };
 
   setEnableVoteButton() {
@@ -137,7 +129,8 @@ class DulReview extends Component {
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
           div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            h(TranslatedDULComponent({restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL}))
+            h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL})
+          ])
         ]),
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [

@@ -419,7 +419,10 @@ class FinalAccessReview extends Component {
 
     if(!isNil(electionReview.consent)) {
       applyToState.downloadUrl = await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul';
-      applyToState.TranslatedDULComponent = h(TranslatedDULComponent, {restrictions: electionReview.consent.dataUse, mrDUL: applyToState.mrDUL});
+      applyToState.TranslatedDULComponent = h(TranslatedDULComponent, {
+        restrictions: electionReview.consent.dataUse,
+        mrDUL: applyToState.mrDUL
+      });
     }
 
     applyToState.voteList = this.chunk(electionReview.reviewVote, 2);
@@ -611,8 +614,9 @@ class FinalAccessReview extends Component {
             downloadDAR: this.downloadDAR,
             researcherProfile: this.state.researcherProfile }),
 
-          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-            applyToState.TranslatedDULComponent
+          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes'}, [
+            this.state.TranslatedDULComponent
+          ])
         ]),
 
         hr({ className: 'section-separator' }),
