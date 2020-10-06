@@ -2,12 +2,13 @@ import { Component } from 'react';
 import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
+import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DataSet } from '../libs/ajax';
+import { DAC, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
@@ -20,6 +21,8 @@ class DatasetRegistration extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      dacList: [],
+      allDatasets: '',
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
@@ -54,7 +57,7 @@ class DatasetRegistration extends Component {
         phenotype: '',
         nrParticipants: '',
         description: '',
-        dac: '',
+        dac: {},
         consentId: '',
         publicAccess: '',
         rus: ''
@@ -80,9 +83,12 @@ class DatasetRegistration extends Component {
     ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
+    const allDatasets =  await DataSet.findDataSets(currentUser.dacUserId);
+    await this.getDACs();
     this.setState(prev => {
       prev.notificationData = notificationData;
       prev.datasetData['researcher'] = currentUser.displayName;
+      prev.allDatasets = allDatasets;
       return prev;
     });
   }
@@ -105,6 +111,18 @@ class DatasetRegistration extends Component {
     });
   };
 
+  handlePositiveIntegerOnly = (e) => {
+    const field = e.target.name;
+    const value = e.target.value.replace(/[^\d]/,'');
+
+    if (value == '' || parseInt(value) > -1) {
+      this.setState(prev => {
+        prev.datasetData[field] = value;
+        return prev;
+      });
+    }
+  };
+
   handleCheckboxChange = (e) => {
     const field = e.target.name;
     const value = e.target.checked;
@@ -117,6 +135,7 @@ class DatasetRegistration extends Component {
 
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
+      this.validateDatasetName((formData.datasetName)) &&
       this.isValid(formData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
       this.isValid(formData.dataType) &&
@@ -125,6 +144,24 @@ class DatasetRegistration extends Component {
       this.isValid(formData.nrParticipants) &&
       this.isValid(formData.description);
   };
+
+  validateDatasetName(name) {
+    let datasets = this.state.allDatasets;
+    let val = fp.filter(function(ds) {
+      let properties = ds.properties;
+      return fp.find(function(p) { return p.propertyName === "Dataset Name" && p.propertyValue === name}, properties);
+    },datasets);
+    return (val.length === 0);
+  };
+
+  showDatasetNameErrors(name, showValidationMessages) {
+    if (fp.isEmpty(name)) {
+      return showValidationMessages ? 'form-control required-field-error' : 'form-control';
+    }
+    else {
+      return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
+    }
+  }
 
   attestAndSave = (e) => {
     this.setState( prev => {
@@ -309,6 +346,36 @@ class DatasetRegistration extends Component {
     return properties;
   }
 
+  getDACs = async () => {
+    const dacs = await DAC.list();
+    this.setState(prev => {
+      prev.dacList = dacs;
+      return prev;
+    });
+  };
+
+  dacOptions = () => {
+    return this.state.dacList.map(function(item) {
+      return {
+        key: item.dacId,
+        value: item.dacId,
+        label: item.name,
+        item: item
+      };
+    });
+  };
+
+  onDacChange = (option) => {
+    this.setState(prev => {
+      if (fp.isNil(option)) {
+        prev.datasetData.dac = {};
+      } else {
+        prev.datasetData.dac = option.item;
+      }
+      return prev;
+    });
+  };
+
   formatFormData = (data) => {
     let result = {};
     result.datasetName = data.datasetName;
@@ -343,7 +410,7 @@ class DatasetRegistration extends Component {
       methods = false,
       populationMigration = false
     } = this.state.formData;
-    const { ontologies } = this.state;
+    const { ontologies, allDatasets } = this.state;
 
     const { problemSavingRequest, showValidationMessages } = this.state;
     const isTypeOfResearchInvalid = false;
@@ -427,16 +494,15 @@ class DatasetRegistration extends Component {
                           maxLength: '256',
                           value: this.state.datasetData.datasetName,
                           onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages,
+                          isRendered: (fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages)
+                            || (!fp.isEmpty(this.state.datasetData.datasetName) && !this.validateDatasetName(this.state.datasetData.datasetName)),
                         },
-                        ['Required field']),
+                        [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
                       ])
                   ]),
 
@@ -454,10 +520,11 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
                       [
                         input({
-                          type: 'text',
+                          type: 'url',
                           name: 'datasetRepoUrl',
                           id: 'inputRepoUrl',
                           maxLength: '256',
+                          placeholder: 'http://...',
                           value: this.state.datasetData.datasetRepoUrl,
                           onChange: this.handleChange,
                           className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
@@ -578,12 +645,13 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
                       [
                         input({
-                          type: 'text',
+                          type: 'number',
                           name: 'nrParticipants',
                           id: 'inputParticipants',
                           maxLength: '256',
+                          min: '0',
                           value: this.state.datasetData.nrParticipants,
-                          onChange: this.handleChange,
+                          onChange: this.handlePositiveIntegerOnly,
                           className: (fp.isEmpty(this.state.datasetData.nrParticipants) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -637,18 +705,19 @@ class DatasetRegistration extends Component {
                         ]),
                       ]),
                     div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
-                        input({
-                          type: 'text',
+                        h(Select, {
+                          key: fp.isEmpty(this.state.datasetData.dac) ? null : this.state.datasetData.dac,
                           name: 'dac',
                           id: 'inputDac',
-                          maxLength: '256',
-                          value: this.state.datasetData.dac,
-                          onChange: this.handleChange,
+                          value: this.state.datasetData.dac.label,
+                          onChange: (option) => this.onDacChange(option),
+                          options: this.dacOptions(),
+                          placeholder: 'Select a DAC...',
                           className: (fp.isEmpty(this.state.datasetData.dac) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                            'required-field-error' :
+                            '',
                           required: true,
                         }),
                         span({
@@ -757,7 +826,7 @@ class DatasetRegistration extends Component {
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkMethods',
                               }, [
-                                span({ classname: 'access-color'},
+                                span({ className: 'access-color'},
                                   ['2.4.1 No methods development or validation studies (NMDS): ']),
                                 'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
                               ]),
