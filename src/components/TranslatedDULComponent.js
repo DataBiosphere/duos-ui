@@ -21,19 +21,20 @@ export const generateUseRestrictionStatements = (dataUse) => {
     });
 };
 
-export default function TranslatedDULComponent(props) {
-  const machineReadableLink = !isNil(props.mrDUL) ? a({
-    id: 'btn_downloadSDul',
-    onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
-    filename: 'machine-readable-DUL.json',
-    value: props.mrDUL,
-    className: 'italic hover-color'
-  }, ['Download DUL machine-readable format']) : '';
-
+export default function translatedDULComponent(props) {
+  let template;
   const translatedDULStatements = generateUseRestrictionStatements(props.restrictions);
 
-  return (
-    div({className: 'translated-dul-component-container'}, [
+  if(props.mrDUL) {
+    const machineReadableLink = !isNil(props.mrDUL) ? a({
+      id: 'btn_downloadSDul',
+      onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
+      filename: 'machine-readable-DUL.json',
+      value: props.mrDUL,
+      className: 'italic hover-color'
+    }, ['Download DUL machine-readable format']) : '';
+
+    template = div({className: 'translated-dul-component-container'}, [
       div({ className: 'panel-heading cm-boxhead dul-color' }, [
         h4({}, ['Data Use Limitations'])
       ]),
@@ -55,6 +56,33 @@ export default function TranslatedDULComponent(props) {
           machineReadableLink
         ])
       ])
-    ])
-  );
+    ]);
+  } else if(props.downloadDUL) {
+    template = div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
+      div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+        div({ className: "panel-heading cm-boxhead dul-color" }, [
+          h4({}, ["Data Use Limitations"]),
+        ]),
+        div({
+          id: "panel_dul",
+          className: "panel-body cm-boxbody"
+        }, [
+          button({
+            id: "btn_downloadDataUseLetter",
+            className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
+            onClick: () => props.downloadDUL()
+          }, ["Download Data Use Letter"]),
+        ])
+      ]),
+
+      div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
+        div({ className: "panel-heading cm-boxhead dul-color" }, [
+          h4({}, ["Structured Limitations"]),
+        ]),
+        div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements])
+      ]),
+    ]);
+  }
+
+  return template;
 }

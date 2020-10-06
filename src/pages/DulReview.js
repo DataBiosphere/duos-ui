@@ -34,7 +34,7 @@ class DulReview extends Component {
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
 
-  voteInfo = async () => {
+  async voteInfo() {
     const voteId = this.props.match.params.voteId;
     const consentId = this.props.match.params.consentId;
 
@@ -42,7 +42,7 @@ class DulReview extends Component {
     const electionPromise = Election.findElectionByVoteId(voteId);
     const consentPromise = Consent.findConsentById(consentId);
 
-    const [votes, elections, consent] = await Promise.all(votesPromise, electionPromise, consentPromise);
+    const [votes, elections, consent] = await Promise.all([votesPromise, electionPromise, consentPromise]);
 
     this.setState( prev => {
       prev.votes = votes;
@@ -126,13 +126,7 @@ class DulReview extends Component {
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
         h4({ className: "hint" }, ["Please review the Data Use Letter and determine if the Data Use Limitations were accurately converted to Structured Limitations"]),
-
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL})
-          ])
-        ]),
-
+        h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL}),
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote dul-background-lighter" }, [
             SubmitVoteBox({
