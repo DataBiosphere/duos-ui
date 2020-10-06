@@ -319,6 +319,18 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { voteAsChair, selectChair, chairVotes } = this.props;
     const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData, accessElectionOpen, rpElectionOpen } = this.state;
 
+    // If we have an open election, theme the button based on the alert status.
+    // If we do not, set it to disabled state.
+    const voteButtonStyle = (accessElectionOpen || rpElectionOpen) ?
+      (alert === 'success') ? { backgroundColor: Theme.palette.success } : {} :
+      { backgroundColor: Theme.palette.disabled, cursor: 'not-allowed'};
+
+    // If we have an open election, we can submit votes as either a chair or member.
+    // If we do not, we cannot submit any votes.
+    const voteButtonAction = (accessElectionOpen || rpElectionOpen) ?
+      (!fp.isEmpty(chairVotes) && voteAsChair) ? this.submitChairVote : this.submitMemberVote :
+      () => {};
+
     return div({ style: ROOT },
       [
         div({ id: 'tabs', style: { display: 'flex' } }, [
@@ -366,8 +378,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               button({
                 id: 'vote',
                 className: 'button-contained',
-                style: alert === 'success' ? { backgroundColor: Theme.palette.success } : {},
-                onClick: (!fp.isEmpty(chairVotes) && voteAsChair) ? this.submitChairVote : this.submitMemberVote,
+                style: voteButtonStyle,
+                onClick: voteButtonAction,
               },
               ['Vote',
                 alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })
