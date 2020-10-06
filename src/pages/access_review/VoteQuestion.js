@@ -48,7 +48,8 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
   };
 
   render() {
-    const { label, question, id, rationale, selectedOption } = this.props;
+    const { label, question, id, rationale, selectedOption, disabled } = this.props;
+    const inputProps = disabled ? { disabled: true } : {};
 
     return div({ style: { marginBottom: '24px' } },
       [
@@ -57,6 +58,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
         div({ style: FADED }, 'Your vote*'),
         fieldset([
           input({
+            ...inputProps,
             type: 'radio',
             id: id + '-yes',
             onChange: () => this.setVote(true, this.state.rationale),
@@ -67,6 +69,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
             style: { margin: '8px' },
           }, 'Yes'),
           input({
+            ...inputProps,
             type: 'radio',
             id: id + '-no',
             onChange: () => this.setVote(false, this.state.rationale),
@@ -79,6 +82,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
         ]),
         div({ style: FADED }, 'Rationale'),
         textarea({
+          ...inputProps,
           style: INPUT,
           rows: '5',
           placeholder: 'OPTIONAL: Describe your rationale or add comments here',

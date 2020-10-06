@@ -55,7 +55,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       chairFinalVote: null,
       chairAgreementVote: null,
       memberAccessVote: null,
-      memberRpVote: null
+      memberRpVote: null,
+      accessElectionOpen: false,
+      rpElectionOpen: false
     };
   };
 
@@ -69,12 +71,16 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const chairFinalVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(finalVotes);
     const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
     const chairRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(chairVotes);
+    const accessElectionOpen = fp.isNil(accessElection) ? false : fp.isEqual(accessElection.status)('Open');
+    const rpElectionOpen = fp.isNil(rpElection) ? false : fp.isEqual(rpElection.status)('Open');
     this.setState({
       alert: '',
       chairAgreementVote: chairAgreementVote,
       chairFinalVote: chairFinalVote,
       chairAccessVote: chairAccessVote,
       chairRpVote: chairRpVote,
+      accessElectionOpen: accessElectionOpen,
+      rpElectionOpen: rpElectionOpen
     });
   };
 
@@ -101,11 +107,15 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
     const memberAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(memberVotes);
     const memberRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(memberVotes);
+    const accessElectionOpen = fp.isNil(accessElection) ? false : fp.isEqual(accessElection.status)('Open');
+    const rpElectionOpen = fp.isNil(rpElection) ? false : fp.isEqual(rpElection.status)('Open');
     this.setState({
       alert: '',
       chairAccessVote: chairAccessVote,
       memberAccessVote: memberAccessVote,
-      memberRpVote: memberRpVote
+      memberRpVote: memberRpVote,
+      accessElectionOpen: accessElectionOpen,
+      rpElectionOpen: rpElectionOpen
     });
   };
 
@@ -254,7 +264,6 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // posts the supplied vote for this DAR
   submitVote = async (vote) => {
-    console.log(JSON.stringify(vote));
     const { darId } = this.props;
     try {
       if (vote.type === 'FINAL') {
@@ -308,7 +317,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   render() {
     const { voteAsChair, selectChair, chairVotes } = this.props;
-    const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData } = this.state;
+    const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData, accessElectionOpen, rpElectionOpen } = this.state;
 
     return div({ style: ROOT },
       [
@@ -338,6 +347,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               onUpdate: this.updateMemberVote,
               vote: memberAccessVote,
               rpVote: memberRpVote,
+              accessElectionOpen: accessElectionOpen,
+              rpElectionOpen: rpElectionOpen
             }),
             VoteAsChair({
               isRendered: voteAsChair,
@@ -346,7 +357,9 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               onUpdate: this.updateChairVotes,
               matchData: matchData,
               vote: chairAccessVote,
-              rpVote: chairRpVote
+              rpVote: chairRpVote,
+              accessElectionOpen: accessElectionOpen,
+              rpElectionOpen: rpElectionOpen
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),

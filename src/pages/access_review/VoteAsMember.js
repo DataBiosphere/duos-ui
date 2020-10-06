@@ -10,7 +10,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
   };
 
   render() {
-    const { onUpdate, vote, rpVote } = this.props;
+    const { onUpdate, vote, rpVote, accessElectionOpen, rpElectionOpen } = this.props;
     return div({ id: 'member-vote' }, [
       VoteQuestion({
         id: 'access-vote',
@@ -21,6 +21,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
         voteId: fp.isNil(vote) ? null : vote.voteId,
         rationale: fp.isNil(vote) ? '' : vote.rationale,
         selectedOption:fp.isNil(vote) ? null : vote.vote,
+        disabled: !accessElectionOpen
       }),
       VoteQuestion({
         id: 'rp-vote',
@@ -31,6 +32,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
         voteId: fp.isNil(rpVote) ? null : rpVote.voteId,
         rationale: fp.isNil(rpVote) ? '' : rpVote.rationale,
         selectedOption: fp.isNil(rpVote) ? null : rpVote.vote,
+        disabled: !rpElectionOpen
       }),
     ]);
   }
