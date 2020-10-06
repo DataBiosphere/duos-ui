@@ -16,6 +16,7 @@ import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 
 class FinalAccessReview extends Component {
@@ -406,19 +407,23 @@ class FinalAccessReview extends Component {
 
   showDULData = async (electionReview) => {
     let applyToState = {
-      sDul: electionReview.election.translatedUseRestriction,
-      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2),
-      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
-      dulName: electionReview.election.dulName,
-      status: electionReview.election.status,
-      voteList: this.chunk(electionReview.reviewVote, 2),
-      chartDataDUL: this.getGraphData(electionReview.reviewVote),
       election: electionReview.election
     };
 
-    if(electionReview.election.finalRationale === null) {
-      applyToState.election.finalRationale = '';
+    if(!isNil(electionReview.election)) {
+      applyToState.mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
+      applyToState.dulName = electionReview.election.dulName;
+      applyToState.status = electionReview.election.status;
+      applyToState.finalRationale = electionReview.election.finalRationale || '';
     }
+
+    if(!isNil(electionReview.consent)) {
+      applyToState.downloadUrl = await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul';
+      applyToState.TranslatedDULComponent = h(TranslatedDULComponent, {restrictions: electionReview.consent.dataUse, mrDUL: applyToState.mrDUL});
+    }
+
+    applyToState.voteList = this.chunk(electionReview.reviewVote, 2);
+    applyToState.chartDataDUL = this.getGraphData(electionReview.reviewVote);
 
     return applyToState;
   };
@@ -607,22 +612,7 @@ class FinalAccessReview extends Component {
             researcherProfile: this.state.researcherProfile }),
 
           div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-
-            div({ className: 'panel-heading cm-boxhead dul-color' }, [
-              h4({}, ['Data Use Limitations'])
-            ]),
-            div({ id: 'dul', className: 'panel-body cm-boxbody' }, [
-              div({ className: 'row dar-summary' }, [
-                div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-                div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: this.state.sDul } }, []),
-                a({
-                  id: 'btn_downloadSDul', onClick: () => Utils.download('machine-readable-DUL.json', this.state.mrDUL),
-                  className: 'italic hover-color'
-                }, ['Download DUL machine-readable format'])
-              ])
-            ])
-          ])
-
+            applyToState.TranslatedDULComponent
         ]),
 
         hr({ className: 'section-separator' }),
