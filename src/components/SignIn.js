@@ -130,7 +130,7 @@ export const SignIn = hh(class SignIn extends Component {
     let googleLoginButton;
 
     if (this.state.clientId === '') {
-      googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
+      googleLoginButton = div({ style: { 'position': 'absolute', 'top': '45px', 'right': '45px', 'zIndex': '10000' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]);
     } else {
@@ -140,6 +140,7 @@ export const SignIn = hh(class SignIn extends Component {
           clientId: this.state.clientId,
           onSuccess: this.responseGoogle,
           onFailure: this.forbidden,
+          disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed', 'pointer-events': 'none' }
         }
       );
     }
