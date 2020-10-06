@@ -13,6 +13,6 @@ jobs:
       - name: NPM Build
         run: CI=false npm run build --silent
       - name: Start server
-        run: npm start
+        run: (npm run start&)
       - name: Cypress run
         uses: cypress-io/github-action@v2
