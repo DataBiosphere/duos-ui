@@ -12,5 +12,7 @@ jobs:
         run: cp config/dev.json public/config.json
       - name: NPM Build
         run: CI=false npm run build --silent
+      - name: Start server
+        run: npx http-server ./build -p 3000
       - name: Cypress run
         uses: cypress-io/github-action@v2
