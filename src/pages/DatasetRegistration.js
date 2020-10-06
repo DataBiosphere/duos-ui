@@ -115,7 +115,7 @@ class DatasetRegistration extends Component {
     const field = e.target.name;
     const value = e.target.value.replace(/[^\d]/,'');
 
-    if (value == '' || parseInt(value) > -1) {
+    if (value === '' || parseInt(value) > -1) {
       this.setState(prev => {
         prev.datasetData[field] = value;
         prev.disableOkBtn = false;
