@@ -92,7 +92,7 @@ class DatasetRegistration extends Component {
       prev.dacList = dacs;
       return prev;
     });
-  }
+  };
 
   handleOpenModal() {
     this.setState({ showModal: true });
@@ -163,7 +163,7 @@ class DatasetRegistration extends Component {
     else {
       return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
     }
-  }
+  };
 
   attestAndSave = (e) => {
     this.setState( prev => {
@@ -384,7 +384,7 @@ class DatasetRegistration extends Component {
     result.properties = this.createProperties();
 
     return result;
-  }
+  };
 
   render() {
 
