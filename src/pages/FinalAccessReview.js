@@ -485,7 +485,6 @@ class FinalAccessReview extends Component {
         showRPaccordion: false
       };
     }
-    //NOTE: should this be moved outside of this method's flow control?
     applyToState.loading = false;
     return applyToState;
   }
