@@ -349,86 +349,57 @@ class FinalAccessReview extends Component {
     const darFinalAccessVotePromise =  Votes.getDarFinalAccessVote(this.state.electionId);
     const dataAccessElectionReviewPromise = Election.findDataAccessElectionReview(this.state.electionId, false);
     const rpElectionReviewPromise = Election.findRPElectionReview(this.state.electionId, false);
+    let [darFinalAccessVote, dataAccessElectionReview, rpElectionReview] = await Promise.all([darFinalAccessVotePromise, dataAccessElectionReviewPromise, rpElectionReviewPromise]);
 
-    try {
-      let [darFinalAccessVote, dataAccessElectionReview, rpElectionReview] = await Promise.all([darFinalAccessVotePromise, dataAccessElectionReviewPromise, rpElectionReviewPromise]);
+    //darFinalAccessVote processing
+    const voteObj = this.processFinalAccessVoteState(darFinalAccessVote, this.state.electionId);
 
-      //data1 = dataAccessElectionReview`
-      //data2 = rpElectionReview
+    let showAccessDataObj = this.showAccessData(dataAccessElectionReview);
+    showAccessDataObj.consentName = dataAccessElectionReview.associatedConsent.name;
 
-      //darFinalAccessVote processing (data1)
-      let voteObj = {
-        vote: darFinalAccessVote,
-        voteId: this.state.electionId
-      };
+    //electionReview processing
+    const electionReview = await Election.findElectionReviewById(
+      dataAccessElectionReview.associatedConsent.electionId,
+      dataAccessElectionReview.associatedConsent.consentId
+    );
+    const vaultVotePromise = this.vaultVote(electionReview.consent.consentId);
+    const dulDataPromise = this.showDULData(electionReview);
+    const [dulData, vaultVote] = await Promise.all([dulDataPromise, vaultVotePromise]);
 
-      if(!isNil(darFinalAccessVote.vote)) {
-        voteObj.alreadyVote = true;
-        voteObj.originalVote = darFinalAccessVote.vote;
-        voteObj.originalRationale = darFinalAccessVote.rationale;
-      } else {
-        voteObj.alreadyVote = false;
-      }
+    //rpElection processing
+    let rpElectionReviewObj = this.processRPElectionReviewState(rpElectionReview);
 
-      const showAccessDataObj = this.showAccessData(dataAccessElectionReview);
-      showAccessDataObj.consentName = dataAccessElectionReview.associatedConsent.name;
-
-      //data3 = electionReview processing
-      const electionReview = await Election.findElectionReviewById(
-        dataAccessElectionReview.associatedConsent.electionId,
-        dataAccessElectionReview.associatedConsent.consentId
-      );
-
-      const vaultVotePromise = this.vaultVote(electionReview.consent.consentId);
-      const dulDataPromise = this.showDULData(electionReview);
-      const [dulData, vaultVote] = await Promise.all([dulDataPromise, vaultVotePromise]);
-
-      //NOTE: need to make object for rpElectionReview results
-      //conditional processing for rpElectionReview (data2)
-      let rpElectionReviewObj = {};
-      if(!isNil(rpElectionReview.election)) {
-        let election = rpElectionReview.election;
-        rpElectionReview.electionRP = election;
-        rpElectionReview.statusRP = election.status;
-        if(isNil(election.finalRationale)) {
-          rpElectionReview.electionRP.finalRationale = '';
-        }
-      }
-
-      this.setState(prev => {
-        prev = assign(prev, voteObj, showAccessDataObj, dulData, vaultVote, rpElectionReviewObj);
-        return prev;
-      });
-
-    } catch(error) {
-      console.log(error);
-    }
+    //state assignment
+    this.setState(prev => {
+      prev = assign(prev, {loading: false}, voteObj, showAccessDataObj, dulData, vaultVote, rpElectionReviewObj);
+      return prev;
+    });
   };
 
-  showAccessData = async (electionReview) => {
+  showAccessData = (electionReview) => {
     let applyToState = {};
-    if (Boolean(electionReview.voteAgreement)) {
+    if (!isNil(electionReview.voteAgreement)) {
       applyToState.originalAgreementVote = electionReview.voteAgreement.vote;
       applyToState.originalAgreementRationale = electionReview.voteAgreement.rationale;
+      if(!isNil(electionReview.voteAgreement.vote)) {
+        applyToState.agreementAlreadyVote = true;
+      }
     }
 
     applyToState.electionAccess = electionReview.election;
-    if(electionReview.election.finalRationale === null) {
-      applyToState.electionAccess.finalRationale = '';
+
+    if (!isNil(electionReview.election)) {
+      if (isNil(electionReview.election.finalRationale)) {
+        applyToState.electionAccess.finalRationale = '';
+      }
+      applyToState.status = electionReview.election.status;
+      applyToState.voteAgreementId = electionReview.election.referenceId;
+      applyToState.mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
     }
 
-    if (Boolean(electionReview.voteAgreement) && electionReview.voteAgreement.vote !== null) {
-      applyToState.agreementAlreadyVote = true;
-    }
-
-    applyToState = assign(applyToState, {
-      mrDAR: JSON.stringify(electionReview.election.useRestriction, null, 2),
-      status: electionReview.election.status,
-      voteAccessList: this.chunk(electionReview.reviewVote, 2),
-      chartDataAccess: this.getGraphData(electionReview.reviewVote),
-      voteAgreement: electionReview.voteAgreement,
-      voteAgreementId: electionReview.election.referenceId
-    });
+    applyToState.voteAccessList = this.chunk(electionReview.reviewVote, 2);
+    applyToState.chartDataAccess = this.getGraphData(electionReview.reviewVote);
+    applyToState.voteAgreement = electionReview.voteAgreement;
 
     return applyToState;
   };
@@ -454,24 +425,70 @@ class FinalAccessReview extends Component {
 
   vaultVote = async (consentId) => {
     const data = await Match.findMatch(consentId, this.state.referenceId);
+    let applyToState;
     if (data.failed !== null && data.failed !== undefined && data.failed) {
-      this.setState({
+      applyToState = {
         hideMatch: false,
         match: '-1',
         createDate: data.createDate
-      });
+      };
     } else if (data.match !== null && data.match !== undefined) {
-      this.setState({
+      applyToState = {
         hideMatch: false,
         match: data.match,
         createDate: data.createDate
-      });
+      };
     } else {
-      this.setState({
+      applyToState = {
         hideMatch: true
-      });
+      };
     }
+
+    return applyToState;
   };
+
+  processFinalAccessVoteState = (darFinalAccessVote, electionId) => {
+    let applyToState = {
+      vote: darFinalAccessVote,
+      voteId: electionId
+    };
+
+    if (!isNil(darFinalAccessVote.vote)) {
+      applyToState.alreadyVote = true;
+      applyToState.originalVote = darFinalAccessVote.vote;
+      applyToState.originalRationale = darFinalAccessVote.rationale;
+    } else {
+      applyToState.alreadyVote = false;
+    }
+
+    return applyToState;
+  };
+
+  processRPElectionReviewState = (rpElectionReview) => {
+    let applyToState;
+    if (!isNil(rpElectionReview.election)) {
+      let election = rpElectionReview.election;
+      const finalRationale = election.finalRationale;
+      applyToState = {
+        electionRP: election,
+        statusRP: election.status,
+        rpVoteAccessList: this.chunk(rpElectionReview.reviewVote, 2), 
+        chartRP: this.getGraphData(rpElectionReview.reviewVote),
+        showRPaccordion: true
+      };
+      applyToState.electionRP.finalRationale = finalRationale || '';
+    } else {
+      applyToState = {
+        electionRP: {},
+        rpVoteAccessList: [],
+        chartRP: { Total: [] },
+        showRPaccordion: false
+      };
+    }
+    //NOTE: should this be moved outside of this method's flow control?
+    applyToState.loading = false;
+    return applyToState;
+  }
 
   chunk = (arr, size) => {
     var newArr = [];
