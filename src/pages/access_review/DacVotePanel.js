@@ -71,8 +71,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const chairFinalVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(finalVotes);
     const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
     const chairRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(chairVotes);
-    const accessElectionOpen = fp.isNil(accessElection) ? false : fp.isEqual(accessElection.status)('Open');
-    const rpElectionOpen = fp.isNil(rpElection) ? false : fp.isEqual(rpElection.status)('Open');
+    const accessElectionOpen = fp.isNil(accessElection) ? false : !fp.isEqual(accessElection.status)('Closed');
+    const rpElectionOpen = fp.isNil(rpElection) ? false : !fp.isEqual(rpElection.status)('Closed');
     this.setState({
       alert: '',
       chairAgreementVote: chairAgreementVote,

@@ -86,9 +86,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
       dars => {
         this.setState(prev => {
-          // Filter elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
+          // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
           // for more work related to ensuring closed elections aren't displayed here.
-          prev.electionsList.access = _.filter(dars.access, { electionStatus: 'Open' });
+          prev.electionsList.access = _.filter(dars.access, (e) => { return e.electionStatus !== 'Closed'; });
           prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
           return prev;
         });
