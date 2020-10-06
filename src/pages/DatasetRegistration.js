@@ -118,6 +118,7 @@ class DatasetRegistration extends Component {
     if (value == '' || parseInt(value) > -1) {
       this.setState(prev => {
         prev.datasetData[field] = value;
+        prev.disableOkBtn = false;
         return prev;
       });
     }
@@ -368,9 +369,10 @@ class DatasetRegistration extends Component {
   onDacChange = (option) => {
     this.setState(prev => {
       if (fp.isNil(option)) {
-        prev.datasetData.dac = {};
+        prev.selectedDac = {};
       } else {
-        prev.datasetData.dac = option.item;
+        prev.selectedDac = option.item;
+        prev.disableOkBtn = false;
       }
       return prev;
     });
@@ -410,7 +412,7 @@ class DatasetRegistration extends Component {
       methods = false,
       populationMigration = false
     } = this.state.formData;
-    const { ontologies, allDatasets } = this.state;
+    const { ontologies } = this.state;
 
     const { problemSavingRequest, showValidationMessages } = this.state;
     const isTypeOfResearchInvalid = false;
@@ -708,11 +710,17 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         h(Select, {
-                          key: fp.isEmpty(this.state.datasetData.dac) ? null : this.state.datasetData.dac,
+                          key: fp.isEmpty(this.state.datasetData.dac) ? null : this.state.datasetData.dac.value,
                           name: 'dac',
                           id: 'inputDac',
                           value: this.state.datasetData.dac.label,
                           onChange: (option) => this.onDacChange(option),
+                          blurInputOnSelect: true,
+                          openMenuOnFocus: true,
+                          isDisabled: false,
+                          isClearable: true,
+                          isMulti: false,
+                          isSearchable: true,
                           options: this.dacOptions(),
                           placeholder: 'Select a DAC...',
                           className: (fp.isEmpty(this.state.datasetData.dac) && showValidationMessages) ?
