@@ -10,12 +10,11 @@ jobs:
         run: npm ci
       - name: Copy Configs
         run: cp config/dev.json public/config.json
+      - name: NPM Build
+        run: CI=false npm run build --silent
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          build: npm run build
           start: npm start
           wait-on: 'http://localhost:3000'
           wait-on-timeout: 120
-        env:
-          CI: false
