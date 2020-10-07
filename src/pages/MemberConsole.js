@@ -90,7 +90,9 @@ class MemberConsole extends Component {
       prev.totalDulPendingVotes = duls.totalDulPendingVotes;
       prev.electionsList.dul = duls.dul;
       prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
-      prev.electionsList.access = dars.access;
+      // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
+      // for more work related to ensuring closed elections aren't displayed here.
+      prev.electionsList.access = _.filter(dars.access, (e) => { return e.electionStatus !== 'Closed'; });
       return prev;
     });
 
