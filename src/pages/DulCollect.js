@@ -27,6 +27,9 @@ class DulCollect extends Component {
     let election = await Election.electionReviewResource(consentId, 'TranslateDUL');
     this.setGraphData(election.reviewVote);
     this.setState(prev => {
+      if(election.consent) {
+        prev.dataUse = election.consent.dataUse;
+      }
       prev.dulVoteList = this.chunk(election.reviewVote, 2);
       prev.consentGroupName = election.consent.groupName;
       prev.consentName = election.consent.name;
@@ -174,8 +177,7 @@ class DulCollect extends Component {
       b({ isRendered: this.state.consentGroupName, className: "pipe", dangerouslySetInnerHTML: { __html: this.state.consentGroupName } }, []),
       this.state.consentName
     ]);
-
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.election.consent.dataUse, downloadDUL: this.downloadDUL});
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.dataUse, downloadDUL: this.downloadDUL});
 
     return (
 
@@ -203,11 +205,7 @@ class DulCollect extends Component {
 
         hr({ className: "section-separator", style: { 'marginTop': '0' } }),
         h4({ className: "hint" }, ["Please review the Data Use Letter, Structured Limitations, and DAC votes to determine if the Data Use Limitations were appropriately converted to Structured Limitations"]),
-
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [translatedDULStatements])
-        ]),
-
+        translatedDULStatements,
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
           CollectResultBox({
             id: "dulCollectResult",
@@ -234,10 +232,10 @@ class DulCollect extends Component {
             title: "Post Final Vote?", color: 'dul', showModal: this.state.showConfirmationDialogOK,
             action: { label: "Yes", handler: this.confirmationHandlerOK }
           }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["If you post this vote the Election will be closed with current results."]),
-              ]),
+            div({ className: "dialog-description" }, [
+              span({}, ["If you post this vote the Election will be closed with current results."]),
             ]),
+          ]),
         ]),
 
         h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),

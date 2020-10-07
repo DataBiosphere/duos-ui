@@ -661,9 +661,6 @@ class AccessResultRecords extends Component {
     //Contextually the difference between each of these elections are not clear (TYPE is different, but what that entails is not obvious)
     //Similar questions with the various votes (rpVotes, finalDACVote).
 
-    //The various consent objects seem to have the same data, they only really differ in timestamps, ids, and type
-    //Need to do a more thorough analysis of the above (larger sample size)
-
     //NOTE: the component currently uses hasRestrictions, which I found out to simply be a check on the restrictions attribute on a DAR
     //Basically all it does is check if a value exists and returns the bool value
     //So all I've done is simply check that value myself from the describeDar return value rather than use the endpoint
@@ -701,10 +698,6 @@ class AccessResultRecords extends Component {
       state = Object.assign({}, state, assignToState);
       return state;
     });
-
-    //From here process results and assign them to state variable
-    //NOTE: need to make sure functions have been refactored/organized correctly
-    //NOTE: see if there's a way to simplify the election/vote requests and processing steps
   }
 }
 

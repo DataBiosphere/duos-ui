@@ -13,6 +13,7 @@ class DulReview extends Component {
   constructor(props) {
     super(props);
     this.state = this.initialState();
+    this.voteInfo = this.voteInfo.bind(this);
   }
 
   initialState() {
@@ -28,8 +29,8 @@ class DulReview extends Component {
     };
   }
 
-  componentDidMount() {
-    this.voteInfo();
+  async componentDidMount() {
+    await this.voteInfo();
     this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
