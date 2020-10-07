@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import { div, h, hh, img, span } from 'react-hyperscript-helpers';
+import { div, h, hh, img, span, button } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -125,6 +125,21 @@ export const SignIn = hh(class SignIn extends Component {
     return user;
   };
 
+  renderSpinnerIfDisabled = (disabled) => {
+    return disabled ?
+      div({ style: { 'position': 'absolute', 'top': '45px', 'right': '45px', 'zIndex': '10000' } }, [
+        img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
+      ]) :
+      h(GoogleLogin, {
+        scope: 'openid email profile',
+        theme: 'dark',
+        clientId: this.state.clientId,
+        onSuccess: this.responseGoogle,
+        onFailure: this.forbidden,
+        disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' },
+      });
+  };
+
   render() {
 
     let googleLoginButton;
@@ -135,12 +150,11 @@ export const SignIn = hh(class SignIn extends Component {
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {
-          scope: 'openid email profile',
-          theme: 'dark',
-          clientId: this.state.clientId,
-          onSuccess: this.responseGoogle,
-          onFailure: this.forbidden,
-          disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' },
+        scope: 'openid email profile',
+        clientId: this.state.clientId,
+        onSuccess: this.responseGoogle,
+        onFailure: this.forbidden,
+        render: ({disabled}) => this.renderSpinnerIfDisabled(disabled)
         }
       );
     }
