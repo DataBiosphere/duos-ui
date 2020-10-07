@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import { div, h, hh, img, span, button } from 'react-hyperscript-helpers';
+import { div, h, hh, img, span } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
