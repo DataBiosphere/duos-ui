@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useState} from 'react';
 import { div, li, h4, a, ul} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -6,7 +6,6 @@ import * as Utils from '../libs/utils';
 import isNil from 'lodash/fp/isNil';
 
 //NOTE: li partial can be used in components that only need the list
-
 const liStyle = {
   padding: '0.6rem'
 };
@@ -33,14 +32,15 @@ export async function GenerateUseRestrictionStatements(dataUse) {
 //template structure is different between DAR and DUL due to differing grid organization in previous template, making it hard to convert
 //task is not impossible, just requires additional time
 export default function TranslatedDULComponent(props) {
-  const translatedDULStatements = useRef();
+  const [translatedDULStatements, setTranslatedDULStatements] = useState([]);
 
   useEffect(() => {
     const generatedRestrictions = async (restrictions) => {
-      translatedDULStatements.current = await GenerateUseRestrictionStatements(restrictions);
+      const updatedStatements = await GenerateUseRestrictionStatements(restrictions);
+      setTranslatedDULStatements(updatedStatements);
     };
     generatedRestrictions(props.restrictions);
-  }, [props.restrictions]);
+  }, [props.restrictions, setTranslatedDULStatements]);
 
   const machineReadableLink = !isNil(props.mrDUL) && !isEmpty(props.mrDUL) ? a({
     id: 'btn_downloadSDul',
@@ -63,7 +63,7 @@ export default function TranslatedDULComponent(props) {
     div({ className: "panel-heading cm-boxhead dul-color" }, [
       h4({}, ["Data Use Limitations"]),
     ]),
-    ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements.current]),
+    ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements]),
     div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL)}, [dataUseLetterLink]),
     div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
   ]);
