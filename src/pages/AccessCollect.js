@@ -413,7 +413,7 @@ class AccessCollect extends Component {
                 className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
                 isRendered: !ld.isEmpty(this.state.dataUse)
               }, [
-                TranslatedDULComponent({restrictions: this.state.dataUse})
+                h(TranslatedDULComponent,{restrictions: this.state.dataUse})
               ])
             ]),
 

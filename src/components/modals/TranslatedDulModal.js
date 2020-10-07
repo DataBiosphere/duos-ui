@@ -1,6 +1,6 @@
 import { ul } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
-import {generateUseRestrictionStatements} from '../TranslatedDULComponent';
+import {GenerateUseRestrictionStatements} from '../TranslatedDULComponent';
 // import { DataSet } from '../../libs/ajax'
 
 const MODAL_ID = 'translatedDul';
@@ -18,7 +18,7 @@ export default function TranslatedDulModal(props) {
     props.onCloseRequest(MODAL_ID);
   };
 
-  const translatedDULList = generateUseRestrictionStatements(props.dataUse || {});
+  const translatedDULList = GenerateUseRestrictionStatements(props.dataUse || {});
 
   return (
     BaseModal({

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, button, div, h4, i } from 'react-hyperscript-helpers';
+import { a, button, div, h4, i, h } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DataAccessRequest } from '../components/DataAccessRequest';
@@ -141,7 +141,7 @@ class AccessPreview extends Component {
                 className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
                 isRendered: !ld.isEmpty(this.state.dataUse)
               }, [
-                TranslatedDULComponent({restrictions: this.state.dataUse})
+                h(TranslatedDULComponent,{restrictions: this.state.dataUse})
               ])
             ])
           ])

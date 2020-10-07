@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hr, label, hh } from 'react-hyperscript-helpers';
+import { div, hr, label, hh, h } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { DataSet, Consent } from '../../libs/ajax';
 import TranslatedDULComponent from '../TranslatedDULComponent';
@@ -155,7 +155,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
           //NOTE: test dataOwner view for this div
           div({ className: "row" }, [
             label({ id: "lbl_structured", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Structured Limitations"]),
-            TranslatedDULComponent({restrictions: this.state.dataUse})
+            h(TranslatedDULComponent,{restrictions: this.state.dataUse})
           ])
         ])
       ])

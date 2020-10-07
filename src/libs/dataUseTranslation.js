@@ -1,10 +1,14 @@
 import forEach from 'lodash/fp/forEach';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
+import filter from 'lodash/fp/filter';
 import join from 'lodash/fp/join';
 import concat from 'lodash/fp/concat';
 import clone from 'lodash/fp/clone';
 import uniq from 'lodash/fp/uniq';
+import { Consent } from '../libs/ajax';
+import { Config } from '../libs/config';
+import { searchOntology } from '../libs/ontologyService';
 
 const srpTranslations = {
   hmb: {
@@ -155,6 +159,12 @@ const consentTranslations = {
     description: 'Use is limited to within a certain geographic area'
   }
 };
+
+const getOntologyName = async(obolibraryURL) => {
+  const ontology = await searchOntology(obolibraryURL);
+  return ontology.label;
+};
+
 
 export const DataUseTranslation = {
 
@@ -326,23 +336,39 @@ export const DataUseTranslation = {
     return dataUseSummary;
   },
 
-  translateDataUseRestrictions: (dataUse) => {
-    if(!dataUse) {return [];}
+  translateDataUseRestrictions: async (dataUse) => {
 
-    let restrictionStatements = [];
-    let targetKeys = Object.keys(consentTranslations);
-    forEach((key) => {
-      const value = dataUse[key];
-      if(!isNil(value) && value) {
-        if(key === 'diseaseRestrictions') {
-          restrictionStatements.push(consentTranslations.diseaseRestrictions(value));
+    const processRestrictionStatements = async(key, value) => {
+      let resp;
+      if (!isNil(value) && value) {
+        if (key === 'diseaseRestrictions') {
+          let resolvedLabels = [];
+          try {
+            const ontologyPromises = value.map(ontologyId => {
+              return getOntologyName(ontologyId);
+            });
+            resolvedLabels = await Promise.all(ontologyPromises);
+          } catch (error) {
+            console.log(error);
+          }
+          resp = consentTranslations.diseaseRestrictions(resolvedLabels);
         } else {
-          restrictionStatements.push(consentTranslations[key]);
+          resp = consentTranslations[key];
         }
       }
-    })(targetKeys);
+      return resp;
+    };
 
+    if(!dataUse) {return [];}
+    let restrictionStatements = [];
+    let targetKeys = Object.keys(consentTranslations);
+    const processingPromises = targetKeys.map((key) => {
+      const value = dataUse[key];
+      return processRestrictionStatements(key, value);
+    });
+
+    restrictionStatements = await Promise.all(processingPromises);
+    restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
     return restrictionStatements;
   }
-
 };

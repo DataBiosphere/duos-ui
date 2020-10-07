@@ -1,88 +1,72 @@
-import { div, ul, li, h4, a, button } from 'react-hyperscript-helpers';
+import {useEffect, useRef} from 'react';
+import { div, li, h4, a, ul} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
 import * as Utils from '../libs/utils';
 import isNil from 'lodash/fp/isNil';
 
 //NOTE: li partial can be used in components that only need the list
-export const generateUseRestrictionStatements = (dataUse) => {
-  if (!dataUse || isEmpty(dataUse)) {
-    return [li({
-      className: 'response-label translated restriction',
-      key: 'restriction-none'
-    }, ['None'])];
-  }
-  return DataUseTranslation.translateDataUseRestrictions(dataUse)
-    .map((restriction) => {
-      return li({
-        className: 'response-label translated-restriction',
-        key: `${restriction.code}-statement`
-      }, [restriction.description]);
-    });
+
+const liStyle = {
+  padding: '0.6rem'
 };
 
-export default function translatedDULComponent(props) {
-  let template;
-  const translatedDULStatements = generateUseRestrictionStatements(props.restrictions);
-
-  if(props.mrDUL) {
-    const machineReadableLink = !isNil(props.mrDUL) ? a({
-      id: 'btn_downloadSDul',
-      onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
-      filename: 'machine-readable-DUL.json',
-      value: props.mrDUL,
-      className: 'italic hover-color'
-    }, ['Download DUL machine-readable format']) : '';
-
-    template = div({className: 'translated-dul-component-container'}, [
-      div({ className: 'panel-heading cm-boxhead dul-color' }, [
-        h4({}, ['Data Use Limitations'])
-      ]),
-      div({
-        id: "panel_dul",
-        className: "panel-body cm-boxbody",
-        isRendered: !isNil(props.downloadDUL) && !isEmpty(props.downloadDUL)
-      }, [
-        button({
-          id: "btn_downloadDataUseLetter",
-          className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-          onClick: props.downloadDUL
-        }, ["Download Data Use Letter"]),
-      ]),
-      div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
-        div({ className: 'row dar-summary' }, [
-          div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-          ul({className: 'response-label translated-restriction'}, [translatedDULStatements]),
-          machineReadableLink
-        ])
-      ])
-    ]);
-  } else if(props.downloadDUL) {
-    template = div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-      div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-        div({ className: "panel-heading cm-boxhead dul-color" }, [
-          h4({}, ["Data Use Limitations"]),
-        ]),
-        div({
-          id: "panel_dul",
-          className: "panel-body cm-boxbody"
-        }, [
-          button({
-            id: "btn_downloadDataUseLetter",
-            className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-            onClick: () => props.downloadDUL()
-          }, ["Download Data Use Letter"]),
-        ])
-      ]),
-
-      div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-        div({ className: "panel-heading cm-boxhead dul-color" }, [
-          h4({}, ["Structured Limitations"]),
-        ]),
-        div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements])
-      ]),
-    ]);
+export async function GenerateUseRestrictionStatements(dataUse) {
+  if (!dataUse || isEmpty(dataUse)) {
+    return [li({
+      className: 'translated restriction',
+      key: 'restriction-none',
+      style: liStyle
+    }, ['None'])];
   }
+  const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+  return translations.map((restriction) => {
+    return li({
+      className: 'translated-restriction',
+      key: `${restriction.code}-statement`,
+      style: liStyle
+    }, [restriction.description]);
+  });
+};
+
+//component generation for non AccessReviewV2 components
+//template structure is different between DAR and DUL due to differing grid organization in previous template, making it hard to convert
+//task is not impossible, just requires additional time
+export default function TranslatedDULComponent(props) {
+  const translatedDULStatements = useRef();
+
+  useEffect(() => {
+    const generatedRestrictions = async (restrictions) => {
+      translatedDULStatements.current = await GenerateUseRestrictionStatements(restrictions);
+    };
+    generatedRestrictions(props.restrictions);
+  }, [props.restrictions]);
+
+  const machineReadableLink = !isNil(props.mrDUL) && !isEmpty(props.mrDUL) ? a({
+    id: 'btn_downloadSDul',
+    onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
+    filename: 'machine-readable-DUL.json',
+    value: props.mrDUL,
+    className: 'italic hover-color response-label',
+  }, ['Download DUL machine-readable format']) : a({className: 'italic hover-color'}, ['No machine readable download DUL present']);
+
+  const dataUseLetterLink = !isNil(props.downloadDUL) && !isEmpty(props.downloadDUL) ? a({
+    id: "btn_downloadDataUseLetter",
+    className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 italic hover-color",
+    fileName: props.downloadDUL,
+    value: props.downloadDUL,
+    onClick: () => props.downloadDUL()
+  }, ["Download Data Use Letter"]) : a({className: 'italic hover-color'}, [' No Data Use Letter Present']);
+
+
+  const template = div({ className: "data-use-container" }, [
+    div({ className: "panel-heading cm-boxhead dul-color" }, [
+      h4({}, ["Data Use Limitations"]),
+    ]),
+    ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements.current]),
+    div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL)}, [dataUseLetterLink]),
+    div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
+  ]);
 
   return template;
 }

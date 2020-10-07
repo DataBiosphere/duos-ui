@@ -1,6 +1,6 @@
 import * as ld from 'lodash';
 import { Component } from 'react';
-import { a, button, div, h4, hr, i } from 'react-hyperscript-helpers';
+import { a, button, div, h4, hr, i, h } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
@@ -320,10 +320,7 @@ class AccessReview extends Component {
                 researcherProfile: researcherProfile }),
 
               div({ className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-                div({ className: 'panel-heading cm-boxhead dul-color' }, [
-                  h4({}, ['Data Use Limitations'])
-                ]),
-                TranslatedDULComponent({restrictions: this.state.dataUse})
+                h(TranslatedDULComponent,{restrictions: this.state.dataUse})
               ])
             ]),
 
