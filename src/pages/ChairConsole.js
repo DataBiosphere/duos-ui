@@ -345,13 +345,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     div({
                       isRendered: this.isAccessCollectEnabled(pendingCase),
                       className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                    ]),
+                    }, []),
                     div({
                       isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
                       className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                    ]),
+                    }, []),
                     div({
                       isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
                       className: twoColumnClass + ' cell-body text f-center empty'
