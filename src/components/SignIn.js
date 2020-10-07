@@ -140,7 +140,7 @@ export const SignIn = hh(class SignIn extends Component {
           clientId: this.state.clientId,
           onSuccess: this.responseGoogle,
           onFailure: this.forbidden,
-          disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed', 'pointer-events': 'none' }
+          disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' },
         }
       );
     }
