@@ -127,7 +127,7 @@ export const SignIn = hh(class SignIn extends Component {
 
   renderSpinnerIfDisabled = (disabled) => {
     return disabled ?
-      div({ style: { 'position': 'absolute', 'top': '45px', 'right': '45px', 'zIndex': '10000' } }, [
+      div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]) :
       h(GoogleLogin, {
@@ -145,7 +145,7 @@ export const SignIn = hh(class SignIn extends Component {
     let googleLoginButton;
 
     if (this.state.clientId === '') {
-      googleLoginButton = div({ style: { 'position': 'absolute', 'top': '45px', 'right': '45px', 'zIndex': '10000' } }, [
+      googleLoginButton = div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]);
     } else {
