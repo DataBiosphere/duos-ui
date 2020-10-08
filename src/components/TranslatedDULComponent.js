@@ -58,7 +58,6 @@ export default function TranslatedDULComponent(props) {
     onClick: () => props.downloadDUL()
   }, ["Download Data Use Letter"]) : a({className: 'italic hover-color'}, [' No Data Use Letter Present']);
 
-
   const template = div({ className: "data-use-container" }, [
     div({ className: "panel-heading cm-boxhead dul-color" }, [
       h4({}, ["Data Use Limitations"]),
