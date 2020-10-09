@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, h } from 'react-hyperscript-helpers';
+import { div, i, span, b, a, hr, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { SingleResultBox } from '../components/SingleResultBox';

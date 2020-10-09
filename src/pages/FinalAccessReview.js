@@ -1,7 +1,7 @@
 import * as ld from 'lodash';
-import { apply, assign, isNil } from 'lodash/fp';
+import { assign, isNil } from 'lodash/fp';
 import { Component, Fragment } from 'react';
-import { a, b, br, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
+import { b, br, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
@@ -480,7 +480,7 @@ class FinalAccessReview extends Component {
       applyToState = {
         electionRP: election,
         statusRP: election.status,
-        rpVoteAccessList: this.chunk(rpElectionReview.reviewVote, 2), 
+        rpVoteAccessList: this.chunk(rpElectionReview.reviewVote, 2),
         chartRP: this.getGraphData(rpElectionReview.reviewVote),
         showRPaccordion: true
       };

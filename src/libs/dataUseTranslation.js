@@ -6,8 +6,6 @@ import join from 'lodash/fp/join';
 import concat from 'lodash/fp/concat';
 import clone from 'lodash/fp/clone';
 import uniq from 'lodash/fp/uniq';
-import { Consent } from '../libs/ajax';
-import { Config } from '../libs/config';
 import { searchOntology } from '../libs/ontologyService';
 
 const srpTranslations = {
