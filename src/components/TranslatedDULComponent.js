@@ -85,7 +85,7 @@ export default function TranslatedDULComponent(props) {
     div({style: DULContainer}, [
       div({ className: "data-use-panel", style: DULPanel }, [
         div({ className: "panel-heading cm-boxhead dul-color" }, [
-          h4({}, ["Data Use Limitations"]),
+          h4({}, ["Structured Limitations"]),
         ]),
         ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements]),
       ]),
