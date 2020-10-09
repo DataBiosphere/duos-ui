@@ -125,21 +125,36 @@ export const SignIn = hh(class SignIn extends Component {
     return user;
   };
 
+  renderSpinnerIfDisabled = (disabled) => {
+    return disabled ?
+      div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
+        img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
+      ]) :
+      h(GoogleLogin, {
+        scope: 'openid email profile',
+        theme: 'dark',
+        clientId: this.state.clientId,
+        onSuccess: this.responseGoogle,
+        onFailure: this.forbidden,
+        disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' },
+      });
+  };
+
   render() {
 
     let googleLoginButton;
 
     if (this.state.clientId === '') {
-      googleLoginButton = div({ style: { 'position': 'relative', 'marginTop': '20px', 'marginLeft': '45px', 'zIndex': '10000' } }, [
+      googleLoginButton = div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {
-          scope: 'openid email profile',
-          theme: 'dark',
-          clientId: this.state.clientId,
-          onSuccess: this.responseGoogle,
-          onFailure: this.forbidden,
+        scope: 'openid email profile',
+        clientId: this.state.clientId,
+        onSuccess: this.responseGoogle,
+        onFailure: this.forbidden,
+        render: ({disabled}) => this.renderSpinnerIfDisabled(disabled)
         }
       );
     }
