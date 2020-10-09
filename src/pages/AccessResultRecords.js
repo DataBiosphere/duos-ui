@@ -356,28 +356,6 @@ class AccessResultRecords extends Component {
     );
   }
 
-  // renderDataUseLimitation(sDUL, mrDUL) {
-
-  //   return (
-  //     div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-
-  //       div({ className: 'panel-heading cm-boxhead dul-color' }, [
-  //         h4({}, ['Data Use Limitations'])
-  //       ]),
-  //       div({ id: 'dul', className: 'panel-body cm-boxbody' }, [
-  //         div({ className: 'row dar-summary' }, [
-  //           div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-  //           div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: sDUL } }, []),
-  //           a({
-  //             id: 'btn_downloadSDul', onClick: () => Utils.download('machine-readable-DUL.json', mrDUL),
-  //             filename: 'machine-readable-DUL.json', value: mrDUL, className: 'italic hover-color'
-  //           }, ['Download DUL machine-readable format'])
-  //         ])
-  //       ])
-  //     ])
-  //   );
-  // }
-
   renderCollectResultBox1(hasUseRestriction, finalDACVote) {
 
     if (finalDACVote === null || finalDACVote === undefined) {
