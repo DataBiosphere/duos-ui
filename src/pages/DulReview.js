@@ -127,7 +127,7 @@ class DulReview extends Component {
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
         h4({ className: "hint" }, ["Please review the Data Use Letter and determine if the Data Use Limitations were accurately converted to Structured Limitations"]),
-        h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL}),
+        h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL, isDUL: true}),
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote dul-background-lighter" }, [
             SubmitVoteBox({

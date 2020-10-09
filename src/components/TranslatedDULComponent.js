@@ -5,11 +5,24 @@ import isEmpty from 'lodash/fp/isEmpty';
 import * as Utils from '../libs/utils';
 import isNil from 'lodash/fp/isNil';
 
-//NOTE: li partial can be used in components that only need the list
 const liStyle = {
   padding: '0.6rem'
 };
 
+const DULPanel = {
+  margin: '0.5rem',
+  flex: 1,
+  boxShadow: 'rgba(0, 0, 0, 0.14) 3px 3px 3px 1px',
+  border: '1px solid #f5f5f5',
+  borderRadius: '5px'
+};
+
+const DULContainer = {
+  display: 'flex',
+  padding: '0 1.1rem'
+};
+
+//NOTE: li partial can be used in components that only need the list
 export async function GenerateUseRestrictionStatements(dataUse) {
   if (!dataUse || isEmpty(dataUse)) {
     return [li({
@@ -28,7 +41,7 @@ export async function GenerateUseRestrictionStatements(dataUse) {
   });
 };
 
-//component generation for non AccessReviewV2 components
+//component generation for non AccessReviewV2 components 
 //template structure is different between DAR and DUL due to differing grid organization in previous template, making it hard to convert
 //task is not impossible, just requires additional time
 export default function TranslatedDULComponent(props) {
@@ -58,14 +71,34 @@ export default function TranslatedDULComponent(props) {
     onClick: () => props.downloadDUL()
   }, ["Download Data Use Letter"]) : a({className: 'italic hover-color'}, [' No Data Use Letter Present']);
 
-  const template = div({ className: "data-use-container" }, [
+  //panel formats differ depending on whether or not its used in DAR vs DUL
+  const DARTemplate = div({ className: "data-use-container" }, [
     div({ className: "panel-heading cm-boxhead dul-color" }, [
       h4({}, ["Data Use Limitations"]),
     ]),
     ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements]),
-    div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL)}, [dataUseLetterLink]),
-    div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
+    div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL) && !isEmpty(props.downloadDUL)}, [dataUseLetterLink]),
+    div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL && !isEmpty(props.mrDUL))},[machineReadableLink])
   ]);
 
-  return template;
+  const DULTemplate =
+    div({style: DULContainer}, [
+      div({ className: "data-use-panel", style: DULPanel }, [
+        div({ className: "panel-heading cm-boxhead dul-color" }, [
+          h4({}, ["Data Use Limitations"]),
+        ]),
+        ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements]),
+      ]),
+      div({className: "data-use-panel", style: DULPanel}, [
+        div({ className: "panel-heading cm-boxhead dul-color" }, [
+          h4({}, ["Data Use Limitations"]),
+        ]),
+        div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL) && !isEmpty(props.downloadDUL)}, [dataUseLetterLink]),
+        div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL && !isEmpty(props.mrDUL))},[machineReadableLink])
+      ])
+    ]);
+
+  const output = props.isDUL ? DULTemplate : DARTemplate;
+
+  return output;
 }

@@ -11,7 +11,6 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { dataUseTranslaton } from '../libs/storage';
 
 class DatasetCatalog extends Component {
 

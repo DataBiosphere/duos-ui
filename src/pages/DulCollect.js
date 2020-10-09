@@ -177,7 +177,7 @@ class DulCollect extends Component {
       b({ isRendered: this.state.consentGroupName, className: "pipe", dangerouslySetInnerHTML: { __html: this.state.consentGroupName } }, []),
       this.state.consentName
     ]);
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.dataUse, downloadDUL: this.downloadDUL});
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.dataUse, downloadDUL: this.downloadDUL, isDUL: true});
 
     return (
 

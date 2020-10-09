@@ -30,7 +30,7 @@ class DulPreview extends Component {
       consent = await Consent.findConsentById(consentId);
     }
 
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: consent, downloadDUL: this.downloadDUL});
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: consent, downloadDUL: this.downloadDUL, isDUL: true});
 
     this.setState(state => {
       state.consentPreview = consent;
