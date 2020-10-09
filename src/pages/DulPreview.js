@@ -24,19 +24,18 @@ class DulPreview extends Component {
 
   async electionReview() {
     const consentId = this.props.match.params.consentId;
-    let consent = (await Election.electionReviewResource(consentId, 'TranslateDUL')).consent;
-
-    if(isNil(consent.election)) {
-      consent = await Consent.findConsentById(consentId);
+    let consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
+    if (consent.election !== undefined) {
+      this.setState({
+        consentPreview: consent.consent
+      });
+    } else {
+      Consent.findConsentById(consentId).then(resp => {
+        this.setState({
+          consentPreview: resp
+        });
+      });
     }
-
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: consent, downloadDUL: this.downloadDUL, isDUL: true});
-
-    this.setState(state => {
-      state.consentPreview = consent;
-      state.translatedDULStatements = translatedDULStatements;
-      return state;
-    });
   }
 
   componentDidMount() {
@@ -54,6 +53,8 @@ class DulPreview extends Component {
       b({ className: "pipe", isRendered: this.state.consentPreview.groupName }, [this.state.consentPreview.groupName]),
       this.state.consentPreview.name
     ]);
+
+    const translatedDULStatements = h(TranslatedDULComponent,{restrictions: this.state.consentPreview.dataUse, isDUL: true});
 
     return (
 
@@ -83,7 +84,7 @@ class DulPreview extends Component {
         div({ className: "accordion-title dul-color" },
           ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
-        this.state.translatedDULStatements
+        translatedDULStatements
       ])
     );
   }
