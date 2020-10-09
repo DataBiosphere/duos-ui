@@ -6,6 +6,7 @@ export const Theme = {
     link: '#216fb4',
     error: '#DB3214',
     success: '#00928A',
+    disabled: '#cccccc',
     background: {
       secondary: 'rgba(0, 96, 159, 0.1)',
       highlighted: 'rgba(193,107,12, 0.1)',

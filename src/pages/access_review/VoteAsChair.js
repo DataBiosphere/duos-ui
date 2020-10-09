@@ -54,7 +54,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   render() {
-    const { vote, rpVote, onUpdate, matchData} = this.props;
+    const { vote, rpVote, onUpdate, matchData, accessElectionOpen, rpElectionOpen } = this.props;
     const accessVoteQuestion = fp.isNil(vote) ?
       div({}, []) :
       VoteQuestion({
@@ -66,6 +66,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
         voteId: fp.isNil(vote) ? null : vote.voteId,
         rationale: fp.isNil(vote.rationale) ? '' : vote.rationale,
         selectedOption: fp.isNil(vote) ? null : vote.vote,
+        disabled: !accessElectionOpen
       });
     const rpVoteQuestion = fp.isNil(rpVote) ?
       div({}, []) :
@@ -78,6 +79,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
         voteId: fp.isNil(rpVote) ? null : rpVote.voteId,
         rationale: fp.isNil(rpVote.rationale) ? '' : rpVote.rationale,
         selectedOption: fp.isNil(rpVote) ? null : rpVote.vote,
+        disabled: !rpElectionOpen
       });
     return div({ id: 'chair-vote' }, [
       accessVoteQuestion,

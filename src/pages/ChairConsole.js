@@ -86,7 +86,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
       dars => {
         this.setState(prev => {
-          prev.electionsList.access = dars.access;
+          // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
+          // for more work related to ensuring closed elections aren't displayed here.
+          prev.electionsList.access = _.filter(dars.access, (e) => { return e.electionStatus !== 'Closed'; });
           prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
           return prev;
         });
@@ -324,10 +326,10 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                         id: pendingCase.frontEndId + '_btnVote',
                         name: 'btn_voteAccess',
                         onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
-                        className: 'cell-button ' + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
+                        className: 'cell-button cancel-color'
                       }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Log Final Vote'])
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Update Vote'])
                       ])
                     ]),
                     div({
@@ -343,13 +345,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     div({
                       isRendered: this.isAccessCollectEnabled(pendingCase),
                       className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                    ]),
+                    }, []),
                     div({
                       isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
                       className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                    ]),
+                    }, []),
                     div({
                       isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
                       className: twoColumnClass + ' cell-body text f-center empty'
