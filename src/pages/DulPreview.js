@@ -54,7 +54,7 @@ class DulPreview extends Component {
       this.state.consentPreview.name
     ]);
 
-    const translatedDULStatements = h(TranslatedDULComponent,{restrictions: this.state.consentPreview.dataUse, isDUL: true});
+    const translatedDULStatements = h(TranslatedDULComponent,{restrictions: this.state.consentPreview.dataUse, isDUL: true, downloadDUL: this.downloadDUL});
 
     return (
 
