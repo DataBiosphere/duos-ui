@@ -116,7 +116,7 @@ class DatasetRegistration extends Component {
     const field = e.target.name;
     const value = e.target.value.replace(/[^\d]/,'');
 
-    if (value === '' || parseInt(value) > -1) {
+    if (value === '' || parseInt(value, 10) > -1) {
       this.setState(prev => {
         prev.datasetData[field] = value;
         prev.disableOkBtn = false;
@@ -151,7 +151,7 @@ class DatasetRegistration extends Component {
     let datasets = this.state.allDatasets;
     let val = fp.filter(function(ds) {
       let properties = ds.properties;
-      return fp.find(function(p) { return p.propertyName === "Dataset Name" && p.propertyValue === name}, properties);
+      return fp.find(function(p) { return p.propertyName === "Dataset Name" && p.propertyValue === name; }, properties);
     },datasets);
     return (val.length === 0);
   };
