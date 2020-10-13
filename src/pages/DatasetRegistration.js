@@ -22,6 +22,7 @@ class DatasetRegistration extends Component {
     super(props);
     this.state = {
       dacList: [],
+      selectedDac: {},
       allDatasets: '',
       nihValid: false,
       disableOkBtn: false,
@@ -57,7 +58,7 @@ class DatasetRegistration extends Component {
         phenotype: '',
         nrParticipants: '',
         description: '',
-        dac: {},
+        dac: '',
         consentId: '',
         publicAccess: '',
         rus: ''
@@ -363,8 +364,10 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       if (fp.isNil(option)) {
         prev.selectedDac = {};
+        prev.datasetData['dac'] = '';
       } else {
         prev.selectedDac = option.item;
+        prev.datasetData['dac'] = option.label;
         prev.disableOkBtn = false;
       }
       return prev;
@@ -703,10 +706,8 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         h(Select, {
-                          key: fp.isEmpty(this.state.datasetData.dac) ? null : this.state.datasetData.dac.value,
                           name: 'dac',
                           id: 'inputDac',
-                          value: this.state.datasetData.dac.label,
                           onChange: (option) => this.onDacChange(option),
                           blurInputOnSelect: true,
                           openMenuOnFocus: true,
