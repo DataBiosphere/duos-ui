@@ -1,7 +1,6 @@
 import * as ld from 'lodash';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
-import assign from 'lodash/fp/assign';
 import { Component, Fragment } from 'react';
 import { a, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';

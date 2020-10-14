@@ -348,7 +348,6 @@ export const DataUseTranslation = {
             resolvedLabels = await Promise.all(ontologyPromises);
           } catch (error) {
             Notifications.showError({text: 'Ontology API Request Error'});
-            console.log(error);
           }
           resp = consentTranslations.diseaseRestrictions(resolvedLabels);
         } else {
