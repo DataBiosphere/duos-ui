@@ -1,7 +1,7 @@
 import { ul } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import {GenerateUseRestrictionStatements} from '../TranslatedDULComponent';
-// import { DataSet } from '../../libs/ajax'
+import { useState, useEffect } from 'react';
 
 const MODAL_ID = 'translatedDul';
 
@@ -18,7 +18,16 @@ export default function TranslatedDulModal(props) {
     props.onCloseRequest(MODAL_ID);
   };
 
-  const translatedDULList = GenerateUseRestrictionStatements(props.dataUse || {});
+  const [translatedDULList, setTranslatedDULList] = useState(GenerateUseRestrictionStatements(props.dataUse || []));
+
+  useEffect(() => {
+    const getTranslatedDULList = async() => {
+      const list = await GenerateUseRestrictionStatements(props.dataUse || []);
+      setTranslatedDULList(list);
+    };
+
+    getTranslatedDULList();
+  }, [props.dataUse]);
 
   return (
     BaseModal({
@@ -33,7 +42,7 @@ export default function TranslatedDulModal(props) {
       action: { label: "Close", handler: OKHandler }
     },
     [
-      ul({style: listStyle, id: "txt_translatedRestrictions", className: "row no-margin translated-restriction"}, [translatedDULList]),
+      ul({style: listStyle, id: "txt_translatedRestrictions", className: "row no-margin translated-restriction"}, translatedDULList),
     ])
   );
 };

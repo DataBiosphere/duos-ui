@@ -41,7 +41,7 @@ export async function GenerateUseRestrictionStatements(dataUse) {
   });
 };
 
-//component generation for non AccessReviewV2 components 
+//component generation for non AccessReviewV2 components
 //template structure is different between DAR and DUL due to differing grid organization in previous template, making it hard to convert
 //task is not impossible, just requires additional time
 export default function TranslatedDULComponent(props) {

@@ -1,4 +1,3 @@
-import forEach from 'lodash/fp/forEach';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
 import filter from 'lodash/fp/filter';
@@ -7,6 +6,7 @@ import concat from 'lodash/fp/concat';
 import clone from 'lodash/fp/clone';
 import uniq from 'lodash/fp/uniq';
 import { searchOntology } from '../libs/ontologyService';
+import { Notifications } from '../libs/utils';
 
 const srpTranslations = {
   hmb: {
@@ -347,6 +347,7 @@ export const DataUseTranslation = {
             });
             resolvedLabels = await Promise.all(ontologyPromises);
           } catch (error) {
+            Notifications.showError({text: 'Ontology API Request Error'});
             console.log(error);
           }
           resp = consentTranslations.diseaseRestrictions(resolvedLabels);

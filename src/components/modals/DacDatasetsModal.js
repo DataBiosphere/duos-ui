@@ -5,7 +5,7 @@ import { Component } from 'react';
 import { a, div, hh, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
 import { BaseModal } from '../BaseModal';
 import { ReadMore } from '../ReadMore';
-import { DataUseTranslation } from '../../libs/dataUseTranslation'
+import { DataUseTranslation } from '../../libs/dataUseTranslation';
 
 export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
 
