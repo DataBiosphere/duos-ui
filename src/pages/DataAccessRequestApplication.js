@@ -16,7 +16,6 @@ import { Navigation } from "../libs/utils";
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
-import { isEmpty } from 'lodash';
 
 class DataAccessRequestApplication extends Component {
 
@@ -76,7 +75,13 @@ class DataAccessRequestApplication extends Component {
         pubmedId: '',
         scientificUrl: '',
         signingOfficial: '',
-        itDirector: ''
+        itDirector: '',
+        anvilUse: '',
+        localUse: '',
+        cloudUse: '',
+        cloudProvider: '',
+        cloudProviderType: '',
+        cloudProviderDescription: ''
       },
       step1: {
         inputResearcher: {
@@ -301,7 +306,15 @@ class DataAccessRequestApplication extends Component {
     let isResearcherInvalid = false,
       isInvestigatorInvalid = false,
       showValidationMessages = false,
+      isSigningOfficialInvalid = false,
+      isITDirectorInvalid = false,
+      isAnvilUseInvalid = false,
+      isCloudUseInvalid = false,
+      isCloudProviderInvalid = false,
       isNihInvalid = !this.state.nihValid;
+
+    const {anvilUse, localUse, cloudUse, cloudProvider, cloudProviderDescription, cloudProviderType} = this.state.formData;
+
     if (!this.isValid(this.state.formData.researcher)) {
       isResearcherInvalid = true;
       showValidationMessages = true;
@@ -325,31 +338,91 @@ class DataAccessRequestApplication extends Component {
       showValidationMessages = true;
     }
 
-    return { isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid };
+    if(!this.isValid(this.state.formData.signingOfficial)) {
+      isSigningOfficialInvalid = true;
+      showValidationMessages = true;
+    }
+
+    if(!this.isValid(this.state.formData.itDirector)) {
+      isITDirectorInvalid = true;
+      showValidationMessages = true;
+    }
+
+    if(!this.isValid(anvilUse)) {
+      isAnvilUseInvalid = true;
+      showValidationMessages = true;
+    } else {
+      if(!anvilUse && !localUse && !cloudUse) {
+        isCloudUseInvalid = true;
+        showValidationMessages = true;
+      } else {
+        if(cloudUse && (!this.isValid(cloudProvider) || !this.isValid(cloudProviderType) || !this.isValid(cloudProviderDescription))){
+          isCloudProviderInvalid = true;
+          showValidationMessages = true;
+        }
+      }
+    }
+
+    return {
+      isResearcherInvalid,
+      isInvestigatorInvalid,
+      showValidationMessages,
+      isNihInvalid,
+      isCloudUseInvalid,
+      isCloudProviderInvalid,
+      isSigningOfficialInvalid,
+      isITDirectorInvalid,
+      isAnvilUseInvalid
+    };
   };
 
   //method to be passed to step 4 for error checks/messaging
   step1InvalidResult(dataset) {
     const checkCollaborator = this.state.formData.checkCollaborator;
-    //NOTE: add signingOfficial back as a constant when back-end functinoality is added
-    //NOTE: add check on cloud use statement as well
-    const {isResearcherInvalid, isInvestigatorInvalid, showValidationMessages, isNihInvalid} = dataset;
+    
+    const {
+      isResearcherInvalid,
+      isInvestigatorInvalid,
+      showValidationMessages,
+      isNihInvalid,
+      isCloudUseInvalid,
+      isCloudProviderInvalid,
+      isSigningOfficialInvalid,
+      isITDirectorInvalid,
+      isAnvilUseInvalid
+    } = dataset;
 
     return isResearcherInvalid
       || isInvestigatorInvalid
       || showValidationMessages
-      || (!checkCollaborator && isNihInvalid);
-    //NOTE: add below check when re-instating signing official
-    //NOTE: also add in check on cloudUseStatement answers
-    // || isEmpty(signingOfficial);
+      || (!checkCollaborator && isNihInvalid)
+      || isCloudUseInvalid
+      || isCloudProviderInvalid
+      || isSigningOfficialInvalid
+      || isITDirectorInvalid
+      || isAnvilUseInvalid;
   }
 
   verifyStep1() {
-    const { isResearcherInvalid, isInvestigatorInvalid, isNihInvalid, showValidationMessages } = this.step1InvalidChecks();
+    const { isResearcherInvalid,
+      isInvestigatorInvalid,
+      isNihInvalid,
+      showValidationMessages,
+      isCloudUseInvalid,
+      isCloudProviderInvalid,
+      isSigningOfficialInvalid,
+      isITDirectorInvalid,
+      isAnvilUseInvalid
+    } = this.step1InvalidChecks();
     this.setState(prev => {
       prev.step1.inputResearcher.invalid = isResearcherInvalid;
       prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
       prev.step1.inputNih.invalid = isNihInvalid;
+      prev.isCloudUseInvalid = isCloudUseInvalid;
+      prev.isCloudProviderInvalid = isCloudProviderInvalid;
+      prev.isSigningOfficialInvalid = isSigningOfficialInvalid;
+      prev.isITDirectorInvalid = isITDirectorInvalid;
+      prev.isAnvilUseInvalid = isAnvilUseInvalid;
       if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
       return prev;
     });
@@ -388,7 +461,6 @@ class DataAccessRequestApplication extends Component {
       this.isValid(this.state.formData.notHealth));
   }
 
-
   verifyStep3() {
     let invalid = false;
     if (this.step3InvalidResult()) {
@@ -425,7 +497,6 @@ class DataAccessRequestApplication extends Component {
           if (prev.formData[key] === '') {
             prev.formData[key] = undefined;
           }
-
         }
         return prev;
       }, () => {
@@ -610,12 +681,12 @@ class DataAccessRequestApplication extends Component {
       ontologies = [],
       signingOfficial = '',
       itDirector = '',
-      cloudRequested = '',
-      localRequested = '',
-      anvilUse = '',
-      providerName = '',
-      providerType = '',
-      providerDescription = ''
+      cloudUse = false,
+      localUse = false,
+      anvilUse = false,
+      cloudProvider = '',
+      cloudProviderType = '',
+      cloudProviderDescription = ''
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
@@ -658,7 +729,6 @@ class DataAccessRequestApplication extends Component {
     }, [div({
       className: 'dialog-description'
     }, ['Are you sure you want to send this Data Access Request Application?'])]);
-
     return (
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -765,12 +835,17 @@ class DataAccessRequestApplication extends Component {
                 nextPage: this.nextPage,
                 signingOfficial,
                 itDirector,
-                providerType,
-                providerName,
-                cloudRequested,
-                localRequested,
                 anvilUse,
-                providerDescription
+                cloudUse,
+                localUse,
+                cloudProviderType,
+                cloudProvider,
+                cloudProviderDescription,
+                isCloudUseInvalid: this.state.isCloudUseInvalid,
+                isCloudProviderInvalid: this.state.isCloudProviderInvalid,
+                isSigningOfficialInvalid: this.state.isSigningOfficialInvalid,
+                isITDirectorInvalid: this.state.isITDirectorInvalid,
+                isAnvilUseInvalid: this.state.isAnvilUseInvalid
               }))
             ]),
 
