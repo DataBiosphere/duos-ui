@@ -11,10 +11,6 @@ const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Pro
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
 const profileSubmitted = span(["Please make sure ", profileLink, " is updated as it will be used to pre-populate parts of the Data Access Request"]);
 
-const errorBackgroundStyle = {
-  backgroundColor: "rgba(243, 73, 73, 0.19)"
-};
-
 export default function ResearcherInfo(props) {
   const {
     completed,
@@ -425,7 +421,7 @@ export default function ResearcherInfo(props) {
                 textarea({
                   style: {
                     backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProviderDescription) ? "rgba(243, 73, 73, 0.19)" : "inherit",
-                    width: '100%', 
+                    width: '100%',
                     padding: '1rem'
                   },
                   defaultValue: cloudProviderDescription,
