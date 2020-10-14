@@ -473,7 +473,7 @@ class DatasetCatalog extends Component {
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
                             a({
                               id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
-                              onClick: (e) => this.openTranslatedDUL(dataSet.dataUse),
+                              onClick: () => this.openTranslatedDUL(dataSet.dataUse),
                               className: (!dataSet.active ? 'dataset-disabled' : 'enabled')
                             }, ['Translated Use Restriction'])
                           ]),

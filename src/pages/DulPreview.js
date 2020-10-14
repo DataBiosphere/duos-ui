@@ -1,6 +1,5 @@
-import { isNil } from 'lodash';
 import { Component } from 'react';
-import { div, button, i, span, b, a, h4, hr, h} from 'react-hyperscript-helpers';
+import { div, i, span, b, a, hr, h} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Consent, Election, Files } from '../libs/ajax';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';

@@ -41,11 +41,6 @@ const TEXT = {
   display: 'inline-block'
 };
 
-const BOLD = {
-  ...TEXT,
-  fontWeight: Theme.font.weight.semibold,
-};
-
 export const AppSummary = hh(class AppSummary extends React.Component {
 
   constructor(props) {
