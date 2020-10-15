@@ -1,5 +1,5 @@
 import React from 'react';
-import { div, hh, span } from 'react-hyperscript-helpers';
+import { div, hh, span, h } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Files } from '../../libs/ajax';
 import { download } from '../../libs/utils';
@@ -82,14 +82,16 @@ export const AppSummary = hh(class AppSummary extends React.Component {
     const StructuredLimitations = div({ style: ROOT}, [
       div({style: HEADER}, 'Data Use Structured Limitations'),
       div({style: TEXT}, [translatedRestrictionsList]),
-      div(DownloadLink({
-        label: 'DUL machine-readable format',
-        onDownload: () => download('machine-readable-DUL.json', mrDUL)
-      })),
-      div(DownloadLink({
-        label: 'Data Use Letter',
-        onDownload: this.downloadDUL
-      }))
+      div({style: {marginTop: '0.8rem'}}, [
+        h(DownloadLink,{
+          label: 'DUL machine-readable format',
+          onDownload: () => download('machine-readable-DUL.json', mrDUL)
+        }),
+        h(DownloadLink,{
+          label: 'Data Use Letter',
+          onDownload: this.downloadDUL
+        })
+      ])
     ]);
 
     return div({ id: 'app-summary' },
