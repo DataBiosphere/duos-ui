@@ -1114,7 +1114,7 @@ class DatasetRegistration extends Component {
                         }, ['Register in DUOS!']),
 
                         ConfirmationDialog({
-                          title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
+                          title: 'Dataset Registration Confirmation', disableOkBtn: this.state.disableOkBtn,
                           color: 'dataset', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
                         }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit this Dataset Registration?'])]),
                         h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
