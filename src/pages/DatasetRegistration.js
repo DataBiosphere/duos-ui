@@ -63,7 +63,8 @@ class DatasetRegistration extends Component {
         publicAccess: '',
         rus: ''
       },
-      problemSavingRequest: false
+      problemSavingRequest: false,
+      submissionSuccess: false
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -110,6 +111,7 @@ class DatasetRegistration extends Component {
       prev.datasetData[field] = value;
       prev.disableOkBtn = false;
       prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -123,6 +125,7 @@ class DatasetRegistration extends Component {
         prev.datasetData[field] = value;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
+        prev.submissionSuccess = false;
         return prev;
       });
     }
@@ -135,6 +138,7 @@ class DatasetRegistration extends Component {
       prev.formData[field] = value;
       prev.disableOkBtn = false;
       prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -221,11 +225,12 @@ class DatasetRegistration extends Component {
         else {
           let ds = this.formatFormData(formData);
           DataSet.postDatasetForm(ds).then(resp => {
-            this.setState({ showDialogSubmit: false });
+            this.setState({ showDialogSubmit: false, submissionSuccess: true });
             this.props.history.push('dataset_registration');
           }).catch(e =>
             this.setState(prev => {
               prev.problemSavingRequest = true;
+              prev.submissionSuccess = false;
               return prev;
             }));
         }
@@ -414,7 +419,7 @@ class DatasetRegistration extends Component {
     } = this.state.formData;
     const { ontologies } = this.state;
 
-    const { problemSavingRequest, showValidationMessages } = this.state;
+    const { problemSavingRequest, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
     // NOTE: set this to always false for now to submit dataset without consent info
     // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
@@ -1108,6 +1113,12 @@ class DatasetRegistration extends Component {
                       })
                     ]),
 
+                    div({ isRendered: submissionSuccess, className: 'rp-alert' }, [
+                      Alert({
+                        id: 'submissionSuccess', type: 'info',
+                        title: 'Dataset was successfully registered.'
+                      })
+                    ]),
 
                     div({ className: 'row no-margin' }, [
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
