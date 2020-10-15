@@ -109,6 +109,7 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.datasetData[field] = value;
       prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
       return prev;
     });
   };
@@ -121,6 +122,7 @@ class DatasetRegistration extends Component {
       this.setState(prev => {
         prev.datasetData[field] = value;
         prev.disableOkBtn = false;
+        prev.problemSavingRequest = false;
         return prev;
       });
     }
@@ -132,6 +134,7 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.formData[field] = value;
       prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
       return prev;
     });
   };
@@ -369,6 +372,7 @@ class DatasetRegistration extends Component {
         prev.selectedDac = option.item;
         prev.datasetData['dac'] = option.label;
         prev.disableOkBtn = false;
+        prev.problemSavingRequest = false;
       }
       return prev;
     });
