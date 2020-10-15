@@ -24,6 +24,7 @@ class DatasetRegistration extends Component {
       dacList: [],
       selectedDac: {},
       allDatasets: '',
+      allDatasetNames: [],
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
@@ -64,7 +65,8 @@ class DatasetRegistration extends Component {
         rus: ''
       },
       problemSavingRequest: false,
-      submissionSuccess: false
+      submissionSuccess: false,
+      errorMessage: ''
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
@@ -86,11 +88,13 @@ class DatasetRegistration extends Component {
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.findDataSets(currentUser.dacUserId);
+    const allDatasetNames = allDatasets.map(d => {let name = d.properties.find(p => p.propertyName === "Dataset Name"); return name.propertyValue;})
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.notificationData = notificationData;
       prev.datasetData['researcher'] = currentUser.displayName;
       prev.allDatasets = allDatasets;
+      prev.allDatasetNames = allDatasetNames;
       prev.dacList = dacs;
       return prev;
     });
@@ -156,12 +160,9 @@ class DatasetRegistration extends Component {
   };
 
   validateDatasetName(name) {
-    let datasets = this.state.allDatasets;
-    let val = fp.filter(function(ds) {
-      let properties = ds.properties;
-      return fp.find(function(p) { return p.propertyName === "Dataset Name" && p.propertyValue === name; }, properties);
-    },datasets);
-    return (val.length === 0);
+    let datasets = this.state.allDatasetNames;
+    let val = !fp.contains(name, datasets);
+    return val;
   };
 
   showDatasetNameErrors(name, showValidationMessages) {
@@ -227,12 +228,18 @@ class DatasetRegistration extends Component {
           DataSet.postDatasetForm(ds).then(resp => {
             this.setState({ showDialogSubmit: false, submissionSuccess: true });
             this.props.history.push('dataset_registration');
-          }).catch(e =>
+          }).catch(e => {
+            let errorMessage = (e.status === 409) ?
+              'Dataset with this name already exists: ' + this.state.datasetData.datasetName
+              + '. Please choose a different name before attempting to submit again.'
+              : 'Some errors occurred, Dataset Registration couldn\'t be completed.';
             this.setState(prev => {
               prev.problemSavingRequest = true;
               prev.submissionSuccess = false;
+              prev.errorMessage = errorMessage;
               return prev;
-            }));
+            });
+          });
         }
       });
     } else {
@@ -1109,7 +1116,7 @@ class DatasetRegistration extends Component {
                     div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
                       Alert({
                         id: 'problemSavingRequest', type: 'danger',
-                        title: 'Some errors occurred, Dataset Registration couldn\'t be completed.'
+                        title: this.state.errorMessage
                       })
                     ]),
 
