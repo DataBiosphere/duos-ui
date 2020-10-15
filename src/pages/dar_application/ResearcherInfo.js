@@ -15,7 +15,7 @@ export default function ResearcherInfo(props) {
   const {
     completed,
     darCode,
-    providerDescription,
+    cloudProviderDescription,
     eRACommonsDestination,
     externalCollaborators,
     formFieldChange,
@@ -34,8 +34,11 @@ export default function ResearcherInfo(props) {
     researcherGate,
     showValidationMessages,
     nextPage,
-    providerType,
-    providerName
+    cloudProviderType,
+    cloudProvider,
+    isCloudUseInvalid,
+    isCloudProviderInvalid,
+    isAnvilUseInvalid
   } = props;
 
   const navButtonContainerStyle = {
@@ -47,16 +50,45 @@ export default function ResearcherInfo(props) {
   const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || '');
   const [itDirector, setITDirector] = useState(props.itDirector || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
-  const [cloudRequested, setCloudRequested] = useState(props.cloudRequested || '');
-  const [localRequested, setLocalRequested] = useState(props.localRequested || '');
+  const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
+  const [localUse, setLocalUse] = useState(props.localUse || '');
+
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
     setCheckCollaborator(props.checkCollaborator);
     setITDirector(props.itDirector);
     setAnvilUse(props.anvilUse);
-    setCloudRequested(props.cloudRequested);
-    setLocalRequested(props.localRequested);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudRequested, props.localRequested]);
+    setCloudUse(props.cloudUse);
+    setLocalUse(props.localUse);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+
+  const cloudRadioGroup = div({
+    className: 'radio-inline',
+    style: {
+      marginBottom: "2rem",
+      backgroundColor: showValidationMessages && isAnvilUseInvalid ? "rgba(243, 73, 73, 0.19)" : "inherit"
+    }
+  }, [
+    [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
+      label({
+        className: "radio-wrapper",
+        key: `anvil-use-option-${option.value}`,
+        id: `lbl-anvil-use-option-${option.value}`,
+        htmlFor: `rad-anvil-use-option-${option.value}`
+      }, [
+        input({
+          type: 'radio',
+          id: `rad-anvil-use-option-${option.value}`,
+          name: 'anvil-use-approval-status',
+          checked: option.value === anvilUse,
+          value: option.value,
+          onChange: (e) => (formFieldChange({name: 'anvilUse', value: option.value}))
+        }),
+        span({ className: "radio-check"}),
+        span({ className: "radio-label"}, [option.label])
+      ])
+    )
+  ]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -242,7 +274,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({className: 'form-group', isRendered: false}, [
+        div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
@@ -266,7 +298,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({className: 'form-group', isRendered: false}, [
+        div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
@@ -290,7 +322,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({className: 'form-group', isRendered: false}, [
+        div({className: 'form-group'}, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               label({className: "control-label rp-title-question"}, [
@@ -304,92 +336,98 @@ export default function ResearcherInfo(props) {
                   }, ['AnVIL']),
                   '?'
                 ]),
-                [{label: 'Yes', value: true}, {label: 'No', value: false}].map((option) =>
-                  label({
-                    className: 'radio-wrapper',
-                    key: `anvil-use-option-${option.value}`,
-                    id: `lbl-anvil-use-option-${option.value}`,
-                    htmlFor: `rad-anvil-use-option-${option.value}`
-                  }, [
-                    input({
-                      type: 'radio',
-                      id: `rad-anvil-use-option-${option.value}`,
-                      name: 'anvil-use-approval-status',
-                      checked: option.value === anvilUse,
-                      onChange: (e) => (formFieldChange({name: 'anvilUse', value: option.value}))
-                    })
-                  ])
-                )
               ]),
             ]),
-            div({className: "row no-margin"}, [
-              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                input({
-                  type: 'checkbox',
-                  id: 'cloud-requested',
-                  name: 'cloudRequested',
-                  className: 'checkbox-inline rp-checkbox',
-                  disabled: !isNil(darCode),
-                  required: true,
-                  checked: cloudRequested,
-                  onChange: (e) => formFieldChange({name: 'cloudRequested', value: e.target.checked})
-                }),
-                label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
-                  ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
-                )
-              ])
+            div({className: 'row no-margin'}, [
+              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+                cloudRadioGroup
+              ]),
             ]),
-            div({className: "row no-margin"}, [
-              div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-                input({
-                  type: 'checkbox',
-                  id: 'local-requested',
-                  name: 'localRequested',
-                  className: 'checkbox-inline rp-checkbox',
-                  disabled: !isNil(darCode),
-                  required: true,
-                  checked: localRequested,
-                  onChange: (e) => formFieldChange({name: 'localRequested', value: e.target.checked})
-                }),
-                label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
-                  ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
-                )
-              ])
+            div({
+              className: 'computing-use-container',
+              style: {
+                backgroundColor: showValidationMessages && isCloudUseInvalid ? "rgba(243, 73, 73, 0.19)" : "inherit"
+              }
+            }, [
+              div({className: "row no-margin"}, [
+                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                  input({
+                    type: 'checkbox',
+                    id: 'cloud-requested',
+                    name: 'cloudUse',
+                    className: 'checkbox-inline rp-checkbox',
+                    disabled: !isNil(darCode),
+                    required: true,
+                    checked: cloudUse,
+                    onChange: (e) => formFieldChange({name: 'cloudUse', value: e.target.checked})
+                  }),
+                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'cloud-requested' },
+                    ['I am requesting permission to use cloud computing to carry out the research described in my Research Use Statement']
+                  )
+                ])
+              ]),
+              div({className: "row no-margin"}, [
+                div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+                  input({
+                    type: 'checkbox',
+                    id: 'local-requested',
+                    name: 'localUse',
+                    className: 'checkbox-inline rp-checkbox',
+                    disabled: !isNil(darCode),
+                    required: true,
+                    checked: localUse,
+                    onChange: (e) => formFieldChange({name: 'localUse', value: e.target.checked})
+                  }),
+                  label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'local-requested' },
+                    ['I am requesting permission to use local computing to carry out the research described in my Research Use Statement']
+                  )
+                ])
+              ]),
             ]),
-            div({className: "row no-margin"}, [
+            div({className: "row no-margin", isRendered: cloudUse === true}, [
               div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group"}, [
                 label({className: 'control-label'}, ['Name of Cloud Provider']),
                 input({
+                  style: {
+                    backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProvider) ? "rgba(243, 73, 73, 0.19)" : "inherit"
+                  },
                   type: 'text',
                   name: 'cloud-provider-name',
-                  defaultValue: providerName || '',
+                  defaultValue: cloudProvider || '',
                   className: 'form-control',
                   required: true,
                   disabled: !isNil(darCode),
-                  onBlur: (e) => formFieldChange({name: 'providerName', value: e.target.value})
+                  onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
                 })
               ]),
               div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group"}, [
-                label({className: 'control-label'}, ['Type of Provider']),
+                label({className: 'control-label'}, ['Type of Cloud Provider']),
                 input({
+                  style: {
+                    backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProviderType) ? "rgba(243, 73, 73, 0.19)" : "inherit"
+                  },
                   type: 'text',
                   name: 'provider-type-name',
-                  defaultValue: providerType || '',
+                  defaultValue: cloudProviderType || '',
                   className: 'form-control',
                   required: true,
                   disabled: !isNil(darCode),
-                  onBlur: (e) => formFieldChange({name: 'providerType', value: e.target.value})
+                  onBlur: (e) => formFieldChange({name: 'cloudProviderType', value: e.target.value})
                 })
               ])
             ]),
-            div({className: 'row no-margin'}, [
+            div({className: 'row no-margin', isRendered: cloudUse === true}, [
               div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group"}, [
                 textarea({
-                  style: {width: '100%', padding: '1rem'},
-                  defaultValue: providerDescription,
-                  onBlur: (e) => formFieldChange({name: 'providerDescription', value: e.target.value}),
-                  name: 'providerDescription',
-                  id: 'providerDescription',
+                  style: {
+                    backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProviderDescription) ? "rgba(243, 73, 73, 0.19)" : "inherit",
+                    width: '100%',
+                    padding: '1rem'
+                  },
+                  defaultValue: cloudProviderDescription,
+                  onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
+                  name: 'cloudProviderDescription',
+                  id: 'cloudProviderDescription',
                   rows: '6',
                   required: true,
                   placeholder: 'Please describe the type(s) of cloud computing service(s) you wish to obtain (e.g PaaS, SaaS, IaaS, DaaS)'
@@ -401,7 +439,7 @@ export default function ResearcherInfo(props) {
             ])
           ])
         ]),
-        div({ className: 'form-group', isRendered: false }, [
+        div({ className: 'form-group'}, [
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               label({ className: "control-label rp-title-question" }, [
