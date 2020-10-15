@@ -88,7 +88,10 @@ class DatasetRegistration extends Component {
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.findDataSets(currentUser.dacUserId);
-    const allDatasetNames = allDatasets.map(d => {let name = d.properties.find(p => p.propertyName === "Dataset Name"); return name.propertyValue;})
+    const allDatasetNames = allDatasets.map(d => {
+      let name = d.properties.find(p => p.propertyName === "Dataset Name");
+      return name.propertyValue;
+    });
     const dacs = await DAC.list();
     this.setState(prev => {
       prev.notificationData = notificationData;
