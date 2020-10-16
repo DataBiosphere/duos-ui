@@ -334,25 +334,8 @@ class DatasetCatalog extends Component {
                 title: "Dataset Catalog",
                 description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
-            ]),
-
-            div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
-              div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
-                h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
-              ]),
-              button({
-                id: "btn_downloadSelection",
-                download: "",
-                disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
-                onClick: this.download,
-                className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background"
-              }, [
-                "Download selection",
-                span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
-              ]),
-            ]),
+            ])
           ]),
-
 
           div({ className: "table-wrap" }, [
             form({ className: "pos-relative" }, [
@@ -564,6 +547,21 @@ class DatasetCatalog extends Component {
             ])
           ]),
 
+          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
+            div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
+              h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
+            ]),
+            button({
+              id: "btn_downloadSelection",
+              download: "",
+              disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
+              onClick: this.download,
+              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background"
+            }, [
+              "Download selection",
+              span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
+            ]),
+          ]),
           div({ className: "f-right" }, [
             button({
               id: "btn_applyAccess",
