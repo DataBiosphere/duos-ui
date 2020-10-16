@@ -121,7 +121,7 @@ class Home extends Component {
                   className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1 hidden-xs',
                   style: { padding: '1rem 5rem', margin: 'auto 10rem' },
                   alt: 'What is DUOS graphic',
-                  src: '/images/DUOS_Homepage_diagram.png'
+                  src: '/images/DUOS_Homepage_diagram.svg'
                 })
               ])
             ])
