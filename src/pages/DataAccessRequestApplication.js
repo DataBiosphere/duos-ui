@@ -9,13 +9,14 @@ import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, Researcher } from '../libs/ajax';
+import { DAR, Researcher, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
+import { isEmpty, isNil } from 'lodash';
 
 class DataAccessRequestApplication extends Component {
 
@@ -570,9 +571,38 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-  onDatasetsChange = (data, action) => {
+  addDataUseToDataset = async(currentDatasets) => {
+    //iterate through datasets array
+    //if dataUse is not on the object, api call to get the full dataset info
+    //otherwise leave it be
+    if(isNil(currentDatasets) || isEmpty(currentDatasets)) {
+      return null;
+    }
+
+    let datasetPromises = currentDatasets.map((partialDataset) => {
+      let mappedDataset;
+      if (fp.isNil(partialDataset.dataUse)) {
+        mappedDataset = DataSet.getDataSetsByDatasetId(partialDataset.value);
+      } else {
+        mappedDataset = Promise.resolve(partialDataset);
+      }
+      return mappedDataset;
+    });
+
+    let dataUseArray = await Promise.all(datasetPromises);
+    dataUseArray.forEach((datasetRecord, index) => {
+      currentDatasets[index].dataUse = datasetRecord.dataUse;
+    });
+    return currentDatasets;
+  }
+
+  onDatasetsChange = async (currentDatasets, action) => {
+    let updatedDatasets = null;
+    if(!isNil(currentDatasets) && !isEmpty(currentDatasets)) {
+      updatedDatasets = await this.addDataUseToDataset(fp.cloneDeep(currentDatasets));
+    }
     this.setState(prev => {
-      prev.formData.datasets = data;
+      prev.formData.datasets = updatedDatasets;
       return prev;
     }, () => this.checkValidations());
   };
@@ -856,6 +886,7 @@ class DataAccessRequestApplication extends Component {
                 showValidationMessages: showValidationMessages,
                 formFieldChange: this.formFieldChange,
                 projectTitle: this.state.formData.projectTitle,
+                initializeDatasets: this.addDataUseToDataset,
                 isTypeOfResearchInvalid: isTypeOfResearchInvalid,
                 TypeOfResearch: TORComponent,
                 methods,

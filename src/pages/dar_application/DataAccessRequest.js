@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react';
 import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
+import cloneDeep from 'lodash/fp/cloneDeep';
+import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 
 export default function DataAccessRequest(props) {
   const {
     darCode,
-    datasets,
+    // datasets,
+    initializeDatasets, //method used to assign dataUse to pre-assgined datasets in the application
     onDatasetsChange,
     showValidationMessages,
     formFieldChange,
@@ -26,6 +29,7 @@ export default function DataAccessRequest(props) {
   const [forProfit, setForProfit] = useState(props.forProfit);
   const [rus, setRus] = useState(props.rus);
   const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
+  const [datasets, setDatasets] = useState(props.datasets || []);
 
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
@@ -47,11 +51,27 @@ export default function DataAccessRequest(props) {
     formFieldChange(dataset);
   };
 
+
   useEffect(() => {
     setProjectTitle(props.projectTitle);
     setRus(props.rus);
     setNonTechRus(props.nonTechRus);
-  }, [props.rus, props.nonTechRus, props.projectTitle]);
+    setDatasets(props.datasets);
+  }, [props.rus, props.nonTechRus, props.projectTitle, props.datasets]);
+
+  //seperate useEffect hook to initialize dataUse on attached datasets (legacy partials)
+  useEffect(() => {
+    //if datasets array is populated, check for dataUse objects
+    //if any dataSet has an empty value or has the key missing, attach dataUse objects to partials
+    const updateDatasets = async(datasets) => {
+      if (!every((dataset) => !isNil(dataset.dataUse) && !isEmpty(dataset.dataUse), datasets)) {
+        const clonedDatasets = cloneDeep(datasets);
+        const updatedDatasets = await initializeDatasets(clonedDatasets);
+        setDatasets(updatedDatasets);
+      }
+    };
+    updateDatasets(datasets);
+  }, [datasets, initializeDatasets]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
