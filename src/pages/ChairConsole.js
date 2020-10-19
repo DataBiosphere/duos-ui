@@ -329,7 +329,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                         className: 'cell-button cancel-color'
                       }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Update Vote'])
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Log Final Vote'])
                       ])
                     ]),
                     div({

@@ -29,7 +29,7 @@ export const SignIn = hh(class SignIn extends Component {
   }
 
   getUser = async () => {
-    return await User.getByEmail(Storage.getGoogleData().profileObj.email);
+    return await User.getMe();
   }
 
   responseGoogle = async (response) => {
