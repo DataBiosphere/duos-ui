@@ -29,6 +29,7 @@ class DatasetCatalog extends Component {
         showDialogDelete: false,
         showDialogEnable: false,
         showDialogDisable: false,
+        showDialogEdit: false
       },
       disableOkButton: false,
       translatedUseRestrictionModal: {},
@@ -176,6 +177,13 @@ class DatasetCatalog extends Component {
     });
   };
 
+  openEdit = (datasetId) => (e) => {
+    this.setState({
+      showDialogEdit: true,
+      datasetId: datasetId
+    })
+  }
+
   openEnable = (datasetId) => (e) => {
     this.setState({
       showDialogEnable: true,
@@ -224,7 +232,7 @@ class DatasetCatalog extends Component {
         });
       });
     } else {
-      this.setState({ showDialogEnagle: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
+      this.setState({ showDialogEnable: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
 
   };
@@ -245,6 +253,18 @@ class DatasetCatalog extends Component {
       });
     } else {
       this.setState({ showDialogDisable: false, alertMessage: undefined, alertTitle: undefined });
+    }
+  };
+
+  dialogHandlerEdit = (answer) => (e) => {
+    this.setState({ disableOkButton: true });
+    if (answer) {
+        this.setState(prev => {
+          this.setState({ showDialogEdit: false, disableOkButton: false });
+          return prev;
+        });
+    } else {
+      this.setState({ showDialogEdit: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
   };
 
@@ -353,6 +373,7 @@ class DatasetCatalog extends Component {
                     th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size', style: { textAlign: 'center' } }, ['Actions']),
                     th({ className: 'table-titles dataset-color cell-size' }, ['Dataset ID']),
                     th({ className: 'table-titles dataset-color cell-size' }, ['Dataset Name']),
+                    th({ className: 'table-titles dataset-color cell-size'}, ['Data Access Committee']),
                     th({ className: 'table-titles dataset-color cell-size' }, ['Data Source']),
                     th({ className: 'table-titles dataset-color cell-size' }, ['Structured Data Use Limitations']),
                     th({ className: 'table-titles dataset-color cell-size' }, ['Data Type']),
@@ -389,7 +410,7 @@ class DatasetCatalog extends Component {
                             ])
                           ]),
 
-                          td({ isRendered: this.state.isAdmin, style: { minWidth: '11rem' } }, [
+                          td({ isRendered: this.state.isAdmin, style: { minWidth: '14rem' } }, [
                             div({ className: 'dataset-actions' }, [
                               a({
                                 id: trIndex + '_btnDelete', name: 'btn_delete', onClick: this.openDelete(dataSet.dataSetId),
@@ -398,6 +419,15 @@ class DatasetCatalog extends Component {
                                 span({
                                   className: 'cm-icon-button glyphicon glyphicon-trash caret-margin ' + (dataSet.deletable ? 'default-color' : ''),
                                   'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
+                                })
+                              ]),
+
+                              a({
+                                id: trIndex + '_btnEdit', name: 'btn_edit', onClick: this.openEdit(dataSet.dataSetId),
+                              }, [
+                                span({
+                                  className: 'cm-icon-button glyphicon glyphicon-pencil caret-margin dataset-color', 'aria-hidden': 'true',
+                                  'data-tip': 'Edit dataset', 'data-for': 'tip_edit'
                                 })
                               ]),
 
@@ -443,6 +473,13 @@ class DatasetCatalog extends Component {
                             className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Dataset Name'; }), 'propertyValue', '')
+                          ]),
+
+                          td({
+                            id: trIndex + '_dac', name: 'dac',
+                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                          }, [
+                            get(find(dataSet.properties, p => { return p.propertyName === 'DAC'; }), 'propertyValue', '')
                           ]),
 
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
@@ -609,6 +646,16 @@ class DatasetCatalog extends Component {
             disableOkBtn: this.state.disableOkButton,
             action: { label: "Yes", handler: this.dialogHandlerEnable }
           }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
+
+          ConfirmationDialog({
+            title: 'Edit Dataset Confirmation?',
+            color: 'dataset',
+            alertMessage: this.state.errorMessage,
+            alertTitle: this.state.alertTitle,
+            showModal: this.state.showDialogEdit,
+            disableOkBtn: this.state.disableOkButton,
+            action: { label: "Yes", handler: this.dialogHandlerEdit }
+          }, [div({ className: "dialog-description" }, ["Are you sure you want to edit this Dataset?"]),]),
 
           ConnectDatasetModal({
             isRendered: this.state.showConnectDatasetModal,
