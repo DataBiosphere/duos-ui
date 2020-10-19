@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
+import forEach from 'lodash/fp/forEach';
 import cloneDeep from 'lodash/fp/cloneDeep';
 import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
@@ -30,6 +31,12 @@ export default function DataAccessRequest(props) {
   const [rus, setRus] = useState(props.rus);
   const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
   const [datasets, setDatasets] = useState(props.datasets || []);
+  const [activeDULQuestions, setActiveDULQuestions] = useState({});
+  //parent needs to initialize defaults if value not present
+  const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement); 
+  const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement);
+  const [irbDocument, setIRBDocument] = useState('');
+
 
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
@@ -51,26 +58,71 @@ export default function DataAccessRequest(props) {
     formFieldChange(dataset);
   };
 
+  const calculateDSTally = (diseaseRestrictions, ontologyTally) => {
+    forEach((diseaseLink) => {
+      if(!ontologyTally[diseaseLink]) {
+        ontologyTally[diseaseLink] = 0;
+      }
+      ontologyTally[diseaseLink]++;
+    })(diseaseRestrictions);
+  };
 
+  //NOTE: Is it a good idea to optimize questionTally struct updates or just keep the method simple?
+  //initialization hook, loads data from props
   useEffect(() => {
     setProjectTitle(props.projectTitle);
     setRus(props.rus);
     setNonTechRus(props.nonTechRus);
-    setDatasets(props.datasets);
+    setDatasets(props.datasets); //initialization of datasets from props
   }, [props.rus, props.nonTechRus, props.projectTitle, props.datasets]);
 
-  //seperate useEffect hook to initialize dataUse on attached datasets (legacy partials)
+  //seperate hook for datasets once state is assigned value from props
+  //used for updates as users add/remove items from AsyncSelect
   useEffect(() => {
     //if datasets array is populated, check for dataUse objects
     //if any dataSet has an empty value or has the key missing, attach dataUse objects to partials
-    const updateDatasets = async(datasets) => {
+
+    const calculateRestrictionEquivalency = (datasetCollection) => {
+      let updatedDULQuestions = {};
+      let ontologyTally = {};
+      if (!isNil(datasetCollection)) {
+        const collectionLength = datasetCollection.length;
+        datasetCollection.forEach(dataset => {
+          const dataUse = dataset.dataUse;
+          if (!isNil(dataUse) && !isEmpty(dataUse)) {
+            forEach((value, key) => {
+              //diseaseRestrictions is an array with obolibrary links
+              //links can still act as comparator values when determining equal Disease related studies
+              if (key === 'diseaseRestrictions' && collectionLength > 1) {
+                calculateDSTally(value, ontologyTally);
+              } else {
+                updatedDULQuestions[key] = true;
+              }
+            })(dataset);
+          }
+        });
+
+        updatedDULQuestions['diseaseRestrictions'] = every((count) => {
+          return count === collectionLength;
+        })(ontologyTally);
+      }
+
+      //NOTE: how to deal with previously loaded documents when visible questions change?
+      //Can compare previous with current, but will lead to infinite loop due to state variable as a dependency
+
+      //end of process, update activeQuestionList for rendering
+      setActiveDULQuestions(updatedDULQuestions);
+    };
+
+    const updateDatasetsAndDULQuestions = async(datasets) => {
       if (!every((dataset) => !isNil(dataset.dataUse) && !isEmpty(dataset.dataUse), datasets)) {
         const clonedDatasets = cloneDeep(datasets);
         const updatedDatasets = await initializeDatasets(clonedDatasets);
         setDatasets(updatedDatasets);
+        calculateRestrictionEquivalency(datasets);
       }
     };
-    updateDatasets(datasets);
+    updateDatasetsAndDULQuestions(datasets);
   }, [datasets, initializeDatasets]);
 
   return (
@@ -101,7 +153,7 @@ export default function DataAccessRequest(props) {
               classNamePrefix: 'select',
               placeholder: 'Dataset Name, Sample Collection ID, or PI',
               className: (isEmpty(datasets) && showValidationMessages) ?
-                ' required-select-error select-autocomplete' :
+                'required-select-error select-autocomplete' :
                 'select-autocomplete'
 
             }),

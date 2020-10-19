@@ -574,7 +574,7 @@ class DataAccessRequestApplication extends Component {
   addDataUseToDataset = async(currentDatasets) => {
     //iterate through datasets array
     //if dataUse is not on the object, api call to get the full dataset info
-    //otherwise leave it be
+    //method defined here rather than step 2 component since it is a dependency of another helper method
     if(isNil(currentDatasets) || isEmpty(currentDatasets)) {
       return null;
     }
@@ -606,7 +606,6 @@ class DataAccessRequestApplication extends Component {
       return prev;
     }, () => this.checkValidations());
   };
-
 
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
