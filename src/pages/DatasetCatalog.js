@@ -9,7 +9,7 @@ import { TranslatedDulModal } from '../components/modals/TranslatedDulModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { DAR, DataSet, Files } from '../libs/ajax';
+import { DAC, DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 
 class DatasetCatalog extends Component {
@@ -31,6 +31,7 @@ class DatasetCatalog extends Component {
         showDialogDisable: false,
         showDialogEdit: false
       },
+      dacs: [],
       disableOkButton: false,
       translatedUseRestrictionModal: {},
       isAdmin: null,
@@ -65,6 +66,16 @@ class DatasetCatalog extends Component {
     });
   }
 
+  async getDacs() {
+    let allDacs = await DAC.list();
+    let dacIdsAndNames = allDacs.map(dac => {
+      return {id: dac.dacId, name: dac.name}
+    });
+    this.setState( {
+      dacs: dacIdsAndNames
+    });
+  }
+
   componentDidMount() {
 
     this.currentUser = Storage.getCurrentUser();
@@ -73,6 +84,7 @@ class DatasetCatalog extends Component {
       isResearcher: this.currentUser.isResearcher
     }, async () => {
       await this.getDatasets();
+      await this.getDacs();
       ReactTooltip.rebuild();
     });
   }
@@ -338,7 +350,7 @@ class DatasetCatalog extends Component {
 
   render() {
 
-    const { searchDulText, currentPage, limit } = this.state;
+    const { searchDulText, currentPage, limit, dacs } = this.state;
 
     return (
       h(Fragment, {}, [
@@ -479,7 +491,7 @@ class DatasetCatalog extends Component {
                             id: trIndex + '_dac', name: 'dac',
                             className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'DAC'; }), 'propertyValue', '')
+                            get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
                           ]),
 
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
