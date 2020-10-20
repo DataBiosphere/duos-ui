@@ -3,6 +3,7 @@ import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
 import forEach from 'lodash/fp/forEach';
+import includes from 'lodash/fp/includes';
 import cloneDeep from 'lodash/fp/cloneDeep';
 import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
@@ -33,10 +34,13 @@ export default function DataAccessRequest(props) {
   const [datasets, setDatasets] = useState(props.datasets || []);
   const [activeDULQuestions, setActiveDULQuestions] = useState({});
   //parent needs to initialize defaults if value not present
-  const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement); 
-  const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement);
+  const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement || false);
+  const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
+  const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
   const [irbDocument, setIRBDocument] = useState('');
+  const [collaborationDocument, setCollaborationDocument] = useState('');
 
+  const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationresults', 'diseaseRestrictions', 'geneticStudiesOnly'];
 
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
@@ -79,9 +83,6 @@ export default function DataAccessRequest(props) {
   //seperate hook for datasets once state is assigned value from props
   //used for updates as users add/remove items from AsyncSelect
   useEffect(() => {
-    //if datasets array is populated, check for dataUse objects
-    //if any dataSet has an empty value or has the key missing, attach dataUse objects to partials
-
     const calculateRestrictionEquivalency = (datasetCollection) => {
       let updatedDULQuestions = {};
       let ontologyTally = {};
@@ -91,26 +92,24 @@ export default function DataAccessRequest(props) {
           const dataUse = dataset.dataUse;
           if (!isNil(dataUse) && !isEmpty(dataUse)) {
             forEach((value, key) => {
-              //diseaseRestrictions is an array with obolibrary links
-              //links can still act as comparator values when determining equal Disease related studies
-              if (key === 'diseaseRestrictions' && collectionLength > 1) {
-                calculateDSTally(value, ontologyTally);
-              } else {
-                updatedDULQuestions[key] = true;
+              if(includes(key, targetDULKeys)) {
+                if (key === 'diseaseRestrictions' && collectionLength > 1) {
+                  //process DS attributes seperately due to unique attributes
+                  calculateDSTally(value, ontologyTally);
+                } else {
+                  //otherwise mark question as true
+                  updatedDULQuestions[key] = true;
+                }
               }
             })(dataset);
           }
         });
-
         updatedDULQuestions['diseaseRestrictions'] = every((count) => {
           return count === collectionLength;
         })(ontologyTally);
       }
-
-      //NOTE: how to deal with previously loaded documents when visible questions change?
-      //Can compare previous with current, but will lead to infinite loop due to state variable as a dependency
-
-      //end of process, update activeQuestionList for rendering
+      //if document questions are undefined, need to delete documents from storage
+      //should the back-end process this?
       setActiveDULQuestions(updatedDULQuestions);
     };
 
@@ -122,8 +121,9 @@ export default function DataAccessRequest(props) {
         calculateRestrictionEquivalency(datasets);
       }
     };
+
     updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets]);
+  }, [datasets, initializeDatasets, targetDULKeys]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -411,7 +411,93 @@ export default function DataAccessRequest(props) {
               ['Required field']),
           ]),
       ]),
-
+      div({className: 'form-group', isRendered: !isNil(activeDULQuestions)}, [
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+          label({className: 'control-label rp-title-question'}, [
+            '2.7 Data Use Acknowledgements',
+            span({}, [
+              'Please confirm listed acknowledgements and/or document requirements below'
+            ])
+          ])
+        ]),
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox'}, [
+          input({
+            type: 'checkbox',
+            id: 'chk_gso_confirm',
+            name: 'gsoAckowledgement',
+            className: 'checkbox-inline rp-checkbox',
+            checked: gsoAcknowledgement,
+            disabled: !isNil(darCode),
+            onChange: (e) => formFieldChange({name: 'gsoAcknowledgement', value: e.target.checked})
+          }),
+          label({
+            className: 'regular-checkbox rp-choice-questions',
+            htmlFor: 'chk_gso_confirm'
+          }, ['I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition. '])
+        ]),
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox'}, [
+          input({
+            type: 'checkbox',
+            id: 'chk_pub_confirm',
+            name: 'pubAckowledgement',
+            className: 'checkbox-inline rp-checkbox',
+            checked: pubAcknowledgement,
+            disabled: !isNil(darCode),
+            onChange: (e) => formFieldChange({name: 'pubAcknowledgement', value: e.target.checked})
+          }),
+          label({
+            className: 'regular-checkbox rp-choice-questions',
+            htmlFor: 'chk_pub_confirm'
+          }, ['I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'])
+        ]),
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox'}, [
+          input({
+            type: 'checkbox',
+            id: 'chk_ds_confirm',
+            name: 'dsAckowledgement',
+            className: 'checkbox-inline rp-checkbox',
+            checked: dsAcknowledgement,
+            disabled: !isNil(darCode),
+            onChange: (e) => formFieldChange({name: 'dsAcknowledgement', value: e.target.checked})
+          }),
+          label({
+            className: 'regular-checkbox rp-choice-questions',
+            htmlFor: 'chk_ds_confirm'
+          }, ['I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with the DUL are considered a violation of the Data Use Certification agreement and any additional terms described in the Addendum.'])
+        ]),
+        //NOTE: need to check to see if formFieldChange will work for file uploads
+        //NOTE: need to add new attributes to formData on parent document
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+          label({
+            className: 'rp-choice-questions',
+            htmlFor: 'btn_uploadFile'
+          }, [
+            //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
+            //second statement can either be a condition for the first or last statements (or maybe both?)
+            `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRP apporval(s) here as a single document. 
+            When IRB approval is required and Expedited or Full Review is required and must be completed annually.
+            Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
+          ]),
+          input({
+            id: 'btn_uploadFile',
+            type: "file",
+            onChange: (e) => formFieldChange({name: 'irbDocument', value: e.target.files[0]})
+          })
+        ]),
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+          label({
+            className: 'rp-choice-questions',
+            htmlFor: 'btn_uploadFile'
+          }, [
+            `One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.`
+          ]),
+          input({
+            id: 'btn_uploadFile',
+            type: 'file',
+            onChange: (e) => formFieldChange({name: 'colDocument', value: e.target.files[0]})
+          })
+        ])
+      ]),
       div({ className: 'row no-margin' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
           a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [

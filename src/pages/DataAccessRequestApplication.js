@@ -574,7 +574,7 @@ class DataAccessRequestApplication extends Component {
   addDataUseToDataset = async(currentDatasets) => {
     //iterate through datasets array
     //if dataUse is not on the object, api call to get the full dataset info
-    //method defined here rather than step 2 component since it is a dependency of another helper method
+    //method defined here rather than step 2 component since it is a dependency of another helper method here
     if(isNil(currentDatasets) || isEmpty(currentDatasets)) {
       return null;
     }
