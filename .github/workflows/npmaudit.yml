@@ -12,3 +12,4 @@ jobs:
         with:
           audit_level: moderate
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          dedupe_issues: true
