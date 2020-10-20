@@ -9,6 +9,10 @@ import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 
+const uploadFileDiv = {
+  margin: '1.8rem 0'
+};
+
 export default function DataAccessRequest(props) {
   const {
     darCode,
@@ -83,6 +87,7 @@ export default function DataAccessRequest(props) {
   //seperate hook for datasets once state is assigned value from props
   //used for updates as users add/remove items from AsyncSelect
   useEffect(() => {
+    const uncappedForEach = forEach.convert({cap:false});
     const calculateRestrictionEquivalency = (datasetCollection) => {
       let updatedDULQuestions = {};
       let ontologyTally = {};
@@ -91,7 +96,7 @@ export default function DataAccessRequest(props) {
         datasetCollection.forEach(dataset => {
           const dataUse = dataset.dataUse;
           if (!isNil(dataUse) && !isEmpty(dataUse)) {
-            forEach((value, key) => {
+            uncappedForEach((value, key) => {
               if(includes(key, targetDULKeys)) {
                 if (key === 'diseaseRestrictions' && collectionLength > 1) {
                   //process DS attributes seperately due to unique attributes
@@ -101,24 +106,26 @@ export default function DataAccessRequest(props) {
                   updatedDULQuestions[key] = true;
                 }
               }
-            })(dataset);
+            })(dataUse);
           }
         });
-        updatedDULQuestions['diseaseRestrictions'] = every((count) => {
-          return count === collectionLength;
-        })(ontologyTally);
+        if(Object.keys(ontologyTally).length > 0) {
+          updatedDULQuestions['diseaseRestrictions'] = every((count) => {
+            return count === collectionLength && count > 0;
+          })(ontologyTally);
+        }
       }
       //if document questions are undefined, need to delete documents from storage
       //should the back-end process this?
       setActiveDULQuestions(updatedDULQuestions);
     };
 
-    const updateDatasetsAndDULQuestions = async(datasets) => {
-      if (!every((dataset) => !isNil(dataset.dataUse) && !isEmpty(dataset.dataUse), datasets)) {
-        const clonedDatasets = cloneDeep(datasets);
+    const updateDatasetsAndDULQuestions = async(rawDatasetCollection) => {
+      if (!every((dataset) => !isNil(dataset.dataUse) && !isEmpty(dataset.dataUse), rawDatasetCollection)) {
+        const clonedDatasets = cloneDeep(rawDatasetCollection);
         const updatedDatasets = await initializeDatasets(clonedDatasets);
         setDatasets(updatedDatasets);
-        calculateRestrictionEquivalency(datasets);
+        calculateRestrictionEquivalency(updatedDatasets);
       }
     };
 
@@ -411,7 +418,10 @@ export default function DataAccessRequest(props) {
               ['Required field']),
           ]),
       ]),
-      div({className: 'form-group', isRendered: !isNil(activeDULQuestions)}, [
+      div({
+        className: 'form-group',
+        // isRendered: !isNil(activeDULQuestions) && !isEmpty(activeDULQuestions)
+      }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
           label({className: 'control-label rp-title-question'}, [
             '2.7 Data Use Acknowledgements',
@@ -420,7 +430,10 @@ export default function DataAccessRequest(props) {
             ])
           ])
         ]),
-        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox'}, [
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
+          // isRendered: activeDULQuestions['geneticStudiesOnly']
+        }, [
           input({
             type: 'checkbox',
             id: 'chk_gso_confirm',
@@ -435,7 +448,10 @@ export default function DataAccessRequest(props) {
             htmlFor: 'chk_gso_confirm'
           }, ['I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition. '])
         ]),
-        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox'}, [
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
+          // isRendered: activeDULQuestions['publicationResults']
+        }, [
           input({
             type: 'checkbox',
             id: 'chk_pub_confirm',
@@ -450,7 +466,10 @@ export default function DataAccessRequest(props) {
             htmlFor: 'chk_pub_confirm'
           }, ['I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'])
         ]),
-        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox'}, [
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
+          // isRendered: !isNil(activeDULQuestions['diseaseRestrictions']) && !isEmpty(activeDULQuestions['diseaseRestrictions'])
+        }, [
           input({
             type: 'checkbox',
             id: 'chk_ds_confirm',
@@ -467,7 +486,11 @@ export default function DataAccessRequest(props) {
         ]),
         //NOTE: need to check to see if formFieldChange will work for file uploads
         //NOTE: need to add new attributes to formData on parent document
-        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+          // isRendered: activeDULQuestions['ethicsApprovalRequired'],
+          style: uploadFileDiv
+        }, [
           label({
             className: 'rp-choice-questions',
             htmlFor: 'btn_uploadFile'
@@ -484,7 +507,11 @@ export default function DataAccessRequest(props) {
             onChange: (e) => formFieldChange({name: 'irbDocument', value: e.target.files[0]})
           })
         ]),
-        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+          // isRendered: activeDULQuestions['collaboratorRequired'],
+          style: uploadFileDiv
+        }, [
           label({
             className: 'rp-choice-questions',
             htmlFor: 'btn_uploadFile'
@@ -499,7 +526,7 @@ export default function DataAccessRequest(props) {
         ])
       ]),
       div({ className: 'row no-margin' }, [
-        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: {marginTop: '2.5rem'} }, [
           a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [
             span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
           ]),
