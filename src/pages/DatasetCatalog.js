@@ -67,8 +67,8 @@ class DatasetCatalog extends Component {
   }
 
   async getDacs() {
-    let allDacs = await DAC.list();
-    let dacIdsAndNames = allDacs.map(dac => {
+    let dacs = await DAC.partialList();
+    let dacIdsAndNames = dacs.map(dac => {
       return {id: dac.dacId, name: dac.name}
     });
     this.setState( {

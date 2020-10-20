@@ -146,6 +146,12 @@ export const DAC = {
     return res.json();
   },
 
+  partialList: async () => {
+    const url = `${await Config.getApiUrl()}/dac/partial`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
   create: async (name, description) => {
     const url = `${await Config.getApiUrl()}/dac`;
     const dac = { "name": name, "description": description };
