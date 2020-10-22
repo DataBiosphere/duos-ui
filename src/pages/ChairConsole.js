@@ -113,7 +113,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`dul_collect/${consentId}`);
   };
 
-  openFinalAccessReview = (referenceId, electionId, rpElectionId,) => (e) => {
+  openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
     this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
   };
 
