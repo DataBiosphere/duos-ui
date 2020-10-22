@@ -5,12 +5,12 @@ import isEmpty from 'lodash/fp/isEmpty';
 import forEach from 'lodash/fp/forEach';
 import includes from 'lodash/fp/includes';
 import cloneDeep from 'lodash/fp/cloneDeep';
+import isEqual from 'lodash/fp/isEqual';
 import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 
 const uploadFileDiv = (showValidationMessages, formInput) => {
-  debugger;
   return {
     margin: '1.8rem 0',
     backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit'
@@ -161,6 +161,7 @@ export default function DataAccessRequest(props) {
   //used for updates as users add/remove items from AsyncSelect
   useEffect(() => {
     const uncappedForEach = forEach.convert({cap:false});
+
     const calculateRestrictionEquivalency = (datasetCollection) => {
       let updatedDULQuestions = {};
       let ontologyTally = {};
@@ -188,22 +189,25 @@ export default function DataAccessRequest(props) {
           })(ontologyTally);
         }
       }
-      //if document questions are undefined, need to delete documents from storage
-      //should the back-end process this?
-      setActiveDULQuestions(updatedDULQuestions);
+
+      if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
+        setActiveDULQuestions(updatedDULQuestions);
+      }
     };
 
     const updateDatasetsAndDULQuestions = async(rawDatasetCollection) => {
-      if (!every((dataset) => !isNil(dataset.dataUse) && !isEmpty(dataset.dataUse), rawDatasetCollection)) {
-        const clonedDatasets = cloneDeep(rawDatasetCollection);
+      const clonedDatasets = cloneDeep(rawDatasetCollection);
+      if (!every((dataset) => !isNil(dataset.dataUse) || !isEmpty(dataset.dataUse), rawDatasetCollection)) {
         const updatedDatasets = await initializeDatasets(clonedDatasets);
         setDatasets(updatedDatasets);
         calculateRestrictionEquivalency(updatedDatasets);
+      } else {
+        calculateRestrictionEquivalency(clonedDatasets);
       }
     };
 
     updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets, targetDULKeys]);
+  }, [datasets, initializeDatasets, targetDULKeys, activeDULQuestions]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
