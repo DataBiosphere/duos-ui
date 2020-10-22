@@ -5,10 +5,6 @@ import isEmpty from 'lodash/fp/isEmpty';
 import * as Utils from '../libs/utils';
 import isNil from 'lodash/fp/isNil';
 
-const liStyle = {
-  padding: '0.6rem'
-};
-
 const DULPanel = {
   margin: '0.5rem',
   flex: 1,
@@ -27,8 +23,7 @@ export async function GenerateUseRestrictionStatements(dataUse) {
   if (!dataUse || isEmpty(dataUse)) {
     return [li({
       className: 'translated restriction',
-      key: 'restriction-none',
-      style: liStyle
+      key: 'restriction-none'
     }, ['None'])];
   }
   const translations = await DataUseTranslation.translateDataUseRestrictions(dataUse);
@@ -36,7 +31,6 @@ export async function GenerateUseRestrictionStatements(dataUse) {
     return li({
       className: 'translated-restriction',
       key: `${restriction.code}-statement`,
-      style: liStyle
     }, [restriction.description]);
   });
 };
@@ -60,7 +54,7 @@ export default function TranslatedDULComponent(props) {
     onClick: () => Utils.download('machine-readable-DUL.json', props.mrDUL),
     filename: 'machine-readable-DUL.json',
     value: props.mrDUL,
-    className: 'italic hover-color response-label',
+    className: 'italic hover-color',
   }, ['Download DUL machine-readable format']);
 
   const dataUseLetterLink = a({
@@ -77,7 +71,7 @@ export default function TranslatedDULComponent(props) {
     div({ className: "panel-heading cm-boxhead dul-color" }, [
       h4({}, ["Data Use Limitations"]),
     ]),
-    ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none'}}, [translatedDULStatements]),
+    ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none', marginTop: '0.8rem'}}, [translatedDULStatements]),
     div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL)}, [dataUseLetterLink]),
     div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
   ]);
