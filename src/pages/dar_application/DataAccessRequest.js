@@ -9,8 +9,80 @@ import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 
-const uploadFileDiv = {
-  margin: '1.8rem 0'
+const uploadFileDiv = (showValidationMessages, formInput) => {
+  debugger;
+  return {
+    margin: '1.8rem 0',
+    backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit'
+  };
+};
+
+const uploadFileLabelColors = {
+  standardBackgroundColor: 'rgb(96, 59, 155)',
+  hoverBackgroundColor: '#2FA4E7'
+};
+
+//NOTE: if the upload add/remove functionality is needed elsewhere, I can pull the label/input out into its own component
+const uploadFileLabel = {
+  backgroundColor: uploadFileLabelColors.standardBackgroundColor,
+  color: 'white',
+  padding: '1rem',
+  borderRadius: '0.6rem',
+  cursor: 'pointer',
+  fontFamily: 'Roboto, sans-serif',
+  fontSize: '1.4rem',
+  transition: 'background 0.3s ease',
+  flex: 1
+};
+
+const uploadFileDescription = {
+  paddingBottom: '1.5rem'
+};
+
+const filenameStyle = {
+  fontFamily: 'Montserrant',
+  fontSize: '2rem',
+  padding: '1rem',
+  flex: 1
+};
+
+const uploadFileInput = {
+  display: 'none'
+};
+
+const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
+
+const UploadLabelButton = (props) => {
+  const {id, formAttribute, file, formFieldChange} = props;
+
+  const removeUploadLabelHover = (e) => {
+    e.target.style.background = uploadFileLabelColors.standardBackgroundColor;
+  };
+
+  const applyUploadLabelHover = (e) => {
+    e.target.style.background = uploadFileLabelColors.hoverBackgroundColor;
+  };
+
+  return (
+    div({display: 'flex'},[
+      input({
+        id,
+        type: 'file',
+        style: uploadFileInput,
+        onChange: (e) => formFieldChange({name: formAttribute, value: e.target.files[0]})
+      }),
+      label({
+        htmlFor: id,
+        style: uploadFileLabel,
+        onMouseEnter: applyUploadLabelHover,
+        onMouseLeave: removeUploadLabelHover
+      }, ['Upload File']),
+      span({
+        isRendered: !isNil(file),
+        style: filenameStyle
+      },[file.name])
+    ])
+  );
 };
 
 export default function DataAccessRequest(props) {
@@ -25,7 +97,9 @@ export default function DataAccessRequest(props) {
     TypeOfResearch,
     nextPage,
     prevPage,
-    partialSave
+    partialSave,
+    irbDocument,
+    collaborationDocument
   } = props;
 
   const [projectTitle, setProjectTitle] = useState(props.projectTitle);
@@ -41,8 +115,8 @@ export default function DataAccessRequest(props) {
   const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement || false);
   const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
   const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
-  const [irbDocument, setIRBDocument] = useState('');
-  const [collaborationDocument, setCollaborationDocument] = useState('');
+  // const [irbDocument, setIRBDocument] = useState(props.irbDocument);
+  // const [collaborationDocument, setCollaborationDocument] = useState(props.collaborationDocument);
 
   const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationresults', 'diseaseRestrictions', 'geneticStudiesOnly'];
 
@@ -59,7 +133,7 @@ export default function DataAccessRequest(props) {
     });
   };
 
-  //function needed to update state for 2.4
+  //function needed to update state for checkboxes
   const checkedStateChange = (dataset, setter) => {
     const { value } = dataset;
     setter(value);
@@ -75,7 +149,6 @@ export default function DataAccessRequest(props) {
     })(diseaseRestrictions);
   };
 
-  //NOTE: Is it a good idea to optimize questionTally struct updates or just keep the method simple?
   //initialization hook, loads data from props
   useEffect(() => {
     setProjectTitle(props.projectTitle);
@@ -420,7 +493,7 @@ export default function DataAccessRequest(props) {
       ]),
       div({
         className: 'form-group',
-        // isRendered: !isNil(activeDULQuestions) && !isEmpty(activeDULQuestions)
+        isRendered: !isNil(activeDULQuestions) && !isEmpty(activeDULQuestions)
       }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
           label({className: 'control-label rp-title-question'}, [
@@ -430,9 +503,14 @@ export default function DataAccessRequest(props) {
             ])
           ])
         ]),
+
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
-          // isRendered: activeDULQuestions['geneticStudiesOnly']
+          style: {
+            backgroundColor: showValidationMessages && (isNil(gsoAcknowledgement) || isEmpty(gsoAcknowledgement)) ?
+              errorBackgroundColor : 'inherit'
+          },
+          isRendered: activeDULQuestions['geneticStudiesOnly'],
         }, [
           input({
             type: 'checkbox',
@@ -441,16 +519,21 @@ export default function DataAccessRequest(props) {
             className: 'checkbox-inline rp-checkbox',
             checked: gsoAcknowledgement,
             disabled: !isNil(darCode),
-            onChange: (e) => formFieldChange({name: 'gsoAcknowledgement', value: e.target.checked})
+            onChange: (e) => checkedStateChange({name: 'gsoAcknowledgement', value: e.target.checked}, setGSOAcknowledgement)
           }),
           label({
             className: 'regular-checkbox rp-choice-questions',
             htmlFor: 'chk_gso_confirm'
           }, ['I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition. '])
         ]),
+
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
-          // isRendered: activeDULQuestions['publicationResults']
+          style: {
+            backgroundColor: showValidationMessages && (isNil(pubAcknowledgement) || isEmpty(pubAcknowledgement)) ?
+              errorBackgroundColor : 'inherit'
+          },
+          isRendered: activeDULQuestions['publicationResults']
         }, [
           input({
             type: 'checkbox',
@@ -459,16 +542,21 @@ export default function DataAccessRequest(props) {
             className: 'checkbox-inline rp-checkbox',
             checked: pubAcknowledgement,
             disabled: !isNil(darCode),
-            onChange: (e) => formFieldChange({name: 'pubAcknowledgement', value: e.target.checked})
+            onChange: (e) => checkedStateChange({name: 'pubAcknowledgement', value: e.target.checked}, setPUBAcknowledgement)
           }),
           label({
             className: 'regular-checkbox rp-choice-questions',
             htmlFor: 'chk_pub_confirm'
           }, ['I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'])
         ]),
+
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
-          // isRendered: !isNil(activeDULQuestions['diseaseRestrictions']) && !isEmpty(activeDULQuestions['diseaseRestrictions'])
+          style: {
+            backgroundColor: showValidationMessages && (isNil(dsAcknowledgement) || isEmpty(dsAcknowledgement)) ?
+              errorBackgroundColor : 'inherit'
+          },
+          isRendered: !isNil(activeDULQuestions['diseaseRestrictions']) && !isEmpty(activeDULQuestions['diseaseRestrictions'])
         }, [
           input({
             type: 'checkbox',
@@ -477,54 +565,50 @@ export default function DataAccessRequest(props) {
             className: 'checkbox-inline rp-checkbox',
             checked: dsAcknowledgement,
             disabled: !isNil(darCode),
-            onChange: (e) => formFieldChange({name: 'dsAcknowledgement', value: e.target.checked})
+            onChange: (e) => checkedStateChange({name: 'dsAcknowledgement', value: e.target.checked}, setDSAcknowledgement)
           }),
           label({
             className: 'regular-checkbox rp-choice-questions',
             htmlFor: 'chk_ds_confirm'
           }, ['I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with the DUL are considered a violation of the Data Use Certification agreement and any additional terms described in the Addendum.'])
         ]),
-        //NOTE: need to check to see if formFieldChange will work for file uploads
-        //NOTE: need to add new attributes to formData on parent document
+
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          // isRendered: activeDULQuestions['ethicsApprovalRequired'],
-          style: uploadFileDiv
+          isRendered: activeDULQuestions['ethicsApprovalRequired'],
+          style: uploadFileDiv(showValidationMessages, irbDocument)
         }, [
-          label({
-            className: 'rp-choice-questions',
-            htmlFor: 'btn_uploadFile'
-          }, [
+          span({className: 'rp-choice-questions', style: uploadFileDescription}, [
             //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
             //second statement can either be a condition for the first or last statements (or maybe both?)
-            `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRP apporval(s) here as a single document. 
+            `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB apporval(s) here as a single document. 
             When IRB approval is required and Expedited or Full Review is required and must be completed annually.
             Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
-          ]),
-          input({
-            id: 'btn_uploadFile',
-            type: "file",
-            onChange: (e) => formFieldChange({name: 'irbDocument', value: e.target.files[0]})
+          ]), h(UploadLabelButton, {
+            id: 'btn_irb_uploadFile',
+            formAttribute: 'irbDocument',
+            file: irbDocument,
+            formFieldChange
           })
         ]),
+
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          // isRendered: activeDULQuestions['collaboratorRequired'],
-          style: uploadFileDiv
+          isRendered: activeDULQuestions['collaboratorRequired'],
+          style: uploadFileDiv(showValidationMessages, collaborationDocument)
         }, [
-          label({
-            className: 'rp-choice-questions',
-            htmlFor: 'btn_uploadFile'
-          }, [
+          span({className: 'rp-choice-questions', style: uploadFileDescription}, [
             `One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.`
           ]),
-          input({
-            id: 'btn_uploadFile',
-            type: 'file',
-            onChange: (e) => formFieldChange({name: 'colDocument', value: e.target.files[0]})
+          h(UploadLabelButton, {
+            id: 'btn_col_uploadFile',
+            formAttribute: 'collaborationDocument',
+            file: collaborationDocument,
+            formFieldChange
           })
         ])
       ]),
+
       div({ className: 'row no-margin' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: {marginTop: '2.5rem'} }, [
           a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [

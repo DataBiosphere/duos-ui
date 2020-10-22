@@ -39,6 +39,8 @@ class DataAccessRequestApplication extends Component {
         labCollaborators: [],
         internalCollaborators: [],
         externalCollaborators: [],
+        collaborationDocument: null,
+        irbDocument: null,
         checkCollaborator: false,
         rus: '',
         nonTechRus: '',
@@ -82,7 +84,10 @@ class DataAccessRequestApplication extends Component {
         cloudUse: '',
         cloudProvider: '',
         cloudProviderType: '',
-        cloudProviderDescription: ''
+        cloudProviderDescription: '',
+        gsoAcknowledgement: false,
+        pubAcknowledgement: false,
+        dsAcknowledgement: false
       },
       step1: {
         inputResearcher: {
@@ -94,6 +99,9 @@ class DataAccessRequestApplication extends Component {
         inputNih: {
           invalid: false
         }
+      },
+      step2: {
+        activeQuestions: {}
       },
       step3: {
         inputPurposes: {
@@ -302,6 +310,15 @@ class DataAccessRequestApplication extends Component {
     return isValid;
   };
 
+  //helper function to update struct that tracks current active DUL questions
+  //not needed for processing (at the moment), saved for easier manual review
+  updateStep2ActiveQuestions = (updatedActiveQuestions) => {
+    this.setState(prev => {
+      prev.step2.activeQuestions = updatedActiveQuestions;
+      return prev;
+    });
+  }
+
   //NOTE: seperated out check functionality from state updates in original function to make it easier to follow
   step1InvalidChecks = () => {
     let isResearcherInvalid = false,
@@ -430,12 +447,40 @@ class DataAccessRequestApplication extends Component {
   };
 
   verifyStep2() {
+    //defined attribute keys for dynamix DUL based questions
+    const dulInvalidCheck = () => {
+      const activeQuestions = this.state.step2.activeQuestions;
+      const dulQuestionMap = {
+        'geneticStudiesOnly': 'gsoAcknowledgement',
+        'publicationResults': 'pubAcknowledgement',
+        'diseaseRestrictions': 'dsAcknowledgement',
+        'ethicsApprovalRequired': 'irbDocument',
+        'collaboratorRequired': 'collaborationDocument'
+      };
+      let result = false;
+
+      if (!isNil(activeQuestions) && !isEmpty(activeQuestions)) {
+        const formData = this.state.formData;
+        result = fp.every((question) => {
+          const formDataKey = dulQuestionMap[question];
+          const input = formData[formDataKey];
+          if (formDataKey === 'irbDocument' || formDataKey === 'collaborationDocument') {
+            return isNil(input);
+          } else {
+            return isNil(input) && isEmpty(input);
+          }
+        })(activeQuestions);
+      }
+      return result;
+    };
+
+    const dulInvalid = dulInvalidCheck();
     const datasetsInvalid = fp.isEmpty(this.state.formData.datasets);
     const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
     const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
     const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
-    return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
+    return dulInvalid || datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
   };
 
   isGenderValid(gender, oneGender) {
@@ -714,7 +759,12 @@ class DataAccessRequestApplication extends Component {
       anvilUse = false,
       cloudProvider = '',
       cloudProviderType = '',
-      cloudProviderDescription = ''
+      irbDocument = null,
+      collaborationDocument = null,
+      cloudProviderDescription = '',
+      gsoAcknowledgement,
+      pubAcknowledgement,
+      dsAcknowledgement,
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
@@ -894,6 +944,11 @@ class DataAccessRequestApplication extends Component {
                 forProfit,
                 rus: this.state.formData.rus,
                 nonTechRus: this.state.formData.nonTechRus,
+                collaborationDocument,
+                irbDocument,
+                gsoAcknowledgement,
+                pubAcknowledgement,
+                dsAcknowledgement,
                 nextPage: this.nextPage,
                 prevPage: this.prevPage,
                 partialSave: this.partialSave
