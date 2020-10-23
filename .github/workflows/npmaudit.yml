@@ -9,5 +9,4 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: npm audit
-        run: |
-          npm audit --audit-level=moderate
+        run: npm audit --audit-level=moderate
