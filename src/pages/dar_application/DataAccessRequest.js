@@ -54,6 +54,7 @@ const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
 
 const UploadLabelButton = (props) => {
   const {id, formAttribute, file, formFieldChange} = props;
+  const fileName = !isNil(file) ? file.name : "";
 
   const removeUploadLabelHover = (e) => {
     e.target.style.background = uploadFileLabelColors.standardBackgroundColor;
@@ -62,7 +63,6 @@ const UploadLabelButton = (props) => {
   const applyUploadLabelHover = (e) => {
     e.target.style.background = uploadFileLabelColors.hoverBackgroundColor;
   };
-
   return (
     div({display: 'flex'},[
       input({
@@ -80,7 +80,7 @@ const UploadLabelButton = (props) => {
       span({
         isRendered: !isNil(file),
         style: filenameStyle
-      },[file.name])
+      },[fileName])
     ])
   );
 };
@@ -183,10 +183,13 @@ export default function DataAccessRequest(props) {
             })(dataUse);
           }
         });
+
         if(Object.keys(ontologyTally).length > 0) {
-          updatedDULQuestions['diseaseRestrictions'] = every((count) => {
+          updatedDULQuestions['diseaseRestrictions'] = !every((count) => {
             return count === collectionLength && count > 0;
           })(ontologyTally);
+        } else {
+          updatedDULQuestions['diseaseRestrictions'] = false;
         }
       }
 
@@ -560,7 +563,7 @@ export default function DataAccessRequest(props) {
             backgroundColor: showValidationMessages && (isNil(dsAcknowledgement) || isEmpty(dsAcknowledgement)) ?
               errorBackgroundColor : 'inherit'
           },
-          isRendered: !isNil(activeDULQuestions['diseaseRestrictions']) && !isEmpty(activeDULQuestions['diseaseRestrictions'])
+          isRendered: activeDULQuestions['diseaseRestrictions']
         }, [
           input({
             type: 'checkbox',
