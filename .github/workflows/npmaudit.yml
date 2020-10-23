@@ -10,4 +10,4 @@ jobs:
         run: npm ci
       - name: npm audit
         run: |
-          npm audit --audit-level=low
+          npm audit --audit-level=moderate
