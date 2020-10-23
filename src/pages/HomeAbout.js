@@ -19,7 +19,7 @@ class HomeAbout extends Component {
       fontWeight: '600',
       padding: '0 5rem',
       textAlign: 'left'
-    }
+    };
 
     const aboutSectionWrapper = {
       fontFamily: 'Montserrat',
