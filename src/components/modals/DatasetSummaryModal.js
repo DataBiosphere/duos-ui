@@ -158,7 +158,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
           div({ className: "row" }, [
             label({ id: "lbl_structured", className: "col-lg-3 col-md-3 col-sm-3 col-xs-4 control-label dataset-color" }, ["Structured Limitations"]),
             div({className: "col-lg-9 col-md-9 col-sm-9 col-xs-8 response-label"}, [
-               ul({style: {listStyleType: 'none', padding: 0, margin: 0}, }, this.state.translatedDULStatements)
+              ul({style: {listStyleType: 'none', padding: 0, margin: 0}, }, this.state.translatedDULStatements)
             ])
           ])
         ])
