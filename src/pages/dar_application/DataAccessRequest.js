@@ -13,7 +13,17 @@ import AsyncSelect from 'react-select/async';
 const uploadFileDiv = (showValidationMessages, formInput) => {
   return {
     padding: '1rem',
-    backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit'
+    backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit',
+    margin: '0.5rem 0'
+  };
+};
+
+const dulQuestionDiv = (showValidationMessages, questionBool) => {
+  return {
+    backgroundColor: showValidationMessages && !questionBool ?
+      errorBackgroundColor : 'inherit',
+    padding: '1rem',
+    margin: '0.5rem 0'
   };
 };
 
@@ -512,12 +522,8 @@ export default function DataAccessRequest(props) {
         ]),
 
         div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
-          style: {
-            backgroundColor: showValidationMessages && (isNil(gsoAcknowledgement) || isEmpty(gsoAcknowledgement)) ?
-              errorBackgroundColor : 'inherit',
-            padding: '1rem'
-          },
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
+          style: dulQuestionDiv(showValidationMessages, gsoAcknowledgement),
           isRendered: activeDULQuestions['geneticStudiesOnly'],
         }, [
           input({
@@ -536,12 +542,8 @@ export default function DataAccessRequest(props) {
         ]),
 
         div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
-          style: {
-            backgroundColor: showValidationMessages && (isNil(pubAcknowledgement) || isEmpty(pubAcknowledgement)) ?
-              errorBackgroundColor : 'inherit',
-            padding: '1rem'
-          },
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
+          style: dulQuestionDiv(showValidationMessages, pubAcknowledgement),
           isRendered: activeDULQuestions['publicationResults']
         }, [
           input({
@@ -560,12 +562,8 @@ export default function DataAccessRequest(props) {
         ]),
 
         div({
-          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
-          style: {
-            backgroundColor: showValidationMessages && (isNil(dsAcknowledgement) || isEmpty(dsAcknowledgement)) ?
-              errorBackgroundColor : 'inherit',
-            padding: '1rem'
-          },
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
+          style: dulQuestionDiv(showValidationMessages, dsAcknowledgement),
           isRendered: activeDULQuestions['diseaseRestrictions']
         }, [
           input({
