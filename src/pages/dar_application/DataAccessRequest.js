@@ -12,7 +12,7 @@ import AsyncSelect from 'react-select/async';
 
 const uploadFileDiv = (showValidationMessages, formInput) => {
   return {
-    margin: '1.8rem 0',
+    padding: '1rem',
     backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit'
   };
 };
@@ -515,7 +515,8 @@ export default function DataAccessRequest(props) {
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
           style: {
             backgroundColor: showValidationMessages && (isNil(gsoAcknowledgement) || isEmpty(gsoAcknowledgement)) ?
-              errorBackgroundColor : 'inherit'
+              errorBackgroundColor : 'inherit',
+            padding: '1rem'
           },
           isRendered: activeDULQuestions['geneticStudiesOnly'],
         }, [
@@ -538,7 +539,8 @@ export default function DataAccessRequest(props) {
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
           style: {
             backgroundColor: showValidationMessages && (isNil(pubAcknowledgement) || isEmpty(pubAcknowledgement)) ?
-              errorBackgroundColor : 'inherit'
+              errorBackgroundColor : 'inherit',
+            padding: '1rem'
           },
           isRendered: activeDULQuestions['publicationResults']
         }, [
@@ -561,7 +563,8 @@ export default function DataAccessRequest(props) {
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox',
           style: {
             backgroundColor: showValidationMessages && (isNil(dsAcknowledgement) || isEmpty(dsAcknowledgement)) ?
-              errorBackgroundColor : 'inherit'
+              errorBackgroundColor : 'inherit',
+            padding: '1rem'
           },
           isRendered: activeDULQuestions['diseaseRestrictions']
         }, [
