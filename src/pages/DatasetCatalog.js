@@ -369,7 +369,18 @@ class DatasetCatalog extends Component {
                 title: "Dataset Catalog",
                 description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
-            ])
+            ]),
+            div({ className: "f-right" }, [
+              button({
+                id: "btn_addDataset",
+                isRendered: this.state.isResearcher,
+                onClick: () => this.props.history.push({ pathname: 'dataset_registration' }),
+                className: "btn-primary dataset-background search-wrapper",
+                "data-tip": "Add a new Dataset", "data-for": "tip_addDataset"
+              }, ["Add Dataset",
+                span({ className: "glyphicon glyphicon-plus-sign", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
+              ])
+            ]),
           ]),
 
           div({ className: "table-wrap" }, [
