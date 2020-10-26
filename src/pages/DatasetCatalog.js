@@ -69,7 +69,7 @@ class DatasetCatalog extends Component {
   async getDacs() {
     let dacs = await DAC.list(false);
     let dacIdsAndNames = dacs.map(dac => {
-      return {id: dac.dacId, name: dac.name}
+      return {id: dac.dacId, name: dac.name};
     });
     this.setState( {
       dacs: dacIdsAndNames
@@ -193,7 +193,7 @@ class DatasetCatalog extends Component {
     this.setState({
       showDialogEdit: true,
       datasetId: datasetId
-    })
+    });
   }
 
   openEnable = (datasetId) => (e) => {
@@ -271,12 +271,12 @@ class DatasetCatalog extends Component {
   dialogHandlerEdit = (answer) => (e) => {
     this.setState({ disableOkButton: true });
     if (answer) {
-        this.setState(prev => {
-          this.setState({ showDialogEdit: false, disableOkButton: false });
-          return prev;
-        });
-        // TODO: implement update dataset_registration so it's editable
-        // this.props.history.push({ pathname: 'dataset_registration/{datasetId}' });
+      this.setState(prev => {
+        this.setState({ showDialogEdit: false, disableOkButton: false });
+        return prev;
+      });
+      // TODO: implement update dataset_registration so it's editable
+      // this.props.history.push({ pathname: 'dataset_registration/{datasetId}' });
       this.props.history.push({ pathname: 'dataset_registration' });
     } else {
       this.setState({ showDialogEdit: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
