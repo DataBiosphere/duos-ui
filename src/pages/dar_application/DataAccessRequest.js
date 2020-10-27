@@ -79,7 +79,7 @@ const filenameStyle = {
   fontSize: '1.8rem',
   padding: '0.5rem',
   border: '1px solid #ea5e5',
-  backgroundColor: 'rgb(251 253 255)',
+  backgroundColor: 'rgb(243 248 253)',
   display: 'inline-flex',
   alignItems: 'center',
   borderTopLeftRadius: '2rem',
@@ -314,9 +314,7 @@ export default function DataAccessRequest(props) {
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
-
         h3({ className: 'rp-form-title access-color' }, ['2. Data Access Request']),
-
         div({ className: 'form-group' }, [
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             label({ className: 'control-label rp-title-question' }, [
