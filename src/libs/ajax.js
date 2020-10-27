@@ -935,6 +935,12 @@ export const User = {
     return res.data;
   },
 
+  getMe: async () => {
+    const url = `${await Config.getApiUrl()}/user/me`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
   getById: async id => {
     const url = `${await Config.getApiUrl()}/user/${id}`;
     const res = await axios.get(url, Config.authOpts());
