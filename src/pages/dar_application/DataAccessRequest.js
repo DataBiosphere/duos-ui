@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -9,12 +9,12 @@ import isEqual from 'lodash/fp/isEqual';
 import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
+import ClearIcon from '@material-ui/icons/Clear';
 
 const uploadFileDiv = (showValidationMessages, formInput) => {
   return {
     padding: '1rem',
-    backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit',
-    margin: '0.5rem 0'
+    backgroundColor: showValidationMessages && isNil(formInput) ? errorBackgroundColor : 'inherit'
   };
 };
 
@@ -32,17 +32,36 @@ const uploadFileLabelColors = {
   hoverBackgroundColor: '#2FA4E7'
 };
 
+const fileClearColor = {
+  standardColors: {
+    backgroundColor: '#fdc3c3ab',
+    color: '#fb3737'
+  },
+  hoverColors: {
+    backgroundColor: 'red',
+    color: 'white'
+  },
+  transition: 'background 0.3s ease'
+};
+
 //NOTE: if the upload add/remove functionality is needed elsewhere, I can pull the label/input out into its own component
 const uploadFileLabel = {
+  flex: 2,
+  maxWidth: '10rem',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   backgroundColor: uploadFileLabelColors.standardBackgroundColor,
   color: 'white',
-  padding: '1rem',
+  padding: '1.3rem',
+  textAlign: 'center',
   borderRadius: '0.6rem',
   cursor: 'pointer',
   fontFamily: 'Roboto, sans-serif',
   fontSize: '1.4rem',
   transition: 'background 0.3s ease',
-  flex: 1
+  margin: 0,
+  boxShadow: "-4px 6px 9px 0px #e8e5e5",
 };
 
 const uploadFileDescription = {
@@ -50,21 +69,48 @@ const uploadFileDescription = {
 };
 
 const filenameStyle = {
+  flex: 1,
+  justifyContent: 'left',
+  whiteSpace: 'nowrap',
+  minWidth: '30rem',
+  overflow: 'hidden',
+  marginLeft: '4rem',
   fontFamily: 'Montserrant',
-  fontSize: '2rem',
-  padding: '1rem',
-  flex: 1
+  fontSize: '1.8rem',
+  padding: '0.5rem',
+  border: '1px solid #ea5e5',
+  backgroundColor: 'rgb(251 253 255)',
+  display: 'inline-flex',
+  alignItems: 'center',
+  borderTopLeftRadius: '2rem',
+  borderBottomLeftRadius: '2rem',
+  maxWidth: '30rem',
+  boxShadow: "-4px 6px 9px 0px #e8e5e5",
 };
 
 const uploadFileInput = {
   display: 'none'
 };
 
+const clearIconStyle = {
+  backgroundColor: fileClearColor.standardColors.backgroundColor,
+  color: fileClearColor.standardColors.color,
+  fontSize: '5rem',
+  flex: 1,
+  borderBottomRightRadius: '2rem',
+  borderTopRightRadius: '2rem',
+  boxShadow: "-4px 6px 9px 0px #e8e5e5",
+  transition: fileClearColor.transition,
+  maxWidth: '3rem'
+}
+
 const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
 
 const UploadLabelButton = (props) => {
   const {id, formAttribute, file, formFieldChange} = props;
   const fileName = !isNil(file) ? file.name : "";
+
+  const fileRef = useRef(props.file || null);
 
   const removeUploadLabelHover = (e) => {
     e.target.style.background = uploadFileLabelColors.standardBackgroundColor;
@@ -73,24 +119,66 @@ const UploadLabelButton = (props) => {
   const applyUploadLabelHover = (e) => {
     e.target.style.background = uploadFileLabelColors.hoverBackgroundColor;
   };
+
+  const removeClearHover = (e) => {
+    e.target.style.backgroundColor = fileClearColor.standardColors.backgroundColor;
+    e.target.style.color = fileClearColor.standardColors.color;
+  };
+
+  const applyClearHover = (e) => {
+    e.target.style.backgroundColor = fileClearColor.hoverColors.backgroundColor;
+    e.target.style.color = fileClearColor.hoverColors.color;
+  };
+
+  //NOTE: File inputs are uncontrolled inputs no matter what
+  //Therefore file name updates need to be updated manually via custom click/change handlers
+  //Manually clear or assign file names and call parent function to update file on parent's state
+  //useRef hook can be used to initialize/update a value for a DOM element while avoiding re-renders on value change
+  const clearFile = (formFieldChange, name) => {
+    fileRef.current.value = '';
+    formFieldChange({name, value: null});
+  };
+
+  const updateFile = (formAttribute, file) => {
+    //set current file as default if user cancels upload prompt
+    const targetFile = file || fileRef.current;
+    fileRef.current = targetFile;
+    formFieldChange({name: formAttribute, value: targetFile});
+  };
+
   return (
-    div({display: 'flex'},[
+    div({
+      style: {
+        margin: '0.5rem 0',
+        display: 'inline-flex',
+        verticalAlign: 'middle'
+      }
+    }, [
       input({
         id,
         type: 'file',
         style: uploadFileInput,
-        onChange: (e) => formFieldChange({name: formAttribute, value: e.target.files[0]})
+        ref: fileRef,
+        onChange: (e) => updateFile(formAttribute, e.target.files[0])
+        // onChange: (e) => formFieldChange({name: formAttribute, value: e.target.files[0]})
       }),
       label({
         htmlFor: id,
         style: uploadFileLabel,
         onMouseEnter: applyUploadLabelHover,
-        onMouseLeave: removeUploadLabelHover
+        onMouseLeave: removeUploadLabelHover,
       }, ['Upload File']),
       span({
         isRendered: !isNil(file),
         style: filenameStyle
-      },[fileName])
+      },[fileName]),
+      h(ClearIcon, {
+        style: clearIconStyle,
+        isRendered: !isNil(file),
+        onClick: (e) => clearFile(formFieldChange, formAttribute),
+        onMouseEnter: applyClearHover,
+        onMouseLeave: removeClearHover
+      })
     ])
   );
 };
@@ -586,18 +674,25 @@ export default function DataAccessRequest(props) {
           isRendered: activeDULQuestions['ethicsApprovalRequired'],
           style: uploadFileDiv(showValidationMessages, irbDocument)
         }, [
-          span({className: 'rp-choice-questions', style: uploadFileDescription}, [
-            //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
-            //second statement can either be a condition for the first or last statements (or maybe both?)
-            `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB apporval(s) here as a single document. 
-            When IRB approval is required and Expedited or Full Review is required and must be completed annually.
-            Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
-          ]), h(UploadLabelButton, {
-            id: 'btn_irb_uploadFile',
-            formAttribute: 'irbDocument',
-            file: irbDocument,
-            formFieldChange
-          })
+          div({className: 'row no-margin'}, [
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              span({className: 'rp-choice-questions', style: uploadFileDescription}, [
+                //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
+                //second statement can either be a condition for the first or last statements (or maybe both?)
+                `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB apporval(s) here as a single document. 
+                When IRB approval is required and Expedited or Full Review is required and must be completed annually.
+                Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
+              ])
+            ]),
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              h(UploadLabelButton, {
+                id: 'btn_irb_uploadFile',
+                formAttribute: 'irbDocument',
+                file: irbDocument,
+                formFieldChange
+              })
+            ])
+          ]),
         ]),
 
         div({
@@ -605,15 +700,22 @@ export default function DataAccessRequest(props) {
           isRendered: activeDULQuestions['collaboratorRequired'],
           style: uploadFileDiv(showValidationMessages, collaborationDocument)
         }, [
-          span({className: 'rp-choice-questions', style: uploadFileDescription}, [
-            `One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.`
-          ]),
-          h(UploadLabelButton, {
-            id: 'btn_col_uploadFile',
-            formAttribute: 'collaborationDocument',
-            file: collaborationDocument,
-            formFieldChange
-          })
+          div({className: 'row no-margin'}, [
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              span({className: 'rp-choice-questions',style: uploadFileDescription
+              }, [
+                `One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.`
+              ])
+            ]),
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              h(UploadLabelButton, {
+                id: 'btn_col_uploadFile',
+                formAttribute: 'collaborationDocument',
+                file: collaborationDocument,
+                formFieldChange
+              })
+            ])
+          ])
         ])
       ]),
 
