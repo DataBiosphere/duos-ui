@@ -215,7 +215,7 @@ export default function DataAccessRequest(props) {
   const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
   const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
 
-  const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationresults', 'diseaseRestrictions', 'geneticStudiesOnly'];
+  const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
 
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
@@ -289,9 +289,10 @@ export default function DataAccessRequest(props) {
           updatedDULQuestions['diseaseRestrictions'] = false;
         }
       }
-
       if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
         setActiveDULQuestions(updatedDULQuestions);
+        //State update is asynchronous, send updatedDULQuestions for parent component
+        formFieldChange({name: 'activeDULQuestions', value: updatedDULQuestions});
       }
     };
 
@@ -307,7 +308,7 @@ export default function DataAccessRequest(props) {
     };
 
     updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets, targetDULKeys, activeDULQuestions]);
+  }, [datasets, initializeDatasets, targetDULKeys, activeDULQuestions, formFieldChange]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -595,7 +596,7 @@ export default function DataAccessRequest(props) {
       ]),
       div({
         className: 'form-group',
-        isRendered: !isNil(activeDULQuestions) && !isEmpty(activeDULQuestions)
+        isRendered: !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions)
       }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
           label({className: 'control-label rp-title-question'}, [
@@ -609,7 +610,7 @@ export default function DataAccessRequest(props) {
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
           style: dulQuestionDiv(showValidationMessages, gsoAcknowledgement),
-          isRendered: activeDULQuestions['geneticStudiesOnly'],
+          isRendered: activeDULQuestions['geneticStudiesOnly'] === true,
         }, [
           input({
             type: 'checkbox',
@@ -629,7 +630,7 @@ export default function DataAccessRequest(props) {
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
           style: dulQuestionDiv(showValidationMessages, pubAcknowledgement),
-          isRendered: activeDULQuestions['publicationResults']
+          isRendered: activeDULQuestions['publicationResults'] === true
         }, [
           input({
             type: 'checkbox',
@@ -649,7 +650,7 @@ export default function DataAccessRequest(props) {
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
           style: dulQuestionDiv(showValidationMessages, dsAcknowledgement),
-          isRendered: activeDULQuestions['diseaseRestrictions']
+          isRendered: activeDULQuestions['diseaseRestrictions'] === true
         }, [
           input({
             type: 'checkbox',
@@ -668,7 +669,7 @@ export default function DataAccessRequest(props) {
 
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          isRendered: activeDULQuestions['ethicsApprovalRequired'],
+          isRendered: activeDULQuestions['ethicsApprovalRequired'] === true,
           style: uploadFileDiv(showValidationMessages, irbDocument)
         }, [
           div({className: 'row no-margin'}, [
@@ -694,7 +695,7 @@ export default function DataAccessRequest(props) {
 
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          isRendered: activeDULQuestions['collaboratorRequired'],
+          isRendered: activeDULQuestions['collaboratorRequired'] === true,
           style: uploadFileDiv(showValidationMessages, collaborationDocument)
         }, [
           div({className: 'row no-margin'}, [

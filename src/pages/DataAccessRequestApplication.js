@@ -87,7 +87,8 @@ class DataAccessRequestApplication extends Component {
         cloudProviderDescription: '',
         gsoAcknowledgement: false,
         pubAcknowledgement: false,
-        dsAcknowledgement: false
+        dsAcknowledgement: false,
+        activeDULQuestions: {}
       },
       step1: {
         inputResearcher: {
