@@ -86,6 +86,7 @@ const filenameStyle = {
   borderBottomLeftRadius: '2rem',
   maxWidth: '30rem',
   boxShadow: "-4px 6px 9px 0px #e8e5e5",
+  zIndex: 1
 };
 
 const uploadFileInput = {
@@ -101,8 +102,7 @@ const clearIconStyle = {
   borderTopRightRadius: '2rem',
   boxShadow: "-4px 6px 9px 0px #e8e5e5",
   transition: fileClearColor.transition,
-  maxWidth: '3rem',
-  zIndex: -1
+  maxWidth: '3rem'
 };
 
 const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
@@ -214,8 +214,6 @@ export default function DataAccessRequest(props) {
   const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement || false);
   const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
   const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
-  // const [irbDocument, setIRBDocument] = useState(props.irbDocument);
-  // const [collaborationDocument, setCollaborationDocument] = useState(props.collaborationDocument);
 
   const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationresults', 'diseaseRestrictions', 'geneticStudiesOnly'];
 
