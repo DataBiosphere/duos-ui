@@ -101,8 +101,9 @@ const clearIconStyle = {
   borderTopRightRadius: '2rem',
   boxShadow: "-4px 6px 9px 0px #e8e5e5",
   transition: fileClearColor.transition,
-  maxWidth: '3rem'
-}
+  maxWidth: '3rem',
+  zIndex: -1
+};
 
 const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
 
