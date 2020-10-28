@@ -215,8 +215,6 @@ export default function DataAccessRequest(props) {
   const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
   const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
 
-  const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
-
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
       let options = items.map(function (item) {
@@ -260,8 +258,10 @@ export default function DataAccessRequest(props) {
     const uncappedForEach = forEach.convert({cap:false});
 
     const calculateRestrictionEquivalency = (datasetCollection) => {
+      const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
       let updatedDULQuestions = {};
       let ontologyTally = {};
+
       if (!isNil(datasetCollection)) {
         const collectionLength = datasetCollection.length;
         datasetCollection.forEach(dataset => {
@@ -308,7 +308,7 @@ export default function DataAccessRequest(props) {
     };
 
     updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets, targetDULKeys, activeDULQuestions, formFieldChange]);
+  }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange]);
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
