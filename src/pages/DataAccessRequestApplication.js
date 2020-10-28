@@ -14,7 +14,6 @@ import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
 import * as fp from 'lodash/fp';
-
 import './DataAccessRequestApplication.css';
 
 class DataAccessRequestApplication extends Component {

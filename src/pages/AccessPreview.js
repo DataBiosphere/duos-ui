@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, button, div, h4, i } from 'react-hyperscript-helpers';
+import { a, button, div, h4, i, h } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { DataAccessRequest } from '../components/DataAccessRequest';
@@ -10,7 +10,7 @@ import { DAR, Files, Researcher } from '../libs/ajax';
 import { Models } from '../libs/models';
 import { Theme } from '../libs/theme';
 import * as ld from 'lodash';
-
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class AccessPreview extends Component {
 
@@ -21,9 +21,7 @@ class AccessPreview extends Component {
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
-      consent: {
-        translatedUseRestriction: ''
-      },
+      dataUse: {},
       darInfo: Models.dar,
       researcherProfile: null
     };
@@ -48,7 +46,7 @@ class AccessPreview extends Component {
     DAR.getDarConsent(referenceId).then(
       consent => {
         this.setState(prev => {
-          prev.consent = consent;
+          prev.dataUse = consent.dataUse;
           prev.consentName = consent.name;
         });
       }
@@ -98,11 +96,7 @@ class AccessPreview extends Component {
   };
 
   render() {
-
-    const { translatedUseRestriction } = this.state.consent;
-
     return (
-
       div({ className: 'container container-wide' }, [
         div({ className: 'row no-margin' }, [
           div({ className: 'col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding' }, [
@@ -143,16 +137,11 @@ class AccessPreview extends Component {
                 downloadDAR: this.downloadDAR,
                 researcherProfile: this.state.researcherProfile }),
 
-              div({ className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-                div({ className: 'panel-heading cm-boxhead dul-color' }, [
-                  h4({}, ['Data Use Limitations'])
-                ]),
-                div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
-                  div({ className: 'row dar-summary' }, [
-                    div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-                    div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
-                  ])
-                ])
+              div({
+                className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
+                isRendered: !ld.isEmpty(this.state.dataUse)
+              }, [
+                h(TranslatedDULComponent,{restrictions: this.state.dataUse})
               ])
             ])
           ])

@@ -1,6 +1,14 @@
-import * as fp from 'lodash/fp';
+import isNil from 'lodash/fp/isNil';
+import isEmpty from 'lodash/fp/isEmpty';
+import filter from 'lodash/fp/filter';
+import join from 'lodash/fp/join';
+import concat from 'lodash/fp/concat';
+import clone from 'lodash/fp/clone';
+import uniq from 'lodash/fp/uniq';
+import { searchOntology } from '../libs/ontologyService';
+import { Notifications } from '../libs/utils';
 
-const translations = {
+const srpTranslations = {
   hmb: {
     code: "HMB",
     description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
@@ -13,7 +21,7 @@ const translations = {
   },
   diseases: (diseases) => {
     const diseaseArray = diseases.sort().map(disease => disease.label);
-    const diseaseString = diseaseArray.length > 1 ? fp.join('; ')(diseaseArray) : diseaseArray[0];
+    const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
     return {
       code: 'DS',
       description: 'Disease-related studies: ' + diseaseString,
@@ -28,7 +36,7 @@ const translations = {
   other: (otherText) => {
     return {
       code: 'OTHER',
-      description: fp.isEmpty(otherText) ? "Other: Not provided" : otherText,
+      description: isEmpty(otherText) ? "Other: Not provided" : otherText,
       manualReview: true
     };
   },
@@ -99,6 +107,63 @@ const translations = {
   }
 };
 
+const consentTranslations = {
+  generalUse: {
+    code: 'GRU',
+    description: 'Use is permitted for any use'
+  },
+  hmbResearch: {
+    code: 'HMB',
+    description: 'Use is permitted for a health, medical, or biomedical research purpose'
+  },
+  diseaseRestrictions: (restrictions) => {
+    if (restrictions.length < 1) { return 'Use is permitted for the specified disease(s): Not specified'; }
+    const restrictionList = restrictions.join(', ');
+    return {
+      code: 'DS',
+      description: `Use is permitted for the specified disease(s): ${restrictionList}`
+    };
+  },
+  populationOriginsAncestry: {
+    code: 'POA',
+    description: 'Use is limited to population, origin, or ancestry research'
+  },
+  methodsResearch: {
+    code: 'NMDS',
+    description: 'Use for methods development research (e.g., development of software or algorithms) only within the bounds of other use limitations'
+  },
+  geneticStudiesOnly: {
+    code: 'GSO',
+    description: 'Use is limited to genetic studies only'
+  },
+  commercialUse: {
+    code: 'NPU',
+    description: 'Use is limited to non-profit and non-commercial'
+  },
+  publicationResults: {
+    code: 'PUB',
+    description: 'Use requires users to make results of studies using the data available to the larger scientific community'
+  },
+  collaboratorRequired: {
+    code: 'COL',
+    description: 'Use requires users to collaborate with the primary study investigators'
+  },
+  ethicsApprovalRequired: {
+    code: 'IRB',
+    description: 'Use requires users to provide documentation of local IRB/ERB approval'
+  },
+  geographicalRestrictions: {
+    code: 'GS',
+    description: 'Use is limited to within a certain geographic area'
+  }
+};
+
+const getOntologyName = async(obolibraryURL) => {
+  const ontology = await searchOntology(obolibraryURL);
+  return ontology.label;
+};
+
+
 export const DataUseTranslation = {
 
   /**
@@ -115,47 +180,47 @@ export const DataUseTranslation = {
   generatePurposeStatement: (darInfo) => {
     let statementArray = [];
     if(darInfo.forProfit) {
-      statementArray = fp.concat(statementArray)(translations.forProfit);
+      statementArray = concat(statementArray)(srpTranslations.forProfit);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      statementArray = fp.concat(statementArray)(translations.genderFemale);
+      statementArray = concat(statementArray)(srpTranslations.genderFemale);
     }
 
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      statementArray = fp.concat(statementArray)(translations.genderMale);
+      statementArray = concat(statementArray)(srpTranslations.genderMale);
     }
 
     if(darInfo.illegalBehavior) {
-      statementArray = fp.concat(statementArray)(translations.illegalBehavior);
+      statementArray = concat(statementArray)(srpTranslations.illegalBehavior);
     }
 
     if(darInfo.addiction) {
-      statementArray = fp.concat(statementArray)(translations.addiction);
+      statementArray = concat(statementArray)(srpTranslations.addiction);
     }
 
     if(darInfo.sexualDiseases) {
-      statementArray = fp.concat(statementArray)(translations.sexualDiseases);
+      statementArray = concat(statementArray)(srpTranslations.sexualDiseases);
     }
 
     if(darInfo.stigmatizedDiseases) {
-      statementArray = fp.concat(statementArray)(translations.stigmatizedDiseases);
+      statementArray = concat(statementArray)(srpTranslations.stigmatizedDiseases);
     }
 
     if(darInfo.vulnerablePopulation) {
-      statementArray = fp.concat(statementArray)(translations.vulnerablePopulation);
+      statementArray = concat(statementArray)(srpTranslations.vulnerablePopulation);
     }
 
     if(darInfo.populationMigration || darInfo.poa || darInfo.population) {
-      statementArray = fp.concat(statementArray)(translations.poa);
+      statementArray = concat(statementArray)(srpTranslations.poa);
     }
 
     if(darInfo.psychiatricTraits) {
-      statementArray = fp.concat(statementArray)(translations.psychiatricTraits);
+      statementArray = concat(statementArray)(srpTranslations.psychiatricTraits);
     }
 
     if(darInfo.notHealth) {
-      statementArray = fp.concat(statementArray)(translations.notHealth);
+      statementArray = concat(statementArray)(srpTranslations.notHealth);
     }
 
     return statementArray;
@@ -165,27 +230,27 @@ export const DataUseTranslation = {
     let statementArray = [];
 
     if(darInfo.diseases) {
-      statementArray = fp.concat(statementArray)(translations.researchTypeDisease);
+      statementArray = concat(statementArray)(srpTranslations.researchTypeDisease);
     }
 
     if(darInfo.methods) {
-      statementArray = fp.concat(statementArray)(translations.methods);
+      statementArray = concat(statementArray)(srpTranslations.methods);
     }
 
     if(darInfo.controls) {
-      statementArray = fp.concat(statementArray)(translations.controls);
+      statementArray = concat(statementArray)(srpTranslations.controls);
     }
 
     if(darInfo.population || darInfo.poa) {
-      statementArray = fp.concat(statementArray)(translations.poa);
+      statementArray = concat(statementArray)(srpTranslations.poa);
     }
 
     if(darInfo.hmb) {
-      statementArray = fp.concat(statementArray)(translations.hmb);
+      statementArray = concat(statementArray)(srpTranslations.hmb);
     }
 
     if(darInfo.other) {
-      statementArray = fp.concat(statementArray)(translations.other(darInfo.otherText));
+      statementArray = concat(statementArray)(srpTranslations.other(darInfo.otherText));
     }
     return statementArray;
   },
@@ -199,8 +264,8 @@ export const DataUseTranslation = {
     // Primary Codes
 
     if (darInfo.hmb) {
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary,
-        translations.hmb);
+      dataUseSummary.primary = concat(dataUseSummary.primary,
+        srpTranslations.hmb);
     }
     /**
      * TODO: Resolve confusion on consent/ontology/orsp sides
@@ -214,59 +279,94 @@ export const DataUseTranslation = {
      * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
      */
     if (darInfo.poa || darInfo.population || darInfo.populationMigration) {
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.poa);
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa);
     }
-    if (darInfo.diseases && !fp.isEmpty(darInfo.diseases)) {
-      const diseaseTranslation = translations.diseases(fp.clone(darInfo.diseases));
-      dataUseSummary.primary = fp.uniq(fp.concat(dataUseSummary.primary)(diseaseTranslation));
+    if (darInfo.diseases && !isEmpty(darInfo.diseases)) {
+      const diseaseTranslation = srpTranslations.diseases(clone(darInfo.diseases));
+      dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation));
     }
     if (darInfo.other) {
-      dataUseSummary.primary = fp.concat(dataUseSummary.primary)(translations.other(darInfo.otherText));
+      dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.other(darInfo.otherText));
     }
 
     // Secondary Codes
 
     if (darInfo.methods) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.methods);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.methods);
     }
     if (darInfo.controls) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.controls);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.controls);
     }
     if (darInfo.forProfit) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.forProfit);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.forProfit);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'f') {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.genderFemale);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
     }
     if (darInfo.gender && darInfo.gender.slice(0, 1).toLowerCase() === 'm') {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.genderFemale);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.genderFemale);
     }
     if (darInfo.pediatric) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.pediatric);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.pediatric);
     }
     if (darInfo.illegalBehavior) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.illegalBehavior);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.illegalBehavior);
     }
     if (darInfo.addiction) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.addiction);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.addiction);
     }
     if (darInfo.sexualDiseases) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.sexualDiseases);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.sexualDiseases);
     }
     if (darInfo.stigmatizedDiseases) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.stigmatizedDiseases);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases);
     }
     if (darInfo.vulnerablePopulation) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.vulnerablePopulation);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation);
     }
     if (darInfo.psychiatricTraits) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.psychiatricTraits);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits);
     }
     if (darInfo.notHealth) {
-      dataUseSummary.secondary = fp.concat(dataUseSummary.secondary)(translations.notHealth);
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.notHealth);
     }
 
     return dataUseSummary;
   },
 
+  translateDataUseRestrictions: async (dataUse) => {
+
+    const processRestrictionStatements = async(key, value) => {
+      let resp;
+      if (!isNil(value) && value) {
+        if (key === 'diseaseRestrictions') {
+          let resolvedLabels = [];
+          try {
+            const ontologyPromises = value.map(ontologyId => {
+              return getOntologyName(ontologyId);
+            });
+            resolvedLabels = await Promise.all(ontologyPromises);
+          } catch (error) {
+            Notifications.showError({text: 'Ontology API Request Error'});
+          }
+          resp = consentTranslations.diseaseRestrictions(resolvedLabels);
+        } else {
+          resp = consentTranslations[key];
+        }
+      }
+      return resp;
+    };
+
+    if(!dataUse) {return [];}
+    let restrictionStatements = [];
+    let targetKeys = Object.keys(consentTranslations);
+    const processingPromises = targetKeys.map((key) => {
+      const value = dataUse[key];
+      return processRestrictionStatements(key, value);
+    });
+
+    restrictionStatements = await Promise.all(processingPromises);
+    restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
+    return restrictionStatements;
+  }
 };

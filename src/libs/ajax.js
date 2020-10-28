@@ -262,6 +262,7 @@ export const DAR = {
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
+    darInfo.restrictions = rawDar.restrictions;
 
     darInfo.hasAdminComment = researcher.rationale != null;
     darInfo.adminComment = researcher.rationale;
