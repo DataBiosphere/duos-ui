@@ -311,15 +311,6 @@ class DataAccessRequestApplication extends Component {
     return isValid;
   };
 
-  //helper function to update struct that tracks current active DUL questions
-  //not needed for processing (at the moment), saved for easier manual review
-  updateStep2ActiveQuestions = (updatedActiveQuestions) => {
-    this.setState(prev => {
-      prev.step2.activeQuestions = updatedActiveQuestions;
-      return prev;
-    });
-  }
-
   //NOTE: seperated out check functionality from state updates in original function to make it easier to follow
   step1InvalidChecks = () => {
     let isResearcherInvalid = false,
@@ -450,7 +441,7 @@ class DataAccessRequestApplication extends Component {
   verifyStep2() {
     //defined attribute keys for dynamix DUL based questions
     const dulInvalidCheck = () => {
-      const activeQuestions = this.state.step2.activeQuestions;
+      const activeQuestions = this.state.formData.activeDULQuestions;
       const dulQuestionMap = {
         'geneticStudiesOnly': 'gsoAcknowledgement',
         'publicationResults': 'pubAcknowledgement',

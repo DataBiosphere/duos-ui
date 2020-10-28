@@ -602,6 +602,7 @@ export default function DataAccessRequest(props) {
           label({className: 'control-label rp-title-question'}, [
             '2.7 Data Use Acknowledgements',
             span({}, [
+              //NOTE: This is something that I came up with as a placeholder. I would appreciate any suggestions for a more legal/formal sub-header
               'Please confirm listed acknowledgements and/or document requirements below'
             ])
           ])
