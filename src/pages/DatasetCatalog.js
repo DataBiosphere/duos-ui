@@ -357,42 +357,42 @@ class DatasetCatalog extends Component {
 
     return (
       h(Fragment, {}, [
-        div({ className: "container container-wide" }, [
+        div({ className: 'container container-wide' }, [
 
-          div({ className: "row no-margin" }, [
-            div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
+          div({ className: 'row no-margin' }, [
+            div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
               PageHeading({
-                id: "datasetCatalog",
-                imgSrc: "/images/icon_dataset_.png",
-                iconSize: "large",
-                color: "dataset",
-                title: "Dataset Catalog",
+                id: 'datasetCatalog',
+                imgSrc: '/images/icon_dataset_.png',
+                iconSize: 'large',
+                color: 'dataset',
+                title: 'Dataset Catalog',
                 description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
             ]),
-            div({ className: "f-right" }, [
+            div({ className: 'f-right' }, [
               button({
-                id: "btn_addDataset",
+                id: 'btn_addDataset',
                 isRendered: this.state.isResearcher,
                 onClick: () => this.props.history.push({ pathname: 'dataset_registration' }),
-                className: "btn-primary dataset-background search-wrapper",
-                "data-tip": "Add a new Dataset", "data-for": "tip_addDataset"
-              }, ["Add Dataset",
-                span({ className: "glyphicon glyphicon-plus-sign", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
+                className: 'btn-primary dataset-background search-wrapper',
+                'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
+              }, ['Add Dataset',
+                span({ className: 'glyphicon glyphicon-plus-sign', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
               ])
             ]),
           ]),
 
-          div({ className: "table-wrap" }, [
-            form({ className: "pos-relative" }, [
-              div({ className: "checkbox check-all" }, [
-                input({ checked: this.state.allChecked, type: "checkbox", "select-all": "true", className: "checkbox-inline", id: "chk_selectAll", onChange: this.selectAll }),
-                label({ className: "regular-checkbox", htmlFor: "chk_selectAll" }, []),
+          div({ className: 'table-wrap' }, [
+            form({ className: 'pos-relative' }, [
+              div({ className: 'checkbox check-all' }, [
+                input({ checked: this.state.allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: this.selectAll }),
+                label({ className: 'regular-checkbox', htmlFor: 'chk_selectAll' }, []),
               ]),
             ]),
 
             div({ className: this.state.isAdmin && !this.state.isResearcher ? 'table-scroll-admin' : 'table-scroll' }, [
-              table({ className: "table" }, [
+              table({ className: 'table' }, [
                 thead({}, [
                   tr({}, [
                     th({}),
@@ -610,30 +610,30 @@ class DatasetCatalog extends Component {
             ])
           ]),
 
-          div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
-            div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
+          div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
+            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7' }, [
               h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
             ]),
             button({
-              id: "btn_downloadSelection",
-              download: "",
+              id: 'btn_downloadSelection',
+              download: '',
               disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
               onClick: this.download,
-              className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background"
+              className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
             }, [
-              "Download selection",
-              span({ className: "glyphicon glyphicon-download", style: { 'marginLeft': '5px' }, "aria-hidden": "true" })
+              'Download selection',
+              span({ className: 'glyphicon glyphicon-download', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
             ]),
           ]),
-          div({ className: "f-right" }, [
+          div({ className: 'f-right' }, [
             button({
-              id: "btn_applyAccess",
+              id: 'btn_applyAccess',
               isRendered: this.state.isResearcher,
               disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
               onClick: () => this.exportToRequest(),
-              className: "btn-primary dataset-background search-wrapper",
-              "data-tip": "Request Access for selected Datasets", "data-for": "tip_requestAccess"
-            }, ["Apply for Access"])
+              className: 'btn-primary dataset-background search-wrapper',
+              'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
+            }, ['Apply for Access'])
           ]),
           TranslatedDulModal({
             isRendered: this.state.showTranslatedDULModal,
@@ -650,8 +650,8 @@ class DatasetCatalog extends Component {
             alertMessage: this.state.errorMessage,
             alertTitle: this.state.alertTitle,
             disableOkBtn: this.state.disableOkButton,
-            action: { label: "Yes", handler: this.dialogHandlerDelete }
-          }, [div({ className: "dialog-description" }, ["Are you sure you want to delete this Dataset?"]),]),
+            action: { label: 'Yes', handler: this.dialogHandlerDelete }
+          }, [div({ className: 'dialog-description' }, ['Are you sure you want to delete this Dataset?']),]),
 
           ConfirmationDialog({
             title: 'Disable Dataset Confirmation?',
@@ -660,8 +660,8 @@ class DatasetCatalog extends Component {
             alertMessage: this.state.errorMessage,
             disableOkBtn: this.state.disableOkButton,
             alertTitle: this.state.alertTitle,
-            action: { label: "Yes", handler: this.dialogHandlerDisable }
-          }, [div({ className: "dialog-description" }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
+            action: { label: 'Yes', handler: this.dialogHandlerDisable }
+          }, [div({ className: 'dialog-description' }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
 
           ConfirmationDialog({
             title: 'Enable Dataset Confirmation?',
@@ -670,8 +670,8 @@ class DatasetCatalog extends Component {
             alertTitle: this.state.alertTitle,
             showModal: this.state.showDialogEnable,
             disableOkBtn: this.state.disableOkButton,
-            action: { label: "Yes", handler: this.dialogHandlerEnable }
-          }, [div({ className: "dialog-description" }, ["If you enable a Dataset, Researchers will be able to request access on it from now on."]),]),
+            action: { label: 'Yes', handler: this.dialogHandlerEnable }
+          }, [div({ className: 'dialog-description' }, ['If you enable a Dataset, Researchers will be able to request access on it from now on.']),]),
 
           ConfirmationDialog({
             title: 'Edit Dataset Confirmation?',
@@ -680,8 +680,8 @@ class DatasetCatalog extends Component {
             alertTitle: this.state.alertTitle,
             showModal: this.state.showDialogEdit,
             disableOkBtn: this.state.disableOkButton,
-            action: { label: "Yes", handler: this.dialogHandlerEdit }
-          }, [div({ className: "dialog-description" }, ["Are you sure you want to edit this Dataset?"]),]),
+            action: { label: 'Yes', handler: this.dialogHandlerEdit }
+          }, [div({ className: 'dialog-description' }, ['Are you sure you want to edit this Dataset?']),]),
 
           ConnectDatasetModal({
             isRendered: this.state.showConnectDatasetModal,
@@ -691,35 +691,35 @@ class DatasetCatalog extends Component {
             dataset: this.state.datasetConnect,
           }),
           h(ReactTooltip, {
-            id: "tip_delete",
+            id: 'tip_delete',
             place: 'right',
             effect: 'solid',
             multiline: true,
             className: 'tooltip-wrapper'
           }),
           h(ReactTooltip, {
-            id: "tip_disable",
+            id: 'tip_disable',
             place: 'right',
             effect: 'solid',
             multiline: true,
             className: 'tooltip-wrapper'
           }),
           h(ReactTooltip, {
-            id: "tip_enable",
+            id: 'tip_enable',
             place: 'right',
             effect: 'solid',
             multiline: true,
             className: 'tooltip-wrapper'
           }),
           h(ReactTooltip, {
-            id: "tip_connect",
+            id: 'tip_connect',
             place: 'right',
             effect: 'solid',
             multiline: true,
             className: 'tooltip-wrapper'
           }),
           h(ReactTooltip, {
-            id: "tip_requestAccess",
+            id: 'tip_requestAccess',
             effect: 'solid',
             multiline: true,
             className: 'tooltip-wrapper'
