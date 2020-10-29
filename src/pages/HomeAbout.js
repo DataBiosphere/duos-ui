@@ -15,11 +15,17 @@ class HomeAbout extends Component {
       float: 'none'
     };
 
+    const header = {
+      fontWeight: '600',
+      padding: '0 5rem',
+      textAlign: 'left'
+    };
+
     const aboutSectionWrapper = {
       fontFamily: 'Montserrat',
       margin: '2rem auto',
       overflow: 'auto',
-      textAlign: 'center',
+      textAlign: 'left',
       color: '#1F3B50',
       display: 'flex',
       flexDirection: 'column',
@@ -29,7 +35,8 @@ class HomeAbout extends Component {
     const aboutSectionTitle = {
       fontWeight: '600',
       color: '#2899BC',
-      padding: '0 5rem'
+      padding: '0 5rem',
+      textAlign: 'left'
     };
 
     const aboutSectionBody = {
@@ -45,10 +52,13 @@ class HomeAbout extends Component {
         div({className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12'}, [
           div({}, [
             div({style: aboutSectionWrapper}, [
-              h1({style: {fontWeight: '600'}}, ['Data Use Oversight System'])
+              h1({style: header, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, ['Data Use Oversight System'])
             ]),
             div({style: aboutSectionWrapper}, [
-              h3({style: aboutSectionTitle}, ['Current State of Data Access']),
+              h3({
+                style: aboutSectionTitle,
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
+              }, ['Current State of Data Access']),
               img({
                 src: '/images/about_current_access.png',
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',

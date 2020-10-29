@@ -1,7 +1,8 @@
 import { Component } from 'react';
-import { div, button, i, span, b, a, h4, hr } from 'react-hyperscript-helpers';
+import { div, i, span, b, a, hr, h} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Consent, Election, Files } from '../libs/ajax';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulPreview extends Component {
 
@@ -23,7 +24,6 @@ class DulPreview extends Component {
   async electionReview() {
     const consentId = this.props.match.params.consentId;
     let consent = await Election.electionReviewResource(consentId, 'TranslateDUL');
-
     if (consent.election !== undefined) {
       this.setState({
         consentPreview: consent.consent
@@ -53,6 +53,8 @@ class DulPreview extends Component {
       this.state.consentPreview.name
     ]);
 
+    const translatedDULStatements = h(TranslatedDULComponent,{restrictions: this.state.consentPreview.dataUse, isDUL: true, downloadDUL: this.downloadDUL});
+
     return (
 
       div({ className: "container container-wide" }, [
@@ -73,39 +75,15 @@ class DulPreview extends Component {
               onClick: this.back,
               className: "btn-primary btn-back"
             }, [
-                i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
-              ])
+              i({ className: "glyphicon glyphicon-chevron-left" }), "Back"
+            ])
           ]),
         ]),
 
         div({ className: "accordion-title dul-color" },
           ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
-
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({
-              id: "panel_dul",
-              className: "panel-body cm-boxbody"
-            }, [
-                button({
-                  id: "btn_downloadDataUseLetter",
-                  className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color",
-                  onClick: () => this.downloadDUL()
-                }, ["Download Data Use Letter"]),
-              ])
-          ]),
-
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.consentPreview.translatedUseRestriction } }, [])
-          ]),
-        ]),
+        translatedDULStatements
       ])
     );
   }

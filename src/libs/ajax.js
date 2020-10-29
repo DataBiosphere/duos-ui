@@ -262,6 +262,7 @@ export const DAR = {
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
+    darInfo.restrictions = rawDar.restrictions;
 
     darInfo.hasAdminComment = researcher.rationale != null;
     darInfo.adminComment = researcher.rationale;
@@ -931,6 +932,12 @@ export const User = {
   //Instead, use getById for more predictable results
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  getMe: async () => {
+    const url = `${await Config.getApiUrl()}/user/me`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },

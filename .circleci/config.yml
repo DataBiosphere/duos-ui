@@ -116,39 +116,6 @@ commands:
             kubectl rollout status deployment/${APPLICATION_NAME}
 
 jobs:
-  test-docker:
-    executor: node
-    steps:
-      - setup_remote_docker
-      - checkout
-      - run: cp config/dev.json public/config.json
-      - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
-      - run: npm run docker-build:test
-  test:
-    executor: cypress
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run:
-          name: Install dependencies
-          command: npm ci
-      - run: npm run cypress:verify
-      - run: cp config/dev.json public/config.json
-      - run: CI=false npm run build --silent
-      - save_cache:
-          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-          paths:
-            - ~/.npm
-            - ~/.cache
-      - run:
-          name: Start server
-          command: npx http-server ./build -p 3000
-          background: true
-      - run: npm run cypress:run
-
   build-dev:
     executor: cypress
     steps:
@@ -246,21 +213,7 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - test-docker:
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: /.*/
-      - test:
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: /.*/
       - build-dev:
-          requires:
-            - test
           filters:
             branches:
               only: /.*/
@@ -271,8 +224,6 @@ workflows:
             branches:
               only: develop
       - build-staging:
-          requires:
-            - test
           filters:
             tags:
               only: /^staging.*/
@@ -287,8 +238,6 @@ workflows:
             branches:
               ignore: /.*/
       - deploy-production:
-          requires:
-            - test
           filters:
             tags:
               only: /^production.*/

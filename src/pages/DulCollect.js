@@ -1,5 +1,5 @@
 import { Component, Fragment } from 'react';
-import { div, button, i, span, b, a, hr, h4, h3, h } from 'react-hyperscript-helpers';
+import { div, i, span, b, a, hr, h4, h3, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
@@ -7,6 +7,7 @@ import { CollectResultBox } from '../components/CollectResultBox';
 import { Election, Files, Email } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from '../libs/storage';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulCollect extends Component {
 
@@ -26,11 +27,13 @@ class DulCollect extends Component {
     let election = await Election.electionReviewResource(consentId, 'TranslateDUL');
     this.setGraphData(election.reviewVote);
     this.setState(prev => {
+      if(election.consent) {
+        prev.dataUse = election.consent.dataUse;
+      }
       prev.dulVoteList = this.chunk(election.reviewVote, 2);
       prev.consentGroupName = election.consent.groupName;
       prev.consentName = election.consent.name;
       prev.dulName = election.consent.dulName;
-      prev.translatedUseRestriction = election.election.translatedUseRestriction;
       prev.projectTitle = election.election.projectTitle;
       prev.finalVote = election.election.finalVote;
       prev.finalRationale = election.election.finalRationale;
@@ -61,7 +64,6 @@ class DulCollect extends Component {
       hasUseRestriction: Boolean,
       projectTitle: '',
       consentName: '',
-      translatedUseRestriction: '',
       consentGroupName: null,
       finalVote: '',
       finalRationale: '',
@@ -175,6 +177,7 @@ class DulCollect extends Component {
       b({ isRendered: this.state.consentGroupName, className: "pipe", dangerouslySetInnerHTML: { __html: this.state.consentGroupName } }, []),
       this.state.consentName
     ]);
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.dataUse, downloadDUL: this.downloadDUL, isDUL: true});
 
     return (
 
@@ -193,34 +196,16 @@ class DulCollect extends Component {
         ConfirmationDialog({
           title: this.state.dialogTitle, color: 'dul', showModal: this.state.showDialogReminder, type: "informative", action: { label: "Ok", handler: this.dialogHandlerReminder }
         }, [
-            div({ className: "dialog-description" }, [
-              span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
-              span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
-            ]),
+          div({ className: "dialog-description" }, [
+            span({ isRendered: this.state.isReminderSent === true }, ["The reminder was successfully sent."]),
+            span({ isRendered: this.state.isReminderSent === false }, ["The reminder couldn't be sent. Please contact Support."]),
           ]),
+        ]),
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
 
         hr({ className: "section-separator", style: { 'marginTop': '0' } }),
         h4({ className: "hint" }, ["Please review the Data Use Letter, Structured Limitations, and DAC votes to determine if the Data Use Limitations were appropriately converted to Structured Limitations"]),
-
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-            ])
-          ]),
-
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.translatedUseRestriction } }, [])
-          ]),
-        ]),
-
+        translatedDULStatements,
         div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
           CollectResultBox({
             id: "dulCollectResult",
@@ -247,10 +232,10 @@ class DulCollect extends Component {
             title: "Post Final Vote?", color: 'dul', showModal: this.state.showConfirmationDialogOK,
             action: { label: "Yes", handler: this.confirmationHandlerOK }
           }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["If you post this vote the Election will be closed with current results."]),
-              ]),
+            div({ className: "dialog-description" }, [
+              span({}, ["If you post this vote the Election will be closed with current results."]),
             ]),
+          ]),
         ]),
 
         h3({ className: "cm-subtitle" }, ["Data Access Committee Votes"]),
