@@ -4,7 +4,7 @@ import { a, button, div, h4, hr, i, h } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { DataAccessRequest } from '../components/DataAccessRequest';
+import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
@@ -276,7 +276,7 @@ class AccessReview extends Component {
               id: 'accessReview', imgSrc: '/images/icon_access.png', iconSize: 'medium',
               color: 'access', title: 'Data Access Congruence Review'
             }),
-            DataAccessRequest({
+            h(DataAccessRequestHeader, {
               isRendered: !ld.isEmpty(darInfo.datasets),
               dar: darInfo,
               consentName: this.state.consentName
