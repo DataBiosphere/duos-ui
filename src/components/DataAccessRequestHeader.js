@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import map from 'lodash/fp';
+import fp from 'lodash/fp';
 import {div, span} from 'react-hyperscript-helpers';
 import { DataSet } from '../libs/ajax';
-import { useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
 const parseAlias = (alias) => {
   const n = parseInt(alias);
@@ -24,18 +24,33 @@ const pipe = ' | ';
 
 export default function DataAccessRequestHeader(props) {
 
-  const [datasets, setDatasets] = useState(props.dar.datasets || []);
-  const [consentName, setConsentName] = useState(props.consentName || '');
-  const [darCode, setDarCode] = useState(props.dar.darCode || '');
-  const [projectTitle, setProjectTitle] = useState(props.dar.projectTitle || '');
+  const [datasets] = useState(props.dar.datasets || []);
+  const [consentName] = useState(props.consentName || '');
+  const [darCode] = useState(props.dar.darCode || '');
+  const [projectTitle] = useState(props.dar.projectTitle || '');
+  const [fullDatasets, setFullDatasets] = useState([]);
 
-  // const [fullDatasets, setFullDatasets] = useState(
-  //   map((id) => DataSet.getDataSetsByDatasetId(id))(
-  //     map('value')(props.dar.datasets)) || []);
+  // Populate remote datasets here
+  useEffect( () => {
+    let didCancel = false;
+    async function fetchDatasets() {
+      const datasetIds = fp.map('value')(datasets);
+      const response = await fp.map((id) => {
+        return DataSet.getDataSetsByDatasetId(id);
+      })(datasetIds);
+      if (!didCancel) {
+        console.log("finished dataset call: " + response);
+      }
+      console.log(response);
+      setFullDatasets(response);
+      // return () => { didCancel === true;};
+    }
+    fetchDatasets();
+  }, [datasets]);
 
-  const aliases = _.join(
-    _.map(datasets, 'alias').map(a => parseAlias(a)), ', ');
-  const names = _.join(_.map(datasets, 'name'), ', ');
+  const aliases = fp.join(',')(_.map(datasets, 'alias').map(a => parseAlias(a)));
+  const names = fp.join(', ')(fp.map('name')(datasets));
+
   return (
     div({style: style}, [
       div({}, [
