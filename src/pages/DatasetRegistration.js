@@ -25,6 +25,7 @@ class DatasetRegistration extends Component {
       selectedDac: {},
       allDatasets: '',
       allDatasetNames: [],
+      updateDataset: {},
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
@@ -83,11 +84,12 @@ class DatasetRegistration extends Component {
   };
 
   async componentDidMount() {
-    this.props.history.push('/dataset_registration');
-    ReactTooltip.rebuild();
+    await this.init();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.findDataSets(currentUser.dacUserId);
+    const { datasetId } = this.props.match.params;
+    let result = fp.find({'dataSetId': parseInt(datasetId)}, allDatasets );
     const allDatasetNames = allDatasets.map(d => {
       let name = d.properties.find(p => p.propertyName === "Dataset Name");
       return name.propertyValue;
@@ -101,7 +103,58 @@ class DatasetRegistration extends Component {
       prev.dacList = dacs;
       return prev;
     });
+    if (!fp.isEmpty(this.state.updateDataset)) {
+      this.prefillDatasetFields(this.state.updateDataset);
+    }
   };
+
+  async init() {
+    const { datasetId } = this.props.match.params;
+    let updateDataset = {};
+    if (!fp.isNil(datasetId)) {
+      // handle the case where we have an existing dataset id (aka this is an update)
+      DataSet.getDataSetsByDatasetId(datasetId).then(data => {
+        updateDataset = data;
+        // if we don't actually get a dataset from that id, redirect to blank form
+        if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
+          this.props.history.push('/dataset_registration');
+          ReactTooltip.rebuild();
+        }
+        else {
+          this.setState(prev => {
+            prev.updateDataset = updateDataset;
+          })
+        }
+      })
+    }
+  }
+
+  prefillDatasetFields(dataset) {
+    let name = dataset.properties.find(p => p.propertyName === "Dataset Name");
+    let collectionId = dataset.properties.find(p => p.propertyName === "Sample Collection ID");
+    let dataType = dataset.properties.find(p => p.propertyName === "Data Type");
+    let species = dataset.properties.find(p => p.propertyName === "Species");
+    let phenotype = dataset.properties.find(p => p.propertyName === "Phenotype/Indication");
+    let nrParticipants = dataset.properties.find(p => p.propertyName === "# of participants");
+    let description = dataset.properties.find(p => p.propertyName === "Description");
+    let datasetRepoUrl = dataset.properties.find(p => p.propertyName === "dbGAP");
+    let researcher = dataset.properties.find(p => p.propertyName === "Data Depositor");
+    let pi = dataset.properties.find(p => p.propertyName === "Principal Investigator(PI)");
+    this.setState(prev => {
+      prev.datasetData.datasetName = name ? name.propertyValue : '';
+      prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
+      prev.datasetData.dataType = dataType ? dataType.propertyValue : '';
+      prev.datasetData.species = species ? species.propertyValue : '';
+      prev.datasetData.phenotype = phenotype ? phenotype.propertyValue : '';
+      prev.datasetData.nrParticipants = nrParticipants ? nrParticipants.propertyValue : '';
+      prev.datasetData.description = description ? description.propertyValue : '';
+      prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
+      prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
+      prev.datasetData.pi = pi ? pi.propertyValue : '';
+
+      return prev;
+    })
+  }
 
   handleOpenModal() {
     this.setState({ showModal: true });
@@ -163,15 +216,40 @@ class DatasetRegistration extends Component {
   };
 
   validateDatasetName(name) {
+    let oldDataset = this.state.updateDataset;
     let datasets = this.state.allDatasetNames;
-    let val = !fp.contains(name, datasets);
-    return val;
+    // if we are creating a brand new dataset
+    if (fp.isEmpty(oldDataset)) {
+      let val = !fp.contains(name, datasets);
+      return val;
+    }
+    // else if we are updating a dataset, we should allow the current name as well.
+    else {
+      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue
+
+      let val = (name === updateDatasetName || !fp.contains(name, datasets))
+      return val;
+    }
   };
 
   showDatasetNameErrors(name, showValidationMessages) {
+    // if there is no name, check if we're throwing errors and color appropriately
     if (fp.isEmpty(name)) {
       return showValidationMessages ? 'form-control required-field-error' : 'form-control';
     }
+    // if there is a name because it was loaded in from update
+    if (!fp.isEmpty(this.state.updateDataset)) {
+      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue
+      let equalsOriginal = (name === updateDatasetName)
+      if (equalsOriginal) {
+        return 'form-control';
+      }
+    // if the old dataset name has been edited
+    else {
+        return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
+      }
+    }
+    // if a new dataset name is being edited
     else {
       return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
     }
@@ -210,7 +288,7 @@ class DatasetRegistration extends Component {
         if (ontologies.length > 0) {
           prev.formData.ontologies = ontologies;
         }
-        for (var key in prev.datasetData) {
+        for (let key in prev.datasetData) {
           if (prev.datasetData[key] === '') {
             prev.datasetData[key] = undefined;
           }
@@ -228,9 +306,11 @@ class DatasetRegistration extends Component {
         }
         else {
           let ds = this.formatFormData(formData);
+          // if there is no updateDataset, this is a create POST
+          if (fp.isEmpty(this.state.updateDataset)) {
           DataSet.postDatasetForm(ds).then(resp => {
             this.setState({ showDialogSubmit: false, submissionSuccess: true });
-            this.props.history.push('dataset_registration');
+            ReactTooltip.rebuild();
           }).catch(e => {
             let errorMessage = (e.status === 409) ?
               'Dataset with this name already exists: ' + this.state.datasetData.datasetName
@@ -243,6 +323,23 @@ class DatasetRegistration extends Component {
               return prev;
             });
           });
+        }
+        // if there is an updateDataset, then this is an update PUT
+        else {
+            const { datasetId } = this.props.match.params;
+            DataSet.updateDataset(datasetId, ds).then(resp => {
+            this.setState({ showDialogSubmit: false, submissionSuccess: true });
+            ReactTooltip.rebuild();
+          }).catch(e => {
+              let errorMessage = 'Some errors occurred, the Dataset was not updated.';
+              this.setState(prev => {
+              prev.problemSavingRequest = true;
+              prev.submissionSuccess = false;
+              prev.errorMessage = errorMessage;
+              return prev;
+            });
+          });
+        }
         }
       });
     } else {
@@ -516,8 +613,7 @@ class DatasetRegistration extends Component {
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: (fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages)
-                            || (!fp.isEmpty(this.state.datasetData.datasetName) && !this.validateDatasetName(this.state.datasetData.datasetName)),
+                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
                         },
                         [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
                       ])
