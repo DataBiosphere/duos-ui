@@ -1,15 +1,7 @@
-import _ from 'lodash';
-import fp from 'lodash/fp';
+import { map, join } from 'lodash/fp';
 import {div, span} from 'react-hyperscript-helpers';
 import { DataSet } from '../libs/ajax';
 import {useEffect, useState} from 'react';
-
-const parseAlias = (alias) => {
-  const n = parseInt(alias);
-  const prefix = 'DUOS-';
-  const pad = '000000';
-  return prefix + (pad + n).slice(-pad.length);
-};
 
 const style = {
   'fontSize': 19,
@@ -32,24 +24,20 @@ export default function DataAccessRequestHeader(props) {
 
   // Populate remote datasets here
   useEffect( () => {
-    let didCancel = false;
+    // dar.datasets.value holds the ID of the dataset
+    const datasetIds = map('value')(datasets);
     async function fetchDatasets() {
-      const datasetIds = fp.map('value')(datasets);
-      const response = await fp.map((id) => {
+      const response = await Promise.all(map((id) => {
         return DataSet.getDataSetsByDatasetId(id);
-      })(datasetIds);
-      if (!didCancel) {
-        console.log("finished dataset call: " + response);
-      }
-      console.log(response);
+      })(datasetIds));
       setFullDatasets(response);
-      // return () => { didCancel === true;};
     }
+    // Call async promise for all datasets
     fetchDatasets();
   }, [datasets]);
 
-  const aliases = fp.join(',')(_.map(datasets, 'alias').map(a => parseAlias(a)));
-  const names = fp.join(', ')(fp.map('name')(datasets));
+  const aliases = join(',')(map('alias')(fullDatasets));
+  const names = join(', ')(map('name')(fullDatasets));
 
   return (
     div({style: style}, [
