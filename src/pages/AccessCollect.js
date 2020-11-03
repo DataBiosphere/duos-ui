@@ -5,7 +5,7 @@ import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { DataAccessRequest } from '../components/DataAccessRequest';
+import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { StructuredDarRp } from '../components/StructuredDarRp';
@@ -372,7 +372,7 @@ class AccessCollect extends Component {
               id: 'collectAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
               color: 'access', title: 'Collect votes for Data Access Congruence Review'
             }),
-            DataAccessRequest({
+            h(DataAccessRequestHeader, {
               isRendered: !ld.isEmpty(this.state.darInfo.datasets),
               dar: this.state.darInfo,
               consentName: this.state.consentName

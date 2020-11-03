@@ -3,7 +3,7 @@ import { Component } from 'react';
 import { a, button, div, h4, i, h } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
-import { DataAccessRequest } from '../components/DataAccessRequest';
+import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { StructuredDarRp } from '../components/StructuredDarRp';
 import { DAR, Files, Researcher } from '../libs/ajax';
@@ -104,7 +104,7 @@ class AccessPreview extends Component {
               id: 'previewAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
               color: 'access', title: 'Data Access Congruence Preview'
             }),
-            DataAccessRequest({
+            h(DataAccessRequestHeader, {
               isRendered: !_.isEmpty(this.state.darInfo.datasets),
               dar: this.state.darInfo,
               consentName: this.state.consentName
