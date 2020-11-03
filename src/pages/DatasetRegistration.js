@@ -88,8 +88,6 @@ class DatasetRegistration extends Component {
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.findDataSets(currentUser.dacUserId);
-    const { datasetId } = this.props.match.params;
-    let result = fp.find({'dataSetId': parseInt(datasetId)}, allDatasets );
     const allDatasetNames = allDatasets.map(d => {
       let name = d.properties.find(p => p.propertyName === "Dataset Name");
       return name.propertyValue;
@@ -111,11 +109,11 @@ class DatasetRegistration extends Component {
   async init() {
     const { datasetId } = this.props.match.params;
     let updateDataset = {};
+    // update dataset case
     if (!fp.isNil(datasetId)) {
-      // handle the case where we have an existing dataset id (aka this is an update)
       DataSet.getDataSetsByDatasetId(datasetId).then(data => {
         updateDataset = data;
-        // if we don't actually get a dataset from that id, redirect to blank form
+        // redirect to blank form if dataset id is invalid or inaccessible
         if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
           this.props.history.push('/dataset_registration');
           ReactTooltip.rebuild();
@@ -123,12 +121,13 @@ class DatasetRegistration extends Component {
         else {
           this.setState(prev => {
             prev.updateDataset = updateDataset;
-          })
+          });
         }
-      })
+      });
     }
-  }
+  };
 
+  // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
     let name = dataset.properties.find(p => p.propertyName === "Dataset Name");
     let collectionId = dataset.properties.find(p => p.propertyName === "Sample Collection ID");
@@ -140,6 +139,7 @@ class DatasetRegistration extends Component {
     let datasetRepoUrl = dataset.properties.find(p => p.propertyName === "dbGAP");
     let researcher = dataset.properties.find(p => p.propertyName === "Data Depositor");
     let pi = dataset.properties.find(p => p.propertyName === "Principal Investigator(PI)");
+
     this.setState(prev => {
       prev.datasetData.datasetName = name ? name.propertyValue : '';
       prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
@@ -154,7 +154,7 @@ class DatasetRegistration extends Component {
 
       return prev;
     })
-  }
+  };
 
   handleOpenModal() {
     this.setState({ showModal: true });
@@ -218,34 +218,31 @@ class DatasetRegistration extends Component {
   validateDatasetName(name) {
     let oldDataset = this.state.updateDataset;
     let datasets = this.state.allDatasetNames;
-    // if we are creating a brand new dataset
+    // create dataset case
     if (fp.isEmpty(oldDataset)) {
-      let val = !fp.contains(name, datasets);
-      return val;
+      return !fp.contains(name, datasets);
     }
-    // else if we are updating a dataset, we should allow the current name as well.
+    // update dataset case (include old dataset name as valid)
     else {
-      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue
+      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
 
-      let val = (name === updateDatasetName || !fp.contains(name, datasets))
-      return val;
+      return (name === updateDatasetName || !fp.contains(name, datasets));
     }
   };
 
   showDatasetNameErrors(name, showValidationMessages) {
-    // if there is no name, check if we're throwing errors and color appropriately
     if (fp.isEmpty(name)) {
       return showValidationMessages ? 'form-control required-field-error' : 'form-control';
     }
-    // if there is a name because it was loaded in from update
+    // if there is a name loaded in because this is an update
     if (!fp.isEmpty(this.state.updateDataset)) {
-      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue
+      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
       let equalsOriginal = (name === updateDatasetName)
       if (equalsOriginal) {
         return 'form-control';
       }
-    // if the old dataset name has been edited
-    else {
+      // if the old dataset name has been edited
+      else {
         return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
       }
     }
@@ -306,40 +303,38 @@ class DatasetRegistration extends Component {
         }
         else {
           let ds = this.formatFormData(formData);
-          // if there is no updateDataset, this is a create POST
           if (fp.isEmpty(this.state.updateDataset)) {
-          DataSet.postDatasetForm(ds).then(resp => {
-            this.setState({ showDialogSubmit: false, submissionSuccess: true });
-            ReactTooltip.rebuild();
-          }).catch(e => {
-            let errorMessage = (e.status === 409) ?
-              'Dataset with this name already exists: ' + this.state.datasetData.datasetName
+            DataSet.postDatasetForm(ds).then(resp => {
+              this.setState({ showDialogSubmit: false, submissionSuccess: true });
+              ReactTooltip.rebuild();
+            }).catch(e => {
+              let errorMessage = (e.status === 409) ?
+                'Dataset with this name already exists: ' + this.state.datasetData.datasetName
               + '. Please choose a different name before attempting to submit again.'
-              : 'Some errors occurred, Dataset Registration couldn\'t be completed.';
-            this.setState(prev => {
-              prev.problemSavingRequest = true;
-              prev.submissionSuccess = false;
-              prev.errorMessage = errorMessage;
-              return prev;
+                : 'Some errors occurred, Dataset Registration couldn\'t be completed.';
+              this.setState(prev => {
+                prev.problemSavingRequest = true;
+                prev.submissionSuccess = false;
+                prev.errorMessage = errorMessage;
+                return prev;
+              });
             });
-          });
-        }
-        // if there is an updateDataset, then this is an update PUT
-        else {
+          }
+          else {
             const { datasetId } = this.props.match.params;
             DataSet.updateDataset(datasetId, ds).then(resp => {
-            this.setState({ showDialogSubmit: false, submissionSuccess: true });
-            ReactTooltip.rebuild();
-          }).catch(e => {
+              this.setState({ showDialogSubmit: false, submissionSuccess: true });
+              ReactTooltip.rebuild();
+            }).catch(e => {
               let errorMessage = 'Some errors occurred, the Dataset was not updated.';
               this.setState(prev => {
-              prev.problemSavingRequest = true;
-              prev.submissionSuccess = false;
-              prev.errorMessage = errorMessage;
-              return prev;
+                prev.problemSavingRequest = true;
+                prev.submissionSuccess = false;
+                prev.errorMessage = errorMessage;
+                return prev;
+              });
             });
-          });
-        }
+          }
         }
       });
     } else {
