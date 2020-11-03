@@ -5,6 +5,7 @@ import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
 import DataUseAgreements from './dar_application/DataUseAgreements';
+import {Notifications as NotyUtil } from '../libs/utils';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
@@ -13,6 +14,7 @@ import { DAR, Researcher, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
+import camelCase from 'lodash/fp/camelCase';
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
@@ -39,8 +41,6 @@ class DataAccessRequestApplication extends Component {
         labCollaborators: [],
         internalCollaborators: [],
         externalCollaborators: [],
-        collaborationDocument: null,
-        irbDocument: null,
         checkCollaborator: false,
         rus: '',
         nonTechRus: '',
@@ -88,6 +88,10 @@ class DataAccessRequestApplication extends Component {
         gsoAcknowledgement: false,
         pubAcknowledgement: false,
         dsAcknowledgement: false,
+        irbDocumentLocation: '',
+        irbDocumentName: '',
+        collaborationLetterLocation: '',
+        collaborationLetterName: '',
         activeDULQuestions: {}
       },
       step1: {
@@ -102,7 +106,8 @@ class DataAccessRequestApplication extends Component {
         }
       },
       step2: {
-        activeQuestions: {}
+        uploadedIrbDocument: null,
+        uploadedCollaborationLetter: null
       },
       step3: {
         inputPurposes: {
@@ -115,6 +120,7 @@ class DataAccessRequestApplication extends Component {
     this.goToStep = this.goToStep.bind(this);
     this.formFieldChange = this.formFieldChange.bind(this);
     this.partialSave = this.partialSave.bind(this);
+    this.changeDULDocument = this.changeDULDocument.bind(this);
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -125,6 +131,29 @@ class DataAccessRequestApplication extends Component {
       return state;
     }, () => this.checkValidations());
   };
+
+  changeDULDocument = (dataset) => {
+    const { name, value } = dataset;
+    const uploadedFileName = `uploaded${name[0].toUpperCase()}${name.slice(1)}`;
+    const prevFileName = `${name}Name`;
+    const prevFileLocation = `${name}Location`;
+
+    //if value (new uploaded file) is not nil, update relevant fields
+    //on later submit/save, save new file to cloud storage and update file name and location before submitting formData
+    if(!isNil(value)) {
+      this.setState(state => {
+        state.formData[prevFileName] = '';
+        state.formData[prevFileLocation] = '';
+        state.step2[uploadedFileName] = value;
+        return state;
+      });
+    } else if(isEmpty(value)) {
+      this.setState(prev => {
+        prev.step2[uploadedFileName] = value;
+        return prev;
+      });
+    }
+  }
 
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
@@ -442,12 +471,13 @@ class DataAccessRequestApplication extends Component {
     //defined attribute keys for dynamix DUL based questions
     const dulInvalidCheck = () => {
       const activeQuestions = this.state.formData.activeDULQuestions;
+
       const dulQuestionMap = {
         'geneticStudiesOnly': 'gsoAcknowledgement',
         'publicationResults': 'pubAcknowledgement',
         'diseaseRestrictions': 'dsAcknowledgement',
         'ethicsApprovalRequired': 'irbDocument',
-        'collaboratorRequired': 'collaborationDocument'
+        'collaboratorRequired': 'collaborationLetter'
       };
       let result = false;
 
@@ -456,8 +486,13 @@ class DataAccessRequestApplication extends Component {
         result = fp.every((question) => {
           const formDataKey = dulQuestionMap[question];
           const input = formData[formDataKey];
-          if (formDataKey === 'irbDocument' || formDataKey === 'collaborationDocument') {
-            return isNil(input);
+          if (formDataKey === 'irbDocument' || formDataKey === 'collaborationLetter') {
+            //NOTE: reframe check on documents
+            //Check if uploaded file has been added or if pre-existing file is present
+            const newFileKey = 'uploaded' + camelCase(formDataKey);
+            const newFile = this.state.step2[newFileKey];
+            const currentFile = this.state.step2[formDataKey];
+            return ((isNil(currentFile) || isEmpty(currentFile)) && isNil(newFile));
           } else {
             return isNil(input) && isEmpty(input);
           }
@@ -520,43 +555,69 @@ class DataAccessRequestApplication extends Component {
     this.setState({ showDialogSave: true });
   };
 
-  dialogHandlerSubmit = (answer) => (e) => {
+  //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
+  //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
+  saveDULDocuments = async(uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
+    await DAR.uploadDULDocument(uploadedIrbDocument, referenceId, 'irbDocument');
+    const updatedDAR = await DAR.uploadDULDocument(uploadedCollaborationLetter, referenceId, 'collaborationLetter');
+    return updatedDAR;
+  }
+
+  submitDARFormData = async (answer) => {
     if (answer === true) {
-      let ontologies = [];
+      const userId = Storage.getCurrentUser().dacUserId;
+      const uploadedIrbDocument = this.state.step2.uploadedIrbDocument;
+      const uploadedCollaborationLetter = this.state.step2.uploadedCollaborationLetter;
+
+      let formattedFormData = fp.cloneDeep(this.state.formData);
+      const ontologies = fp.map((item) => {
+        return {
+          id: item.key,
+          value: item.value
+        };
+      })(formattedFormData.ontologies);
+
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       }
-      this.setState(prev => {
-        if (ontologies.length > 0) {
-          prev.formData.ontologies = ontologies;
+
+      if (ontologies.length > 0) {
+        formattedFormData.ontologies = ontologies;
+      }
+
+      for (var key in formattedFormData) {
+        if (formattedFormData[key] === '') {
+          formattedFormData[key] = undefined;
         }
-        for (var key in prev.formData) {
-          if (prev.formData[key] === '') {
-            prev.formData[key] = undefined;
-          }
-        }
-        return prev;
-      }, () => {
-        let formData = this.state.formData;
-        // DAR datasetIds needs to be a list of ids
-        formData.datasetIds = fp.map('value')(formData.datasets);
-        formData.userId = Storage.getCurrentUser().dacUserId;
-        this.setState(prev => {
-          prev.disableOkBtn = true;
-          return prev;
+      }
+      formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
+      formattedFormData.userId = userId;
+
+      try {
+        let initDARData = await DAR.postDataAccessRequest(formattedFormData);
+        const referenceId = initDARData.referenceId;
+        debugger;
+        await this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+        this.setState({
+          showDialogSubmit: false
+        }, Navigation.console(Storage.getCurrentUser(), this.props.history));
+      } catch (error) {
+        NotyUtil.showError({
+          text: 'Error: DAR update failed on document upload process'
         });
-        DAR.postDataAccessRequest(formData).then(response => {
-          this.setState({ showDialogSubmit: false });
-          Navigation.console(Storage.getCurrentUser(), this.props.history);
-        }).catch(e =>
-          this.setState(prev => {
-            prev.problemSavingRequest = true;
-            return prev;
-          }));
-      });
+      }
     } else {
-      this.setState({ showDialogSubmit: false });
+      this.setState({
+        showDialogSubmit: false
+      });
     }
+  }
+
+  dialogHandlerSubmit = (answer) => (e) => {
+    this.setState(prev => {
+      prev.disableOkButton = true;
+      return prev;
+    }, this.submitDARFormData(answer));
   };
 
   setShowDialogSave = (value) => {
@@ -590,22 +651,36 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-  savePartial = () => {
-    let formData = this.state.formData;
+  savePartial = async () => {
+    let formattedFormData = fp.cloneDeep(this.state.formData);
     // DAR datasetIds needs to be a list of ids
-    formData.datasetIds = fp.map('value')(formData.datasets);
+    formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
+    const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = this.props.match.params;
+    let darPartialResponse = await DAR.postPartialDarRequest(formattedFormData);
+    let referenceId = darPartialResponse.referenceId;
     if (fp.isNil(dataRequestId)) {
-      DAR.postPartialDarRequest(formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.replace('/dar_application/' + resp.referenceId);
-      });
+      try {
+        this.props.history.replace('/dar_application/' + referenceId);
+      } catch(error) {
+        NotyUtil.showError('Error saving partial DAR update');
+      }
     } else {
-      DAR.updatePartialDarRequest(formData).then(resp => {
+      try {
+        darPartialResponse = await DAR.updatePartialDarRequest(formattedFormData);
         this.setShowDialogSave(false);
-      });
+      } catch(error) {
+        NotyUtil.showError('Error saving partial DAR update');
+      }
     }
+    debugger;
+    darPartialResponse = await this.saveDULDocuments(uploadedCollaborationLetter, uploadedIrbDocument, referenceId);
+    debugger;
+    this.setState(prev => {
+      prev.formData = Object.assign({}, prev.formData, darPartialResponse);
+      return prev;
+    });
   };
 
   addDataUseToDataset = async(currentDatasets) => {
@@ -751,8 +826,10 @@ class DataAccessRequestApplication extends Component {
       anvilUse = false,
       cloudProvider = '',
       cloudProviderType = '',
-      irbDocument = null,
-      collaborationDocument = null,
+      irbDocumentLocation = '', //file storage location of uploaded file,
+      irbDocumentName = '', //name of uploaded file
+      collaborationLetterLocation = '', //file storage location of uploaded letter
+      collaborationLetterName = '', //name of uploaded letter
       cloudProviderDescription = '',
       gsoAcknowledgement,
       pubAcknowledgement,
@@ -936,14 +1013,19 @@ class DataAccessRequestApplication extends Component {
                 forProfit,
                 rus: this.state.formData.rus,
                 nonTechRus: this.state.formData.nonTechRus,
-                collaborationDocument,
-                irbDocument,
                 gsoAcknowledgement,
                 pubAcknowledgement,
                 dsAcknowledgement,
                 nextPage: this.nextPage,
                 prevPage: this.prevPage,
-                partialSave: this.partialSave
+                partialSave: this.partialSave,
+                irbDocumentLocation,
+                irbDocumentName,
+                collaborationLetterLocation,
+                collaborationLetterName,
+                changeDULDocument: this.changeDULDocument,
+                uploadedCollaborationLetter: this.state.step2.uploadedCollaborationLetter,
+                uploadedIrbDocument: this.state.step2.uploadedIrbDocument
               })
             ]),
 

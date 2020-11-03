@@ -313,8 +313,10 @@ export const DAR = {
     return await res.json();
   },
 
+  //NOTE: make sure this endpoint works
+  //api was updated to use v2 endpoint
   postPartialDarRequest: async dar => {
-    const url = `${await Config.getApiUrl()}/dar/partial`;
+    const url = `${await Config.getApiUrl()}/dar/v2/draft`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
     return await res.json();
   },
@@ -425,6 +427,14 @@ export const DAR = {
     return manualReview;
   },
 
+  //NOTE: endpoints requires a dar id
+  uploadDULDocument: async(file, darId, fileType) => {
+    let authOpts = Config.authOpts();
+    authOpts.headers['Content-Type'] = 'multipart/form-data';
+    let formData = new FormData();
+    const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
+    return axios.post(url, {file}, authOpts);
+  }
 };
 
 export const DataSet = {

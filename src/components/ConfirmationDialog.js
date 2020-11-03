@@ -64,7 +64,8 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
           onAfterOpen: this.props.afterOpenModal,
           onRequestClose: this.props.onRequestClose,
           style: _.mergeAll([customStyles, this.props.style]),
-          contentLabel: "Modal"
+          contentLabel: "Modal",
+          zIndex: 5
         }, [
 
             div({ className: "dialog-header" }, [
