@@ -1,4 +1,4 @@
-import {filter, flatMap, flow, identity, join, map} from 'lodash/fp';
+import {filter, flatMap, flow, identity, join, map, sortBy} from 'lodash/fp';
 import {div, span} from 'react-hyperscript-helpers';
 import {DataSet} from '../libs/ajax';
 import {useEffect, useState} from 'react';
@@ -28,12 +28,12 @@ export default function DataAccessRequestHeader(props) {
     const datasetIds = map('value')(datasets);
 
     async function fetchDatasets() {
-      const response = await Promise.all(
+      const rawDatasets = await Promise.all(
         map((id) => {
           return DataSet.getDataSetsByDatasetId(id);
         })(datasetIds),
       );
-      setFullDatasets(response);
+      setFullDatasets(sortBy('alias')(rawDatasets));
     }
 
     // Call async promise for all datasets
@@ -61,7 +61,7 @@ export default function DataAccessRequestHeader(props) {
         div({}, [
           span([aliases, pipe]),
           span([names, pipe]),
-          span({}, [consentName]),
+          span([consentName]),
         ]),
       ]),
     ])
