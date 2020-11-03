@@ -1218,7 +1218,7 @@ class DatasetRegistration extends Component {
                     div({ isRendered: submissionSuccess, className: 'rp-alert' }, [
                       Alert({
                         id: 'submissionSuccess', type: 'info',
-                        title: 'Dataset was successfully registered.'
+                        title: this.state.updateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
                       })
                     ]),
 
