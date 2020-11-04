@@ -318,7 +318,6 @@ export const DAR = {
   updateDarDraft: async (dar, referenceId) => {
     const url = `${await Config.getApiUrl()}/dar/v2/draft/${referenceId}`;
     const res = await axios.put(url, dar, Config.authOpts());
-    debugger;
     return res.data;
   },
 
@@ -326,7 +325,6 @@ export const DAR = {
   postDarDraft: async(dar) => {
     const url = `${await Config.getApiUrl()}/dar/v2/draft/`;
     const res = await axios.post(url, dar, Config.authOpts());
-    debugger;
     return res.data;
   },
 
