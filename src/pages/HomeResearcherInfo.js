@@ -1,5 +1,6 @@
 import {Component} from 'react';
-import {div, h1, h3, a, p, span} from 'react-hyperscript-helpers';
+import {div, h1, h3, a, p, span, h} from 'react-hyperscript-helpers';
+import Mailto from "react-protected-mailto";
 
 class HomeResearcherInfo extends Component {
 
@@ -84,7 +85,10 @@ class HomeResearcherInfo extends Component {
                   div({style: sectionBody}, [
                     p({style: paragraph}, ['Yes, you must have an eRA Commons account in order to request access to data via DUOS. If you do not have an eRA Commons, and would like to obtain one please follow the NIH instructions here:']),
                     span({}, [
-                      a({}, ['https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/registration/investigators-and-other-users/era-commons-user-registration.htm'])
+                      a({
+                        href: 'https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/registration/investigators-and-other-users/era-commons-user-registration.htm',
+                        target: '_blank'
+                      }, ['https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/registration/investigators-and-other-users/era-commons-user-registration.htm'])
                     ])
                   ]),
                 ]),
@@ -97,39 +101,33 @@ class HomeResearcherInfo extends Component {
                 div({style: sectionWrapper}, [
                   h3({style: faqTitle}, ['If I am approved for access, where and how do I access the data?']),
                   div({style: sectionBody}, [
-                    p({style: paragraph}, ['Each DAC may store their data in different locations, however much of the data accessible via DUOS is available in Terra. Instructions on how to access data and and data access permissions will be shared with researchers once approved by the DAC in DUOS. For questions or issues on accessing data via Terra please see the Terra support documentation, or reach out to the support team directly at']),
-                    span({}, [
-                      a({}, ['terra-support@broadinstitute.zendesk.com'])
-                    ]),
+                    p({style: paragraph}, ['Each DAC may store their data in different locations, however much of the data accessible via DUOS is available in Terra. Instructions on how to access data and and data access permissions will be shared with researchers once approved by the DAC in DUOS. For questions or issues on accessing data via Terra please see the Terra support documentation, or reach out to the support team directly at ',
+                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
+                      '.'
+                    ])
                   ]),
                 ]),
                 div({style: sectionWrapper}, [
                   h3({style: faqTitle}, ['I am having issues accessing data I was approved for via Terra. What do I do?']),
                   div({style: sectionBody}, [
-                    p({style: paragraph}, ['If you are having issues with accessing the data and have already been granted access by the Data Custodian, please reach out Terra customer support at']),
-                    span({}, [
-                      a({}, ['terra-support@broadinstitute.zendesk.com'])
-                    ]),
-                    p({style: paragraph}, ['If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
+                    p({style: paragraph}, ['If you are having issues with accessing the data and have already been granted access by the Data Custodian, please reach out Terra customer support at ',
+                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
+                    '. If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
                   ]),
                 ]),
                 div({style: sectionWrapper}, [
                   h3({style: faqTitle}, ['I received a DAR approval email from DUOS, but I have not received access to data. What do I do?']),
                   div({style: sectionBody}, [
-                    p({style: paragraph}, ['If you are having issues with accessing the data and have already been granted access by the Data Custodian, please consider reaching out to the system administrator of the repository in which the data is stored. For DUOS datasets stored in Terra, you can reach the Terra customer support at']),
-                    span({}, [
-                      a({}, ['terra-support@broadinstitute.zendesk.com'])
-                    ]),
-                    p({style: paragraph}, ['If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
+                    p({style: paragraph}, ['If you are having issues with accessing the data and have already been granted access by the Data Custodian, please consider reaching out to the system administrator of the repository in which the data is stored. For DUOS datasets stored in Terra, you can reach the Terra customer support at ',
+                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
+                    '. If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
                   ]),
                 ]),
                 div({style: sectionWrapper}, [
                   h3({style: faqTitle}, ['How do I grant access to my lab staff after being approved for access to data?']),
                   div({style: sectionBody}, [
-                    p({style: paragraph}, ['Subsequent access grants to lab staff members depend upon the repository in which the data is stored. For information on how to share access permissions with colleagues in Terra, contact Terra support at']),
-                    span({}, [
-                      a({}, ['terra-support@broadinstitute.zendesk.com'])
-                    ]),
+                    p({style: paragraph}, ['Subsequent access grants to lab staff members depend upon the repository in which the data is stored. For information on how to share access permissions with colleagues in Terra, contact Terra support at ']),
+                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
                   ]),
                 ]),
                 div({style: sectionWrapper}, [
