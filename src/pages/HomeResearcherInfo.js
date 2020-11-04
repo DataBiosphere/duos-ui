@@ -6,16 +6,6 @@ class HomeResearcherInfo extends Component {
 
   render() {
 
-    const imageWrapper = {
-      padding: '3rem',
-      margin: '0 3rem',
-      height: 'auto',
-      maxHeight: '300px',
-      width: 'auto',
-      maxWidth: '100%',
-      float: 'none'
-    };
-
     const header = {
       fontWeight: '600',
       padding: '0 5rem',
@@ -102,7 +92,7 @@ class HomeResearcherInfo extends Component {
                   h3({style: faqTitle}, ['If I am approved for access, where and how do I access the data?']),
                   div({style: sectionBody}, [
                     p({style: paragraph}, ['Each DAC may store their data in different locations, however much of the data accessible via DUOS is available in Terra. Instructions on how to access data and and data access permissions will be shared with researchers once approved by the DAC in DUOS. For questions or issues on accessing data via Terra please see the Terra support documentation, or reach out to the support team directly at ',
-                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
+                      h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
                       '.'
                     ])
                   ]),
@@ -111,16 +101,16 @@ class HomeResearcherInfo extends Component {
                   h3({style: faqTitle}, ['I am having issues accessing data I was approved for via Terra. What do I do?']),
                   div({style: sectionBody}, [
                     p({style: paragraph}, ['If you are having issues with accessing the data and have already been granted access by the Data Custodian, please reach out Terra customer support at ',
-                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
-                    '. If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
+                      h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
+                      '. If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
                   ]),
                 ]),
                 div({style: sectionWrapper}, [
                   h3({style: faqTitle}, ['I received a DAR approval email from DUOS, but I have not received access to data. What do I do?']),
                   div({style: sectionBody}, [
                     p({style: paragraph}, ['If you are having issues with accessing the data and have already been granted access by the Data Custodian, please consider reaching out to the system administrator of the repository in which the data is stored. For DUOS datasets stored in Terra, you can reach the Terra customer support at ',
-                    h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
-                    '. If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
+                      h(Mailto, {email: 'terra-support@broadinstitute.zendesk.com'}),
+                      '. If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.'])
                   ]),
                 ]),
                 div({style: sectionWrapper}, [
