@@ -2,6 +2,7 @@ import isNil from 'lodash/fp/isNil';
 import ClearIcon from '@material-ui/icons/Clear';
 import { div, input, label, span, h } from 'react-hyperscript-helpers';
 import isEmpty from 'lodash/fp/isEmpty';
+import { isFileEmpty } from '../libs/utils';
 
 const uploadFileLabelColors = {
   standardBackgroundColor: 'rgb(96, 59, 155)',
@@ -116,13 +117,6 @@ export default function UploadLabelButton(props) {
     if(!isNil(file)) {
       changeDULDocument({name: formAttribute, value: file});
     }
-  };
-
-  //Custom empty check needed on File
-  //lodash's isEmpty checks for enumerated keys, something a File does not have (ends up being an empty array)
-  //leads to incorrect evaluation of File
-  const isFileEmpty = (file) => {
-    return isNil(file) || file.size < 1 || file.length < 1;
   };
 
   return (

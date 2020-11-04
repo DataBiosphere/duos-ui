@@ -16,7 +16,7 @@ import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
 import camelCase from 'lodash/fp/camelCase';
 import * as fp from 'lodash/fp';
-
+import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import { isEmpty, isNil } from 'lodash';
 
@@ -491,8 +491,8 @@ class DataAccessRequestApplication extends Component {
             //Check if uploaded file has been added or if pre-existing file is present
             const newFileKey = 'uploaded' + camelCase(formDataKey);
             const newFile = this.state.step2[newFileKey];
-            const currentFile = this.state.step2[formDataKey];
-            return ((isNil(currentFile) || isEmpty(currentFile)) && isNil(newFile));
+            const currentFile = this.state.formData[formDataKey];
+            return ((isFileEmpty(currentFile) || isEmpty(currentFile)) && isNil(newFile));
           } else {
             return isNil(input) && isEmpty(input);
           }
@@ -661,8 +661,14 @@ class DataAccessRequestApplication extends Component {
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = this.props.match.params;
     try {
-      let darPartialResponse = await DAR.postPartialDarRequest(formattedFormData);
-      let referenceId = darPartialResponse.referenceId;
+      let darPartialResponse;
+      let referenceId = formattedFormData.referenceId;
+      if(!isNil(referenceId) && !isEmpty(referenceId)) {
+        darPartialResponse = await DAR.updateDarDraft(formattedFormData, referenceId);
+      } else {
+        darPartialResponse = await DAR.postDarDraft(formattedFormData);
+      }
+      referenceId = darPartialResponse.referenceId;
       if(fp.isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);
       }

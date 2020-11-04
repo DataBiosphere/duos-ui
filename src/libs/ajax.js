@@ -314,12 +314,28 @@ export const DAR = {
     return await res.json();
   },
 
-  //NOTE: make sure this endpoint works
+  //v2 update for dar partials
+  updateDarDraft: async (dar, referenceId) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/draft/${referenceId}`;
+    const res = await axios.put(url, dar, Config.authOpts());
+    debugger;
+    return res.data;
+  },
+
+  //api endpoint for v2 draft submission
+  postDarDraft: async(dar) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/draft/`;
+    const res = await axios.post(url, dar, Config.authOpts());
+    debugger;
+    return res.data;
+  },
+
+  //NOTE: revert back to v1 version, made distinct method for v2
   //api was updated to use v2 endpoint
   postPartialDarRequest: async dar => {
     const url = `${await Config.getApiUrl()}/dar/v2/draft`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
-    return await res.json();
+    const res = await axios.post(url, {dar}, Config.authOpts());
+    return res.data;
   },
 
   deletePartialDarRequest: async (darId) => {
