@@ -168,10 +168,7 @@ class Home extends Component {
                 'Click here to learn more about how DUOS helps researchers and for details on making a data access request.']),
               div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyle }, [
-                  a({
-                    style: { color: '#fff' }}, [
-                    'LEARN MORE'
-                  ])
+                  a({href: 'home_researcher_info', style: {color: '#fff'}}, ['LEARN MORE'])
                 ])
               ])
             ])
