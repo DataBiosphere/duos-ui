@@ -94,15 +94,30 @@ class Home extends Component {
       display: 'block'
     };
 
+    const signInPositionStyle = {
+      padding: '1em 1em 0 0',
+      display: 'flex',
+      alignItems: 'center',
+      position: 'absolute',
+      top: '1rem',
+      right: '1rem'}
+
     return (
 
       div({ className: 'row' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
-            div({ isRendered: !isLogged, style: { padding: '1em 1em 0 0', display: 'flex', alignItems: 'center', position: 'absolute', top: '1rem', right: '1rem'}}, [
+            div({ isRendered: !isLogged, style: signInPositionStyle}, [
               span({ style: { color: '#FFFFFF', position: 'relative', float: 'left', margin: 'auto 1rem'}}, ['Already registered?']),
               SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative', float: 'right'}})
+            ]),
+            div({isRendered: !isLogged, style: { ...signInPositionStyle, padding: '1em 2em 0 0', top: '6rem', zIndex: 1000 }}, [
+              span( {style: { color: '#FFFFFF', float: 'right', margin: 'auto 1rem'} }, ['If not, ',
+                a({
+                  href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
+                  }, ['register here'])
+              ])
             ]),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
@@ -126,7 +141,7 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ isRendered: !isLogged, className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
+          div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
             div({ className: 'col-lg-4 col-md-4'}, [
               p({ style: header }, ['Are you a DAC member?']),
               p({ style: description }, [
@@ -140,7 +155,7 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-md-4 '}, [
               p({ style: header }, ['Are you a Signing Official?']),
               p({ style: description }, [
-                'Click here to learn learn more about DUOS\' innovative Library Card \ninitiative and how to issue a Library Card to your researchers']),
+                'Click here to learn learn more about DUOS\' innovative Library Card \ninitiative and how to issue a Library Card to your researchers.']),
               div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyle }, [
                   a({href: 'home_signing_official', style: {color: '#fff'}}, ['LEARN MORE'])
@@ -150,13 +165,12 @@ class Home extends Component {
             div({ className: 'col-lg-4 col-md-4' }, [
               p({ style: header }, ['Are you a researcher?']),
               p({ style: description }, [
-                'Click here to start your data access request!']),
+                'Click here to learn more about how DUOS helps researchers and for details on making a data access request.']),
               div({className:'row', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyle }, [
                   a({
-                    href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
                     style: { color: '#fff' }}, [
-                    'REGISTER'
+                    'LEARN MORE'
                   ])
                 ])
               ])
