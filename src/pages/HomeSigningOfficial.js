@@ -24,7 +24,7 @@ class HomeSigningOfficial extends Component {
 
     const sectionWrapper = {
       fontFamily: 'Montserrat',
-      margin: '2rem auto',
+      margin: '2rem 0',
       overflow: 'auto',
       textAlign: 'left',
       color: '#1F3B50',
@@ -89,8 +89,9 @@ class HomeSigningOfficial extends Component {
                   'Download DUOS Library Card Agreement'])
                 ]),
               div({style: {fontWeight: 600}}, [
-                p({style: paragraph}, ['To issue your researchers this Library Card pre-authorization, please sign and send the DUOS Library Card Agreement (above) along with a list of the first and last name, and eRA Commmons ID of each researcher you will issue this privilege, to: ']),
-                h(Mailto, {email: 'DUOS-support@broadinstitute.zendesk.com'})
+                p({style: paragraph}, ['To issue your researchers this Library Card pre-authorization, please sign and send the DUOS Library Card Agreement (above) along with a list of the first and last name, and eRA Commmons ID of each researcher you will issue this privilege, to: ',
+                  h(Mailto, {email: 'DUOS-support@broadinstitute.zendesk.com'})
+                ]),
               ]),
               p({style: {...paragraph, marginTop: '2rem', marginBottom: '2rem'}}, ['Please note, this agreement is non-negotiable.'])
             ])

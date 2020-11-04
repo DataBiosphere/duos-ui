@@ -42,6 +42,7 @@ import ReviewedCases from './pages/ReviewedCases';
 import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
+import HomeResearcherInfo from "./pages/HomeResearcherInfo";
 
 
 const Routes = (props) => (
@@ -53,6 +54,7 @@ const Routes = (props) => (
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />
     <Route path="/home_dac_info" component={HomeDacInfo} />
+    <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
     <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
