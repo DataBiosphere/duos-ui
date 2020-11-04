@@ -147,7 +147,7 @@ class DataAccessRequestApplication extends Component {
         state.step2[uploadedFileName] = value;
         return state;
       });
-    } else if(isEmpty(value)) {
+    } else {
       this.setState(prev => {
         prev.step2[uploadedFileName] = value;
         return prev;
@@ -558,9 +558,10 @@ class DataAccessRequestApplication extends Component {
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
   saveDULDocuments = async(uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
-    await DAR.uploadDULDocument(uploadedIrbDocument, referenceId, 'irbDocument');
-    const updatedDAR = await DAR.uploadDULDocument(uploadedCollaborationLetter, referenceId, 'collaborationLetter');
-    return updatedDAR;
+    let irbUpdate, collaborationUpdate;
+    irbUpdate = await DAR.uploadDULDocument(uploadedIrbDocument, referenceId, 'irbDocument');
+    collaborationUpdate = await DAR.uploadDULDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
+    return Object.assign({}, irbUpdate.data, collaborationUpdate.data);
   }
 
   submitDARFormData = async (answer) => {
@@ -596,7 +597,6 @@ class DataAccessRequestApplication extends Component {
       try {
         let initDARData = await DAR.postDataAccessRequest(formattedFormData);
         const referenceId = initDARData.referenceId;
-        debugger;
         await this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
         this.setState({
           showDialogSubmit: false
@@ -651,6 +651,8 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
+
+  //NOTE: work on this, expect similar issue with submit?
   savePartial = async () => {
     let formattedFormData = fp.cloneDeep(this.state.formData);
     // DAR datasetIds needs to be a list of ids
@@ -658,29 +660,27 @@ class DataAccessRequestApplication extends Component {
     const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = this.props.match.params;
-    let darPartialResponse = await DAR.postPartialDarRequest(formattedFormData);
-    let referenceId = darPartialResponse.referenceId;
-    if (fp.isNil(dataRequestId)) {
-      try {
+    try {
+      let darPartialResponse = await DAR.postPartialDarRequest(formattedFormData);
+      let referenceId = darPartialResponse.referenceId;
+      if(fp.isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);
-      } catch(error) {
-        NotyUtil.showError('Error saving partial DAR update');
       }
-    } else {
-      try {
-        darPartialResponse = await DAR.updatePartialDarRequest(formattedFormData);
-        this.setShowDialogSave(false);
-      } catch(error) {
-        NotyUtil.showError('Error saving partial DAR update');
-      }
+      darPartialResponse = await this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+      this.setState(prev => {
+        prev.formData = Object.assign({}, this.state.formData, darPartialResponse);
+        prev.showDialogSave = false;
+        prev.disableOkBtn = false;
+        return prev;
+      });
+    } catch(error) {
+      this.setState(prev => {
+        prev.showDialogSave = false;
+        prev.disableOkBtn = false;
+        return prev;
+      });
+      NotyUtil.showError('Error saving partial DAR update');
     }
-    debugger;
-    darPartialResponse = await this.saveDULDocuments(uploadedCollaborationLetter, uploadedIrbDocument, referenceId);
-    debugger;
-    this.setState(prev => {
-      prev.formData = Object.assign({}, prev.formData, darPartialResponse);
-      return prev;
-    });
   };
 
   addDataUseToDataset = async(currentDatasets) => {

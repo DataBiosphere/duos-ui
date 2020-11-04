@@ -541,9 +541,9 @@ export default function DataAccessRequest(props) {
               h(UploadLabelButton, {
                 id: 'btn_irb_uploadFile',
                 formAttribute: 'irbDocument',
+                newDULFile: uploadedIrbDocument,
                 currentFileName: irbDocumentName,
                 currentFileLocation: irbDocumentLocation,
-                newDULFile: uploadedIrbDocument,
                 changeDULDocument
               })
             ])

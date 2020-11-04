@@ -6,6 +6,7 @@ import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
 import axios from 'axios';
 import { DataUseTranslation } from './dataUseTranslation';
+import { isNil } from 'lodash';
 
 const dataTemplate = {
   accessTotal: [
@@ -429,11 +430,16 @@ export const DAR = {
 
   //NOTE: endpoints requires a dar id
   uploadDULDocument: async(file, darId, fileType) => {
-    let authOpts = Config.authOpts();
-    authOpts.headers['Content-Type'] = 'multipart/form-data';
-    let formData = new FormData();
-    const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
-    return axios.post(url, {file}, authOpts);
+    if(!isNil(file)) {
+      let authOpts = Config.authOpts();
+      authOpts.headers['Content-Type'] = 'multipart/form-data';
+      let formData = new FormData();
+      formData.append("file", file);
+      const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
+      return axios.post(url, formData, authOpts);
+    } else {
+      return Promise.resolve({data: null})
+    }
   }
 };
 
