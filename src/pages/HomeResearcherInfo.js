@@ -14,7 +14,7 @@ class HomeResearcherInfo extends Component {
 
     const sectionWrapper = {
       fontFamily: 'Montserrat',
-      margin: '2rem auto',
+      margin: '2rem 0',
       overflow: 'auto',
       textAlign: 'left',
       color: '#1F3B50',
