@@ -17,6 +17,9 @@ export const formatDate = (dateval) => {
   return datestr;
 };
 
+//Custom empty check needed on File
+//lodash's isEmpty checks for enumerated keys, something a File does not have (ends up being an empty array)
+//leads to incorrect evaluation of File
 export const isFileEmpty = (file) => {
   return isNil(file) || file.size < 1 || file.length < 1;
 };

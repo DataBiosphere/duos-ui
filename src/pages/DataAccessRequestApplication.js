@@ -14,7 +14,6 @@ import { DAR, Researcher, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
-import camelCase from 'lodash/fp/camelCase';
 import * as fp from 'lodash/fp';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
@@ -468,7 +467,7 @@ class DataAccessRequestApplication extends Component {
   };
 
   verifyStep2() {
-    //defined attribute keys for dynamix DUL based questions
+    //defined attribute keys for dynamic DUL based questions
     const dulInvalidCheck = () => {
       const activeQuestions = this.state.formData.activeDULQuestions;
 
@@ -481,20 +480,21 @@ class DataAccessRequestApplication extends Component {
       };
       let result = false;
 
+      //NOTE: verify validation runs correctly here
       if (!isNil(activeQuestions) && !isEmpty(activeQuestions)) {
         const formData = this.state.formData;
         result = fp.every((question) => {
           const formDataKey = dulQuestionMap[question];
           const input = formData[formDataKey];
           if (formDataKey === 'irbDocument' || formDataKey === 'collaborationLetter') {
-            //NOTE: reframe check on documents
-            //Check if uploaded file has been added or if pre-existing file is present
-            const newFileKey = 'uploaded' + camelCase(formDataKey);
-            const newFile = this.state.step2[newFileKey];
-            const currentFile = this.state.formData[formDataKey];
-            return ((isFileEmpty(currentFile) || isEmpty(currentFile)) && isNil(newFile));
+            const newlyUploadedFileKey = `uploaded${formDataKey[0].toUpperCase()}${formDataKey.slice(1)}`;
+            const currentFileLocationKey = `${formDataKey}Location`;
+            const newlyUploadedFile = this.state.step2[newlyUploadedFileKey];
+            //use fileLocation rather than name as an indicator of a file present
+            const currentFileLocation = this.state.formData[currentFileLocationKey];
+            return isEmpty(currentFileLocation) && isFileEmpty(newlyUploadedFile); 
           } else {
-            return isNil(input) && isEmpty(input);
+            return isNil(input) || isEmpty(input);
           }
         })(activeQuestions);
       }

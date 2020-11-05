@@ -140,12 +140,12 @@ export default function UploadLabelButton(props) {
         onMouseLeave: removeUploadLabelHover,
       }, ['Upload File']),
       span({
-        isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileName),
+        isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileLocation),
         style: filenameStyle
       }, [!isFileEmpty(newDULFile) ? newDULFile.name : currentFileName]),
       h(ClearIcon, {
         style: clearIconStyle,
-        isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileName),
+        isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileLocation),
         onClick: () => clearFile(changeDULDocument, formAttribute),
         onMouseEnter: applyClearHover,
         onMouseLeave: removeClearHover

@@ -6,7 +6,7 @@ import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
 import axios from 'axios';
 import { DataUseTranslation } from './dataUseTranslation';
-import { isNil } from 'lodash';
+import { isFileEmpty } from './utils';
 
 const dataTemplate = {
   accessTotal: [
@@ -444,15 +444,15 @@ export const DAR = {
 
   //NOTE: endpoints requires a dar id
   uploadDULDocument: async(file, darId, fileType) => {
-    if(!isNil(file)) {
+    if(isFileEmpty(file)) {
+      return Promise.resolve({data: null})
+    } else {
       let authOpts = Config.authOpts();
       authOpts.headers['Content-Type'] = 'multipart/form-data';
       let formData = new FormData();
       formData.append("file", file);
       const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
       return axios.post(url, formData, authOpts);
-    } else {
-      return Promise.resolve({data: null})
     }
   }
 };
@@ -559,7 +559,6 @@ export const Election = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
-
 
   downloadDatasetVotesForDARElection: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;

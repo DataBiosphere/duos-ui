@@ -143,6 +143,7 @@ export default function DataAccessRequest(props) {
           updatedDULQuestions['diseaseRestrictions'] = false;
         }
       }
+
       if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
         setActiveDULQuestions(updatedDULQuestions);
         //State update is asynchronous, send updatedDULQuestions for parent component
@@ -450,7 +451,7 @@ export default function DataAccessRequest(props) {
       ]),
       div({
         className: 'form-group',
-        // isRendered: !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions)
+        isRendered: !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions)
       }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
           label({className: 'control-label rp-title-question'}, [
@@ -524,7 +525,7 @@ export default function DataAccessRequest(props) {
 
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          // isRendered: activeDULQuestions['ethicsApprovalRequired'] === true,
+          isRendered: activeDULQuestions['ethicsApprovalRequired'] === true,
           style: uploadFileDiv(showValidationMessages, uploadedIrbDocument, collaborationLetterLocation)
         }, [
           div({className: 'row no-margin'}, [
@@ -552,7 +553,7 @@ export default function DataAccessRequest(props) {
 
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          // isRendered: activeDULQuestions['collaboratorRequired'] === true,
+          isRendered: activeDULQuestions['collaboratorRequired'] === true,
           style: uploadFileDiv(showValidationMessages, uploadedCollaborationLetter, collaborationLetterLocation)
         }, [
           div({className: 'row no-margin'}, [
