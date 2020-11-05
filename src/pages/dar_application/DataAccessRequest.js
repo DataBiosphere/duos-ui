@@ -10,11 +10,12 @@ import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 import UploadLabelButton from '../../components/UploadLabelButton';
+import { isFileEmpty } from '../../libs/utils';
 
 const uploadFileDiv = (showValidationMessages, uploadedFile, currentDocumentLocation) => {
   return {
     padding: '1rem',
-    backgroundColor: showValidationMessages && isNil(uploadedFile) && isNil(currentDocumentLocation) ? errorBackgroundColor : 'inherit'
+    backgroundColor: showValidationMessages && (isFileEmpty(uploadedFile) && isEmpty(currentDocumentLocation)) ? errorBackgroundColor : 'inherit'
   };
 };
 
@@ -526,14 +527,14 @@ export default function DataAccessRequest(props) {
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
           isRendered: activeDULQuestions['ethicsApprovalRequired'] === true,
-          style: uploadFileDiv(showValidationMessages, uploadedIrbDocument, collaborationLetterLocation)
+          style: uploadFileDiv(showValidationMessages, uploadedIrbDocument, irbDocumentLocation)
         }, [
           div({className: 'row no-margin'}, [
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
               span({className: 'rp-choice-questions', style: uploadFileDescription}, [
                 //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
                 //second statement can either be a condition for the first or last statements (or maybe both?)
-                `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB apporval(s) here as a single document. 
+                `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. 
                 When IRB approval is required and Expedited or Full Review is required and must be completed annually.
                 Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
               ])

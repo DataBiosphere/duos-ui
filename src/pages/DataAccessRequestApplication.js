@@ -483,7 +483,8 @@ class DataAccessRequestApplication extends Component {
       //NOTE: verify validation runs correctly here
       if (!isNil(activeQuestions) && !isEmpty(activeQuestions)) {
         const formData = this.state.formData;
-        result = fp.every((question) => {
+        const uncappedAny = fp.any.convert({cap: false});
+        result = uncappedAny((value, question) => {
           const formDataKey = dulQuestionMap[question];
           const input = formData[formDataKey];
           if (formDataKey === 'irbDocument' || formDataKey === 'collaborationLetter') {
@@ -492,9 +493,10 @@ class DataAccessRequestApplication extends Component {
             const newlyUploadedFile = this.state.step2[newlyUploadedFileKey];
             //use fileLocation rather than name as an indicator of a file present
             const currentFileLocation = this.state.formData[currentFileLocationKey];
-            return isEmpty(currentFileLocation) && isFileEmpty(newlyUploadedFile); 
+          
+            return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile)); 
           } else {
-            return isNil(input) || isEmpty(input);
+            return isNil(input);
           }
         })(activeQuestions);
       }
