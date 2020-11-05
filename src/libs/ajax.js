@@ -328,12 +328,11 @@ export const DAR = {
     return res.data;
   },
 
-  //NOTE: revert back to v1 version, made distinct method for v2
-  //api was updated to use v2 endpoint
+  //v1 api endpoint to post dar drafts, should remove once all uses of it has been eliminated
   postPartialDarRequest: async dar => {
-    const url = `${await Config.getApiUrl()}/dar/v2/draft`;
-    const res = await axios.post(url, {dar}, Config.authOpts());
-    return res.data;
+    const url = `${await Config.getApiUrl()}/dar/partial`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
+    return await res.json();
   },
 
   deletePartialDarRequest: async (darId) => {
