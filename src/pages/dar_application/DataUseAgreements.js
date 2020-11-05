@@ -97,7 +97,7 @@ export default function DataUseAgreements(props) {
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 p({ className: 'rp-agreement' },
                   ['By submitting this data access request, you agree to comply with all terms relevant to Authorized Users put forth in the agreement']),
-                a({ href: '/home_about', target: '_blank' }, '(Click here for detailed instructions for your Signing Official)')
+                a({ href: '/home_signing_official', target: '_blank' }, '(Click here for detailed instructions for your Signing Official)')
               ])
             ])
           ]),
