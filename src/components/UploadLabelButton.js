@@ -1,9 +1,11 @@
 import isNil from 'lodash/fp/isNil';
 import ClearIcon from '@material-ui/icons/Clear';
-import { div, input, label, span, h } from 'react-hyperscript-helpers';
+import { div, input, label, a, h } from 'react-hyperscript-helpers';
 import isEmpty from 'lodash/fp/isEmpty';
 import { isFileEmpty } from '../libs/utils';
 
+
+///Constant styles, not dependent on component variables
 const uploadFileLabelColors = {
   standardBackgroundColor: 'rgb(96, 59, 155)',
   hoverBackgroundColor: '#2FA4E7'
@@ -21,24 +23,16 @@ const fileClearColor = {
   transition: 'background 0.3s ease'
 };
 
-//NOTE: if the upload add/remove functionality is needed elsewhere, I can pull the label/input out into its own component
-const uploadFileLabel = {
-  flex: 2,
-  maxWidth: '10rem',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  backgroundColor: uploadFileLabelColors.standardBackgroundColor,
-  color: 'white',
-  padding: '1.3rem',
-  textAlign: 'center',
-  borderRadius: '0.6rem',
-  cursor: 'pointer',
-  fontFamily: 'Roboto, sans-serif',
-  fontSize: '1.4rem',
-  transition: 'background 0.3s ease',
-  margin: 0,
-  boxShadow: "-4px 6px 9px 0px #e8e5e5",
+const fileNameColor = {
+  standardColors: {
+    backgroundColor: 'rgb(243 248 253)',
+    color: 'black'
+  },
+  hoverColors: {
+    backgroundColor: '#2FA4E7',
+    color: 'white'
+  },
+  transition: 'background 0.3s ease'
 };
 
 const filenameStyle = {
@@ -52,29 +46,18 @@ const filenameStyle = {
   fontSize: '1.8rem',
   padding: '0.5rem',
   border: '1px solid #ea5e5',
-  backgroundColor: 'rgb(243 248 253)',
+  backgroundColor: fileNameColor.standardColors.backgroundColor,
+  color: fileNameColor.standardColors.color,
   display: 'inline-flex',
   alignItems: 'center',
   borderTopLeftRadius: '2rem',
   borderBottomLeftRadius: '2rem',
   maxWidth: '30rem',
-  boxShadow: "-4px 6px 9px 0px #e8e5e5"
+  boxShadow: "-4px 6px 9px 0px #e8e5e5",
+  transition: fileNameColor.transition,
 };
-
 const uploadFileInput = {
   display: 'none'
-};
-
-const clearIconStyle = {
-  backgroundColor: fileClearColor.standardColors.backgroundColor,
-  color: fileClearColor.standardColors.color,
-  fontSize: '5rem',
-  flex: 1,
-  borderBottomRightRadius: '2rem',
-  borderTopRightRadius: '2rem',
-  boxShadow: "-4px 6px 9px 0px #e8e5e5",
-  transition: fileClearColor.transition,
-  maxWidth: '3rem'
 };
 
 export default function UploadLabelButton(props) {
@@ -84,8 +67,44 @@ export default function UploadLabelButton(props) {
     newDULFile = {}, //refers to recently uploaded file (via browser upload, for reference if user cancels a future upload attempt)
     changeDULDocument,
     currentFileName = '', //refers to filename in db record
-    currentFileLocation = '' //use to allow user to download current file? (needs to be implemented)
+    currentFileLocation = '', //use to allow user to download current file? (needs to be implemented),
+    darCode
   } = props;
+
+  //const styles, dependent on darCode availability
+  const uploadFileLabel = {
+    flex: 2,
+    maxWidth: '10rem',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: uploadFileLabelColors.standardBackgroundColor,
+    color: 'white',
+    padding: '1.3rem',
+    textAlign: 'center',
+    borderRadius: '0.6rem',
+    cursor: !darCode ? 'pointer' : 'not-allowed',
+    fontFamily: 'Roboto, sans-serif',
+    fontSize: '1.4rem',
+    transition: 'background 0.3s ease',
+    margin: 0,
+    boxShadow: "-4px 6px 9px 0px #e8e5e5",
+    opacity: darCode ? 0.75 : 1
+  };
+
+  const clearIconStyle = {
+    backgroundColor: fileClearColor.standardColors.backgroundColor,
+    color: fileClearColor.standardColors.color,
+    fontSize: '5rem',
+    flex: 1,
+    borderBottomRightRadius: '2rem',
+    borderTopRightRadius: '2rem',
+    boxShadow: "-4px 6px 9px 0px #e8e5e5",
+    transition: fileClearColor.transition,
+    maxWidth: '3rem',
+    cursor: !darCode ? 'pointer' : 'not-allowed',
+    opacity: darCode ? 0.75 : 1
+  };
 
   const removeUploadLabelHover = (e) => {
     e.target.style.background = uploadFileLabelColors.standardBackgroundColor;
@@ -95,14 +114,14 @@ export default function UploadLabelButton(props) {
     e.target.style.background = uploadFileLabelColors.hoverBackgroundColor;
   };
 
-  const removeClearHover = (e) => {
-    e.target.style.backgroundColor = fileClearColor.standardColors.backgroundColor;
-    e.target.style.color = fileClearColor.standardColors.color;
+  const removeHoverEffect = (e, targetStyle) => {
+    e.target.style.backgroundColor = targetStyle.standardColors.backgroundColor;
+    e.target.style.color = targetStyle.standardColors.color;
   };
 
-  const applyClearHover = (e) => {
-    e.target.style.backgroundColor = fileClearColor.hoverColors.backgroundColor;
-    e.target.style.color = fileClearColor.hoverColors.color;
+  const applyHoverEffect = (e, targetStyle) => {
+    e.target.style.backgroundColor = targetStyle.hoverColors.backgroundColor;
+    e.target.style.color = targetStyle.hoverColors.color;
   };
 
   //NOTE: File inputs are uncontrolled inputs no matter what
@@ -131,24 +150,27 @@ export default function UploadLabelButton(props) {
         id,
         type: 'file',
         style: uploadFileInput,
-        onChange: (e) => updateFile(formAttribute, e.target.files[0])
+        disabled: darCode,
+        onChange: (e) => !darCode && updateFile(formAttribute, e.target.files[0])
       }),
       label({
         htmlFor: id,
         style: uploadFileLabel,
-        onMouseEnter: applyUploadLabelHover,
-        onMouseLeave: removeUploadLabelHover,
+        onMouseEnter:(e) => !darCode && applyUploadLabelHover(e),
+        onMouseLeave:(e) => !darCode && removeUploadLabelHover(e),
       }, ['Upload File']),
-      span({
+      a({
         isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileLocation),
-        style: filenameStyle
+        style: filenameStyle,
+        onMouseEnter: (e) => applyHoverEffect(e, fileNameColor),
+        onMouseLeave: (e) => removeHoverEffect(e, fileNameColor)
       }, [!isFileEmpty(newDULFile) ? newDULFile.name : currentFileName]),
       h(ClearIcon, {
         style: clearIconStyle,
         isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileLocation),
-        onClick: () => clearFile(changeDULDocument, formAttribute),
-        onMouseEnter: applyClearHover,
-        onMouseLeave: removeClearHover
+        onClick: () => !darCode && clearFile(changeDULDocument, formAttribute),
+        onMouseEnter:(e) => !darCode && applyHoverEffect(e, fileClearColor),
+        onMouseLeave:(e) => !darCode && removeHoverEffect(e, fileClearColor)
       })
     ])
   );

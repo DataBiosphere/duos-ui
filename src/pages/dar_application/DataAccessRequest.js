@@ -456,7 +456,7 @@ export default function DataAccessRequest(props) {
       }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
           label({className: 'control-label rp-title-question'}, [
-            '2.7 Data Use Acknowledgements',
+            '2.7 Data Use Acknowledgements*',
             span({}, [
               //NOTE: This is something that I came up with as a placeholder. I would appreciate any suggestions for a more legal/formal sub-header
               'Please confirm listed acknowledgements and/or document requirements below'
@@ -542,6 +542,7 @@ export default function DataAccessRequest(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
               h(UploadLabelButton, {
                 id: 'btn_irb_uploadFile',
+                darCode,
                 formAttribute: 'irbDocument',
                 newDULFile: uploadedIrbDocument,
                 currentFileName: irbDocumentName,
@@ -567,6 +568,7 @@ export default function DataAccessRequest(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
               h(UploadLabelButton, {
                 id: 'btn_col_uploadFile',
+                darCode,
                 formAttribute: 'collaborationLetter',
                 newDULFile: uploadedCollaborationLetter,
                 currentFileName: collaborationLetterName,

@@ -362,6 +362,16 @@ export const DAR = {
     return await res.json();
   },
 
+  //v2 endpoint for DAR POST
+  postDar: async (dar) => {
+    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
+    const url = `${await Config.getApiUrl()}/dar/v2`;
+    // const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredDar), { method: 'POST' }]));
+    const res = axios.post(url, filteredDar, Config.authOpts());
+    return await res.data;
+  },
+
+  //v1 endpoint for DAR POST
   postDataAccessRequest: async dar => {
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await Config.getApiUrl()}/dar`;

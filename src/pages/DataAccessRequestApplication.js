@@ -566,12 +566,20 @@ class DataAccessRequestApplication extends Component {
     return Object.assign({}, irbUpdate.data, collaborationUpdate.data);
   }
 
+  updateDraftResponse = (formattedFormData, referenceId) => {
+    let darPartialResponse;
+    if(!isNil(referenceId) && !isEmpty(referenceId)) {
+        darPartialResponse = DAR.updateDarDraft(formattedFormData, referenceId);
+    } else {
+      darPartialResponse = DAR.postDarDraft(formattedFormData);
+    }
+    return darPartialResponse;
+  }
+
   submitDARFormData = async (answer) => {
     if (answer === true) {
       const userId = Storage.getCurrentUser().dacUserId;
-      const uploadedIrbDocument = this.state.step2.uploadedIrbDocument;
-      const uploadedCollaborationLetter = this.state.step2.uploadedCollaborationLetter;
-
+      const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
       let formattedFormData = fp.cloneDeep(this.state.formData);
       const ontologies = fp.map((item) => {
         return {
@@ -583,29 +591,39 @@ class DataAccessRequestApplication extends Component {
       for (let ontology of this.state.formData.ontologies) {
         ontologies.push(ontology.item);
       }
-
       if (ontologies.length > 0) {
         formattedFormData.ontologies = ontologies;
       }
-
       for (var key in formattedFormData) {
         if (formattedFormData[key] === '') {
           formattedFormData[key] = undefined;
         }
       }
+      
       formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
       formattedFormData.userId = userId;
 
       try {
-        let initDARData = await DAR.postDataAccessRequest(formattedFormData);
-        const referenceId = initDARData.referenceId;
-        await this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+        //NOTE: the pre-processing saves are adding time to record generation (makes front-end seem slow)
+        //pre-prcessing saves are needed since you can't save documents without a reference id
+        //saves ensure record has a reference id
+        //actual fix would involve generating a blank draft record that is saved on console button click
+        //however that would fall outside the scope of this pr, which is already large enough due to refactored code
+        let referenceId = formattedFormData.referenceId;
+        let darPartialResponse = this.updateDraftResponse(formattedFormData, referenceId);
+        referenceId = darPartialResponse.referenceId;
+        darPartialResponse = this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+        let updatedFormData = Object.assign({}, formattedFormData, darPartialResponse);
+        await DAR.postDar(updatedFormData);
         this.setState({
           showDialogSubmit: false
         }, Navigation.console(Storage.getCurrentUser(), this.props.history));
       } catch (error) {
+        this.setState({
+          showDialogSubmit: false
+        });
         NotyUtil.showError({
-          text: 'Error: DAR update failed on document upload process'
+          text: 'Error: DAR submission failed'
         });
       }
     } else {
@@ -619,7 +637,8 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.disableOkButton = true;
       return prev;
-    }, this.submitDARFormData(answer));
+    });
+    this.submitDARFormData(answer);
   };
 
   setShowDialogSave = (value) => {
@@ -647,7 +666,7 @@ class DataAccessRequestApplication extends Component {
         prev.formData.datasetIds = datasetIds;
         prev.formData.ontologies = ontologies;
         return prev;
-      }, () => this.savePartial());
+      }, () => this.saveDarDraft());
     } else {
       this.setShowDialogSave(false);
     }
@@ -655,7 +674,7 @@ class DataAccessRequestApplication extends Component {
 
 
   //NOTE: work on this, expect similar issue with submit?
-  savePartial = async () => {
+  saveDarDraft = async () => {
     let formattedFormData = fp.cloneDeep(this.state.formData);
     // DAR datasetIds needs to be a list of ids
     formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
@@ -663,13 +682,8 @@ class DataAccessRequestApplication extends Component {
     // Make sure we navigate back to the current DAR after saving.
     const { dataRequestId } = this.props.match.params;
     try {
-      let darPartialResponse;
       let referenceId = formattedFormData.referenceId;
-      if(!isNil(referenceId) && !isEmpty(referenceId)) {
-        darPartialResponse = await DAR.updateDarDraft(formattedFormData, referenceId);
-      } else {
-        darPartialResponse = await DAR.postDarDraft(formattedFormData);
-      }
+      let darPartialResponse = await this.updateDraftResponse(formattedFormData, referenceId)
       referenceId = darPartialResponse.referenceId;
       if(fp.isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);
