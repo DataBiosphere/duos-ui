@@ -94,7 +94,6 @@ export default function UploadLabelButton(props) {
             setTargetDownload(URL.createObjectURL(targetFile));
           }
         }catch(error) {
-          console.log(error);
           Notifications.showError({text: 'Error: Failed to retreive saved file'});
         }
       }
