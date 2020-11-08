@@ -397,6 +397,17 @@ export const DAR = {
     return await res.json();
   },
 
+  getIRBDocument: async (referenceId, fileType) => {
+    const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream', 
+      'Accept': 'application/octet-stream'
+    });
+    const url = `${await Config.getApiUrl()}/dar/v2/${referenceId}/${fileType}`;
+    const res = await axios.get(url, authOpts);
+    return res.data;
+  },
+
   getDataAccessManage: async userId => {
     userId = userId === undefined ? '' : userId;
     const url = `${await Config.getApiUrl()}/dar/manage/?userId=${userId}`;

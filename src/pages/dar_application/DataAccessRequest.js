@@ -53,7 +53,8 @@ export default function DataAccessRequest(props) {
     collaborationLetterName,
     uploadedIrbDocument,
     uploadedCollaborationLetter,
-    changeDULDocument
+    changeDULDocument,
+    referenceId
   } = props;
 
   const [projectTitle, setProjectTitle] = useState(props.projectTitle);
@@ -547,7 +548,8 @@ export default function DataAccessRequest(props) {
                 newDULFile: uploadedIrbDocument,
                 currentFileName: irbDocumentName,
                 currentFileLocation: irbDocumentLocation,
-                changeDULDocument
+                changeDULDocument,
+                referenceId
               })
             ])
           ]),
@@ -573,7 +575,8 @@ export default function DataAccessRequest(props) {
                 newDULFile: uploadedCollaborationLetter,
                 currentFileName: collaborationLetterName,
                 currentFileLocation: collaborationLetterLocation,
-                changeDULDocument
+                changeDULDocument,
+                referenceId
               })
             ])
           ])

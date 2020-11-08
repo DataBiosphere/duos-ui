@@ -856,6 +856,7 @@ class DataAccessRequestApplication extends Component {
       gsoAcknowledgement,
       pubAcknowledgement,
       dsAcknowledgement,
+      referenceId
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
@@ -1047,7 +1048,8 @@ class DataAccessRequestApplication extends Component {
                 collaborationLetterName,
                 changeDULDocument: this.changeDULDocument,
                 uploadedCollaborationLetter: this.state.step2.uploadedCollaborationLetter,
-                uploadedIrbDocument: this.state.step2.uploadedIrbDocument
+                uploadedIrbDocument: this.state.step2.uploadedIrbDocument,
+                referenceId
               })
             ]),
 

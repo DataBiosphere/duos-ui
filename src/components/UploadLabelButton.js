@@ -3,7 +3,9 @@ import ClearIcon from '@material-ui/icons/Clear';
 import { div, input, label, a, h } from 'react-hyperscript-helpers';
 import isEmpty from 'lodash/fp/isEmpty';
 import { isFileEmpty } from '../libs/utils';
-
+import { DAR } from '../libs/ajax';
+import { useEffect, useState } from 'react';
+import { Notifications } from '../libs/utils';
 
 ///Constant styles, not dependent on component variables
 const uploadFileLabelColors = {
@@ -46,6 +48,7 @@ const filenameStyle = {
   fontSize: '1.8rem',
   padding: '0.5rem',
   border: '1px solid #ea5e5',
+  cursor: 'pointer',
   backgroundColor: fileNameColor.standardColors.backgroundColor,
   color: fileNameColor.standardColors.color,
   display: 'inline-flex',
@@ -68,8 +71,36 @@ export default function UploadLabelButton(props) {
     changeDULDocument,
     currentFileName = '', //refers to filename in db record
     currentFileLocation = '', //use to allow user to download current file? (needs to be implemented),
-    darCode
+    darCode,
+    referenceId
   } = props;
+
+  const [targetDownload, setTargetDownload] = useState(null);
+
+  useEffect(() => {
+    const downloadFile = async() => {
+      const fileAttributeLinks = {
+        irbDocument: 'irbDocument',
+        collaborationLetter: 'collaborationDocument'
+      };
+
+      if(!isFileEmpty(newDULFile)) {
+        setTargetDownload(URL.createObjectURL(newDULFile));
+      } else if(!isNil(currentFileLocation) && !isEmpty(currentFileLocation)) {
+        try{
+          let targetResponse = await DAR.getIRBDocument(referenceId, fileAttributeLinks[formAttribute]);
+          const targetFile = new Blob([targetResponse], {type: 'application/octet-stream'});
+          if(!isNil(targetFile)) {
+            setTargetDownload(URL.createObjectURL(targetFile));
+          }
+        }catch(error) {
+          console.log(error);
+          Notifications.showError({text: 'Error: Failed to retreive saved file'});
+        }
+      }
+    };
+    downloadFile();
+  }, [currentFileLocation, currentFileName, formAttribute, newDULFile, referenceId]);
 
   //const styles, dependent on darCode availability
   const uploadFileLabel = {
@@ -163,7 +194,9 @@ export default function UploadLabelButton(props) {
         isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileLocation),
         style: filenameStyle,
         onMouseEnter: (e) => applyHoverEffect(e, fileNameColor),
-        onMouseLeave: (e) => removeHoverEffect(e, fileNameColor)
+        onMouseLeave: (e) => removeHoverEffect(e, fileNameColor),
+        href: targetDownload,
+        download: true
       }, [!isFileEmpty(newDULFile) ? newDULFile.name : currentFileName]),
       h(ClearIcon, {
         style: clearIconStyle,
