@@ -1,9 +1,8 @@
 on: [pull_request]
 name: minnie-kenny
 jobs:
-  scan:
-    name: minnie-kenny
-    runs-on: ubuntu-latest
+  minnie_kenny_scan:
+    uses: docker://sobolevn/git-secret:ubuntu-latest
     steps:
       - name: checkout duos
         uses: actions/checkout@v2
@@ -13,7 +12,6 @@ jobs:
           repository: 'broadinstitute/minnie-kenny'
           path: 'minnie-kenny'
       - name: run scan
-        uses: docker://sobolevn/git-secret:ubuntu-latest
         run: |
           cp minnie-kenny/minnie-kenny.sh .
           ls -al .
