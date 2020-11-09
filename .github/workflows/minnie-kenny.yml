@@ -5,13 +5,15 @@ jobs:
     name: minnie-kenny
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/checkout@v2
+      - name: checkout duos
+        uses: actions/checkout@v2
+      - name: checkout minnie-kenny
+        uses: actions/checkout@v2
         with:
           repository: 'broadinstitute/minnie-kenny'
           path: 'minnie-kenny'
-      - name: run
-        uses: sobolevn/git-secret:ubuntu-latest
+      - name: run scan
+        uses: docker://sobolevn/git-secret:ubuntu-latest
         run: |
           cp minnie-kenny/minnie-kenny.sh .
           ls -al .
