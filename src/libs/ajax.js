@@ -367,7 +367,6 @@ export const DAR = {
   postDar: async (dar) => {
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await Config.getApiUrl()}/dar/v2`;
-    // const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredDar), { method: 'POST' }]));
     const res = axios.post(url, filteredDar, Config.authOpts());
     return await res.data;
   },
@@ -398,7 +397,7 @@ export const DAR = {
     return await res.json();
   },
 
-  getIRBDocument: async (referenceId, fileType) => {
+  getDARDocument: async (referenceId, fileType) => {
     const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
     authOpts.headers = Object.assign(authOpts.headers, {
       'Content-Type': 'application/octet-stream',
@@ -464,7 +463,7 @@ export const DAR = {
   },
 
   //NOTE: endpoints requires a dar id
-  uploadDULDocument: async(file, darId, fileType) => {
+  uploadDARDocument: async(file, darId, fileType) => {
     if(isFileEmpty(file)) {
       return Promise.resolve({data: null});
     } else {

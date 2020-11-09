@@ -53,7 +53,7 @@ export default function DataAccessRequest(props) {
     collaborationLetterName,
     uploadedIrbDocument,
     uploadedCollaborationLetter,
-    changeDULDocument,
+    changeDARDocument,
     referenceId
   } = props;
 
@@ -548,7 +548,7 @@ export default function DataAccessRequest(props) {
                 newDULFile: uploadedIrbDocument,
                 currentFileName: irbDocumentName,
                 currentFileLocation: irbDocumentLocation,
-                changeDULDocument,
+                changeDARDocument,
                 referenceId
               })
             ])
@@ -575,7 +575,7 @@ export default function DataAccessRequest(props) {
                 newDULFile: uploadedCollaborationLetter,
                 currentFileName: collaborationLetterName,
                 currentFileLocation: collaborationLetterLocation,
-                changeDULDocument,
+                changeDARDocument,
                 referenceId
               })
             ])

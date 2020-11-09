@@ -119,7 +119,7 @@ class DataAccessRequestApplication extends Component {
     this.goToStep = this.goToStep.bind(this);
     this.formFieldChange = this.formFieldChange.bind(this);
     this.partialSave = this.partialSave.bind(this);
-    this.changeDULDocument = this.changeDULDocument.bind(this);
+    this.changeDARDocument = this.changeDARDocument.bind(this);
   }
 
   //helper function to coordinate local state changes as well as updates to form data on the parent
@@ -131,7 +131,7 @@ class DataAccessRequestApplication extends Component {
     }, () => this.checkValidations());
   };
 
-  changeDULDocument = (dataset) => {
+  changeDARDocument = (dataset) => {
     const { name, value } = dataset;
     const uploadedFileName = `uploaded${name[0].toUpperCase()}${name.slice(1)}`;
     const prevFileName = `${name}Name`;
@@ -558,10 +558,10 @@ class DataAccessRequestApplication extends Component {
 
   //Can't do uploads in parallel since endpoints are post and they both alter attributes in json column
   //If done in parallel, updated attribute of one document will be overwritten by the outdated value on the other
-  saveDULDocuments = async(uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
+  saveDARDocuments = async(uploadedIrbDocument = null, uploadedCollaborationLetter = null, referenceId) => {
     let irbUpdate, collaborationUpdate;
-    irbUpdate = await DAR.uploadDULDocument(uploadedIrbDocument, referenceId, 'irbDocument');
-    collaborationUpdate = await DAR.uploadDULDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
+    irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
+    collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
     return Object.assign({}, irbUpdate.data, collaborationUpdate.data);
   }
 
@@ -610,7 +610,7 @@ class DataAccessRequestApplication extends Component {
         let referenceId = formattedFormData.referenceId;
         let darPartialResponse = this.updateDraftResponse(formattedFormData, referenceId);
         referenceId = darPartialResponse.referenceId;
-        darPartialResponse = this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+        darPartialResponse = this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
         let updatedFormData = Object.assign({}, formattedFormData, darPartialResponse);
         await DAR.postDar(updatedFormData);
         this.setState({
@@ -670,8 +670,6 @@ class DataAccessRequestApplication extends Component {
     }
   };
 
-
-  //NOTE: work on this, expect similar issue with submit?
   saveDarDraft = async () => {
     let formattedFormData = fp.cloneDeep(this.state.formData);
     // DAR datasetIds needs to be a list of ids
@@ -686,7 +684,7 @@ class DataAccessRequestApplication extends Component {
       if(fp.isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);
       }
-      darPartialResponse = await this.saveDULDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+      darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       this.setState(prev => {
         prev.formData = Object.assign({}, this.state.formData, darPartialResponse);
         prev.showDialogSave = false;
@@ -1044,7 +1042,7 @@ class DataAccessRequestApplication extends Component {
                 irbDocumentName,
                 collaborationLetterLocation,
                 collaborationLetterName,
-                changeDULDocument: this.changeDULDocument,
+                changeDARDocument: this.changeDARDocument,
                 uploadedCollaborationLetter: this.state.step2.uploadedCollaborationLetter,
                 uploadedIrbDocument: this.state.step2.uploadedIrbDocument,
                 referenceId

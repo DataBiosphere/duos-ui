@@ -68,7 +68,7 @@ export default function UploadLabelButton(props) {
     id,
     formAttribute,
     newDULFile = {}, //refers to recently uploaded file (via browser upload, for reference if user cancels a future upload attempt)
-    changeDULDocument,
+    changeDARDocument,
     currentFileName = '', //refers to filename in db record
     currentFileLocation = '', //use to allow user to download current file? (needs to be implemented),
     darCode,
@@ -88,7 +88,7 @@ export default function UploadLabelButton(props) {
         setTargetDownload(URL.createObjectURL(newDULFile));
       } else if(!isNil(currentFileLocation) && !isEmpty(currentFileLocation)) {
         try{
-          let targetResponse = await DAR.getIRBDocument(referenceId, fileAttributeLinks[formAttribute]);
+          let targetResponse = await DAR.getDARDocument(referenceId, fileAttributeLinks[formAttribute]);
           const targetFile = new Blob([targetResponse], {type: 'application/octet-stream'});
           if(!isNil(targetFile)) {
             setTargetDownload(URL.createObjectURL(targetFile));
@@ -158,13 +158,13 @@ export default function UploadLabelButton(props) {
   //Therefore file name updates need to be updated manually via custom click/change handlers
   //Manually clear or assign file names and call parent function to update file on parent's state
   //useRef hook can be used to initialize/update a value for a DOM element while avoiding re-renders on value change
-  const clearFile = (changeDULDocument, name) => {
-    changeDULDocument({name, value: ''});
+  const clearFile = (changeDARDocument, name) => {
+    changeDARDocument({name, value: ''});
   };
 
   const updateFile = (formAttribute, file) => {
     if(!isNil(file)) {
-      changeDULDocument({name: formAttribute, value: file});
+      changeDARDocument({name: formAttribute, value: file});
     }
   };
 
@@ -200,7 +200,7 @@ export default function UploadLabelButton(props) {
       h(ClearIcon, {
         style: clearIconStyle,
         isRendered: !isFileEmpty(newDULFile) || !isEmpty(currentFileLocation),
-        onClick: () => !darCode && clearFile(changeDULDocument, formAttribute),
+        onClick: () => !darCode && clearFile(changeDARDocument, formAttribute),
         onMouseEnter:(e) => !darCode && applyHoverEffect(e, fileClearColor),
         onMouseLeave:(e) => !darCode && removeHoverEffect(e, fileClearColor)
       })
