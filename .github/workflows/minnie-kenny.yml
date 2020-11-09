@@ -10,6 +10,14 @@ jobs:
         with:
           repository: 'broadinstitute/minnie-kenny'
           path: 'minnie-kenny'
+      - uses: actions/checkout@v2
+        with:
+          repository: 'awslabs/git-secrets'
+          path: 'git-secrets'
+      - name:
+        run: |
+          cd git-secrets
+          make install
       - name: check install
         run: |
           cp minnie-kenny/minnie-kenny.sh .
