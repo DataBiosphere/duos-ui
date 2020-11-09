@@ -66,6 +66,7 @@ class DatasetRegistration extends Component {
         rus: ''
       },
       problemSavingRequest: false,
+      problemLoadingUpdateDataset: false,
       submissionSuccess: false,
       errorMessage: ''
     };
@@ -115,6 +116,10 @@ class DatasetRegistration extends Component {
         updateDataset = data;
         // redirect to blank form if dataset id is invalid or inaccessible
         if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
+
+          this.setState(prev => {
+            prev.problemLoadingUpdateDataset = true;
+          })
           this.props.history.push('/dataset_registration');
           ReactTooltip.rebuild();
         }
@@ -129,16 +134,16 @@ class DatasetRegistration extends Component {
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
-    let name = dataset.properties.find(p => p.propertyName === "Dataset Name");
-    let collectionId = dataset.properties.find(p => p.propertyName === "Sample Collection ID");
-    let dataType = dataset.properties.find(p => p.propertyName === "Data Type");
-    let species = dataset.properties.find(p => p.propertyName === "Species");
-    let phenotype = dataset.properties.find(p => p.propertyName === "Phenotype/Indication");
-    let nrParticipants = dataset.properties.find(p => p.propertyName === "# of participants");
-    let description = dataset.properties.find(p => p.propertyName === "Description");
-    let datasetRepoUrl = dataset.properties.find(p => p.propertyName === "dbGAP");
-    let researcher = dataset.properties.find(p => p.propertyName === "Data Depositor");
-    let pi = dataset.properties.find(p => p.propertyName === "Principal Investigator(PI)");
+    let name = fp.find({propertyName: "Dataset Name"})(dataset.properties);
+    let collectionId = fp.find({propertyName: "Sample Collection ID"})(dataset.properties);
+    let dataType = fp.find({propertyName: "Data Type"})(dataset.properties);
+    let species = fp.find({propertyName: "Species"})(dataset.properties);
+    let phenotype = fp.find({propertyName: "Phenotype/Indication"})(dataset.properties);
+    let nrParticipants = fp.find({propertyName: "# of participants"})(dataset.properties);
+    let description = fp.find({propertyName: "Description"})(dataset.properties);
+    let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
+    let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
+    let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
 
     this.setState(prev => {
       prev.datasetData.datasetName = name ? name.propertyValue : '';
@@ -153,7 +158,7 @@ class DatasetRegistration extends Component {
       prev.datasetData.pi = pi ? pi.propertyValue : '';
 
       return prev;
-    })
+    });
   };
 
   handleOpenModal() {
@@ -237,7 +242,7 @@ class DatasetRegistration extends Component {
     // if there is a name loaded in because this is an update
     if (!fp.isEmpty(this.state.updateDataset)) {
       let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
-      let equalsOriginal = (name === updateDatasetName)
+      let equalsOriginal = (name === updateDatasetName);
       if (equalsOriginal) {
         return 'form-control';
       }
@@ -257,10 +262,12 @@ class DatasetRegistration extends Component {
       let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
         prev.showDialogSubmit = true;
+        prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = false;
       }
       else {
         prev.showDialogSubmit = false;
+        prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = true;
       }
       return prev;
@@ -480,6 +487,7 @@ class DatasetRegistration extends Component {
         prev.datasetData['dac'] = option.label;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
+        prev.problemLoadingUpdateDataset = false;
       }
       return prev;
     });
@@ -521,7 +529,7 @@ class DatasetRegistration extends Component {
     } = this.state.formData;
     const { ontologies } = this.state;
 
-    const { problemSavingRequest, showValidationMessages, submissionSuccess } = this.state;
+    const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
     // NOTE: set this to always false for now to submit dataset without consent info
     // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
@@ -559,7 +567,12 @@ class DatasetRegistration extends Component {
                   div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
                     Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
                   ]),
-
+                  div({ isRendered: problemLoadingUpdateDataset, className: 'rp-alert' }, [
+                    Alert({
+                      id: 'problemLoadingUpdateDataset', type: 'danger',
+                      title: "The Dataset you were trying to access either does not exist or you do not have permission to edit it."
+                    })
+                  ]),
                   h3({ className: 'rp-form-title dataset-color' }, ['1. Dataset Information']),
 
                   div({ className: 'form-group' }, [
