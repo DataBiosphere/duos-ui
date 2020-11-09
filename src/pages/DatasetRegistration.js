@@ -531,6 +531,7 @@ class DatasetRegistration extends Component {
 
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
+    const disableDataUseOptions = (!fp.isEmpty(this.state.updateDataset));
     // NOTE: set this to always false for now to submit dataset without consent info
     // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
@@ -946,6 +947,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'methods',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -969,6 +971,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'genetic',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -992,6 +995,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'publication',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1015,6 +1019,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'collaboration',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1038,6 +1043,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'ethics',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1061,6 +1067,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'geographic',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1084,6 +1091,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'moratorium',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1107,6 +1115,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'populationMigration',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1130,6 +1139,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'forProfit',
+                                disabled: disableDataUseOptions
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1170,6 +1180,7 @@ class DatasetRegistration extends Component {
                           rows: '6',
                           required: false,
                           placeholder: 'Please limit your other data use terms to 1100 characters.',
+                          disabled: disableDataUseOptions
                         })
                       ]),
                   ]),
