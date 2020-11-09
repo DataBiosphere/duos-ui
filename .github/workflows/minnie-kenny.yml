@@ -12,7 +12,7 @@ jobs:
           path: 'minnie-kenny'
       - uses: DamianReeves/write-file-action
         with:
-          path: ./.git/minnie-kenny.gitconfig
+          path: ./minnie-kenny.gitconfig
           contents: |
             echo "[secrets]
                 providers = git secrets --aws-provider
