@@ -492,7 +492,7 @@ class DataAccessRequestApplication extends Component {
             const currentFileLocationKey = `${formDataKey}Location`;
             const newlyUploadedFile = this.state.step2[newlyUploadedFileKey];
             //use fileLocation rather than name as an indicator of a file present
-            const currentFileLocation = this.state.formData[currentFileLocationKey];          
+            const currentFileLocation = this.state.formData[currentFileLocationKey];       
             return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile));
           } else {
             return isNil(input);
@@ -597,8 +597,7 @@ class DataAccessRequestApplication extends Component {
         if (formattedFormData[key] === '') {
           formattedFormData[key] = undefined;
         }
-      }
-      
+      }      
       formattedFormData.datasetIds = fp.map('value')(formattedFormData.datasets);
       formattedFormData.userId = userId;
 
