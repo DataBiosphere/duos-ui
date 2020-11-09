@@ -1,17 +1,19 @@
 import { Component } from 'react';
-import { div, b, span, a, h4, hr, i, button } from 'react-hyperscript-helpers';
+import { div, b, span, a, h4, hr, i, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { Votes, Election, Consent, Files } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
 import { Navigation } from "../libs/utils";
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulReview extends Component {
 
   constructor(props) {
     super(props);
     this.state = this.initialState();
+    this.voteInfo = this.voteInfo.bind(this);
   }
 
   initialState() {
@@ -27,8 +29,8 @@ class DulReview extends Component {
     };
   }
 
-  componentDidMount() {
-    this.voteInfo();
+  async componentDidMount() {
+    await this.voteInfo();
     this.logVote = this.logVote.bind(this);
     this.setEnableVoteButton = this.setEnableVoteButton.bind(this);
   }
@@ -37,31 +39,19 @@ class DulReview extends Component {
     const voteId = this.props.match.params.voteId;
     const consentId = this.props.match.params.consentId;
 
-    Votes.find(consentId, voteId).then(
-      vote => {
-        this.setState({
-          voteId: voteId,
-          vote: vote
-        });
-      }
-    );
+    const votesPromise = Votes.find(consentId, voteId);
+    const electionPromise = Election.findElectionByVoteId(voteId);
+    const consentPromise = Consent.findConsentById(consentId);
 
-    Election.findElectionByVoteId(voteId).then(
-      election => {
-        this.setState({
-          election: election
-        });
-      }
-    );
+    const [votes, elections, consent] = await Promise.all([votesPromise, electionPromise, consentPromise]);
 
-    Consent.findConsentById(consentId).then(
-      consent => {
-        this.setState({
-          consent: consent,
-          consentName: consent.dulName
-        });
-      }
-    );
+    this.setState( prev => {
+      prev.votes = votes;
+      prev.elections = elections;
+      prev.consent = consent;
+      prev.consentName = consent.dulName;
+      return prev;
+    });
   };
 
   setEnableVoteButton() {
@@ -137,25 +127,7 @@ class DulReview extends Component {
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
         h4({ className: "hint" }, ["Please review the Data Use Letter and determine if the Data Use Limitations were accurately converted to Structured Limitations"]),
-
-        div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Data Use Limitations"]),
-            ]),
-            div({ id: "panel_dul", className: "panel-body cm-boxbody" }, [
-              button({ id: "btn_downloadDataUseLetter", className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color", onClick: this.downloadDUL }, ["Download Data Use Letter"]),
-            ])
-          ]),
-
-          div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes" }, [
-            div({ className: "panel-heading cm-boxhead dul-color" }, [
-              h4({}, ["Structured Limitations"]),
-            ]),
-            div({ id: "panel_structuredDul", className: "panel-body cm-boxbody translated-restriction", dangerouslySetInnerHTML: { __html: this.state.consent.translatedUseRestriction } }, [])
-          ]),
-        ]),
-
+        h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL, isDUL: true}),
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote dul-background-lighter" }, [
             SubmitVoteBox({

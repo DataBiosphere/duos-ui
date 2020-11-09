@@ -5,16 +5,17 @@ import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { DataAccessRequest } from '../components/DataAccessRequest';
+import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { DAR, Election, Email, Files, Researcher } from '../libs/ajax';
+import { DAR, Election, Email, Files, Researcher, DataSet } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
+import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class AccessCollect extends Component {
 
@@ -64,7 +65,7 @@ class AccessCollect extends Component {
           ['Pending', 0]
         ]
       },
-      translatedUseRestriction: '',
+      dataUse: {},
       voteStatus: '',
       createDate: '',
       hasUseRestriction: false,
@@ -230,18 +231,25 @@ class AccessCollect extends Component {
     await this.findDataAccessElectionReview();
     await this.findRPElectionReview();
     await this.findDar();
+    await this.getDataset(this.state.election.dataSetId);
+  }
+
+  async getDataset(id) {
+    const dataset = await DataSet.getDataSetsByDatasetId(id);
+    this.setState((prev) => {
+      prev.dataUse = dataset.dataUse;
+      return prev;
+    });
   }
 
   async findDataAccessElectionReview() {
     let electionReview = await Election.findDataAccessElectionReview(this.props.match.params.electionId, false);
     this.getRPGraphData('access', electionReview.reviewVote);
-
     this.setState(prev => {
       prev.isQ1Expanded = true;
       prev.isQ2Expanded = false;
       prev.consentName = electionReview.associatedConsent.name;
       prev.consentId = electionReview.consent.consentId;
-      prev.translatedUseRestriction = electionReview.consent.translatedUseRestriction;
       prev.electionType = 'access';
       prev.election = electionReview.election;
       prev.darOriginalFinalVote = electionReview.election.finalVote;
@@ -251,9 +259,6 @@ class AccessCollect extends Component {
       prev.dulName = electionReview.consent.dulName;
       prev.status = electionReview.election.status;
       prev.accessAlreadyVote = electionReview.election.finalVote !== null ? true : false;
-      prev.userestriction = electionReview.election.translatedUseRestriction === null ?
-        'This includes sensitive research objectives that requires manual review.' :
-        electionReview.election.translatedUseRestriction;
       prev.voteAccessList = this.chunk(electionReview.reviewVote, 2);
       return prev;
     });
@@ -359,9 +364,6 @@ class AccessCollect extends Component {
   }
 
   render() {
-
-    const { translatedUseRestriction } = this.state;
-
     return (
       div({ className: 'container container-wide' }, [
         div({ className: 'row no-margin' }, [
@@ -370,7 +372,7 @@ class AccessCollect extends Component {
               id: 'collectAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
               color: 'access', title: 'Collect votes for Data Access Congruence Review'
             }),
-            DataAccessRequest({
+            h(DataAccessRequestHeader, {
               isRendered: !ld.isEmpty(this.state.darInfo.datasets),
               dar: this.state.darInfo,
               consentName: this.state.consentName
@@ -407,16 +409,11 @@ class AccessCollect extends Component {
                 downloadDAR: this.downloadDAR,
                 researcherProfile: this.state.researcherProfile }),
 
-              div({ className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
-                div({ className: 'panel-heading cm-boxhead dul-color' }, [
-                  h4({}, ['Data Use Limitations'])
-                ]),
-                div({ id: 'panel_dul', className: 'panel-body cm-boxbody' }, [
-                  div({ className: 'row dar-summary' }, [
-                    div({ className: 'control-label dul-color' }, ['Structured Limitations']),
-                    div({ className: 'response-label translated-restriction', dangerouslySetInnerHTML: { __html: translatedUseRestriction } }, [])
-                  ])
-                ])
+              div({
+                className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
+                isRendered: !ld.isEmpty(this.state.dataUse)
+              }, [
+                h(TranslatedDULComponent,{restrictions: this.state.dataUse})
               ])
             ]),
 

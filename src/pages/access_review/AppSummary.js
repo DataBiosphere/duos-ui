@@ -1,13 +1,13 @@
 import React from 'react';
-import { div, hh } from 'react-hyperscript-helpers';
+import { div, hh, span, h } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Files } from '../../libs/ajax';
 import { download } from '../../libs/utils';
 import { ApplicationSection } from './ApplicationSection';
 import { StructuredDarRp } from '../../components/StructuredDarRp';
-import { StructuredLimitations } from './StructuredLimitations';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
+import { DataUseTranslation } from '../../libs/dataUseTranslation';
 
 const SUBHEADER = {
   margin: '32px 0px',
@@ -20,7 +20,49 @@ const SUBHEADER = {
   fontFamily: 'Montserrat',
 };
 
-export const AppSummary = hh(class AppSummary extends React.PureComponent {
+const ROOT = {
+  fontFamily: 'Montserrat',
+  color: Theme.palette.primary,
+  whiteSpace: 'pre-line'
+};
+
+const HEADER = {
+  marginBottom: '5px',
+  fontSize: Theme.font.size.header,
+  lineHeight: Theme.font.leading.regular,
+  fontWeight: Theme.font.weight.semibold,
+  color: Theme.palette.highlighted,
+};
+
+const TEXT = {
+  fontSize: Theme.font.size.small,
+  lineHeight: Theme.font.leading.regular,
+  fontWeight: Theme.font.weight.regular,
+  display: 'inline-block'
+};
+
+export const AppSummary = hh(class AppSummary extends React.Component {
+
+  constructor(props) {
+    super();
+    this.state = {
+      generateRestrictions: this.generateRestrictions.bind(this),
+      translatedRestrictions: []
+    };
+  }
+
+  generateRestrictions = async(dataUse) => {
+    const translatedRestrictions = await DataUseTranslation.translateDataUseRestrictions(dataUse);
+    this.setState(prev => {
+      prev.translatedRestrictions = translatedRestrictions;
+      return prev;
+    });
+  }
+
+  async componentDidMount() {
+    await this.generateRestrictions(this.props.consent.dataUse);
+  }
+
   /**
    * downloads the data use letter for this dataset
    */
@@ -34,6 +76,23 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
     const { pi, profileName, institution, department, city, country } = darInfo;
     const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
+    const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj) => {
+      return span({style: TEXT}, restrictionObj.description);
+    });
+    const StructuredLimitations = div({ style: ROOT}, [
+      div({style: HEADER}, 'Data Use Structured Limitations'),
+      div({style: TEXT}, [translatedRestrictionsList]),
+      div({style: {marginTop: '0.8rem'}}, [
+        h(DownloadLink,{
+          label: 'DUL machine-readable format',
+          onDownload: () => download('machine-readable-DUL.json', mrDUL)
+        }),
+        h(DownloadLink,{
+          label: 'Data Use Letter',
+          onDownload: this.downloadDUL
+        })
+      ])
+    ]);
 
     return div({ id: 'app-summary' },
       [
@@ -64,11 +123,7 @@ export const AppSummary = hh(class AppSummary extends React.PureComponent {
                 borderRadius: '9px',
               }
             },
-            [StructuredLimitations({
-              content: darInfo.translatedDataUse,
-              labels: ['DUL machine-readable format', 'Data Use Letter'],
-              functions: [() => download('machine-readable-DUL.json', mrDUL), this.downloadDUL]
-            })]
+            [StructuredLimitations]
           )
         ]),
         div(
