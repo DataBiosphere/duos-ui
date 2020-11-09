@@ -1,5 +1,5 @@
 on: [pull_request]
-name: npm audit
+name: minnie-kenny
 jobs:
   scan:
     name: minnie-kenny
