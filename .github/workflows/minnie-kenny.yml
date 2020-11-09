@@ -8,7 +8,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/checkout@v2
         with:
-          repository: 'https://github.com/broadinstitute/minnie-kenny'
+          repository: 'broadinstitute/minnie-kenny'
           path: 'minnie-kenny'
       - name: check install
         run: |
