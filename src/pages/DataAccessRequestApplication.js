@@ -492,9 +492,8 @@ class DataAccessRequestApplication extends Component {
             const currentFileLocationKey = `${formDataKey}Location`;
             const newlyUploadedFile = this.state.step2[newlyUploadedFileKey];
             //use fileLocation rather than name as an indicator of a file present
-            const currentFileLocation = this.state.formData[currentFileLocationKey];
-          
-            return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile)); 
+            const currentFileLocation = this.state.formData[currentFileLocationKey];          
+            return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile));
           } else {
             return isNil(input);
           }
@@ -569,7 +568,7 @@ class DataAccessRequestApplication extends Component {
   updateDraftResponse = (formattedFormData, referenceId) => {
     let darPartialResponse;
     if(!isNil(referenceId) && !isEmpty(referenceId)) {
-        darPartialResponse = DAR.updateDarDraft(formattedFormData, referenceId);
+      darPartialResponse = DAR.updateDarDraft(formattedFormData, referenceId);
     } else {
       darPartialResponse = DAR.postDarDraft(formattedFormData);
     }
@@ -683,7 +682,7 @@ class DataAccessRequestApplication extends Component {
     const { dataRequestId } = this.props.match.params;
     try {
       let referenceId = formattedFormData.referenceId;
-      let darPartialResponse = await this.updateDraftResponse(formattedFormData, referenceId)
+      let darPartialResponse = await this.updateDraftResponse(formattedFormData, referenceId);
       referenceId = darPartialResponse.referenceId;
       if(fp.isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);

@@ -401,7 +401,7 @@ export const DAR = {
   getIRBDocument: async (referenceId, fileType) => {
     const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
     authOpts.headers = Object.assign(authOpts.headers, {
-      'Content-Type': 'application/octet-stream', 
+      'Content-Type': 'application/octet-stream',
       'Accept': 'application/octet-stream'
     });
     const url = `${await Config.getApiUrl()}/dar/v2/${referenceId}/${fileType}`;
@@ -466,7 +466,7 @@ export const DAR = {
   //NOTE: endpoints requires a dar id
   uploadDULDocument: async(file, darId, fileType) => {
     if(isFileEmpty(file)) {
-      return Promise.resolve({data: null})
+      return Promise.resolve({data: null});
     } else {
       let authOpts = Config.authOpts();
       authOpts.headers['Content-Type'] = 'multipart/form-data';
