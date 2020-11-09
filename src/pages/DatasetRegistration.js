@@ -531,7 +531,7 @@ class DatasetRegistration extends Component {
 
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
-    const disableDataUseOptions = (!fp.isEmpty(this.state.updateDataset));
+    const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
     // NOTE: set this to always false for now to submit dataset without consent info
     // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
@@ -947,7 +947,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'methods',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -971,7 +971,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'genetic',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -995,7 +995,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'publication',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1019,7 +1019,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'collaboration',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1043,7 +1043,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'ethics',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1067,7 +1067,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'geographic',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1091,7 +1091,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'moratorium',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1115,7 +1115,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'populationMigration',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1139,7 +1139,7 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'forProfit',
-                                disabled: disableDataUseOptions
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
@@ -1180,7 +1180,7 @@ class DatasetRegistration extends Component {
                           rows: '6',
                           required: false,
                           placeholder: 'Please limit your other data use terms to 1100 characters.',
-                          disabled: disableDataUseOptions
+                          disabled: isUpdateDataset
                         })
                       ]),
                   ]),
@@ -1242,7 +1242,7 @@ class DatasetRegistration extends Component {
                     div({ isRendered: submissionSuccess, className: 'rp-alert' }, [
                       Alert({
                         id: 'submissionSuccess', type: 'info',
-                        title: this.state.updateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
+                        title: isUpdateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
                       })
                     ]),
 
@@ -1252,7 +1252,7 @@ class DatasetRegistration extends Component {
                         a({
                           id: 'btn_submit', onClick: this.attestAndSave,
                           className: 'f-right btn-primary dataset-background bold'
-                        }, ['Register in DUOS!']),
+                        }, [isUpdateDataset ? 'Update Dataset' : 'Register in DUOS!']),
 
                         ConfirmationDialog({
                           title: 'Dataset Registration Confirmation', disableOkBtn: this.state.disableOkBtn,
