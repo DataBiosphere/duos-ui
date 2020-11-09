@@ -10,10 +10,11 @@ jobs:
         with:
           repository: 'broadinstitute/minnie-kenny'
           path: 'minnie-kenny'
-      - name: copy
-        run: |
-          cp minnie-kenny/minnie-kenny.sh .
       - name: check install
         run: |
+          cp minnie-kenny/minnie-kenny.sh .
           ls -al .
           ls -al minnie-kenny
+      - name: run
+        run: |
+          ./minnie-kenny.sh
