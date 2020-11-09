@@ -1,0 +1,16 @@
+on: [pull_request]
+name: npm audit
+jobs:
+  scan:
+    name: minnie-kenny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          repository: 'https://github.com/broadinstitute/minnie-kenny'
+          path: 'minnie-kenny'
+      - name: check install
+        run: |
+          ls -al .
+          ls -al minnie-kenny
