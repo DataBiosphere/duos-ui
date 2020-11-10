@@ -214,7 +214,7 @@ class DataAccessRequestApplication extends Component {
           key: item.id,
           value: item.id,
           label: item.label,
-          item: { id: item.id, label: item.label }
+          item: item
         };
       })(formDataOntologies);
     }
@@ -483,10 +483,11 @@ class DataAccessRequestApplication extends Component {
 
   dialogHandlerSubmit = (answer) => (e) => {
     if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
+      let ontologies = fp.map(ontology => ({
+        id: ontology.key,
+        label: ontology.value,
+        definition: ontology.item.definition
+      }))(this.state.formData.ontologies);
       this.setState(prev => {
         if (ontologies.length > 0) {
           prev.formData.ontologies = ontologies;
@@ -537,10 +538,11 @@ class DataAccessRequestApplication extends Component {
       // DAR datasetIds needs to be a list of ids
       const datasetIds = fp.map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
-      const ontologies = fp.map((o) => {return {
+      const ontologies = fp.map((o) => ({
         id: o.key,
-        label: o.value
-      };})(this.state.formData.ontologies);
+        label: o.value,
+        definition: o.item.definition
+      }))(this.state.formData.ontologies);
       this.setState(prev => {
         prev.formData.datasetIds = datasetIds;
         prev.formData.ontologies = ontologies;
