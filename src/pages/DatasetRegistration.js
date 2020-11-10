@@ -116,7 +116,6 @@ class DatasetRegistration extends Component {
         updateDataset = data;
         // redirect to blank form if dataset id is invalid or inaccessible
         if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
-
           this.setState(prev => {
             prev.problemLoadingUpdateDataset = true;
           })
@@ -242,8 +241,7 @@ class DatasetRegistration extends Component {
     // if there is a name loaded in because this is an update
     if (!fp.isEmpty(this.state.updateDataset)) {
       let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
-      let equalsOriginal = (name === updateDatasetName);
-      if (equalsOriginal) {
+      if (name === updateDatasetName) {
         return 'form-control';
       }
       // if the old dataset name has been edited
