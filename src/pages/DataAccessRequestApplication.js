@@ -15,7 +15,7 @@ import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
 import * as fp from 'lodash/fp';
-import { isEmpty, isNil } from 'lodash';
+import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 
@@ -562,7 +562,7 @@ class DataAccessRequestApplication extends Component {
     let irbUpdate, collaborationUpdate;
     irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
     collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
-    return Object.assign({}, irbUpdate.data, collaborationUpdate.data);
+    return assign({}, irbUpdate.data, collaborationUpdate.data);
   }
 
   updateDraftResponse = (formattedFormData, referenceId) => {
@@ -611,7 +611,7 @@ class DataAccessRequestApplication extends Component {
         let darPartialResponse = this.updateDraftResponse(formattedFormData, referenceId);
         referenceId = darPartialResponse.referenceId;
         darPartialResponse = this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
-        let updatedFormData = Object.assign({}, formattedFormData, darPartialResponse);
+        let updatedFormData = assign({}, formattedFormData, darPartialResponse);
         await DAR.postDar(updatedFormData);
         this.setState({
           showDialogSubmit: false
@@ -686,7 +686,7 @@ class DataAccessRequestApplication extends Component {
       }
       darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
       this.setState(prev => {
-        prev.formData = Object.assign({}, this.state.formData, darPartialResponse);
+        prev.formData = assign({}, prev.formData, darPartialResponse);
         prev.showDialogSave = false;
         prev.disableOkBtn = false;
         return prev;
