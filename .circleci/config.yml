@@ -46,7 +46,7 @@ commands:
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             gcloud --quiet config set project ${GOOGLE_PROJECT}
       - setup_remote_docker
-        version: 19.03.13 # See https://support.circleci.com/hc/en-us/articles/360050934711
+          version: 19.03.13 # See https://support.circleci.com/hc/en-us/articles/360050934711
       - run:
           name: Docker build/push to GCR
           command: |
