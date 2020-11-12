@@ -33,7 +33,7 @@ commands:
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
-            echo 'export COMMIT="`git rev-parse --short HEAD`"' >> $BASH_ENV
+            echo 'export COMMIT="`git rev-parse --short=12 HEAD`"' >> $BASH_ENV
             echo 'export ENV="<< parameters.env >>"' >> $BASH_ENV
             echo 'export APPLICATION_NAME="<< parameters.application_name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="<< parameters.google_project >>"' >> $BASH_ENV
@@ -217,7 +217,7 @@ workflows:
             - build-dev
           filters:
             branches:
-              only: develop # REVERT from 'DUOS-493' to 'develop' when testing is complete
+              only: DUOS-493 # REVERT from 'DUOS-493' to 'develop' when testing is complete
       - build-staging:
           filters:
             tags:
