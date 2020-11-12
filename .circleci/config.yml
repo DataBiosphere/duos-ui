@@ -118,7 +118,7 @@ jobs:
       - restore_cache:
           keys:
             - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run: cp config/dev.json public/config.json
+      - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
@@ -136,7 +136,7 @@ jobs:
       - restore_cache:
           keys:
             - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run: cp config/staging.json public/config.json
+      - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
