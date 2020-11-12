@@ -47,6 +47,6 @@ Builds, tests, and deployments are handled by CircleCI.
 ### Running under Docker
 
     ```sh
-    docker build -f Dockerfile-dev . -t duos-ui
-    docker run -p 80:80 duos-ui:latest
+    docker build . -t duos
+    docker run -p 80:80 duos:latest
     ```
