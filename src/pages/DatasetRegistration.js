@@ -47,7 +47,7 @@ class DatasetRegistration extends Component {
         ontologies: [],
         other: false,
         otherText: '',
-        pubRef: '',
+        pubRef: ''
       },
       datasetData: {
         datasetName: '',
@@ -62,8 +62,7 @@ class DatasetRegistration extends Component {
         description: '',
         dac: '',
         consentId: '',
-        publicAccess: '',
-        rus: ''
+        publicAccess: ''
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -156,6 +155,41 @@ class DatasetRegistration extends Component {
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.pi = pi ? pi.propertyValue : '';
 
+      return prev;
+    });
+
+    this.prefillDataUseFields(dataset.dataUse);
+  };
+
+  prefillDataUseFields(dataUse) {
+    console.log(dataUse);
+    let methods = dataUse.methodsResearch;
+    let genetics = dataUse.geneticStudiesOnly;
+    let publication = dataUse.publicationResults;
+    let collaboration = dataUse.collaboratorRequired;
+    let ethics = dataUse.ethicsApprovalRequired;
+    let geographic = dataUse.geographicalRestrictions;
+    let forProfit = !dataUse.commercialUse;
+    let hmb = dataUse.hmbResearch;
+    let poa = dataUse.populationOriginsAncestry;
+    let diseases = dataUse.diseaseRestrictions;
+    let other = !fp.isEmpty(dataUse.other);
+    let otherText = dataUse.other;
+    // let pubRef = dataUse.pubRef;
+
+    this.setState(prev => {
+      prev.formData.methods = methods;
+      prev.formData.genetic = genetics;
+      prev.formData.publication = publication;
+      prev.formData.collaboration = collaboration;
+      prev.formData.ethics = ethics;
+      prev.formData.geographic = geographic;
+      prev.formData.forProfit = forProfit;
+      prev.formData.hmb = hmb;
+      prev.formData.poa = poa;
+      prev.formData.diseases = diseases;
+      // prev.formData.other = other;
+      prev.formData.otherText = otherText;
       return prev;
     });
   };
@@ -912,7 +946,7 @@ class DatasetRegistration extends Component {
                               poaHandler: this.setPoa,
                               diseases: diseases,
                               diseasesHandler: this.setDiseases,
-                              disabled: true,
+                              disabled: isUpdateDataset,
                               ontologies: ontologies,
                               ontologiesHandler: this.onOntologiesChange,
                               other: other,
@@ -1170,10 +1204,10 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         textarea({
-                          value: this.state.datasetData.rus,
+                          value: this.state.formData.otherText,
                           onChange: this.handleChange,
-                          name: 'rus',
-                          id: 'inputRUS',
+                          name: 'other',
+                          id: 'inputOther',
                           className: 'form-control',
                           rows: '6',
                           required: false,
