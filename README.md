@@ -1,5 +1,9 @@
 DUOS UI
 =======
+https://github.com/databiosphere/duos-ui/workflows/cypress%20tests/badge.svg
+https://github.com/databiosphere/duos-ui/workflows/docker%20test/badge.svg
+https://github.com/databiosphere/duos-ui/workflows/npm%20audit/badge.svg
+https://github.com/databiosphere/duos-ui/workflows/trivy/badge.svg
 [![CircleCI](https://circleci.com/gh/DataBiosphere/duos-ui.svg?style=svg)](https://circleci.com/gh/DataBiosphere/duos-ui)
 
 ## Data Use Oversight System
@@ -17,36 +21,38 @@ The Data Use Oversight system ensures that researchers using genomics data honor
 
 ### Developers
 
-Builds, tests, and deployments are handled by CircleCI.
+Deployments are currently run in CircleCI.
 
-1. We use node@13 On Darwin with Homebrew:
+1. We use node@15 On Darwin with Homebrew:
 
-    ```sh
-    brew install node@13
-    ```
+```
+brew install node@15
+```
 2. Update npm:
 
-    ```sh
-    npm install -g npm@6
-    ```
+```
+npm install -g npm@7
+```
 3. Install deps:
 
-    ```sh
-    npm install
-    ```
+```
+npm install
+```
 4. Install configs for an environment:
 
-    ```sh
-    cp config/dev.json public/config.json
-    ```
+```
+cp config/dev.json public/config.json
+```
 5. Start development server:
 
-    ```sh
-    npm start
-    ```
+```
+npm start
+```
 ### Running under Docker
 
-    ```sh
-    docker build . -t duos
-    docker run -p 80:80 duos:latest
-    ```
+Choose an environment configuration file to mount to `/usr/share/nginx/html/config.json`
+
+```
+docker build . -t duos
+docker run -v config/dev.json:/usr/share/nginx/html/config.json:ro -p 80:80 duos:latest
+```

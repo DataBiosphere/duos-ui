@@ -1,5 +1,5 @@
-name: Trivy
 on: [pull_request]
+name: Trivy
 jobs:
   build:
     name: Scan for Vulnerabilities
