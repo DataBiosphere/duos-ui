@@ -42,6 +42,14 @@ spec:
         - name: ${APPLICATION_NAME}
           image: gcr.io/${GOOGLE_PROJECT}/${APPLICATION_NAME}:${COMMIT}-${ENV}
           imagePullPolicy: Always
+          volumeMounts:
+            - name: configs
+              mountPath: /usr/share/nginx/html/config.json
+              subPath: config.json
+      volumes:
+        - name: configs
+          configMap:
+            name: duos-configmap
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
