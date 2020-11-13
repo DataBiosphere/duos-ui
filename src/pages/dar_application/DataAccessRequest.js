@@ -142,12 +142,23 @@ export default function DataAccessRequest(props) {
             return count === collectionLength && count > 0;
           })(ontologyTally);
         } else {
+          //ds rendering logic is compromised with submitted dars due to datasets being split into groups of one
+          //therefore dsAcknowledgement is maintained in order to ensure conditional rendering on that value
+          //Example: if dsAcknowledgement is true, question should be rendered
+          //if false, question should not be rendered since
+          //  1) if ds question is active, statement needs to be marked true for submission (false would not be a valid answer)
+          //  2) if ds question is inactive, false value will indicate that the question should not be rendered. (True would not be a valid answer)
           updatedDULQuestions['diseaseRestrictions'] = false;
         }
       }
 
       if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
         setActiveDULQuestions(updatedDULQuestions);
+        //maintain dsAcknowledgement integrity when question is no longer active
+        if(!updatedDULQuestions['diseaseRestrictions'] && isEmpty(darCode)) {
+          setDSAcknowledgement(false);
+          formFieldChange({name: 'dsAcknowledgement', value: false});
+        }
         //State update is asynchronous, send updatedDULQuestions for parent component
         formFieldChange({name: 'activeDULQuestions', value: updatedDULQuestions});
       }
@@ -165,7 +176,17 @@ export default function DataAccessRequest(props) {
     };
 
     updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange]);
+  }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
+
+  const renderDULQuestions = (darCode) => {
+    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions);
+
+    if(!isEmpty(darCode)) {
+      //for submitted dars dsAcknowledgement is not processed properly due to dataset split, therefore you need to check dsAcknowledgement directly
+      renderBool = renderBool || (dsAcknowledgement === true);
+    }
+    return renderBool;
+  };
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
@@ -453,7 +474,9 @@ export default function DataAccessRequest(props) {
       ]),
       div({
         className: 'form-group',
-        isRendered: !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions)
+        //if draft -> check if any one question is active
+        //if submit -> same condition plus check if dsAcknowledgement is true
+        isRendered: renderDULQuestions(darCode)
       }, [
         div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
           label({className: 'control-label rp-title-question'}, [
@@ -508,7 +531,7 @@ export default function DataAccessRequest(props) {
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
           style: dulQuestionDiv(showValidationMessages, dsAcknowledgement),
-          isRendered: activeDULQuestions['diseaseRestrictions'] === true
+          isRendered: (isEmpty(darCode) && activeDULQuestions['diseaseRestrictions'] === true) || (!isEmpty(darCode) && props.dsAcknowledgement)
         }, [
           input({
             type: 'checkbox',
