@@ -82,7 +82,7 @@ export default function DataUseAgreements(props) {
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 label({ className: 'control-label default-color' },
                   ['Important: Your Signing Official must sign and send a Library Card Agreement authorizing your use prior to accesssing to data.']),
-                  a({ href: '/home_signing_official', target: '_blank' }, '(Click here for detailed instructions for your Signing Official)'),
+                a({ href: '/home_signing_official', target: '_blank' }, '(Click here for detailed instructions for your Signing Official)'),
               ]),
 
 
