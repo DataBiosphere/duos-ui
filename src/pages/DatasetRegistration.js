@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { RadioButton } from '../components/RadioButton';
 import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
@@ -12,9 +13,11 @@ import { DAC, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
+import { DataUseTranslation } from '../libs/dataUseTranslation';
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
+import AsyncSelect from "react-select/async/dist/react-select.esm";
 
 class DatasetRegistration extends Component {
 
@@ -163,6 +166,8 @@ class DatasetRegistration extends Component {
 
   prefillDataUseFields(dataUse) {
     console.log(dataUse);
+    console.log(DataUseTranslation.translateDarInfo(dataUse));
+    console.log(DataUseTranslation.translateDataUseRestrictions(dataUse));
     let methods = dataUse.methodsResearch;
     let genetics = dataUse.geneticStudiesOnly;
     let publication = dataUse.publicationResults;
@@ -188,7 +193,7 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = hmb;
       prev.formData.poa = poa;
       prev.formData.diseases = diseases;
-      // prev.formData.other = other;
+      prev.formData.other = !fp.isEmpty(other);
       prev.formData.otherText = otherText;
       return prev;
     });
@@ -921,7 +926,7 @@ class DatasetRegistration extends Component {
                       label({className: 'control-label rp-title-question dataset-color'}, [
                         '2.1 Primary Data Use Terms* ',
                         span({},
-                          ['Please select one of the following options.']),
+                          ['Please select one of the following data use permissions for your dataset.']),
 
                         div({
                           style: {'marginLeft': '15px'},
@@ -939,21 +944,143 @@ class DatasetRegistration extends Component {
                         div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
-                            TypeOfResearch({
-                              hmb: hmb,
-                              hmbHandler: this.setHmb,
-                              poa: poa,
-                              poaHandler: this.setPoa,
-                              diseases: diseases,
-                              diseasesHandler: this.setDiseases,
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkGeneral',
+                              name: 'checkPrimary',
+                              value: 'general',
+                              defaultChecked: hmb,
+                              onClick: this.setHmb,
+                              label: 'General Research Use: ',
+                              description: 'use is permitted for any research purpose',
                               disabled: isUpdateDataset,
-                              ontologies: ontologies,
-                              ontologiesHandler: this.onOntologiesChange,
-                              other: other,
-                              otherHandler: this.setOther,
-                              otherText: otherText,
-                              otherTextHandler: this.setOtherText
-                            })
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkHmb',
+                              name: 'checkPrimary',
+                              value: 'hmb',
+                              defaultChecked: hmb,
+                              onClick: this.setHmb,
+                              label: 'Health/Medical/Biomedical Use: ',
+                              description: 'use is permitted for any health, medical, or biomedical purpose',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkDisease',
+                              name: 'checkPrimary',
+                              value: 'diseases',
+                              defaultChecked: diseases,
+                              onClick: this.setDiseases,
+                              label: 'Disease-related studies: ',
+                              description: 'use is permitted for research on the specified disease',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            textarea({
+                              // style: otherTextStyle,
+                              value: ontologies,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'otherText',
+                              maxLength: '512',
+                              rendered: diseases,
+                              rows: '2',
+                              required: other,
+                              placeholder: 'Please specify if selected (max. 512 characters)',
+                              disabled: isUpdateDataset || !other,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkPoa',
+                              name: 'checkPrimary',
+                              value: 'poa',
+                              defaultChecked: poa,
+                              onClick: this.setPoa,
+                              label: 'Populations, Origins, Ancestry Use: ',
+                              description: 'use is permitted exclusively for populations, origins, or ancestry research',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            // div({
+                            //   style: {
+                            //     marginBottom: '2rem',
+                            //     color: '#777',
+                            //     cursor: props.diseases ? 'pointer' : 'not-allowed',
+                            //   },
+                            // }, [
+                            //   h(AsyncSelect, {
+                            //     styles: ontologySelectionStyle,
+                            //     id: 'sel_diseases',
+                            //     isDisabled: !props.diseases,
+                            //     isMulti: true,
+                            //     loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                            //     onChange: (option) => props.ontologiesHandler(option),
+                            //     value: props.ontologies,
+                            //     placeholder: 'Please enter one or more diseases',
+                            //     classNamePrefix: 'select',
+                            //   }),
+                            // ]),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkOther',
+                              name: 'checkPrimary',
+                              value: 'other',
+                              defaultChecked: other,
+                              onClick: this.setOther,
+                              label: 'Other Use:',
+                              description: 'permitted research use is defined as follows: ',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            textarea({
+                              // style: otherTextStyle,
+                              value: otherText,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'otherText',
+                              maxLength: '512',
+                              rendered: other,
+                              rows: '2',
+                              required: other,
+                              placeholder: 'Please specify if selected (max. 512 characters)',
+                              disabled: isUpdateDataset || !other,
+                            }),
+                            // TypeOfResearch({
+                            //   hmb: hmb,
+                            //   hmbHandler: this.setHmb,
+                            //   poa: poa,
+                            //   poaHandler: this.setPoa,
+                            //   diseases: diseases,
+                            //   diseasesHandler: this.setDiseases,
+                            //   disabled: isUpdateDataset,
+                            //   ontologies: ontologies,
+                            //   ontologiesHandler: this.onOntologiesChange,
+                            //   other: other,
+                            //   otherHandler: this.setOther,
+                            //   otherText: otherText,
+                            //   otherTextHandler: this.setOtherText
+                            // })
                           ]),
 
                         div({className: 'form-group'}, [
@@ -962,8 +1089,8 @@ class DatasetRegistration extends Component {
                             [
                               label({className: 'control-label rp-title-question dataset-color'},
                                 [
-                                  '2.4 Secondary Data Use Terms',
-                                  span({}, ['Select all applicable options.']),
+                                  '2.2 Secondary Data Use Terms',
+                                  span({}, ['Please select all applicable data use parameters.']),
                                 ]),
                             ]),
                         ]),
@@ -986,8 +1113,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkMethods',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.1 No methods development or validation studies (NMDS):']),
-                                'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
+                                  ['No methods development or validation studies (NMDS)']),
                               ]),
                             ]),
                           ]),
@@ -1010,8 +1136,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkGenetic',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.2 Genetic Studies Only (GSO):']),
-                                'Use is limited to genetic studies only.',
+                                  ['Genetic Studies Only (GSO)']),
                               ]),
                             ]),
                           ]),
@@ -1034,8 +1159,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkPublication',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.3 Publication Required (PUB):']),
-                                'Approved users are required to make results of studies using the data available to the larger scientific community.',
+                                  ['Publication Required (PUB)']),
                               ]),
                             ]),
                           ]),
@@ -1058,8 +1182,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkCollaboration',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.4 Collaboration Required (COL):']),
-                                'Approved users are required to collaborate with the primary study investigators.',
+                                  ['Collaboration Required (COL)']),
                               ]),
                             ]),
                           ]),
@@ -1082,8 +1205,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkEthics',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.5 Ethics Approval Required (IRB):']),
-                                'Approved users are required to provide documentation of local IRB/REB approval.',
+                                  ['Ethics Approval Required (IRB)']),
                               ]),
                             ]),
                           ]),
@@ -1106,8 +1228,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkGeographic',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.6 Geographic Restriction (GS-):']),
-                                'Use limited to be within the specified geographic area.',
+                                  ['Geographic Restriction (GS-)']),
                               ]),
                             ]),
                           ]),
@@ -1130,8 +1251,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkMoratorium',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.7 Publication Moratorium (MOR):']),
-                                'Approved users are required to withhold from publishing until the specified date.',
+                                  ['Publication Moratorium (MOR)']),
                               ]),
                             ]),
                           ]),
@@ -1154,8 +1274,7 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkPopulationMigration',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.8 No Populations Origins or Ancestry Research (NPOA):']),
-                                'Use for Populations, Origins, or Ancestry Research is prohibited.',
+                                  ['No Populations Origins or Ancestry Research (NPOA)']),
                               ]),
                             ]),
                           ]),
@@ -1178,44 +1297,50 @@ class DatasetRegistration extends Component {
                                 htmlFor: 'checkForProfit',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.9 Non-Profit Use Only (NPU):']),
-                                'The data cannot be used by for-profit organizations nor for commercial research purposes.',
+                                  ['Non-Profit Use Only (NPU)']),
                               ]),
                             ]),
                           ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: other,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkOther',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'other',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkOther',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Other Secondary Use Terms:']),
+                              ]),
+                            ]),
+                          ]),
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            textarea({
+                              value: this.state.formData.otherText,
+                              onChange: this.handleChange,
+                              name: 'other',
+                              id: 'inputOther',
+                              className: 'form-control',
+                              rows: '6',
+                              required: false,
+                              placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
+                              disabled: isUpdateDataset
+                            })
+                          ]),
                       ]),
                     ]),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question dataset-color'}, [
-                          '2.5 Other Data Use Terms ',
-                          span({}, [
-                            'If there are additional data use terms governing the future use of this dataset, please include them here.',
-                            br(),
-                            'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access requests. If you have questions, please reach out to the DUOS support team ',
-                            span( [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })]),
-                          ]),
-                        ]),
-                      ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        textarea({
-                          value: this.state.formData.otherText,
-                          onChange: this.handleChange,
-                          name: 'other',
-                          id: 'inputOther',
-                          className: 'form-control',
-                          rows: '6',
-                          required: false,
-                          placeholder: 'Please limit your other data use terms to 1100 characters.',
-                          disabled: isUpdateDataset
-                        })
-                      ]),
-                  ]),
                 ]),
 
 
@@ -1244,17 +1369,38 @@ class DatasetRegistration extends Component {
                       ])
                     ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-                      input({
-                        type: 'checkbox',
-                        id: 'chk_publicAccess',
-                        name: 'publicAccess',
-                        className: 'checkbox-inline rp-checkbox',
-                        checked: publicAccess,
-                        onChange: this.handleCheckboxChange
+                    // change the css for radio buttons (incl yes/no)
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                      label({ className: 'regular-radio rp-choice-questions', htmlFor: 'radio_publicAccess' },
+                        ['Do you want to make this dataset publicly available in the DUOS dataset catalog and able to receive data access requests under the assigned DAC above?']),
+
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          color: '#777',
+                        },
+                        id: 'checkGeneral',
+                        name: 'checkPrimary',
+                        value: 'general',
+                        defaultChecked: hmb,
+                        onClick: this.setHmb,
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
                       }),
-                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_publicAccess' },
-                        ['I would like this dataset to be made publicly available for data access requests via the DUOS Dataset Catalog'])
+
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          color: '#777',
+                        },
+                        id: 'checkGeneral',
+                        name: 'checkPrimary',
+                        value: 'general',
+                        defaultChecked: hmb,
+                        onClick: this.setHmb,
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
 
                   ]),
