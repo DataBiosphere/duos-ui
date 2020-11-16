@@ -204,7 +204,6 @@ class DataAccessRequestApplication extends Component {
   };
 
   formatOntologyItems = (ontologies) => {
-    // Filter null values. TODO: Possible bug in saving partial dars
     const ontologyItems = ontologies.map((ontology) => {
       return {
         id: ontology.id || ontology.item.id,

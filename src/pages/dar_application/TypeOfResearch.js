@@ -26,6 +26,8 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
   render() {
     const props = this.props;
     const ontologies = props.ontologies.map(ontology => {
+      //minor processing step to ensure id and key are on ontology so that AsyncSelect does not break
+      //done as a preventative measure for previously saved ontologies (prior to DUOS-718 PR)
       ontology.id = ontology.id || ontology.item.id;
       ontology.key = ontology.id;
       return ontology;
