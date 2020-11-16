@@ -159,7 +159,6 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.darCode = fp.isNil(formData.darCode) ? null : formData.darCode;
     formData.partialDarCode = fp.isNil(formData.partialDarCode) ? null : formData.partialDarCode;
-    formData.ontologies = this.formatOntologyItems(formData);
     formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
@@ -204,20 +203,18 @@ class DataAccessRequestApplication extends Component {
 
   };
 
-  formatOntologyItems = (formData) => {
-    let ontologyItems = [];
+  formatOntologyItems = (ontologies) => {
     // Filter null values. TODO: Possible bug in saving partial dars
-    let formDataOntologies = fp.pickBy(fp.identity)(formData.ontologies);
-    if (!fp.isNil(formDataOntologies) && !fp.isEmpty(formDataOntologies)) {
-      ontologyItems = fp.map((item) => {
-        return {
-          key: item.id,
-          value: item.id,
-          label: item.label,
-          item: item
-        };
-      })(formDataOntologies);
-    }
+    const ontologyItems = ontologies.map((ontology) => {
+      return {
+        id: ontology.id || ontology.item.id,
+        key: ontology.id || ontology.item.id,
+        value: ontology.id || ontology.item.id,
+        label: ontology.label || ontology.item.label,
+        definition: ontology.definition || ontology.item.definition,
+        item: ontology.item
+      };
+    });
     return ontologyItems;
   };
 
@@ -539,9 +536,10 @@ class DataAccessRequestApplication extends Component {
       const datasetIds = fp.map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
       const ontologies = fp.map((o) => ({
-        id: o.key,
-        label: o.value,
-        definition: o.item.definition
+        id: o.id || o.item.id,
+        label: o.label || o.item.label,
+        definition: o.definition || o.item.definition,
+        item: o.item
       }))(this.state.formData.ontologies);
       this.setState(prev => {
         prev.formData.datasetIds = datasetIds;
@@ -630,7 +628,7 @@ class DataAccessRequestApplication extends Component {
 
   onOntologiesChange = (data) => {
     this.setState(prev => {
-      prev.formData.ontologies = data;
+      prev.formData.ontologies = data || [];
       return prev;
     });
   };
@@ -678,7 +676,6 @@ class DataAccessRequestApplication extends Component {
       labCollaborators,
       internalCollaborators,
       externalCollaborators,
-      ontologies = [],
       signingOfficial = '',
       itDirector = '',
       cloudUse = false,
@@ -686,20 +683,21 @@ class DataAccessRequestApplication extends Component {
       anvilUse = false,
       cloudProvider = '',
       cloudProviderType = '',
-      cloudProviderDescription = ''
+      cloudProviderDescription = '',
     } = this.state.formData;
 
     const { dataRequestId } = this.props.match.params;
     const eRACommonsDestination = fp.isNil(dataRequestId) ? 'dar_application' : ('dar_application/' + dataRequestId);
     const { problemSavingRequest, showValidationMessages,  step1 } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
-
+    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const step1Invalid = this.step1InvalidResult(this.step1InvalidChecks());
     const step2Invalid = this.verifyStep2();
     const step3Invalid = this.step3InvalidResult();
 
     //NOTE: component is only here temporarily until component conversion has been complete
     //ideally this, along with the other variable initialization should be done with a useEffect hook
+
     const TORComponent = TypeOfResearch({
       hmb: hmb,
       hmbHandler: this.setHmb,
