@@ -11,7 +11,6 @@ import { PageHeading } from '../components/PageHeading';
 import { DAC, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
@@ -64,7 +63,7 @@ class DatasetRegistration extends Component {
         description: '',
         dac: '',
         consentId: '',
-        publicAccess: '',
+        publicAccess: false,
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -144,6 +143,7 @@ class DatasetRegistration extends Component {
     let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
     let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
     let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
+    let publicAccess = !dataset.needsApproval;
 
     this.setState(prev => {
       prev.datasetData.datasetName = name ? name.propertyValue : '';
@@ -156,6 +156,7 @@ class DatasetRegistration extends Component {
       prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.pi = pi ? pi.propertyValue : '';
+      prev.datasetData.publicAccess = publicAccess;
 
       return prev;
     });
@@ -391,10 +392,9 @@ class DatasetRegistration extends Component {
   isTypeOfResearchInvalid = () => {
     const valid = (
       this.state.formData.hmb === true ||
-      // this.state.formData.poa === true ||
-      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies))
-      // ||
-      // (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
+      this.state.formData.poa === true ||
+      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
+      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
     );
     return !valid;
   };
@@ -410,10 +410,7 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.formData.generalUse = true;
       prev.formData.hmb = false;
-      // prev.formData.poa = false;
       prev.formData.diseases = false;
-      // prev.formData.other = false;
-      // prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
@@ -423,36 +420,30 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.formData.generalUse = false;
       prev.formData.hmb = true;
-      // prev.formData.poa = false;
       prev.formData.diseases = false;
-      // prev.formData.other = false;
-      // prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
   };
 
-  // setPoa = () => {
-  //   this.setState(prev => {
-  //     prev.formData.generalUse = false;
-  //     prev.formData.hmb = false;
-  //     prev.formData.poa = true;
-  //     prev.formData.diseases = false;
-  //     prev.formData.other = false;
-  //     prev.formData.otherText = '';
-  //     prev.formData.ontologies = [];
-  //     return prev;
-  //   });
-  // };
+  setPoa = () => {
+    this.setState(prev => {
+      prev.formData.generalUse = false;
+      prev.formData.hmb = false;
+      prev.formData.poa = true;
+      prev.formData.diseases = false;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  };
 
   setDiseases = () => {
     this.setState(prev => {
       prev.formData.generalUse = false;
       prev.formData.hmb = false;
-      // prev.formData.poa = false;
       prev.formData.diseases = true;
-      // prev.formData.other = false;
-      // prev.formData.otherText = '';
       return prev;
     });
   };
@@ -464,17 +455,16 @@ class DatasetRegistration extends Component {
     });
   };
 
-  // setOther = () => {
-  //   this.setState(prev => {
-  //     prev.formData.generalUse = false;
-  //     prev.formData.hmb = false;
-  //     prev.formData.poa = false;
-  //     prev.formData.diseases = false;
-  //     prev.formData.other = true;
-  //     prev.formData.ontologies = [];
-  //     return prev;
-  //   });
-  // };
+  setOther = () => {
+    this.setState(prev => {
+      prev.formData.generalUse = false;
+      prev.formData.hmb = false;
+      prev.formData.diseases = false;
+      prev.formData.other = true;
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  };
 
   setOtherText = (e) => {
     const value = e.target.value;
@@ -555,6 +545,7 @@ class DatasetRegistration extends Component {
   };
 
   formatFormData = (data) => {
+    console.log(data);
     let result = {};
     result.datasetName = data.datasetName;
     result.consentId = data.consentId;
@@ -565,7 +556,7 @@ class DatasetRegistration extends Component {
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
-
+    console.log(result);
     return result;
   };
 
@@ -587,7 +578,7 @@ class DatasetRegistration extends Component {
       methods = false,
       generalUse = false
     } = this.state.formData;
-    const { publicAccess } = this.state.datasetData;
+    const { publicAccess = false } = this.state.datasetData;
     const { ontologies } = this.state;
 
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
@@ -1042,7 +1033,7 @@ class DatasetRegistration extends Component {
                               name: 'checkPrimary',
                               value: 'poa',
                               defaultChecked: false,
-                              // onClick: this.setPoa,
+                              onClick: this.setPoa,
                               label: 'Populations, Origins, Ancestry Use: ',
                               description: 'use is permitted exclusively for populations, origins, or ancestry research',
                               disabled: true,
