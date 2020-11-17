@@ -8,13 +8,12 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAC, DataSet } from '../libs/ajax';
+import {DAC, DAR, DataSet} from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 
-import './DataAccessRequestApplication.css';
-import AsyncSelect from "react-select/async/dist/react-select.esm";
+import AsyncSelect from 'react-select/async/dist/react-select.esm';
 
 class DatasetRegistration extends Component {
 
@@ -432,8 +431,6 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = false;
       prev.formData.poa = true;
       prev.formData.diseases = false;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
@@ -580,7 +577,7 @@ class DatasetRegistration extends Component {
     } = this.state.formData;
     const { publicAccess = false } = this.state.datasetData;
     const { ontologies } = this.state;
-
+    const { npoa } = !poa;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
@@ -1032,11 +1029,11 @@ class DatasetRegistration extends Component {
                               id: 'checkPoa',
                               name: 'checkPrimary',
                               value: 'poa',
-                              defaultChecked: false,
+                              defaultChecked: poa,
                               onClick: this.setPoa,
                               label: 'Populations, Origins, Ancestry Use: ',
                               description: 'use is permitted exclusively for populations, origins, or ancestry research',
-                              disabled: true,
+                              disabled: isUpdateDataset,
                             }),
 
                             RadioButton({
@@ -1047,11 +1044,11 @@ class DatasetRegistration extends Component {
                               id: 'checkOther',
                               name: 'checkPrimary',
                               value: 'other',
-                              defaultChecked: false,
+                              defaultChecked: other,
                               onClick: this.setOther,
                               label: 'Other Use:',
                               description: 'permitted research use is defined as follows: ',
-                              disabled: true,
+                              disabled: isUpdateDataset,
                             }),
 
                             textarea({
@@ -1061,11 +1058,10 @@ class DatasetRegistration extends Component {
                               name: 'otherText',
                               id: 'otherText',
                               maxLength: '512',
-                              rendered: other,
                               rows: '2',
                               required: other,
                               placeholder: 'Please specify if selected (max. 512 characters)',
-                              disabled: true,
+                              disabled: isUpdateDataset || !other,
                             }),
                           ]),
 
@@ -1247,7 +1243,7 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: poa,
+                                checked: npoa,
                                 onChange: this.handleCheckboxChange,
                                 id: 'checkNpoa',
                                 type: 'checkbox',
@@ -1314,7 +1310,7 @@ class DatasetRegistration extends Component {
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             textarea({
-                              value: this.state.datasetData.otherText,
+                              value: otherText,
                               onChange: this.setOtherText,
                               name: 'otherText',
                               id: 'inputOtherText',
@@ -1322,7 +1318,7 @@ class DatasetRegistration extends Component {
                               rows: '6',
                               required: false,
                               placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
-                              disabled: isUpdateDataset
+                              disabled: isUpdateDataset || !other
                             })
                           ]),
                       ]),
