@@ -50,7 +50,8 @@ class DatasetRegistration extends Component {
         ontologies: [],
         other: false,
         otherText: '',
-        pubRef: ''
+        pubRef: '',
+        generalUse: false
       },
       datasetData: {
         datasetName: '',
@@ -180,6 +181,7 @@ class DatasetRegistration extends Component {
     let diseases = dataUse.diseaseRestrictions;
     let other = !fp.isEmpty(dataUse.other);
     let otherText = dataUse.other;
+    let generalUse = dataUse.generalUse;
     // let pubRef = dataUse.pubRef;
 
     this.setState(prev => {
@@ -195,6 +197,7 @@ class DatasetRegistration extends Component {
       prev.formData.diseases = diseases;
       prev.formData.other = !fp.isEmpty(other);
       prev.formData.otherText = otherText;
+      prev.formData.generalUse = generalUse;
       return prev;
     });
   };
@@ -400,8 +403,29 @@ class DatasetRegistration extends Component {
     return !valid;
   };
 
+  setPublicAccess = (value) => {
+    this.setState(prev => {
+      prev.datasetData.publicAccess = value;
+      return prev;
+    });
+  }
+
+  setGeneralUse = () => {
+    this.setState(prev => {
+      prev.formData.generalUse = true;
+      prev.formData.hmb = false;
+      prev.formData.poa = false;
+      prev.formData.diseases = false;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  }
+
   setHmb = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = true;
       prev.formData.poa = false;
       prev.formData.diseases = false;
@@ -414,6 +438,7 @@ class DatasetRegistration extends Component {
 
   setPoa = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = false;
       prev.formData.poa = true;
       prev.formData.diseases = false;
@@ -426,6 +451,7 @@ class DatasetRegistration extends Component {
 
   setDiseases = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = false;
       prev.formData.poa = false;
       prev.formData.diseases = true;
@@ -444,6 +470,7 @@ class DatasetRegistration extends Component {
 
   setOther = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = false;
       prev.formData.poa = false;
       prev.formData.diseases = false;
@@ -548,7 +575,6 @@ class DatasetRegistration extends Component {
   render() {
 
     const {
-      publicAccess = false,
       hmb = false,
       poa = false,
       diseases = false,
@@ -562,8 +588,10 @@ class DatasetRegistration extends Component {
       geographic = false,
       moratorium = false,
       methods = false,
-      populationMigration = false
+      populationMigration = false,
+      generalUse = false
     } = this.state.formData;
+    const { publicAccess } = this.state.datasetData;
     const { ontologies } = this.state;
 
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
@@ -952,8 +980,8 @@ class DatasetRegistration extends Component {
                               id: 'checkGeneral',
                               name: 'checkPrimary',
                               value: 'general',
-                              defaultChecked: hmb,
-                              onClick: this.setHmb,
+                              defaultChecked: generalUse,
+                              onClick: this.setGeneralUse,
                               label: 'General Research Use: ',
                               description: 'use is permitted for any research purpose',
                               disabled: isUpdateDataset,
@@ -990,7 +1018,7 @@ class DatasetRegistration extends Component {
                             }),
 
                             textarea({
-                              // style: otherTextStyle,
+                              className: 'form-control',
                               value: ontologies,
                               onChange: this.setOtherText,
                               name: 'otherText',
@@ -1054,7 +1082,7 @@ class DatasetRegistration extends Component {
                             }),
 
                             textarea({
-                              // style: otherTextStyle,
+                              className: 'form-control',
                               value: otherText,
                               onChange: this.setOtherText,
                               name: 'otherText',
@@ -1371,7 +1399,7 @@ class DatasetRegistration extends Component {
 
                     // change the css for radio buttons (incl yes/no)
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'regular-radio rp-choice-questions', htmlFor: 'radio_publicAccess' },
+                      label({ className: 'control-label default-color' },
                         ['Do you want to make this dataset publicly available in the DUOS dataset catalog and able to receive data access requests under the assigned DAC above?']),
 
                       RadioButton({
@@ -1379,11 +1407,11 @@ class DatasetRegistration extends Component {
                           marginBottom: '2rem',
                           color: '#777',
                         },
-                        id: 'checkGeneral',
-                        name: 'checkPrimary',
-                        value: 'general',
-                        defaultChecked: hmb,
-                        onClick: this.setHmb,
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
                         label: 'Yes',
                         disabled: isUpdateDataset,
                       }),
@@ -1393,11 +1421,11 @@ class DatasetRegistration extends Component {
                           marginBottom: '2rem',
                           color: '#777',
                         },
-                        id: 'checkGeneral',
-                        name: 'checkPrimary',
-                        value: 'general',
-                        defaultChecked: hmb,
-                        onClick: this.setHmb,
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
                         label: 'No',
                         disabled: isUpdateDataset,
                       }),
