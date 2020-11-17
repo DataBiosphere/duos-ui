@@ -494,7 +494,8 @@ class DataAccessRequestApplication extends Component {
             const currentFileLocation = this.state.formData[currentFileLocationKey];
             //empty check on both to ensure that a file does exists for the DAR application
             return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile));
-          } else if(formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement') {
+            //if question is a checkbox acnkowledgement and the question is active, check to see if box was left unchecked
+          } else if((formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement') && value) {
             return !this.state.formData[formDataKey];            
           } else {
             return isNil(input);
