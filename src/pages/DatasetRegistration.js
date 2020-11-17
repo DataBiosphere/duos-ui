@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { RadioButton } from '../components/RadioButton';
 import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
-import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
@@ -13,7 +12,6 @@ import { DAC, DataSet } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
-import { DataUseTranslation } from '../libs/dataUseTranslation';
 import * as fp from 'lodash/fp';
 
 import './DataAccessRequestApplication.css';
@@ -66,7 +64,7 @@ class DatasetRegistration extends Component {
         description: '',
         dac: '',
         consentId: '',
-        publicAccess: ''
+        publicAccess: '',
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -166,9 +164,6 @@ class DatasetRegistration extends Component {
   };
 
   prefillDataUseFields(dataUse) {
-    console.log(dataUse);
-    console.log(DataUseTranslation.translateDarInfo(dataUse));
-    console.log(DataUseTranslation.translateDataUseRestrictions(dataUse));
     let methods = dataUse.methodsResearch;
     let genetics = dataUse.geneticStudiesOnly;
     let publication = dataUse.publicationResults;
@@ -396,9 +391,10 @@ class DatasetRegistration extends Component {
   isTypeOfResearchInvalid = () => {
     const valid = (
       this.state.formData.hmb === true ||
-      this.state.formData.poa === true ||
-      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
-      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
+      // this.state.formData.poa === true ||
+      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies))
+      // ||
+      // (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
     );
     return !valid;
   };
@@ -414,10 +410,10 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.formData.generalUse = true;
       prev.formData.hmb = false;
-      prev.formData.poa = false;
+      // prev.formData.poa = false;
       prev.formData.diseases = false;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
+      // prev.formData.other = false;
+      // prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
@@ -427,36 +423,36 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       prev.formData.generalUse = false;
       prev.formData.hmb = true;
-      prev.formData.poa = false;
+      // prev.formData.poa = false;
       prev.formData.diseases = false;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
+      // prev.formData.other = false;
+      // prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
   };
 
-  setPoa = () => {
-    this.setState(prev => {
-      prev.formData.generalUse = false;
-      prev.formData.hmb = false;
-      prev.formData.poa = true;
-      prev.formData.diseases = false;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
-      prev.formData.ontologies = [];
-      return prev;
-    });
-  };
+  // setPoa = () => {
+  //   this.setState(prev => {
+  //     prev.formData.generalUse = false;
+  //     prev.formData.hmb = false;
+  //     prev.formData.poa = true;
+  //     prev.formData.diseases = false;
+  //     prev.formData.other = false;
+  //     prev.formData.otherText = '';
+  //     prev.formData.ontologies = [];
+  //     return prev;
+  //   });
+  // };
 
   setDiseases = () => {
     this.setState(prev => {
       prev.formData.generalUse = false;
       prev.formData.hmb = false;
-      prev.formData.poa = false;
+      // prev.formData.poa = false;
       prev.formData.diseases = true;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
+      // prev.formData.other = false;
+      // prev.formData.otherText = '';
       return prev;
     });
   };
@@ -468,21 +464,22 @@ class DatasetRegistration extends Component {
     });
   };
 
-  setOther = () => {
-    this.setState(prev => {
-      prev.formData.generalUse = false;
-      prev.formData.hmb = false;
-      prev.formData.poa = false;
-      prev.formData.diseases = false;
-      prev.formData.other = true;
-      prev.formData.ontologies = [];
-      return prev;
-    });
-  };
+  // setOther = () => {
+  //   this.setState(prev => {
+  //     prev.formData.generalUse = false;
+  //     prev.formData.hmb = false;
+  //     prev.formData.poa = false;
+  //     prev.formData.diseases = false;
+  //     prev.formData.other = true;
+  //     prev.formData.ontologies = [];
+  //     return prev;
+  //   });
+  // };
 
   setOtherText = (e) => {
     const value = e.target.value;
     this.setState(prev => {
+      prev.formData.other = true;
       prev.formData.otherText = value;
       return prev;
     });
@@ -588,7 +585,6 @@ class DatasetRegistration extends Component {
       geographic = false,
       moratorium = false,
       methods = false,
-      populationMigration = false,
       generalUse = false
     } = this.state.formData;
     const { publicAccess } = this.state.datasetData;
@@ -1017,20 +1013,26 @@ class DatasetRegistration extends Component {
                               disabled: isUpdateDataset,
                             }),
 
-                            textarea({
-                              className: 'form-control',
-                              value: ontologies,
-                              onChange: this.setOtherText,
-                              name: 'otherText',
-                              id: 'otherText',
-                              maxLength: '512',
-                              rendered: diseases,
-                              rows: '2',
-                              required: other,
-                              placeholder: 'Please specify if selected (max. 512 characters)',
-                              disabled: isUpdateDataset || !other,
-                            }),
+                            div({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                                cursor: diseases ? 'pointer' : 'not-allowed',
+                              },
+                            }, [
+                              h(AsyncSelect, {
+                                id: 'sel_diseases',
+                                isDisabled: isUpdateDataset || !diseases,
+                                isMulti: true,
+                                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                onChange: (option) => this.onOntologiesChange(option),
+                                value: ontologies,
+                                placeholder: 'Please enter one or more diseases',
+                                classNamePrefix: 'select',
+                              }),
+                            ]),
 
+                            // disable primary use poa and other for now as they are duplicated in secondary use terms
                             RadioButton({
                               style: {
                                 marginBottom: '2rem',
@@ -1039,32 +1041,12 @@ class DatasetRegistration extends Component {
                               id: 'checkPoa',
                               name: 'checkPrimary',
                               value: 'poa',
-                              defaultChecked: poa,
-                              onClick: this.setPoa,
+                              defaultChecked: false,
+                              // onClick: this.setPoa,
                               label: 'Populations, Origins, Ancestry Use: ',
                               description: 'use is permitted exclusively for populations, origins, or ancestry research',
-                              disabled: isUpdateDataset,
+                              disabled: true,
                             }),
-
-                            // div({
-                            //   style: {
-                            //     marginBottom: '2rem',
-                            //     color: '#777',
-                            //     cursor: props.diseases ? 'pointer' : 'not-allowed',
-                            //   },
-                            // }, [
-                            //   h(AsyncSelect, {
-                            //     styles: ontologySelectionStyle,
-                            //     id: 'sel_diseases',
-                            //     isDisabled: !props.diseases,
-                            //     isMulti: true,
-                            //     loadOptions: (query, callback) => this.searchOntologies(query, callback),
-                            //     onChange: (option) => props.ontologiesHandler(option),
-                            //     value: props.ontologies,
-                            //     placeholder: 'Please enter one or more diseases',
-                            //     classNamePrefix: 'select',
-                            //   }),
-                            // ]),
 
                             RadioButton({
                               style: {
@@ -1074,11 +1056,11 @@ class DatasetRegistration extends Component {
                               id: 'checkOther',
                               name: 'checkPrimary',
                               value: 'other',
-                              defaultChecked: other,
+                              defaultChecked: false,
                               onClick: this.setOther,
                               label: 'Other Use:',
                               description: 'permitted research use is defined as follows: ',
-                              disabled: isUpdateDataset,
+                              disabled: true,
                             }),
 
                             textarea({
@@ -1092,23 +1074,8 @@ class DatasetRegistration extends Component {
                               rows: '2',
                               required: other,
                               placeholder: 'Please specify if selected (max. 512 characters)',
-                              disabled: isUpdateDataset || !other,
+                              disabled: true,
                             }),
-                            // TypeOfResearch({
-                            //   hmb: hmb,
-                            //   hmbHandler: this.setHmb,
-                            //   poa: poa,
-                            //   poaHandler: this.setPoa,
-                            //   diseases: diseases,
-                            //   diseasesHandler: this.setDiseases,
-                            //   disabled: isUpdateDataset,
-                            //   ontologies: ontologies,
-                            //   ontologiesHandler: this.onOntologiesChange,
-                            //   other: other,
-                            //   otherHandler: this.setOther,
-                            //   otherText: otherText,
-                            //   otherTextHandler: this.setOtherText
-                            // })
                           ]),
 
                         div({className: 'form-group'}, [
@@ -1289,17 +1256,17 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: populationMigration,
+                                checked: poa,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulationMigration',
+                                id: 'checkNpoa',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'populationMigration',
+                                name: 'poa',
                                 disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulationMigration',
+                                htmlFor: 'checkNpoa',
                               }, [
                                 span({ className: 'access-color'},
                                   ['No Populations Origins or Ancestry Research (NPOA)']),
@@ -1337,7 +1304,7 @@ class DatasetRegistration extends Component {
                               input({
                                 checked: other,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkOther',
+                                id: 'checkOtherSecondary',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'other',
@@ -1345,7 +1312,7 @@ class DatasetRegistration extends Component {
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkOther',
+                                htmlFor: 'checkOtherSecondary',
                               }, [
                                 span({ className: 'access-color'},
                                   ['Other Secondary Use Terms:']),
@@ -1356,10 +1323,10 @@ class DatasetRegistration extends Component {
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             textarea({
-                              value: this.state.formData.otherText,
-                              onChange: this.handleChange,
-                              name: 'other',
-                              id: 'inputOther',
+                              value: this.state.datasetData.otherText,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'inputOtherText',
                               className: 'form-control',
                               rows: '6',
                               required: false,
