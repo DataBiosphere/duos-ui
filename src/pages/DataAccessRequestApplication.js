@@ -496,7 +496,7 @@ class DataAccessRequestApplication extends Component {
             return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile));
             //if question is a checkbox acnkowledgement and the question is active, check to see if box was left unchecked
           } else if((formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement') && value) {
-            return !this.state.formData[formDataKey];            
+            return !this.state.formData[formDataKey];
           } else {
             return isNil(input);
           }
