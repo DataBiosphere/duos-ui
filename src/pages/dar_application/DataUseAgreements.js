@@ -65,7 +65,7 @@ export default function DataUseAgreements(props) {
 
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-              span ({ className: 'rp-agreement rp-last-group' }, ['Under the National Institutes of Health (NIH) Genomic Data Sharing Policy, the Genomic Data User Code of Conduct sets forth principles for responsible management and use of large-scale genomic data and associated phenotypic data accessed through controlled access to NIHdesignated data repositories (e.g., the database of Genotypes and Phenotypes (dbGaP), repositories established as NIH Trusted Partners). Failure to abide by any term within this Code of Conduct may result in revocation of approved access to datasets obtained through these repositories. Investigators who are approved to access data agree to:']),
+              span ({ className: 'rp-agreement rp-last-group' }, ['Under the National Institutes of Health (NIH) Genomic Data Sharing Policy, the Genomic Data User Code of Conduct sets forth principles for responsible management and use of large-scale genomic data and associated phenotypic data accessed through controlled access to NIH-designated data repositories (e.g., the database of Genotypes and Phenotypes (dbGaP), repositories established as NIH Trusted Partners). Failure to abide by any term within this Code of Conduct may result in revocation of approved access to datasets obtained through these repositories. Investigators who are approved to access data agree to:']),
 
               ol({ className: 'rp-agreement rp-last-group' }, [
                 li({}, ['Use datasets solely in connection with the research project described in the approved Data Access Request for each dataset']),
@@ -81,8 +81,10 @@ export default function DataUseAgreements(props) {
             div({ className: 'row no-margin' }, [
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 label({ className: 'control-label default-color' },
-                  ['Important: For your request to be reviewed, your Signing Official must authorize you by sending a signed Library Card data access agreement.'])
+                  ['Important: Your Signing Official must sign and send a Library Card Agreement authorizing your use prior to accesssing to data.']),
+                a({ href: '/home_signing_official', target: '_blank' }, '(Click here for detailed instructions for your Signing Official)'),
               ]),
+
 
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 a({
@@ -96,8 +98,7 @@ export default function DataUseAgreements(props) {
 
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 p({ className: 'rp-agreement' },
-                  ['By submitting this data access request, you agree to comply with all terms relevant to Authorized Users put forth in the agreement']),
-                a({ href: '/home_about', target: '_blank' }, '(Click here for detailed instructions for your Signing Official)')
+                  ['By submitting this data access request, you agree to all terms relevant to Authorized Users in the agreement']),
               ])
             ])
           ]),
