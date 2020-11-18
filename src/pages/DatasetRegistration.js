@@ -559,6 +559,11 @@ class DatasetRegistration extends Component {
 
   render() {
 
+    const controlLabelStyle = {
+      fontWeight: 500,
+      marginBottom: 0
+    }
+
     const {
       hmb = false,
       poa = false,
@@ -1020,7 +1025,6 @@ class DatasetRegistration extends Component {
                               }),
                             ]),
 
-                            // disable primary use poa and other for now as they are duplicated in secondary use terms
                             RadioButton({
                               style: {
                                 marginBottom: '2rem',
@@ -1337,7 +1341,7 @@ class DatasetRegistration extends Component {
 
                   div({ className: 'row no-margin' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label default-color' },
+                      label({ style: controlLabelStyle, className: 'default-color' },
                         ['By submitting this dataset registration, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.'])
                     ]),
 
@@ -1350,15 +1354,16 @@ class DatasetRegistration extends Component {
                         'DUOS Dataset Registration Agreement'
                       ])
                     ]),
+                  ]),
 
-                    // change the css for radio buttons (incl yes/no)
+                  div({ className: 'row no-margin' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label default-color' },
+                      label({ style: controlLabelStyle, className: 'default-color' },
                         ['Do you want to make this dataset publicly available in the DUOS dataset catalog and able to receive data access requests under the assigned DAC above?']),
 
                       RadioButton({
                         style: {
-                          marginBottom: '2rem',
+                          margin: '2rem',
                           color: '#777',
                         },
                         id: 'checkPublicAccess_yes',
@@ -1373,6 +1378,7 @@ class DatasetRegistration extends Component {
                       RadioButton({
                         style: {
                           marginBottom: '2rem',
+                          marginLeft: '2rem',
                           color: '#777',
                         },
                         id: 'checkPublicAccess_no',
@@ -1384,7 +1390,6 @@ class DatasetRegistration extends Component {
                         disabled: isUpdateDataset,
                       }),
                     ]),
-
                   ]),
 
                   div({ className: 'row no-margin' }, [
