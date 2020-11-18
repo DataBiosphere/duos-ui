@@ -560,7 +560,7 @@ class DatasetRegistration extends Component {
     const controlLabelStyle = {
       fontWeight: 500,
       marginBottom: 0
-    }
+    };
 
     const {
       hmb = false,
