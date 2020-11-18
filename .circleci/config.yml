@@ -67,7 +67,7 @@ commands:
         default: 'dev'
       namespace:
         type: string
-        default: 'duos-test' # REVERT 'duos' when testing is complete
+        default: 'duos'
       application_name:
         type: string
         default: 'duos'
@@ -218,7 +218,7 @@ workflows:
             - build-dev
           filters:
             branches:
-              only: DUOS-493 # REVERT from 'DUOS-493' to 'develop' when testing is complete
+              only: develop
       - build-staging:
           filters:
             tags:
