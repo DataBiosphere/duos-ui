@@ -46,7 +46,6 @@ class DatasetRegistration extends Component {
         ontologies: [],
         other: false,
         otherText: '',
-        pubRef: '',
         generalUse: false
       },
       datasetData: {
@@ -177,7 +176,6 @@ class DatasetRegistration extends Component {
     let other = !fp.isEmpty(dataUse.other);
     let otherText = dataUse.other;
     let generalUse = dataUse.generalUse;
-    // let pubRef = dataUse.pubRef;
 
     this.setState(prev => {
       prev.formData.methods = methods;
@@ -905,30 +903,6 @@ class DatasetRegistration extends Component {
                           isRendered: fp.isEmpty(this.state.datasetData.dac) && showValidationMessages,
                         },
                         ['Required field']),
-                      ])
-                  ]),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.10 Publication Reference',
-                        ]),
-                      ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'pubRef',
-                          id: 'inputPubRef',
-                          maxLength: '256',
-                          value: this.state.datasetData.pubRef,
-                          onChange: this.handleChange,
-                          className: 'form-control',
-                          required: false,
-                        })
                       ])
                   ]),
                 ]),
