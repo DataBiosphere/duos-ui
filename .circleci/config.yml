@@ -166,7 +166,7 @@ jobs:
       - deploy-env:
           sa_key_name: 'GCLOUD_DUOS_DEV'
           env: 'dev'
-          namespace: 'duos-test' # REVERT 'duos' when testing is complete
+          namespace: 'duos'
           application_name: 'duos'
           google_project: 'broad-duos-dev'
           google_zone: 'us-central1-a'
