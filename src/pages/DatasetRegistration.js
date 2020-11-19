@@ -116,7 +116,7 @@ class DatasetRegistration extends Component {
         if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
           this.setState(prev => {
             prev.problemLoadingUpdateDataset = true;
-          })
+          });
           this.props.history.push('/dataset_registration');
           ReactTooltip.rebuild();
         }
