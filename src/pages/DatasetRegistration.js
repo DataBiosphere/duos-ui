@@ -388,12 +388,29 @@ class DatasetRegistration extends Component {
 
   isTypeOfResearchInvalid = () => {
     const valid = (
+      this.state.formData.generalUse === true ||
       this.state.formData.hmb === true ||
       this.state.formData.poa === true ||
       (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
       (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
     );
     return !valid;
+  };
+
+  searchOntologies = (query, callback) => {
+    let options = [];
+    DAR.getAutoCompleteOT(query).then(
+      items => {
+        options = items.map(function(item) {
+          return {
+            key: item.id,
+            value: item.id,
+            label: item.label,
+            item: item,
+          };
+        });
+        callback(options);
+      });
   };
 
   setPublicAccess = (value) => {
@@ -445,7 +462,7 @@ class DatasetRegistration extends Component {
 
   onOntologiesChange = (data) => {
     this.setState(prev => {
-      prev.formData.ontologies = data;
+      prev.formData.ontologies = data || [];
       return prev;
     });
   };
@@ -540,7 +557,6 @@ class DatasetRegistration extends Component {
   };
 
   formatFormData = (data) => {
-    console.log(data);
     let result = {};
     result.datasetName = data.datasetName;
     result.consentId = data.consentId;
@@ -551,8 +567,21 @@ class DatasetRegistration extends Component {
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
-    console.log(result);
     return result;
+  };
+
+  formatOntologyItems = (ontologies) => {
+    const ontologyItems = ontologies.map((ontology) => {
+      return {
+        id: ontology.id || ontology.item.id,
+        key: ontology.id || ontology.item.id,
+        value: ontology.id || ontology.item.id,
+        label: ontology.label || ontology.item.label,
+        definition: ontology.definition || ontology.item.definition,
+        item: ontology.item
+      };
+    });
+    return ontologyItems;
   };
 
   render() {
@@ -579,7 +608,7 @@ class DatasetRegistration extends Component {
       generalUse = false
     } = this.state.formData;
     const { publicAccess = false } = this.state.datasetData;
-    const { ontologies } = this.state;
+    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const { npoa } = !poa;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
@@ -918,7 +947,6 @@ class DatasetRegistration extends Component {
                         '2.1 Primary Data Use Terms* ',
                         span({},
                           ['Please select one of the following data use permissions for your dataset.']),
-
                         div({
                           style: {'marginLeft': '15px'},
                           className: 'row'
@@ -979,7 +1007,6 @@ class DatasetRegistration extends Component {
                               description: 'use is permitted for research on the specified disease',
                               disabled: isUpdateDataset,
                             }),
-
                             div({
                               style: {
                                 marginBottom: '2rem',
