@@ -10,10 +10,10 @@ import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import {DAC, DAR, DataSet} from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
+import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
-
-import AsyncSelect from 'react-select/async/dist/react-select.esm';
+import AsyncSelect from 'react-select/async';
 
 class DatasetRegistration extends Component {
 
@@ -102,7 +102,12 @@ class DatasetRegistration extends Component {
     });
     if (!fp.isEmpty(this.state.updateDataset)) {
       this.prefillDatasetFields(this.state.updateDataset);
-    }
+      const ontologies = await this.getOntologies(this.state.formData.diseases);
+      this.setState(prev => {
+        prev.formData.ontologies = ontologies;
+        return prev;
+      });
+    };
   };
 
   async init() {
@@ -160,6 +165,19 @@ class DatasetRegistration extends Component {
     });
 
     this.prefillDataUseFields(dataset.dataUse);
+  };
+
+  async getOntologies(urls) {
+    if (fp.isEmpty(urls)) {
+      return [];
+    }
+    else {
+      let ontologies = await Promise.all(
+        urls.map(url => searchOntology(url)
+          .then(data => { return data; })
+        ));
+      return ontologies;
+    }
   };
 
   prefillDataUseFields(dataUse) {
@@ -570,20 +588,6 @@ class DatasetRegistration extends Component {
     return result;
   };
 
-  formatOntologyItems = (ontologies) => {
-    const ontologyItems = ontologies.map((ontology) => {
-      return {
-        id: ontology.id || ontology.item.id,
-        key: ontology.id || ontology.item.id,
-        value: ontology.id || ontology.item.id,
-        label: ontology.label || ontology.item.label,
-        definition: ontology.definition || ontology.item.definition,
-        item: ontology.item
-      };
-    });
-    return ontologyItems;
-  };
-
   render() {
 
     const controlLabelStyle = {
@@ -605,10 +609,10 @@ class DatasetRegistration extends Component {
       geographic = false,
       moratorium = false,
       methods = false,
-      generalUse = false
+      generalUse = false,
+      ontologies
     } = this.state.formData;
     const { publicAccess = false } = this.state.datasetData;
-    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const { npoa } = !poa;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
@@ -943,7 +947,7 @@ class DatasetRegistration extends Component {
                   div(
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
-                      label({className: 'control-label rp-title-question dataset-color'}, [
+                      span({className: 'control-label rp-title-question dataset-color'}, [
                         '2.1 Primary Data Use Terms* ',
                         span({},
                           ['Please select one of the following data use permissions for your dataset.']),
