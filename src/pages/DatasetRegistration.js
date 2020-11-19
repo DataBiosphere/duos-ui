@@ -588,6 +588,20 @@ class DatasetRegistration extends Component {
     return result;
   };
 
+  formatOntologyItems = (ontologies) => {
+    const ontologyItems = ontologies.map((ontology) => {
+      return {
+        id: ontology.id || ontology.item.id,
+        key: ontology.id || ontology.item.id,
+        value: ontology.id || ontology.item.id,
+        label: ontology.label || ontology.item.label,
+        definition: ontology.definition || ontology.item.definition,
+        item: ontology || ontology.item
+      };
+    });
+    return ontologyItems;
+  };
+
   render() {
 
     const controlLabelStyle = {
@@ -610,8 +624,8 @@ class DatasetRegistration extends Component {
       moratorium = false,
       methods = false,
       generalUse = false,
-      ontologies
     } = this.state.formData;
+    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const { publicAccess = false } = this.state.datasetData;
     const { npoa } = !poa;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
