@@ -140,8 +140,8 @@ export const Consent = {
 
 export const DAC = {
 
-  list: async () => {
-    const url = `${await Config.getApiUrl()}/dac`;
+  list: async (withUsers) => {
+    const url = `${await Config.getApiUrl()}/dac` + (fp.isEmpty(withUsers) ? '' : `?withUsers=${withUsers}`);
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
