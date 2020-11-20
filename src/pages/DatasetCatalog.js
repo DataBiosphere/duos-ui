@@ -265,7 +265,6 @@ class DatasetCatalog extends Component {
   };
 
   dialogHandlerEdit = (answer) => (e) => {
-    console.log(answer);
     this.setState({ disableOkButton: true });
     if (answer) {
       this.setState(prev => {
