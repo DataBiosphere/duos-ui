@@ -42,6 +42,7 @@ import ReviewedCases from './pages/ReviewedCases';
 import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
+import HomeResearcherInfo from "./pages/HomeResearcherInfo";
 
 
 const Routes = (props) => (
@@ -53,6 +54,7 @@ const Routes = (props) => (
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />
     <Route path="/home_dac_info" component={HomeDacInfo} />
+    <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
     <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
@@ -73,6 +75,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />

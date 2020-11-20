@@ -25,6 +25,13 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
   render() {
     const props = this.props;
+    const ontologies = props.ontologies.map(ontology => {
+      //minor processing step to ensure id and key are on ontology so that AsyncSelect does not break
+      //done as a preventative measure for previously saved ontologies (prior to DUOS-718 PR)
+      ontology.id = ontology.id || ontology.item.id;
+      ontology.key = ontology.id;
+      return ontology;
+    });
     let otherTextStyle = {
       borderRadius: 4,
       boxShadow: 'inset 0 1px 1px rgba(0,0,0,.075)',
@@ -121,7 +128,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
               isMulti: true,
               loadOptions: (query, callback) => this.searchOntologies(query, callback),
               onChange: (option) => props.ontologiesHandler(option),
-              value: props.ontologies,
+              value: ontologies,
               placeholder: 'Please enter one or more diseases',
               classNamePrefix: 'select',
             }),

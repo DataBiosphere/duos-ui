@@ -1,6 +1,6 @@
 import { Component } from 'react';
+import { RadioButton } from '../components/RadioButton';
 import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
-import Mailto from 'react-protected-mailto';
 import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
@@ -8,13 +8,12 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAC, DataSet } from '../libs/ajax';
+import {DAC, DAR, DataSet} from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
+import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
-import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
-
-import './DataAccessRequestApplication.css';
+import AsyncSelect from 'react-select/async';
 
 class DatasetRegistration extends Component {
 
@@ -25,6 +24,7 @@ class DatasetRegistration extends Component {
       selectedDac: {},
       allDatasets: '',
       allDatasetNames: [],
+      updateDataset: {},
       nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
@@ -46,7 +46,7 @@ class DatasetRegistration extends Component {
         ontologies: [],
         other: false,
         otherText: '',
-        pubRef: '',
+        generalUse: false
       },
       datasetData: {
         datasetName: '',
@@ -61,10 +61,10 @@ class DatasetRegistration extends Component {
         description: '',
         dac: '',
         consentId: '',
-        publicAccess: '',
-        rus: ''
+        publicAccess: false,
       },
       problemSavingRequest: false,
+      problemLoadingUpdateDataset: false,
       submissionSuccess: false,
       errorMessage: ''
     };
@@ -83,8 +83,7 @@ class DatasetRegistration extends Component {
   };
 
   async componentDidMount() {
-    this.props.history.push('/dataset_registration');
-    ReactTooltip.rebuild();
+    await this.init();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     const currentUser = await Storage.getCurrentUser();
     const allDatasets =  await DataSet.findDataSets(currentUser.dacUserId);
@@ -99,6 +98,117 @@ class DatasetRegistration extends Component {
       prev.allDatasets = allDatasets;
       prev.allDatasetNames = allDatasetNames;
       prev.dacList = dacs;
+      return prev;
+    });
+    if (!fp.isEmpty(this.state.updateDataset)) {
+      this.prefillDatasetFields(this.state.updateDataset);
+      const ontologies = await this.getOntologies(this.state.formData.diseases);
+      this.setState(prev => {
+        prev.formData.ontologies = ontologies;
+        return prev;
+      });
+    };
+  };
+
+  async init() {
+    const { datasetId } = this.props.match.params;
+    let updateDataset = {};
+    // update dataset case
+    if (!fp.isNil(datasetId)) {
+      DataSet.getDataSetsByDatasetId(datasetId).then(data => {
+        updateDataset = data;
+        // redirect to blank form if dataset id is invalid or inaccessible
+        if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
+          this.setState(prev => {
+            prev.problemLoadingUpdateDataset = true;
+          });
+          this.props.history.push('/dataset_registration');
+          ReactTooltip.rebuild();
+        }
+        else {
+          this.setState(prev => {
+            prev.updateDataset = updateDataset;
+          });
+        }
+      });
+    }
+  };
+
+  // fill out the form fields with old dataset properties if they already exist
+  prefillDatasetFields(dataset) {
+    let name = fp.find({propertyName: "Dataset Name"})(dataset.properties);
+    let collectionId = fp.find({propertyName: "Sample Collection ID"})(dataset.properties);
+    let dataType = fp.find({propertyName: "Data Type"})(dataset.properties);
+    let species = fp.find({propertyName: "Species"})(dataset.properties);
+    let phenotype = fp.find({propertyName: "Phenotype/Indication"})(dataset.properties);
+    let nrParticipants = fp.find({propertyName: "# of participants"})(dataset.properties);
+    let description = fp.find({propertyName: "Description"})(dataset.properties);
+    let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
+    let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
+    let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
+    let publicAccess = !dataset.needsApproval;
+
+    this.setState(prev => {
+      prev.datasetData.datasetName = name ? name.propertyValue : '';
+      prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
+      prev.datasetData.dataType = dataType ? dataType.propertyValue : '';
+      prev.datasetData.species = species ? species.propertyValue : '';
+      prev.datasetData.phenotype = phenotype ? phenotype.propertyValue : '';
+      prev.datasetData.nrParticipants = nrParticipants ? nrParticipants.propertyValue : '';
+      prev.datasetData.description = description ? description.propertyValue : '';
+      prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
+      prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
+      prev.datasetData.pi = pi ? pi.propertyValue : '';
+      prev.datasetData.publicAccess = publicAccess;
+
+      return prev;
+    });
+
+    this.prefillDataUseFields(dataset.dataUse);
+  };
+
+  async getOntologies(urls) {
+    if (fp.isEmpty(urls)) {
+      return [];
+    }
+    else {
+      let ontologies = await Promise.all(
+        urls.map(url => searchOntology(url)
+          .then(data => { return data; })
+        ));
+      return ontologies;
+    }
+  };
+
+  prefillDataUseFields(dataUse) {
+    let methods = dataUse.methodsResearch;
+    let genetics = dataUse.geneticStudiesOnly;
+    let publication = dataUse.publicationResults;
+    let collaboration = dataUse.collaboratorRequired;
+    let ethics = dataUse.ethicsApprovalRequired;
+    let geographic = dataUse.geographicalRestrictions;
+    let forProfit = !dataUse.commercialUse;
+    let hmb = dataUse.hmbResearch;
+    let poa = dataUse.populationOriginsAncestry;
+    let diseases = dataUse.diseaseRestrictions;
+    let other = !fp.isEmpty(dataUse.other);
+    let otherText = dataUse.other;
+    let generalUse = dataUse.generalUse;
+
+    this.setState(prev => {
+      prev.formData.methods = methods;
+      prev.formData.genetic = genetics;
+      prev.formData.publication = publication;
+      prev.formData.collaboration = collaboration;
+      prev.formData.ethics = ethics;
+      prev.formData.geographic = geographic;
+      prev.formData.forProfit = forProfit;
+      prev.formData.hmb = hmb;
+      prev.formData.poa = poa;
+      prev.formData.diseases = diseases;
+      prev.formData.other = !fp.isEmpty(other);
+      prev.formData.otherText = otherText;
+      prev.formData.generalUse = generalUse;
       return prev;
     });
   };
@@ -163,15 +273,36 @@ class DatasetRegistration extends Component {
   };
 
   validateDatasetName(name) {
+    let oldDataset = this.state.updateDataset;
     let datasets = this.state.allDatasetNames;
-    let val = !fp.contains(name, datasets);
-    return val;
+    // create dataset case
+    if (fp.isEmpty(oldDataset)) {
+      return !fp.contains(name, datasets);
+    }
+    // update dataset case (include old dataset name as valid)
+    else {
+      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
+
+      return (name === updateDatasetName || !fp.contains(name, datasets));
+    }
   };
 
   showDatasetNameErrors(name, showValidationMessages) {
     if (fp.isEmpty(name)) {
       return showValidationMessages ? 'form-control required-field-error' : 'form-control';
     }
+    // if there is a name loaded in because this is an update
+    if (!fp.isEmpty(this.state.updateDataset)) {
+      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
+      if (name === updateDatasetName) {
+        return 'form-control';
+      }
+      // if the old dataset name has been edited
+      else {
+        return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
+      }
+    }
+    // if a new dataset name is being edited
     else {
       return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
     }
@@ -182,10 +313,12 @@ class DatasetRegistration extends Component {
       let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
         prev.showDialogSubmit = true;
+        prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = false;
       }
       else {
         prev.showDialogSubmit = false;
+        prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = true;
       }
       return prev;
@@ -210,7 +343,7 @@ class DatasetRegistration extends Component {
         if (ontologies.length > 0) {
           prev.formData.ontologies = ontologies;
         }
-        for (var key in prev.datasetData) {
+        for (let key in prev.datasetData) {
           if (prev.datasetData[key] === '') {
             prev.datasetData[key] = undefined;
           }
@@ -228,21 +361,38 @@ class DatasetRegistration extends Component {
         }
         else {
           let ds = this.formatFormData(formData);
-          DataSet.postDatasetForm(ds).then(resp => {
-            this.setState({ showDialogSubmit: false, submissionSuccess: true });
-            this.props.history.push('dataset_registration');
-          }).catch(e => {
-            let errorMessage = (e.status === 409) ?
-              'Dataset with this name already exists: ' + this.state.datasetData.datasetName
+          if (fp.isEmpty(this.state.updateDataset)) {
+            DataSet.postDatasetForm(ds).then(resp => {
+              this.setState({ showDialogSubmit: false, submissionSuccess: true });
+              ReactTooltip.rebuild();
+            }).catch(e => {
+              let errorMessage = (e.status === 409) ?
+                'Dataset with this name already exists: ' + this.state.datasetData.datasetName
               + '. Please choose a different name before attempting to submit again.'
-              : 'Some errors occurred, Dataset Registration couldn\'t be completed.';
-            this.setState(prev => {
-              prev.problemSavingRequest = true;
-              prev.submissionSuccess = false;
-              prev.errorMessage = errorMessage;
-              return prev;
+                : 'Some errors occurred, Dataset Registration couldn\'t be completed.';
+              this.setState(prev => {
+                prev.problemSavingRequest = true;
+                prev.submissionSuccess = false;
+                prev.errorMessage = errorMessage;
+                return prev;
+              });
             });
-          });
+          }
+          else {
+            const { datasetId } = this.props.match.params;
+            DataSet.updateDataset(datasetId, ds).then(resp => {
+              this.setState({ showDialogSubmit: false, submissionSuccess: true });
+              ReactTooltip.rebuild();
+            }).catch(e => {
+              let errorMessage = 'Some errors occurred, the Dataset was not updated.';
+              this.setState(prev => {
+                prev.problemSavingRequest = true;
+                prev.submissionSuccess = false;
+                prev.errorMessage = errorMessage;
+                return prev;
+              });
+            });
+          }
         }
       });
     } else {
@@ -256,6 +406,7 @@ class DatasetRegistration extends Component {
 
   isTypeOfResearchInvalid = () => {
     const valid = (
+      this.state.formData.generalUse === true ||
       this.state.formData.hmb === true ||
       this.state.formData.poa === true ||
       (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
@@ -264,13 +415,44 @@ class DatasetRegistration extends Component {
     return !valid;
   };
 
+  searchOntologies = (query, callback) => {
+    let options = [];
+    DAR.getAutoCompleteOT(query).then(
+      items => {
+        options = items.map(function(item) {
+          return {
+            key: item.id,
+            value: item.id,
+            label: item.label,
+            item: item,
+          };
+        });
+        callback(options);
+      });
+  };
+
+  setPublicAccess = (value) => {
+    this.setState(prev => {
+      prev.datasetData.publicAccess = value;
+      return prev;
+    });
+  }
+
+  setGeneralUse = () => {
+    this.setState(prev => {
+      prev.formData.generalUse = true;
+      prev.formData.hmb = false;
+      prev.formData.diseases = false;
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  }
+
   setHmb = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = true;
-      prev.formData.poa = false;
       prev.formData.diseases = false;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
@@ -278,11 +460,10 @@ class DatasetRegistration extends Component {
 
   setPoa = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = false;
       prev.formData.poa = true;
       prev.formData.diseases = false;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
       prev.formData.ontologies = [];
       return prev;
     });
@@ -290,26 +471,24 @@ class DatasetRegistration extends Component {
 
   setDiseases = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = false;
-      prev.formData.poa = false;
       prev.formData.diseases = true;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
       return prev;
     });
   };
 
   onOntologiesChange = (data) => {
     this.setState(prev => {
-      prev.formData.ontologies = data;
+      prev.formData.ontologies = data || [];
       return prev;
     });
   };
 
   setOther = () => {
     this.setState(prev => {
+      prev.formData.generalUse = false;
       prev.formData.hmb = false;
-      prev.formData.poa = false;
       prev.formData.diseases = false;
       prev.formData.other = true;
       prev.formData.ontologies = [];
@@ -320,6 +499,7 @@ class DatasetRegistration extends Component {
   setOtherText = (e) => {
     const value = e.target.value;
     this.setState(prev => {
+      prev.formData.other = true;
       prev.formData.otherText = value;
       return prev;
     });
@@ -388,6 +568,7 @@ class DatasetRegistration extends Component {
         prev.datasetData['dac'] = option.label;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
+        prev.problemLoadingUpdateDataset = false;
       }
       return prev;
     });
@@ -404,14 +585,31 @@ class DatasetRegistration extends Component {
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
-
     return result;
+  };
+
+  formatOntologyItems = (ontologies) => {
+    const ontologyItems = ontologies.map((ontology) => {
+      return {
+        id: ontology.id || ontology.item.id,
+        key: ontology.id || ontology.item.id,
+        value: ontology.id || ontology.item.id,
+        label: ontology.label || ontology.item.label,
+        definition: ontology.definition || ontology.item.definition,
+        item: ontology || ontology.item
+      };
+    });
+    return ontologyItems;
   };
 
   render() {
 
+    const controlLabelStyle = {
+      fontWeight: 500,
+      marginBottom: 0
+    };
+
     const {
-      publicAccess = false,
       hmb = false,
       poa = false,
       diseases = false,
@@ -425,12 +623,14 @@ class DatasetRegistration extends Component {
       geographic = false,
       moratorium = false,
       methods = false,
-      populationMigration = false
+      generalUse = false,
     } = this.state.formData;
-    const { ontologies } = this.state;
-
-    const { problemSavingRequest, showValidationMessages, submissionSuccess } = this.state;
+    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+    const { publicAccess = false } = this.state.datasetData;
+    const { npoa } = !poa;
+    const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
+    const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
     // NOTE: set this to always false for now to submit dataset without consent info
     // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
@@ -467,7 +667,12 @@ class DatasetRegistration extends Component {
                   div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
                     Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
                   ]),
-
+                  div({ isRendered: problemLoadingUpdateDataset, className: 'rp-alert' }, [
+                    Alert({
+                      id: 'problemLoadingUpdateDataset', type: 'danger',
+                      title: "The Dataset you were trying to access either does not exist or you do not have permission to edit it."
+                    })
+                  ]),
                   h3({ className: 'rp-form-title dataset-color' }, ['1. Dataset Information']),
 
                   div({ className: 'form-group' }, [
@@ -516,8 +721,7 @@ class DatasetRegistration extends Component {
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: (fp.isEmpty(this.state.datasetData.datasetName) && showValidationMessages)
-                            || (!fp.isEmpty(this.state.datasetData.datasetName) && !this.validateDatasetName(this.state.datasetData.datasetName)),
+                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
                         },
                         [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
                       ])
@@ -748,30 +952,6 @@ class DatasetRegistration extends Component {
                         ['Required field']),
                       ])
                   ]),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.10 Publication Reference',
-                        ]),
-                      ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'pubRef',
-                          id: 'inputPubRef',
-                          maxLength: '256',
-                          value: this.state.datasetData.pubRef,
-                          onChange: this.handleChange,
-                          className: 'form-control',
-                          required: false,
-                        })
-                      ])
-                  ]),
                 ]),
 
 
@@ -781,11 +961,10 @@ class DatasetRegistration extends Component {
                   div(
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
-                      label({className: 'control-label rp-title-question dataset-color'}, [
+                      span({className: 'control-label rp-title-question dataset-color'}, [
                         '2.1 Primary Data Use Terms* ',
                         span({},
-                          ['Please select one of the following options.']),
-
+                          ['Please select one of the following data use permissions for your dataset.']),
                         div({
                           style: {'marginLeft': '15px'},
                           className: 'row'
@@ -802,21 +981,111 @@ class DatasetRegistration extends Component {
                         div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
-                            TypeOfResearch({
-                              hmb: hmb,
-                              hmbHandler: this.setHmb,
-                              poa: poa,
-                              poaHandler: this.setPoa,
-                              diseases: diseases,
-                              diseasesHandler: this.setDiseases,
-                              disabled: true,
-                              ontologies: ontologies,
-                              ontologiesHandler: this.onOntologiesChange,
-                              other: other,
-                              otherHandler: this.setOther,
-                              otherText: otherText,
-                              otherTextHandler: this.setOtherText
-                            })
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkGeneral',
+                              name: 'checkPrimary',
+                              value: 'general',
+                              defaultChecked: generalUse,
+                              onClick: this.setGeneralUse,
+                              label: 'General Research Use: ',
+                              description: 'use is permitted for any research purpose',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkHmb',
+                              name: 'checkPrimary',
+                              value: 'hmb',
+                              defaultChecked: hmb,
+                              onClick: this.setHmb,
+                              label: 'Health/Medical/Biomedical Use: ',
+                              description: 'use is permitted for any health, medical, or biomedical purpose',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkDisease',
+                              name: 'checkPrimary',
+                              value: 'diseases',
+                              defaultChecked: diseases,
+                              onClick: this.setDiseases,
+                              label: 'Disease-related studies: ',
+                              description: 'use is permitted for research on the specified disease',
+                              disabled: isUpdateDataset,
+                            }),
+                            div({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                                cursor: diseases ? 'pointer' : 'not-allowed',
+                              },
+                            }, [
+                              h(AsyncSelect, {
+                                id: 'sel_diseases',
+                                isDisabled: isUpdateDataset || !diseases,
+                                isMulti: true,
+                                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                onChange: (option) => this.onOntologiesChange(option),
+                                value: ontologies,
+                                placeholder: 'Please enter one or more diseases',
+                                classNamePrefix: 'select',
+                              }),
+                            ]),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkPoa',
+                              name: 'checkPrimary',
+                              value: 'poa',
+                              defaultChecked: poa,
+                              onClick: this.setPoa,
+                              label: 'Populations, Origins, Ancestry Use: ',
+                              description: 'use is permitted exclusively for populations, origins, or ancestry research',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: '#777',
+                              },
+                              id: 'checkOther',
+                              name: 'checkPrimary',
+                              value: 'other',
+                              defaultChecked: other,
+                              onClick: this.setOther,
+                              label: 'Other Use:',
+                              description: 'permitted research use is defined as follows: ',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            textarea({
+                              className: 'form-control',
+                              value: otherText,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'otherText',
+                              maxLength: '512',
+                              rows: '2',
+                              required: other,
+                              placeholder: 'Please specify if selected (max. 512 characters)',
+                              disabled: isUpdateDataset || !other,
+                            }),
                           ]),
 
                         div({className: 'form-group'}, [
@@ -825,8 +1094,8 @@ class DatasetRegistration extends Component {
                             [
                               label({className: 'control-label rp-title-question dataset-color'},
                                 [
-                                  '2.4 Secondary Data Use Terms',
-                                  span({}, ['Select all applicable options.']),
+                                  '2.2 Secondary Data Use Terms',
+                                  span({}, ['Please select all applicable data use parameters.']),
                                 ]),
                             ]),
                         ]),
@@ -842,14 +1111,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'methods',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkMethods',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.1 No methods development or validation studies (NMDS):']),
-                                'Use for methods development research (e.g., development of software or algorithms) is only permissible within the bounds of other use limitations.',
+                                  ['No methods development or validation studies (NMDS)']),
                               ]),
                             ]),
                           ]),
@@ -865,14 +1134,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'genetic',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkGenetic',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.2 Genetic Studies Only (GSO):']),
-                                'Use is limited to genetic studies only.',
+                                  ['Genetic Studies Only (GSO)']),
                               ]),
                             ]),
                           ]),
@@ -888,14 +1157,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'publication',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkPublication',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.3 Publication Required (PUB):']),
-                                'Approved users are required to make results of studies using the data available to the larger scientific community.',
+                                  ['Publication Required (PUB)']),
                               ]),
                             ]),
                           ]),
@@ -911,14 +1180,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'collaboration',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkCollaboration',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.4 Collaboration Required (COL):']),
-                                'Approved users are required to collaborate with the primary study investigators.',
+                                  ['Collaboration Required (COL)']),
                               ]),
                             ]),
                           ]),
@@ -934,14 +1203,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'ethics',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkEthics',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.5 Ethics Approval Required (IRB):']),
-                                'Approved users are required to provide documentation of local IRB/REB approval.',
+                                  ['Ethics Approval Required (IRB)']),
                               ]),
                             ]),
                           ]),
@@ -957,14 +1226,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'geographic',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkGeographic',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.6 Geographic Restriction (GS-):']),
-                                'Use limited to be within the specified geographic area.',
+                                  ['Geographic Restriction (GS-)']),
                               ]),
                             ]),
                           ]),
@@ -980,14 +1249,14 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'moratorium',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkMoratorium',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.7 Publication Moratorium (MOR):']),
-                                'Approved users are required to withhold from publishing until the specified date.',
+                                  ['Publication Moratorium (MOR)']),
                               ]),
                             ]),
                           ]),
@@ -997,20 +1266,20 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: populationMigration,
+                                checked: npoa,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkPopulationMigration',
+                                id: 'checkNpoa',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'populationMigration',
+                                name: 'poa',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkPopulationMigration',
+                                htmlFor: 'checkNpoa',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.8 No Populations Origins or Ancestry Research (NPOA):']),
-                                'Use for Populations, Origins, or Ancestry Research is prohibited.',
+                                  ['No Populations Origins or Ancestry Research (NPOA)']),
                               ]),
                             ]),
                           ]),
@@ -1026,49 +1295,57 @@ class DatasetRegistration extends Component {
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
                                 name: 'forProfit',
+                                disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
                                 htmlFor: 'checkForProfit',
                               }, [
                                 span({ className: 'access-color'},
-                                  ['2.4.9 Non-Profit Use Only (NPU):']),
-                                'The data cannot be used by for-profit organizations nor for commercial research purposes.',
+                                  ['Non-Profit Use Only (NPU)']),
                               ]),
                             ]),
                           ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: other,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkOtherSecondary',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'other',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkOtherSecondary',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Other Secondary Use Terms:']),
+                              ]),
+                            ]),
+                          ]),
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            textarea({
+                              value: otherText,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'inputOtherText',
+                              className: 'form-control',
+                              rows: '6',
+                              required: false,
+                              placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
+                              disabled: isUpdateDataset || !other
+                            })
+                          ]),
                       ]),
                     ]),
-
-                  div({className: 'form-group'}, [
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        label({className: 'control-label rp-title-question dataset-color'}, [
-                          '2.5 Other Data Use Terms ',
-                          span({}, [
-                            'If there are additional data use terms governing the future use of this dataset, please include them here.',
-                            br(),
-                            'Note, terms entered below will not be able to be structured with the Data Use Ontology, which facilitates downstream access management. Please only enter additional terms below if you are certain they should govern all future data access requests. If you have questions, please reach out to the DUOS support team ',
-                            span( [h(Mailto, { email: 'duos-support@broadinstitute.zendesk.com' })]),
-                          ]),
-                        ]),
-                      ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        textarea({
-                          value: this.state.datasetData.rus,
-                          onChange: this.handleChange,
-                          name: 'rus',
-                          id: 'inputRUS',
-                          className: 'form-control',
-                          rows: '6',
-                          required: false,
-                          placeholder: 'Please limit your other data use terms to 1100 characters.',
-                        })
-                      ]),
-                  ]),
                 ]),
 
 
@@ -1083,33 +1360,55 @@ class DatasetRegistration extends Component {
 
                   div({ className: 'row no-margin' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label default-color' },
+                      label({ style: controlLabelStyle, className: 'default-color' },
                         ['By submitting this dataset registration, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.'])
                     ]),
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       a({
-                        id: 'link_downloadAgreement', href: '/duos_librarycardagreementtemplate_rev_2020-04-14.pdf', target: '_blank',
+                        id: 'link_downloadAgreement', href: '/DUOSLibraryCardAgreement_10.14.2020.pdf', target: '_blank',
                         className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                       }, [
                         span({ className: 'glyphicon glyphicon-download' }),
                         'DUOS Dataset Registration Agreement'
                       ])
                     ]),
+                  ]),
 
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
-                      input({
-                        type: 'checkbox',
-                        id: 'chk_publicAccess',
-                        name: 'publicAccess',
-                        className: 'checkbox-inline rp-checkbox',
-                        checked: publicAccess,
-                        onChange: this.handleCheckboxChange
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                      label({ style: controlLabelStyle, className: 'default-color' },
+                        ['Do you want to make this dataset publicly available in the DUOS dataset catalog and able to receive data access requests under the assigned DAC above?']),
+
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: '#777',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
                       }),
-                      label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_publicAccess' },
-                        ['I would like this dataset to be made publicly available for data access requests via the DUOS Dataset Catalog'])
-                    ]),
 
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: '#777',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
+                    ]),
                   ]),
 
                   div({ className: 'row no-margin' }, [
@@ -1127,7 +1426,7 @@ class DatasetRegistration extends Component {
                     div({ isRendered: submissionSuccess, className: 'rp-alert' }, [
                       Alert({
                         id: 'submissionSuccess', type: 'info',
-                        title: 'Dataset was successfully registered.'
+                        title: isUpdateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
                       })
                     ]),
 
@@ -1137,7 +1436,7 @@ class DatasetRegistration extends Component {
                         a({
                           id: 'btn_submit', onClick: this.attestAndSave,
                           className: 'f-right btn-primary dataset-background bold'
-                        }, ['Register in DUOS!']),
+                        }, [isUpdateDataset ? 'Update Dataset' : 'Register in DUOS!']),
 
                         ConfirmationDialog({
                           title: 'Dataset Registration Confirmation', disableOkBtn: this.state.disableOkBtn,

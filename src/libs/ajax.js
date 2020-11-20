@@ -262,6 +262,7 @@ export const DAR = {
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
+    darInfo.restrictions = rawDar.restrictions;
 
     darInfo.hasAdminComment = researcher.rationale != null;
     darInfo.adminComment = researcher.rationale;
@@ -486,6 +487,12 @@ export const DataSet = {
     const url = `${await Config.getApiUrl()}/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
     return res.json();
+  },
+
+  updateDataset: async (datasetId, dataSetObject) => {
+    const url = `${await Config.getApiUrl()}/dataset/${datasetId}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
+    return await res.json();
   }
 };
 

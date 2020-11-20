@@ -14,12 +14,8 @@ const SECTION = {
 class AccessReviewV2 extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = this.initialState();
-  }
-
-  initialState() {
-    return {
-      voteAsChair: false,
+    this.state = {
+      voteAsChair: props.location.state.chairFinal
     };
   }
 
