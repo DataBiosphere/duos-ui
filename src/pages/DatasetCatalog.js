@@ -265,15 +265,15 @@ class DatasetCatalog extends Component {
   };
 
   dialogHandlerEdit = (answer) => (e) => {
+    console.log(answer);
     this.setState({ disableOkButton: true });
     if (answer) {
       this.setState(prev => {
         this.setState({ showDialogEdit: false, disableOkButton: false });
         return prev;
       });
-      // TODO: implement update dataset_registration so it's editable
-      // this.props.history.push({ pathname: 'dataset_registration/{datasetId}' });
-      this.props.history.push({ pathname: 'dataset_registration' });
+      let datasetId = this.state.datasetId;
+      this.props.history.push({ pathname: `dataset_registration/${datasetId}` });
     } else {
       this.setState({ showDialogEdit: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
     }
