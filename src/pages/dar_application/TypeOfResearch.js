@@ -11,11 +11,11 @@ const radioButtonStyle = {
 };
 
 const diseaseLabel = {
-    fontWeight: 800,
-    color: '#777777',
-    float: 'left',
-    marginLeft: '2rem'
-  }
+  fontWeight: 800,
+  color: '#777777',
+  float: 'left',
+  marginLeft: '2rem'
+};
 
 export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
@@ -41,7 +41,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
   render() {
     const props = this.props;
-    const hmb = props.diseases ? true : this.props.hmb; 
+    const hmb = props.diseases ? true : this.props.hmb;
     const ontologies = props.ontologies.map(ontology => {
       //minor processing step to ensure id and key are on ontology so that AsyncSelect does not break
       //done as a preventative measure for previously saved ontologies (prior to DUOS-718 PR)
@@ -99,7 +99,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
                 div({style: {marginLeft: '2rem', color: 'rgb(96, 59, 155)'}}, 'Are you studying any specific disease(s)?'),
                 fp.map.convert({cap: false})((boolVal, option) => {
                   return label({
-                    key: `check-diseases-option-${option}`, 
+                    key: `check-diseases-option-${option}`,
                     className: 'control-label',
                     //!important is needed since rp-choice-questions has an !important tag
                     //NOTE: try to review css and see if !important can be removed. Inline style eliminates the need for it
