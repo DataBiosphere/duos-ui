@@ -614,13 +614,21 @@ class DataAccessRequestApplication extends Component {
     });
   };
 
-  setDiseases = () => {
+  setDiseases = (e) => {
+    let applyToState = {
+      hmb: false,
+      poa: false,
+      other: false,
+      otherText: ''
+    };
+    if(!fp.isEmpty(e.target.value)) {
+      applyToState.diseases = true;
+    } else {
+      applyToState.diseases = false;
+      applyToState.ontologies = [];
+    }
     this.setState(prev => {
-      prev.formData.hmb = false;
-      prev.formData.poa = false;
-      prev.formData.diseases = true;
-      prev.formData.other = false;
-      prev.formData.otherText = '';
+      prev.formData = fp.assign(prev.formData, applyToState);
       return prev;
     });
   };
