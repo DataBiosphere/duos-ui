@@ -10,6 +10,13 @@ const radioButtonStyle = {
   color: '#777',
 };
 
+const diseaseLabel = {
+    fontWeight: 800,
+    color: '#777777',
+    float: 'left',
+    marginLeft: '2rem'
+  }
+
 export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
   searchOntologies = (query, callback) => {
@@ -89,12 +96,14 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
           },[
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: {marginBottom: '1.5rem'}}, [
               span({className: 'control-label rp-choice-questions'}, [
-                div({style: {marginLeft: '2rem'}}, 'Are you studying any specific disease(s)?'),
+                div({style: {marginLeft: '2rem', color: 'rgb(96, 59, 155)'}}, 'Are you studying any specific disease(s)?'),
                 fp.map.convert({cap: false})((boolVal, option) => {
                   return label({
                     key: `check-diseases-option-${option}`, 
-                    className: 'control-label rp-choice-questions',
-                    style: {marginLeft: '2rem'}
+                    className: 'control-label',
+                    //!important is needed since rp-choice-questions has an !important tag
+                    //NOTE: try to review css and see if !important can be removed. Inline style eliminates the need for it
+                    style: diseaseLabel
                   }, [
                     input({
                       type: 'radio',

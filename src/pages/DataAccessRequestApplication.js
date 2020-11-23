@@ -616,14 +616,15 @@ class DataAccessRequestApplication extends Component {
 
   setDiseases = (e) => {
     let applyToState = {
-      hmb: false,
       poa: false,
       other: false,
       otherText: ''
     };
     if(!fp.isEmpty(e.target.value)) {
+      applyToState.hmb = false;
       applyToState.diseases = true;
     } else {
+      applyToState.hmb = true;
       applyToState.diseases = false;
       applyToState.ontologies = [];
     }
