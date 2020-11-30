@@ -1,14 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { a, br, div, fieldset, h, h3, input, label, span, textarea } from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import isEmpty from 'lodash/fp/isEmpty';
+import forEach from 'lodash/fp/forEach';
+import includes from 'lodash/fp/includes';
+import cloneDeep from 'lodash/fp/cloneDeep';
+import isEqual from 'lodash/fp/isEqual';
+import every from 'lodash/fp/every';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
+import UploadLabelButton from '../../components/UploadLabelButton';
+import { isFileEmpty } from '../../libs/utils';
 
+const uploadFileDiv = (showValidationMessages, uploadedFile, currentDocumentLocation) => {
+  return {
+    padding: '1rem',
+    backgroundColor: showValidationMessages && (isFileEmpty(uploadedFile) && isEmpty(currentDocumentLocation)) ? errorBackgroundColor : 'inherit'
+  };
+};
+
+const dulQuestionDiv = (showValidationMessages, questionBool) => {
+  return {
+    backgroundColor: showValidationMessages && !questionBool ?
+      errorBackgroundColor : 'inherit',
+    padding: '1rem',
+    margin: '0.5rem 0'
+  };
+};
+
+const uploadFileDescription = {
+  paddingBottom: '1.5rem'
+};
+
+const errorBackgroundColor = "rgba(243, 73, 73, 0.19)";
+
+//NOTE: need to change props to acccount for file locations for previous uploaded file
 export default function DataAccessRequest(props) {
   const {
     darCode,
-    datasets,
+    initializeDatasets, //method used to assign dataUse to pre-assgined datasets in the application
     onDatasetsChange,
     showValidationMessages,
     formFieldChange,
@@ -16,7 +46,15 @@ export default function DataAccessRequest(props) {
     TypeOfResearch,
     nextPage,
     prevPage,
-    partialSave
+    partialSave,
+    irbDocumentLocation,
+    irbDocumentName,
+    collaborationLetterLocation,
+    collaborationLetterName,
+    uploadedIrbDocument,
+    uploadedCollaborationLetter,
+    changeDARDocument,
+    referenceId
   } = props;
 
   const [projectTitle, setProjectTitle] = useState(props.projectTitle);
@@ -26,6 +64,12 @@ export default function DataAccessRequest(props) {
   const [forProfit, setForProfit] = useState(props.forProfit);
   const [rus, setRus] = useState(props.rus);
   const [nonTechRus, setNonTechRus] = useState(props.nonTechRus);
+  const [datasets, setDatasets] = useState(props.datasets || []);
+  const [activeDULQuestions, setActiveDULQuestions] = useState({});
+  //parent needs to initialize defaults if value not present
+  const [gsoAcknowledgement, setGSOAcknowledgement] = useState(props.gsoAcknowledgement || false);
+  const [pubAcknowledgement, setPUBAcknowledgement] = useState(props.pubAcknowledgement || false);
+  const [dsAcknowledgement, setDSAcknowledgement] = useState(props.dsAcknowledgement || false);
 
   const searchDatasets = (query, callback) => {
     DAR.getAutoCompleteDS(query).then(items => {
@@ -40,25 +84,114 @@ export default function DataAccessRequest(props) {
     });
   };
 
-  //function needed to update state for 2.4
+  //function needed to update state for checkboxes
   const checkedStateChange = (dataset, setter) => {
     const { value } = dataset;
     setter(value);
     formFieldChange(dataset);
   };
 
+  const calculateDSTally = (diseaseRestrictions, ontologyTally) => {
+    forEach((diseaseLink) => {
+      if(!ontologyTally[diseaseLink]) {
+        ontologyTally[diseaseLink] = 0;
+      }
+      ontologyTally[diseaseLink]++;
+    })(diseaseRestrictions);
+  };
+
+  //initialization hook, loads data from props
   useEffect(() => {
     setProjectTitle(props.projectTitle);
     setRus(props.rus);
     setNonTechRus(props.nonTechRus);
-  }, [props.rus, props.nonTechRus, props.projectTitle]);
+    setDatasets(props.datasets); //initialization of datasets from props
+  }, [props.rus, props.nonTechRus, props.projectTitle, props.datasets]);
+
+  //seperate hook for datasets once state is assigned value from props
+  //used for updates as users add/remove items from AsyncSelect
+  useEffect(() => {
+    const uncappedForEach = forEach.convert({cap:false});
+
+    const calculateRestrictionEquivalency = (datasetCollection) => {
+      const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
+      let updatedDULQuestions = {};
+      let ontologyTally = {};
+
+      if (!isNil(datasetCollection)) {
+        const collectionLength = datasetCollection.length;
+        datasetCollection.forEach(dataset => {
+          const dataUse = dataset.dataUse;
+          if (!isNil(dataUse) && !isEmpty(dataUse)) {
+            uncappedForEach((value, key) => {
+              if(includes(key, targetDULKeys)) {
+                if (key === 'diseaseRestrictions' && collectionLength > 1) {
+                  //process DS attributes seperately due to unique attributes
+                  calculateDSTally(value, ontologyTally);
+                } else {
+                  //otherwise mark question as true
+                  updatedDULQuestions[key] = true;
+                }
+              }
+            })(dataUse);
+          }
+        });
+
+        if(Object.keys(ontologyTally).length > 0) {
+          updatedDULQuestions['diseaseRestrictions'] = !every((count) => {
+            return count === collectionLength && count > 0;
+          })(ontologyTally);
+        } else {
+          //ds rendering logic is compromised with submitted dars due to datasets being split into groups of one
+          //therefore dsAcknowledgement is maintained in order to ensure conditional rendering on that value
+          //Example: if dsAcknowledgement is true, question should be rendered
+          //if false, question should not be rendered since
+          //  1) if ds question is active, statement needs to be marked true for submission (false would not be a valid answer)
+          //  2) if ds question is inactive, false value will indicate that the question should not be rendered. (True would not be a valid answer)
+          updatedDULQuestions['diseaseRestrictions'] = false;
+        }
+      }
+
+      if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
+        setActiveDULQuestions(updatedDULQuestions);
+        //maintain dsAcknowledgement integrity when question is no longer active
+        if(!updatedDULQuestions['diseaseRestrictions'] && isEmpty(darCode)) {
+          setDSAcknowledgement(false);
+          formFieldChange({name: 'dsAcknowledgement', value: false});
+        }
+        //State update is asynchronous, send updatedDULQuestions for parent component
+        formFieldChange({name: 'activeDULQuestions', value: updatedDULQuestions});
+      }
+    };
+
+    const updateDatasetsAndDULQuestions = async(rawDatasetCollection) => {
+      const clonedDatasets = cloneDeep(rawDatasetCollection);
+      if (!every((dataset) => !isNil(dataset.dataUse) || !isEmpty(dataset.dataUse), rawDatasetCollection)) {
+        const updatedDatasets = await initializeDatasets(clonedDatasets);
+        setDatasets(updatedDatasets);
+        calculateRestrictionEquivalency(updatedDatasets);
+      } else {
+        calculateRestrictionEquivalency(clonedDatasets);
+      }
+    };
+
+    updateDatasetsAndDULQuestions(datasets);
+  }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
+
+  const renderDULQuestions = (darCode) => {
+    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions);
+
+    if(!isEmpty(darCode)) {
+      //for submitted dars dsAcknowledgement is not processed properly due to dataset split, therefore you need to check dsAcknowledgement directly
+      renderBool = renderBool || (dsAcknowledgement === true);
+    }
+    return renderBool;
+  };
 
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
-
         h3({ className: 'rp-form-title access-color' }, ['2. Data Access Request']),
-
         div({ className: 'form-group' }, [
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
             label({ className: 'control-label rp-title-question' }, [
@@ -81,7 +214,7 @@ export default function DataAccessRequest(props) {
               classNamePrefix: 'select',
               placeholder: 'Dataset Name, Sample Collection ID, or PI',
               className: (isEmpty(datasets) && showValidationMessages) ?
-                ' required-select-error select-autocomplete' :
+                'required-select-error select-autocomplete' :
                 'select-autocomplete'
 
             }),
@@ -339,9 +472,142 @@ export default function DataAccessRequest(props) {
               ['Required field']),
           ]),
       ]),
+      div({
+        className: 'form-group',
+        //if draft -> check if any one question is active
+        //if submit -> same condition plus check if dsAcknowledgement is true
+        isRendered: renderDULQuestions(darCode)
+      }, [
+        div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
+          label({className: 'control-label rp-title-question'}, [
+            '2.7 Data Use Acknowledgements*',
+            span({}, [
+              //NOTE: This is something that I came up with as a placeholder. I would appreciate any suggestions for a more legal/formal sub-header
+              'Please confirm listed acknowledgements and/or document requirements below'
+            ])
+          ])
+        ]),
+
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
+          style: dulQuestionDiv(showValidationMessages, gsoAcknowledgement),
+          isRendered: activeDULQuestions['geneticStudiesOnly'] === true,
+        }, [
+          input({
+            type: 'checkbox',
+            id: 'chk_gso_confirm',
+            name: 'gsoAckowledgement',
+            className: 'checkbox-inline rp-checkbox',
+            checked: gsoAcknowledgement,
+            disabled: !isNil(darCode),
+            onChange: (e) => checkedStateChange({name: 'gsoAcknowledgement', value: e.target.checked}, setGSOAcknowledgement)
+          }),
+          label({
+            className: 'regular-checkbox rp-choice-questions',
+            htmlFor: 'chk_gso_confirm'
+          }, ['I acknowledge that I have selected a dataset limited to use on genetic studies only (GSO). I attest that I will respect this data use condition. '])
+        ]),
+
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
+          style: dulQuestionDiv(showValidationMessages, pubAcknowledgement),
+          isRendered: activeDULQuestions['publicationResults'] === true
+        }, [
+          input({
+            type: 'checkbox',
+            id: 'chk_pub_confirm',
+            name: 'pubAckowledgement',
+            className: 'checkbox-inline rp-checkbox',
+            checked: pubAcknowledgement,
+            disabled: !isNil(darCode),
+            onChange: (e) => checkedStateChange({name: 'pubAcknowledgement', value: e.target.checked}, setPUBAcknowledgement)
+          }),
+          label({
+            className: 'regular-checkbox rp-choice-questions',
+            htmlFor: 'chk_pub_confirm'
+          }, ['I acknowledge that I have selected a dataset which requires results of studies using the data to be made available to the larger scientific community (PUB). I attest that I will respect this data use condition.'])
+        ]),
+
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 checkbox',
+          style: dulQuestionDiv(showValidationMessages, dsAcknowledgement),
+          isRendered: (isEmpty(darCode) && activeDULQuestions['diseaseRestrictions'] === true) || (!isEmpty(darCode) && props.dsAcknowledgement)
+        }, [
+          input({
+            type: 'checkbox',
+            id: 'chk_ds_confirm',
+            name: 'dsAckowledgement',
+            className: 'checkbox-inline rp-checkbox',
+            checked: dsAcknowledgement,
+            disabled: !isNil(darCode),
+            onChange: (e) => checkedStateChange({name: 'dsAcknowledgement', value: e.target.checked}, setDSAcknowledgement)
+          }),
+          label({
+            className: 'regular-checkbox rp-choice-questions',
+            htmlFor: 'chk_ds_confirm'
+          }, ['I acknowledge that the dataset can only be used in research consistent with the Data Use Limitations (DULs) and cannot be combined with other datasets of other phenotypes. Research uses inconsistent with the DUL are considered a violation of the Data Use Certification agreement and any additional terms described in the Addendum.'])
+        ]),
+
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+          isRendered: activeDULQuestions['ethicsApprovalRequired'] === true,
+          style: uploadFileDiv(showValidationMessages, uploadedIrbDocument, irbDocumentLocation)
+        }, [
+          div({className: 'row no-margin'}, [
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              span({className: 'rp-choice-questions', style: uploadFileDescription}, [
+                //NOTE: ask for question to be rephrased, grammar seems odd and I don't know how the conditions tie to each other
+                //second statement can either be a condition for the first or last statements (or maybe both?)
+                `One or more of the datasets you selected requires local IRB approval for use. Please upload your local IRB approval(s) here as a single document. 
+                When IRB approval is required and Expedited or Full Review is required and must be completed annually.
+                Determinations of Not Human Subjects Research (NHSR) by IRBs will not be accepted as IRB approval.`
+              ])
+            ]),
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              h(UploadLabelButton, {
+                id: 'btn_irb_uploadFile',
+                darCode,
+                formAttribute: 'irbDocument',
+                newDULFile: uploadedIrbDocument,
+                currentFileName: irbDocumentName,
+                currentFileLocation: irbDocumentLocation,
+                changeDARDocument,
+                referenceId
+              })
+            ])
+          ]),
+        ]),
+
+        div({
+          className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+          isRendered: activeDULQuestions['collaboratorRequired'] === true,
+          style: uploadFileDiv(showValidationMessages, uploadedCollaborationLetter, collaborationLetterLocation)
+        }, [
+          div({className: 'row no-margin'}, [
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              span({className: 'rp-choice-questions',style: uploadFileDescription
+              }, [
+                `One or more of the datasets you selected requires collaboration (COL) with the primary study investigator(s) for use. Please upload documentation of your collaboration here.`
+              ])
+            ]),
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'}, [
+              h(UploadLabelButton, {
+                id: 'btn_col_uploadFile',
+                darCode,
+                formAttribute: 'collaborationLetter',
+                newDULFile: uploadedCollaborationLetter,
+                currentFileName: collaborationLetterName,
+                currentFileLocation: collaborationLetterLocation,
+                changeDARDocument,
+                referenceId
+              })
+            ])
+          ])
+        ])
+      ]),
 
       div({ className: 'row no-margin' }, [
-        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: {marginTop: '2.5rem'} }, [
           a({ id: 'btn_prev', onClick: prevPage, className: 'btn-primary f-left access-background' }, [
             span({ className: 'glyphicon glyphicon-chevron-left', 'aria-hidden': 'true' }), 'Previous Step'
           ]),

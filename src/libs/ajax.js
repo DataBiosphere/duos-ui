@@ -6,6 +6,7 @@ import { spinnerService } from './spinner-service';
 import { Storage } from './storage';
 import axios from 'axios';
 import { DataUseTranslation } from './dataUseTranslation';
+import { isFileEmpty } from './utils';
 
 const dataTemplate = {
   accessTotal: [
@@ -314,6 +315,21 @@ export const DAR = {
     return await res.json();
   },
 
+  //v2 update for dar partials
+  updateDarDraft: async (dar, referenceId) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/draft/${referenceId}`;
+    const res = await axios.put(url, dar, Config.authOpts());
+    return res.data;
+  },
+
+  //api endpoint for v2 draft submission
+  postDarDraft: async(dar) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/draft/`;
+    const res = await axios.post(url, dar, Config.authOpts());
+    return res.data;
+  },
+
+  //v1 api endpoint to post dar drafts, should remove once all uses of it has been eliminated
   postPartialDarRequest: async dar => {
     const url = `${await Config.getApiUrl()}/dar/partial`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
@@ -347,6 +363,15 @@ export const DAR = {
     return await res.json();
   },
 
+  //v2 endpoint for DAR POST
+  postDar: async (dar) => {
+    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
+    const url = `${await Config.getApiUrl()}/dar/v2`;
+    const res = axios.post(url, filteredDar, Config.authOpts());
+    return await res.data;
+  },
+
+  //v1 endpoint for DAR POST
   postDataAccessRequest: async dar => {
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await Config.getApiUrl()}/dar`;
@@ -370,6 +395,17 @@ export const DAR = {
     const url = `${await Config.getOntologyApiUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
+  },
+
+  getDARDocument: async (referenceId, fileType) => {
+    const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream',
+      'Accept': 'application/octet-stream'
+    });
+    const url = `${await Config.getApiUrl()}/dar/v2/${referenceId}/${fileType}`;
+    const res = await axios.get(url, authOpts);
+    return res.data;
   },
 
   getDataAccessManage: async userId => {
@@ -426,6 +462,19 @@ export const DAR = {
     return manualReview;
   },
 
+  //NOTE: endpoints requires a dar id
+  uploadDARDocument: async(file, darId, fileType) => {
+    if(isFileEmpty(file)) {
+      return Promise.resolve({data: null});
+    } else {
+      let authOpts = Config.authOpts();
+      authOpts.headers['Content-Type'] = 'multipart/form-data';
+      let formData = new FormData();
+      formData.append("file", file);
+      const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
+      return axios.post(url, formData, authOpts);
+    }
+  }
 };
 
 export const DataSet = {
@@ -536,7 +585,6 @@ export const Election = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
-
 
   downloadDatasetVotesForDARElection: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
