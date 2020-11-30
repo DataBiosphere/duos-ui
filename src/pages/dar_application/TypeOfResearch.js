@@ -1,9 +1,21 @@
-import {div, h, hh, textarea} from 'react-hyperscript-helpers';
+import {div, h, hh, textarea, label, input, span} from 'react-hyperscript-helpers';
 import {RadioButton} from '../../components/RadioButton';
 import {Component} from 'react';
 import AsyncSelect from 'react-select/async/dist/react-select.esm';
 import {DAR} from '../../libs/ajax';
 import * as fp from 'lodash/fp';
+
+const radioButtonStyle = {
+  marginBottom: '2rem',
+  color: '#777',
+};
+
+const diseaseLabel = {
+  fontWeight: 800,
+  color: '#777777',
+  float: 'left',
+  marginLeft: '2rem'
+};
 
 export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
@@ -23,8 +35,13 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
       });
   };
 
+  optionEventHandler = (e, optionHandler) => {
+    optionHandler(e);
+  }
+
   render() {
     const props = this.props;
+    const hmb = props.diseases ? true : this.props.hmb;
     const ontologies = props.ontologies.map(ontology => {
       //minor processing step to ensure id and key are on ontology so that AsyncSelect does not break
       //done as a preventative measure for previously saved ontologies (prior to DUOS-718 PR)
@@ -38,7 +55,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
       border: '1px solid #999',
       backgroundColor: '#eee',
       padding: '6px 12px',
-      width: '100%',
+      width: '100%'
     };
     if (props.other) {
       otherTextStyle = fp.merge(otherTextStyle, {backgroundColor: '#fff'});
@@ -59,28 +76,75 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
     }
 
     return (
-      div({},
+      div({className: 'radio-questions-container'},
         [
           RadioButton({
-            style: {
-              marginBottom: '2rem',
-              color: '#777',
-            },
+            style: fp.merge(radioButtonStyle, {marginBottom: 0}),
             id: 'checkHmb',
             name: 'checkPrimary',
             value: 'hmb',
-            defaultChecked: props.hmb,
+            defaultChecked: (hmb || this.props.diseases),
             onClick: props.hmbHandler,
             label: '2.3.1 Health/medical/biomedical research: ',
             description: 'The primary purpose of the study is to investigate a health/medical/biomedical (or biological) phenomenon or condition.',
             disabled: props.disabled,
           }),
 
+          div({
+            isRendered: hmb,
+            className: 'row no-margin'
+          },[
+            div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: {marginBottom: '1.5rem'}}, [
+              span({className: 'control-label rp-choice-questions'}, [
+                div({style: {marginLeft: '2rem', color: 'rgb(96, 59, 155)'}}, 'Are you studying any specific disease(s)?'),
+                fp.map.convert({cap: false})((boolVal, option) => {
+                  return label({
+                    key: `check-diseases-option-${option}`,
+                    className: 'control-label',
+                    //!important is needed since rp-choice-questions has an !important tag
+                    //NOTE: try to review css and see if !important can be removed. Inline style eliminates the need for it
+                    style: diseaseLabel
+                  }, [
+                    input({
+                      type: 'radio',
+                      id: 'checkDiseases',
+                      value: boolVal ? boolVal : undefined, //value on inputs is always a string, need to ensure booleans from props are processed correctly
+                      name: 'diseases',
+                      checked: props.diseases === !!boolVal,
+                      onChange: props.diseasesHandler,
+                      disabled: props.disabled,
+                      style: {marginRight: '1rem'}
+                    }),
+                    option
+                  ]);
+                })({'Yes': true, 'No': false})
+              ])
+            ]),
+
+            div({
+              className: 'col-lg-12 col-md-12 col-sm-12 col-sx-12 ',
+              isRendered: props.diseases,
+              style: {
+                marginLeft: '2rem',
+                marginBottom: '2rem'
+              }
+            }, [
+              h(AsyncSelect, {
+                styles: ontologySelectionStyle,
+                id: 'sel_diseases',
+                isDisabled: !props.diseases,
+                isMulti: true,
+                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                onChange: (option) => props.ontologiesHandler(option),
+                value: ontologies,
+                placeholder: 'Please enter one or more diseases',
+                classNamePrefix: 'select'
+              })
+            ])
+          ]),
+
           RadioButton({
-            style: {
-              marginBottom: '2rem',
-              color: '#777',
-            },
+            style: radioButtonStyle,
             id: 'checkPoa',
             name: 'checkPrimary',
             value: 'poa',
@@ -90,49 +154,6 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
             description: 'The outcome of this study is expected to provide new knowledge about the origins of a certain population or its ancestry.',
             disabled: props.disabled,
           }),
-
-          RadioButton({
-            style: {
-              marginBottom: '2rem',
-              color: '#777',
-            },
-            id: 'checkDisease',
-            name: 'checkPrimary',
-            value: 'poa',
-            defaultChecked: props.diseases,
-            onClick: props.diseasesHandler,
-            label: '2.3.3 Disease-related studies: ',
-            description: 'The primary purpose of the research is to learn more about a particular disease or disorder (e.g., type 2 diabetes), a trait (e.g., blood pressure), or a set of related conditions (e.g., autoimmune diseases, psychiatric disorders).',
-            disabled: props.disabled,
-          }),
-
-          div({
-            style: {
-              marginBottom: '2rem',
-              color: '#777',
-            },
-          },
-          ['If you selected Disease-related Studies, please select the disease area(s) this study focuses on in the box below.']),
-
-          div({
-            style: {
-              marginBottom: '2rem',
-              color: '#777',
-              cursor: props.diseases ? 'pointer' : 'not-allowed',
-            },
-          }, [
-            h(AsyncSelect, {
-              styles: ontologySelectionStyle,
-              id: 'sel_diseases',
-              isDisabled: !props.diseases,
-              isMulti: true,
-              loadOptions: (query, callback) => this.searchOntologies(query, callback),
-              onChange: (option) => props.ontologiesHandler(option),
-              value: ontologies,
-              placeholder: 'Please enter one or more diseases',
-              classNamePrefix: 'select',
-            }),
-          ]),
 
           RadioButton({
             style: {
