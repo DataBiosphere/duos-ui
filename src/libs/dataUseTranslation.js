@@ -342,7 +342,7 @@ export const DataUseTranslation = {
       const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
       const isPOAActive = !isGeneralUseActive && ! isHMBActive && isEmpty(dataUse.diseaseRestrictions);
       let statement;
-      
+
       if(
         !targetKeys.includes(key) ||
         (key === 'hmbResearch' && isHMBActive) ||
