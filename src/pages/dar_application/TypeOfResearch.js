@@ -79,7 +79,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
       div({className: 'radio-questions-container'},
         [
           RadioButton({
-            style: fp.merge(radioButtonStyle, {marginBottom: 0}),
+            style: fp.merge(radioButtonStyle, {marginBottom: hmb ? 0 : '2rem'}),
             id: 'checkHmb',
             name: 'checkPrimary',
             value: 'hmb',
@@ -165,7 +165,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
             value: 'other',
             defaultChecked: props.other,
             onClick: props.otherHandler,
-            label: '2.3.4 Other:',
+            label: '2.3.3 Other:',
             description: '',
             disabled: props.disabled,
           }),
