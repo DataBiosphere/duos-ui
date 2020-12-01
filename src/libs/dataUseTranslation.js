@@ -340,7 +340,7 @@ export const DataUseTranslation = {
       const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
       const isHMBActive = dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
       const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
-      const isPOAActive = !isGeneralUseActive && ! isHMBActive && isEmpty[dataUse.diseaseRestrictions]
+      const isPOAActive = !isGeneralUseActive && ! isHMBActive && isEmpty(dataUse.diseaseRestrictions);
       let statement;
       
       if(
@@ -352,10 +352,10 @@ export const DataUseTranslation = {
         statement = consentTranslations[key];
       }
       return statement;
-    }
+    };
 
     const processRestrictionStatements = async(key, dataUse) => {
-      let resp;   
+      let resp;
       const value = dataUse[key];
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
