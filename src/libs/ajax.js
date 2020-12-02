@@ -227,10 +227,11 @@ export const DAR = {
     return { darInfo, consent };
   },
 
+  //v2 get for DARs
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
     const authOpts = Config.authOpts();
-    const rawDarRes = await axios.get(`${apiUrl}/dar/${darId}`, authOpts);
+    const rawDarRes = await axios.get(`${apiUrl}/dar/v2/${darId}`, authOpts);
     const rawDar = rawDarRes.data;
     const researcher = await User.getById(rawDar.userId);
 
@@ -303,8 +304,9 @@ export const DAR = {
     return await res.json();
   },
 
+  //v2 get for DARs
   getPartialDarRequest: async darId => {
-    const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
+    const url = `${await Config.getApiUrl()}/dar/v2/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
