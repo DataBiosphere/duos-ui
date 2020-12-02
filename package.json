@@ -21,7 +21,7 @@
     "react": "16.14.0",
     "react-dom": "16.14.0",
     "react-dropzone": "11.2.4",
-    "react-ga": "3.2.1",
+    "react-ga": "3.3.0",
     "react-google-charts": "3.0.15",
     "react-google-login": "5.1.25",
     "react-hyperscript-helpers": "2.0.0",
