@@ -410,8 +410,11 @@ class FinalAccessReview extends Component {
       election: electionReview.election
     };
 
+    if (!isNil(electionReview.consent)) {
+      applyToState.mrDUL = JSON.stringify(electionReview.consent.useRestriction, null, 2);
+    }
+
     if(!isNil(electionReview.election)) {
-      applyToState.mrDUL = JSON.stringify(electionReview.election.useRestriction, null, 2);
       applyToState.dulName = electionReview.election.dulName;
       applyToState.status = electionReview.election.status;
       applyToState.finalRationale = electionReview.election.finalRationale || '';
