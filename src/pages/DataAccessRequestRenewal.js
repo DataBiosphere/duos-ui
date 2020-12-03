@@ -646,7 +646,7 @@ class DataAccessRequestRenewal extends Component {
                       id: 'inputTitle',
                       maxLength: '256',
                       value: this.state.formData.projectTitle,
-                      onChange: () => {},
+                        onChange: () => {},
                       className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
                         'form-control required-field-error' :
                         'form-control',
