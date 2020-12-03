@@ -129,7 +129,7 @@ class DatasetCatalog extends Component {
       datasets: datasets,
       datasetId: datasetIdList
     };
-    const formData = await DAR.postPartialDarRequest(darBody);
+    const formData = await DAR.postDarDraft(darBody);
     const referenceId = formData.referenceId;
     this.props.history.push({ pathname: 'dar_application/' + referenceId });
   };
