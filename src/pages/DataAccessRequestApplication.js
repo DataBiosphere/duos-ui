@@ -179,16 +179,12 @@ class DataAccessRequestApplication extends Component {
     if (!fp.isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
-      DAR.getPartialDarRequest(dataRequestId).then(data => {
-        formData = data;
-        // Handle the case where the DAR is already submitted. We have to
-        // show the single dataset that was selected for this DAR and not
-        // all of the original datasets that may have been originally selected.
-        if (!fp.isNil(formData.darCode)) {
-          const dsId = fp.get('datasetIds')(formData)[0];
-          formData.datasets = fp.filter({value: dsId.toString()})(formData.datasets);
-        }
-      });
+      formData = await DAR.getPartialDarRequest(dataRequestId);
+      const dsIds = fp.get('datasetIds')(formData);
+      if (!fp.isNil(dsIds)) {
+        const datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
+        formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+      }
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
@@ -241,6 +237,15 @@ class DataAccessRequestApplication extends Component {
     });
 
   };
+
+  formatDatasetForAutocomplete = (dataset) => {
+    const nameProp = fp.find({"propertyName":"Dataset Name"})(dataset.properties);
+    return {
+      key: dataset.dataSetId,
+      value: dataset.dataSetId,
+      label: nameProp.propertyValue
+    };
+  }
 
   formatOntologyItems = (ontologies) => {
     const ontologyItems = ontologies.map((ontology) => {
