@@ -182,8 +182,7 @@ class DataAccessRequestApplication extends Component {
       formData = await DAR.getPartialDarRequest(dataRequestId);
       const dsIds = fp.get('datasetIds')(formData);
       if (!fp.isNil(dsIds)) {
-        const datasets = await Promise.all(fp.map(async (id) =>
-          await DataSet.getDataSetsByDatasetId(id))(dsIds));
+        const datasets = await Promise.all(fp.map(async (id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
         formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
       }
     } else {
