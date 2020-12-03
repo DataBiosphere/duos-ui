@@ -344,8 +344,8 @@ export const DAR = {
     return await res;
   },
 
-  getPartialDarRequestList: async userId => {
-    const url = `${await Config.getApiUrl()}/dar/partials/manage?userId=${userId}`;
+  getPartialDarRequestList: async () => {
+    const url = `${await Config.getApiUrl()}/dar/partials/manage`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

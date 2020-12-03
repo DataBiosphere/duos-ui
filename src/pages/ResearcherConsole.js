@@ -117,7 +117,7 @@ class ResearcherConsole extends Component {
       }
     );
 
-    DAR.getPartialDarRequestList(currentUser.dacUserId).then(
+    DAR.getPartialDarRequestList().then(
       pdars => {
         this.setState({
           partialDars: pdars,
