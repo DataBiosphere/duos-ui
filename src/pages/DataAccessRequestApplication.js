@@ -176,14 +176,13 @@ class DataAccessRequestApplication extends Component {
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
-    let datasets = [];
     if (!fp.isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
       const dsIds = fp.get('datasetIds')(formData);
       if (!fp.isNil(dsIds)) {
-        datasets = await Promise.all(fp.map(async (id) =>
+        const datasets = await Promise.all(fp.map(async (id) =>
           await DataSet.getDataSetsByDatasetId(id))(dsIds));
         formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
       }
