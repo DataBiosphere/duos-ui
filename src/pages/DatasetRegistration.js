@@ -31,21 +31,23 @@ class DatasetRegistration extends Component {
       showModal: false,
       showDialogSubmit: false,
       formData: {
-        methods: '',
-        genetic: '',
-        publication: '',
-        collaboration: '',
-        ethics: '',
-        geographic: '',
-        moratorium: '',
-        populationMigration: '',
-        forProfit: '',
+        methods: false,
+        genetic: false,
+        publication: false,
+        collaboration: false,
+        ethics: false,
+        geographic: false,
+        moratorium: false,
+        populationMigration: false,
+        forProfit: false,
         hmb: false,
-        poa: false,
+        npoa: false,
         diseases: false,
         ontologies: [],
         other: false,
-        otherText: '',
+        primaryOtherText: '',
+        secondaryOther: false,
+        secondaryOtherText: '',
         generalUse: false
       },
       datasetData: {
@@ -164,7 +166,9 @@ class DatasetRegistration extends Component {
       return prev;
     });
 
-    this.prefillDataUseFields(dataset.dataUse);
+    if (!fp.isEmpty(dataset.dataUse)) {
+      this.prefillDataUseFields(dataset.dataUse);
+    }
   };
 
   async getOntologies(urls) {
@@ -187,12 +191,15 @@ class DatasetRegistration extends Component {
     let collaboration = dataUse.collaboratorRequired;
     let ethics = dataUse.ethicsApprovalRequired;
     let geographic = dataUse.geographicalRestrictions;
-    let forProfit = !dataUse.commercialUse;
+    let moratorium = dataUse.publicationMoratorium;
+    let forProfit = dataUse.commercialUse;
     let hmb = dataUse.hmbResearch;
-    let poa = dataUse.populationOriginsAncestry;
+    let npoa = dataUse.populationOriginsAncestry;
     let diseases = dataUse.diseaseRestrictions;
     let other = !fp.isEmpty(dataUse.other);
-    let otherText = dataUse.other;
+    let primaryOtherText = dataUse.other;
+    let secondaryOther = !fp.isEmpty(dataUse.secondaryOther);
+    let secondaryOtherText = dataUse.secondaryOther;
     let generalUse = dataUse.generalUse;
 
     this.setState(prev => {
@@ -202,12 +209,15 @@ class DatasetRegistration extends Component {
       prev.formData.collaboration = collaboration;
       prev.formData.ethics = ethics;
       prev.formData.geographic = geographic;
+      prev.formData.moratorium = moratorium;
       prev.formData.forProfit = forProfit;
       prev.formData.hmb = hmb;
-      prev.formData.poa = poa;
+      prev.formData.npoa = npoa;
       prev.formData.diseases = diseases;
       prev.formData.other = !fp.isEmpty(other);
-      prev.formData.otherText = otherText;
+      prev.formData.primaryOtherText = primaryOtherText;
+      prev.formData.secondaryOther = !fp.isEmpty(secondaryOther);
+      prev.formData.secondaryOtherText = secondaryOtherText;
       prev.formData.generalUse = generalUse;
       return prev;
     });
@@ -269,7 +279,8 @@ class DatasetRegistration extends Component {
       this.isValid(formData.species) &&
       this.isValid(formData.phenotype) &&
       this.isValid(formData.nrParticipants) &&
-      this.isValid(formData.description);
+      this.isValid(formData.description) &&
+      !this.isTypeOfResearchInvalid();
   };
 
   validateDatasetName(name) {
@@ -401,16 +412,15 @@ class DatasetRegistration extends Component {
   };
 
   /**
-   * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
+   * HMB, Diseases, and Other/OtherText are all mutually exclusive
    */
 
   isTypeOfResearchInvalid = () => {
     const valid = (
       this.state.formData.generalUse === true ||
       this.state.formData.hmb === true ||
-      this.state.formData.poa === true ||
       (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
-      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
+      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.primaryOtherText))
     );
     return !valid;
   };
@@ -444,6 +454,9 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = false;
       prev.formData.diseases = false;
       prev.formData.ontologies = [];
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   }
@@ -454,17 +467,10 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = true;
       prev.formData.diseases = false;
       prev.formData.ontologies = [];
-      return prev;
-    });
-  };
-
-  setPoa = () => {
-    this.setState(prev => {
-      prev.formData.generalUse = false;
-      prev.formData.hmb = false;
-      prev.formData.poa = true;
-      prev.formData.diseases = false;
-      prev.formData.ontologies = [];
+      prev.formData.npoa = false;
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -474,6 +480,10 @@ class DatasetRegistration extends Component {
       prev.formData.generalUse = false;
       prev.formData.hmb = false;
       prev.formData.diseases = true;
+      prev.formData.npoa = false;
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -481,6 +491,9 @@ class DatasetRegistration extends Component {
   onOntologiesChange = (data) => {
     this.setState(prev => {
       prev.formData.ontologies = data || [];
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -492,17 +505,33 @@ class DatasetRegistration extends Component {
       prev.formData.diseases = false;
       prev.formData.other = true;
       prev.formData.ontologies = [];
+      prev.formData.npoa = false;
+      prev.disableOkBtn = false;
+      prev.problemSavingRequest = false;
+      prev.submissionSuccess = false;
       return prev;
     });
   };
 
-  setOtherText = (e) => {
+  setOtherText = (e, level) => {
     const value = e.target.value;
-    this.setState(prev => {
-      prev.formData.other = true;
-      prev.formData.otherText = value;
-      return prev;
-    });
+    (level === "primary") ?
+      this.setState(prev => {
+        prev.formData.other = true;
+        prev.formData.primaryOtherText = value;
+        prev.disableOkBtn = false;
+        prev.problemSavingRequest = false;
+        prev.submissionSuccess = false;
+        return prev;
+      }) :
+      this.setState(prev => {
+        prev.formData.secondaryOther = true;
+        prev.formData.secondaryOtherText = value;
+        prev.disableOkBtn = false;
+        prev.problemSavingRequest = false;
+        prev.submissionSuccess = false;
+        return prev;
+      });
   };
 
   back = (e) => {
@@ -585,8 +614,56 @@ class DatasetRegistration extends Component {
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
+    result.dataUse = this.formatDataUse(this.state.formData);
     return result;
   };
+
+  formatDataUse = (data) => {
+    let result = {};
+    if (data.methods) {
+      result.methodsResearch = data.methods;
+    }
+    if (data.genetic) {
+      result.geneticStudiesOnly = data.genetic;
+    }
+    if (data.publication) {
+      result.publicationResults = data.publication;
+    }
+    if (data.collaboration) {
+      result.collaboratorRequired = data.collaboration;
+    }
+    if (data.ethics) {
+      result.ethicsApprovalRequired = data.ethics;
+    }
+    if (data.geographic) {
+      result.geographicalRestrictions = "Yes";
+    }
+    if (data.moratorium) {
+      result.publicationMoratorium = data.moratorium;
+    }
+    if (data.populationMigration) {
+      result.populationOriginsAncestry = data.populationMigration;
+    }
+    if (data.forProfit) {
+      result.commercialUse = data.forProfit;
+    }
+    if (data.hmb) {
+      result.hmbResearch = data.hmb;
+    }
+    if (data.diseases) {
+      result.diseaseRestrictions = data.ontologies;
+    }
+    if (data.other) {
+      result.otherRestrictions = data.other;
+    }
+    if (fp.trim(data.primaryOtherText).length > 0) {
+      result.other = data.primaryOtherText;
+    }
+    if (data.generalUse) {
+      result.generalUse = data.generalUse;
+    }
+    return result;
+  }
 
   formatOntologyItems = (ontologies) => {
     const ontologyItems = ontologies.map((ontology) => {
@@ -611,10 +688,12 @@ class DatasetRegistration extends Component {
 
     const {
       hmb = false,
-      poa = false,
+      npoa = false,
       diseases = false,
       other = false,
-      otherText = '',
+      primaryOtherText = '',
+      secondaryOther = false,
+      secondaryOtherText = '',
       genetic = false,
       forProfit = false,
       publication = false,
@@ -627,12 +706,9 @@ class DatasetRegistration extends Component {
     } = this.state.formData;
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const { publicAccess = false } = this.state.datasetData;
-    const { npoa } = !poa;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
-    const isTypeOfResearchInvalid = false;
+    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
-    // NOTE: set this to always false for now to submit dataset without consent info
-    // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
     const profileUnsubmitted = span({}, [
       'Please make sure ',
@@ -1049,21 +1125,6 @@ class DatasetRegistration extends Component {
                                 marginBottom: '2rem',
                                 color: '#777',
                               },
-                              id: 'checkPoa',
-                              name: 'checkPrimary',
-                              value: 'poa',
-                              defaultChecked: poa,
-                              onClick: this.setPoa,
-                              label: 'Populations, Origins, Ancestry Use: ',
-                              description: 'use is permitted exclusively for populations, origins, or ancestry research',
-                              disabled: isUpdateDataset,
-                            }),
-
-                            RadioButton({
-                              style: {
-                                marginBottom: '2rem',
-                                color: '#777',
-                              },
                               id: 'checkOther',
                               name: 'checkPrimary',
                               value: 'other',
@@ -1076,10 +1137,10 @@ class DatasetRegistration extends Component {
 
                             textarea({
                               className: 'form-control',
-                              value: otherText,
-                              onChange: this.setOtherText,
-                              name: 'otherText',
-                              id: 'otherText',
+                              value: primaryOtherText,
+                              onChange: (e) => this.setOtherText(e, "primary"),
+                              name: 'primaryOtherText',
+                              id: 'primaryOtherText',
                               maxLength: '512',
                               rows: '2',
                               required: other,
@@ -1262,7 +1323,7 @@ class DatasetRegistration extends Component {
                           ]),
 
                         div(
-                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group', isRendered: generalUse || npoa },
                           [
                             div({className: 'checkbox'}, [
                               input({
@@ -1271,7 +1332,7 @@ class DatasetRegistration extends Component {
                                 id: 'checkNpoa',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'poa',
+                                name: 'npoa',
                                 disabled: isUpdateDataset
                               }),
                               label({
@@ -1312,17 +1373,17 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: other,
+                                checked: secondaryOther,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkOtherSecondary',
+                                id: 'checkSecondaryOther',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'other',
+                                name: 'secondaryOther',
                                 disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkOtherSecondary',
+                                htmlFor: 'checkSecondaryOther',
                               }, [
                                 span({ className: 'access-color'},
                                   ['Other Secondary Use Terms:']),
@@ -1333,15 +1394,15 @@ class DatasetRegistration extends Component {
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             textarea({
-                              value: otherText,
-                              onChange: this.setOtherText,
-                              name: 'otherText',
-                              id: 'inputOtherText',
+                              value: secondaryOtherText,
+                              onChange: (e) => this.setOtherText(e, "secondary"),
+                              name: 'secondaryOtherText',
+                              id: 'inputSecondaryOtherText',
                               className: 'form-control',
                               rows: '6',
                               required: false,
                               placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
-                              disabled: isUpdateDataset || !other
+                              disabled: isUpdateDataset || !secondaryOther
                             })
                           ]),
                       ]),
