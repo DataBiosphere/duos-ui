@@ -1,4 +1,4 @@
-FROM nginxinc/nginx-unprivileged:1.19.4-alpine
+FROM nginxinc/nginx-unprivileged:1.19.5-alpine
 LABEL maintainer="grushton@broadinstitute.org"
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
