@@ -1,13 +1,18 @@
-version: '3.7'
+# This is an example compose file that can be used for local development.
+# Build first:
+#   docker build -f Dockerfile-dev . -t duos-ui
+# Modify the config file in `volumes` to point to the desired environment
+# Then run:
+#   docker-compose up
+# Visit
+#   http://localhost:3000/
+version: '3.8'
 services:
   app:
     image: duos-ui:latest
     container_name: duos
     ports:
-      - 8080:8080
+      - 3000:8080
     volumes:
       - ./config/dev.json:/usr/share/nginx/html/config.json
-      - ./conf/conf.d/default.conf:/etc/nginx/conf.d/default.conf
-      - ./conf/nginx.conf:/etc/nginx/nginx.conf
-    user: ${CURRENT_UID}
     command: ["nginx", "-g", "daemon off;"]

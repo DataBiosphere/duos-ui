@@ -2,6 +2,7 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
+import isNil from 'lodash/fp/isNil';
 
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
@@ -14,6 +15,13 @@ export const formatDate = (dateval) => {
   let day = ('0' + dateFormat.getDate()).slice(-2);
   let datestr = year + '-' + month + '-' + day;
   return datestr;
+};
+
+//Custom empty check needed on File
+//lodash's isEmpty checks for enumerated keys, something a File does not have (ends up being an empty array)
+//leads to incorrect evaluation of File
+export const isFileEmpty = (file) => {
+  return isNil(file) || file.size < 1 || file.length < 1;
 };
 
 export const USER_ROLES = {
