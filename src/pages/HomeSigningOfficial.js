@@ -107,7 +107,7 @@ class HomeSigningOfficial extends Component {
             div({style: sectionWrapper}, [
               h3({style: faqTitle}, ['How do I issue or remove a Library Card for one of my researchers?']),
               div({style: sectionBody}, [
-                p({style: paragraph}, ['Currently, you must write to duos-support@broadinstitute.zendesk.com to notify them of your institution and provide the name, email address, and eRA Commons ID of the researcher(s) for whom you would like to issue or remove Library Cards.'])
+                p({style: paragraph}, ['Currently, you must send a signed Library Card Agreement to duos-support@broadinstitute.zendesk.com to notify them of your institution and provide the name, email address, and eRA Commons ID of the researcher(s) for whom you would like to issue or remove Library Cards.'])
               ]),
             ]),
             div({style: sectionWrapper}, [
