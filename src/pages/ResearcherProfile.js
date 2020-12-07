@@ -12,7 +12,7 @@ import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
-import {USER_ROLES, setUserRoleStatuses, Navigation } from '../libs/utils';
+import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -379,8 +379,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       } else {
         this.saveUser().then(resp => {
           this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
-          //Should the code redirect the user to the Researcher console or should it redirect to the expanded profile on account creation
-          //QUESTION: Is there a reason why the expanded profile page isn't the default view?
         });
       }
 
