@@ -52,7 +52,7 @@ class DatasetRegistration extends Component {
         datasetName: '',
         researcher: '',
         collectionId: '',
-        pi: '',
+        principalInvestigator: '',
         datasetRepoUrl: '',
         dataType: '',
         species: '',
@@ -158,7 +158,7 @@ class DatasetRegistration extends Component {
       prev.datasetData.description = description ? description.propertyValue : '';
       prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
-      prev.datasetData.pi = pi ? pi.propertyValue : '';
+      prev.datasetData.principalInvestigator = pi ? pi.propertyValue : '';
       prev.datasetData.needsApproval = needsApproval;
       prev.selectedDac = dac;
 
@@ -271,6 +271,7 @@ class DatasetRegistration extends Component {
 
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
+      this.isValid(formData.principalInvestigator) &&
       this.validateDatasetName((formData.datasetName)) &&
       this.isValid(formData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
@@ -566,8 +567,8 @@ class DatasetRegistration extends Component {
     if (formData.researcher) {
       properties.push({"propertyName": "Data Depositor", "propertyValue": formData.researcher});
     }
-    if (formData.pi) {
-      properties.push({"propertyName": "Principal Investigator(PI)", "propertyValue": formData.pi});
+    if (formData.principalInvestigator) {
+      properties.push({"propertyName": "Principal Investigator(PI)", "propertyValue": formData.principalInvestigator});
     }
 
     return properties;
@@ -682,7 +683,8 @@ class DatasetRegistration extends Component {
 
     const controlLabelStyle = {
       fontWeight: 500,
-      marginBottom: 0
+      marginTop: '1rem',
+      marginBottom: '1rem'
     };
 
     const {
@@ -772,12 +774,32 @@ class DatasetRegistration extends Component {
                     ])
                   ]),
 
+                  div({ className: 'form-group' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                      label({ className: 'control-label rp-title-question dataset-color' }, ['1.2 Principal Investigator (PI)*'])
+                    ]),
+
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                      input({
+                        type: 'text',
+                        name: 'principalInvestigator',
+                        id: 'inputPrincipalInvestigator',
+                        value: this.state.datasetData.principalInvestigator,
+                        className: (fp.isEmpty(this.state.datasetData.principalInvestigator) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        required: true
+                      }),
+                      span({
+                        isRendered: (fp.isEmpty(this.state.datasetData.principalInvestigator) && showValidationMessages), className: 'cancel-color required-field-error-span'
+                      }, ['Required field'])
+                    ])
+                  ]),
+
                   div({className: 'form-group'}, [
                     div(
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.2 Dataset Name* ',
+                          '1.3 Dataset Name* ',
                           span({},
                             ['Please provide a publicly displayable name for the dataset']),
                         ]),
@@ -808,7 +830,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.3 Dataset Repository URL* ',
+                          '1.4 Dataset Repository URL* ',
                           span({},
                             ['Please provide the URL at which approved requestors can access the data']),
                         ]),
@@ -842,7 +864,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.4 Data Type* ',
+                          '1.5 Data Type* ',
                         ]),
                       ]),
                     div(
@@ -873,7 +895,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.5 Species* ',
+                          '1.6 Species* ',
                         ]),
                       ]),
                     div(
@@ -904,7 +926,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.6 Phenotype/Indication* ',
+                          '1.7 Phenotype/Indication* ',
                         ]),
                       ]),
                     div(
@@ -935,7 +957,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.7 # of Participants* ',
+                          '1.8 # of Participants* ',
                         ]),
                       ]),
                     div(
@@ -967,7 +989,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.8 Dataset Description* ',
+                          '1.9 Dataset Description* ',
                         ]),
                       ]),
                     div(
@@ -998,7 +1020,7 @@ class DatasetRegistration extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question dataset-color'}, [
-                          '1.9 Data Access Committee* ',
+                          '1.10 Data Access Committee* ',
                         ]),
                       ]),
                     div(
