@@ -516,7 +516,7 @@ class DatasetRegistration extends Component {
 
   setOtherText = (e, level) => {
     const value = e.target.value;
-    (level === "primary") ?
+    (level === 'primary') ?
       this.setState(prev => {
         prev.formData.other = true;
         prev.formData.primaryOtherText = value;
@@ -636,7 +636,7 @@ class DatasetRegistration extends Component {
       result.ethicsApprovalRequired = data.ethics;
     }
     if (data.geographic) {
-      result.geographicalRestrictions = "Yes";
+      result.geographicalRestrictions = 'Yes';
     }
     if (data.moratorium) {
       result.publicationMoratorium = data.moratorium;
@@ -1143,7 +1143,7 @@ class DatasetRegistration extends Component {
                             textarea({
                               className: 'form-control',
                               value: primaryOtherText,
-                              onChange: (e) => this.setOtherText(e, "primary"),
+                              onChange: (e) => this.setOtherText(e, 'primary'),
                               name: 'primaryOtherText',
                               id: 'primaryOtherText',
                               maxLength: '512',
@@ -1400,7 +1400,7 @@ class DatasetRegistration extends Component {
                           [
                             textarea({
                               value: secondaryOtherText,
-                              onChange: (e) => this.setOtherText(e, "secondary"),
+                              onChange: (e) => this.setOtherText(e, 'secondary'),
                               name: 'secondaryOtherText',
                               id: 'inputSecondaryOtherText',
                               className: 'form-control',
