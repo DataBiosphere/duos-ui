@@ -38,7 +38,6 @@ class DatasetRegistration extends Component {
         ethics: false,
         geographic: false,
         moratorium: false,
-        populationMigration: false,
         forProfit: false,
         hmb: false,
         npoa: false,
@@ -63,7 +62,7 @@ class DatasetRegistration extends Component {
         description: '',
         dac: '',
         consentId: '',
-        publicAccess: false,
+        needsApproval: false,
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -148,7 +147,8 @@ class DatasetRegistration extends Component {
     let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
     let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
     let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
-    let publicAccess = !dataset.needsApproval;
+    let needsApproval = dataset.needsApproval;
+    let dac = fp.find({dacId: dataset.dacId})(this.state.dacList);
 
     this.setState(prev => {
       prev.datasetData.datasetName = name ? name.propertyValue : '';
@@ -161,7 +161,8 @@ class DatasetRegistration extends Component {
       prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.pi = pi ? pi.propertyValue : '';
-      prev.datasetData.publicAccess = publicAccess;
+      prev.datasetData.needsApproval = needsApproval;
+      prev.selectedDac = dac;
 
       return prev;
     });
@@ -196,9 +197,9 @@ class DatasetRegistration extends Component {
     let hmb = dataUse.hmbResearch;
     let npoa = dataUse.populationOriginsAncestry;
     let diseases = dataUse.diseaseRestrictions;
-    let other = !fp.isEmpty(dataUse.other);
+    let other = dataUse.otherRestrictions;
     let primaryOtherText = dataUse.other;
-    let secondaryOther = !fp.isEmpty(dataUse.secondaryOther);
+    let secondaryOther = !fp.isNil(dataUse.secondaryOther);
     let secondaryOtherText = dataUse.secondaryOther;
     let generalUse = dataUse.generalUse;
 
@@ -214,9 +215,9 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = hmb;
       prev.formData.npoa = npoa;
       prev.formData.diseases = diseases;
-      prev.formData.other = !fp.isEmpty(other);
+      prev.formData.other = other;
       prev.formData.primaryOtherText = primaryOtherText;
-      prev.formData.secondaryOther = !fp.isEmpty(secondaryOther);
+      prev.formData.secondaryOther = secondaryOther;
       prev.formData.secondaryOtherText = secondaryOtherText;
       prev.formData.generalUse = generalUse;
       return prev;
@@ -441,9 +442,9 @@ class DatasetRegistration extends Component {
       });
   };
 
-  setPublicAccess = (value) => {
+  setNeedsApproval = (value) => {
     this.setState(prev => {
-      prev.datasetData.publicAccess = value;
+      prev.datasetData.needsApproval = value;
       return prev;
     });
   }
@@ -591,10 +592,8 @@ class DatasetRegistration extends Component {
     this.setState(prev => {
       if (fp.isNil(option)) {
         prev.selectedDac = {};
-        prev.datasetData['dac'] = '';
       } else {
         prev.selectedDac = option.item;
-        prev.datasetData['dac'] = option.label;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
         prev.problemLoadingUpdateDataset = false;
@@ -606,11 +605,12 @@ class DatasetRegistration extends Component {
   formatFormData = (data) => {
     let result = {};
     result.datasetName = data.datasetName;
+    result.dacId = this.state.selectedDac.dacId;
     result.consentId = data.consentId;
     result.translatedUseRestriction = data.translatedUseRestriction;
     result.deletable = true;
     result.active = true;
-    result.needsApproval = !data.publicAccess;
+    result.needsApproval = data.needsApproval;
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
@@ -641,8 +641,8 @@ class DatasetRegistration extends Component {
     if (data.moratorium) {
       result.publicationMoratorium = data.moratorium;
     }
-    if (data.populationMigration) {
-      result.populationOriginsAncestry = data.populationMigration;
+    if (data.npoa) {
+      result.populationOriginsAncestry = data.npoa;
     }
     if (data.forProfit) {
       result.commercialUse = data.forProfit;
@@ -658,6 +658,9 @@ class DatasetRegistration extends Component {
     }
     if (fp.trim(data.primaryOtherText).length > 0) {
       result.other = data.primaryOtherText;
+    }
+    if (data.secondaryOther) {
+      result.secondaryOther = data.secondaryOtherText;
     }
     if (data.generalUse) {
       result.generalUse = data.generalUse;
@@ -705,10 +708,11 @@ class DatasetRegistration extends Component {
       generalUse = false,
     } = this.state.formData;
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
-    const { publicAccess = false } = this.state.datasetData;
+    const { needsApproval = false } = this.state.datasetData;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
+    const dacOptions = this.dacOptions();
 
     const profileUnsubmitted = span({}, [
       'Please make sure ',
@@ -1009,21 +1013,22 @@ class DatasetRegistration extends Component {
                           id: 'inputDac',
                           onChange: (option) => this.onDacChange(option),
                           blurInputOnSelect: true,
+                          value: fp.filter((dac) => this.state.selectedDac.dacId === dac.value, dacOptions),
                           openMenuOnFocus: true,
                           isDisabled: false,
                           isClearable: true,
                           isMulti: false,
                           isSearchable: true,
-                          options: this.dacOptions(),
+                          options: dacOptions,
                           placeholder: 'Select a DAC...',
-                          className: (fp.isEmpty(this.state.datasetData.dac) && showValidationMessages) ?
+                          className: (fp.isEmpty(this.state.selectedDac) && showValidationMessages) ?
                             'required-field-error' :
                             '',
                           required: true,
                         }),
                         span({
                           className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.dac) && showValidationMessages,
+                          isRendered: fp.isEmpty(this.state.selectedDac) && showValidationMessages,
                         },
                         ['Required field']),
                       ])
@@ -1443,29 +1448,29 @@ class DatasetRegistration extends Component {
 
                       RadioButton({
                         style: {
-                          margin: '2rem',
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
                           color: '#777',
                         },
-                        id: 'checkPublicAccess_yes',
-                        name: 'checkPublicAccess',
+                        id: 'checkNeedsApproval_yes',
+                        name: 'checkNeedsApproval',
                         value: 'yes',
-                        defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
+                        defaultChecked: !needsApproval,
+                        onClick: () => this.setNeedsApproval(false),
                         label: 'Yes',
                         disabled: isUpdateDataset,
                       }),
 
                       RadioButton({
                         style: {
-                          marginBottom: '2rem',
-                          marginLeft: '2rem',
+                          margin: '2rem',
                           color: '#777',
                         },
-                        id: 'checkPublicAccess_no',
-                        name: 'checkPublicAccess',
+                        id: 'checkNeedsApproval_no',
+                        name: 'checkNeedsApproval',
                         value: 'no',
-                        defaultChecked: !publicAccess,
-                        onClick: () => this.setPublicAccess(false),
+                        defaultChecked: needsApproval,
+                        onClick: () => this.setNeedsApproval(true),
                         label: 'No',
                         disabled: isUpdateDataset,
                       }),
