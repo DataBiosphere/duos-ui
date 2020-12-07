@@ -173,9 +173,9 @@ class FAQs extends Component {
                 h3({}, ['How do I issue or remove a Library Card for one of my researchers?']),
                 div({className: 'home-content'}, [
                   p({},
-                    ['Currently, you must write to duos-support@broadinstitute.zendesk.com to notify them of your institution and provide the name, email address, and eRA Commons ID of the researcher(s) for whom you would like to issue or remove Library Cards. ']),
+                    ['Currently, you must send a signed Library Card Agreement to duos-support@broadinstitute.zendesk.com to notify them of your institution and provide the name, email address, and eRA Commons ID of the researcher(s) for whom you would like to issue or remove Library Cards.']),
                 ]),
-                h3({}, ['How and when do I need to renew my institution\'s Libray Cards?']),
+                h3({}, ['How and when do I need to renew my institution\'s Library Cards?']),
                 div({className: 'home-content'}, [
                   p({},
                     ['The DUOS team will contact each Signing Official to request an annual renewal of their issued Library Cards on July 1st of each year, starting in 2021.']),
