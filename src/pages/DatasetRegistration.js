@@ -3,7 +3,6 @@ import { RadioButton } from '../components/RadioButton';
 import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import { Link } from 'react-router-dom';
 import Select from 'react-select';
-import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
@@ -124,7 +123,6 @@ class DatasetRegistration extends Component {
             prev.problemLoadingUpdateDataset = true;
           });
           this.props.history.push('/dataset_registration');
-          ReactTooltip.rebuild();
         }
         else {
           this.setState(prev => {
@@ -376,7 +374,6 @@ class DatasetRegistration extends Component {
           if (fp.isEmpty(this.state.updateDataset)) {
             DataSet.postDatasetForm(ds).then(resp => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
-              ReactTooltip.rebuild();
             }).catch(e => {
               let errorMessage = (e.status === 409) ?
                 'Dataset with this name already exists: ' + this.state.datasetData.datasetName
@@ -394,7 +391,6 @@ class DatasetRegistration extends Component {
             const { datasetId } = this.props.match.params;
             DataSet.updateDataset(datasetId, ds).then(resp => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
-              ReactTooltip.rebuild();
             }).catch(e => {
               let errorMessage = 'Some errors occurred, the Dataset was not updated.';
               this.setState(prev => {
@@ -1508,7 +1504,6 @@ class DatasetRegistration extends Component {
                           title: 'Dataset Registration Confirmation', disableOkBtn: this.state.disableOkBtn,
                           color: 'dataset', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
                         }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit this Dataset Registration?'])]),
-                        h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
 
                       ])
                     ])
