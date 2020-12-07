@@ -8,6 +8,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, Election } from '../libs/ajax';
+import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
 
 
@@ -36,8 +37,8 @@ class AdminManageAccess extends Component {
 
   async getElectionDarList() {
     let darElection = [];
-
-    const elections = await DAR.getDataAccessManage();
+    let currentUser = Storage.getCurrentUser();
+    const elections = await DAR.getDataAccessManage(currentUser.dacUserId);
     elections.map(dar => {
       darElection.push(dar);
       return dar;
