@@ -43,6 +43,7 @@ import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
 import HomeResearcherInfo from "./pages/HomeResearcherInfo";
+import BackgroundSignIn from './pages/BackgroundSignIn';
 
 
 const Routes = (props) => (
@@ -50,6 +51,7 @@ const Routes = (props) => (
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
+    <Route exact path="/backgroundsignin" render={(routeProps) => <BackgroundSignIn />}/>
     <Route path="/FAQs" component={FAQs} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />
