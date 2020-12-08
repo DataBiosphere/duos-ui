@@ -92,7 +92,7 @@ export default function ResearcherInfo(props) {
 
   const cloudInputStyle = (input) => {
     return {
-      backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(input) ? "rgba(243, 73, 73, 0.19)" : 
+      backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(input) ? "rgba(243, 73, 73, 0.19)" :
         isEmpty(darCode) ? 'inherit' : '#eee'
     };
   };
