@@ -1,9 +1,10 @@
 import { User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { div, form, input, label, textarea, br } from 'react-hyperscript-helpers';
+import { div, form, input, label, textarea, br, h } from 'react-hyperscript-helpers';
 import { USER_ROLES } from '../libs/utils';
 import { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { SpinnerComponent } from '../components/SpinnerComponent';
 
 export default function BackgroundSignIn(props) {
   const location = useLocation();
@@ -12,6 +13,7 @@ export default function BackgroundSignIn(props) {
   let token = queryParams.get("token");
   let { onSignIn, onError, bearerToken } = props;
   token = bearerToken || (token || '');
+  let [loading, setLoading] = useState(token && token !== '');
   let [accessToken, setAccessToken] = useState(token);
   let [formToken, setFormToken] = useState(token);
   let [invalidToken, setInvalidToken] = useState(false);
@@ -50,42 +52,47 @@ export default function BackgroundSignIn(props) {
     };
 
     const performLogin = () => {
-      if (accessToken) {
-        Storage.setGoogleData({ accessToken: accessToken });
-        getUser().then(
-          user => {
-            user = Object.assign(user, setUserRoleStatuses(user));
-            setIsLogged();
-            redirect(user);
-          },
-          error => {
-            const status = error.status;
-            switch (status) {
-              case 400:
-                if (onError)
-                  onError(error);
-                break;
-              case 409:
-                // If the user exists, just log them in.
-                getUser().then(
-                  user => {
-                    user = Object.assign(user, setUserRoleStatuses(user));
-                    setIsLogged();
-                    redirect(user);
-                  },
-                  error => {
-                    Storage.clearStorage();
-                  });
-                break;
-              case 401:
-                setInvalidToken(true);
-                break;
-              default:
-                setInvalidToken(true);
-                break;
-            }
-          });
-      }
+      setLoading(true);
+      Storage.setGoogleData({ accessToken: accessToken });
+      getUser().then(
+        user => {
+          user = Object.assign(user, setUserRoleStatuses(user));
+          setIsLogged();
+          setLoading(false);
+          redirect(user);
+        },
+        error => {
+          const status = error.status;
+          switch (status) {
+            case 400:
+              if (onError)
+                onError(error);
+              setLoading(false);
+              break;
+            case 409:
+              // If the user exists, just log them in.
+              getUser().then(
+                user => {
+                  user = Object.assign(user, setUserRoleStatuses(user));
+                  setIsLogged();
+                  redirect(user);
+                  setLoading(false);
+                },
+                error => {
+                  Storage.clearStorage();
+                  setLoading(false);
+                });
+              break;
+            case 401:
+              setInvalidToken(true);
+              setLoading(false);
+              break;
+            default:
+              setInvalidToken(true);
+              setLoading(false);
+              break;
+          }
+        });
     };
 
     if (accessToken)
@@ -94,9 +101,19 @@ export default function BackgroundSignIn(props) {
   }, [accessToken, history, onError, onSignIn]);
 
   return div({}, [
+    div({
+      isRendered: loading
+    }, [
+      h(SpinnerComponent, {
+        show: true,
+        name: 'loadingSpinner',
+        loadingImage: '/images/loading-indicator.svg'
+      }, [])
+    ]),
     form({
       name: 'accessTokenForm',
       encType: 'multipart/form-data',
+      isRendered: !loading,
       onSubmit: (e) => {
         e.preventDefault();
         setAccessToken(formToken);

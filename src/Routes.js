@@ -51,7 +51,14 @@ const Routes = (props) => (
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
-    <Route exact path="/backgroundsignin" component={BackgroundSignIn} />
+    <Route exact path="/backgroundsignin" render={
+      (routeProps) =>
+        props.env
+          ? props.env !== 'prod'
+            ? <BackgroundSignIn {...routeProps} />
+            : <NotFound />
+          : <div />
+    } />
     <Route path="/FAQs" component={FAQs} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />

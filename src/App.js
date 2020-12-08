@@ -14,6 +14,7 @@ import Routes from './Routes';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [env, setEnv] = useState('');
   let history = useHistory();
 
   const trackPageView = (location) => {
@@ -37,10 +38,16 @@ function App() {
       history.listen(trackPageView);
     };
 
+    const setEnvironment = async () => {
+      const environment = await Config.getEnv();
+      setEnv(environment);
+    };
+
     const initApp = async () => {
       Modal.setAppElement(document.getElementById('modal-root'));
       await initializeReactGA(history);
       await setUserIsLogged();
+      await setEnvironment();
     };
 
     initApp();
@@ -66,7 +73,7 @@ function App() {
           h(Spinner, {
             name: 'mainSpinner', group: 'duos', loadingImage: '/images/loading-indicator.svg'
           }),
-          h(Routes, { onSignIn: signIn, isLogged: isLoggedIn })
+          h(Routes, { onSignIn: signIn, isLogged: isLoggedIn, env: env })
         ])
       ]),
       DuosFooter()
