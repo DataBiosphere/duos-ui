@@ -90,6 +90,13 @@ export default function ResearcherInfo(props) {
     )
   ]);
 
+  const cloudInputStyle = (input) => {
+    return {
+      backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(input) ? "rgba(243, 73, 73, 0.19)" :
+        isEmpty(darCode) ? 'inherit' : '#eee'
+    };
+  };
+
   return (
     div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
       fieldset({ disabled: !isNil(darCode) }, [
@@ -390,24 +397,20 @@ export default function ResearcherInfo(props) {
               div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group"}, [
                 label({className: 'control-label'}, ['Name of Cloud Provider']),
                 input({
-                  style: {
-                    backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProvider) ? "rgba(243, 73, 73, 0.19)" : "inherit"
-                  },
+                  style: cloudInputStyle(cloudProvider),
                   type: 'text',
                   name: 'cloud-provider-name',
                   defaultValue: cloudProvider || '',
                   className: 'form-control',
                   required: true,
-                  disabled: !isNil(darCode),
+                  disabled: !isEmpty(darCode),
                   onBlur: (e) => formFieldChange({name: 'cloudProvider', value: e.target.value})
                 })
               ]),
               div({className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 rp-group"}, [
                 label({className: 'control-label'}, ['Type of Cloud Provider']),
                 input({
-                  style: {
-                    backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProviderType) ? "rgba(243, 73, 73, 0.19)" : "inherit"
-                  },
+                  style: cloudInputStyle(cloudProviderType),
                   type: 'text',
                   name: 'provider-type-name',
                   defaultValue: cloudProviderType || '',
@@ -422,11 +425,12 @@ export default function ResearcherInfo(props) {
               div({className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group"}, [
                 textarea({
                   style: {
-                    backgroundColor: showValidationMessages && isCloudProviderInvalid && isEmpty(cloudProviderDescription) ? "rgba(243, 73, 73, 0.19)" : "inherit",
+                    backgroundColor: cloudInputStyle(cloudProviderDescription).backgroundColor,
                     width: '100%',
                     padding: '1rem'
                   },
                   defaultValue: cloudProviderDescription,
+                  disabled: !isNil(darCode),
                   onBlur: (e) => formFieldChange({name: 'cloudProviderDescription', value: e.target.value}),
                   name: 'cloudProviderDescription',
                   id: 'cloudProviderDescription',
