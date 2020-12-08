@@ -243,6 +243,7 @@ export default function ResearcherInfo(props) {
                 collaboratorKey: 'labCollaborators',
                 collaboratorLabel: 'Internal Lab Member',
                 showApproval: true,
+                disabled: !isEmpty(darCode),
                 deleteBoolArray: (new Array(labCollaborators.length).fill(false))
               })
             ])
@@ -265,6 +266,7 @@ export default function ResearcherInfo(props) {
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               h(CollaboratorList, {
+                disabled: !isEmpty(darCode),
                 formFieldChange,
                 collaborators: internalCollaborators,
                 collaboratorKey: 'internalCollaborators',
@@ -456,6 +458,7 @@ export default function ResearcherInfo(props) {
             ]),
             div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
               h(CollaboratorList, {
+                disabled: !isEmpty(darCode),
                 formFieldChange,
                 collaborators: externalCollaborators,
                 collaboratorKey: 'externalCollaborators',
