@@ -12,7 +12,7 @@ import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
-import {USER_ROLES} from '../libs/utils';
+import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -378,8 +378,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         }
       } else {
         this.saveUser().then(resp => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.goBack();
+          this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
         });
       }
 
@@ -387,7 +386,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       this.setState({ showDialogSubmit: false });
     }
   };
-
 
   updateResearcher(profile) {
     const profileClone = this.cloneProfile(profile);
@@ -405,7 +403,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     currentUser.additionalEmail = this.state.additionalEmail;
     currentUser.roles = this.state.roles;
     const payload = { updatedUser: currentUser };
-    await User.update(payload, currentUser.dacUserId);
+    let updatedUser = await User.update(payload, currentUser.dacUserId);
+    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
+    return updatedUser;
   };
 
   handleCheckboxChange = (e) => {

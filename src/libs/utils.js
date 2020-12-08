@@ -38,6 +38,18 @@ export const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
 
+export const setUserRoleStatuses = (user, Storage) => {
+  const currentUserRoles = user.roles.map(roles => roles.name);
+  user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
+  user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
+  user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
+  user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
+  user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
+  user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+  Storage.setCurrentUser(user);
+  return user;
+};
+
 export const Navigation = {
   back: (user, history) => {
     const page = user.isChairPerson ? '/chair_console'
