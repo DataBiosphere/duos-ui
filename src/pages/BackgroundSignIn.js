@@ -112,7 +112,7 @@ export default function BackgroundSignIn(props) {
             'The provided token is invalid.'
           ]),
           br(),
-          label({ 
+          label({
             id: 'lbl_accessToken',
             className: 'common-color'
           }, ['Access Token']),
