@@ -595,7 +595,6 @@ class DatasetRegistration extends Component {
         key: ontology.id || ontology.item.id,
         value: ontology.id || ontology.item.id,
         label: ontology.label || ontology.item.label,
-        definition: ontology.definition || ontology.item.definition,
         item: ontology || ontology.item
       };
     });
