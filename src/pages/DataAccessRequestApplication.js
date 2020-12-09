@@ -254,7 +254,6 @@ class DataAccessRequestApplication extends Component {
         key: ontology.id || ontology.item.id,
         value: ontology.id || ontology.item.id,
         label: ontology.label || ontology.item.label,
-        definition: ontology.definition || ontology.item.definition,
         item: ontology.item
       };
     });
@@ -591,7 +590,6 @@ class DataAccessRequestApplication extends Component {
       const ontologies = fp.map(ontology => ({
         id: ontology.key,
         label: ontology.value,
-        definition: ontology.item.definition
       }))(this.state.formData.ontologies);
 
       if (ontologies.length > 0) {
@@ -663,7 +661,6 @@ class DataAccessRequestApplication extends Component {
       const ontologies = fp.map((o) => ({
         id: o.id || o.item.id,
         label: o.label || o.item.label,
-        definition: o.definition || o.item.definition,
         item: o.item
       }))(this.state.formData.ontologies);
       this.setState(prev => {
