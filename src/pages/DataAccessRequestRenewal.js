@@ -28,6 +28,8 @@ class DataAccessRequestRenewal extends Component {
 
   constructor(props) {
     super(props);
+    this.dialogHandlerSave = this.dialogHandlerSave.bind(this);
+    this.setShowDialogSave = this.setShowDialogSave.bind(this);
     this.state = {
       nihValid: false,
       disableOkBtn: false,
@@ -94,7 +96,8 @@ class DataAccessRequestRenewal extends Component {
           invalid: false
         }
       },
-      problemSavingRequest: false
+      problemSavingRequest: false,
+      ontologies: []
     };
   }
 
@@ -210,6 +213,64 @@ class DataAccessRequestRenewal extends Component {
     });
   }
 
+  handleOpenModal() {
+    this.setState({ showModal: true });
+  };
+
+  handleCloseModal() {
+    this.setState({ showModal: false });
+  };
+
+  handleChange = (e) => {
+    const field = e.target.name;
+    const value = e.target.value;
+    this.setState(prev => {
+      prev.formData[field] = value;
+      return prev;
+    }, () => this.checkValidations());
+  };
+
+  checkValidations() {
+    if (this.state.showValidationMessages === true && this.state.step === 1) {
+      this.verifyStep1();
+    } else if (this.state.showValidationMessages === true && this.state.step === 2) {
+      this.verifyStep2();
+    } else if (this.state.showValidationMessages === true && this.state.step === 3) {
+      this.verifyStep3();
+    }
+  };
+
+  handleCheckboxChange = (e) => {
+    const field = e.target.name;
+    const value = e.target.checked;
+    this.setState(prev => {
+      prev.formData[field] = value;
+      return prev;
+    }, () => this.checkValidations());
+  };
+
+  handleRadioChange = (e, field, value) => {
+    if (value === 'true') {
+      value = true;
+    } else if (value === 'false') {
+      value = false;
+    }
+    this.setState(prev => {
+      if (field === 'oneGender' && value === false) {
+        prev.formData.gender = '';
+      }
+      prev.formData[field] = value;
+      return prev;
+    }, () => this.checkValidations());
+  };
+
+  handleGenderChange = (e, value) => {
+    this.setState(prev => {
+      prev.formData.gender = value;
+      return prev;
+    }, () => this.checkValidations());
+  };
+
   step1 = (e) => {
     this.setState(prev => {
       prev.step = 1;
@@ -242,6 +303,194 @@ class DataAccessRequestRenewal extends Component {
     window.scrollTo(0, 0);
   };
 
+  attestAndSave = (e) => {
+    let invalidStep1 = this.verifyStep1();
+    let invalidStep2 = this.verifyStep2();
+    let invalidStep3 = this.verifyStep3();
+    if (!invalidStep1 && !invalidStep2 && !invalidStep3) {
+      this.setState({ showDialogSubmit: true });
+    }
+  };
+
+  isValid(value) {
+    let isValid = false;
+    if (value !== '' && value !== null && value !== undefined) {
+      isValid = true;
+    }
+    return isValid;
+  };
+
+  verifyStep1() {
+    let isResearcherInvalid = false,
+      isInvestigatorInvalid = false,
+      showValidationMessages = false,
+      isNihInvalid = !this.state.nihValid;
+
+    if (!this.isValid(this.state.formData.researcher)) {
+      isResearcherInvalid = true;
+      showValidationMessages = true;
+    }
+    if (!this.isValid(this.state.formData.investigator)) {
+      isInvestigatorInvalid = true;
+      showValidationMessages = true;
+    }
+    if (this.state.formData.checkCollaborator !== true
+      && !this.isValid(this.state.formData.linkedIn)
+      && !this.isValid(this.state.formData.researcherGate)
+      && !this.isValid(this.state.formData.orcid)
+      && !this.state.nihValid) {
+      isNihInvalid = true;
+      showValidationMessages = true;
+    }
+    // DUOS-565: checkCollaborator : false and nihValid : false is an invalid combination
+    if (this.state.formData.checkCollaborator !== true
+      && !this.state.nihValid) {
+      isNihInvalid = true;
+      showValidationMessages = true;
+    }
+    this.setState(prev => {
+      prev.step1.inputResearcher.invalid = isResearcherInvalid;
+      prev.step1.inputInvestigator.invalid = isInvestigatorInvalid;
+      prev.step1.inputNih.invalid = isNihInvalid;
+      if (prev.showValidationMessages === false) prev.showValidationMessages = showValidationMessages;
+      return prev;
+    });
+    return showValidationMessages;
+  };
+
+  verifyStep2() {
+    const datasetsInvalid = fp.isEmpty(this.state.formData.datasets);
+    const titleInvalid = fp.isEmpty(this.state.formData.projectTitle);
+    const typeOfResearchInvalid = this.isTypeOfResearchInvalid();
+    const rusInvalid = fp.isEmpty(this.state.formData.rus);
+    const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
+    return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
+  };
+
+  isGenderValid(gender, oneGender) {
+    let isValidGender = false;
+    if (oneGender === false || (oneGender === true && this.isValid(gender))) {
+      isValidGender = true;
+    }
+    return isValidGender;
+  }
+
+  verifyStep3() {
+    let invalid = false;
+    if (!(this.isValid(this.state.formData.forProfit) &&
+      this.isValid(this.state.formData.oneGender) &&
+      this.isGenderValid(this.state.formData.gender, this.state.formData.oneGender) &&
+      this.isValid(this.state.formData.pediatric) &&
+      this.isValid(this.state.formData.illegalBehavior) &&
+      this.isValid(this.state.formData.addiction) &&
+      this.isValid(this.state.formData.sexualDiseases) &&
+      this.isValid(this.state.formData.stigmatizedDiseases) &&
+      this.isValid(this.state.formData.vulnerablePopulation) &&
+      this.isValid(this.state.formData.populationMigration) &&
+      this.isValid(this.state.formData.psychiatricTraits) &&
+      this.isValid(this.state.formData.notHealth))) {
+      this.setState(prev => {
+        prev.step3.inputPurposes.invalid = true;
+        prev.showValidationMessages = true;
+        return prev;
+      });
+      invalid = true;
+    } else {
+      this.setState(prev => {
+        prev.step3.inputPurposes.invalid = false;
+        return prev;
+      });
+    }
+    return invalid;
+  }
+
+  partialSave = (e) => {
+    this.setState({ showDialogSave: true });
+  };
+
+  dialogHandlerSubmit = (answer) => (e) => {
+    if (answer === true) {
+      let ontologies = [];
+      for (let ontology of this.state.formData.ontologies) {
+        ontologies.push(ontology.item);
+      }
+      this.setState(prev => {
+        if (ontologies.length > 0) {
+          prev.formData.ontologies = ontologies;
+        }
+        for (var key in prev.formData) {
+          if (prev.formData[key] === '') {
+            prev.formData[key] = undefined;
+          }
+
+        }
+        return prev;
+      }, () => {
+        let formData = this.state.formData;
+        let ds = [];
+        this.state.formData.datasets.forEach(dataset => {
+          ds.push(dataset.value);
+        });
+        formData.datasetIds = ds;
+        formData.userId = Storage.getCurrentUser().dacUserId;
+        this.setState(prev => {
+          prev.disableOkBtn = true;
+          return prev;
+        });
+      });
+    } else {
+      this.setState({ showDialogSubmit: false });
+    }
+  };
+
+  setShowDialogSave(value) {
+    this.setState(prev => {
+      prev.showDialogSave = value;
+      prev.disableOkBtn = false;
+      return prev;
+    });
+  };
+
+  dialogHandlerSave = (answer) => (e) => {
+    this.setState(prev => {
+      prev.disableOkBtn = true;
+      return prev;
+    });
+    if (answer === true) {
+      let ontologies = [];
+      for (let ontology of this.state.formData.ontologies) {
+        ontologies.push(ontology.item);
+      }
+      let datasets = this.state.formData.datasets.map(function(item) {
+        return {
+          id: item.value,
+          concatenation: item.label
+        };
+      });
+      this.setState(prev => {
+        prev.formData.datasetIds = datasets;
+        prev.formData.ontologies = ontologies;
+        return prev;
+      }, () => this.savePartial());
+    } else {
+      this.setShowDialogSave(false);
+    }
+  };
+
+  savePartial() {
+    this.saveDAR(null);
+  };
+
+  saveDAR(response) {
+  }
+
+  onDatasetsChange = (data, action) => {
+    this.setState(prev => {
+      prev.formData.datasets = data;
+      return prev;
+    }, () => this.checkValidations());
+  };
+
   searchDataSets(query, callback) {
     DAR.getAutoCompleteDS(query).then(items => {
       let options = items.map(function(item) {
@@ -254,6 +503,81 @@ class DataAccessRequestRenewal extends Component {
       callback(options);
     });
 
+  };
+
+  /**
+   * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
+   */
+
+  isTypeOfResearchInvalid = () => {
+    const valid = (
+      this.state.formData.hmb === true ||
+      this.state.formData.poa === true ||
+      (this.state.formData.diseases === true && !fp.isEmpty(this.state.formData.ontologies)) ||
+      (this.state.formData.other === true && !fp.isEmpty(this.state.formData.otherText))
+    );
+    return !valid;
+  };
+
+  setHmb = () => {
+    this.setState(prev => {
+      prev.formData.hmb = true;
+      prev.formData.poa = false;
+      prev.formData.diseases = false;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  };
+
+  setPoa = () => {
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = true;
+      prev.formData.diseases = false;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  };
+
+  setDiseases = () => {
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = false;
+      prev.formData.diseases = true;
+      prev.formData.other = false;
+      prev.formData.otherText = '';
+      return prev;
+    });
+  };
+
+  onOntologiesChange = (data) => {
+    this.setState(prev => {
+      prev.formData.ontologies = data;
+      return prev;
+    });
+  };
+
+  setOther = () => {
+    this.setState(prev => {
+      prev.formData.hmb = false;
+      prev.formData.poa = false;
+      prev.formData.diseases = false;
+      prev.formData.other = true;
+      prev.formData.ontologies = [];
+      return prev;
+    });
+  };
+
+  setOtherText = (e) => {
+    const value = e.target.value;
+    this.setState(prev => {
+      prev.formData.otherText = value;
+      return prev;
+    });
   };
 
   back = (e) => {
@@ -282,7 +606,7 @@ class DataAccessRequestRenewal extends Component {
     const { ontologies } = this.state;
 
     const { problemSavingRequest, showValidationMessages, step1, step3 } = this.state;
-    const isTypeOfResearchInvalid = false;
+    const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
     const genderLabels = ['Female', 'Male'];
     const genderValues = ['F', 'M'];
 
@@ -375,7 +699,7 @@ class DataAccessRequestRenewal extends Component {
 
             ConfirmationDialog({
               title: 'Save changes?', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn, color: 'access',
-              showModal: this.state.showDialogSave, action: { label: 'Yes', handler: () => {} }
+              showModal: this.state.showDialogSave, action: { label: 'Yes', handler: this.dialogHandlerSave }
             }, [
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
@@ -422,7 +746,7 @@ class DataAccessRequestRenewal extends Component {
                         className: 'checkbox-inline rp-checkbox',
                         disabled: this.state.formData.darCode !== null,
                         checked: checkCollaborator,
-                        onChange: () => {}
+                        onChange: this.handleCheckboxChange
                       }),
                       label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_collaborator' },
                         ['I am an NIH Intramural researcher (NIH email required) and/or collaborator of the PI/Data Custodian for the selected dataset(s)'])
@@ -457,7 +781,7 @@ class DataAccessRequestRenewal extends Component {
                           name: 'linkedIn',
                           id: 'inputLinkedIn',
                           value: linkedIn,
-                          onChange: () => {},
+                          onChange: this.handleChange,
                           disabled: false,
                           className: 'form-control',
                           required: true
@@ -473,7 +797,7 @@ class DataAccessRequestRenewal extends Component {
                           name: 'orcid',
                           id: 'inputOrcid',
                           value: orcid,
-                          onChange: () => {},
+                          onChange: this.handleChange,
                           disabled: false,
                           className: 'form-control',
                           required: true
@@ -487,7 +811,7 @@ class DataAccessRequestRenewal extends Component {
                           name: 'researcherGate',
                           id: 'inputResearcherGate',
                           value: researcherGate,
-                          onChange: () => {},
+                          onChange: this.handleChange,
                           disabled: false,
                           className: 'form-control',
                           required: true
@@ -537,7 +861,7 @@ class DataAccessRequestRenewal extends Component {
 
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                     textarea({
-                      value: this.state.formData.rus, onChange: () => {},
+                      value: this.state.formData.rus, onChange: this.handleChange,
                       name: 'rus',
                       id: 'inputRUS',
                       className: 'form-control',
@@ -565,7 +889,7 @@ class DataAccessRequestRenewal extends Component {
                     name: 'linkedIn',
                     id: 'inputLinkedIn',
                     value: linkedIn,
-                    onChange: () => {},
+                    onChange: this.handleChange,
                     disabled: false,
                     className: 'form-control',
                     required: true
@@ -580,7 +904,7 @@ class DataAccessRequestRenewal extends Component {
                       name: 'orcid',
                       id: 'inputOrcid',
                       value: orcid,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       disabled: false,
                       className: 'form-control',
                       required: true
@@ -596,7 +920,7 @@ class DataAccessRequestRenewal extends Component {
                       name: 'orcid',
                       id: 'inputOrcid',
                       value: orcid,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       disabled: false,
                       className: 'form-control',
                       required: true
@@ -610,7 +934,7 @@ class DataAccessRequestRenewal extends Component {
                       name: 'researcherGate',
                       id: 'inputResearcherGate',
                       value: researcherGate,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       disabled: false,
                       className: 'form-control',
                       required: true
@@ -624,7 +948,7 @@ class DataAccessRequestRenewal extends Component {
                 ]),
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
-                    value: this.state.formData.forProfit, onChange: () => {}, id: 'forProfit', name: 'forProfit',
+                    value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
                     required: true
                   })
                 ]),
@@ -646,7 +970,7 @@ class DataAccessRequestRenewal extends Component {
                       id: 'inputTitle',
                       maxLength: '256',
                       value: this.state.formData.projectTitle,
-                        onChange: () => {},
+                      onChange: this.handleChange,
                       className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
                         'form-control required-field-error' :
                         'form-control',
@@ -688,7 +1012,7 @@ class DataAccessRequestRenewal extends Component {
                     name: 'linkedIn',
                     id: 'inputLinkedIn',
                     value: linkedIn,
-                    onChange: () => {},
+                    onChange: this.handleChange,
                     disabled: false,
                     className: 'form-control',
                     required: true
@@ -703,7 +1027,7 @@ class DataAccessRequestRenewal extends Component {
                       name: 'orcid',
                       id: 'inputOrcid',
                       value: orcid,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       disabled: false,
                       className: 'form-control',
                       required: true
@@ -719,7 +1043,7 @@ class DataAccessRequestRenewal extends Component {
                       name: 'orcid',
                       id: 'inputOrcid',
                       value: orcid,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       disabled: false,
                       className: 'form-control',
                       required: true
@@ -733,7 +1057,7 @@ class DataAccessRequestRenewal extends Component {
                       name: 'researcherGate',
                       id: 'inputResearcherGate',
                       value: researcherGate,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       disabled: false,
                       className: 'form-control',
                       required: true
@@ -747,7 +1071,7 @@ class DataAccessRequestRenewal extends Component {
                 ]),
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
-                    value: this.state.formData.forProfit, onChange: () => {}, id: 'forProfit', name: 'forProfit',
+                    value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
                     required: true
                   })
                 ]),
@@ -769,7 +1093,7 @@ class DataAccessRequestRenewal extends Component {
                       id: 'inputTitle',
                       maxLength: '256',
                       value: this.state.formData.projectTitle,
-                        onChange: () => {},
+                      onChange: this.handleChange,
                       className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
                         'form-control required-field-error' :
                         'form-control',
@@ -806,7 +1130,7 @@ class DataAccessRequestRenewal extends Component {
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                     textarea({
                       value: this.state.formData.nonTechRus,
-                      onChange: () => {},
+                      onChange: this.handleChange,
                       name: 'nonTechRus',
                       id: 'inputNonTechRUS',
                       className: 'form-control',
@@ -825,7 +1149,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
 
                     a({
-                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: () => {},
+                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: this.partialSave,
                       className: 'btn-secondary f-right access-color'
                     }, ['Save'])
                   ])
@@ -854,7 +1178,7 @@ class DataAccessRequestRenewal extends Component {
                         isDisabled: this.state.formData.darCode !== null,
                         isMulti: true,
                         loadOptions: (query, callback) => this.searchDataSets(query, callback),
-                        onChange: () => {},
+                        onChange: (option) => this.onDatasetsChange(option),
                         value: this.state.formData.datasets,
                         noOptionsMessage: () => this.state.optionMessage,
                         loadingMessage: () => this.state.optionMessage,
@@ -892,7 +1216,7 @@ class DataAccessRequestRenewal extends Component {
                           id: 'inputTitle',
                           maxLength: '256',
                           value: this.state.formData.projectTitle,
-                          onChange: () => {},
+                          onChange: this.handleChange,
                           className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -935,18 +1259,18 @@ class DataAccessRequestRenewal extends Component {
                       [
                         TypeOfResearch({
                           hmb: hmb,
-                          hmbHandler: () => {},
+                          hmbHandler: this.setHmb,
                           poa: poa,
-                          poaHandler: () => {},
+                          poaHandler: this.setPoa,
                           diseases: diseases,
-                          diseasesHandler: () => {},
+                          diseasesHandler: this.setDiseases,
                           disabled: (darCode !== null),
                           ontologies: ontologies,
-                          ontologiesHandler: () => {},
+                          ontologiesHandler: this.onOntologiesChange,
                           other: other,
-                          otherHandler: () => {},
+                          otherHandler: this.setOther,
                           otherText: otherText,
-                          otherTextHandler: () => {}
+                          otherTextHandler: this.setOtherText
                         })
                       ]),
 
@@ -968,7 +1292,7 @@ class DataAccessRequestRenewal extends Component {
                         div({className: 'checkbox'}, [
                           input({
                             checked: methods,
-                            onChange: () => {},
+                            onChange: this.handleCheckboxChange,
                             id: 'checkMethods',
                             type: 'checkbox',
                             disabled: (this.state.formData.darCode !== null),
@@ -992,7 +1316,7 @@ class DataAccessRequestRenewal extends Component {
                         div({className: 'checkbox'}, [
                           input({
                             checked: controls,
-                            onChange: () => {},
+                            onChange: this.handleCheckboxChange,
                             id: 'checkControls',
                             type: 'checkbox',
                             disabled: (this.state.formData.darCode !== null),
@@ -1015,7 +1339,7 @@ class DataAccessRequestRenewal extends Component {
                         div({className: 'checkbox'}, [
                           input({
                             checked: population,
-                            onChange: () => {},
+                            onChange: this.handleCheckboxChange,
                             id: 'checkPopulation',
                             type: 'checkbox',
                             disabled: (this.state.formData.darCode !== null),
@@ -1039,7 +1363,7 @@ class DataAccessRequestRenewal extends Component {
                         div({className: 'checkbox'}, [
                           input({
                             checked: forProfit,
-                            onChange: () => {},
+                            onChange: this.handleCheckboxChange,
                             id: 'checkForProfit',
                             type: 'checkbox',
                             disabled: (this.state.formData.darCode !== null),
@@ -1081,7 +1405,7 @@ class DataAccessRequestRenewal extends Component {
                     [
                       textarea({
                         value: this.state.formData.rus,
-                        onChange: () => {},
+                        onChange: this.handleChange,
                         name: 'rus',
                         id: 'inputRUS',
                         className: (fp.isEmpty(this.state.formData.rus) && showValidationMessages) ?
@@ -1116,7 +1440,7 @@ class DataAccessRequestRenewal extends Component {
                     [
                       textarea({
                         value: this.state.formData.nonTechRus,
-                        onChange: () => {},
+                        onChange: this.handleChange,
                         name: 'nonTechRus',
                         id: 'inputNonTechRUS',
                         className: (fp.isEmpty(this.state.formData.nonTechRus) && showValidationMessages) ?
@@ -1147,7 +1471,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
 
                     a({
-                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: () => {},
+                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: this.partialSave,
                       className: 'btn-secondary f-right access-color'
                     }, ['Save'])
                   ])
@@ -1178,7 +1502,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.forProfit, onChange: () => {}, id: 'forProfit', name: 'forProfit',
+                        value: this.state.formData.forProfit, onChange: this.handleRadioChange, id: 'forProfit', name: 'forProfit',
                         required: true
                       })
                     ]),
@@ -1189,7 +1513,7 @@ class DataAccessRequestRenewal extends Component {
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.oneGender, onChange: () => {}, id: 'oneGender', name: 'oneGender',
+                        value: this.state.formData.oneGender, onChange: this.handleRadioChange, id: 'oneGender', name: 'oneGender',
                         required: true
                       }),
                       div({
@@ -1202,7 +1526,7 @@ class DataAccessRequestRenewal extends Component {
                             return (
                               label({
                                 key: 'gender' + ix,
-                                onClick: () => {},
+                                onClick: (e) => this.handleGenderChange(e, genderValues[ix]),
                                 id: 'lbl_gender_' + ix,
                                 htmlFor: 'rad_gender_' + ix,
                                 className: 'radio-wrapper'
@@ -1229,7 +1553,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.pediatric, onChange: () => {}, id: 'pediatric', name: 'pediatric', required: true
+                        value: this.state.formData.pediatric, onChange: this.handleRadioChange, id: 'pediatric', name: 'pediatric', required: true
                       })
                     ]),
 
@@ -1239,7 +1563,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.illegalBehavior, onChange: () => {}, id: 'illegalBehavior', name: 'illegalBehavior',
+                        value: this.state.formData.illegalBehavior, onChange: this.handleRadioChange, id: 'illegalBehavior', name: 'illegalBehavior',
                         required: true
                       })
                     ]),
@@ -1250,7 +1574,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.addiction, onChange: () => {}, id: 'addiction', name: 'addiction', required: true
+                        value: this.state.formData.addiction, onChange: this.handleRadioChange, id: 'addiction', name: 'addiction', required: true
                       })
                     ]),
 
@@ -1260,7 +1584,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.sexualDiseases, onChange: () => {}, id: 'sexualDiseases', name: 'sexualDiseases',
+                        value: this.state.formData.sexualDiseases, onChange: this.handleRadioChange, id: 'sexualDiseases', name: 'sexualDiseases',
                         required: true
                       })
                     ]),
@@ -1271,7 +1595,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.stigmatizedDiseases, onChange: () => {}, id: 'stigmatizedDiseases',
+                        value: this.state.formData.stigmatizedDiseases, onChange: this.handleRadioChange, id: 'stigmatizedDiseases',
                         name: 'stigmatizedDiseases', required: true
                       })
                     ]),
@@ -1283,7 +1607,7 @@ class DataAccessRequestRenewal extends Component {
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.vulnerablePopulation, onChange: () => {}, id: 'vulnerablePopulation', name: 'vulnerablePopulation',
+                        value: this.state.formData.vulnerablePopulation, onChange: this.handleRadioChange, id: 'vulnerablePopulation', name: 'vulnerablePopulation',
                         required: true
                       })
                     ]),
@@ -1294,7 +1618,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.populationMigration, onChange: () => {}, id: 'populationMigration', name: 'populationMigration',
+                        value: this.state.formData.populationMigration, onChange: this.handleRadioChange, id: 'populationMigration', name: 'populationMigration',
                         required: true
                       })
                     ]),
@@ -1305,7 +1629,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.psychiatricTraits, onChange: () => {}, id: 'psychiatricTraits', name: 'psychiatricTraits',
+                        value: this.state.formData.psychiatricTraits, onChange: this.handleRadioChange, id: 'psychiatricTraits', name: 'psychiatricTraits',
                         required: true
                       })
                     ]),
@@ -1316,7 +1640,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group' }, [
                       YesNoRadioGroup({
-                        value: this.state.formData.notHealth, onChange: () => {}, id: 'notHealth', name: 'notHealth', required: true
+                        value: this.state.formData.notHealth, onChange: this.handleRadioChange, id: 'notHealth', name: 'notHealth', required: true
                       })
                     ])
                   ])
@@ -1333,7 +1657,7 @@ class DataAccessRequestRenewal extends Component {
                     ]),
 
                     a({
-                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: () => {},
+                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: this.partialSave,
                       className: 'f-right btn-secondary access-color'
                     }, ['Save'])
                   ])
@@ -1421,18 +1745,18 @@ class DataAccessRequestRenewal extends Component {
                     ]),
 
                     a({
-                      id: 'btn_submit', isRendered: this.state.formData.darCode === null, onClick: () => {},
+                      id: 'btn_submit', isRendered: this.state.formData.darCode === null, onClick: this.attestAndSave,
                       className: 'f-right btn-primary access-background bold'
                     }, ['Attest and Send']),
 
                     ConfirmationDialog({
                       title: 'Data Request Confirmation', disableOkBtn: this.state.disableOkBtn, disableNoBtn: this.state.disableOkBtn,
-                      color: 'access', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: () => {} }
+                      color: 'access', showModal: this.state.showDialogSubmit, action: { label: 'Yes', handler: this.dialogHandlerSubmit }
                     }, [div({ className: 'dialog-description' }, ['Are you sure you want to send this Data Access Request Renewal?'])]),
                     h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
 
                     a({
-                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: () => {},
+                      id: 'btn_save', isRendered: this.state.formData.darCode === null, onClick: this.partialSave,
                       className: 'f-right btn-secondary access-color'
                     }, ['Save'])
                   ])
