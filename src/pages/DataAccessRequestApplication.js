@@ -614,7 +614,13 @@ class DataAccessRequestApplication extends Component {
         let referenceId = formattedFormData.referenceId;
         let darPartialResponse = this.updateDraftResponse(formattedFormData, referenceId);
         referenceId = darPartialResponse.referenceId;
-        darPartialResponse = this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+
+        //execute saveDARDocuments method only if documents are required for the DAR
+        //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
+        const {activeDULQuestions} = this.state.formData;
+        if(activeDULQuestions.ethicsApprovalRequired || activeDULQuestions.collaboratorRequired) {
+          darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+        }
         let updatedFormData = assign({}, formattedFormData, darPartialResponse);
         await DAR.postDar(updatedFormData);
         this.setState({
@@ -690,7 +696,12 @@ class DataAccessRequestApplication extends Component {
       if(fp.isNil(dataRequestId)) {
         this.props.history.replace('/dar_application/' + referenceId);
       }
-      darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+      //execute saveDARDocuments method only if documents are required for the DAR
+      //value can be determined from activeDULQuestions, which is populated on Step 2 where document upload occurs
+      const {activeDULQuestions} = this.state.formData;
+      if(activeDULQuestions.ethicsApprovalRequired || activeDULQuestions.collaboratorRequired) {
+        darPartialResponse = await this.saveDARDocuments(uploadedIrbDocument, uploadedCollaborationLetter, referenceId);
+      }
       this.setState(prev => {
         prev.formData = assign({}, prev.formData, darPartialResponse);
         prev.showDialogSave = false;
