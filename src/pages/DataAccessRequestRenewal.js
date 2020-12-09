@@ -20,6 +20,10 @@ import './DataAccessRequestApplication.css';
 
 const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
 
+/**
+ * This class is for demo purposes only and is not intended to perform any data
+ * saving functionality.
+ */
 class DataAccessRequestRenewal extends Component {
 
   constructor(props) {
@@ -92,11 +96,9 @@ class DataAccessRequestRenewal extends Component {
           invalid: false
         }
       },
-      problemSavingRequest: false
+      problemSavingRequest: false,
+      ontologies: []
     };
-
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
   onNihStatusUpdate = (nihValid) => {
@@ -435,21 +437,6 @@ class DataAccessRequestRenewal extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
-        if (formData.darCode !== undefined && formData.darCode !== null) {
-          DAR.updateDar(formData, formData.darCode).then(response => {
-            this.setState({ showDialogSubmit: false });
-            this.props.history.push('researcher_console');
-          });
-        } else {
-          DAR.postDataAccessRequest(formData).then(response => {
-            this.setState({ showDialogSubmit: false });
-            this.props.history.push('researcher_console');
-          }).catch(e =>
-            this.setState(prev => {
-              prev.problemSavingRequest = true;
-              return prev;
-            }));
-        }
       });
     } else {
       this.setState({ showDialogSubmit: false });
@@ -495,18 +482,6 @@ class DataAccessRequestRenewal extends Component {
   };
 
   saveDAR(response) {
-    let formData = this.state.formData;
-    if (formData.partialDarCode === null) {
-      DAR.postPartialDarRequest(formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.push('researcher_console');
-      });
-    } else {
-      DAR.updatePartialDarRequest(formData).then(resp => {
-        this.setShowDialogSave(false);
-        this.props.history.push({ pathname: 'researcher_console' });
-      });
-    }
   }
 
   onDatasetsChange = (data, action) => {

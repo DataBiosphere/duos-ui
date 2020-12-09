@@ -331,13 +331,6 @@ export const DAR = {
     return res.data;
   },
 
-  //v1 api endpoint to post dar drafts, should remove once all uses of it has been eliminated
-  postPartialDarRequest: async dar => {
-    const url = `${await Config.getApiUrl()}/dar/partial`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
-    return await res.json();
-  },
-
   deletePartialDarRequest: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
@@ -371,14 +364,6 @@ export const DAR = {
     const url = `${await Config.getApiUrl()}/dar/v2`;
     const res = axios.post(url, filteredDar, Config.authOpts());
     return await res.data;
-  },
-
-  //v1 endpoint for DAR POST
-  postDataAccessRequest: async dar => {
-    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
-    const url = `${await Config.getApiUrl()}/dar`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredDar), { method: 'POST' }]));
-    return await res;
   },
 
   cancelDar: async referenceId => {
