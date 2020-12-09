@@ -107,7 +107,7 @@ class DatasetRegistration extends Component {
         prev.formData.ontologies = ontologies;
         return prev;
       });
-    };
+    }
   };
 
   async init() {
@@ -452,6 +452,8 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = false;
       prev.formData.diseases = false;
       prev.formData.ontologies = [];
+      prev.formData.other = false;
+      prev.formData.primaryOtherText = '';
       prev.disableOkBtn = false;
       prev.problemSavingRequest = false;
       prev.submissionSuccess = false;
@@ -466,6 +468,8 @@ class DatasetRegistration extends Component {
       prev.formData.diseases = false;
       prev.formData.ontologies = [];
       prev.formData.npoa = false;
+      prev.formData.other = false;
+      prev.formData.primaryOtherText = '';
       prev.disableOkBtn = false;
       prev.problemSavingRequest = false;
       prev.submissionSuccess = false;
@@ -479,6 +483,8 @@ class DatasetRegistration extends Component {
       prev.formData.hmb = false;
       prev.formData.diseases = true;
       prev.formData.npoa = false;
+      prev.formData.other = false;
+      prev.formData.primaryOtherText = '';
       prev.disableOkBtn = false;
       prev.problemSavingRequest = false;
       prev.submissionSuccess = false;
@@ -764,7 +770,7 @@ class DatasetRegistration extends Component {
                         name: 'researcher',
                         id: 'inputResearcher',
                         value: this.state.datasetData.researcher,
-                        disabled: true,
+                        disabled: !isUpdateDataset,
                         className: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
                       }),
@@ -1475,8 +1481,7 @@ class DatasetRegistration extends Component {
                         value: 'yes',
                         defaultChecked: !needsApproval,
                         onClick: () => this.setNeedsApproval(false),
-                        label: 'Yes',
-                        disabled: isUpdateDataset,
+                        label: 'Yes'
                       }),
 
                       RadioButton({
@@ -1489,8 +1494,7 @@ class DatasetRegistration extends Component {
                         value: 'no',
                         defaultChecked: needsApproval,
                         onClick: () => this.setNeedsApproval(true),
-                        label: 'No',
-                        disabled: isUpdateDataset,
+                        label: 'No'
                       }),
                     ]),
                   ]),
