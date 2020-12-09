@@ -140,7 +140,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
           [ApplicantInfo({
             researcherProfile: researcherProfile,
             content: {
-              principalInvestigator: piName,
+              principalInvestigator: researcherProfile.isThePI ? profileName : (piName || '- - -'),
               researcher: profileName,
               institution,
               department,
