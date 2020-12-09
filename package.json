@@ -40,7 +40,7 @@
     "react-tabs": "3.1.1",
     "react-tooltip": "4.2.11",
     "set-value": "3.0.2",
-    "uuid": "8.3.1",
+    "uuid": "8.3.2",
     "source-map-explorer": "2.5.1"
   },
   "scripts": {
@@ -52,13 +52,11 @@
     "start:ci": "BROWSER=none react-scripts start",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "cypress:verify": "cypress verify",
-    "docker-build:test": "docker-build test"
+    "cypress:verify": "cypress verify"
   },
   "devDependencies": {
     "acorn": "8.0.4",
-    "cypress": "6.0.1",
-    "docker-build": "2.2.0",
+    "cypress": "6.1.0",
     "eslint": "6.8.0",
     "eslint-config-react-app": "5.2.1",
     "eslint-plugin-flowtype": "4.7.0",

@@ -6,9 +6,7 @@ import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
-import { USER_ROLES } from '../libs/utils';
-
-
+import { setUserRoleStatuses, USER_ROLES } from '../libs/utils';
 export const SignIn = hh(class SignIn extends Component {
 
   constructor(props) {
@@ -34,48 +32,50 @@ export const SignIn = hh(class SignIn extends Component {
 
   responseGoogle = async (response) => {
     Storage.setGoogleData(response);
-    this.getUser().then(
-      user => {
-        user = Object.assign(user, this.setUserRoleStatuses(user));
-        this.redirect(user);
-      },
-      error => {
-        User.registerUser().then(
-          user => {
-            this.setUserRoleStatuses(user);
-            this.props.history.push('/profile');
-            this.props.onSignIn();
-          },
-          error => {
-            const status = error.status;
-            switch (status) {
-              case 400:
-                this.setState(prev => {
-                  prev.error = { show: true, title: 'Error', msg: JSON.stringify(error) };
-                  return prev;
-                });
-                break;
-              case 409:
-                // If the user exists, just log them in.
-                this.getUser().then(
-                  user => {
-                    user = Object.assign(user, this.setUserRoleStatuses(user));
-                    this.redirect(user);
-                  },
-                  error => {
-                    Storage.clearStorage();
-                  });
-                break;
-              default:
-                this.setState(prev => {
-                  prev.error = { show: true, title: 'Error', msg: 'Unexpected error, please try again' };
-                  return prev;
-                });
-                break;
-            }
+    try{
+      const userRes = await this.getUser();
+      const user = Object.assign(userRes, setUserRoleStatuses(userRes, Storage));
+      this.redirect(user);
+    } catch(error) {
+      try {
+        let registeredUser = await User.registerUser();
+        this.setUserRoleStatuses(registeredUser, Storage);
+        this.props.onSignIn(); //is this async?
+        this.props.history.push('/profile');
+      } catch(error) {
+        try{
+          const status = error.status;
+          switch(status) {
+            case 400:
+              this.setState(prev => {
+                prev.error = {show: true, title: 'Error', msg: JSON.stringify(error)};
+                return prev;
+              });
+              break;
+            case 409:
+              try {
+                let user = await this.getUser();
+                user = Object.assign({}, user, setUserRoleStatuses(user, Storage));
+                this.redirect(user);
+              } catch(error) {
+                Storage.clearStorage();
+              }
+              break;
+            default:
+              this.setState(prev => {
+                prev.error = { show: true, title: 'Error', msg: 'Unexpected error, please try again'};
+                return prev;
+              });
+              break;
           }
-        );
-      });
+        } catch(error) {
+          this.setState(prev => {
+            prev.error = {show: true, title: 'Error', msg: JSON.stringify(error)};
+            return prev;
+          });
+        }
+      }
+    }
   };
 
   forbidden = (response) => {
@@ -155,7 +155,7 @@ export const SignIn = hh(class SignIn extends Component {
         onSuccess: this.responseGoogle,
         onFailure: this.forbidden,
         render: ({disabled}) => this.renderSpinnerIfDisabled(disabled)
-        }
+      }
       );
     }
 

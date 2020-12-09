@@ -336,8 +336,27 @@ export const DataUseTranslation = {
 
   translateDataUseRestrictions: async (dataUse) => {
 
-    const processRestrictionStatements = async(key, value) => {
+    const processDefinedLimitations = (key, dataUse, consentTranslations) => {
+      const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
+      const isHMBActive = dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
+      const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
+      const isPOAActive = !isGeneralUseActive && ! isHMBActive && isEmpty(dataUse.diseaseRestrictions);
+      let statement;
+
+      if(
+        !targetKeys.includes(key) ||
+        (key === 'hmbResearch' && isHMBActive) ||
+        (key === 'populationOriginsAncestry' && isPOAActive) ||
+        (key === 'generalUse' && !isHMBActive)
+      ) {
+        statement = consentTranslations[key];
+      }
+      return statement;
+    };
+
+    const processRestrictionStatements = async(key, dataUse) => {
       let resp;
+      const value = dataUse[key];
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
           let resolvedLabels = [];
@@ -351,7 +370,7 @@ export const DataUseTranslation = {
           }
           resp = consentTranslations.diseaseRestrictions(resolvedLabels);
         } else {
-          resp = consentTranslations[key];
+          resp = processDefinedLimitations(key, dataUse, consentTranslations);
         }
       }
       return resp;
@@ -361,8 +380,7 @@ export const DataUseTranslation = {
     let restrictionStatements = [];
     let targetKeys = Object.keys(consentTranslations);
     const processingPromises = targetKeys.map((key) => {
-      const value = dataUse[key];
-      return processRestrictionStatements(key, value);
+      return processRestrictionStatements(key, dataUse);
     });
 
     restrictionStatements = await Promise.all(processingPromises);
