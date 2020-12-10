@@ -38,10 +38,6 @@ export default function NIHPilotInfo() {
 
                 div({className: 'home-content'}, [
                   h3({}, ['Related Information']),
-                  p({},
-                    ['']),
-                  p({},
-                    ['']),
                 ]),
               ]),
             ]),
