@@ -311,12 +311,6 @@ export const DAR = {
     return await res.json();
   },
 
-  updatePartialDarRequest: async dar => {
-    const url = `${await Config.getApiUrl()}/dar/partial`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'PUT' }]));
-    return await res.json();
-  },
-
   //v2 update for dar partials
   updateDarDraft: async (dar, referenceId) => {
     const url = `${await Config.getApiUrl()}/dar/v2/draft/${referenceId}`;
@@ -331,8 +325,9 @@ export const DAR = {
     return res.data;
   },
 
-  deletePartialDarRequest: async (darId) => {
-    const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
+  //v2 delete dar
+  deleteDar: async (darId) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/${darId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
     return await res;
   },
