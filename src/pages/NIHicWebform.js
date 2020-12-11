@@ -60,24 +60,12 @@ class NIHICWebform extends Component {
         consentId: '',
         publicAccess: false,
       },
-      problemSavingRequest: false,
-      problemLoadingUpdateDataset: false,
-      submissionSuccess: false,
-      errorMessage: ''
     };
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   };
 
-  onNihStatusUpdate = (nihValid) => {
-    if (this.state.nihValid !== nihValid) {
-      this.setState(prev => {
-        prev.nihValid = nihValid;
-        return prev;
-      });
-    }
-  };
 
 
 
@@ -226,12 +214,6 @@ class NIHICWebform extends Component {
     if (fp.isEmpty(oldDataset)) {
       return !fp.contains(name, datasets);
     }
-    // update dataset case (include old dataset name as valid)
-    else {
-      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
-
-      return (name === updateDatasetName || !fp.contains(name, datasets));
-    }
   };
 
   showDatasetNameErrors(name, showValidationMessages) {
@@ -244,14 +226,6 @@ class NIHICWebform extends Component {
       if (name === updateDatasetName) {
         return 'form-control';
       }
-      // if the old dataset name has been edited
-      else {
-        return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
-      }
-    }
-    // if a new dataset name is being edited
-    else {
-      return this.validateDatasetName(name) ? 'form-control' : 'form-control required-field-error';
     }
   };
 
@@ -475,12 +449,6 @@ class NIHICWebform extends Component {
       if (fp.isNil(option)) {
         prev.selectedDac = {};
         prev.datasetData['dac'] = '';
-      } else {
-        prev.selectedDac = option.item;
-        prev.datasetData['dac'] = option.label;
-        prev.disableOkBtn = false;
-        prev.problemSavingRequest = false;
-        prev.problemLoadingUpdateDataset = false;
       }
       return prev;
     });
@@ -546,11 +514,6 @@ class NIHICWebform extends Component {
     // NOTE: set this to always false for now to submit dataset without consent info
     // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
 
-    const profileUnsubmitted = span({}, [
-      'Please make sure ',
-      h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
-      ' is updated, as it will be linked to your dataset for future correspondence'
-    ]);
 
     return (
 
@@ -576,15 +539,6 @@ class NIHICWebform extends Component {
             div({}, [
               div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
                 fieldset({}, [
-                  div({ isRendered: this.state.completed === false, className: 'rp-alert' }, [
-                    Alert({ id: 'profileUnsubmitted', type: 'danger', title: profileUnsubmitted })
-                  ]),
-                  div({ isRendered: problemLoadingUpdateDataset, className: 'rp-alert' }, [
-                    Alert({
-                      id: 'problemLoadingUpdateDataset', type: 'danger',
-                      title: "The Dataset you were trying to access either does not exist or you do not have permission to edit it."
-                    })
-                  ]),
                   h3({ className: 'rp-form-title common-color' }, ['Administrative Information']),
 
                   div({className: 'form-group'}, [
@@ -2740,8 +2694,6 @@ class NIHICWebform extends Component {
                         title: isUpdateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
                       })
                     ]),
-
-
                   ])
                 ]),
               ])
