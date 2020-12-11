@@ -371,6 +371,7 @@ class DatasetCatalog extends Component {
               ]),
               button({
                 id: 'btn_addDataset',
+                isRendered: this.state.isAdmin,
                 onClick: () => this.props.history.push({ pathname: 'dataset_registration' }),
                 className: 'btn-primary dataset-background search-wrapper',
                 'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
