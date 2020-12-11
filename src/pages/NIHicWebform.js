@@ -80,29 +80,6 @@ class NIHICWebform extends Component {
   };
 
 
-  async init() {
-    const { datasetId } = this.props.match.params;
-    let updateDataset = {};
-    // update dataset case
-    if (!fp.isNil(datasetId)) {
-      DataSet.getDataSetsByDatasetId(datasetId).then(data => {
-        updateDataset = data;
-        // redirect to blank form if dataset id is invalid or inaccessible
-        if (fp.isEmpty(updateDataset) || fp.isNil(updateDataset.dataSetId)) {
-          this.setState(prev => {
-            prev.problemLoadingUpdateDataset = true;
-          });
-          this.props.history.push('/dataset_registration');
-          ReactTooltip.rebuild();
-        }
-        else {
-          this.setState(prev => {
-            prev.updateDataset = updateDataset;
-          });
-        }
-      });
-    }
-  };
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
@@ -328,41 +305,6 @@ class NIHICWebform extends Component {
 
         if (this.state.showValidationMessages) {
           this.setState({showDialogSubmit: false});
-        }
-        else {
-          let ds = this.formatFormData(formData);
-          if (fp.isEmpty(this.state.updateDataset)) {
-            DataSet.postDatasetForm(ds).then(resp => {
-              this.setState({ showDialogSubmit: false, submissionSuccess: true });
-              ReactTooltip.rebuild();
-            }).catch(e => {
-              let errorMessage = (e.status === 409) ?
-                'Dataset with this name already exists: ' + this.state.datasetData.datasetName
-              + '. Please choose a different name before attempting to submit again.'
-                : 'Some errors occurred, Dataset Registration couldn\'t be completed.';
-              this.setState(prev => {
-                prev.problemSavingRequest = true;
-                prev.submissionSuccess = false;
-                prev.errorMessage = errorMessage;
-                return prev;
-              });
-            });
-          }
-          else {
-            const { datasetId } = this.props.match.params;
-            DataSet.updateDataset(datasetId, ds).then(resp => {
-              this.setState({ showDialogSubmit: false, submissionSuccess: true });
-              ReactTooltip.rebuild();
-            }).catch(e => {
-              let errorMessage = 'Some errors occurred, the Dataset was not updated.';
-              this.setState(prev => {
-                prev.problemSavingRequest = true;
-                prev.submissionSuccess = false;
-                prev.errorMessage = errorMessage;
-                return prev;
-              });
-            });
-          }
         }
       });
     } else {
@@ -643,35 +585,44 @@ class NIHICWebform extends Component {
                       title: "The Dataset you were trying to access either does not exist or you do not have permission to edit it."
                     })
                   ]),
-                  h3({ className: 'rp-form-title common-color' }, ['1. Administrative Information']),
-
-                  div({ className: 'form-group' }, [
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      label({ className: 'control-label rp-title-question common-color' }, ['1.1 Principal Investigator Name*'])
-                    ]),
-
-                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                      input({
-                        type: 'text',
-                        name: 'researcher',
-                        id: 'inputResearcher',
-                        value: this.state.datasetData.researcher,
-                        disabled: true,
-                        className: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
-                        required: true
-                      }),
-                      span({
-                        isRendered: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages), className: 'cancel-color required-field-error-span'
-                      }, ['Required field'])
-                    ])
-                  ]),
+                  h3({ className: 'rp-form-title common-color' }, ['Administrative Information']),
 
                   div({className: 'form-group'}, [
                     div(
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.2 Principal Investigator Title* ',
+                          'Principal Investigator Name* ',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'datasetName',
+                          id: 'inputName',
+                          maxLength: '256',
+                          value: this.state.datasetData.datasetName,
+                          onChange: this.handleChange,
+                          className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
+                          required: true,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
+                        },
+                        [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
+                      ])
+                  ]),
+
+
+                  div({className: 'form-group'}, [
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        label({className: 'control-label rp-title-question common-color'}, [
+                          'Principal Investigator Title* ',
                         ]),
                       ]),
                     div(
@@ -700,7 +651,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.3 Principal Investigator Email* ',
+                          'Principal Investigator Email* ',
                         ]),
                       ]),
                     div(
@@ -732,7 +683,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.4 Principal Investigator Institution* ',
+                          'Principal Investigator Institution* ',
                         ]),
                       ]),
                     div(
@@ -763,7 +714,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.5 Assitant/Submitter Name (if applicable)',
+                          'Assitant/Submitter Name (if applicable)',
                         ]),
                       ]),
                     div(
@@ -794,7 +745,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.6 Assistant Submitter Email',
+                          'Assistant Submitter Email',
                         ]),
                       ]),
                     div(
@@ -825,7 +776,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.7 Do you have an eRA Commons Account?',
+                          'Do you have an eRA Commons Account?',
                         ]),
                       ]),
                 div({ className: 'row no-margin' }, [
@@ -868,7 +819,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.8 NIH Grant or Contract Number ',
+                          'NIH Grant or Contract Number ',
                         ]),
                       ]),
                     div(
@@ -899,7 +850,27 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.9 NIH Institutes/Centers supporting the study',
+                          'NIH Institutes/Centers supporting the study',
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'check1',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NHGRI']),
+                            '',
+                          ]),
                         ]),
                       ]),
                     div(
@@ -917,12 +888,132 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NHGRI']),
+                        ['NCI']),
                             '',
                           ]),
                         ]),
                       ]),
-                      div(
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NHLBI']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NIMH']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NIDCR']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NIAID']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NINDS']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NCATS']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
+                    div(
                         {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                         [
                           div({className: 'checkbox'}, [
@@ -937,132 +1028,12 @@ class NIHICWebform extends Component {
                               htmlFor: 'checkMethods',
                             }, [
                               span({},
-                              ['NCI']),
+                            ['NIA']),
                               '',
                             ]),
                           ]),
                         ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NHLBI']),
-                              '',
-                            ]),
-                          ]),
-                        ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NIMH']),
-                              '',
-                            ]),
-                          ]),
-                        ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NIDCR']),
-                              '',
-                            ]),
-                          ]),
-                        ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NIAID']),
-                              '',
-                            ]),
-                          ]),
-                        ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NINDS']),
-                              '',
-                            ]),
-                          ]),
-                        ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NCATS']),
-                              '',
-                            ]),
-                          ]),
-                        ]),
-                      div(
+                    div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             div({className: 'checkbox'}, [
@@ -1077,12 +1048,12 @@ class NIHICWebform extends Component {
                                 htmlFor: 'checkMethods',
                               }, [
                                 span({},
-                                  ['NIA']),
+                              ['NIDDK']),
                                 '',
                               ]),
                             ]),
                           ]),
-                      div(
+                    div(
                             {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                             [
                               div({className: 'checkbox'}, [
@@ -1097,51 +1068,31 @@ class NIHICWebform extends Component {
                                   htmlFor: 'checkMethods',
                                 }, [
                                   span({},
-                                    ['NIDDK']),
+                                ['NEI']),
                                   '',
                                 ]),
                               ]),
                             ]),
-                      div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    id: 'checkMethods',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'methods',
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkMethods',
-                                  }, [
-                                    span({},
-                                      ['NEI']),
-                                    '',
-                                  ]),
-                                ]),
-                              ]),
-                      div(
-                                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                    [
-                                      div({className: 'checkbox'}, [
-                                        input({
-                                          id: 'checkMethods',
-                                          type: 'checkbox',
-                                          className: 'checkbox-inline rp-checkbox',
-                                          name: 'methods',
-                                        }),
-                                        label({
-                                          className: 'regular-checkbox rp-choice-questions',
-                                          htmlFor: 'checkMethods',
-                                        }, [
-                                          span({},
-                                            ['NIDA']),
-                                          '',
-                                        ]),
+                    div(
+                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                                  [
+                                    div({className: 'checkbox'}, [
+                                      input({
+                                        id: 'checkMethods',
+                                        type: 'checkbox',
+                                        className: 'checkbox-inline rp-checkbox',
+                                        name: 'methods',
+                                      }),
+                                      label({
+                                        className: 'regular-checkbox rp-choice-questions',
+                                        htmlFor: 'checkMethods',
+                                      }, [
+                                        span({},
+                                      ['NIDA']),
+                                        '',
                                       ]),
                                     ]),
+                                  ]),
                   ]),
 
                   div({className: 'form-group'}, [
@@ -1149,7 +1100,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.11 NIH Program Officer Name',
+                          'NIH Program Officer Name',
                         ]),
                       ]),
                     div(
@@ -1186,7 +1137,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.12 NIH Institute/Center for Submission',
+                      'NIH Institute/Center for Submission',
                         ]),
                       ]),
                     div(
@@ -1222,7 +1173,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          '1.13 NIH Genomic Program Administrator Name',
+                          'NIH Genomic Program Administrator Name',
                         ]),
                       ]),
                     div(
@@ -1256,14 +1207,14 @@ class NIHICWebform extends Component {
                 ]),
 
 
-                h3({ className: 'rp-form-title common-color' }, ['2. Study/Dataset Information']),
+                h3({ className: 'rp-form-title common-color' }, ['Study/Dataset Information']),
 
                 div({className: 'form-group'}, [
                   div(
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.1 Original Study Name',
+                        'Original Study Name',
                       ]),
                     ]),
                     div(
@@ -1294,7 +1245,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.2 Study Type',
+                        'Study Type',
                       ]),
                     ]),
                   div(
@@ -1316,7 +1267,7 @@ class NIHICWebform extends Component {
                           'required-field-error' :
                           '',
                         required: true,
-                      }),
+                    }),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: fp.isEmpty(this.state.datasetData.dac) && showValidationMessages,
@@ -1330,7 +1281,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.3  Project title for data to be submitted',
+                        'Project title for data to be submitted',
                       ]),
                     ]),
                     div(
@@ -1361,7 +1312,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.4 Is this a multi-center study?',
+                        'Is this a multi-center study?',
                       ]),
                     ]),
                     div({ className: 'row no-margin' }, [
@@ -1404,7 +1355,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.5 List Collaborating Sites (please enter a comma or tab delimited list)',
+                        'List Collaborating Sites (please enter a comma or tab delimited list)',
                       ]),
                     ]),
                     div(
@@ -1435,7 +1386,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.6 The individual level data are to be made available through:',
+                        'The individual level data are to be made available through:',
                       ]),
                     ]),
                     div({ className: 'row no-margin' }, [
@@ -1478,7 +1429,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.7 The genomic summary results (GSR) from this study are only to be made available through controlled-access',
+                        'The genomic summary results (GSR) from this study are only to be made available through controlled-access',
                       ]),
                     ]),
                     div({ className: 'row no-margin' }, [
@@ -1521,7 +1472,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.8 Explanation if controlled-access for GSR was selected',
+                        'Explanation if controlled-access for GSR was selected',
                       ]),
                     ]),
                     div(
@@ -1552,7 +1503,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.9 Consent Group 1 - Name:',
+                        'Consent Group 1 - Name:',
                       ]),
                     ]),
                     div(
@@ -1966,12 +1917,22 @@ class NIHICWebform extends Component {
                         ]),
                 ]),
 
+                div({ className: 'row no-margin' }, [
+                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                    a({
+                      id: 'btn_submit',
+                      className: 'f-right btn-primary access-background bold'
+                    }, [isUpdateDataset ? 'Update Dataset' : 'Add Consent Group']),
+                  ])
+                ]),
+
+
                 div({className: 'form-group'}, [
                   div(
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.11 Are you requesting an Alternative Data Sharing Plan for samples that cannot be shared through a public database or repository?',
+                        'Are you requesting an Alternative Data Sharing Plan for samples that cannot be shared through a public database or repository?',
                       ]),
                     ]),
                     div({ className: 'row no-margin' }, [
@@ -2014,7 +1975,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.12 Please mark the reasons for which you are requesting an Alternative Data Sharing Plan',
+                        'Please mark the reasons for which you are requesting an Alternative Data Sharing Plan',
                       ]),
                     ]),
                     div(
@@ -2184,7 +2145,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.14 Explanation for Request',
+                        'Explanation for Request',
                       ]),
                     ]),
                     div(
@@ -2215,7 +2176,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.15 Alternative Data Sharing Plan',
+                        'Alternative Data Sharing Plan',
                       ]),
                     ]),
                     div(
@@ -2246,7 +2207,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.16 If needed, please attach additional information to this document',
+                        'If needed, please attach additional information to this document',
                       ]),
                     ]),
 
@@ -2257,7 +2218,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.17 Acknowledgement Statement',
+                        'Acknowledgement Statement',
                       ]),
                     ]),
                     div(
@@ -2288,7 +2249,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.18 Data will be submitted',
+                        'Data will be submitted',
                       ]),
                     ]),
                     div({ className: 'row no-margin' }, [
@@ -2331,7 +2292,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.19 Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release',
+                        'Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release',
                       ]),
                     ]),
                     div({ className: 'row no-margin' }, [
@@ -2374,7 +2335,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.21 Target data delivery date',
+                        'Target data delivery date',
                       ]),
                     ]),
                   div(
@@ -2410,7 +2371,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.22 Target public release dae',
+                        'Target public release dae',
                       ]),
                     ]),
                   div(
@@ -2446,7 +2407,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.23 Estimated # of bytes of data to be deposited',
+                        'Estimated # of bytes of data to be deposited',
                       ]),
                     ]),
                     div(
@@ -2477,7 +2438,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.24 Estimated # of Study Participants',
+                        'Estimated # of Study Participants',
                       ]),
                     ]),
                     div(
@@ -2508,7 +2469,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        '2.25 Samples genotyped/sequenced (check all dattypes expected for this study)',
+                        'Samples genotyped/sequenced (check all data types expected for this study)',
                       ]),
                     ]),
                     div(
@@ -2695,7 +2656,7 @@ class NIHICWebform extends Component {
 
 
 
-                h3({ className: 'rp-form-title common-color' }, ['3. Signatures']),
+                h3({ className: 'rp-form-title common-color' }, ['Signatures']),
 
                 div({ className: 'form-group' }, [
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
