@@ -828,7 +828,7 @@ class NIHICWebform extends Component {
                           '1.7 Do you have an eRA Commons Account?',
                         ]),
                       ]),
-                  div({ className: 'row no-margin' }, [
+                div({ className: 'row no-margin' }, [
                         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
                           RadioButton({
@@ -902,26 +902,26 @@ class NIHICWebform extends Component {
                           '1.9 NIH Institutes/Centers supporting the study',
                         ]),
                       ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['NHGRI']),
-                              '',
-                            ]),
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                          ['NHGRI']),
+                            '',
                           ]),
                         ]),
+                      ]),
                       div(
                         {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                         [
@@ -937,7 +937,7 @@ class NIHICWebform extends Component {
                               htmlFor: 'checkMethods',
                             }, [
                               span({},
-                                ['NCI']),
+                              ['NCI']),
                               '',
                             ]),
                           ]),
