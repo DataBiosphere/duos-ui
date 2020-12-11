@@ -5,13 +5,10 @@ import { Link } from 'react-router-dom';
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAC, DAR, DataSet} from '../libs/ajax';
-import { NotificationService } from '../libs/notificationService';
+import {DAR, DataSet} from '../libs/ajax';
 import { searchOntology } from '../libs/ontologyService';
-import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 
@@ -831,7 +828,7 @@ class NIHICWebform extends Component {
                           '1.7 Do you have an eRA Commons Account?',
                         ]),
                       ]),
-                      div({ className: 'row no-margin' }, [
+                  div({ className: 'row no-margin' }, [
                         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
                           RadioButton({
@@ -925,7 +922,147 @@ class NIHICWebform extends Component {
                             ]),
                           ]),
                         ]),
-                        div(
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NCI']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NHLBI']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NIMH']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NIDCR']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NIAID']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NINDS']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
+                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                        [
+                          div({className: 'checkbox'}, [
+                            input({
+                              id: 'checkMethods',
+                              type: 'checkbox',
+                              className: 'checkbox-inline rp-checkbox',
+                              name: 'methods',
+                            }),
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              htmlFor: 'checkMethods',
+                            }, [
+                              span({},
+                                ['NCATS']),
+                              '',
+                            ]),
+                          ]),
+                        ]),
+                      div(
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             div({className: 'checkbox'}, [
@@ -940,12 +1077,12 @@ class NIHICWebform extends Component {
                                 htmlFor: 'checkMethods',
                               }, [
                                 span({},
-                                  ['NCI']),
+                                  ['NIA']),
                                 '',
                               ]),
                             ]),
                           ]),
-                          div(
+                      div(
                             {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                             [
                               div({className: 'checkbox'}, [
@@ -960,12 +1097,12 @@ class NIHICWebform extends Component {
                                   htmlFor: 'checkMethods',
                                 }, [
                                   span({},
-                                    ['NHLBI']),
+                                    ['NIDDK']),
                                   '',
                                 ]),
                               ]),
                             ]),
-                            div(
+                      div(
                               {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                               [
                                 div({className: 'checkbox'}, [
@@ -980,52 +1117,12 @@ class NIHICWebform extends Component {
                                     htmlFor: 'checkMethods',
                                   }, [
                                     span({},
-                                      ['NIMH']),
+                                      ['NEI']),
                                     '',
                                   ]),
                                 ]),
                               ]),
-                              div(
-                                {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                [
-                                  div({className: 'checkbox'}, [
-                                    input({
-                                      id: 'checkMethods',
-                                      type: 'checkbox',
-                                      className: 'checkbox-inline rp-checkbox',
-                                      name: 'methods',
-                                    }),
-                                    label({
-                                      className: 'regular-checkbox rp-choice-questions',
-                                      htmlFor: 'checkMethods',
-                                    }, [
-                                      span({},
-                                        ['NIDCR']),
-                                      '',
-                                    ]),
-                                  ]),
-                                ]),
-                                div(
-                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                  [
-                                    div({className: 'checkbox'}, [
-                                      input({
-                                        id: 'checkMethods',
-                                        type: 'checkbox',
-                                        className: 'checkbox-inline rp-checkbox',
-                                        name: 'methods',
-                                      }),
-                                      label({
-                                        className: 'regular-checkbox rp-choice-questions',
-                                        htmlFor: 'checkMethods',
-                                      }, [
-                                        span({},
-                                          ['NIAID']),
-                                        '',
-                                      ]),
-                                    ]),
-                                  ]),
-                                  div(
+                      div(
                                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                                     [
                                       div({className: 'checkbox'}, [
@@ -1040,111 +1137,11 @@ class NIHICWebform extends Component {
                                           htmlFor: 'checkMethods',
                                         }, [
                                           span({},
-                                            ['NINDS']),
+                                            ['NIDA']),
                                           '',
                                         ]),
                                       ]),
                                     ]),
-                                    div(
-                                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                      [
-                                        div({className: 'checkbox'}, [
-                                          input({
-                                            id: 'checkMethods',
-                                            type: 'checkbox',
-                                            className: 'checkbox-inline rp-checkbox',
-                                            name: 'methods',
-                                          }),
-                                          label({
-                                            className: 'regular-checkbox rp-choice-questions',
-                                            htmlFor: 'checkMethods',
-                                          }, [
-                                            span({},
-                                              ['NCATS']),
-                                            '',
-                                          ]),
-                                        ]),
-                                      ]),
-                                      div(
-                                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                        [
-                                          div({className: 'checkbox'}, [
-                                            input({
-                                              id: 'checkMethods',
-                                              type: 'checkbox',
-                                              className: 'checkbox-inline rp-checkbox',
-                                              name: 'methods',
-                                            }),
-                                            label({
-                                              className: 'regular-checkbox rp-choice-questions',
-                                              htmlFor: 'checkMethods',
-                                            }, [
-                                              span({},
-                                                ['NIA']),
-                                              '',
-                                            ]),
-                                          ]),
-                                        ]),
-                                        div(
-                                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                          [
-                                            div({className: 'checkbox'}, [
-                                              input({
-                                                id: 'checkMethods',
-                                                type: 'checkbox',
-                                                className: 'checkbox-inline rp-checkbox',
-                                                name: 'methods',
-                                              }),
-                                              label({
-                                                className: 'regular-checkbox rp-choice-questions',
-                                                htmlFor: 'checkMethods',
-                                              }, [
-                                                span({},
-                                                  ['NIDDK']),
-                                                '',
-                                              ]),
-                                            ]),
-                                          ]),
-                                          div(
-                                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                            [
-                                              div({className: 'checkbox'}, [
-                                                input({
-                                                  id: 'checkMethods',
-                                                  type: 'checkbox',
-                                                  className: 'checkbox-inline rp-checkbox',
-                                                  name: 'methods',
-                                                }),
-                                                label({
-                                                  className: 'regular-checkbox rp-choice-questions',
-                                                  htmlFor: 'checkMethods',
-                                                }, [
-                                                  span({},
-                                                    ['NEI']),
-                                                  '',
-                                                ]),
-                                              ]),
-                                            ]),
-                                            div(
-                                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                              [
-                                                div({className: 'checkbox'}, [
-                                                  input({
-                                                    id: 'checkMethods',
-                                                    type: 'checkbox',
-                                                    className: 'checkbox-inline rp-checkbox',
-                                                    name: 'methods',
-                                                  }),
-                                                  label({
-                                                    className: 'regular-checkbox rp-choice-questions',
-                                                    htmlFor: 'checkMethods',
-                                                  }, [
-                                                    span({},
-                                                      ['NIDA']),
-                                                    '',
-                                                  ]),
-                                                ]),
-                                              ]),
                   ]),
 
                   div({className: 'form-group'}, [
