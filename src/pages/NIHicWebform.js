@@ -7,7 +7,6 @@ import {Alert} from '../components/Alert';
 import {Notification} from '../components/Notification';
 import {PageHeading} from '../components/PageHeading';
 import {DAR} from '../libs/ajax';
-import {searchOntology} from '../libs/ontologyService';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 
@@ -18,14 +17,10 @@ class NIHICWebform extends Component {
     this.state = {
       dacList: [],
       selectedDac: {},
-      allDatasets: '',
       allDatasetNames: [],
       updateDataset: {},
-      nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
-      showModal: false,
-      showDialogSubmit: false,
       formData: {
         methods: '',
         genetic: '',
@@ -34,7 +29,6 @@ class NIHICWebform extends Component {
         ethics: '',
         geographic: '',
         moratorium: '',
-        populationMigration: '',
         forProfit: '',
         hmb: false,
         poa: false,
@@ -47,120 +41,18 @@ class NIHICWebform extends Component {
       datasetData: {
         datasetName: '',
         researcher: '',
-        collectionId: '',
-        pi: '',
         datasetRepoUrl: '',
         dataType: '',
         species: '',
         phenotype: '',
-        nrParticipants: '',
         description: '',
         dac: '',
-        consentId: '',
         publicAccess: false,
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
       submissionSuccess: false,
-      errorMessage: ''
     };
-  };
-
-  onNihStatusUpdate = (nihValid) => {
-    if (this.state.nihValid !== nihValid) {
-      this.setState(prev => {
-        prev.nihValid = nihValid;
-        return prev;
-      });
-    }
-  };
-
-  // fill out the form fields with old dataset properties if they already exist
-  prefillDatasetFields(dataset) {
-    let name = fp.find({propertyName: "Dataset Name"})(dataset.properties);
-    let collectionId = fp.find({propertyName: "Sample Collection ID"})(dataset.properties);
-    let dataType = fp.find({propertyName: "Data Type"})(dataset.properties);
-    let species = fp.find({propertyName: "Species"})(dataset.properties);
-    let phenotype = fp.find({propertyName: "Phenotype/Indication"})(dataset.properties);
-    let nrParticipants = fp.find({propertyName: "# of participants"})(dataset.properties);
-    let description = fp.find({propertyName: "Description"})(dataset.properties);
-    let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
-    let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
-    let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
-    let publicAccess = !dataset.needsApproval;
-
-    this.setState(prev => {
-      prev.datasetData.datasetName = name ? name.propertyValue : '';
-      prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
-      prev.datasetData.dataType = dataType ? dataType.propertyValue : '';
-      prev.datasetData.species = species ? species.propertyValue : '';
-      prev.datasetData.phenotype = phenotype ? phenotype.propertyValue : '';
-      prev.datasetData.nrParticipants = nrParticipants ? nrParticipants.propertyValue : '';
-      prev.datasetData.description = description ? description.propertyValue : '';
-      prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
-      prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
-      prev.datasetData.pi = pi ? pi.propertyValue : '';
-      prev.datasetData.publicAccess = publicAccess;
-
-      return prev;
-    });
-
-    this.prefillDataUseFields(dataset.dataUse);
-  };
-
-  async getOntologies(urls) {
-    if (fp.isEmpty(urls)) {
-      return [];
-    }
-    else {
-      return await Promise.all(
-        urls.map(url => searchOntology(url)
-          .then(data => {
-            return data;
-          })
-        ));
-    }
-  };
-
-  prefillDataUseFields(dataUse) {
-    let methods = dataUse.methodsResearch;
-    let genetics = dataUse.geneticStudiesOnly;
-    let publication = dataUse.publicationResults;
-    let collaboration = dataUse.collaboratorRequired;
-    let ethics = dataUse.ethicsApprovalRequired;
-    let geographic = dataUse.geographicalRestrictions;
-    let forProfit = !dataUse.commercialUse;
-    let hmb = dataUse.hmbResearch;
-    let poa = dataUse.populationOriginsAncestry;
-    let diseases = dataUse.diseaseRestrictions;
-    let other = !fp.isEmpty(dataUse.other);
-    let otherText = dataUse.other;
-    let generalUse = dataUse.generalUse;
-
-    this.setState(prev => {
-      prev.formData.methods = methods;
-      prev.formData.genetic = genetics;
-      prev.formData.publication = publication;
-      prev.formData.collaboration = collaboration;
-      prev.formData.ethics = ethics;
-      prev.formData.geographic = geographic;
-      prev.formData.forProfit = forProfit;
-      prev.formData.hmb = hmb;
-      prev.formData.poa = poa;
-      prev.formData.diseases = diseases;
-      prev.formData.other = !fp.isEmpty(other);
-      prev.formData.otherText = otherText;
-      prev.formData.generalUse = generalUse;
-      return prev;
-    });
-  };
-
-  handleOpenModal = () => {
-    this.setState({ showModal: true });
-  };
-
-  handleCloseModal = () => {
-    this.setState({ showModal: false });
   };
 
   handleChange = (e) => {
@@ -175,21 +67,6 @@ class NIHICWebform extends Component {
     });
   };
 
-  handlePositiveIntegerOnly = (e) => {
-    const field = e.target.name;
-    const value = e.target.value.replace(/[^\d]/,'');
-
-    if (value === '' || parseInt(value, 10) > -1) {
-      this.setState(prev => {
-        prev.datasetData[field] = value;
-        prev.disableOkBtn = false;
-        prev.problemSavingRequest = false;
-        prev.submissionSuccess = false;
-        return prev;
-      });
-    }
-  };
-
   handleCheckboxChange = (e) => {
     const field = e.target.name;
     const value = e.target.checked;
@@ -200,18 +77,6 @@ class NIHICWebform extends Component {
       prev.submissionSuccess = false;
       return prev;
     });
-  };
-
-  validateRequiredFields(formData) {
-    return this.isValid(formData.researcher) &&
-      this.validateDatasetName((formData.datasetName)) &&
-      this.isValid(formData.datasetName) &&
-      this.isValid(formData.datasetRepoUrl) &&
-      this.isValid(formData.dataType) &&
-      this.isValid(formData.species) &&
-      this.isValid(formData.phenotype) &&
-      this.isValid(formData.nrParticipants) &&
-      this.isValid(formData.description);
   };
 
   validateDatasetName(name) {
@@ -250,66 +115,9 @@ class NIHICWebform extends Component {
     }
   };
 
-  attestAndSave = () => {
-    this.setState( prev => {
-      let allValid = this.validateRequiredFields(prev.datasetData);
-      if (allValid) {
-        prev.showDialogSubmit = true;
-        prev.problemLoadingUpdateDataset = false;
-        prev.showValidationMessages = false;
-      }
-      else {
-        prev.showDialogSubmit = false;
-        prev.problemLoadingUpdateDataset = false;
-        prev.showValidationMessages = true;
-      }
-      return prev;
-    });
-  };
-
-  isValid(value) {
-    let isValid = false;
-    if (value !== '' && value !== null && value !== undefined) {
-      isValid = true;
-    }
-    return isValid;
-  };
-
-  dialogHandlerSubmit = (answer) => () => {
-    if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
-      this.setState(prev => {
-        if (ontologies.length > 0) {
-          prev.formData.ontologies = ontologies;
-        }
-        for (let key in prev.datasetData) {
-          if (prev.datasetData[key] === '') {
-            prev.datasetData[key] = undefined;
-          }
-        }
-        return prev;
-      }, () => {
-        this.setState(prev => {
-          prev.disableOkBtn = true;
-          return prev;
-        });
-
-        if (this.state.showValidationMessages) {
-          this.setState({showDialogSubmit: false});
-        }
-      });
-    } else {
-      this.setState({ showDialogSubmit: false });
-    }
-  };
-
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
    */
-
   isTypeOfResearchInvalid = () => {
     const valid = (
       this.state.formData.generalUse === true ||
@@ -415,44 +223,6 @@ class NIHICWebform extends Component {
     this.props.history.goBack();
   };
 
-  createProperties = () => {
-    let properties = [];
-    let formData = this.state.datasetData;
-
-    if (formData.datasetName) {
-      properties.push({"propertyName": "Dataset Name", "propertyValue": formData.datasetName});
-    }
-    if (formData.collectionId) {
-      properties.push({"propertyName": "Sample Collection ID", "propertyValue": formData.collectionId});
-    }
-    if (formData.dataType) {
-      properties.push({"propertyName": "Data Type", "propertyValue": formData.dataType});
-    }
-    if (formData.species) {
-      properties.push({"propertyName": "Species", "propertyValue": formData.species});
-    }
-    if (formData.phenotype) {
-      properties.push({"propertyName": "Phenotype/Indication", "propertyValue": formData.phenotype});
-    }
-    if (formData.nrParticipants) {
-      properties.push({"propertyName": "# of participants", "propertyValue": formData.nrParticipants});
-    }
-    if (formData.description) {
-      properties.push({"propertyName": "Description", "propertyValue": formData.description});
-    }
-    if (formData.datasetRepoUrl) {
-      properties.push({"propertyName": "dbGAP", "propertyValue": formData.datasetRepoUrl});
-    }
-    if (formData.researcher) {
-      properties.push({"propertyName": "Data Depositor", "propertyValue": formData.researcher});
-    }
-    if (formData.pi) {
-      properties.push({"propertyName": "Principal Investigator(PI)", "propertyValue": formData.pi});
-    }
-
-    return properties;
-  }
-
   dacOptions = () => {
     return this.state.dacList.map(function(item) {
       return {
@@ -478,20 +248,6 @@ class NIHICWebform extends Component {
       }
       return prev;
     });
-  };
-
-  formatFormData = (data) => {
-    let result = {};
-    result.datasetName = data.datasetName;
-    result.consentId = data.consentId;
-    result.translatedUseRestriction = data.translatedUseRestriction;
-    result.deletable = true;
-    result.active = true;
-    result.needsApproval = !data.publicAccess;
-    result.isAssociatedToDataOwners = true;
-    result.updateAssociationToDataOwnerAllowed = true;
-    result.properties = this.createProperties();
-    return result;
   };
 
   formatOntologyItems = (ontologies) => {
@@ -536,9 +292,6 @@ class NIHICWebform extends Component {
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = false;
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
-    // NOTE: set this to always false for now to submit dataset without consent info
-    // const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
-
     const profileUnsubmitted = span({}, [
       'Please make sure ',
       h(Link, { to: '/profile', className: 'hover-color' }, ['Your Profile']),
