@@ -380,7 +380,7 @@ class DatasetCatalog extends Component {
             ]),
           ]),
 
-          div({ className: 'table-wrap' }, [
+          div({ className: 'table' }, [
             form({ className: 'pos-relative' }, [
               div({ className: 'checkbox check-all' }, [
                 input({ checked: this.state.allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: this.selectAll }),
@@ -394,21 +394,21 @@ class DatasetCatalog extends Component {
                   tr({}, [
                     th({}),
                     th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size', style: { textAlign: 'center' } }, ['Actions']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Dataset ID']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Dataset Name']),
-                    th({ className: 'table-titles dataset-color cell-size'}, ['Data Access Committee']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Source']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Structured Data Use Limitations']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Type']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Disease Studied']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Principal Investigator (PI)']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['# of Participants']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Description']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Species']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Custodian']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Consent ID']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['SC-ID']),
-                    th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size' }, ['Approved Requestors'])
+                    th({ className: 'cell-size' }, ['Dataset ID']),
+                    th({ className: 'cell-size' }, ['Dataset Name']),
+                    th({ className: 'cell-size'}, ['Data Access Committee']),
+                    th({ className: 'cell-size' }, ['Data Source']),
+                    th({ className: 'cell-size' }, ['Structured Data Use Limitations']),
+                    th({ className: 'cell-size' }, ['Data Type']),
+                    th({ className: 'cell-size' }, ['Disease Studied']),
+                    th({ className: 'cell-size' }, ['Principal Investigator (PI)']),
+                    th({ className: 'cell-size' }, ['# of Participants']),
+                    th({ className: 'cell-size' }, ['Description']),
+                    th({ className: 'cell-size' }, ['Species']),
+                    th({ className: 'cell-size' }, ['Data Custodian']),
+                    th({ className: 'cell-size' }, ['Consent ID']),
+                    th({ className: 'cell-size' }, ['SC-ID']),
+                    th({ isRendered: this.state.isAdmin, className: 'cell-size' }, ['Approved Requestors'])
                   ])
                 ]),
 
@@ -615,7 +615,7 @@ class DatasetCatalog extends Component {
               onClick: this.download,
               className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
             }, [
-              'Download selection',
+              'Download Dataset Info',
               span({ className: 'glyphicon glyphicon-download', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
             ]),
           ]),
