@@ -365,7 +365,7 @@ class DatasetCatalog extends Component {
                 description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
             ]),
-            div({ className: 'f-right', isRendered: (this.state.isAdmin || this.state.isChairPerson) }, [
+            div({ className: 'right', isRendered: (this.state.isAdmin || this.state.isChairPerson) }, [
               div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper' }, [
                 h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
               ]),
@@ -373,7 +373,7 @@ class DatasetCatalog extends Component {
                 id: 'btn_addDataset',
                 isRendered: this.state.isAdmin,
                 onClick: () => this.props.history.push({ pathname: 'dataset_registration' }),
-                className: 'btn-primary dataset-background search-wrapper',
+                className: 'f-right btn-primary dataset-background search-wrapper',
                 'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
               }, ['Add Dataset',
                 span({ className: 'glyphicon glyphicon-plus-sign', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
