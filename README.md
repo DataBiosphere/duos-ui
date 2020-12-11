@@ -1,7 +1,6 @@
 DUOS UI
 =======
 https://github.com/databiosphere/duos-ui/workflows/cypress%20tests/badge.svg
-https://github.com/databiosphere/duos-ui/workflows/docker%20test/badge.svg
 https://github.com/databiosphere/duos-ui/workflows/npm%20audit/badge.svg
 https://github.com/databiosphere/duos-ui/workflows/trivy/badge.svg
 [![CircleCI](https://circleci.com/gh/DataBiosphere/duos-ui.svg?style=svg)](https://circleci.com/gh/DataBiosphere/duos-ui)
