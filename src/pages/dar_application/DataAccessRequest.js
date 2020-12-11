@@ -154,10 +154,23 @@ export default function DataAccessRequest(props) {
 
       if(!isEqual(updatedDULQuestions, activeDULQuestions)) {
         setActiveDULQuestions(updatedDULQuestions);
-        //maintain dsAcknowledgement integrity when question is no longer active
-        if(!updatedDULQuestions['diseaseRestrictions'] && isEmpty(darCode)) {
-          setDSAcknowledgement(false);
-          formFieldChange({name: 'dsAcknowledgement', value: false});
+        //integrity checks/actions only occur on drafts
+        if(isEmpty(darCode)) {
+          //maintain dsAcknowledgement integrity when question is no longer active
+          if(!updatedDULQuestions['diseaseRestrictions']) {
+            setDSAcknowledgement(false);
+            formFieldChange({name: 'dsAcknowledgement', value: false});
+          }
+          //clear document files if associated question is inactive
+          //active clearing allows submitted DAR to control document rendering confidently when referencing these variables
+          if(!updatedDULQuestions['ethicsApprovalRequired']) {
+            formFieldChange({name: 'irbDocumentName', value: ''});
+            formFieldChange({name: 'irbDocumentLocation', value: ''});
+          }
+          if(!updatedDULQuestions['collaboratorRequired']) {
+            formFieldChange({name: 'collaborationLetterName', value: ''});
+            formFieldChange({name: 'collaborationLetterLocation', value: ''});
+          }
         }
         //State update is asynchronous, send updatedDULQuestions for parent component
         formFieldChange({name: 'activeDULQuestions', value: updatedDULQuestions});
@@ -550,7 +563,8 @@ export default function DataAccessRequest(props) {
 
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          isRendered: activeDULQuestions['ethicsApprovalRequired'] === true,
+          //isRendered conditions => 1st condition: submitted DARs, 2nd condition: DAR drafts
+          isRendered: (!isEmpty(darCode) && !isEmpty(irbDocumentLocation)) || activeDULQuestions['ethicsApprovalRequired'] === true,
           style: uploadFileDiv(showValidationMessages, uploadedIrbDocument, irbDocumentLocation)
         }, [
           div({className: 'row no-margin'}, [
@@ -580,7 +594,8 @@ export default function DataAccessRequest(props) {
 
         div({
           className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
-          isRendered: activeDULQuestions['collaboratorRequired'] === true,
+          //isRendered conditions => 1st condition: submitted DARs, 2nd condition: DAR drafts
+          isRendered: (!isEmpty(darCode) && !isEmpty(collaborationLetterLocation)) || activeDULQuestions['collaboratorRequired'] === true,
           style: uploadFileDiv(showValidationMessages, uploadedCollaborationLetter, collaborationLetterLocation)
         }, [
           div({className: 'row no-margin'}, [

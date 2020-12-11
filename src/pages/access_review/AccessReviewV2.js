@@ -15,7 +15,7 @@ class AccessReviewV2 extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      voteAsChair: props.location.state.chairFinal
+      voteAsChair: (props.location && props.location.state ? props.location.state.chairFinal : false)
     };
   }
 

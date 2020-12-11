@@ -129,7 +129,7 @@ class DatasetCatalog extends Component {
       datasets: datasets,
       datasetId: datasetIdList
     };
-    const formData = await DAR.postPartialDarRequest(darBody);
+    const formData = await DAR.postDarDraft(darBody);
     const referenceId = formData.referenceId;
     this.props.history.push({ pathname: 'dar_application/' + referenceId });
   };
@@ -365,10 +365,12 @@ class DatasetCatalog extends Component {
                 description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
             ]),
-            div({ className: 'f-right' }, [
+            div({ className: 'f-right', isRendered: (this.state.isAdmin || this.state.isChairPerson) }, [
+              div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper' }, [
+                h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
+              ]),
               button({
                 id: 'btn_addDataset',
-                isRendered: this.state.isResearcher,
                 onClick: () => this.props.history.push({ pathname: 'dataset_registration' }),
                 className: 'btn-primary dataset-background search-wrapper',
                 'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
@@ -606,9 +608,6 @@ class DatasetCatalog extends Component {
           ]),
 
           div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7' }, [
-              h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
-            ]),
             button({
               id: 'btn_downloadSelection',
               download: '',

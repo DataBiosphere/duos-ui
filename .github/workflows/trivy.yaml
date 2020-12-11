@@ -1,0 +1,26 @@
+on: [pull_request]
+name: Trivy
+jobs:
+  build:
+    name: Scan for Vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Update and install node
+        run: |
+          sudo apt update
+          sudo apt install nodejs
+          sudo apt install npm
+      - name: Build an image from Dockerfile
+        run: |
+          docker build -f Dockerfile-dev -t docker.io/broadinstitute/duos:${{ github.sha }} .
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/broadinstitute/duos:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: false
+          severity: 'CRITICAL'
