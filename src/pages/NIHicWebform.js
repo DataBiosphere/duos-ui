@@ -714,7 +714,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                          'Assitant/Submitter Name (if applicable)',
+                          'Assistant/Submitter Name (if applicable)',
                         ]),
                       ]),
                     div(
