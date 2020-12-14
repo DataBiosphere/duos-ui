@@ -1,13 +1,11 @@
 import { Component } from 'react';
 import { RadioButton } from '../components/RadioButton';
 import { a, br, div, fieldset, form, h, h3, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
-import { Link } from 'react-router-dom';
 import Select from 'react-select';
-import ReactTooltip from 'react-tooltip';
 import { Alert } from '../components/Alert';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAR, DataSet} from '../libs/ajax';
+import { DAR } from '../libs/ajax';
 import { searchOntology } from '../libs/ontologyService';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
@@ -23,10 +21,7 @@ class NIHICWebform extends Component {
       allDatasetNames: [],
       updateDataset: {},
       nihValid: false,
-      disableOkBtn: false,
       showValidationMessages: false,
-      showModal: false,
-      showDialogSubmit: false,
       formData: {
         methods: '',
         genetic: '',
@@ -61,45 +56,6 @@ class NIHICWebform extends Component {
         publicAccess: false,
       },
     };
-
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
-  };
-
-
-
-
-  // fill out the form fields with old dataset properties if they already exist
-  prefillDatasetFields(dataset) {
-    let name = fp.find({propertyName: "Dataset Name"})(dataset.properties);
-    let collectionId = fp.find({propertyName: "Sample Collection ID"})(dataset.properties);
-    let dataType = fp.find({propertyName: "Data Type"})(dataset.properties);
-    let species = fp.find({propertyName: "Species"})(dataset.properties);
-    let phenotype = fp.find({propertyName: "Phenotype/Indication"})(dataset.properties);
-    let nrParticipants = fp.find({propertyName: "# of participants"})(dataset.properties);
-    let description = fp.find({propertyName: "Description"})(dataset.properties);
-    let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
-    let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
-    let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
-    let publicAccess = !dataset.needsApproval;
-
-    this.setState(prev => {
-      prev.datasetData.datasetName = name ? name.propertyValue : '';
-      prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
-      prev.datasetData.dataType = dataType ? dataType.propertyValue : '';
-      prev.datasetData.species = species ? species.propertyValue : '';
-      prev.datasetData.phenotype = phenotype ? phenotype.propertyValue : '';
-      prev.datasetData.nrParticipants = nrParticipants ? nrParticipants.propertyValue : '';
-      prev.datasetData.description = description ? description.propertyValue : '';
-      prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
-      prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
-      prev.datasetData.pi = pi ? pi.propertyValue : '';
-      prev.datasetData.publicAccess = publicAccess;
-
-      return prev;
-    });
-
-    this.prefillDataUseFields(dataset.dataUse);
   };
 
   async getOntologies(urls) {
@@ -148,22 +104,6 @@ class NIHICWebform extends Component {
     });
   };
 
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  };
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  };
-
-  handleChange = (e) => {
-    const field = e.target.name;
-    const value = e.target.value;
-    this.setState(prev => {
-      return prev;
-    });
-  };
-
   handlePositiveIntegerOnly = (e) => {
     const field = e.target.name;
     const value = e.target.value.replace(/[^\d]/,'');
@@ -171,9 +111,6 @@ class NIHICWebform extends Component {
     if (value === '' || parseInt(value, 10) > -1) {
       this.setState(prev => {
         prev.datasetData[field] = value;
-        prev.disableOkBtn = false;
-        prev.problemSavingRequest = false;
-        prev.submissionSuccess = false;
         return prev;
       });
     }
@@ -184,9 +121,6 @@ class NIHICWebform extends Component {
     const value = e.target.checked;
     this.setState(prev => {
       prev.formData[field] = value;
-      prev.disableOkBtn = false;
-      prev.problemSavingRequest = false;
-      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -229,12 +163,10 @@ class NIHICWebform extends Component {
     this.setState( prev => {
       let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
-        prev.showDialogSubmit = true;
         prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = false;
       }
       else {
-        prev.showDialogSubmit = false;
         prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = true;
       }
@@ -248,38 +180,6 @@ class NIHICWebform extends Component {
       isValid = true;
     }
     return isValid;
-  };
-
-  dialogHandlerSubmit = (answer) => (e) => {
-    if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
-      this.setState(prev => {
-        if (ontologies.length > 0) {
-          prev.formData.ontologies = ontologies;
-        }
-        for (let key in prev.datasetData) {
-          if (prev.datasetData[key] === '') {
-            prev.datasetData[key] = undefined;
-          }
-        }
-        return prev;
-      }, () => {
-        let formData = this.state.datasetData;
-        this.setState(prev => {
-          prev.disableOkBtn = true;
-          return prev;
-        });
-
-        if (this.state.showValidationMessages) {
-          this.setState({showDialogSubmit: false});
-        }
-      });
-    } else {
-      this.setState({ showDialogSubmit: false });
-    }
   };
 
   /**
@@ -502,9 +402,9 @@ class NIHICWebform extends Component {
       generalUse = false,
     } = this.state.formData;
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
-    const { publicAccess = false } = this.state.datasetData;
+    const publicAccess = false;
     const { npoa } = !poa;
-    const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
+    const { showValidationMessages } = this.state;
     const isTypeOfResearchInvalid = false;
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
     // NOTE: set this to always false for now to submit dataset without consent info
@@ -550,19 +450,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'datasetName',
-                          id: 'inputName',
+                          name: 'piName',
+                          id: 'piName',
                           maxLength: '256',
-                          value: this.state.datasetData.datasetName,
-                          onChange: this.handleChange,
-                          className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
+                          value: '',
+                          onChange: () => {},
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
-                        },
-                        [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
+                        })
                       ])
                   ]),
 
@@ -580,19 +475,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'datasetName',
-                          id: 'inputName',
+                          name: 'piTitle',
+                          id: 'piTitle',
                           maxLength: '256',
-                          value: this.state.datasetData.datasetName,
-                          onChange: this.handleChange,
-                          className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
+                          value: '',
+                          onChange: () => {},
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
-                        },
-                        [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
+                        })
                       ])
                   ]),
 
@@ -609,22 +499,15 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'url',
-                          name: 'datasetRepoUrl',
-                          id: 'inputRepoUrl',
+                          name: 'piEmail',
+                          id: 'piEmail',
                           maxLength: '256',
                           placeholder: 'email@domain.org',
-                          value: this.state.datasetData.datasetRepoUrl,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          value: '',
+                          onChange: () => {},
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -641,21 +524,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'dataType',
-                          id: 'inputDataType',
+                          name: 'piInstitute',
+                          id: 'piInstitute',
                           maxLength: '256',
-                          value: this.state.datasetData.dataType,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          value: '',
+                          onChange: () => {},
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -672,21 +548,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'species',
-                          id: 'inputSpecies',
+                          name: 'assistantName',
+                          id: 'assistantName',
                           maxLength: '256',
-                          value: this.state.datasetData.species,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.species) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          value: '',
+                          onChange: () => {},
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.species) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -703,21 +572,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'phenotype',
-                          id: 'inputPhenotype',
+                          name: 'assistantEmail',
+                          id: 'assistantEmail',
                           maxLength: '256',
-                          value: this.state.datasetData.phenotype,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          value: '',
+                          onChange: () => {},
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -729,39 +591,39 @@ class NIHICWebform extends Component {
                           'Do you have an eRA Commons Account?',
                         ]),
                       ]),
-                div({ className: 'row no-margin' }, [
-                        div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                    div({ className: 'row no-margin' }, [
+                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                          RadioButton({
-                            style: {
-                              margin: '2rem',
-                              color: ' #010101',
-                            },
-                            id: 'checkPublicAccess_yes',
-                            name: 'checkPublicAccess',
-                            value: 'yes',
-                            defaultChecked: publicAccess,
-                            onClick: () => this.setPublicAccess(true),
-                            label: 'Yes',
-                            disabled: isUpdateDataset,
-                          }),
+                        RadioButton({
+                          style: {
+                            margin: '2rem',
+                            color: ' #010101',
+                          },
+                          id: 'eraAuthorizedYes',
+                          name: 'eraAuthorizedYes',
+                          value: 'yes',
+                          defaultChecked: true,
+                          onClick: () => {},
+                          label: 'Yes',
+                          disabled: false,
+                        }),
 
-                          RadioButton({
-                            style: {
-                              marginBottom: '2rem',
-                              marginLeft: '2rem',
-                              color: ' #010101',
-                            },
-                            id: 'checkPublicAccess_no',
-                            name: 'checkPublicAccess',
-                            value: 'no',
-                            defaultChecked: !publicAccess,
-                            onClick: () => this.setPublicAccess(false),
-                            label: 'No',
-                            disabled: isUpdateDataset,
-                          }),
-                        ]),
+                        RadioButton({
+                          style: {
+                            marginBottom: '2rem',
+                            marginLeft: '2rem',
+                            color: ' #010101',
+                          },
+                          id: 'eraAuthorizedNo',
+                          name: 'eraAuthorizedNo',
+                          value: 'no',
+                          defaultChecked: false,
+                          onClick: () => {},
+                          label: 'No',
+                          disabled: false,
+                        }),
                       ]),
+                    ]),
                   ]),
 
                   div({className: 'form-group'}, [
@@ -781,7 +643,7 @@ class NIHICWebform extends Component {
                           id: 'inputDescription',
                           maxLength: '256',
                           value: this.state.datasetData.description,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -818,7 +680,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NHGRI']),
+                              ['NHGRI']),
                             '',
                           ]),
                         ]),
@@ -838,7 +700,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                        ['NCI']),
+                              ['NCI']),
                             '',
                           ]),
                         ]),
@@ -858,7 +720,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NHLBI']),
+                              ['NHLBI']),
                             '',
                           ]),
                         ]),
@@ -878,7 +740,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NIMH']),
+                              ['NIMH']),
                             '',
                           ]),
                         ]),
@@ -898,7 +760,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NIDCR']),
+                              ['NIDCR']),
                             '',
                           ]),
                         ]),
@@ -918,7 +780,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NIAID']),
+                              ['NIAID']),
                             '',
                           ]),
                         ]),
@@ -938,7 +800,7 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NINDS']),
+                              ['NINDS']),
                             '',
                           ]),
                         ]),
@@ -958,91 +820,91 @@ class NIHICWebform extends Component {
                             htmlFor: 'checkMethods',
                           }, [
                             span({},
-                          ['NCATS']),
+                              ['NCATS']),
                             '',
                           ]),
                         ]),
                       ]),
                     div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                            ['NIA']),
-                              '',
-                            ]),
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                              ['NIA']),
+                            '',
                           ]),
                         ]),
+                      ]),
                     div(
-                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                          [
-                            div({className: 'checkbox'}, [
-                              input({
-                                id: 'checkMethods',
-                                type: 'checkbox',
-                                className: 'checkbox-inline rp-checkbox',
-                                name: 'methods',
-                              }),
-                              label({
-                                className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkMethods',
-                              }, [
-                                span({},
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
                               ['NIDDK']),
-                                '',
-                              ]),
-                            ]),
+                            '',
                           ]),
+                        ]),
+                      ]),
                     div(
-                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                            [
-                              div({className: 'checkbox'}, [
-                                input({
-                                  id: 'checkMethods',
-                                  type: 'checkbox',
-                                  className: 'checkbox-inline rp-checkbox',
-                                  name: 'methods',
-                                }),
-                                label({
-                                  className: 'regular-checkbox rp-choice-questions',
-                                  htmlFor: 'checkMethods',
-                                }, [
-                                  span({},
-                                ['NEI']),
-                                  '',
-                                ]),
-                              ]),
-                            ]),
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                              ['NEI']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
                     div(
-                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                  [
-                                    div({className: 'checkbox'}, [
-                                      input({
-                                        id: 'checkMethods',
-                                        type: 'checkbox',
-                                        className: 'checkbox-inline rp-checkbox',
-                                        name: 'methods',
-                                      }),
-                                      label({
-                                        className: 'regular-checkbox rp-choice-questions',
-                                        htmlFor: 'checkMethods',
-                                      }, [
-                                        span({},
-                                      ['NIDA']),
-                                        '',
-                                      ]),
-                                    ]),
-                                  ]),
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                      [
+                        div({className: 'checkbox'}, [
+                          input({
+                            id: 'checkMethods',
+                            type: 'checkbox',
+                            className: 'checkbox-inline rp-checkbox',
+                            name: 'methods',
+                          }),
+                          label({
+                            className: 'regular-checkbox rp-choice-questions',
+                            htmlFor: 'checkMethods',
+                          }, [
+                            span({},
+                              ['NIDA']),
+                            '',
+                          ]),
+                        ]),
+                      ]),
                   ]),
 
                   div({className: 'form-group'}, [
@@ -1087,7 +949,7 @@ class NIHICWebform extends Component {
                       {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                       [
                         label({className: 'control-label rp-title-question common-color'}, [
-                      'NIH Institute/Center for Submission',
+                          'NIH Institute/Center for Submission',
                         ]),
                       ]),
                     div(
@@ -1167,27 +1029,27 @@ class NIHICWebform extends Component {
                         'Original Study Name',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1217,7 +1079,7 @@ class NIHICWebform extends Component {
                           'required-field-error' :
                           '',
                         required: true,
-                    }),
+                      }),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: fp.isEmpty(this.state.datasetData.dac) && showValidationMessages,
@@ -1234,27 +1096,27 @@ class NIHICWebform extends Component {
                         'Project title for data to be submitted',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1265,39 +1127,39 @@ class NIHICWebform extends Component {
                         'Is this a multi-center study?',
                       ]),
                     ]),
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                        RadioButton({
-                          style: {
-                            margin: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
-                          value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
-                          label: 'Yes',
-                          disabled: isUpdateDataset,
-                        }),
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
+                      }),
 
-                        RadioButton({
-                          style: {
-                            marginBottom: '2rem',
-                            marginLeft: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
-                          value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
-                          label: 'No',
-                          disabled: isUpdateDataset,
-                        }),
-                      ]),
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
+                  ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1308,27 +1170,27 @@ class NIHICWebform extends Component {
                         'List Collaborating Sites (please enter a comma or tab delimited list)',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1339,39 +1201,39 @@ class NIHICWebform extends Component {
                         'The individual level data are to be made available through:',
                       ]),
                     ]),
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                        RadioButton({
-                          style: {
-                            margin: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
-                          value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
-                          label: 'Yes',
-                          disabled: isUpdateDataset,
-                        }),
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
+                      }),
 
-                        RadioButton({
-                          style: {
-                            marginBottom: '2rem',
-                            marginLeft: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
-                          value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
-                          label: 'No',
-                          disabled: isUpdateDataset,
-                        }),
-                      ]),
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
+                  ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1382,39 +1244,39 @@ class NIHICWebform extends Component {
                         'The genomic summary results (GSR) from this study are only to be made available through controlled-access',
                       ]),
                     ]),
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                        RadioButton({
-                          style: {
-                            margin: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
-                          value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
-                          label: 'Yes',
-                          disabled: isUpdateDataset,
-                        }),
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
+                      }),
 
-                        RadioButton({
-                          style: {
-                            marginBottom: '2rem',
-                            marginLeft: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
-                          value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
-                          label: 'No',
-                          disabled: isUpdateDataset,
-                        }),
-                      ]),
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
+                  ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1425,27 +1287,27 @@ class NIHICWebform extends Component {
                         'Explanation if controlled-access for GSR was selected',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1456,415 +1318,415 @@ class NIHICWebform extends Component {
                         'Consent Group 1 - Name:',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          span({className: 'control-label rp-title-question common-color'}, [
-                            'Consent Group 1 - Primary Data Use Terms ',
-                            span({},
-                              ['Please select one of the following data use permissions for your dataset.']),
-                            div({
-                              style: {'marginLeft': '15px'},
-                              className: 'row'
-                            }, [
-                              span({
-                                className: 'cancel-color required-field-error-span',
-                                isRendered: isTypeOfResearchInvalid && showValidationMessages,
-                              }, [
-                                'One of the following fields is required.', br(),
-                                'Disease related studies require a disease selection.', br(),
-                                'Other studies require additional details.'])
-                            ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                RadioButton({
-                                  style: {
-                                    marginBottom: '2rem',
-                                    color: ' #010101',
-                                  },
-                                  id: 'checkGeneral',
-                                  name: 'checkPrimary',
-                                  value: 'general',
-                                  defaultChecked: generalUse,
-                                  onClick: this.setGeneralUse,
-                                  label: 'General Research Use: ',
-                                  description: 'use is permitted for any research purpose',
-                                  disabled: isUpdateDataset,
-                                }),
-
-                                RadioButton({
-                                  style: {
-                                    marginBottom: '2rem',
-                                    color: ' #010101',
-                                  },
-                                  id: 'checkHmb',
-                                  name: 'checkPrimary',
-                                  value: 'hmb',
-                                  defaultChecked: hmb,
-                                  onClick: this.setHmb,
-                                  label: 'Health/Medical/Biomedical Use: ',
-                                  description: 'use is permitted for any health, medical, or biomedical purpose',
-                                  disabled: isUpdateDataset,
-                                }),
-
-                                RadioButton({
-                                  style: {
-                                    marginBottom: '2rem',
-                                    color: ' #010101',
-                                  },
-                                  id: 'checkDisease',
-                                  name: 'checkPrimary',
-                                  value: 'diseases',
-                                  defaultChecked: diseases,
-                                  onClick: this.setDiseases,
-                                  label: 'Disease-related studies: ',
-                                  description: 'use is permitted for research on the specified disease',
-                                  disabled: isUpdateDataset,
-                                }),
-                                div({
-                                  style: {
-                                    marginBottom: '2rem',
-                                    color: ' #010101',
-                                    cursor: diseases ? 'pointer' : 'not-allowed',
-                                  },
-                                }, [
-                                  h(AsyncSelect, {
-                                    id: 'sel_diseases',
-                                    isDisabled: isUpdateDataset || !diseases,
-                                    isMulti: true,
-                                    loadOptions: (query, callback) => this.searchOntologies(query, callback),
-                                    onChange: (option) => this.onOntologiesChange(option),
-                                    value: ontologies,
-                                    placeholder: 'Please enter one or more diseases',
-                                    classNamePrefix: 'select',
-                                  }),
-                                ]),
-
-                                RadioButton({
-                                  style: {
-                                    marginBottom: '2rem',
-                                    color: ' #010101',
-                                  },
-                                  id: 'checkPoa',
-                                  name: 'checkPrimary',
-                                  value: 'poa',
-                                  defaultChecked: poa,
-                                  onClick: this.setPoa,
-                                  label: 'Populations, Origins, Ancestry Use: ',
-                                  description: 'use is permitted exclusively for populations, origins, or ancestry research',
-                                  disabled: isUpdateDataset,
-                                }),
-
-                                RadioButton({
-                                  style: {
-                                    marginBottom: '2rem',
-                                    color: ' #010101',
-                                  },
-                                  id: 'checkOther',
-                                  name: 'checkPrimary',
-                                  value: 'other',
-                                  defaultChecked: other,
-                                  onClick: this.setOther,
-                                  label: 'Other Use:',
-                                  description: 'permitted research use is defined as follows: ',
-                                  disabled: isUpdateDataset,
-                                }),
-
-                                textarea({
-                                  className: 'form-control',
-                                  value: otherText,
-                                  onChange: this.setOtherText,
-                                  name: 'otherText',
-                                  id: 'otherText',
-                                  maxLength: '512',
-                                  rows: '2',
-                                  required: other,
-                                  placeholder: 'Please specify if selected (max. 512 characters)',
-                                  disabled: isUpdateDataset || !other,
-                                }),
-                              ]),
-
-                            div({className: 'form-group'}, [
-                              div(
-                                {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                [
-                                  label({className: 'control-label rp-title-question common-color'},
-                                    [
-                                      'Consent Group 1 - Secondary Data Use Terms',
-                                      span({}, ['Please select all applicable data use parameters.']),
-                                    ]),
-                                ]),
-                            ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: methods,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkMethods',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'methods',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkMethods',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['No methods development or validation studies (NMDS)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: genetic,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkGenetic',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'genetic',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkGenetic',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Genetic Studies Only (GSO)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: publication,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkPublication',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'publication',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkPublication',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Publication Required (PUB)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: collaboration,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkCollaboration',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'collaboration',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkCollaboration',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Collaboration Required (COL)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: ethics,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkEthics',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'ethics',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkEthics',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Ethics Approval Required (IRB)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: geographic,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkGeographic',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'geographic',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkGeographic',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Geographic Restriction (GS-)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: moratorium,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkMoratorium',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'moratorium',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkMoratorium',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Publication Moratorium (MOR)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: npoa,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkNpoa',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'poa',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkNpoa',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['No Populations Origins or Ancestry Research (NPOA)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: forProfit,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkForProfit',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'forProfit',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkForProfit',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Non-Profit Use Only (NPU)']),
-                                  ]),
-                                ]),
-                              ]),
-
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    checked: other,
-                                    onChange: this.handleCheckboxChange,
-                                    id: 'checkOtherSecondary',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'other',
-                                    disabled: isUpdateDataset
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkOtherSecondary',
-                                  }, [
-                                    span({ className: 'access-color'},
-                                      ['Other Secondary Use Terms:']),
-                                  ]),
-                                ]),
-                              ]),
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                textarea({
-                                  value: otherText,
-                                  onChange: this.setOtherText,
-                                  name: 'otherText',
-                                  id: 'inputOtherText',
-                                  className: 'form-control',
-                                  rows: '6',
-                                  required: false,
-                                  placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
-                                  disabled: isUpdateDataset || !other
-                                })
-                              ]),
-                          ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      span({className: 'control-label rp-title-question common-color'}, [
+                        'Consent Group 1 - Primary Data Use Terms ',
+                        span({},
+                          ['Please select one of the following data use permissions for your dataset.']),
+                        div({
+                          style: {'marginLeft': '15px'},
+                          className: 'row'
+                        }, [
+                          span({
+                            className: 'cancel-color required-field-error-span',
+                            isRendered: isTypeOfResearchInvalid && showValidationMessages,
+                          }, [
+                            'One of the following fields is required.', br(),
+                            'Disease related studies require a disease selection.', br(),
+                            'Other studies require additional details.'])
                         ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: ' #010101',
+                              },
+                              id: 'checkGeneral',
+                              name: 'checkPrimary',
+                              value: 'general',
+                              defaultChecked: generalUse,
+                              onClick: this.setGeneralUse,
+                              label: 'General Research Use: ',
+                              description: 'use is permitted for any research purpose',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: ' #010101',
+                              },
+                              id: 'checkHmb',
+                              name: 'checkPrimary',
+                              value: 'hmb',
+                              defaultChecked: hmb,
+                              onClick: this.setHmb,
+                              label: 'Health/Medical/Biomedical Use: ',
+                              description: 'use is permitted for any health, medical, or biomedical purpose',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: ' #010101',
+                              },
+                              id: 'checkDisease',
+                              name: 'checkPrimary',
+                              value: 'diseases',
+                              defaultChecked: diseases,
+                              onClick: this.setDiseases,
+                              label: 'Disease-related studies: ',
+                              description: 'use is permitted for research on the specified disease',
+                              disabled: isUpdateDataset,
+                            }),
+                            div({
+                              style: {
+                                marginBottom: '2rem',
+                                color: ' #010101',
+                                cursor: diseases ? 'pointer' : 'not-allowed',
+                              },
+                            }, [
+                              h(AsyncSelect, {
+                                id: 'sel_diseases',
+                                isDisabled: isUpdateDataset || !diseases,
+                                isMulti: true,
+                                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                onChange: (option) => this.onOntologiesChange(option),
+                                value: ontologies,
+                                placeholder: 'Please enter one or more diseases',
+                                classNamePrefix: 'select',
+                              }),
+                            ]),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: ' #010101',
+                              },
+                              id: 'checkPoa',
+                              name: 'checkPrimary',
+                              value: 'poa',
+                              defaultChecked: poa,
+                              onClick: this.setPoa,
+                              label: 'Populations, Origins, Ancestry Use: ',
+                              description: 'use is permitted exclusively for populations, origins, or ancestry research',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            RadioButton({
+                              style: {
+                                marginBottom: '2rem',
+                                color: ' #010101',
+                              },
+                              id: 'checkOther',
+                              name: 'checkPrimary',
+                              value: 'other',
+                              defaultChecked: other,
+                              onClick: this.setOther,
+                              label: 'Other Use:',
+                              description: 'permitted research use is defined as follows: ',
+                              disabled: isUpdateDataset,
+                            }),
+
+                            textarea({
+                              className: 'form-control',
+                              value: otherText,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'otherText',
+                              maxLength: '512',
+                              rows: '2',
+                              required: other,
+                              placeholder: 'Please specify if selected (max. 512 characters)',
+                              disabled: isUpdateDataset || !other,
+                            }),
+                          ]),
+
+                        div({className: 'form-group'}, [
+                          div(
+                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                            [
+                              label({className: 'control-label rp-title-question common-color'},
+                                [
+                                  'Consent Group 1 - Secondary Data Use Terms',
+                                  span({}, ['Please select all applicable data use parameters.']),
+                                ]),
+                            ]),
+                        ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: methods,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkMethods',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'methods',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkMethods',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['No methods development or validation studies (NMDS)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: genetic,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkGenetic',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'genetic',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkGenetic',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Genetic Studies Only (GSO)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: publication,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkPublication',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'publication',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkPublication',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Publication Required (PUB)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: collaboration,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkCollaboration',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'collaboration',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkCollaboration',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Collaboration Required (COL)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: ethics,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkEthics',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'ethics',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkEthics',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Ethics Approval Required (IRB)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: geographic,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkGeographic',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'geographic',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkGeographic',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Geographic Restriction (GS-)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: moratorium,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkMoratorium',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'moratorium',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkMoratorium',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Publication Moratorium (MOR)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: npoa,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkNpoa',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'poa',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkNpoa',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['No Populations Origins or Ancestry Research (NPOA)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: forProfit,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkForProfit',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'forProfit',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkForProfit',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Non-Profit Use Only (NPU)']),
+                              ]),
+                            ]),
+                          ]),
+
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            div({className: 'checkbox'}, [
+                              input({
+                                checked: other,
+                                onChange: this.handleCheckboxChange,
+                                id: 'checkOtherSecondary',
+                                type: 'checkbox',
+                                className: 'checkbox-inline rp-checkbox',
+                                name: 'other',
+                                disabled: isUpdateDataset
+                              }),
+                              label({
+                                className: 'regular-checkbox rp-choice-questions',
+                                htmlFor: 'checkOtherSecondary',
+                              }, [
+                                span({ className: 'access-color'},
+                                  ['Other Secondary Use Terms:']),
+                              ]),
+                            ]),
+                          ]),
+                        div(
+                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                          [
+                            textarea({
+                              value: otherText,
+                              onChange: this.setOtherText,
+                              name: 'otherText',
+                              id: 'inputOtherText',
+                              className: 'form-control',
+                              rows: '6',
+                              required: false,
+                              placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
+                              disabled: isUpdateDataset || !other
+                            })
+                          ]),
+                      ]),
+                    ]),
                 ]),
 
                 div({ className: 'row no-margin' }, [
@@ -1885,39 +1747,39 @@ class NIHICWebform extends Component {
                         'Are you requesting an Alternative Data Sharing Plan for samples that cannot be shared through a public database or repository?',
                       ]),
                     ]),
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                        RadioButton({
-                          style: {
-                            margin: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
-                          value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
-                          label: 'Yes',
-                          disabled: isUpdateDataset,
-                        }),
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
+                      }),
 
-                        RadioButton({
-                          style: {
-                            marginBottom: '2rem',
-                            marginLeft: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
-                          value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
-                          label: 'No',
-                          disabled: isUpdateDataset,
-                        }),
-                      ]),
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
+                  ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1928,166 +1790,166 @@ class NIHICWebform extends Component {
                         'Please mark the reasons for which you are requesting an Alternative Data Sharing Plan',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            id: 'checkMethods',
-                            type: 'checkbox',
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'methods',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkMethods',
-                          }, [
-                            span({},
-                              ['Legal Restrictions']),
-                            '',
-                          ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Legal Restrictions']),
+                          '',
                         ]),
                       ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['Informed consent processes are inadequate to support data sharing for the following reasons:']),
-                              '',
-                            ]),
-                          ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Informed consent processes are inadequate to support data sharing for the following reasons:']),
+                          '',
                         ]),
-                        div(
-                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                          [
-                            div({className: 'checkbox'}, [
-                              input({
-                                id: 'checkMethods',
-                                type: 'checkbox',
-                                className: 'checkbox-inline rp-checkbox',
-                                name: 'methods',
-                              }),
-                              label({
-                                className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkMethods',
-                              }, [
-                                span({},
-                                  ['The consent forms are unavailable or non-existent for samples collected after January 25, 2015']),
-                                '',
-                              ]),
-                            ]),
-                          ]),
-                          div(
-                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                            [
-                              div({className: 'checkbox'}, [
-                                input({
-                                  id: 'checkMethods',
-                                  type: 'checkbox',
-                                  className: 'checkbox-inline rp-checkbox',
-                                  name: 'methods',
-                                }),
-                                label({
-                                  className: 'regular-checkbox rp-choice-questions',
-                                  htmlFor: 'checkMethods',
-                                }, [
-                                  span({},
-                                    [' The consent process did not explicitly address future use or broad data sharing for samples collect after January 25, 2015']),
-                                  '',
-                                ]),
-                              ]),
-                            ]),
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    id: 'checkMethods',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'methods',
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkMethods',
-                                  }, [
-                                    span({},
-                                      ['The consent process inadequately address risks related to future use or broad data sharing for samples collected after January 25, 2015']),
-                                    '',
-                                  ]),
-                                ]),
-                              ]),
-                              div(
-                                {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                [
-                                  div({className: 'checkbox'}, [
-                                    input({
-                                      id: 'checkMethods',
-                                      type: 'checkbox',
-                                      className: 'checkbox-inline rp-checkbox',
-                                      name: 'methods',
-                                    }),
-                                    label({
-                                      className: 'regular-checkbox rp-choice-questions',
-                                      htmlFor: 'checkMethods',
-                                    }, [
-                                      span({},
-                                        ['The consent process specifically precludes future use or broad sharing (including a statement that use of data will be limited to the original researchers)']),
-                                      '',
-                                    ]),
-                                  ]),
-                                ]),
-                                div(
-                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                  [
-                                    div({className: 'checkbox'}, [
-                                      input({
-                                        id: 'checkMethods',
-                                        type: 'checkbox',
-                                        className: 'checkbox-inline rp-checkbox',
-                                        name: 'methods',
-                                      }),
-                                      label({
-                                        className: 'regular-checkbox rp-choice-questions',
-                                        htmlFor: 'checkMethods',
-                                      }, [
-                                        span({},
-                                          ['Other informed consent limitations or concerns']),
-                                        '',
-                                      ]),
-                                    ]),
-                                  ]),
-                                  div(
-                                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                    [
-                                      div({className: 'checkbox'}, [
-                                        input({
-                                          id: 'checkMethods',
-                                          type: 'checkbox',
-                                          className: 'checkbox-inline rp-checkbox',
-                                          name: 'methods',
-                                        }),
-                                        label({
-                                          className: 'regular-checkbox rp-choice-questions',
-                                          htmlFor: 'checkMethods',
-                                        }, [
-                                          span({},
-                                            ['Other']),
-                                          '',
-                                        ]),
-                                      ]),
-                                    ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['The consent forms are unavailable or non-existent for samples collected after January 25, 2015']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            [' The consent process did not explicitly address future use or broad data sharing for samples collect after January 25, 2015']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['The consent process inadequately address risks related to future use or broad data sharing for samples collected after January 25, 2015']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['The consent process specifically precludes future use or broad sharing (including a statement that use of data will be limited to the original researchers)']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Other informed consent limitations or concerns']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Other']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2098,27 +1960,27 @@ class NIHICWebform extends Component {
                         'Explanation for Request',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2129,27 +1991,27 @@ class NIHICWebform extends Component {
                         'Alternative Data Sharing Plan',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2171,27 +2033,27 @@ class NIHICWebform extends Component {
                         'Acknowledgement Statement',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2202,39 +2064,39 @@ class NIHICWebform extends Component {
                         'Data will be submitted',
                       ]),
                     ]),
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                        RadioButton({
-                          style: {
-                            margin: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
-                          value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
-                          label: 'Within 3 months of last data generated or last clnical visit',
-                          disabled: isUpdateDataset,
-                        }),
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Within 3 months of last data generated or last clnical visit',
+                        disabled: isUpdateDataset,
+                      }),
 
-                        RadioButton({
-                          style: {
-                            marginBottom: '2rem',
-                            marginLeft: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
-                          value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
-                          label: 'Data will be submitted by batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
-                          disabled: isUpdateDataset,
-                        }),
-                      ]),
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'Data will be submitted by batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
+                  ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2245,39 +2107,39 @@ class NIHICWebform extends Component {
                         'Data to be released will meet the timeframes specified in the NHGRI Guidance for Data Submission and Data Release',
                       ]),
                     ]),
-                    div({ className: 'row no-margin' }, [
-                      div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
+                  div({ className: 'row no-margin' }, [
+                    div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 dataset-group' }, [
 
-                        RadioButton({
-                          style: {
-                            margin: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
-                          value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
-                          label: 'Yes',
-                          disabled: isUpdateDataset,
-                        }),
+                      RadioButton({
+                        style: {
+                          margin: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_yes',
+                        name: 'checkPublicAccess',
+                        value: 'yes',
+                        defaultChecked: publicAccess,
+                        onClick: () => this.setPublicAccess(true),
+                        label: 'Yes',
+                        disabled: isUpdateDataset,
+                      }),
 
-                        RadioButton({
-                          style: {
-                            marginBottom: '2rem',
-                            marginLeft: '2rem',
-                            color: ' #010101',
-                          },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
-                          value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
-                          label: 'No',
-                          disabled: isUpdateDataset,
-                        }),
-                      ]),
+                      RadioButton({
+                        style: {
+                          marginBottom: '2rem',
+                          marginLeft: '2rem',
+                          color: ' #010101',
+                        },
+                        id: 'checkPublicAccess_no',
+                        name: 'checkPublicAccess',
+                        value: 'no',
+                        defaultChecked: !publicAccess,
+                        onClick: () => this.setPublicAccess(false),
+                        label: 'No',
+                        disabled: isUpdateDataset,
+                      }),
                     ]),
+                  ]),
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2360,27 +2222,27 @@ class NIHICWebform extends Component {
                         'Estimated # of bytes of data to be deposited',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2391,27 +2253,27 @@ class NIHICWebform extends Component {
                         'Estimated # of Study Participants',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                      [
-                        input({
-                          type: 'text',
-                          name: 'description',
-                          id: 'inputDescription',
-                          maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
-                          required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                        },
-                        ['Required field']),
-                      ])
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        value: this.state.datasetData.description,
+                        onChange: () => {},
+                        className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -2422,186 +2284,186 @@ class NIHICWebform extends Component {
                         'Samples genotyped/sequenced (check all data types expected for this study)',
                       ]),
                     ]),
-                    div(
-                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                      [
-                        div({className: 'checkbox'}, [
-                          input({
-                            id: 'checkMethods',
-                            type: 'checkbox',
-                            className: 'checkbox-inline rp-checkbox',
-                            name: 'methods',
-                          }),
-                          label({
-                            className: 'regular-checkbox rp-choice-questions',
-                            htmlFor: 'checkMethods',
-                          }, [
-                            span({},
-                              ['Species']),
-                            '',
-                          ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Species']),
+                          '',
                         ]),
                       ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                        [
-                          div({className: 'checkbox'}, [
-                            input({
-                              id: 'checkMethods',
-                              type: 'checkbox',
-                              className: 'checkbox-inline rp-checkbox',
-                              name: 'methods',
-                            }),
-                            label({
-                              className: 'regular-checkbox rp-choice-questions',
-                              htmlFor: 'checkMethods',
-                            }, [
-                              span({},
-                                ['Sample Collection']),
-                              '',
-                            ]),
-                          ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Sample Collection']),
+                          '',
                         ]),
-                        div(
-                          {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                          [
-                            div({className: 'checkbox'}, [
-                              input({
-                                id: 'checkMethods',
-                                type: 'checkbox',
-                                className: 'checkbox-inline rp-checkbox',
-                                name: 'methods',
-                              }),
-                              label({
-                                className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkMethods',
-                              }, [
-                                span({},
-                                  ['Phenotype']),
-                                '',
-                              ]),
-                            ]),
-                          ]),
-                          div(
-                            {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                            [
-                              div({className: 'checkbox'}, [
-                                input({
-                                  id: 'checkMethods',
-                                  type: 'checkbox',
-                                  className: 'checkbox-inline rp-checkbox',
-                                  name: 'methods',
-                                }),
-                                label({
-                                  className: 'regular-checkbox rp-choice-questions',
-                                  htmlFor: 'checkMethods',
-                                }, [
-                                  span({},
-                                    ['Genotypes']),
-                                  '',
-                                ]),
-                              ]),
-                            ]),
-                            div(
-                              {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                              [
-                                div({className: 'checkbox'}, [
-                                  input({
-                                    id: 'checkMethods',
-                                    type: 'checkbox',
-                                    className: 'checkbox-inline rp-checkbox',
-                                    name: 'methods',
-                                  }),
-                                  label({
-                                    className: 'regular-checkbox rp-choice-questions',
-                                    htmlFor: 'checkMethods',
-                                  }, [
-                                    span({},
-                                      ['General']),
-                                    '',
-                                  ]),
-                                ]),
-                              ]),
-                              div(
-                                {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                [
-                                  div({className: 'checkbox'}, [
-                                    input({
-                                      id: 'checkMethods',
-                                      type: 'checkbox',
-                                      className: 'checkbox-inline rp-checkbox',
-                                      name: 'methods',
-                                    }),
-                                    label({
-                                      className: 'regular-checkbox rp-choice-questions',
-                                      htmlFor: 'checkMethods',
-                                    }, [
-                                      span({},
-                                        ['Sequencing']),
-                                      '',
-                                    ]),
-                                  ]),
-                                ]),
-                                div(
-                                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                  [
-                                    div({className: 'checkbox'}, [
-                                      input({
-                                        id: 'checkMethods',
-                                        type: 'checkbox',
-                                        className: 'checkbox-inline rp-checkbox',
-                                        name: 'methods',
-                                      }),
-                                      label({
-                                        className: 'regular-checkbox rp-choice-questions',
-                                        htmlFor: 'checkMethods',
-                                      }, [
-                                        span({},
-                                          ['Sample Types']),
-                                        '',
-                                      ]),
-                                    ]),
-                                  ]),
-                                  div(
-                                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                    [
-                                      div({className: 'checkbox'}, [
-                                        input({
-                                          id: 'checkMethods',
-                                          type: 'checkbox',
-                                          className: 'checkbox-inline rp-checkbox',
-                                          name: 'methods',
-                                        }),
-                                        label({
-                                          className: 'regular-checkbox rp-choice-questions',
-                                          htmlFor: 'checkMethods',
-                                        }, [
-                                          span({},
-                                            ['Analyses']),
-                                          '',
-                                        ]),
-                                      ]),
-                                    ]),
-                                    div(
-                                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
-                                      [
-                                        div({className: 'checkbox'}, [
-                                          input({
-                                            id: 'checkMethods',
-                                            type: 'checkbox',
-                                            className: 'checkbox-inline rp-checkbox',
-                                            name: 'methods',
-                                          }),
-                                          label({
-                                            className: 'regular-checkbox rp-choice-questions',
-                                            htmlFor: 'checkMethods',
-                                          }, [
-                                            span({},
-                                              ['Array Data']),
-                                            '',
-                                          ]),
-                                        ]),
-                                      ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Phenotype']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Genotypes']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['General']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Sequencing']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Sample Types']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Analyses']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
+                    [
+                      div({className: 'checkbox'}, [
+                        input({
+                          id: 'checkMethods',
+                          type: 'checkbox',
+                          className: 'checkbox-inline rp-checkbox',
+                          name: 'methods',
+                        }),
+                        label({
+                          className: 'regular-checkbox rp-choice-questions',
+                          htmlFor: 'checkMethods',
+                        }, [
+                          span({},
+                            ['Array Data']),
+                          '',
+                        ]),
+                      ]),
+                    ]),
                 ]),
 
 
@@ -2640,27 +2502,27 @@ class NIHICWebform extends Component {
                           'Principal Investigator Signature',
                         ]),
                       ]),
-                      div(
-                        {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
-                        [
-                          input({
-                            type: 'text',
-                            name: 'description',
-                            id: 'inputDescription',
-                            maxLength: '256',
-                            value: this.state.datasetData.description,
-                            onChange: this.handleChange,
-                            className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                              'form-control required-field-error' :
-                              'form-control',
-                            required: true,
-                          }),
-                          span({
-                            className: 'cancel-color required-field-error-span',
-                            isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
-                          },
-                          ['Required field']),
-                        ])
+                    div(
+                      {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                      [
+                        input({
+                          type: 'text',
+                          name: 'description',
+                          id: 'inputDescription',
+                          maxLength: '256',
+                          value: this.state.datasetData.description,
+                          onChange: () => {},
+                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
+                            'form-control required-field-error' :
+                            'form-control',
+                          required: true,
+                        }),
+                        span({
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.datasetData.description) && showValidationMessages,
+                        },
+                        ['Required field']),
+                      ])
                   ]),
 
                   div({ className: 'row no-margin' }, [
@@ -2675,20 +2537,6 @@ class NIHICWebform extends Component {
                   div({ className: 'row no-margin' }, [
                     div({ isRendered: showValidationMessages, className: 'rp-alert' }, [
                       Alert({ id: 'formErrors', type: 'danger', title: 'Please, complete all required fields.' })
-                    ]),
-
-                    div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
-                      Alert({
-                        id: 'problemSavingRequest', type: 'danger',
-                        title: this.state.errorMessage
-                      })
-                    ]),
-
-                    div({ isRendered: submissionSuccess, className: 'rp-alert' }, [
-                      Alert({
-                        id: 'submissionSuccess', type: 'info',
-                        title: isUpdateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
-                      })
                     ]),
                   ])
                 ]),
