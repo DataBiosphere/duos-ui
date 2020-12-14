@@ -170,8 +170,6 @@ class NIHICWebform extends Component {
       this.setState(prev => {
         prev.datasetData[field] = value;
         prev.disableOkBtn = false;
-        prev.problemSavingRequest = false;
-        prev.submissionSuccess = false;
         return prev;
       });
     }
@@ -183,8 +181,6 @@ class NIHICWebform extends Component {
     this.setState(prev => {
       prev.formData[field] = value;
       prev.disableOkBtn = false;
-      prev.problemSavingRequest = false;
-      prev.submissionSuccess = false;
       return prev;
     });
   };
@@ -502,7 +498,7 @@ class NIHICWebform extends Component {
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
     const { publicAccess = false } = this.state.datasetData;
     const { npoa } = !poa;
-    const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
+    const { showValidationMessages } = this.state;
     const isTypeOfResearchInvalid = false;
     const isUpdateDataset = (!fp.isEmpty(this.state.updateDataset));
     // NOTE: set this to always false for now to submit dataset without consent info
@@ -2673,20 +2669,6 @@ class NIHICWebform extends Component {
                   div({ className: 'row no-margin' }, [
                     div({ isRendered: showValidationMessages, className: 'rp-alert' }, [
                       Alert({ id: 'formErrors', type: 'danger', title: 'Please, complete all required fields.' })
-                    ]),
-
-                    div({ isRendered: problemSavingRequest, className: 'rp-alert' }, [
-                      Alert({
-                        id: 'problemSavingRequest', type: 'danger',
-                        title: this.state.errorMessage
-                      })
-                    ]),
-
-                    div({ isRendered: submissionSuccess, className: 'rp-alert' }, [
-                      Alert({
-                        id: 'submissionSuccess', type: 'info',
-                        title: isUpdateDataset ? 'Dataset was successfully updated.' : 'Dataset was successfully registered.'
-                      })
                     ]),
                   ])
                 ]),
