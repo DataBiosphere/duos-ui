@@ -41,6 +41,7 @@
     "react-tooltip": "4.2.11",
     "set-value": "3.0.2",
     "source-map-explorer": "2.5.1",
+    "stackdriver-errors-js": "0.8.0",
     "uuid": "8.3.2"
   },
   "scripts": {
