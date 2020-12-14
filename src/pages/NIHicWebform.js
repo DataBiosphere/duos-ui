@@ -160,10 +160,6 @@ class NIHICWebform extends Component {
     const field = e.target.name;
     const value = e.target.value;
     this.setState(prev => {
-      prev.datasetData[field] = value;
-      prev.disableOkBtn = false;
-      prev.problemSavingRequest = false;
-      prev.submissionSuccess = false;
       return prev;
     });
   };
