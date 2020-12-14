@@ -21,7 +21,6 @@ class NIHICWebform extends Component {
       allDatasetNames: [],
       updateDataset: {},
       nihValid: false,
-      disableOkBtn: false,
       showValidationMessages: false,
       showModal: false,
       showDialogSubmit: false,
@@ -169,7 +168,6 @@ class NIHICWebform extends Component {
     if (value === '' || parseInt(value, 10) > -1) {
       this.setState(prev => {
         prev.datasetData[field] = value;
-        prev.disableOkBtn = false;
         return prev;
       });
     }
@@ -180,7 +178,6 @@ class NIHICWebform extends Component {
     const value = e.target.checked;
     this.setState(prev => {
       prev.formData[field] = value;
-      prev.disableOkBtn = false;
       return prev;
     });
   };
@@ -242,38 +239,6 @@ class NIHICWebform extends Component {
       isValid = true;
     }
     return isValid;
-  };
-
-  dialogHandlerSubmit = (answer) => (e) => {
-    if (answer === true) {
-      let ontologies = [];
-      for (let ontology of this.state.formData.ontologies) {
-        ontologies.push(ontology.item);
-      }
-      this.setState(prev => {
-        if (ontologies.length > 0) {
-          prev.formData.ontologies = ontologies;
-        }
-        for (let key in prev.datasetData) {
-          if (prev.datasetData[key] === '') {
-            prev.datasetData[key] = undefined;
-          }
-        }
-        return prev;
-      }, () => {
-        let formData = this.state.datasetData;
-        this.setState(prev => {
-          prev.disableOkBtn = true;
-          return prev;
-        });
-
-        if (this.state.showValidationMessages) {
-          this.setState({showDialogSubmit: false});
-        }
-      });
-    } else {
-      this.setState({ showDialogSubmit: false });
-    }
   };
 
   /**
