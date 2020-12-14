@@ -58,9 +58,6 @@ class NIHICWebform extends Component {
         publicAccess: false,
       },
     };
-
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   };
 
 
@@ -141,22 +138,6 @@ class NIHICWebform extends Component {
       prev.formData.other = !fp.isEmpty(other);
       prev.formData.otherText = otherText;
       prev.formData.generalUse = generalUse;
-      return prev;
-    });
-  };
-
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  };
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  };
-
-  handleChange = (e) => {
-    const field = e.target.name;
-    const value = e.target.value;
-    this.setState(prev => {
       return prev;
     });
   };
@@ -513,7 +494,7 @@ class NIHICWebform extends Component {
                           id: 'inputName',
                           maxLength: '256',
                           value: this.state.datasetData.datasetName,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
                           required: true,
                         }),
@@ -543,7 +524,7 @@ class NIHICWebform extends Component {
                           id: 'inputName',
                           maxLength: '256',
                           value: this.state.datasetData.datasetName,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
                           required: true,
                         }),
@@ -573,7 +554,7 @@ class NIHICWebform extends Component {
                           maxLength: '256',
                           placeholder: 'email@domain.org',
                           value: this.state.datasetData.datasetRepoUrl,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -604,7 +585,7 @@ class NIHICWebform extends Component {
                           id: 'inputDataType',
                           maxLength: '256',
                           value: this.state.datasetData.dataType,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -635,7 +616,7 @@ class NIHICWebform extends Component {
                           id: 'inputSpecies',
                           maxLength: '256',
                           value: this.state.datasetData.species,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.species) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -666,7 +647,7 @@ class NIHICWebform extends Component {
                           id: 'inputPhenotype',
                           maxLength: '256',
                           value: this.state.datasetData.phenotype,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -740,7 +721,7 @@ class NIHICWebform extends Component {
                           id: 'inputDescription',
                           maxLength: '256',
                           value: this.state.datasetData.description,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -1135,7 +1116,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -1202,7 +1183,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -1276,7 +1257,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -1393,7 +1374,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -1424,7 +1405,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -2066,7 +2047,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -2097,7 +2078,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -2139,7 +2120,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -2328,7 +2309,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -2359,7 +2340,7 @@ class NIHICWebform extends Component {
                         id: 'inputDescription',
                         maxLength: '256',
                         value: this.state.datasetData.description,
-                        onChange: this.handleChange,
+                        onChange: () => {},
                         className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -2608,7 +2589,7 @@ class NIHICWebform extends Component {
                           id: 'inputDescription',
                           maxLength: '256',
                           value: this.state.datasetData.description,
-                          onChange: this.handleChange,
+                          onChange: () => {},
                           className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
