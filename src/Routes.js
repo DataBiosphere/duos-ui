@@ -39,7 +39,7 @@ import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
-import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
+import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
 import HomeResearcherInfo from "./pages/HomeResearcherInfo";
@@ -65,7 +65,7 @@ const Routes = (props) => (
     <Route path="/home_dac_info" component={HomeDacInfo} />
     <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
-    <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
+    <Route path="/nih_pilot_info" render={(routeProps) => <NIHPilotInfo />} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dac" component={AdminManageDac} props={props} rolesAllowed={[USER_ROLES.admin]} />
