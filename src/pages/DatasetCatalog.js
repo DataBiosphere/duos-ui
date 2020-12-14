@@ -397,7 +397,7 @@ class DatasetCatalog extends Component {
                     th({}),
                     th({ className: 'cell-size' }, ['Dataset ID']),
                     th({ className: 'cell-size' }, ['Dataset Name']),
-                    th({ className: 'cell-size'}, ['Data Access Committee']),
+                    th({ className: 'cell-size' }, ['Data Access Committee']),
                     th({ className: 'cell-size' }, ['Data Source']),
                     th({ className: 'cell-size' }, ['Structured Data Use Limitations']),
                     th({ className: 'cell-size' }, ['Data Type']),
