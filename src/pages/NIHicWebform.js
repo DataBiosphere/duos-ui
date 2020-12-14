@@ -22,8 +22,6 @@ class NIHICWebform extends Component {
       updateDataset: {},
       nihValid: false,
       showValidationMessages: false,
-      showModal: false,
-      showDialogSubmit: false,
       formData: {
         methods: '',
         genetic: '',
@@ -165,12 +163,10 @@ class NIHICWebform extends Component {
     this.setState( prev => {
       let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
-        prev.showDialogSubmit = true;
         prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = false;
       }
       else {
-        prev.showDialogSubmit = false;
         prev.problemLoadingUpdateDataset = false;
         prev.showValidationMessages = true;
       }
@@ -406,7 +402,7 @@ class NIHICWebform extends Component {
       generalUse = false,
     } = this.state.formData;
     const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
-    const { publicAccess = false } = this.state.datasetData;
+    const publicAccess = false;
     const { npoa } = !poa;
     const { showValidationMessages } = this.state;
     const isTypeOfResearchInvalid = false;
@@ -454,19 +450,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'datasetName',
-                          id: 'inputName',
+                          name: 'piName',
+                          id: 'piName',
                           maxLength: '256',
-                          value: this.state.datasetData.datasetName,
+                          value: '',
                           onChange: () => {},
-                          className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
-                        },
-                        [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
+                        })
                       ])
                   ]),
 
@@ -484,19 +475,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'datasetName',
-                          id: 'inputName',
+                          name: 'piTitle',
+                          id: 'piTitle',
                           maxLength: '256',
-                          value: this.state.datasetData.datasetName,
+                          value: '',
                           onChange: () => {},
-                          className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.includes('required-field-error', this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages))
-                        },
-                        [this.validateDatasetName(this.state.datasetData.datasetName) ? 'Required field' : 'Dataset Name already in use']),
+                        })
                       ])
                   ]),
 
@@ -513,22 +499,15 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'url',
-                          name: 'datasetRepoUrl',
-                          id: 'inputRepoUrl',
+                          name: 'piEmail',
+                          id: 'piEmail',
                           maxLength: '256',
                           placeholder: 'email@domain.org',
-                          value: this.state.datasetData.datasetRepoUrl,
+                          value: '',
                           onChange: () => {},
-                          className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -545,21 +524,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'dataType',
-                          id: 'inputDataType',
+                          name: 'piInstitute',
+                          id: 'piInstitute',
                           maxLength: '256',
-                          value: this.state.datasetData.dataType,
+                          value: '',
                           onChange: () => {},
-                          className: (fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -576,21 +548,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'species',
-                          id: 'inputSpecies',
+                          name: 'assistantName',
+                          id: 'assistantName',
                           maxLength: '256',
-                          value: this.state.datasetData.species,
+                          value: '',
                           onChange: () => {},
-                          className: (fp.isEmpty(this.state.datasetData.species) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.species) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -607,21 +572,14 @@ class NIHICWebform extends Component {
                       [
                         input({
                           type: 'text',
-                          name: 'phenotype',
-                          id: 'inputPhenotype',
+                          name: 'assistantEmail',
+                          id: 'assistantEmail',
                           maxLength: '256',
-                          value: this.state.datasetData.phenotype,
+                          value: '',
                           onChange: () => {},
-                          className: (fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: 'form-control',
                           required: true,
-                        }),
-                        span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        })
                       ])
                   ]),
 
@@ -641,13 +599,13 @@ class NIHICWebform extends Component {
                             margin: '2rem',
                             color: ' #010101',
                           },
-                          id: 'checkPublicAccess_yes',
-                          name: 'checkPublicAccess',
+                          id: 'eraAuthorizedYes',
+                          name: 'eraAuthorizedYes',
                           value: 'yes',
-                          defaultChecked: publicAccess,
-                          onClick: () => this.setPublicAccess(true),
+                          defaultChecked: true,
+                          onClick: () => {},
                           label: 'Yes',
-                          disabled: isUpdateDataset,
+                          disabled: false,
                         }),
 
                         RadioButton({
@@ -656,13 +614,13 @@ class NIHICWebform extends Component {
                             marginLeft: '2rem',
                             color: ' #010101',
                           },
-                          id: 'checkPublicAccess_no',
-                          name: 'checkPublicAccess',
+                          id: 'eraAuthorizedNo',
+                          name: 'eraAuthorizedNo',
                           value: 'no',
-                          defaultChecked: !publicAccess,
-                          onClick: () => this.setPublicAccess(false),
+                          defaultChecked: false,
+                          onClick: () => {},
                           label: 'No',
-                          disabled: isUpdateDataset,
+                          disabled: false,
                         }),
                       ]),
                     ]),
