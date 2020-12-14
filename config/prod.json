@@ -1,7 +1,7 @@
 {
   "env": "prod",
-  "tag": "git-tag",
-  "hash": "git-hash",
+  "tag": "prod",
+  "hash": "prod",
   "apiUrl": "https://consent.dsde-prod.broadinstitute.org/api",
   "ontologyApiUrl": "https://consent-ontology.dsde-prod.broadinstitute.org/",
   "clientId": "383345696373-epss75p24k6on93kq37ccse0n626ojal.apps.googleusercontent.com",

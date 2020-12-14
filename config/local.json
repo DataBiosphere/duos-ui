@@ -1,7 +1,7 @@
 {
   "env": "local",
-  "tag": "git-tag",
-  "hash": "git-hash",
+  "tag": "local",
+  "hash": "local",
   "apiUrl": "https://local.broadinstitute.org:27443/api",
   "ontologyApiUrl": "https://local.broadinstitute.org:28443/",
   "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",

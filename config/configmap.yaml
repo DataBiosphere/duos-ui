@@ -11,6 +11,8 @@ data:
   config.json: |
     {
       "env": "",
+      "hash": "",
+      "tag": "",
       "apiUrl": "",
       "ontologyApiUrl": "",
       "clientId": "",

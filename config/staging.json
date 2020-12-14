@@ -1,7 +1,7 @@
 {
   "env": "staging",
-  "tag": "git-tag",
-  "hash": "git-hash",
+  "tag": "staging",
+  "hash": "staging",
   "apiUrl": "https://consent.dsde-staging.broadinstitute.org/api",
   "ontologyApiUrl": "https://consent-ontology.dsde-staging.broadinstitute.org/",
   "clientId": "1087760099392-t0nb61ehicbeuqkeftvql765ncu1707r.apps.googleusercontent.com",
