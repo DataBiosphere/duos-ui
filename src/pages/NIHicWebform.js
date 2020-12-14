@@ -60,42 +60,6 @@ class NIHICWebform extends Component {
     };
   };
 
-
-
-
-  // fill out the form fields with old dataset properties if they already exist
-  prefillDatasetFields(dataset) {
-    let name = fp.find({propertyName: "Dataset Name"})(dataset.properties);
-    let collectionId = fp.find({propertyName: "Sample Collection ID"})(dataset.properties);
-    let dataType = fp.find({propertyName: "Data Type"})(dataset.properties);
-    let species = fp.find({propertyName: "Species"})(dataset.properties);
-    let phenotype = fp.find({propertyName: "Phenotype/Indication"})(dataset.properties);
-    let nrParticipants = fp.find({propertyName: "# of participants"})(dataset.properties);
-    let description = fp.find({propertyName: "Description"})(dataset.properties);
-    let datasetRepoUrl = fp.find({propertyName: "dbGAP"})(dataset.properties);
-    let researcher = fp.find({propertyName: "Data Depositor"})(dataset.properties);
-    let pi = fp.find({propertyName: "Principal Investigator(PI)"})(dataset.properties);
-    let publicAccess = !dataset.needsApproval;
-
-    this.setState(prev => {
-      prev.datasetData.datasetName = name ? name.propertyValue : '';
-      prev.datasetData.collectionId = collectionId ? collectionId.propertyValue : '';
-      prev.datasetData.dataType = dataType ? dataType.propertyValue : '';
-      prev.datasetData.species = species ? species.propertyValue : '';
-      prev.datasetData.phenotype = phenotype ? phenotype.propertyValue : '';
-      prev.datasetData.nrParticipants = nrParticipants ? nrParticipants.propertyValue : '';
-      prev.datasetData.description = description ? description.propertyValue : '';
-      prev.datasetData.datasetRepoUrl = datasetRepoUrl ? datasetRepoUrl.propertyValue : '';
-      prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
-      prev.datasetData.pi = pi ? pi.propertyValue : '';
-      prev.datasetData.publicAccess = publicAccess;
-
-      return prev;
-    });
-
-    this.prefillDataUseFields(dataset.dataUse);
-  };
-
   async getOntologies(urls) {
     if (fp.isEmpty(urls)) {
       return [];
