@@ -3,6 +3,7 @@
   "apiUrl": "",
   "ontologyApiUrl": "",
   "clientId": "",
+  "errorApiKey": "",
   "firecloudUrl": "",
   "gwasUrl": "",
   "profileUrl": "",
