@@ -41,7 +41,7 @@ function App() {
 
     const stackdriverStart = async () => {
       await StackdriverReporter.start();
-    }
+    };
 
     const setEnvironment = async () => {
       const environment = await Config.getEnv();
@@ -53,6 +53,7 @@ function App() {
       await initializeReactGA(history);
       await setUserIsLogged();
       await setEnvironment();
+      await stackdriverStart();
     };
 
     initApp();
