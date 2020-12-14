@@ -1,0 +1,15 @@
+{
+  "env": "",
+  "apiUrl": "",
+  "ontologyApiUrl": "",
+  "clientId": "",
+  "firecloudUrl": "",
+  "gwasUrl": "",
+  "profileUrl": "",
+  "nihUrl": "",
+  "powerBiUrl": "",
+  "gaId": "",
+  "features": {
+    "newDarUi": true
+  }
+}

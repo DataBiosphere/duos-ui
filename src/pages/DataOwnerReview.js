@@ -46,7 +46,6 @@ class DataOwnerReview extends Component {
       alertMessage: '',
     };
 
-    this.myHandler = this.myHandler.bind(this);
     this.handleOpenApplicationModal = this.handleOpenApplicationModal.bind(this);
     this.handleCloseApplicationModal = this.handleCloseApplicationModal.bind(this);
     this.handleOpenDatasetModal = this.handleOpenDatasetModal.bind(this);
@@ -116,10 +115,6 @@ class DataOwnerReview extends Component {
         return prev;
       });
     }
-  }
-
-  myHandler(event) {
-    // TBD
   }
 
   handleOpenApplicationModal() {

@@ -1330,17 +1330,6 @@ input:-webkit-autofill {
   color: #777777;
 }
 
-.fileName.daa {
-  font-size: 15px;
-  color: #333;
-  margin-bottom: 10px;
-}
-
- .fileName.daa span{
-  font-weight: 400 !important;
-  font-style: italic;
-}
-
 /*///////////////////////////////////////////////////////ADMIN USERS*/
 
 .admin-users-list .enabled {
@@ -1392,45 +1381,21 @@ input:-webkit-autofill {
 
 /***************************************************Footer*/
 
-.footer {
-  position: relative;
-  margin-top: -100px;
-  /* negative value of footer height */
-  clear: both;
-  background-color: #333333;
-}
-
-.main-footer {
-  color: #989898 !important;
-  margin: 25px 0 0 0;
-  height: 75px;
-  display: block;
-  width: 100%;
-  padding: 0 50px;
-  background-color: #333333;
-}
-
-@media screen and (max-width: 800px) {
-  .main-footer {
-    padding: 0 25px;
-  }
-}
-
 .footer-links li {
   cursor: default;
-  padding: 28px 0 0 0;
+  padding: 8px 0 0 0;
 }
 
 .footer-links, .footer-links a {
-  color: #989898 !important;
+  color: #D8D8D8 !important;
   display: inline-block;
-  font-family: "Roboto", sans-serif;
-  font-size: 14px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 12px;
   font-weight: 500 !important;
   height: 100%;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 10px 0;
   transition: color 0.3s ease;
 }
 
@@ -1444,16 +1409,9 @@ input:-webkit-autofill {
 }
 
 .footer-links__item~*:before {
-  padding: 0 0.6em 0 0.5em;
+  padding: 0 0.8em 0 0.8em;
   content: "|";
   font-size: 1em;
-}
-
-.footer-logo {
-  float: right;
-  height: 32px;
-  width: 127px;
-  margin-top: 22px;
 }
 
 /*///////////////////////////////////////////////////////LOGIN*/

@@ -33,7 +33,7 @@ commands:
       - run:
           name: Export env vars for substitution. $BASH_ENV is sourced before each step
           command: |
-            echo 'export COMMIT="`git rev-parse --short HEAD`"' >> $BASH_ENV
+            echo 'export COMMIT="`git rev-parse --short=12 HEAD`"' >> $BASH_ENV
             echo 'export ENV="<< parameters.env >>"' >> $BASH_ENV
             echo 'export APPLICATION_NAME="<< parameters.application_name >>"' >> $BASH_ENV
             echo 'export GOOGLE_PROJECT="<< parameters.google_project >>"' >> $BASH_ENV
@@ -46,7 +46,7 @@ commands:
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             gcloud --quiet config set project ${GOOGLE_PROJECT}
       - setup_remote_docker:
-          docker_layer_caching: true
+          version: 19.03.13 # See https://support.circleci.com/hc/en-us/articles/360050934711      - run:
       - run:
           name: Docker build/push to GCR
           command: |
@@ -112,40 +112,6 @@ commands:
             kubectl rollout status deployment/${APPLICATION_NAME}
 
 jobs:
-  test-docker:
-    executor: node
-    steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - checkout
-      - run: cp config/dev.json public/config.json
-      - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
-      - run: npm run docker-build:test
-  test:
-    executor: cypress
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run:
-          name: Install dependencies
-          command: npm ci
-      - run: npm run cypress:verify
-      - run: cp config/dev.json public/config.json
-      - run: CI=false npm run build --silent
-      - save_cache:
-          key: cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-          paths:
-            - ~/.npm
-            - ~/.cache
-      - run:
-          name: Start server
-          command: npx http-server ./build -p 3000
-          background: true
-      - run: npm run cypress:run
-
   build-dev:
     executor: cypress
     steps:
@@ -153,7 +119,7 @@ jobs:
       - restore_cache:
           keys:
             - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run: cp config/dev.json public/config.json
+      - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
@@ -171,7 +137,7 @@ jobs:
       - restore_cache:
           keys:
             - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run: cp config/staging.json public/config.json
+      - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
       - run: CI=false npm run build --silent
@@ -243,21 +209,7 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - test-docker:
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: /.*/
-      - test:
-          filters:
-            tags:
-              only: /.*/
-            branches:
-              only: /.*/
       - build-dev:
-          requires:
-            - test
           filters:
             branches:
               only: /.*/
@@ -268,8 +220,6 @@ workflows:
             branches:
               only: develop
       - build-staging:
-          requires:
-            - test
           filters:
             tags:
               only: /^staging.*/
@@ -284,8 +234,6 @@ workflows:
             branches:
               ignore: /.*/
       - deploy-production:
-          requires:
-            - test
           filters:
             tags:
               only: /^production.*/

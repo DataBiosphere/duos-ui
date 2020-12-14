@@ -1,79 +1,89 @@
-import React from 'react';
+import {useState, useEffect} from 'react';
+import ReactGA from 'react-ga';
 import { div, h } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './App.css';
+import { Config } from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
+import {useHistory} from 'react-router-dom';
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
 import { StackdriverReporter } from './libs/stackdriverReporter';
 import { Storage } from './libs/storage';
-
 import Routes from './Routes';
 
-class App extends React.Component {
+function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [env, setEnv] = useState('');
+  let history = useHistory();
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      loading: false,
-      isLoggedIn: false
+  const trackPageView = (location) => {
+    ReactGA.pageview(location.pathname + location.search);
+  };
+
+  useEffect(() => {
+    const setUserIsLogged = async () => {
+      const isLogged = await Storage.userIsLogged();
+      setIsLoggedIn(isLogged);
     };
-  }
 
-  showSpinner = () => {
-    this.setState({
-      loading: true
-    });
-  };
+    const initializeReactGA = async (history) => {
+      const gaId = await Config.getGAId();
+      ReactGA.initialize(gaId, {
+        titleCase: false
+      });
+      //call trackPageView to register initial page load
+      trackPageView(history.location);
+      //pass trackPageView as callback function for url change listener
+      history.listen(trackPageView);
+    };
 
-  hideSpinner = () => {
-    this.setState({
-      loading: false
-    });
-  };
+    const stackdriverStart = async () => {
+      await StackdriverReporter.start();
+    }
 
-  async componentDidMount() {
-    const isLogged = await Storage.userIsLogged();
-    this.setState({ isLoggedIn: isLogged });
-    await StackdriverReporter.start();
-  };
+    const setEnvironment = async () => {
+      const environment = await Config.getEnv();
+      setEnv(environment);
+    };
 
-  signOut = () => {
+    const initApp = async () => {
+      Modal.setAppElement(document.getElementById('modal-root'));
+      await initializeReactGA(history);
+      await setUserIsLogged();
+      await setEnvironment();
+    };
+
+    initApp();
+
+  }, [history]);
+
+  const signOut = () => {
     Storage.setUserIsLogged(false);
     Storage.clearStorage();
-    this.setState({ isLoggedIn: false });
+    setIsLoggedIn(false);
   };
 
-  signIn = () => {
+  const signIn = () => {
     Storage.setUserIsLogged(true);
-    this.setState({ isLoggedIn: true });
+    setIsLoggedIn(true);
   };
 
-  componentWillMount() {
-    Modal.setAppElement(document.getElementById('modal-root'));
-  }
-
-  render() {
-
-    const { loading } = this.state;
-
-    return (
-      div({ className: 'body' }, [
-        div({ className: 'wrap' }, [
-          div({ className: 'main' }, [
-            h(DuosHeader, { onSignOut: this.signOut }),
-            h(Spinner, {
-              name: 'mainSpinner', group: 'duos', loadingImage: '/images/loading-indicator.svg'
-            }),
-            h(Routes, { onSignIn: this.signIn, isRendered: !loading, isLogged: this.state.isLoggedIn })
-          ])
-        ]),
-        h(DuosFooter, { isLogged: this.state.isLoggedIn })
-      ])
-
-    );
-  }
+  return (
+    div({ className: 'body' }, [
+      div({ className: 'wrap' }, [
+        div({ className: 'main' }, [
+          h(DuosHeader, { onSignOut: signOut }),
+          h(Spinner, {
+            name: 'mainSpinner', group: 'duos', loadingImage: '/images/loading-indicator.svg'
+          }),
+          h(Routes, { onSignIn: signIn, isLogged: isLoggedIn, env: env })
+        ])
+      ]),
+      DuosFooter()
+    ])
+  );
 }
 
 export default App;

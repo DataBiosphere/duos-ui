@@ -14,12 +14,8 @@ const SECTION = {
 class AccessReviewV2 extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = this.initialState();
-  }
-
-  initialState() {
-    return {
-      voteAsChair: false,
+    this.state = {
+      voteAsChair: (props.location && props.location.state ? props.location.state.chairFinal : false)
     };
   }
 
@@ -96,7 +92,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '70%',
               }
             },
-            [DarApplication({ voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile })]
+            [DarApplication({ voteAsChair, darId, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile })]
           )
         ])
       ]

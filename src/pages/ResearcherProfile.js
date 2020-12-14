@@ -1,17 +1,18 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import { a, button, div, form, h, hh, hr, input, label, p, span, textarea } from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { DAR, Researcher, User } from '../libs/ajax';
+import { Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
+import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -26,7 +27,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     this.saveProfile = this.saveProfile.bind(this);
     this.submit = this.submit.bind(this);
     this.saveUser = this.saveUser.bind(this);
-    this.handleFileChange = this.handleFileChange.bind(this);
   }
 
   async componentDidMount() {
@@ -49,9 +49,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       additionalEmail: '',
-      file: {
-        name: ''
-      },
+      roles: [],
       profile: {
         checkNotifications: false,
         academicEmail: '',
@@ -75,9 +73,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         researcherGate: '',
         scientificURL: '',
         state: '',
-        zipcode: '',
-        urlDAA: '',
-        nameDAA: ''
+        zipcode: ''
       },
       showRequired: false,
       invalidFields: {
@@ -117,6 +113,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
+      if (_.isEmpty(currentUser.roles)) {
+        prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
+      } else {
+        prev.roles = currentUser.roles;
+      }
       prev.researcherProfile = profile;
       let key;
       for (key in profile) {
@@ -152,15 +153,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.researcherFieldsValidation();
       }
     });
-  };
-
-  handleFileChange(event) {
-    if (event.target.files !== undefined && event.target.files[0]) {
-      let file = event.target.files[0];
-      this.setState({
-        file: file
-      });
-    }
   };
 
   researcherFieldsValidation() {
@@ -380,32 +372,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          if (this.state.file !== undefined && this.state.file.name !== '') {
-            DAR.postDAA(this.state.file.name, this.state.file, '').then(response => {
-              profile.urlDAA = response.urlDAA;
-              profile.nameDAA = response.nameDAA;
-              this.saveProperties(profile);
-            });
-          } else {
-            this.saveProperties(profile);
-          }
-
+          this.saveProperties(profile);
         } else {
-          if (this.state.file !== undefined && this.state.file.name !== '') {
-            const existentDAAUrl = _.isNil(profile.urlDAA) ? '' : profile.urlDAA;
-            DAR.postDAA(this.state.file.name, this.state.file, existentDAAUrl).then(response => {
-              profile.urlDAA = response.urlDAA;
-              profile.nameDAA = response.nameDAA;
-              this.updateResearcher(profile);
-            });
-          } else {
-            this.updateResearcher(profile);
-          }
+          this.updateResearcher(profile);
         }
       } else {
         this.saveUser().then(resp => {
-          this.setState({ showDialogSubmit: false });
-          this.props.history.goBack();
+          this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
         });
       }
 
@@ -414,9 +387,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   };
 
-
   updateResearcher(profile) {
-    const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+    const profileClone = this.cloneProfile(profile);
     Researcher.updateProperties(Storage.getCurrentUser().dacUserId, true, profileClone).then(resp => {
       this.saveUser().then(resp => {
         this.setState({ showDialogSubmit: false });
@@ -429,8 +401,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const currentUser = Storage.getCurrentUser();
     currentUser.displayName = this.state.profile.profileName;
     currentUser.additionalEmail = this.state.additionalEmail;
+    currentUser.roles = this.state.roles;
     const payload = { updatedUser: currentUser };
-    await User.update(payload, currentUser.dacUserId);
+    let updatedUser = await User.update(payload, currentUser.dacUserId);
+    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
+    return updatedUser;
   };
 
   handleCheckboxChange = (e) => {
@@ -453,13 +428,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
-      const profileClone = _.omit(_.cloneDeep(profile), ['libraryCards']);
+      const profileClone = this.cloneProfile(profile);
       Researcher.updateProperties(Storage.getCurrentUser().dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
     this.setState({ showDialogSave: false });
   };
+
+  // When posting a user's researcher properties, library cards and entries are
+  // not valid properties for update.
+  cloneProfile = (profile) => {
+    return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+  }
 
   render() {
     let completed = this.state.profile.completed;
@@ -933,49 +914,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     onChange: this.handleChange,
                     value: this.state.profile.scientificURL
                   })
-                ])
-              ]),
-
-              div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                label({ className: 'control-label rp-title-question default-color' }, [
-                  'Data Access Agreement ', span({ className: 'italic display-inline' }, ['(optional)']),
-                  span({ className: 'default-color' }, ['Data Access Agreement will be required for submission of a Data Access Request'])
-                ])
-              ]),
-
-              div({ isRendered: this.state.isResearcher, className: 'row no-margin' }, [
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                  label({ className: 'control-label default-color' },
-                    ['1. Download the Data Access Agreement template and have your organization\'s Signing Official sign it'])
-                ]),
-
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                  a({
-                    id: 'link_downloadAgreement', href: 'BroadDataAccessAgreement.pdf', target: '_blank',
-                    className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                  }, [
-                    span({ className: 'glyphicon glyphicon-download' }),
-                    'Download Agreement Template'
-                  ])
-                ]),
-
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                  label({ className: 'control-label default-color' },
-                    ['2. Upload your template of the Data Access Agreement signed by your organization\'s Signing Official'])
-                ]),
-
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
-                  div({
-                    style: { paddingTop: 7 }, className: 'fileUpload col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                  }, [
-                    span({ className: 'glyphicon glyphicon-upload' }),
-                    'Upload S.O. Signed Agreement',
-                    input({ id: 'uploadFile', type: 'file', onChange: this.handleFileChange, className: 'upload' })
-                  ])
-                ]),
-                p({ id: 'txt_uploadFile', className: 'fileName daa', isRendered: this.state.file.name !== '' || this.state.profile.nameDAA !== '' }, [
-                  'Your currently uploaded Data Access Agreement: ',
-                  span({ className: 'italic normal' }, [this.state.file.name !== '' ? this.state.file.name : this.state.profile.nameDAA])
                 ])
               ]),
 

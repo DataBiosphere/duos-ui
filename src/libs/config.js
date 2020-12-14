@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Storage } from './storage';
+import {Storage} from './storage';
 
 export const Config = {
 
@@ -11,9 +11,15 @@ export const Config = {
 
   getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
 
+  getProfileUrl: async () => (await getConfig()).profileUrl,
+
   getNihUrl: async () => (await getConfig()).nihUrl,
 
+  getPowerBiUrl: async () => (await getConfig()).powerBiUrl,
+
   getGoogleClientId: async () => (await getConfig()).clientId,
+
+  getGAId: async () => (await getConfig()).gaId,
 
   getErrorApiKey: async () => (await getConfig()).errorApiKey,
 
@@ -54,6 +60,11 @@ export const Config = {
   jsonBody: body => ({
     body: JSON.stringify(body),
     headers: {'Content-Type': 'application/json'},
+  }),
+
+  attachmentBody: body => ({
+    body: body,
+    headers: {'Content-Type': 'application/binary'}
   }),
 
   fileBody: (token = Token.getToken()) => ({

@@ -8,7 +8,7 @@ export const RadioButton = (props) => {
     lineHeight: '2rem',
     color: 333,
     fontFamily: '\'Roboto\', sans-serif',
-    cursor: 'pointer',
+    cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
   };
 
@@ -16,7 +16,7 @@ export const RadioButton = (props) => {
     fontSize: 15,
     lineHeight: '1.5rem',
     color: 333,
-    cursor: 'pointer',
+    cursor: props.disabled ? 'not-allowed' : 'pointer',
     boxSizing: 'border-box',
     position: 'absolute',
     top: 0,
@@ -35,7 +35,7 @@ export const RadioButton = (props) => {
   });
 
   const labelStyle = {
-    cursor: 'pointer',
+    cursor: props.disabled ? 'not-allowed' : 'pointer',
     color: '#603B9B',
     fontSize: 15,
     fontWeight: 'normal',

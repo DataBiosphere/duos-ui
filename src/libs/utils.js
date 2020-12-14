@@ -1,6 +1,8 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
+import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
+import isNil from 'lodash/fp/isNil';
 
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
@@ -13,6 +15,13 @@ export const formatDate = (dateval) => {
   let day = ('0' + dateFormat.getDate()).slice(-2);
   let datestr = year + '-' + month + '-' + day;
   return datestr;
+};
+
+//Custom empty check needed on File
+//lodash's isEmpty checks for enumerated keys, something a File does not have (ends up being an empty array)
+//leads to incorrect evaluation of File
+export const isFileEmpty = (file) => {
+  return isNil(file) || file.size < 1 || file.length < 1;
 };
 
 export const USER_ROLES = {
@@ -29,12 +38,34 @@ export const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
 
+export const setUserRoleStatuses = (user, Storage) => {
+  const currentUserRoles = user.roles.map(roles => roles.name);
+  user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
+  user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
+  user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
+  user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
+  user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
+  user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+  Storage.setCurrentUser(user);
+  return user;
+};
+
 export const Navigation = {
   back: (user, history) => {
     const page = user.isChairPerson ? '/chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/dataset_catalog?reviewProfile'
+            : user.isDataOwner ? '/data_owner_console'
+              : user.isAlumni ? '/summary_votes'
+                : '/';
+    history.push(page);
+  },
+  console: (user, history) => {
+    const page = user.isChairPerson ? '/chair_console'
+      : user.isMember ? '/member_console'
+        : user.isAdmin ? '/admin_console'
+          : user.isResearcher ? '/researcher_console'
             : user.isDataOwner ? '/data_owner_console'
               : user.isAlumni ? '/summary_votes'
                 : '/';
@@ -59,7 +90,7 @@ export const Notifications = {
     timeout: '3500',
     progressBar: false,
     type: 'error',
-    theme: 'duos',
+    theme: 'bootstrap-v3',
   },
   /**
    * @param props: pass in properties like 'text', 'timeout', 'layout', and 'progressBar'.
@@ -82,6 +113,22 @@ export const Notifications = {
       ...Notifications.defaultNotification,
       ...props,
       type: 'success',
+    }).show();
+  },
+  showWarning: props => {
+    return new Noty({
+      text: 'Warning!',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'warning',
+    }).show();
+  },
+  showInformation: props => {
+    return new Noty({
+      text: 'Information',
+      ...Notifications.defaultNotification,
+      ...props,
+      type: 'information',
     }).show();
   },
 };

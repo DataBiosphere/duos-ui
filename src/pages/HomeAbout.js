@@ -1,110 +1,199 @@
-import { Component } from 'react';
-import { a, div, h, hr, h1, h3, p, span, img } from 'react-hyperscript-helpers';
-import Mailto from 'react-protected-mailto';
+import {Component} from 'react';
+import {div, h1, h3, p, img} from 'react-hyperscript-helpers';
 
-// export const HomeAbout = hh(
 class HomeAbout extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      showModal: false,
-    };
-  }
 
   render() {
 
+    const imageWrapper = {
+      padding: '3rem',
+      margin: '0 3rem',
+      height: 'auto',
+      maxHeight: '300px',
+      width: 'auto',
+      maxWidth: '100%',
+      float: 'none'
+    };
+
+    const header = {
+      fontWeight: '600',
+      padding: '0 5rem',
+      textAlign: 'left'
+    };
+
+    const aboutSectionWrapper = {
+      fontFamily: 'Montserrat',
+      margin: '2rem auto',
+      overflow: 'auto',
+      textAlign: 'left',
+      color: '#1F3B50',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center'
+    };
+
+    const aboutSectionTitle = {
+      fontWeight: '600',
+      color: '#2899BC',
+      padding: '0 5rem',
+      textAlign: 'left'
+    };
+
+    const aboutSectionBody = {
+      padding: '0 5rem',
+    };
+
+    const paragraph = {
+      padding: '1rem 0 0 0'
+    };
+
     return (
       div({className: 'row home'}, [
-        div(
-          {className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12'},
-          [
-            h1({className: 'home-title'}, ['Data Use Oversight System']),
-            hr({className: 'home-line'}),
-            div({className: 'home-sections home-sections-table'}, [
+        div({className: 'col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-xs-12'}, [
+          div({}, [
+            div({style: aboutSectionWrapper}, [
+              h1({style: header, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, ['Data Use Oversight System'])
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: aboutSectionTitle,
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
+              }, ['Current State of Data Access']),
               img({
-                src: '/images/home_icon_about.svg',
-                className: 'home-sections-icon',
-                alt: 'About icon',
+                src: '/images/about_current_access.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Current state of data access',
+                style: imageWrapper
               }),
-              div({className: 'home-sections-title'}, [
-                h3({}, ['DUOS']),
-                p({className: 'home-sections-description'},
-                  ['A semi-automated management service for compliant secondary use of human genomics data']),
-                div({className: 'home-content'}, [
-                  p({},
-                    ['Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data.']),
-                  p({},
-                    ['As part of our efforts to enhance collaborative research, the Broad Institute developed the “Data Use Oversight System” (DUOS) to semi-automate and efficiently manage compliant sharing of human subjects data. DUOS\' objective is two-fold, to enhance data access committee\'s confidence that data use restrictions are respected while efficiently enabling appropriate data access.']),
-                  p({},
-                    ['To better enable the use of existing human subjects datasets in future projects, DUOS mimics, in a semi-automated fashion, the data access request review processes common to DACs globally, like those in dbGaP. To this end, the system includes interfaces to capture and structure data use restrictions and data access requests as machine-readable data use terms based on the GA4GH\'s Data Use Ontology. With these machine-readable terms for dataset\'s use limitations and data access requests established, DUOS is able to trigger a matching algorithm to reason if data access should be granted given the research purpose and the data restrictions, serving as a decision support tool for DACs using DUOS.']),
-                  p({},
-                    ['To evaluate the feasibility of using machine readable data use terms to interpret data use restrictions and access requests, we are piloting a trial of DUOS overseen by Partners’ Healthcare IRB. During the pilot, DACs comprised of governmental and non-governmental data custodians will pilot the use of DUOS, its ability to structure use limitations and access requests, and the accuracy of the DUOS algorithm. This aids us in improving the DUOS algorithm and providing feedback on the GA4GH Data Use Ontology based on experts’ feedback.']),
-                ]),
-
-                div({className: 'home-content'}, [
-                  h3({}, ['Library Card']),
-                  p({className: 'home-sections-description'},
-                    ['An innovative and simplified approach to data access agreements']),
-                  p({},
-                    ['Currently, when a researcher makes a data access request they are not only required to obtain approval from the data access committee (DAC) which oversees the data, but also from their home instiution\'s Signing Official, who approves their request and acknowledges the acceptance of organizational liability in the case of data misuse. Estimates show Signing Officials were required to approve at least 50,000 DARs in 2019 in the US. Based on feedback from numerous Signing Officials we understand Signing Officials primary concern in the approval of data access requests (DARs) to be primarily an endorsement or authorization of the researcher, rather than the proposed research.']),
-                  img({
-                    src: '/images/lc-only-process.png',
-                    className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic',
-                    alt: 'About icon',
-                  }),
-                  p({},
-                    ['To alleviate this burden on Signing Officials, DUOS is offering Signing Offficals the opportunity to pre-authorize researchers to submit DARs to DACs using DUOS, via our DUOS Library Card Agreement. This agreement allows a Signing Official to pre-authorize researchers from their instutions for a 1 year renewable term.']),
-                  div({style: { marginTop: '2rem', marginBottom: '2rem' },},
-                    [a({
-                      id: 'link_downloadAgreement',
-                      href: 'duos_librarycardagreementtemplate_rev_2020-04-14.pdf',
-                      target: '_blank',
-                      className: 'btn-secondary btn-download-pdf hover-color',
-                      style: { paddingBottom: '1rem' },
-                    }, [
-                      span({className: 'glyphicon glyphicon-download'}),
-                      'Download DUOS Library Card Agreement'])
-                    ]),
-                ]),
-                p({style: {fontWeight: '500'}}, [
-                  'To issue your researchers this Library Card pre-authorization, please sign and send the DUOS Library Card Agreement (above) along with a list of the first and last name, and eRA Commmons ID of each researcher you will issue this privilege, to: ',
-                  h(Mailto, {email: 'DUOS-support@broadinstitute.zendesk.com'}),
-                  p({style: {fontWeight: '400'}},
-                    ['Please note, this agreement is non-negotiable.']),
-                  div({className: 'home-content'}, [
-                    h3({}, ['DUOS & Library Card']),
-                    p({className: 'home-sections-description'},
-                      ['Bringing the two together for a data access revolution']),
-                    p({style: {fontWeight: '400'}},
-                      ['The current data access request process incurs delays from and unncessary burden on Signing Officials and is further slowed by providing data access committees (DACs) with ambiguous and non-compatible terms which they are obligated to interpret and evaluate to maintain compliance.']),
-                    img({
-                      src: '/images/duos-lc-process.png',
-                      className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic',
-                      alt: 'About icon',
-                    }),
-                    p({style: {fontWeight: '450'}},
-                      ['Combined, the DUOS Library Card Agreement and DUOS system significantly alleviate the burden of work on Signing Officials and DACs while enhancing their compliant function and expediting appropriate access for researchers. ']),
-
-                      div({ className: "home-content" }, [
-                        h3({}, ["Machine Readable Consent Forms & DUOS"]),
-                        p( { className: "home-sections-description" }, ["Standardizing data sharing language for expedited and compliant sharing"]),
-                        p( {style: { fontWeight: '400' }}, ["To date, many consent forms contain ambiguous or region-specific data sharing language, making widespread data sharing and aggregation of datasets difficult or near impossible."]),
-                        span({}, []),
-                        a({ href: 'https://blog.primr.org/is-your-data-sharing-consent-language-transparent-and-machine-readable/', target: '_blank' }, 'GA4GH\'s Machine Readable Consent Form Initiative'),
-                        p( {style: { fontWeight: '400' }}, ["This initiative provides standard data sharing language for IRBs, funders, and investigators to use in their consent forms, based on the Data Use Ontology (DUO)."]),
-                        img({ src: "/images/machine_readable_consent_forms.png", className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 home-content-graphic", alt: "machine readable consent icons" }),
-                        p( {style: { fontWeight: '400' }}, ["By using these machine readable consent form clauses, IRBs, funders, and investigators establish how their dataset(s) may be used, specifically the data use limitations, according to the international DUO standard - removing the need for latter interpretation of the consent forms, and greatly aiding DACs in reviewing DARs for the dataset(s)."]),
-                        p ({style: {fontWeight: '450'}}, ['The GA4GH Consent Machine Readable Consent Clauses guidance is now open for public review and comment!']),
-                        span ({style: {fontWeight: '400'}}, ['To read the guidance for integrating the GA4GH Data Use Ontology terms in your conseent form, and/or provide feedback visit the Machine Readable Consent Clause link on the ']),
-                        a({ href: 'https://www.ga4gh.org/', target: '_blank' }, 'GA4GH homepage')
-                      ]),
-
-                  ]),
-                ]),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data.']),
+                p({style: paragraph},
+                  ['Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies.']),
+                p({style: paragraph},
+                  ['On top of this, researchers submitting data access requests for this data have done with varying levels of clarity and specificity, and are delayed by needing to obtain their Signing Official’s approval prior to submitting their request. Unfortunately, a number of the world’s data access committees (DACs) which receive these requests do not have a standard approach for collecting this information, which leads to further ambiguity.']),
+                p({style: paragraph},
+                  ['The lack of consistent standards on both sides of this equation, requires the investment of significant human effort to determine if researchers should be permitted to use the data, which ultimately confuses and delays the data access request process, while the demand for data access requests increase exponentially.']),
+                p({style: paragraph},
+                  ['DUOS is working to improve this process, let us describe how.']),
+                p({style: paragraph},
+                  ['We will start on the left of our diagram...'])
               ]),
             ]),
-          ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: aboutSectionTitle,
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
+              }, ['Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes']),
+              img({
+                src: '/images/about_reducing_complexity.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Reducing the complexity',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['Let’s look at the present issue with consent forms.']),
+                p({style: paragraph},
+                  ['Most consent forms either contain unique, institution-specific language on data sharing or remain silent. Unfortunately, these uniquely written or silent consent provide DACs with little or difficult-to-interpret guidance on how data may be permissibly shared.']),
+                p({style: paragraph},
+                  ['To solve this issue, GA4GH’s Data Use and Researcher Identities (DURI) workstream created the Data Use Ontology (DUO), which is a structured and machine-readable vocabulary for defining terms of future data use and meant to provide a common standard for describing data sharing policies in consent forms. To facilitate the implementation of GA4GH’s DUO, the DURI workstream and GA4GH’s Regulatory and Ethics workstream (REWS) created the Machine Readable Consent Guidance (PDF). This guidance instructs IRBs and investigators on how to use DUO terms in consent forms in order to clearly describe the permitted uses of the data collected using the DUO standard.']),
+                p({style: paragraph},
+                  ['The Data Use Ontology is an official GA4GH standard now referenced by genomics repositories in over 15 countries, is actively being adopted in the drafting of numerous consent forms by IRBs and investigators, and is an integral element of the Data Use Oversight System (DUOS) software.'])
+              ]),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: aboutSectionTitle,
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
+              }, ['Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology']),
+              img({
+                src: '/images/about_consent_ontology.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'GA4GH Data Use Ontology',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['Once the consent forms clearly distinguish permitted uses of the data using machine readable DUO terms, the data can be tagged and stored with its appropriate DUO terms. This enables investigators desiring to access the data to know up front whether or not they are likely to be granted access. Furthermore, having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.'])
+              ]),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: aboutSectionTitle
+              }, ['Clarity of permitted data use helps, but complexity still lies in free-text data access requests']),
+              img({
+                src: '/images/about_clarity_complexity.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Complexity still lies in free-text data access requests',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['Having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.']),
+                p({style: paragraph},
+                  ['Yet, DACs are still left with multiple issues in receiving and reviewing data access requests.']),
+                p({style: paragraph},
+                  ['First, they are responsible for interpreting complex, domain-specific research proposals contained within each request which they must compare with the requested data’s permitted uses.']),
+                p({style: paragraph},
+                  ['Additionally, the DAC is responsible for assuring the legitimacy of a submitting researcher, and making sure they have appropriate institutional backing.']),
+                p({style: paragraph},
+                  ['Further, DACs and Signing Officials often sign and/or negotiate a unique data access agreement between their institutions for every single data access request submitted/approved.'])
+              ]),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: aboutSectionTitle,
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
+              }, ['A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests']),
+              img({
+                src: '/images/about_two_fold_approach.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Two-fold approach to improving data access requests',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['The DUOS team is working actively on process, policy, and software improvements to reduce or remove each of these issues impact on research.']),
+                p({style: paragraph},
+                  ['To address the complexity of the domain-specific research proposals in each request, DUOS requires requesting investigators to structure their data access request using Data Use Ontology’s structured vocabulary.']),
+                p({style: paragraph},
+                  ['To assist with identifying the legitimacy of the researcher and the heavy administrative burden on Signing Officials, DUOS developed the Library Card Agreement (PDF) which is a single-signature, annually renewable data access agreement under which Signing Officials can pre-authorize any investigators from their institution to submit data access requests to any DAC using the DUOS system.'])
+              ]),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({
+                style: aboutSectionTitle,
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
+              }, ['Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency']),
+              img({
+                src: '/images/about_dacs_compare.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Now DACs can compare',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['With those improvements to the data access request process in place, DACs are then able to compare the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms. This significantly expedites the DACs review of a data access. On top of this, the Signing Official is no longer required to take part in the review and submission of each DAR, nor does a unique data access agreement need to be signed. Removing these elements of the process further expedites the process.'])
+              ]),
+            ]),
+            div({style: aboutSectionWrapper}, [
+              h3({style: aboutSectionTitle}, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
+              img({
+                src: '/images/about_dacs_algorithm.png',
+                className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
+                alt: 'Algorithm can offer suggested decisions to DACs',
+                style: imageWrapper
+              }),
+              div({style: aboutSectionBody}, [
+                p({style: paragraph},
+                  ['Having the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms, doesn’t just facilitate the DAC’s review - but given that the DUO terms are machine readable it means that we are able to use the DUOS algorithm to compare the permitted uses with the data access request instantly.']),
+                p({style: paragraph},
+                  ['Currently, DACs using DUOS are able to review the algorithm’s suggested decision on comparing the permitted uses with the data access request prior to logging their final decision on a request.'])
+              ])
+            ])
+          ])
+        ])
       ])
     );
   }

@@ -1,5 +1,5 @@
 # base image
-FROM node:14.3.0 AS builder
+FROM node:14.15.1 AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory
@@ -18,9 +18,8 @@ RUN npm install --silent
 RUN npm install react-scripts@1.1.1 -g --silent
 RUN npm run build --silent
 
-FROM nginx:1.19.0-alpine
+FROM nginxinc/nginx-unprivileged:1.19.5-alpine
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
-EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

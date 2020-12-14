@@ -1,12 +1,13 @@
 import fileDownload from 'js-file-download';
-import * as ld from 'lodash';
 import * as fp from 'lodash/fp';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
 import { StackdriverReporter } from './stackdriverReporter';
 import { Storage } from './storage';
-
+import axios from 'axios';
+import { DataUseTranslation } from './dataUseTranslation';
+import { isFileEmpty } from './utils';
 
 const dataTemplate = {
   accessTotal: [
@@ -141,8 +142,8 @@ export const Consent = {
 
 export const DAC = {
 
-  list: async () => {
-    const url = `${await Config.getApiUrl()}/dac`;
+  list: async (withUsers) => {
+    const url = `${await Config.getApiUrl()}/dac` + (fp.isEmpty(withUsers) ? '' : `?withUsers=${withUsers}`);
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -227,14 +228,15 @@ export const DAR = {
     return { darInfo, consent };
   },
 
+  //v2 get for DARs
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
-    const summaryDarRes = await fetchOk(`${apiUrl}/dar/modalSummary/${darId}`, Config.authOpts());
-    const summaryDar = await summaryDarRes.json();
+    const authOpts = Config.authOpts();
+    const rawDarRes = await axios.get(`${apiUrl}/dar/v2/${darId}`, authOpts);
+    const rawDar = rawDarRes.data;
+    const researcher = await User.getById(rawDar.userId);
 
     let darInfo = Models.dar;
-    const rawDarRes = await fetchOk(`${apiUrl}/dar/${darId}`, Config.authOpts());
-    const rawDar = await rawDarRes.json();
     darInfo.hmb = rawDar.hmb;
     darInfo.methods = rawDar.methods;
     darInfo.controls = rawDar.controls;
@@ -244,47 +246,47 @@ export const DAR = {
     darInfo.forProfit = rawDar.forProfit;
     darInfo.gender = rawDar.gender;
     darInfo.pediatric = rawDar.pediatric;
-    darInfo.illegalbehave = rawDar.illegalbehave;
+    darInfo.illegalBehavior = rawDar.illegalBehavior;
     darInfo.addiction = rawDar.addiction;
-    darInfo.sexualdiseases = rawDar.sexualdiseases;
-    darInfo.stigmatizediseases = rawDar.stigmatizediseases;
-    darInfo.vulnerablepop = rawDar.vulnerablepop;
-    darInfo.popmigration = rawDar.popmigration;
-    darInfo.psychtraits = rawDar.psychtraits;
-    darInfo.nothealth = rawDar.nothealth;
-    darInfo.hasDiseases = !fp.isEmpty(summaryDar.diseases);
-    darInfo.diseases = summaryDar.diseases;
+    darInfo.sexualDiseases = rawDar.sexualDiseases;
+    darInfo.stigmatizedDiseases = rawDar.stigmatizedDiseases;
+    darInfo.vulnerablePopulation = rawDar.vulnerablePopulation;
+    darInfo.populationMigration = rawDar.populationMigration;
+    darInfo.psychiatricTraits = rawDar.psychiatricTraits;
+    darInfo.notHealth = rawDar.notHealth;
+    darInfo.diseases = rawDar.ontologies || [];
+    darInfo.hasDiseases = !fp.isEmpty(darInfo.diseases);
     darInfo.rus = rawDar.rus;
-    darInfo.researcherId = summaryDar.userId;
-    darInfo.darCode = summaryDar.darCode;
-    darInfo.projectTitle = summaryDar.projectTitle;
-    darInfo.institution = summaryDar.institutionName;
-    darInfo.department = summaryDar.department;
-    darInfo.city = summaryDar.city;
-    darInfo.country = summaryDar.country;
-    darInfo.status = summaryDar.status;
-    darInfo.hasAdminComment = summaryDar.rationale != null;
-    darInfo.adminComment = summaryDar.rationale;
-    darInfo.hasPurposeStatements = summaryDar.purposeStatements.length > 0;
+    darInfo.researcherId = rawDar.userId;
+    darInfo.darCode = rawDar.darCode;
+    darInfo.projectTitle = rawDar.projectTitle;
+    darInfo.institution = rawDar.institutionName;
+    darInfo.department = rawDar.department;
+    darInfo.city = rawDar.city;
+    darInfo.country = rawDar.country;
+    darInfo.status = rawDar.status;
+    darInfo.restrictions = rawDar.restrictions;
+
+    darInfo.hasAdminComment = researcher.rationale != null;
+    darInfo.adminComment = researcher.rationale;
+    const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
+    const researchType = DataUseTranslation.generateResearchTypes(darInfo);
+    darInfo.hasPurposeStatements = purposeStatements && purposeStatements.length > 0;
     if (darInfo.hasPurposeStatements) {
-      darInfo.purposeStatements = summaryDar.purposeStatements;
+      darInfo.purposeStatements = purposeStatements;
       darInfo.purposeManualReview = await DAR.requiresManualReview(darInfo.purposeStatements);
     } else {
       darInfo.purposeStatements = [];
     }
-    if (summaryDar.researchType.length > 0) {
-      darInfo.researchType = summaryDar.researchType;
+    if (researchType && researchType.length > 0) {
+      darInfo.researchType = researchType;
       darInfo.researchTypeManualReview = await DAR.requiresManualReview(darInfo.researchType);
     }
-    darInfo.datasets = summaryDar.datasets;
-    darInfo.researcherProperties = summaryDar.researcherProperties;
-    const isThePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'isThePI' })), 'propertyValue', false);
-    const havePI = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'havePI' })), 'propertyValue', false);
-    const profileName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'profileName' })), 'propertyValue', "");
-    const piName = ld.get(ld.head(ld.filter(darInfo.researcherProperties, { 'propertyKey': 'piName' })), 'propertyValue', "");
-    darInfo.pi = isThePI ? profileName : piName;
-    darInfo.havePI = havePI || isThePI;
-    darInfo.profileName = profileName;
+
+    darInfo.datasets = rawDar.datasets;
+    darInfo.pi = rawDar.investigator;
+    darInfo.havePI = rawDar.havePI || rawDar.isThePI;
+    darInfo.profileName = researcher.displayName;
     // dataUse from Models.dar has properties denoting what research the data will be used for.
     // Get these properties directly from the DAR.
     const dataUseModel = fp.keys(darInfo.dataUse);
@@ -303,8 +305,9 @@ export const DAR = {
     return await res.json();
   },
 
+  //v2 get for DARs
   getPartialDarRequest: async darId => {
-    const url = `${await Config.getApiUrl()}/dar/partial/${darId}`;
+    const url = `${await Config.getApiUrl()}/dar/v2/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -315,16 +318,18 @@ export const DAR = {
     return await res.json();
   },
 
-  postPartialDarRequest: async dar => {
-    const url = `${await Config.getApiUrl()}/dar/partial`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
-    return await res.json();
+  //v2 update for dar partials
+  updateDarDraft: async (dar, referenceId) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/draft/${referenceId}`;
+    const res = await axios.put(url, dar, Config.authOpts());
+    return res.data;
   },
 
-  partialDarFromCatalogPost: async (userId, datasetIds) => {
-    const url = `${await Config.getApiUrl()}/dar/partial/datasetCatalog?userId=${userId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(datasetIds), { method: 'POST' }]));
-    return await res.json();
+  //api endpoint for v2 draft submission
+  postDarDraft: async(dar) => {
+    const url = `${await Config.getApiUrl()}/dar/v2/draft/`;
+    const res = await axios.post(url, dar, Config.authOpts());
+    return res.data;
   },
 
   deletePartialDarRequest: async (darId) => {
@@ -333,8 +338,8 @@ export const DAR = {
     return await res;
   },
 
-  getPartialDarRequestList: async userId => {
-    const url = `${await Config.getApiUrl()}/dar/partials/manage?userId=${userId}`;
+  getPartialDarRequestList: async () => {
+    const url = `${await Config.getApiUrl()}/dar/partials/manage`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -354,10 +359,12 @@ export const DAR = {
     return await res.json();
   },
 
-  postDataAccessRequest: async dar => {
-    const url = `${await Config.getApiUrl()}/dar`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'POST' }]));
-    return await res;
+  //v2 endpoint for DAR POST
+  postDar: async (dar) => {
+    const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
+    const url = `${await Config.getApiUrl()}/dar/v2`;
+    const res = axios.post(url, filteredDar, Config.authOpts());
+    return await res.data;
   },
 
   cancelDar: async referenceId => {
@@ -376,6 +383,17 @@ export const DAR = {
     const url = `${await Config.getOntologyApiUrl()}/autocomplete?q=${partial}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
+  },
+
+  getDARDocument: async (referenceId, fileType) => {
+    const authOpts = Object.assign(Config.authOpts(), {responseType: 'blob'});
+    authOpts.headers = Object.assign(authOpts.headers, {
+      'Content-Type': 'application/octet-stream',
+      'Accept': 'application/octet-stream'
+    });
+    const url = `${await Config.getApiUrl()}/dar/v2/${referenceId}/${fileType}`;
+    const res = await axios.get(url, authOpts);
+    return res.data;
   },
 
   getDataAccessManage: async userId => {
@@ -432,12 +450,18 @@ export const DAR = {
     return manualReview;
   },
 
-  postDAA: async (fileName, file, existentFileUrl) => {
-    const url = `${await Config.getApiUrl()}/dar/storeDAA?fileName=${fileName}&existentFileUrl=${existentFileUrl}`;
-    let formData = new FormData();
-    formData.append("data", new Blob([file], { type: 'application/pdf' }));
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    return await res.json();
+  //NOTE: endpoints requires a dar id
+  uploadDARDocument: async(file, darId, fileType) => {
+    if(isFileEmpty(file)) {
+      return Promise.resolve({data: null});
+    } else {
+      let authOpts = Config.authOpts();
+      authOpts.headers['Content-Type'] = 'multipart/form-data';
+      let formData = new FormData();
+      formData.append("file", file);
+      const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
+      return axios.post(url, formData, authOpts);
+    }
   }
 };
 
@@ -448,6 +472,12 @@ export const DataSet = {
     let formData = new FormData();
     formData.append("data", new Blob([file], { type: 'text/plain' }));
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
+    return await res.json();
+  },
+
+  postDatasetForm: async (form) => {
+    const url = `${await Config.getApiUrl()}/dataset/v2`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(form), { method: 'POST' }]));
     return await res.json();
   },
 
@@ -494,6 +524,12 @@ export const DataSet = {
     const url = `${await Config.getApiUrl()}/dataset?dataSetId=${dataSetId}&needsApproval=${needsApproval}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'PUT' }]));
     return res.json();
+  },
+
+  updateDataset: async (datasetId, dataSetObject) => {
+    const url = `${await Config.getApiUrl()}/dataset/${datasetId}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
+    return await res.json();
   }
 };
 
@@ -537,7 +573,6 @@ export const Election = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
-
 
   downloadDatasetVotesForDARElection: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election/dataSetVotes`;
@@ -697,12 +732,6 @@ export const Files = {
     return getFile(url, fileName);
   },
 
-  getOntologyFile: async (fileName, fileUrl) => {
-    const encodeURI = encodeURIComponent(fileUrl);
-    const url = `${await Config.getApiUrl()}/ontology/file?fileUrl=${encodeURI}&fileName=${fileName}`;
-    return getFile(url, fileName);
-  },
-
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;
     return getFile(url, fileName);
@@ -711,11 +740,6 @@ export const Files = {
   getDARFile: async (darId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
     return await getFile(url, null);
-  },
-
-  getDAAFile: async (researcherId, fileName) => {
-    const url = `${await Config.getApiUrl()}/dar/downloadDAA/${researcherId}`;
-    return getFile(url, fileName);
   }
 };
 
@@ -726,20 +750,41 @@ export const Summary = {
   }
 };
 
-export const Help = {
+export const Support = {
 
-  findHelpMeReports: async (userId) => {
-    const url = `${await Config.getApiUrl()}/report/user/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
+  createTicket: (name, type, email, subject, description, attachmentToken, url) => {
+    const ticket = {};
+
+    ticket.request = {
+      requester: { name: name, email: email },
+      subject: subject,
+      // BEWARE changing the following ids or values! If you change them then you must thoroughly test.
+      custom_fields: [
+        { id: 360012744452, value: type},
+        { id: 360007369412, value: description},
+        { id: 360012744292, value: name},
+        { id: 360012782111, value: email },
+        { id: 360018545031, value: email }
+      ],
+      comment: {
+        body: description + '\n\n------------------\nSubmitted from: ' + url,
+        uploads: attachmentToken
+      },
+      ticket_form_id: 360000669472
+    };
+
+    return ticket;
+
+  },
+  createSupportRequest: async (ticket) => {
+    const res = await fetchAny(`https://broadinstitute.zendesk.com/api/v2/requests.json`, fp.mergeAll([Config.jsonBody(ticket), { method: 'POST' }]));
+    return await res;
   },
 
-  createHelpMeReport: async (report) => {
-    const url = `${await Config.getApiUrl()}/report`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(report), { method: 'POST' }]));
-    return await res.json();
-  }
-
+  uploadAttachment: async (file) => {
+    const res = await fetchAny(`https://broadinstitute.zendesk.com/api/v2/uploads?filename=Attachment`, fp.mergeAll([Config.attachmentBody(file), { method: 'POST' }]));
+    return (await res.json()).upload;
+  },
 };
 
 export const Match = {
@@ -755,55 +800,6 @@ export const Match = {
     } finally {
       return answer;
     }
-  }
-};
-
-export const Ontology = {
-
-  postOntologyFile: async (fileData) => {
-    var formData = new FormData();
-    var uuid = Ontology.guid();
-    var metadata = {};
-    metadata[uuid] = fileData.fileMetadata;
-    formData.append(uuid, fileData.file);
-    formData.append("metadata", JSON.stringify(metadata));
-
-    const url = `${await Config.getApiUrl()}/ontology`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    if (res.status === 204) {
-      return [];
-    }
-    return await res.json();
-  },
-
-  retrieveIndexedFiles: async () => {
-    const url = `${await Config.getApiUrl()}/ontology`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json().then((data) => { return data; });
-  },
-
-  deleteOntologyFile: async (fileUrl) => {
-    const url = `${await Config.getApiUrl()}/ontology`;
-    const obj = { fileUrl: fileUrl };
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(obj), { method: 'PUT' }]));
-    return await res.json();
-  },
-
-  getOntologyTypes: async () => {
-    const url = `${await Config.getApiUrl()}/ontology/types`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json();
-  },
-
-  guid: () => {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-      s4() + '-' + s4() + s4() + s4();
   }
 };
 
@@ -973,10 +969,25 @@ export const StatFiles = {
 
 export const User = {
 
+  //DEPRECATION NOTE: consider this method deprecated, a user's email can change with their employment
+  //Therefore the possibility that the email registered to a DAR will differ from the researcher's current email, leading to invalid queries
+  //Instead, use getById for more predictable results
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  getMe: async () => {
+    const url = `${await Config.getApiUrl()}/user/me`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+
+  getById: async id => {
+    const url = `${await Config.getApiUrl()}/user/${id}`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   },
 
   list: async () => {
@@ -1009,12 +1020,6 @@ export const User = {
     }
   },
 
-  updateMainFields: async (user, userId) => {
-    const url = `${await Config.getApiUrl()}/dacuser/mainFields/${userId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
-    return res.json();
-  },
-
   registerUser: async () => {
     const url = `${await Config.getApiUrl()}/user`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
@@ -1025,14 +1030,8 @@ export const User = {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
     return res.json();
-  },
-
-  findUserStatus: async userId => {
-    const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    const user = await res.json();
-    return user;
   }
+
 };
 
 export const Votes = {
@@ -1154,8 +1153,9 @@ export const AuthenticateNIH = {
   },
 
   verifyNihToken: async (token) => {
-    const url = `${await Config.getFireCloudUrl()}api/nih/callback`;
-    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(token), { method: 'POST' }]));
+    const url = `${await Config.getProfileUrl()}/shibboleth-token`;
+    const payload = fp.get('nih-username-token')(token);
+    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: payload }]));
     return await res.json();
   },
 

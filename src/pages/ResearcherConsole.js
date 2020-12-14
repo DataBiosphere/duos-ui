@@ -4,7 +4,7 @@ import * as Utils from '../libs/utils';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
-import { DAR, DataSet } from '../libs/ajax';
+import { DAR } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
@@ -30,10 +30,6 @@ class ResearcherConsole extends Component {
       showDialogDeletePDAR: false,
       alertTitle: undefined
     };
-
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.review = this.review.bind(this);
   }
 
   handleDarPageChange = page => {
@@ -64,64 +60,9 @@ class ResearcherConsole extends Component {
     });
   };
 
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  }
-
-  async review(e) {
-    const dataRequestId = e.target.getAttribute('value');
-    const SEPARATOR = ' | ';
-    let darFields = await DAR.getDarFields(dataRequestId, null);
-    let formData = darFields;
-    formData.datasetId = [];
-    for (let detail of formData.datasetDetail) {
-      let obj = {};
-
-      obj.id = detail.datasetId;
-      let ds = await this.getDsPIName(obj.id);
-
-      if (detail.objectId !== undefined && detail.objectId !== null) {
-        obj.concatenation = detail.objectId.concat(SEPARATOR, detail.name, SEPARATOR, ds.piName, SEPARATOR, ds.consentId);
-      } else {
-        obj.concatenation = detail.name.concat(SEPARATOR, ds.piName, SEPARATOR, ds.consentId);
-      }
-      formData.datasetId.push(obj);
-
-    }
-    this.props.history.push({ pathname: 'dar_application', props: { formData: formData } });
-
-  };
-
-  getDsPIName = async (dsId) => {
-    let piName = '';
-    let ds = await DataSet.getDataSetsByDatasetId(dsId);
-    ds.properties.forEach(
-      prop => {
-        if (prop.propertyName === 'Principal Investigator(PI)') {
-          piName = prop.propertyValue;
-        }
-      }
-    );
-    return { piName: piName, consentId: ds.consentId };
-  }
-
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
-  };
-
-  resume = (e) => {
-    const dataRequestId = e.target.getAttribute('value');
-
-    DAR.getPartialDarRequest(dataRequestId).then(
-      data => {
-        let formData = data;
-        this.props.history.push({ pathname: 'dar_application', props: { formData: formData } });
-      });
   };
 
   deletePartialDar = (e) => {
@@ -176,7 +117,7 @@ class ResearcherConsole extends Component {
       }
     );
 
-    DAR.getPartialDarRequestList(currentUser.dacUserId).then(
+    DAR.getPartialDarRequestList().then(
       pdars => {
         this.setState({
           partialDars: pdars,
@@ -200,8 +141,8 @@ class ResearcherConsole extends Component {
             PageHeading({
               id: "researcherConsole",
               color: "common",
-              title: "Welcome " + currentUser.displayName + "!",
-              description: "These are your Data Access Request cases"
+              title: "Welcome to your Researcher Console, " + currentUser.displayName + "!",
+              description: "Your Data Access Requests are below"
             }),
             hr({ className: "section-separator" }),
           ]),
@@ -213,8 +154,8 @@ class ResearcherConsole extends Component {
                   id: "researcherConsoleAccess",
                   imgSrc: "/images/icon_access.png",
                   color: "access",
-                  title: "Data Access Request cases",
-                  description: "List of your Requests for Data Access"
+                  title: "Your Data Access Requests",
+                  description: "List of your Data Access Requests"
                 }),
               ]),
 
@@ -233,8 +174,8 @@ class ResearcherConsole extends Component {
                 div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-header access-color" }, ["Project Title"]),
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Date"]),
                 div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Status"]),
+                div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Cancel"]),
                 div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Review"]),
-                div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Renewal"]),
               ]),
               hr({ className: "table-head-separator" }),
 
@@ -248,8 +189,8 @@ class ResearcherConsole extends Component {
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, ["Submitted"]),
                       span({ isRendered: dar.electionStatus === 'Open' || dar.electionStatus === 'Final' || dar.electionStatus === 'PendingApproval' }, ["In review"]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, ["Canceled"]),
-                      span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === false }, ["DENIED"]),
-                      span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === true }, ["APPROVED"]),
+                      span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === false }, ["Denied"]),
+                      span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === true }, ["Approved"]),
                     ]),
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center", disabled: dar.isCanceled }, [
                       button({
@@ -260,9 +201,10 @@ class ResearcherConsole extends Component {
                     ]),
                     div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
                       button({
-                        id: dar.frontEndId + "_btnReview", name: "btn_review", className: "cell-button hover-color", onClick: this.review,
-                        value: dar.dataRequestId
-                      }, ["Review"]),
+                        id: dar.frontEndId + "_btnReview", name: "btn_review", className: "cell-button hover-color"
+                      }, [h(Link, {
+                        to: 'dar_application/' + dar.dataRequestId,
+                      }, ['Review'])]),
                     ])
                   ]),
                   hr({ className: "table-body-separator" })
@@ -295,23 +237,28 @@ class ResearcherConsole extends Component {
                 hr({ className: "table-head-separator" }),
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {
-                  return h(Fragment, { key: pdar.partial_dar_code }, [
-                    div({ key: pdar.partial_dar_code, id: pdar.partial_dar_code, className: "row no-margin tableRowPartial" }, [
+                  return h(Fragment, { key: pdar.partialDarCode }, [
+                    div({ key: pdar.partialDarCode, id: pdar.partialDarCode, className: "row no-margin tableRowPartial" }, [
                       a({
-                        id: pdar.partial_dar_code + "_btnDelete", name: "btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
+                        id: pdar.partialDarCode + "_btnDelete", name: "btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
                         onClick: this.deletePartialDar, value: pdar.dataRequestId
                       }, [
                           span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
                         ]),
 
-                      div({ id: pdar.partial_dar_code + "_partialId", name: "partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partial_dar_code]),
-                      div({ id: pdar.partial_dar_code + "_partialTitle", name: "partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),
-                      div({ id: pdar.partial_dar_code + "_partialDate", name: "partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),
+                      div({ id: pdar.partialDarCode + "_partialId", name: "partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partialDarCode]),
+                      div({ id: pdar.partialDarCode + "_partialTitle", name: "partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),
+                      div({ id: pdar.partialDarCode + "_partialDate", name: "partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),
                       div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
                         button({
-                          id: pdar.partial_dar_code + "_btnResume", name: "btn_resume", className: "cell-button hover-color", onClick: this.resume,
-                          value: pdar.dataRequestId
-                        }, ["Resume"]),
+                          id: pdar.partialDarCode + '_btnResume',
+                          name: 'btn_resume',
+                          className: 'cell-button hover-color',
+                        }, [
+                          h(Link, {
+                            to: 'dar_application/' + pdar.dataRequestId,
+                          }, ['Resume'])],
+                        ),
                       ]),
                     ]),
                     hr({ className: "table-body-separator" })

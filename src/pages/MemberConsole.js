@@ -90,7 +90,9 @@ class MemberConsole extends Component {
       prev.totalDulPendingVotes = duls.totalDulPendingVotes;
       prev.electionsList.dul = duls.dul;
       prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
-      prev.electionsList.access = dars.access;
+      // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
+      // for more work related to ensuring closed elections aren't displayed here.
+      prev.electionsList.access = _.filter(dars.access, (e) => { return e.electionStatus !== 'Closed'; });
       return prev;
     });
 
@@ -137,7 +139,7 @@ class MemberConsole extends Component {
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
           PageHeading({
-            id: 'memberConsole', color: 'common', title: 'Welcome ' + currentUser.displayName + '!',
+            id: 'memberConsole', color: 'common', title: 'Welcome to your DAC Member Console, ' + currentUser.displayName + '!',
             description: 'These are your pending cases for review'
           }),
           hr({ className: 'section-separator' }),

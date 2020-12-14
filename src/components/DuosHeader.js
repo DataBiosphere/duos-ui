@@ -1,19 +1,26 @@
-import { Component } from 'react';
-import { a, div, h, hr, img, li, nav, small, span, ul } from 'react-hyperscript-helpers';
+import {Component} from 'react';
+import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import ResponsiveMenu from 'react-responsive-navbar';
-import { Link, withRouter } from 'react-router-dom';
-import { Storage } from '../libs/storage';
+import {Link, withRouter} from 'react-router-dom';
+import {Storage} from '../libs/storage';
+import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
-
 
 class DuosHeader extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      showHelpModal: false
+      showSupportRequestModal: false,
+      hover: false
     };
-    this.signOut = this.signOut.bind(this);
+  };
+
+  toggleHover = () => {
+    this.setState(prev => {
+      prev.hover = !this.state.hover;
+      return prev;
+    });
   };
 
   signOut = () => {
@@ -21,31 +28,23 @@ class DuosHeader extends Component {
     this.props.onSignOut();
   };
 
-  helpModal = () => {
+  supportRequestModal = () => {
     this.setState(prev => {
-      prev.showHelpModal = true;
+      prev.showSupportRequestModal = true;
       return prev;
     });
   };
 
-  okModal = () => {
+  okSupportRequestModal = () => {
     this.setState(prev => {
-      prev.showHelpModal = false;
-      return prev;
-    });
-    window.location = 'help_reports';
-  };
-
-  closeModal = () => {
-    this.setState(prev => {
-      prev.showHelpModal = false;
+      prev.showSupportRequestModal = false;
       return prev;
     });
   };
 
-  afterModalOpen = () => {
+  closeSupportRequestModal = () => {
     this.setState(prev => {
-      prev.showHelpModal = false;
+      prev.showSupportRequestModal = false;
       return prev;
     });
   };
@@ -57,7 +56,6 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
-
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
 
@@ -70,14 +68,66 @@ class DuosHeader extends Component {
       isDataOwner = currentUser.isDataOwner;
     }
 
-    let helpLink = isAdmin ? '/help_reports' : '/home_help';
+    const duosLogoImage = {
+      width: '140px',
+      height: '40px',
+      padding: '0',
+      margin: '12px 64px 0 0'
+    };
+
+    const navbarDuosIcon = {
+      display: 'inline-block',
+      width: '16px',
+      height: '16px',
+      margin: '0 8px 0 0',
+      transition: 'all 0.3s ease !important',
+      verticalAlign: 'baseline'
+    };
+
+    const navbarDuosText = {
+      display: 'inline',
+      verticalAlign: 'text-bottom'
+    };
+
+    const hrStyle = {
+      float: 'right',
+      margin: '0',
+      width: '100%'
+    };
+
+    const contactUsSource = this.state.hover ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
+    const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
+    const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
+    const contactUsButton = button({
+      id: "btn_applyAcces",
+      style: {
+        color: this.state.hover ? '#2FA4E7' : '#ffffff',
+        fontSize: '14px',
+        fontWeight: '500',
+        background: 'transparent',
+        border: 'none',
+        outline: 'none',
+        margin: '0 20px 0 0',
+        padding: '15px 0'
+      },
+      onMouseEnter: this.toggleHover,
+      onMouseLeave: this.toggleHover,
+      onClick: this.supportRequestModal,
+      "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
+    }, [contactUsIcon, contactUsText]);
+    const supportrequestModal = SupportRequestModal({
+      showModal: this.state.showSupportRequestModal,
+      onOKRequest: this.okSupportRequestModal,
+      onCloseRequest: this.closeSupportRequestModal,
+      url: this.props.location.pathname
+    });
 
     return (
 
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         div({ className: 'row no-margin' }, [
           h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-            img({ src: '/images/duos_logo.svg', alt: 'DUOS Logo' })
+            img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
           ]),
           h(ResponsiveMenu, {
             changeMenuOn: '767px',
@@ -101,7 +151,6 @@ class DuosHeader extends Component {
                       li({}, [a({ id: 'link_signOut', onClick: this.signOut }, ['Sign out'])])
                     ])
                   ]),
-
                   li({ isRendered: isAdmin }, [
                     h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
                   ]),
@@ -126,18 +175,22 @@ class DuosHeader extends Component {
                     h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
                   ]),
 
+                  li({}, [
+                    h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])
+                  ]),
+
                   li({ className: 'dropdown', isRendered: isAdmin }, [
                     a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
                       div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
                     ]),
                     ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
                       li({}, [
-                        h(Link, { id: 'link_statistics', to: '/summary_votes', className: 'f-left' }, ['Votes Statistics'])
+                        h(Link, { id: 'link_statistics', to: '/summary_votes' }, ['Votes Statistics'])
                       ]),
-                      hr({}),
+                      hr({ style: hrStyle }),
                       li({}, [
                         h(Link, {
-                          id: 'link_reviewedCases', to: '/reviewed_cases', className: 'f-left', isRendered: !(isDataOwner || isResearcher) || isAdmin
+                          id: 'link_reviewedCases', to: '/reviewed_cases', isRendered: !(isDataOwner || isResearcher) || isAdmin
                         }, ['Reviewed Cases Record'])
                       ])
                     ])
@@ -146,25 +199,23 @@ class DuosHeader extends Component {
                   li({}, [
                     h(Link, { id: 'link_datasetCatalog', isRendered: isLogged, to: '/dataset_catalog' }, ['Dataset Catalog'])
                   ]),
-
-                  li({}, [
-                    h(Link, { id: 'link_help', to: helpLink }, ['Request Help'])
-                  ])
+                  contactUsButton, supportrequestModal
                 ]),
 
                 ul({ isRendered: !isLogged, className: 'navbar-public' }, [
                   li({}, [
                     h(Link, { id: 'link_about', className: 'navbar-duos-link', to: '/home_about' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-about' }),
-                      span({ className: 'navbar-duos-text' }, ['About'])
+                      div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
+                      span({ style: navbarDuosText }, ['About'])
                     ])
                   ]),
                   li({}, [
-                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/home_help' }, [
-                      div({ className: 'navbar-duos-icon navbar-duos-icon-help' }),
-                      span({ className: 'navbar-duos-text' }, ['Help'])
+                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
+                      div({ className: 'navbar-duos-icon-help', style: navbarDuosIcon }),
+                      span({ style: navbarDuosText }, ['FAQs'])
                     ])
-                  ])
+                  ]),
+                  contactUsButton, supportrequestModal
                 ])
               ])
           })

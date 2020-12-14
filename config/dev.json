@@ -7,7 +7,11 @@
   "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",
   "errorApiKey": "AIzaSyBFLIUf__4yxDpM9wFt3T4K_UX_VCu7tcQ",
   "firecloudUrl": "https://firecloud-orchestration.dsde-dev.broadinstitute.org/",
-  "nihUrl": "http://mock-nih.dev.test.firecloud.org/link-nih-account/index.html",
+  "gwasUrl": "",
+  "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
+  "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
+  "powerBiUrl": "https://app.powerbi.com/view?r=eyJrIjoiMjI2YjdmZGEtMmRiNC00YjVjLWJjNjktNmI4NmNlYjAxOGY3IiwidCI6IjBjYjdhNjQwLTQ1YTItNGVkNi1iZTlmLTYzNTE5Zjg2ZTA0YiIsImMiOjN9&pageName=ReportSectionc1c4107ccd69e2852e18",
+  "gaId": "UA-159441671-1",
   "features": {
     "newDarUi": true
   }

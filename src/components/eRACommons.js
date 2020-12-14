@@ -102,8 +102,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   redirectToNihLogin = async () => {
-    const nihUrl = `${ await Config.getNihUrl() }?redirect-url=`;
-    window.location.href = nihUrl.concat(window.location.origin + '/' + this.props.destination + '?jwt%3D%7Btoken%7D');
+    const destination = window.location.origin + '/' + this.props.destination + '?nih-username-token=<token>';
+    const nihUrl = `${ await Config.getNihUrl() }?${qs.stringify({ 'return-url': destination })}`;
+    window.location.href = nihUrl;
   };
 
   deleteNihAccount = async () => {

@@ -86,7 +86,9 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
       dars => {
         this.setState(prev => {
-          prev.electionsList.access = dars.access;
+          // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
+          // for more work related to ensuring closed elections aren't displayed here.
+          prev.electionsList.access = _.filter(dars.access, (e) => { return e.electionStatus !== 'Closed'; });
           prev.totalAccessPendingVotes = dars.totalAccessPendingVotes;
           return prev;
         });
@@ -115,12 +117,22 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
   };
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
+  openAccessReview = (referenceId, voteId, rpVoteId, alreadyVoted) => async (e) => {
     const pathStart = await NavigationUtils.accessReviewPath();
+    let chairFinal = false;
+    if(this.state.currentUser && alreadyVoted) {
+      chairFinal = this.state.currentUser.isChairPerson;
+    }
     if (rpVoteId !== null) {
-      this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
+      this.props.history.push(
+        `${pathStart}/${referenceId}/${voteId}/${rpVoteId}`,
+        {chairFinal}
+      );
     } else {
-      this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
+      this.props.history.push(
+        `${pathStart}/${referenceId}/${voteId}`,
+        {chairFinal}
+      );
     }
   };
 
@@ -177,7 +189,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
           PageHeading({
-            id: 'chairConsole', color: 'common', title: 'Welcome ' + currentUser.displayName + '!',
+            id: 'chairConsole', color: 'common', title: 'Welcome to your DAC Chair Console, ' + currentUser.displayName + '!',
             description: 'These are your pending cases for review'
           }),
 
@@ -323,11 +335,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                       button({
                         id: pendingCase.frontEndId + '_btnVote',
                         name: 'btn_voteAccess',
-                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
-                        className: 'cell-button ' + (pendingCase.alreadyVoted === true ? 'default-color' : 'cancel-color')
+                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId, pendingCase.alreadyVoted),
+                        className: 'cell-button cancel-color'
                       }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Edit'])
+                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Log Final Vote'])
                       ])
                     ]),
                     div({
@@ -343,25 +355,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                     div({
                       isRendered: this.isAccessCollectEnabled(pendingCase),
                       className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnCollect',
-                        name: 'btn_collectAccess',
-                        onClick: this.openAccessCollect(pendingCase.referenceId, pendingCase.electionId),
-                        className: 'cell-button cancel-color'
-                      }, ['Collect Votes'])
-                    ]),
+                    }, []),
                     div({
                       isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
                       className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnFinal',
-                        name: 'btn_finalAccess',
-                        onClick: this.openFinalAccessReview(pendingCase.referenceId, pendingCase.electionId, pendingCase.rpElectionId),
-                        className: 'cell-button cancel-color'
-                      }, ['FINAL VOTE'])
-                    ]),
+                    }, []),
                     div({
                       isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
                       className: twoColumnClass + ' cell-body text f-center empty'
