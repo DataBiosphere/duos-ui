@@ -616,7 +616,7 @@ class DatasetCatalog extends Component {
               onClick: this.download,
               className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
             }, [
-              'Download Dataset Info',
+              'Download Dataset List',
               span({ className: 'glyphicon glyphicon-download', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
             ]),
           ]),
