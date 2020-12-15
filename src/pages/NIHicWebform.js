@@ -71,51 +71,6 @@ class NIHICWebform extends Component {
     }
   };
 
-  prefillDataUseFields(dataUse) {
-    let methods = dataUse.methodsResearch;
-    let genetics = dataUse.geneticStudiesOnly;
-    let publication = dataUse.publicationResults;
-    let collaboration = dataUse.collaboratorRequired;
-    let ethics = dataUse.ethicsApprovalRequired;
-    let geographic = dataUse.geographicalRestrictions;
-    let forProfit = !dataUse.commercialUse;
-    let hmb = dataUse.hmbResearch;
-    let poa = dataUse.populationOriginsAncestry;
-    let diseases = dataUse.diseaseRestrictions;
-    let other = !fp.isEmpty(dataUse.other);
-    let otherText = dataUse.other;
-    let generalUse = dataUse.generalUse;
-
-    this.setState(prev => {
-      prev.formData.methods = methods;
-      prev.formData.genetic = genetics;
-      prev.formData.publication = publication;
-      prev.formData.collaboration = collaboration;
-      prev.formData.ethics = ethics;
-      prev.formData.geographic = geographic;
-      prev.formData.forProfit = forProfit;
-      prev.formData.hmb = hmb;
-      prev.formData.poa = poa;
-      prev.formData.diseases = diseases;
-      prev.formData.other = !fp.isEmpty(other);
-      prev.formData.otherText = otherText;
-      prev.formData.generalUse = generalUse;
-      return prev;
-    });
-  };
-
-  handlePositiveIntegerOnly = (e) => {
-    const field = e.target.name;
-    const value = e.target.value.replace(/[^\d]/,'');
-
-    if (value === '' || parseInt(value, 10) > -1) {
-      this.setState(prev => {
-        prev.datasetData[field] = value;
-        return prev;
-      });
-    }
-  };
-
   handleCheckboxChange = (e) => {
     const field = e.target.name;
     const value = e.target.checked;
@@ -125,67 +80,9 @@ class NIHICWebform extends Component {
     });
   };
 
-  validateRequiredFields(formData) {
-    return this.isValid(formData.researcher) &&
-      this.validateDatasetName((formData.datasetName)) &&
-      this.isValid(formData.datasetName) &&
-      this.isValid(formData.datasetRepoUrl) &&
-      this.isValid(formData.dataType) &&
-      this.isValid(formData.species) &&
-      this.isValid(formData.phenotype) &&
-      this.isValid(formData.nrParticipants) &&
-      this.isValid(formData.description);
-  };
-
-  validateDatasetName(name) {
-    let oldDataset = this.state.updateDataset;
-    let datasets = this.state.allDatasetNames;
-    // create dataset case
-    if (fp.isEmpty(oldDataset)) {
-      return !fp.contains(name, datasets);
-    }
-  };
-
-  showDatasetNameErrors(name, showValidationMessages) {
-    if (fp.isEmpty(name)) {
-      return showValidationMessages ? 'form-control required-field-error' : 'form-control';
-    }
-    // if there is a name loaded in because this is an update
-    if (!fp.isEmpty(this.state.updateDataset)) {
-      let updateDatasetName = fp.find(p => p.propertyName === "Dataset Name", this.state.updateDataset.properties).propertyValue;
-      if (name === updateDatasetName) {
-        return 'form-control';
-      }
-    }
-  };
-
-  attestAndSave = (e) => {
-    this.setState( prev => {
-      let allValid = this.validateRequiredFields(prev.datasetData);
-      if (allValid) {
-        prev.problemLoadingUpdateDataset = false;
-        prev.showValidationMessages = false;
-      }
-      else {
-        prev.problemLoadingUpdateDataset = false;
-        prev.showValidationMessages = true;
-      }
-      return prev;
-    });
-  };
-
-  isValid(value) {
-    let isValid = false;
-    if (value !== '' && value !== null && value !== undefined) {
-      isValid = true;
-    }
-    return isValid;
-  };
-
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
    */
-
   isTypeOfResearchInvalid = () => {
     const valid = (
       this.state.formData.generalUse === true ||
