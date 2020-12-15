@@ -769,6 +769,7 @@ class DatasetRegistration extends Component {
                         name: 'researcher',
                         id: 'inputResearcher',
                         value: this.state.datasetData.researcher,
+                        onChange: this.handleChange,
                         disabled: !isUpdateDataset,
                         className: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
@@ -790,6 +791,7 @@ class DatasetRegistration extends Component {
                         name: 'principalInvestigator',
                         id: 'inputPrincipalInvestigator',
                         value: this.state.datasetData.principalInvestigator,
+                        onChange: this.handleChange,
                         className: (fp.isEmpty(this.state.datasetData.principalInvestigator) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
                       }),
