@@ -180,7 +180,7 @@ class AccessReview extends Component {
       prev.dataUse = consent.dataUse;
       prev.election = election;
       prev.rpVote = rpVote;
-      if (!ld.isNil(election) && !ld.isNil(election.useRestriction) && !ld.isNil(rpVote)) {
+      if (!ld.isNil(consent.useRestriction) && !ld.isNil(rpVote)) {
         prev.hasUseRestriction = true;
       } else {
         prev.hasUseRestriction = false;

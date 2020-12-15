@@ -40,10 +40,11 @@ import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
-import NHGRIpilotinfo from './pages/NHGRIpilotinfo';
+import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
 import HomeResearcherInfo from "./pages/HomeResearcherInfo";
+import BackgroundSignIn from './pages/BackgroundSignIn';
 
 
 const Routes = (props) => (
@@ -51,14 +52,22 @@ const Routes = (props) => (
     <Route exact path="/" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/home" render={(routeProps) => <Home {...routeProps} {...props} />} />
     <Route exact path="/status" render={(routeProps) => Status(_.mergeAll([routeProps, props]))} />
+    <Route exact path="/backgroundsignin" render={
+      (routeProps) =>
+        props.env
+          ? props.env !== 'prod'
+            ? <BackgroundSignIn {...routeProps} />
+            : <NotFound />
+          : <div />
+    } />
     <Route path="/FAQs" component={FAQs} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />
     <Route path="/home_dac_info" component={HomeDacInfo} />
     <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
-    <Route path="/NHGRIpilotinfo" component={NHGRIpilotinfo} />
     <Route path="/NIHICWebform" component={NIHICWebform} />
+    <Route path="/nih_pilot_info" render={(routeProps) => <NIHPilotInfo />} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dac" component={AdminManageDac} props={props} rolesAllowed={[USER_ROLES.admin]} />
@@ -77,8 +86,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/profile" component={ResearcherProfile} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/admin_manage_access" component={AdminManageAccess} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin]} />
+    <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
+    <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />

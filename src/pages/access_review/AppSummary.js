@@ -73,7 +73,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
-    const { pi, profileName, institution, department, city, country } = darInfo;
+    const { piName, profileName, institution, department, city, country } = researcherProfile;
     const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj) => {
@@ -140,7 +140,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
           [ApplicantInfo({
             researcherProfile: researcherProfile,
             content: {
-              principalInvestigator: pi,
+              principalInvestigator: researcherProfile.isThePI ? profileName : (piName || '- - -'),
               researcher: profileName,
               institution,
               department,
