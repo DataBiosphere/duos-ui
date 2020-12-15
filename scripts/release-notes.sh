@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+set -u
 
 # This script is used to print a formatted list of commits between two tags.
 # By design, it is intended to look back at the last two tags. That can be
@@ -17,16 +19,16 @@ log_repo() {
   {
     rm -rf tempdir
     mkdir -p tempdir
-    git clone "$1.git" tempdir
+    git clone "${1}.git" tempdir
     cd tempdir || exit
     array=()
-    while IFS='' read -r line; do array+=("$line"); done < <(git for-each-ref --sort=creatordate --format '%(refname)' | grep "refs/tags/$3" | sed 's/refs\/tags\///')
+    while IFS='' read -r line; do array+=("$line"); done < <(git for-each-ref --sort=creatordate --format '%(refname)' | grep "refs/tags/${3}" | sed 's/refs\/tags\///')
   } &> /dev/null # Hide output from these commands
 
   # Generate a formatted summary of each commit from the earlier to the later tag hash
-  printf '\n## %s Changes' "$2"
-  printf '\n%s/releases/tag/%s\n' "$1" "${array[to_commit]}"
-  git --no-pager log --reverse --pretty="format:$1/commit/%h - %s (%an)" "${array[from_commit]}".."${array[to_commit]}"
+  printf '\n## %s Changes' "${2}"
+  printf '\n%s/releases/tag/%s\n' "${1}" "${array[to_commit]}"
+  git --no-pager log --reverse --pretty="format:${1}/commit/%h - %s (%an)" "${array[${from_commit}]}".."${array[${to_commit}]}"
   printf '\n'
   {
     cd ../
