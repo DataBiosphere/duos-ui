@@ -1143,7 +1143,7 @@ class DatasetRegistration extends Component {
                                 isDisabled: isUpdateDataset || !diseases,
                                 isMulti: true,
                                 loadOptions: (query, callback) => this.searchOntologies(query, callback),
-                                onBlur: (option) => this.onOntologiesChange(option),
+                                onChange: (option) => this.onOntologiesChange(option),
                                 value: ontologies,
                                 placeholder: 'Please enter one or more diseases',
                                 classNamePrefix: 'select',
