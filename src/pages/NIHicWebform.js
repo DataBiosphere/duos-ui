@@ -447,9 +447,7 @@ class NIHICWebform extends Component {
                           maxLength: '256',
                           value: '',
                           onChange: () => {},
-                          className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
-                            'form-control required-field-error' :
-                            'form-control',
+                          className: 'form-control',
                           required: true,
                         }),
                         span({
