@@ -900,7 +900,7 @@ class NIHICWebform extends Component {
                         name: 'checkPublicAccess',
                         value: 'yes',
                         defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
+                        onClick: () => {},
                         label: 'Yes',
                         disabled: false,
                       }),
