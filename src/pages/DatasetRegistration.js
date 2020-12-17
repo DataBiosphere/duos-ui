@@ -768,7 +768,8 @@ class DatasetRegistration extends Component {
                         type: 'text',
                         name: 'researcher',
                         id: 'inputResearcher',
-                        value: this.state.datasetData.researcher,
+                        defaultValue: this.state.datasetData.researcher,
+                        onBlur: this.handleChange,
                         disabled: !isUpdateDataset,
                         className: (fp.isEmpty(this.state.datasetData.researcher) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
@@ -789,7 +790,8 @@ class DatasetRegistration extends Component {
                         type: 'text',
                         name: 'principalInvestigator',
                         id: 'inputPrincipalInvestigator',
-                        value: this.state.datasetData.principalInvestigator,
+                        defaultValue: this.state.datasetData.principalInvestigator,
+                        onBlur: this.handleChange,
                         className: (fp.isEmpty(this.state.datasetData.principalInvestigator) && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true
                       }),
@@ -817,8 +819,8 @@ class DatasetRegistration extends Component {
                           name: 'datasetName',
                           id: 'inputName',
                           maxLength: '256',
-                          value: this.state.datasetData.datasetName,
-                          onChange: this.handleChange,
+                          defaultValue: this.state.datasetData.datasetName,
+                          onBlur: this.handleChange,
                           className: this.showDatasetNameErrors(this.state.datasetData.datasetName, showValidationMessages),
                           required: true,
                         }),
@@ -849,8 +851,8 @@ class DatasetRegistration extends Component {
                           id: 'inputRepoUrl',
                           maxLength: '256',
                           placeholder: 'http://...',
-                          value: this.state.datasetData.datasetRepoUrl,
-                          onChange: this.handleChange,
+                          defaultValue: this.state.datasetData.datasetRepoUrl,
+                          onBlur: this.handleChange,
                           className: (fp.isEmpty(this.state.datasetData.datasetRepoUrl) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -880,8 +882,8 @@ class DatasetRegistration extends Component {
                           name: 'dataType',
                           id: 'inputDataType',
                           maxLength: '256',
-                          value: this.state.datasetData.dataType,
-                          onChange: this.handleChange,
+                          defaultValue: this.state.datasetData.dataType,
+                          onBlur: this.handleChange,
                           className: (fp.isEmpty(this.state.datasetData.dataType) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -911,8 +913,8 @@ class DatasetRegistration extends Component {
                           name: 'species',
                           id: 'inputSpecies',
                           maxLength: '256',
-                          value: this.state.datasetData.species,
-                          onChange: this.handleChange,
+                          defaultValue: this.state.datasetData.species,
+                          onBlur: this.handleChange,
                           className: (fp.isEmpty(this.state.datasetData.species) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -942,8 +944,8 @@ class DatasetRegistration extends Component {
                           name: 'phenotype',
                           id: 'inputPhenotype',
                           maxLength: '256',
-                          value: this.state.datasetData.phenotype,
-                          onChange: this.handleChange,
+                          defaultValue: this.state.datasetData.phenotype,
+                          onBlur: this.handleChange,
                           className: (fp.isEmpty(this.state.datasetData.phenotype) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -974,8 +976,8 @@ class DatasetRegistration extends Component {
                           id: 'inputParticipants',
                           maxLength: '256',
                           min: '0',
-                          value: this.state.datasetData.nrParticipants,
-                          onChange: this.handlePositiveIntegerOnly,
+                          defaultValue: this.state.datasetData.nrParticipants,
+                          onBlur: this.handlePositiveIntegerOnly,
                           className: (fp.isEmpty(this.state.datasetData.nrParticipants) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -1005,8 +1007,8 @@ class DatasetRegistration extends Component {
                           name: 'description',
                           id: 'inputDescription',
                           maxLength: '256',
-                          value: this.state.datasetData.description,
-                          onChange: this.handleChange,
+                          defaultValue: this.state.datasetData.description,
+                          onBlur: this.handleChange,
                           className: (fp.isEmpty(this.state.datasetData.description) && showValidationMessages) ?
                             'form-control required-field-error' :
                             'form-control',
@@ -1165,8 +1167,8 @@ class DatasetRegistration extends Component {
 
                             textarea({
                               className: 'form-control',
-                              value: primaryOtherText,
-                              onChange: (e) => this.setOtherText(e, 'primary'),
+                              defaultValue: primaryOtherText,
+                              onBlur: (e) => this.setOtherText(e, 'primary'),
                               name: 'primaryOtherText',
                               id: 'primaryOtherText',
                               maxLength: '512',
@@ -1422,8 +1424,8 @@ class DatasetRegistration extends Component {
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             textarea({
-                              value: secondaryOtherText,
-                              onChange: (e) => this.setOtherText(e, 'secondary'),
+                              defaultValue: secondaryOtherText,
+                              onBlur: (e) => this.setOtherText(e, 'secondary'),
                               name: 'secondaryOtherText',
                               id: 'inputSecondaryOtherText',
                               className: 'form-control',
