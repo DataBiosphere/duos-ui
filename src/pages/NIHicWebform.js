@@ -856,7 +856,6 @@ class NIHICWebform extends Component {
                         name: 'checkPublicAccess',
                         value: 'yes',
                         defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
                         label: 'Yes',
                         disabled: false,
                       }),
@@ -898,7 +897,6 @@ class NIHICWebform extends Component {
                         name: 'checkPublicAccess',
                         value: 'yes',
                         defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
                         label: 'Yes',
                         disabled: false,
                       }),
@@ -912,7 +910,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_no',
                         name: 'checkPublicAccess',
                         value: 'no',
-                        defaultChecked: !publicAccess,
                         label: 'No',
                         disabled: false,
                       }),
@@ -1376,7 +1373,6 @@ class NIHICWebform extends Component {
                         name: 'checkPublicAccess',
                         value: 'yes',
                         defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
                         label: 'Yes',
                         disabled: false,
                       }),
@@ -1617,10 +1613,21 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        'If needed, please attach additional information to this document',
+                        'Alternative Data Sharing Plan',
                       ]),
                     ]),
-
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-last-group'},
+                    [
+                      input({
+                        type: 'text',
+                        name: 'description',
+                        id: 'inputDescription',
+                        maxLength: '256',
+                        onChange: () => {},
+                        required: true,
+                      }),
+                    ])
                 ]),
 
                 div({className: 'form-group'}, [
@@ -1628,7 +1635,7 @@ class NIHICWebform extends Component {
                     {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                     [
                       label({className: 'control-label rp-title-question common-color'}, [
-                        'Acknowledgement Statement',
+                        'If needed, please attach additional information to this document',
                       ]),
                     ]),
                   div(
@@ -1664,7 +1671,6 @@ class NIHICWebform extends Component {
                         name: 'checkPublicAccess',
                         value: 'yes',
                         defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
                         label: 'Within 3 months of last data generated or last clnical visit',
                         disabled: false,
                       }),
@@ -1706,7 +1712,7 @@ class NIHICWebform extends Component {
                         name: 'checkPublicAccess',
                         value: 'yes',
                         defaultChecked: publicAccess,
-                        onClick: () => this.setPublicAccess(true),
+
                         label: 'Yes',
                         disabled: false,
                       }),

@@ -477,7 +477,7 @@ class AccessResultRecords extends Component {
     );
   }
 
-  showDarData(electionReview) {
+  async showDarData(electionReview) {
     let electionAccess = electionReview.election;
     if (electionReview.election.finalRationale === null) {
       electionAccess.finalRationale = '';
@@ -488,7 +488,7 @@ class AccessResultRecords extends Component {
     const voteAgreement = electionReview.voteAgreement;
 
     // this data is used to construct structured_ files
-    const mrDAR = JSON.stringify(electionReview.election.useRestriction, null, 2);
+    const mrDAR = JSON.stringify(electionReview.consent.useRestriction, null, 2);
 
     return {
       electionAccess: electionAccess,
@@ -512,7 +512,7 @@ class AccessResultRecords extends Component {
       status: electionReview.election.status,
       voteList: this.chunk(electionReview.reviewVote, 2),
       chartDataDUL: this.getGraphData(electionReview.reviewVote),
-      mrDUL: JSON.stringify(electionReview.election.useRestriction, null, 2)
+      mrDUL: JSON.stringify(electionReview.consent.useRestriction, null, 2)
     };
   };
 
@@ -570,7 +570,7 @@ class AccessResultRecords extends Component {
     };
 
     const dataAccessElectionReview = await Election.findDataAccessElectionReview(electionId, false);
-    const darData = this.showDarData(dataAccessElectionReview);
+    const darData = await this.showDarData(dataAccessElectionReview);
     const electionReview = await Election.findElectionReviewById(dataAccessElectionReview.associatedConsent.electionId, dataAccessElectionReview.associatedConsent.consentId);
     const showDULDataPromise = await this.showDULData(electionReview);
     const vaultVotePromise = await this.vaultVote(electionReview.consent.consentId, darData.electionAccess.referenceId);

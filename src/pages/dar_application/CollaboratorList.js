@@ -208,10 +208,11 @@ export default function CollaboratorList(props) {
       div({className: 'row no-margin'}, [
         div({className: 'col-lg-12 col-md-12 col-sm-12-col-xs-12', style: {marginTop: "1rem"}}, [
           a({
-            id: 'add-collaborator-btn',
-            onClick: addCollaborator,
+            id: 'add-collaborator-btn access-background',
+            onClick: () => !props.disabled && addCollaborator(),
             className: 'btn-primary f-right access-background',
-            role: "button"
+            role: "button",
+            disabled: props.disabled
           },[
             span({ className: 'glyphicon glyphicon-plus', 'aria-hidden': 'true'}),
             'Add Collaborator'
