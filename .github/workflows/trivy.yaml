@@ -15,7 +15,7 @@ jobs:
           sudo apt install npm
       - name: Build an image from Dockerfile
         run: |
-          docker build -f Dockerfile-dev -t docker.io/broadinstitute/duos:${{ github.sha }} .
+          docker build -f Dockerfile -t docker.io/broadinstitute/duos:${{ github.sha }} .
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
