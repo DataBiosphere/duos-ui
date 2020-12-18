@@ -2,19 +2,11 @@ import {Component} from 'react';
 import {RadioButton} from '../components/RadioButton';
 import {a, div, fieldset, form, h, h3, hr, input, label, span, textarea} from 'react-hyperscript-helpers';
 import Select from 'react-select';
-import {Notification} from '../components/Notification';
 import {PageHeading} from '../components/PageHeading';
 import {DAR} from '../libs/ajax';
-import {searchOntology} from '../libs/ontologyService';
-import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 
 class NIHICWebform extends Component {
-
-  constructor(props) {
-    super(props);
-
-  };
 
   searchOntologies = (query, callback) => {
     let options = [];
