@@ -393,8 +393,8 @@ class DatasetCatalog extends Component {
               table({ className: 'table' }, [
                 thead({}, [
                   tr({}, [
-                    th({ isRendered: this.state.isAdmin, className: 'cell-size', style: { textAlign: 'center' } }, ['Actions']),
-                    th({}),
+                    th(),
+                    th({ isRendered: this.state.isAdmin, className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
                     th({ className: 'cell-size' }, ['Dataset ID']),
                     th({ className: 'cell-size' }, ['Dataset Name']),
                     th({ className: 'cell-size' }, ['Data Access Committee']),
