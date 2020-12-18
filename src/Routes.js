@@ -34,6 +34,7 @@ import InvalidRestrictions from './pages/InvalidRestrictions';
 import AccessReviewV2 from './pages/access_review/AccessReviewV2';
 import MemberConsole from './pages/MemberConsole';
 import NotFound from './pages/NotFound';
+import NIHICWebform from './pages/NIHicWebform';
 import ResearcherConsole from './pages/ResearcherConsole';
 import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
@@ -65,7 +66,8 @@ const Routes = (props) => (
     <Route path="/home_dac_info" component={HomeDacInfo} />
     <Route path="/home_researcher_info" component={HomeResearcherInfo} />
     <Route path="/election404" component={Election404} />
-    <Route path="/nih_pilot_info" render={(routeProps) => <NIHPilotInfo />} />
+    <Route path="/nih_ic_webform" component={NIHICWebform} />
+    <Route path="/nih_pilot_info" component={NIHPilotInfo} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dac" component={AdminManageDac} props={props} rolesAllowed={[USER_ROLES.admin]} />
