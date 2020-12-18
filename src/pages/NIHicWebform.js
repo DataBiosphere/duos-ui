@@ -13,43 +13,7 @@ class NIHICWebform extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      dacList: [],
-      selectedDac: {},
-      nihValid: false,
-      formData: {
-        methods: '',
-        genetic: '',
-        publication: '',
-        collaboration: '',
-        ethics: '',
-        geographic: '',
-        moratorium: '',
-        populationMigration: '',
-        forProfit: '',
-        hmb: false,
-        poa: false,
-        diseases: false,
-        ontologies: [],
-        other: false,
-        otherText: '',
-        generalUse: false
-      },
-    };
-  };
 
-  async getOntologies(urls) {
-    if (fp.isEmpty(urls)) {
-      return [];
-    }
-    else {
-      return await Promise.all(
-        urls.map(url => searchOntology(url)
-          .then(data => {
-            return data;
-          })
-        ));
-    }
   };
 
   searchOntologies = (query, callback) => {
@@ -68,23 +32,6 @@ class NIHICWebform extends Component {
       });
   };
 
-  back = (e) => {
-    this.props.history.goBack();
-  };
-
-  formatOntologyItems = (ontologies) => {
-    return ontologies.map((ontology) => {
-      return {
-        id: ontology.id || ontology.item.id,
-        key: ontology.id || ontology.item.id,
-        value: ontology.id || ontology.item.id,
-        label: ontology.label || ontology.item.label,
-        definition: ontology.definition || ontology.item.definition,
-        item: ontology || ontology.item
-      };
-    });
-  };
-
   render() {
 
     const controlLabelStyle = {
@@ -92,33 +39,11 @@ class NIHICWebform extends Component {
       marginBottom: 0
     };
 
-    const {
-      hmb = false,
-      poa = false,
-      diseases = false,
-      other = false,
-      otherText = '',
-      genetic = false,
-      forProfit = false,
-      publication = false,
-      collaboration = false,
-      ethics = false,
-      geographic = false,
-      moratorium = false,
-      methods = false,
-      generalUse = false,
-    } = this.state.formData;
-    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
-    const publicAccess = false;
-    const { npoa } = !poa;
-
-
     return (
 
       div({ className: 'container' }, [
         div({ className: 'col-lg-10 col-lg-offset-1 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row no-margin' }, [
-            Notification({notificationData: this.state.notificationData}),
             div({
               className: ( 'col-lg-12 col-md-12 col-sm-12 ' )
             }, [
@@ -791,7 +716,6 @@ class NIHICWebform extends Component {
                         id: 'multicenter',
                         name: 'multicenterdescription',
                         value: 'yes',
-                        defaultChecked: publicAccess,
                         onClick: () => {},
                         label: 'Yes',
                         disabled: false,
@@ -806,7 +730,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_no',
                         name: 'checkPublicAccess',
                         value: 'no',
-                        defaultChecked: !publicAccess,
                         label: 'No',
                         disabled: false,
                       }),
@@ -832,6 +755,7 @@ class NIHICWebform extends Component {
                         maxLength: '256',
                         onChange: () => {},
                         required: true,
+                        className: 'form-control'
                       }),
                     ])
                 ]),
@@ -855,7 +779,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_yes',
                         name: 'checkPublicAccess',
                         value: 'yes',
-                        defaultChecked: publicAccess,
                         label: 'Yes',
                         disabled: false,
                       }),
@@ -869,7 +792,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_no',
                         name: 'checkPublicAccess',
                         value: 'no',
-                        defaultChecked: !publicAccess,
                         label: 'No',
                         disabled: false,
                       }),
@@ -896,7 +818,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_yes',
                         name: 'checkPublicAccess',
                         value: 'yes',
-                        defaultChecked: publicAccess,
                         label: 'Yes',
                         disabled: false,
                       }),
@@ -984,8 +905,7 @@ class NIHICWebform extends Component {
                               id: 'checkGeneral',
                               name: 'checkPrimary',
                               value: 'general',
-                              defaultChecked: generalUse,
-                              onClick: this.setGeneralUse,
+                              onClick: () => {},
                               label: 'General Research Use: ',
                               description: 'use is permitted for any research purpose',
                               disabled: false,
@@ -999,8 +919,7 @@ class NIHICWebform extends Component {
                               id: 'checkHmb',
                               name: 'checkPrimary',
                               value: 'hmb',
-                              defaultChecked: hmb,
-                              onClick: this.setHmb,
+                              onClick: () => {},
                               label: 'Health/Medical/Biomedical Use: ',
                               description: 'use is permitted for any health, medical, or biomedical purpose',
                               disabled: false,
@@ -1014,8 +933,7 @@ class NIHICWebform extends Component {
                               id: 'checkDisease',
                               name: 'checkPrimary',
                               value: 'diseases',
-                              defaultChecked: diseases,
-                              onClick: this.setDiseases,
+                              onClick: () => {},
                               label: 'Disease-related studies: ',
                               description: 'use is permitted for research on the specified disease',
                               disabled: false,
@@ -1023,8 +941,7 @@ class NIHICWebform extends Component {
                             div({
                               style: {
                                 marginBottom: '2rem',
-                                color: ' #010101',
-                                cursor: diseases ? 'pointer' : 'not-allowed',
+                                color: ' #010101'
                               },
                             }, [
                               h(AsyncSelect, {
@@ -1032,8 +949,7 @@ class NIHICWebform extends Component {
                                 isDisabled: false,
                                 isMulti: true,
                                 loadOptions: (query, callback) => this.searchOntologies(query, callback),
-                                onChange: (option) => this.onOntologiesChange(option),
-                                value: ontologies,
+                                onChange: () => {},
                                 placeholder: 'Please enter one or more diseases',
                                 classNamePrefix: 'select',
                               }),
@@ -1047,8 +963,7 @@ class NIHICWebform extends Component {
                               id: 'checkPoa',
                               name: 'checkPrimary',
                               value: 'poa',
-                              defaultChecked: poa,
-                              onClick: this.setPoa,
+                              onClick: () => {},
                               label: 'Populations, Origins, Ancestry Use: ',
                               description: 'use is permitted exclusively for populations, origins, or ancestry research',
                               disabled: false,
@@ -1062,24 +977,20 @@ class NIHICWebform extends Component {
                               id: 'checkOther',
                               name: 'checkPrimary',
                               value: 'other',
-                              defaultChecked: other,
-                              onClick: this.setOther,
+                              onClick: () => {},
                               label: 'Other Use:',
                               description: 'permitted research use is defined as follows: ',
-                              disabled: false,
+                              disabled: false
                             }),
 
                             textarea({
                               className: 'form-control',
-                              value: otherText,
-                              onChange: this.setOtherText,
+                              onChange: () => {},
                               name: 'otherText',
                               id: 'otherText',
                               maxLength: '512',
                               rows: '2',
-                              required: other,
-                              placeholder: 'Please specify if selected (max. 512 characters)',
-                              disabled: !other,
+                              placeholder: 'Please specify if selected (max. 512 characters)'
                             }),
                           ]),
 
@@ -1100,8 +1011,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: methods,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkMethods',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1123,8 +1033,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: genetic,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkGenetic',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1146,8 +1055,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: publication,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkPublication',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1169,8 +1077,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: collaboration,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkCollaboration',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1192,8 +1099,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: ethics,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkEthics',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1215,8 +1121,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: geographic,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkGeographic',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1238,8 +1143,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: moratorium,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkMoratorium',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1261,8 +1165,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: npoa,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkNpoa',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1284,8 +1187,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: forProfit,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkForProfit',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1307,8 +1209,7 @@ class NIHICWebform extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: other,
-                                onChange: this.handleCheckboxChange,
+                                onChange: () => {},
                                 id: 'checkOtherSecondary',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
@@ -1328,15 +1229,13 @@ class NIHICWebform extends Component {
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             textarea({
-                              value: otherText,
-                              onChange: this.setOtherText,
+                              onChange: () => {},
                               name: 'otherText',
                               id: 'inputOtherText',
                               className: 'form-control',
                               rows: '6',
                               required: false,
                               placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
-                              disabled: !other
                             })
                           ]),
                       ]),
@@ -1372,7 +1271,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_yes',
                         name: 'checkPublicAccess',
                         value: 'yes',
-                        defaultChecked: publicAccess,
                         label: 'Yes',
                         disabled: false,
                       }),
@@ -1386,7 +1284,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_no',
                         name: 'checkPublicAccess',
                         value: 'no',
-                        defaultChecked: !publicAccess,
                         label: 'No',
                         disabled: false,
                       }),
@@ -1582,6 +1479,7 @@ class NIHICWebform extends Component {
                         maxLength: '256',
                         onChange: () => {},
                         required: true,
+                        className: 'form-control'
                       }),
                     ])
                 ]),
@@ -1604,6 +1502,7 @@ class NIHICWebform extends Component {
                         maxLength: '256',
                         onChange: () => {},
                         required: true,
+                        className: 'form-control'
                       }),
                     ])
                 ]),
@@ -1626,6 +1525,7 @@ class NIHICWebform extends Component {
                         maxLength: '256',
                         onChange: () => {},
                         required: true,
+                        className: 'form-control'
                       }),
                     ])
                 ]),
@@ -1647,6 +1547,7 @@ class NIHICWebform extends Component {
                         id: 'inputAcknowledgement',
                         maxLength: '256',
                         onChange: () => {},
+                        className: 'form-control'
                       }),
                     ])
                 ]),
@@ -1670,8 +1571,7 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_yes',
                         name: 'checkPublicAccess',
                         value: 'yes',
-                        defaultChecked: publicAccess,
-                        label: 'Within 3 months of last data generated or last clnical visit',
+                        label: 'Within 3 months of last data generated or last clinical visit',
                         disabled: false,
                       }),
 
@@ -1684,7 +1584,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_no',
                         name: 'checkPublicAccess',
                         value: 'no',
-                        defaultChecked: !publicAccess,
                         label: 'Data will be submitted by batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
                         disabled: false,
                       }),
@@ -1711,7 +1610,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_yes',
                         name: 'checkPublicAccess',
                         value: 'yes',
-                        defaultChecked: publicAccess,
 
                         label: 'Yes',
                         disabled: false,
@@ -1726,7 +1624,6 @@ class NIHICWebform extends Component {
                         id: 'checkPublicAccess_no',
                         name: 'checkPublicAccess',
                         value: 'no',
-                        defaultChecked: !publicAccess,
                         label: 'No',
                         disabled: false,
                       }),
@@ -1829,6 +1726,7 @@ class NIHICWebform extends Component {
                         id: 'inputstudyparticipants',
                         maxLength: '256',
                         onChange: () => {},
+                        className: 'form-control'
                       })
                     ])
                 ]),
