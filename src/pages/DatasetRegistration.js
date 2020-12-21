@@ -654,7 +654,8 @@ class DatasetRegistration extends Component {
       result.hmbResearch = data.hmb;
     }
     if (data.diseases) {
-      result.diseaseRestrictions = data.ontologies;
+      let ids = data.ontologies.map(ontology => ontology.id);
+      result.diseaseRestrictions = ids;
     }
     if (data.other) {
       result.otherRestrictions = data.other;
