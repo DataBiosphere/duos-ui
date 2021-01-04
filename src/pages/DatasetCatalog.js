@@ -365,12 +365,15 @@ class DatasetCatalog extends Component {
                 description: "Search and select datasets then click 'Apply for Access' to request access"
               }),
             ]),
-            div({ className: 'f-right' }, [
+            div({ className: 'right', isRendered: (this.state.isAdmin || this.state.isChairPerson) }, [
+              div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper' }, [
+                h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
+              ]),
               button({
                 id: 'btn_addDataset',
-                isRendered: this.state.isResearcher,
+                isRendered: this.state.isAdmin,
                 onClick: () => this.props.history.push({ pathname: 'dataset_registration' }),
-                className: 'btn-primary dataset-background search-wrapper',
+                className: 'f-right btn-primary dataset-background search-wrapper',
                 'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
               }, ['Add Dataset',
                 span({ className: 'glyphicon glyphicon-plus-sign', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
@@ -378,7 +381,7 @@ class DatasetCatalog extends Component {
             ]),
           ]),
 
-          div({ className: 'table-wrap' }, [
+          div({ className: 'table' }, [
             form({ className: 'pos-relative' }, [
               div({ className: 'checkbox check-all' }, [
                 input({ checked: this.state.allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: this.selectAll }),
@@ -390,23 +393,23 @@ class DatasetCatalog extends Component {
               table({ className: 'table' }, [
                 thead({}, [
                   tr({}, [
-                    th({}),
-                    th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size', style: { textAlign: 'center' } }, ['Actions']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Dataset ID']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Dataset Name']),
-                    th({ className: 'table-titles dataset-color cell-size'}, ['Data Access Committee']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Source']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Structured Data Use Limitations']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Type']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Disease Studied']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Principal Investigator (PI)']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['# of Participants']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Description']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Species']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Data Custodian']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['Consent ID']),
-                    th({ className: 'table-titles dataset-color cell-size' }, ['SC-ID']),
-                    th({ isRendered: this.state.isAdmin, className: 'table-titles dataset-color cell-size' }, ['Approved Requestors'])
+                    th(),
+                    th({ isRendered: this.state.isAdmin, className: 'cell-size', style: { minWidth: '14rem' }}, ['Actions']),
+                    th({ className: 'cell-size' }, ['Dataset ID']),
+                    th({ className: 'cell-size' }, ['Dataset Name']),
+                    th({ className: 'cell-size' }, ['Data Access Committee']),
+                    th({ className: 'cell-size' }, ['Data Source']),
+                    th({ className: 'cell-size' }, ['Structured Data Use Limitations']),
+                    th({ className: 'cell-size' }, ['Data Type']),
+                    th({ className: 'cell-size' }, ['Disease Studied']),
+                    th({ className: 'cell-size' }, ['Principal Investigator (PI)']),
+                    th({ className: 'cell-size' }, ['# of Participants']),
+                    th({ className: 'cell-size' }, ['Description']),
+                    th({ className: 'cell-size' }, ['Species']),
+                    th({ className: 'cell-size' }, ['Data Custodian']),
+                    th({ className: 'cell-size' }, ['Consent ID']),
+                    th({ className: 'cell-size' }, ['SC-ID']),
+                    th({ isRendered: this.state.isAdmin, className: 'cell-size' }, ['Approved Requestors'])
                   ])
                 ]),
 
@@ -606,9 +609,6 @@ class DatasetCatalog extends Component {
           ]),
 
           div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-            div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7' }, [
-              h(SearchBox, { id: 'datasetCatalog', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
-            ]),
             button({
               id: 'btn_downloadSelection',
               download: '',
@@ -616,7 +616,7 @@ class DatasetCatalog extends Component {
               onClick: this.download,
               className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
             }, [
-              'Download selection',
+              'Download Dataset List',
               span({ className: 'glyphicon glyphicon-download', style: { 'marginLeft': '5px' }, 'aria-hidden': 'true' })
             ]),
           ]),

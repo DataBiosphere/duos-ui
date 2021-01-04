@@ -1,15 +1,16 @@
 # This is an example compose file that can be used for local development.
-# Build first:
-#   docker build -f Dockerfile-dev . -t duos-ui
-# Modify the config file in `volumes` to point to the desired environment
-# Then run:
+# Modify the config file in `volumes` to point to the desired environment, default id dev.
+#
+# Build:
+#   docker build . -t duos
+# Run:
 #   docker-compose up
-# Visit
+# Test
 #   http://localhost:3000/
 version: '3.8'
 services:
   app:
-    image: duos-ui:latest
+    image: duos:latest
     container_name: duos
     ports:
       - 3000:8080
