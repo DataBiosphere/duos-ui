@@ -18,7 +18,7 @@ RUN npm install --silent
 RUN npm install react-scripts@1.1.1 -g --silent
 RUN npm run build --silent
 
-FROM nginxinc/nginx-unprivileged:1.19.5-alpine
+FROM nginxinc/nginx-unprivileged:1.19.6-alpine
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
