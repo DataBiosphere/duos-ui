@@ -11,6 +11,7 @@ jobs:
       - name: Update and install node
         run: |
           sudo apt update
+          sudo apt install -f nodejs-dev node-gyp libssl1.0-dev
           sudo apt install -f nodejs npm
       - name: Build an image from Dockerfile
         run: |
