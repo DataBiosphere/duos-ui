@@ -1,8 +1,11 @@
 {
   "env": "staging",
+  "tag": "staging",
+  "hash": "staging",
   "apiUrl": "https://consent.dsde-staging.broadinstitute.org/api",
   "ontologyApiUrl": "https://consent-ontology.dsde-staging.broadinstitute.org/",
   "clientId": "1087760099392-t0nb61ehicbeuqkeftvql765ncu1707r.apps.googleusercontent.com",
+  "errorApiKey": "AIzaSyBFLIUf__4yxDpM9wFt3T4K_UX_VCu7tcQ",
   "firecloudUrl": "https://firecloud-orchestration.dsde-staging.broadinstitute.org/",
   "gwasUrl": "",
   "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",

@@ -11,9 +11,12 @@ data:
   config.json: |
     {
       "env": "",
+      "hash": "",
+      "tag": "",
       "apiUrl": "",
       "ontologyApiUrl": "",
       "clientId": "",
+      "errorApiKey": "",
       "firecloudUrl": "",
       "gwasUrl": "",
       "profileUrl": "",

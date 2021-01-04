@@ -21,9 +21,25 @@ export const Config = {
 
   getGAId: async () => (await getConfig()).gaId,
 
+  getErrorApiKey: async () => (await getConfig()).errorApiKey,
+
+  getHash: async () => (await getConfig()).hash,
+
+  getTag: async () => (await getConfig()).tag,
+
   getFeatureFlag: async (featureName) => {
     const feature = _.get(await getConfig(), 'features', {});
     return _.get(feature, featureName, false);
+  },
+
+  getProject: async () => {
+    const env = await Config.getEnv();
+    switch (env) {
+      case 'prod':
+        return 'broad-duos-prod';
+      default:
+        return 'broad-duos-dev';
+    }
   },
 
   authOpts: (token = Token.getToken()) => ({

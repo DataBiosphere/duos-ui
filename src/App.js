@@ -9,6 +9,7 @@ import DuosHeader from './components/DuosHeader';
 import {useHistory} from 'react-router-dom';
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
+import { StackdriverReporter } from './libs/stackdriverReporter';
 import { Storage } from './libs/storage';
 import Routes from './Routes';
 
@@ -38,6 +39,10 @@ function App() {
       history.listen(trackPageView);
     };
 
+    const stackdriverStart = async () => {
+      await StackdriverReporter.start();
+    };
+
     const setEnvironment = async () => {
       const environment = await Config.getEnv();
       setEnv(environment);
@@ -48,6 +53,7 @@ function App() {
       await initializeReactGA(history);
       await setUserIsLogged();
       await setEnvironment();
+      await stackdriverStart();
     };
 
     initApp();
