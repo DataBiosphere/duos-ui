@@ -103,8 +103,10 @@ class DatasetRegistration extends Component {
     if (!fp.isEmpty(this.state.updateDataset)) {
       this.prefillDatasetFields(this.state.updateDataset);
       const ontologies = await this.getOntologies(this.state.formData.diseases);
+      const formattedOntologies = this.formatOntologyItems(ontologies);
       this.setState(prev => {
-        prev.formData.ontologies = ontologies;
+        prev.formData.ontologies = formattedOntologies;
+        prev.formData.diseases = !fp.isEmpty(ontologies);
         return prev;
       });
     }
@@ -280,7 +282,7 @@ class DatasetRegistration extends Component {
       this.isValid(formData.phenotype) &&
       this.isValid(formData.nrParticipants) &&
       this.isValid(formData.description) &&
-      !this.isTypeOfResearchInvalid();
+      (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
   };
 
   validateDatasetName(name) {
@@ -617,7 +619,7 @@ class DatasetRegistration extends Component {
     result.isAssociatedToDataOwners = true;
     result.updateAssociationToDataOwnerAllowed = true;
     result.properties = this.createProperties();
-    result.dataUse = this.formatDataUse(this.state.formData);
+    result.dataUse = fp.isEmpty(this.state.updateDataset) ? this.formatDataUse(this.state.formData) : this.state.updateDataset.dataUse;
     return result;
   };
 
@@ -654,7 +656,8 @@ class DatasetRegistration extends Component {
       result.hmbResearch = data.hmb;
     }
     if (data.diseases) {
-      result.diseaseRestrictions = data.ontologies;
+      let ids = data.ontologies.map(ontology => ontology.id);
+      result.diseaseRestrictions = ids;
     }
     if (data.other) {
       result.otherRestrictions = data.other;
@@ -710,7 +713,7 @@ class DatasetRegistration extends Component {
       methods = false,
       generalUse = false,
     } = this.state.formData;
-    const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
+    const { ontologies } = this.state.formData;
     const { needsApproval = false } = this.state.datasetData;
     const { problemSavingRequest, problemLoadingUpdateDataset, showValidationMessages, submissionSuccess } = this.state;
     const isTypeOfResearchInvalid = this.isTypeOfResearchInvalid();
