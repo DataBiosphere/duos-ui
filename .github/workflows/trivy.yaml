@@ -12,6 +12,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install nodejs
+          sudo apt install nodejs-dev
           sudo apt install node-gyp
           sudo apt install npm
       - name: Build an image from Dockerfile
