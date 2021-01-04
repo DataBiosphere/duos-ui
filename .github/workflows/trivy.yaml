@@ -11,10 +11,7 @@ jobs:
       - name: Update and install node
         run: |
           sudo apt update
-          sudo apt install nodejs
-          sudo apt install nodejs-dev
-          sudo apt install node-gyp
-          sudo apt install npm
+          sudo apt install -f nodejs npm
       - name: Build an image from Dockerfile
         run: |
           docker build -f Dockerfile -t docker.io/broadinstitute/duos:${{ github.sha }} .
