@@ -8,8 +8,6 @@ jobs:
       - uses: actions/checkout@v2
 #      - uses: broadinstitute/dsp-appsec-trivy-action@v1
       - name: downcase REPO
-        run: |
-          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
       - run: |
           docker build -f Dockerfile -t docker.io/broadinstitute/duos:${{ github.sha }} .
       - uses: aquasecurity/trivy-action@master
