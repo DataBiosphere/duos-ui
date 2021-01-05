@@ -55,7 +55,7 @@
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {
-    "cypress": "6.2.0",
+    "cypress": "6.2.1",
     "eslint": "6.8.0",
     "eslint-config-react-app": "5.2.1",
     "eslint-plugin-flowtype": "4.7.0",
