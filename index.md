@@ -1,14 +1,11 @@
 ## How To: Register your data in DUOS
 
 
-
-
-
 ### Researchers are often motivated or required to share their data.
 
 ### DUOS enables researchers to register their dataset with a DUOS ID so it can be requested for secondary research use. 
 
-To register your data’s info in DUOS, you must first have your data available in a location where other researchers can access it, such as Broad’s .[Terra](https://app.terra.bio) system. 
+To register your data’s info in DUOS, you must first have your data available in a location where other researchers can access it, such as Broad’s [Terra](https://app.terra.bio) system. 
 
 Note, DUOS does not store genomic data.
 
@@ -19,14 +16,18 @@ You will then be allowed to complete a DUOS Dataset Registration form. In doing 
 Once the form is completed and the DAC confirms their willingness to manage access requests for the data, your data will be made available in the DUOS Dataset Catalog with a unique DUOS ID that serves as an accession identifier and can be shared with publishers and requestors. 
 
 [Link](url) and ![Image](src)
-```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+## Related FAQs
 
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/DataBiosphere/duos-ui/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+### If I want to register data in DUOS, does the data have to be in a specific storage location?
+Nope! Any dataset may be registered in DUOS, regardless of the physical location of the data. Data Custodians and DACs interested in using DUOS are responsible for making sure researchers approved for access via DUOS are able to access the data once approved.
+### If I make my data available via DUOS, does it need to be located in a single location?
+No. However, the Data Custodian for your dataset(s) will be responsible for providing access to researchers approved by the DAC and having data in multiple locations will be increasingly complex for Data Custodians to set and maintain access permissions, and for researchers to access and analyze the data in aggregate.
+### How do I determine the data use limitations for my dataset(s)?
+DUOS is actively developing a tool to enable you to determine your datasets’ data use limitations according to the GA4GH Data Use Ontology, which we aim to make publicly available in 2020. For further assistance, our experienced and expert team is glad to consult with anyone needing guidance in assigning data use limitations to their datasets.
+### Does DUOS store genetic data?
+No. DUOS only enables the metadata you see displayed in the DUOS Dataset Catalog to be stored in DUOS. All genetic data which may be requested via DUOS is stored in external systems, and predominantly in Broad’s Terra service, though use of Terra is not required for DACs to register their data in DUOS.
 
 ### Support or Contact
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Still having trouble? Click 'Contact Us' on our [DUOS homepage](https://duos.broadinstitute.org/home) and we’ll help you sort it out.
