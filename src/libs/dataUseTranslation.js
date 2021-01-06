@@ -16,7 +16,7 @@ const srpTranslations = {
   },
   poa: {
     code: 'POA',
-    desciption: 'The dataset will be used for the study of Population Origins/Migration patterns.',
+    description: 'The dataset will be used for the study of Population Origins/Migration patterns.',
     manualReview: true
   },
   diseases: (diseases) => {
