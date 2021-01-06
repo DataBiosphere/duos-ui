@@ -6,7 +6,7 @@ Currently, when DAC’s receive data access requests they must decide if the pro
 
 [![](http://img.youtube.com/vi/8ZyU34xpi4M/0.jpg)](http://www.youtube.com/watch?v=8ZyU34xpi4M "")
 
-<img src="https://github.com/DataBiosphere/duos-ui/edit/gh-pages/duos-ui/duos_process_flow.png">
+<img src="https://github.com/DataBiosphere/duos-ui/edit/gh-pages/duos_process_flow.png">
 
 Unfortunately, data use limitations are often described with unique language across the various consent forms in which they appear (diagram left). Thus a DAC is left to attempt to interpret either the consent form, or the receive the original IRB’s interpretation (ex. NIH Institutional Certification, Broad Data Use Letter) to determine the official use limitations.
 
