@@ -481,8 +481,8 @@ export const DataSet = {
     return await res.json();
   },
 
-  findDataSets: async dacUserId => {
-    const url = `${await Config.getApiUrl()}/dataset?dacUserId=${dacUserId}`;
+  getDatasets: async () => {
+    const url = `${await Config.getApiUrl()}/dataset`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

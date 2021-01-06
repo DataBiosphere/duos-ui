@@ -55,7 +55,7 @@ class DatasetCatalog extends Component {
   }
 
   async getDatasets() {
-    let catalog = await DataSet.findDataSets(this.currentUser.dacUserId);
+    let catalog = await DataSet.getDatasets();
     catalog.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
