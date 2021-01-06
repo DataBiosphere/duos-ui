@@ -1,14 +1,13 @@
-## Welcome to GitHub Pages
+## How To: Register your data in DUOS
 
-You can use the [editor on GitHub](https://github.com/DataBiosphere/duos-ui/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-### Markdown
+
+
+### Researchers are often motivated or required to share their data. 
 
 Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
 Syntax highlighted code block
 
 # Header 1
