@@ -4,7 +4,7 @@
 
 Currently, when DAC’s receive data access requests they must decide if the proposed research use is within the bounds of the data’s use limitations.
 
-![DUOS Process Flow](duos_process_flow.png "DUOS Process Flow")
+![](duos_process_flow.png "DUOS Process Flow")
 
 Unfortunately, data use limitations are often described with unique language across the various consent forms in which they appear (diagram left). Thus a DAC is left to attempt to interpret either the consent form, or the receive the original IRB’s interpretation (ex. NIH Institutional Certification, Broad Data Use Letter) to determine the official use limitations.
 
@@ -12,13 +12,13 @@ On the other hand (diagram right), researchers data access requests are often na
 
 The inconsistency and lack of clarity in the terms used to describe data use use limitations and research proposals makes it difficult for DACs to answer the question of “Is the proposed research within the bounds of the data use limitations?”
 
-
+![DUOS Process Flow](duos_process_flow.png "DUOS Process Flow")
 
 To resolve this issue, the Global Alliance for Genomics and Health created a common vocabulary for data use limitations and proposed research, called the Data Use Ontology. The ontology is not only a standardized series of terms and definitions describing data use but is also computer readable.
 
 DUOS leverages the Data Use Ontology by enabling Data Depositors to describe their data use limitations with DUO terms, and Researchers to describe their research purposes with DUO terms. The result is that DACs using DUOS can compare data use limitations and research purposes using the same vocabulary of terms.
 
-
+![DUOS Process Flow](duos_process_flow.png "DUOS Process Flow")
 
 Additionally, with the use limitations and proposed research in DUO terms, DUOS can enable an algorithm to compute the comparison of the data use limitations and proposed research in an attempt to replicate the decision the DAC would make. Through testing, the DUOS algorithm has seen >90% agreement with DACs. Currently, DACs are able to leverage the algorithm as a decision-support tool, reviewing the DUOS algorithm’s suggested decision prior to logging their own decision. If the DUOS algorithm proves to consistently decide as the DAC would, DACs may choose to use the DUOS algorithm to automatically respond to data access requests.
 
