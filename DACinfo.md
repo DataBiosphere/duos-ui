@@ -1,6 +1,6 @@
 ## DUOS for DACs
 
-## DACs must answer important questions about access to data, but often have to interpret complex and ambiguous inputs to those decisions
+### DACs must answer important questions about access to data, but often have to interpret complex and ambiguous inputs to those decisions
 
 Currently, when DAC’s receive data access requests they must decide if the proposed research use is within the bounds of the data’s use limitations.
 
@@ -22,29 +22,29 @@ Additionally, with the use limitations and proposed research in DUO terms, DUOS 
 
 
 
-### DAC FAQs
+## DAC FAQs
 
-## Can my DAC use DUOS?
+### Can my DAC use DUOS?
 Yes! If you and/or your DAC is interested in using DUOS, please reach out to use at duos-support@broadinstitute.zendesk.com.
 
-## If my DAC wants to use DUOS, does my data have to be in a specific system?
+### If my DAC wants to use DUOS, does my data have to be in a specific system?
 Nope! Any dataset may be registered in DUOS, regardless of the physical location of the data. Data Custodians and DACs interested in using DUOS are responsible for making sure researchers approved for access via DUOS are able to access the data once approved.
 
-## How do I determine the data use limitations for my dataset(s)?
+### How do I determine the data use limitations for my dataset(s)?
 DUOS is actively developing a tool to enable you to determine your datasets’ data use limitations according to the GA4GH Data Use Ontology, which we aim to make publicly available in 2020. For further assistance, our experienced and expert team is glad to consult with anyone needing guidance in assigning data use limitations to their datasets.
 
-## Does DUOS store genetic data?
+### Does DUOS store genetic data?
 No. DUOS only enables the metadata you see displayed in the DUOS Dataset Catalog to be stored in DUOS. All genetic data which may be requested via DUOS is stored in external systems, and predominantly in Broad’s Terra service, though use of Terra is not required for DACs to register their data in DUOS.
 
-## If I make my data available via DUOS, does it need to be located in a single location?
+### If I make my data available via DUOS, does it need to be located in a single location?
 No. However, the Data Custodian for your dataset(s) will be responsible for providing access to researchers approved by the DAC and having data in multiple locations will be increasingly complex for Data Custodians to set and maintain access permissions, and for researchers to access and analyze the data in aggregate.
 
-## Can DUOS allow for multiple parties to review and approve a data access request?
+### Can DUOS allow for multiple parties to review and approve a data access request?
 Yes. There are two ways to enable multiple individuals to review a DAR in DUOS.
 
 One option is to add multiple individuals to your DAC, as DAC Members. DAC Members are able to offer comments and a suggested vote to the DAC Chair, without directly controlling the final vote on the DAR. This option is most helpful for individuals who are in the same organization, consortium, or collaborate with one another.
 
 Another option is to set a Data Owner for a dataset. In the case of a DAR approval by the DAC, a notification goes to a Data Owner for them to review the DAR and either approve or deny the DAR themselves. This option is most helpful for separate organizations to clearly delineate each group’s responsibilities and authority.
 
-## Does DUOS automate data access requests?
+### Does DUOS automate data access requests?
 No, DUOS does not automate data access requests. DUOS’ matching algorithm would easily allow for data access request review to be automated and instantaneous, and we are testing the algorithm with multiple DACs to see if and how this may be possible. Currently, DACs use the DUOS matching algorithm for decision support in their DAR reviews. As community confidence in the matching algorithm grows, we will allow each DAC to control if and when they automate their DARs via DUOS.
