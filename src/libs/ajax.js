@@ -3,6 +3,7 @@ import * as fp from 'lodash/fp';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
+import { StackdriverReporter } from './stackdriverReporter';
 import { Storage } from './storage';
 import axios from 'axios';
 import { DataUseTranslation } from './dataUseTranslation';
@@ -1208,6 +1209,9 @@ const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
   spinnerService.hideAll();
+  if (res.status >= 400) {
+    await reportError(args[0], res.status);
+  }
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
@@ -1218,6 +1222,9 @@ const fetchOk = async (...args) => {
 const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
+  if (res.status >= 500) {
+    await reportError(args[0], res.status);
+  }
   spinnerService.hideAll();
   return res;
 };
@@ -1232,4 +1239,12 @@ const getFile = async (URI, fileName) => {
 const getFileNameFromHttpResponse = (response) => {
   const respHeaders = response.headers;
   return respHeaders.get('Content-Disposition').split(';')[1].trim().split('=')[1];
+};
+
+const reportError = async (url, status) => {
+  const msg = 'Error fetching response: '
+    .concat(JSON.stringify(url))
+    .concat('Status: ')
+    .concat(status);
+  await StackdriverReporter.report(msg);
 };
