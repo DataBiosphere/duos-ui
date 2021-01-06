@@ -7,15 +7,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Update and install node
-        run: |
-          sudo apt update
-          sudo apt install -f nodejs-dev node-gyp libssl1.0-dev
-          sudo apt install -f nodejs npm
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -f Dockerfile -t docker.io/broadinstitute/duos:${{ github.sha }} .
+      - name: Build Dockerfile
+        run: docker build -f Dockerfile -t docker.io/broadinstitute/duos:${{ github.sha }} .
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
