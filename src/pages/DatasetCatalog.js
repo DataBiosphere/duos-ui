@@ -1,7 +1,5 @@
 import find from 'lodash/find';
 import get from 'lodash/get';
-import first from 'lodash/first';
-import isNil from 'lodash/isNil';
 import { Component, Fragment } from 'react';
 import { a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
