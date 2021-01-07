@@ -59,6 +59,7 @@ class DatasetCatalog extends Component {
     catalog.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
+      row.dbGapLinked = true;
     });
     this.setState({
       dataSetList: { catalog: catalog },
