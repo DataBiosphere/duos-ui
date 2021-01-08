@@ -181,7 +181,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
             rows: '2',
             required: props.other,
             placeholder: 'Please specify if selected (max. 512 characters)',
-            enabled: true
+            disabled: props.disabled
           })
         ])
     );
