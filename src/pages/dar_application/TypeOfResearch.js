@@ -170,19 +170,19 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
             disabled: props.disabled,
           }),
 
-          props.other ?
-            textarea({
-              style: otherTextStyle,
-              value: props.otherText,
-              onChange: props.otherTextHandler,
-              name: 'otherText',
-              id: 'otherText',
-              maxLength: '512',
-              rows: '2',
-              required: props.other,
-              placeholder: 'Please specify if selected (max. 512 characters)',
-              enabled: true
-            }) : undefined
+          textarea({
+            isRendered: props.other,
+            style: otherTextStyle,
+            value: props.otherText,
+            onChange: props.otherTextHandler,
+            name: 'otherText',
+            id: 'otherText',
+            maxLength: '512',
+            rows: '2',
+            required: props.other,
+            placeholder: 'Please specify if selected (max. 512 characters)',
+            enabled: true
+          })
         ])
     );
   }
