@@ -64,9 +64,9 @@ class DatasetCatalog extends Component {
           find(
             row.properties,
             p => {
-              return p.propertyName == 'dbGAP';
+              return p.propertyName === 'dbGAP';
             },
-        ), 'propertyValue', '') ;
+          ), 'propertyValue', '') ;
     });
     this.setState({
       dataSetList: { catalog: catalog },
@@ -514,16 +514,16 @@ class DatasetCatalog extends Component {
                             get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
                           ]),
 
-                            td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') },
-                              [ dataSet.dbGapLink !== '' ?
-                                  a({
-                                  id: trIndex + '_linkdbGap',
-                                  name: 'link_dbGap',
-                                  href: dataSet.dbGapLink,
-                                  target: '_blank',
-                                  className: 'enabled'
-                                }, ['Link']) : ''
-                              ]),
+                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') },
+                            [dataSet.dbGapLink !== '' ?
+                              a({
+                                id: trIndex + '_linkdbGap',
+                                name: 'link_dbGap',
+                                href: dataSet.dbGapLink,
+                                target: '_blank',
+                                className: 'enabled'
+                              }, ['Link']) : '--'
+                            ]),
 
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
                             a({
