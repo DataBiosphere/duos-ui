@@ -1041,7 +1041,7 @@ class DatasetRegistration extends Component {
                           id: 'inputDac',
                           onChange: (option) => this.onDacChange(option),
                           blurInputOnSelect: true,
-                          value: fp.filter((dac) => this.state.selectedDac.dacId === dac.value, dacOptions),
+                          value: fp.filter((dac) => this.state.selectedDac?.dacId === dac.value, dacOptions),
                           openMenuOnFocus: true,
                           isDisabled: false,
                           isClearable: true,
