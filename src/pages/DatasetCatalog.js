@@ -59,6 +59,14 @@ class DatasetCatalog extends Component {
     catalog.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
+      row.dbGapLink =
+        get (
+          find(
+            row.properties,
+            p => {
+              return p.propertyName === 'dbGAP';
+            },
+          ), 'propertyValue', '') ;
     });
     this.setState({
       dataSetList: { catalog: catalog },
@@ -506,17 +514,16 @@ class DatasetCatalog extends Component {
                             get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
                           ]),
 
-                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                            a({
-                              id: trIndex + '_linkdbGap',
-                              name: 'link_dbGap',
-                              href: get(find(dataSet.properties, p => { return p.propertyName === 'dbGAP'; }), 'propertyValue', ''),
-                              target: '_blank',
-                              className: (get(find(dataSet.properties, p => { return p.propertyName === 'dbGAP'; }), 'propertyValue', '').length > 0 ?
-                                'enabled' :
-                                'disabled')
-                            }, ['Link'])
-                          ]),
+                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') },
+                            [dataSet.dbGapLink !== '' ?
+                              a({
+                                id: trIndex + '_linkdbGap',
+                                name: 'link_dbGap',
+                                href: dataSet.dbGapLink,
+                                target: '_blank',
+                                className: 'enabled'
+                              }, ['Link']) : '--'
+                            ]),
 
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
                             a({
