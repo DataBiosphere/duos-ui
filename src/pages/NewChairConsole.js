@@ -4,10 +4,6 @@ import {PageHeading} from "../components/PageHeading";
 
 class NewChairConsole extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const titleStyle = {
       color: '#1F3B50',
