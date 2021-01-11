@@ -1,19 +1,12 @@
+name: dsp-appsec-trivy
 on: [pull_request]
-name: Trivy
+
 jobs:
-  build:
-    name: Scan for Vulnerabilities
+  appsec-trivy:
+    # Parse Dockerfile and build, scan image if a "blessed" base image is not used
+    name: DSP AppSec Trivy check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Build Dockerfile
-        run: docker build -f Dockerfile -t docker.io/broadinstitute/duos:${{ github.sha }} .
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'docker.io/broadinstitute/duos:${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: false
-          severity: 'CRITICAL'
+      - uses: actions/checkout@v2
+
+      - uses: broadinstitute/dsp-appsec-trivy-action@v1
