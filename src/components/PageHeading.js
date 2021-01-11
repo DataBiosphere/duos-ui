@@ -15,8 +15,8 @@ export const PageHeading = hh(class PageHeading extends Component {
         className: "page-heading-icon"
       }),
       div({ className: "page-heading-text " + this.props.iconSize}, [
-        h2({ id: this.props.id + "_title", className: "page-heading-title  " + this.props.color + "-color"}, [this.props.title]),
-        span({ id: this.props.id + "_description", className: "page-heading-description"}, [this.props.description]),
+        h2({ id: this.props.id + "_title", className: "page-heading-title  " + this.props.color + "-color", style: this.props.titleStyle }, [this.props.title]),
+        span({ id: this.props.id + "_description", className: "page-heading-description", style: this.props.descriptionStyle }, [this.props.description]),
       ]),
 
     ]);
