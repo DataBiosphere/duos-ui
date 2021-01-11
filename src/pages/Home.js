@@ -87,17 +87,17 @@ class Home extends Component {
     };
 
     const buttonStyleBig = {
-          borderRadius: '5px',
-          backgroundColor: '#00689F',
-          fontFamily: 'Montserrat',
-          fontSize: '22px',
-          fontWeight: 500,
-          color: '#FFFFFF',
-          padding: '0 5rem',
-          margin: '2rem auto',
-          height: '50px',
-          width: '600px'
-        };
+      borderRadius: '5px',
+      backgroundColor: '#00689F',
+      fontFamily: 'Montserrat',
+      fontSize: '22px',
+      fontWeight: 500,
+      color: '#FFFFFF',
+      padding: '0 5rem',
+      margin: '2rem auto',
+      height: '50px',
+      width: '600px'
+    };
 
     const readMoreStyle = {
       fontFamily: 'Montserrat',
