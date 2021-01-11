@@ -1,5 +1,6 @@
 import find from 'lodash/find';
 import get from 'lodash/get';
+import some from 'lodash/some';
 import { Component, Fragment } from 'react';
 import { a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -33,6 +34,7 @@ class DatasetCatalog extends Component {
       },
       dacs: [],
       disableOkButton: false,
+      disableApplyAccessButton: true,
       translatedUseRestrictionModal: {},
       isAdmin: null,
       isResearcher: null,
@@ -55,10 +57,18 @@ class DatasetCatalog extends Component {
   }
 
   async getDatasets() {
-    let catalog = await DataSet.findDataSets(this.currentUser.dacUserId);
+    let catalog = await DataSet.getDatasets();
     catalog.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
+      row.dbGapLink =
+        get (
+          find(
+            row.properties,
+            p => {
+              return p.propertyName === 'dbGAP';
+            },
+          ), 'propertyValue', '') ;
     });
     this.setState({
       dataSetList: { catalog: catalog },
@@ -316,10 +326,13 @@ class DatasetCatalog extends Component {
 
   selectAll = (e) => {
     const checked = e.target.checked;
-    const checkedCatalog = this.state.dataSetList.catalog.map(row => { row.checked = checked; return row; });
+    const catalog = this.state.dataSetList.catalog;
+    const checkedCatalog = catalog.map(row => { row.checked = checked; return row; });
+    const disabledChecked = some(catalog, {'checked': true, 'active': false});
     this.setState(prev => {
       prev.allChecked = checked;
       prev.dataSetList.catalog = checkedCatalog;
+      prev.disableApplyAccessButton = disabledChecked;
       return prev;
     });
   };
@@ -335,8 +348,11 @@ class DatasetCatalog extends Component {
       ...catalog.slice(index + 1)
     ];
 
+    const disabledChecked = some(catalog, {'checked': true, 'active': false});
+
     this.setState(prev => {
       prev.dataSetList.catalog = catalog;
+      prev.disableApplyAccessButton = disabledChecked;
       return prev;
     });
   };
@@ -506,17 +522,16 @@ class DatasetCatalog extends Component {
                             get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
                           ]),
 
-                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
-                            a({
-                              id: trIndex + '_linkdbGap',
-                              name: 'link_dbGap',
-                              href: get(find(dataSet.properties, p => { return p.propertyName === 'dbGAP'; }), 'propertyValue', ''),
-                              target: '_blank',
-                              className: (get(find(dataSet.properties, p => { return p.propertyName === 'dbGAP'; }), 'propertyValue', '').length > 0 ?
-                                'enabled' :
-                                'disabled')
-                            }, ['Link'])
-                          ]),
+                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') },
+                            [dataSet.dbGapLink !== '' ?
+                              a({
+                                id: trIndex + '_linkdbGap',
+                                name: 'link_dbGap',
+                                href: dataSet.dbGapLink,
+                                target: '_blank',
+                                className: 'enabled'
+                              }, ['Link']) : '--'
+                            ]),
 
                           td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
                             a({
@@ -624,7 +639,7 @@ class DatasetCatalog extends Component {
             button({
               id: 'btn_applyAccess',
               isRendered: this.state.isResearcher,
-              disabled: this.state.dataSetList.catalog.filter(row => row.checked).length === 0,
+              disabled: (this.state.dataSetList.catalog.filter(row => row.checked).length === 0) || this.state.disableApplyAccessButton,
               onClick: () => this.exportToRequest(),
               className: 'btn-primary dataset-background search-wrapper',
               'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
