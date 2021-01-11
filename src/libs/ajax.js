@@ -402,7 +402,7 @@ export const DAR = {
     const res = await fetchOk(url, Config.authOpts());
     let dars = await res.json();
     dars.map(dar => {
-      if (dar.ownerUser !== null) {
+      if (!fp.isNil(dar.ownerUser) && !fp.isNil(dar.ownerUser.roles)) {
         dar.ownerUser.roles.map(role => {
           if (role.name === 'Researcher') {
             dar.status = dar.ownerUser.status;
