@@ -5,6 +5,7 @@ import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
+import {NavigationUtils} from "../libs/utils";
 
 class DuosHeader extends Component {
 
@@ -12,9 +13,15 @@ class DuosHeader extends Component {
     super(props);
     this.state = {
       showSupportRequestModal: false,
-      hover: false
+      hover: false,
+      dacChairPath: 'chair_console'
     };
   };
+
+  async componentDidMount() {
+    let dacChairPath = await NavigationUtils.dacChairConsolePath();
+    this.setState({dacChairPath: dacChairPath});
+  }
 
   toggleHover = () => {
     this.setState(prev => {
@@ -156,7 +163,7 @@ class DuosHeader extends Component {
                   ]),
 
                   li({ isRendered: isChairPerson }, [
-                    h(Link, { id: 'link_chairConsole', to: '/chair_console' }, ['DAC Chair Console'])
+                    h(Link, { id: 'link_chairConsole', to: this.state.dacChairPath }, ['DAC Chair Console'])
                   ]),
 
                   li({ isRendered: isMember }, [
