@@ -152,7 +152,7 @@ class Home extends Component {
             div({ className: 'row', style: { background: '#eff0f2', margin: '0 0 48px 0'} }, [
               div({ className:'col-lg-6 col-md-6', style: { display: 'flex', justifyContent: 'center' }}, [
                 button({ className: 'btn-primary', style: buttonStyleBig }, [
-                  a({href: 'https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo', style: {color: '#fff'}}, ['Register a dataset in DUOS'])
+                  a({href: 'https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo', style: {color: '#fff'}, target: "_blank"}, ['Register a dataset in DUOS'])
                 ])
               ]),
               div({ className:'col-lg-6 col-md-6', style: { display: 'flex', justifyContent: 'center' }}, [
