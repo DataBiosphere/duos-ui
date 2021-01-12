@@ -140,7 +140,7 @@ export const SignIn = hh(class SignIn extends Component {
           onSuccess: this.responseGoogle,
           onFailure: this.forbidden,
           disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
-          } : {
+        } : {
           render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
           scope: 'openid email profile',
           height: '44px',
