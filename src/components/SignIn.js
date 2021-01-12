@@ -130,26 +130,26 @@ export const SignIn = hh(class SignIn extends Component {
       div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]) : //_.isNil(this.props.customStyle) ?
-        h(GoogleLogin,
-          _.isNil(this.props.customStyle) ? {
-            scope: 'openid email profile',
-            height: '44px',
-            width: '180px',
-            theme: 'dark',
-            clientId: this.state.clientId,
-            onSuccess: this.responseGoogle,
-            onFailure: this.forbidden,
-            disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
+      h(GoogleLogin,
+        _.isNil(this.props.customStyle) ? {
+          scope: 'openid email profile',
+          height: '44px',
+          width: '180px',
+          theme: 'dark',
+          clientId: this.state.clientId,
+          onSuccess: this.responseGoogle,
+          onFailure: this.forbidden,
+          disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
           } : {
-            render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
-            scope: 'openid email profile',
-            height: '44px',
-            width: '180px',
-            theme: 'dark',
-            clientId: this.state.clientId,
-            onSuccess: this.responseGoogle,
-            onFailure: this.forbidden,
-            disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
+          render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
+          scope: 'openid email profile',
+          height: '44px',
+          width: '180px',
+          theme: 'dark',
+          clientId: this.state.clientId,
+          onSuccess: this.responseGoogle,
+          onFailure: this.forbidden,
+          disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
         });
   };
 
