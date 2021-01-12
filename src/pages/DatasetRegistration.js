@@ -1443,7 +1443,7 @@ class DatasetRegistration extends Component {
                 ]),
 
 
-                h3({ className: 'rp-form-title dataset-color' }, ['3. DataSet Registration Agreement']),
+                h3({ className: 'rp-form-title dataset-color' }, ['3. Dataset Registration Agreements']),
 
                 div({ className: 'form-group' }, [
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
@@ -1455,12 +1455,12 @@ class DatasetRegistration extends Component {
                   div({ className: 'row no-margin' }, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       label({ style: controlLabelStyle, className: 'default-color' },
-                        ['By submitting this data registration, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.'])
+                        ['By submitting this dataset registration, you agree to comply with all terms relevant to Dataset Custodians put forth in the agreement.'])
                     ]),
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       a({
-                        id: 'link_downloadAgreement', href: 'https://drive.google.com/file/d/1y95uWYqqYPg4XcgbWnU0FuotDgrkPp-7/view?usp=sharing', target: '_blank',
+                        id: 'link_downloadAgreement', href: '/DUOSLibraryCardAgreement_10.14.2020.pdf', target: '_blank',
                         className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                       }, [
                         span({ className: 'glyphicon glyphicon-download' }),
