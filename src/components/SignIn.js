@@ -129,7 +129,7 @@ export const SignIn = hh(class SignIn extends Component {
     return disabled ?
       div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
-      ]) : //_.isNil(this.props.customStyle) ?
+      ]) :
       h(GoogleLogin,
         _.isNil(this.props.customStyle) ? {
           scope: 'openid email profile',
