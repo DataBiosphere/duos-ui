@@ -87,14 +87,8 @@ class Home extends Component {
     };
 
     const buttonStyleBig = {
-      borderRadius: '5px',
-      backgroundColor: '#00689F',
-      fontFamily: 'Montserrat',
+      buttonStyle,
       fontSize: '22px',
-      fontWeight: 500,
-      color: '#FFFFFF',
-      padding: '0 5rem',
-      margin: '2rem auto',
       height: '50px',
       width: '600px'
     };
@@ -162,9 +156,11 @@ class Home extends Component {
                 ])
               ]),
               div({ className:'col-lg-6 col-md-6', style: { display: 'flex', justifyContent: 'center' }}, [
-                button({ className: 'btn-primary', style: buttonStyleBig }, [
-                  a({href: '/dataset_catalog', style: {color: '#fff'}}, ['Submit a Data Access Request'])
-                ])
+                isLogged?
+                  button({ className: 'btn-primary', style: buttonStyleBig }, [
+                    a({href: '/dataset_catalog', style: {color: '#fff'}}, ['Submit a Data Access Request'])
+                  ]) :
+                  SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, customStyle: buttonStyleBig})
               ])
             ]),
             div({ className: 'col-lg-4 col-md-4'}, [

@@ -1,7 +1,7 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import { div, h, hh, img, span } from 'react-hyperscript-helpers';
+import { div, h, hh, img, span, button } from 'react-hyperscript-helpers';
 import { Alert } from '../components/Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
@@ -13,7 +13,7 @@ export const SignIn = hh(class SignIn extends Component {
     super(props);
     this.state = {
       clientId: '',
-      error: {}
+      error: {},
     };
     this.getGoogleClientId();
   }
@@ -129,15 +129,28 @@ export const SignIn = hh(class SignIn extends Component {
     return disabled ?
       div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
-      ]) :
-      h(GoogleLogin, {
-        scope: 'openid email profile',
-        theme: 'dark',
-        clientId: this.state.clientId,
-        onSuccess: this.responseGoogle,
-        onFailure: this.forbidden,
-        disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' },
-      });
+      ]) : //_.isNil(this.props.customStyle) ?
+        h(GoogleLogin,
+          _.isNil(this.props.customStyle) ? {
+            scope: 'openid email profile',
+            height: '44px',
+            width: '180px',
+            theme: 'dark',
+            clientId: this.state.clientId,
+            onSuccess: this.responseGoogle,
+            onFailure: this.forbidden,
+            disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
+          } : {
+            render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
+            scope: 'openid email profile',
+            height: '44px',
+            width: '180px',
+            theme: 'dark',
+            clientId: this.state.clientId,
+            onSuccess: this.responseGoogle,
+            onFailure: this.forbidden,
+            disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
+        });
   };
 
   render() {
