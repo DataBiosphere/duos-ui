@@ -1460,7 +1460,7 @@ class DatasetRegistration extends Component {
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       a({
-                        id: 'link_downloadAgreement', href: 'https://drive.google.com/file/d/1y95uWYqqYPg4XcgbWnU0FuotDgrkPp-7/view?usp=sharing', target: '_blank',
+                        id: 'link_downloadAgreement', href: 'Data_Provider_Agreement.pdf', target: '_blank',
                         className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                       }, [
                         span({ className: 'glyphicon glyphicon-download' }),

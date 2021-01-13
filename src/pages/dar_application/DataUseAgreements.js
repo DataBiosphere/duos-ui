@@ -88,7 +88,7 @@ export default function DataUseAgreements(props) {
 
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                 a({
-                  id: 'link_downloadAgreement', href: '/DUOSLibraryCardAgreement_10.14.2020.pdf', target: '_blank',
+                  id: 'link_downloadAgreement', href: '/Data_Provider_Agreement.pdf', target: '_blank',
                   className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                 }, [
                   span({ className: 'glyphicon glyphicon-download' }),
