@@ -1443,12 +1443,12 @@ class DatasetRegistration extends Component {
                 ]),
 
 
-                h3({ className: 'rp-form-title dataset-color' }, ['3. Dataset Registration Agreements']),
+                h3({ className: 'rp-form-title dataset-color' }, ['3. Data Provider Agreement']),
 
                 div({ className: 'form-group' }, [
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
                     label({ className: 'control-label rp-title-question dataset-color' }, [
-                      '3.1 DUOS Dataset Registration Agreement'
+                      '3.1 Data Provider Agreement'
                     ])
                   ]),
 
@@ -1464,7 +1464,7 @@ class DatasetRegistration extends Component {
                         className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                       }, [
                         span({ className: 'glyphicon glyphicon-download' }),
-                        'DUOS Dataset Registration Agreement'
+                        'Data Provider Agreement'
                       ])
                     ]),
                   ]),
