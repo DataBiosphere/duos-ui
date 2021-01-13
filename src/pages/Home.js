@@ -134,7 +134,7 @@ class Home extends Component {
               div({}, [
                 img({
                   className: 'col-sm-10 hidden-xs',
-                  style: { padding: '1rem 5rem', margin: 'auto 15rem' },
+                  style: { padding: '1rem', margin: 'auto 8.25%' },
                   alt: 'What is DUOS graphic',
                   src: '/images/DUOS_Homepage_diagram.svg'
                 })
