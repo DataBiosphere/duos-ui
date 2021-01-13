@@ -19,6 +19,23 @@ import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 
+export const getDatasets = async(formData) => {
+  const dsIds = fp.get('datasetIds')(formData);
+  let datasets;
+  if (!fp.isNil(dsIds)) {
+    try {
+      datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
+      formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+    } catch(error) {
+      datasets = ['Error retreiving datasets for application'];
+      NotyUtil.showError({text: 'Error: failed to retreive datasets for application pdf'});
+    }
+  } else {
+    datasets = [];
+  }
+  return datasets;
+};
+
 class DataAccessRequestApplication extends Component {
 
   constructor(props) {
@@ -173,6 +190,19 @@ class DataAccessRequestApplication extends Component {
     });
   }
 
+  async getDatasets(formData) {
+    const dsIds = fp.get('datasetIds')(formData);
+    let datasets;
+    if (!fp.isNil(dsIds)) {
+      datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
+      formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+    } else {
+      datasets = [];
+    }
+
+    return datasets;
+  }
+
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
@@ -180,11 +210,7 @@ class DataAccessRequestApplication extends Component {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
-      const dsIds = fp.get('datasetIds')(formData);
-      if (!fp.isNil(dsIds)) {
-        const datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-        formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
-      }
+      formData.datasets = getDatasets(formData);
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
