@@ -465,6 +465,15 @@ small {
   margin: 15px 0 20px 0;
 }
 
+.table-catalog {
+  padding: 15px 25px !important;
+  box-shadow: 3px 3px 0 #cccccc;
+  height: auto;
+  border: 1px solid #cccccc;
+  background: #ffffff;
+  margin: 25px 0 10px 0;
+}
+
 .box-vote, .box-vote-results, .box-vote-singleresults, .box-vote-stats {
   padding: 15px 25px !important;
   margin: 10px 0 20px 0;
@@ -624,7 +633,6 @@ small {
 
 .cell-header {
   min-height: 43px;
-  font-style: italic;
   font-size: 16px;
   padding: 5px 10px;
   font-weight: 500;
@@ -648,6 +656,15 @@ small {
 .cell-body {
   min-height: 43px;
   color: #777777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 2px 10px;
+}
+
+.cell-body-black {
+  min-height: 43px;
+  color: #000000;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
