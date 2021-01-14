@@ -7,6 +7,7 @@ import { Navigation, Notifications } from '../../libs/utils';
 import { Votes, Election, Match } from '../../libs/ajax';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
+import {StackdriverReporter} from '../../libs/stackdriverReporter';
 
 const ROOT = {
   height: '100%',
@@ -256,9 +257,14 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   submitAgreementVote = async () => {
     const { chairAgreementVote, chairAccessVote, matchData } = this.state;
     if (!fp.isNil(fp.getOr(matchData, 'match', null))) {
-      chairAgreementVote.rationale = chairAccessVote.rationale;
-      chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
-      this.submitVote(chairAgreementVote);
+      if (!fp.isNil(chairAgreementVote)) {
+        chairAgreementVote.rationale = chairAccessVote.rationale;
+        chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
+        await this.submitVote(chairAgreementVote);
+      } else {
+        console.log("Invalid Agreement for Access Vote: " + JSON.stringify(chairAccessVote));
+        await StackdriverReporter.report("Invalid Chair Agreement vote for Chair Access Vote: " + JSON.stringify(chairAccessVote));
+      }
     }
   };
 
