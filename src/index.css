@@ -322,6 +322,7 @@ small {
 
 .search-wrapper {
   margin-top: 35px !important;
+  margin-bottom: 20px !important;
 }
 
 @media (max-width: 800px) {
@@ -463,15 +464,6 @@ small {
   height: auto;
   background: #eeeeee;
   margin: 15px 0 20px 0;
-}
-
-.table-catalog {
-  padding: 15px 25px !important;
-  box-shadow: 3px 3px 0 #cccccc;
-  height: auto;
-  border: 1px solid #cccccc;
-  background: #ffffff;
-  margin: 25px 0 10px 0;
 }
 
 .box-vote, .box-vote-results, .box-vote-singleresults, .box-vote-stats {
@@ -1630,13 +1622,6 @@ td:first-child .checkbox label {
   padding: 10px 20px 5px 5px !important;
   margin: 0!important;
   color: #777777;
-}
-.catalog-table-items {
-  font-weight: normal !important;
-  font-size: 14px !important;
-  padding: 10px 20px 5px 5px !important;
-  margin: 0!important;
-  color: #000000;
 }
 
 .table-items .enabled, .table-items .disabled {
