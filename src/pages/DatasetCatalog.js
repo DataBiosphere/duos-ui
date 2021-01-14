@@ -12,7 +12,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { Theme } from '../libs/theme'
+import { Theme } from '../libs/theme';
 
 
 class DatasetCatalog extends Component {

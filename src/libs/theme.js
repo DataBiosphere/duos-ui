@@ -49,7 +49,7 @@ export const Theme = {
       weight: 'normal !important',
       size: '14px !important',
       color: '#000000'
-      },
+    },
     padding: '10px 10px 5px 5px !important',
   }
 };
