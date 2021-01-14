@@ -1,13 +1,13 @@
 import React from 'react';
 import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
-import { Theme } from '../../libs/theme';
-import { Storage } from '../../libs/storage';
-import { Navigation, Notifications } from '../../libs/utils';
 import { Votes, Election, Match } from '../../libs/ajax';
+import { StackdriverReporter } from '../../libs/stackdriverReporter';
+import { Storage } from '../../libs/storage';
+import { Theme } from '../../libs/theme';
+import { Navigation, Notifications } from '../../libs/utils';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
-import {StackdriverReporter} from '../../libs/stackdriverReporter';
 
 const ROOT = {
   height: '100%',
