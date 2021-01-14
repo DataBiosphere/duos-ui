@@ -13,6 +13,7 @@
   "powerBiUrl": "https://app.powerbi.com/view?r=eyJrIjoiN2ZiYWU0MzktOTllOS00ZmZkLWFlMTMtMTQ1YTA1ZWNmZTNkIiwidCI6IjBjYjdhNjQwLTQ1YTItNGVkNi1iZTlmLTYzNTE5Zjg2ZTA0YiIsImMiOjN9",
   "gaId": "UA-159441671-3",
   "features": {
-    "newDarUi": true
+    "newDarUi": true,
+    "newChairConsole": false
   }
 }
