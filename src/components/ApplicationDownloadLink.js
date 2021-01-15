@@ -78,10 +78,10 @@ const LabelListComponent = (props) => {
 };
 
 const StandardLabelTextComponent = (props) => {
-  const {statement, label} = props;
+  const {text, label} = props;
   return h(View, {style: styles.section}, [
     h(Text, {style: styles.label}, [label]),
-    h(Text, {style: styles.text}, [statement || "N/A"])
+    h(Text, {style: styles.text}, [text || "N/A"])
   ]);
 };
 
