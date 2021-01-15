@@ -2,6 +2,8 @@
 
 ### Current State of Data Access
 
+![Current Access](about_current_access.png "Current Access")
+
 Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data.
 
 Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies.
@@ -16,6 +18,8 @@ We will start on the left of our diagram...
 
 ### Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes
 
+![Reducing Complexity](about_reducing_complexity.png "Reducing Complexity")
+
 Let’s look at the present issue with consent forms.
 
 Most consent forms either contain unique, institution-specific language on data sharing or remain silent. Unfortunately, these uniquely written or silent consent provide DACs with little or difficult-to-interpret guidance on how data may be permissibly shared.
@@ -26,9 +30,13 @@ The Data Use Ontology is an official GA4GH standard now referenced by genomics r
 
 ### Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology
 
+![Consent Ontology](about_consent_ontology.png "Consent Ontology")
+
 Once the consent forms clearly distinguish permitted uses of the data using machine readable DUO terms, the data can be tagged and stored with its appropriate DUO terms. This enables investigators desiring to access the data to know up front whether or not they are likely to be granted access. Furthermore, having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.
 
 ### Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology
+
+![Clarity Complexity](about_clarity_complexity.png "Clarity Complexity")
 
 Having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.
 
@@ -42,6 +50,8 @@ Further, DACs and Signing Officials often sign and/or negotiate a unique data ac
 
 ### A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests
 
+![Two Fold](about_two_fold_approach.png "Two Fold")
+
 The DUOS team is working actively on process, policy, and software improvements to reduce or remove each of these issues impact on research.
 
 To address the complexity of the domain-specific research proposals in each request, DUOS requires requesting investigators to structure their data access request using Data Use Ontology’s structured vocabulary.
@@ -49,6 +59,8 @@ To address the complexity of the domain-specific research proposals in each requ
 To assist with identifying the legitimacy of the researcher and the heavy administrative burden on Signing Officials, DUOS developed the Library Card Agreement (PDF) which is a single-signature, annually renewable data access agreement under which Signing Officials can pre-authorize any investigators from their institution to submit data access requests to any DAC using the DUOS system.
 
 ### Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency
+
+![DACs Compare](about_dacs_compare.png "DACs Compare")
 
 With those improvements to the data access request process in place, DACs are then able to compare the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms. This significantly expedites the DACs review of a data access. On top of this, the Signing Official is no longer required to take part in the review and submission of each DAR, nor does a unique data access agreement need to be signed. Removing these elements of the process further expedites the process.
 
