@@ -1,10 +1,11 @@
 import React from 'react';
 import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
-import { Theme } from '../../libs/theme';
-import { Storage } from '../../libs/storage';
-import { Navigation, Notifications } from '../../libs/utils';
 import { Votes, Election, Match } from '../../libs/ajax';
+import { StackdriverReporter } from '../../libs/stackdriverReporter';
+import { Storage } from '../../libs/storage';
+import { Theme } from '../../libs/theme';
+import { Navigation, Notifications } from '../../libs/utils';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
 
@@ -256,9 +257,13 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   submitAgreementVote = async () => {
     const { chairAgreementVote, chairAccessVote, matchData } = this.state;
     if (!fp.isNil(fp.getOr(matchData, 'match', null))) {
-      chairAgreementVote.rationale = chairAccessVote.rationale;
-      chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
-      this.submitVote(chairAgreementVote);
+      if (!fp.isNil(chairAgreementVote)) {
+        chairAgreementVote.rationale = chairAccessVote.rationale;
+        chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
+        await this.submitVote(chairAgreementVote);
+      } else {
+        await StackdriverReporter.report("Invalid Chair Agreement vote for Chair Access Vote: " + JSON.stringify(chairAccessVote));
+      }
     }
   };
 
