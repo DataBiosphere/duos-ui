@@ -12,6 +12,8 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
+import { Theme } from '../libs/theme';
+
 
 class DatasetCatalog extends Component {
 
@@ -397,7 +399,7 @@ class DatasetCatalog extends Component {
             ]),
           ]),
 
-          div({ className: 'table' }, [
+          div({style: Theme.lightTable}, [
             form({ className: 'pos-relative' }, [
               div({ className: 'checkbox check-all' }, [
                 input({ checked: this.state.allChecked, type: 'checkbox', 'select-all': 'true', className: 'checkbox-inline', id: 'chk_selectAll', onChange: this.selectAll }),
@@ -505,24 +507,29 @@ class DatasetCatalog extends Component {
 
                           td({
                             id: dataSet.alias + '_dataset', name: 'alias',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [dataSet.alias]),
 
                           td({
                             id: trIndex + '_datasetName', name: 'datasetName',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Dataset Name'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_dac', name: 'dac',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
                           ]),
 
-                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') },
+                          td({
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody },
                             [dataSet.dbGapLink !== '' ?
                               a({
                                 id: trIndex + '_linkdbGap',
@@ -533,7 +540,10 @@ class DatasetCatalog extends Component {
                               }, ['Link']) : '--'
                             ]),
 
-                          td({ className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                          td({
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
+                          }, [
                             a({
                               id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
                               onClick: () => this.openTranslatedDUL(dataSet.dataUse),
@@ -543,64 +553,75 @@ class DatasetCatalog extends Component {
 
                           td({
                             id: trIndex + '_dataType', name: 'dataType',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Data Type'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_phenotype', name: 'phenotype',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Phenotype/Indication'; }), 'propertyValue', '')
                           ]),
 
-                          td({ id: trIndex + '_pi', name: 'pi', className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '') }, [
+                          td({
+                            id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
+                          }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Principal Investigator(PI)'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_participants', name: 'participants',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === '# of participants'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_description', name: 'description',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Description'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_species', name: 'species',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Species'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_depositor', name: 'depositor',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Data Depositor'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_consentId', name: 'consentId',
-                            className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [dataSet.consentId]),
 
                           td({
-                            id: trIndex + '_scid', name: 'sc-id', className: 'table-items cell-size ' + (!dataSet.active ? 'dataset-disabled' : '')
+                            id: trIndex + '_scid', name: 'sc-id', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                            style: Theme.textTableBody
                           }, [
                             this.defaultString(
                               get(find(dataSet.properties, p => { return p.propertyName === 'Sample Collection ID'; }), 'propertyValue', ''),
                               '---')
                           ]),
 
-                          td({ isRendered: this.state.isAdmin, className: 'table-items cell-size' }, [
+                          td({ isRendered: this.state.isAdmin, className: 'cell-size', style: Theme.textTableBody }, [
                             a({
                               id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => this.downloadList(dataSet),
                               className: 'enabled'
