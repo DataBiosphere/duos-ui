@@ -1,4 +1,4 @@
-import { Page, Document, StyleSheet, View, PDFViewer, Text, Font } from '@react-pdf/renderer';
+import { Page, Document, StyleSheet, View, PDFViewer, Text} from '@react-pdf/renderer';
 import {h} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   smLabel: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: 800,
     marginBottom: 10,
     marginRight: 30,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 10,
-    fontSize: 15
+    fontSize: 16
   },
   section: {
     marginBottom: 20
