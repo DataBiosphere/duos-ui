@@ -177,7 +177,7 @@ class DataAccessRequestApplication extends Component {
     let datasets;
     if (!fp.isNil(dsIds)) {
       datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-      formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+      datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
     } else {
       datasets = [];
     }
@@ -192,7 +192,7 @@ class DataAccessRequestApplication extends Component {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
-      formData.datasets = getDatasets(formData);
+      formData.datasets = await this.getDatasets(formData);
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
