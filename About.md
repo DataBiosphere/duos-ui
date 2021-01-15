@@ -66,6 +66,8 @@ With those improvements to the data access request process in place, DACs are th
 
 ### With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs
 
+![DACs Algo](about_dacs_algorithm.png "DACs Algo")
+
 Having the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms, doesn’t just facilitate the DAC’s review - but given that the DUO terms are machine readable it means that we are able to use the DUOS algorithm to compare the permitted uses with the data access request instantly.
 
 Currently, DACs using DUOS are able to review the algorithm’s suggested decision on comparing the permitted uses with the data access request prior to logging their final decision on a request.
