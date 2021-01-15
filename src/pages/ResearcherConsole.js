@@ -87,7 +87,7 @@ class ResearcherConsole extends Component {
   dialogHandlerDeletePDAR = (answer) => (e) => {
     this.setState({ buttonDisabled: true });
     if (answer === true) {
-      DAR.deletePartialDarRequest(this.state.dataRequestId).then(resp => {
+      DAR.deleteDar(this.state.dataRequestId).then(resp => {
         this.init(this.state.currentUser);
       }).catch(error => {
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to delete the request. Please try again.', buttonDisabled: false });
