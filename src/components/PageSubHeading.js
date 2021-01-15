@@ -1,15 +1,27 @@
 import { Component } from 'react';
 import { div, hh, img, h2, span } from 'react-hyperscript-helpers';
-import './PageSubHeading.css';
 
 export const PageSubHeading = hh(class PageSubHeading extends Component {
 
   render() {
 
+    const HEADING = {
+      width: '100%',
+      margin: '20px 0 10px 0',
+      position: 'relative'
+    };
+
     const DESCRIPTION = {
       color: '#000000',
       fontSize: '16px',
       fontWeight: '400'
+    };
+
+    const ICON = {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      height: '40px'
     };
 
     const TITLE = {
@@ -20,15 +32,31 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
       fontWeight: '500',
     };
 
-    return div({ className: "page-sub-heading" }, [
+    const MEDIUM = {
+      marginLeft: '45px'
+    };
+
+    const LARGE = {
+      marginLeft: '55px'
+    }
+
+    const NONE = {
+      marginLeft: '0'
+    };
+
+    return div({ style: HEADING }, [
       img({
         id: this.props.id + "_icon",
         isRendered: this.props.imgSrc !== undefined,
         src: this.props.imgSrc,
         alt: this.props.title,
-        className: "page-sub-heading-icon"
+        style: ICON
        }),
-      div({ className: "page-sub-heading-text " + this.props.iconSize }, [
+      div( this.props.iconSize === 'none' ?
+        { style: NONE }
+        : this.props.iconSize === 'large' ?
+          { style: LARGE }
+          : { style: MEDIUM }, [
         h2({ id: this.props.id + "_title", className: this.props.color + "-color", style: TITLE }, [this.props.title]),
         span({ id: this.props.id + "_description", style: DESCRIPTION }, [this.props.description]),
       ])

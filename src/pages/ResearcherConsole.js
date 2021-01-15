@@ -230,8 +230,8 @@ class ResearcherConsole extends Component {
               }),
               div({ style: Theme.lightTable }, [
                 div({ className: "row no-margin" }, [
-                  div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Temporary ID"]),
-                  div({ style: Theme.textTableHead, className: "col-xs-5 col-xs-offset-1 access-color" }, ["Project Title"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-2 col-xs-offset-1 access-color" }, ["Temporary ID"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-5 access-color" }, ["Project Title"]),
                   div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Date"]),
                   div({ style: Theme.textTableHead, className: "col-xs-2 f-center access-color" }, ["Resume"]),
                 ]),
