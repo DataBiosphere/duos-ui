@@ -300,7 +300,6 @@ class DatasetRegistration extends Component {
       (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
   };
 
-  // call the new ajax function and save it to the state?
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
       const isValid = (datasetId < 0);
