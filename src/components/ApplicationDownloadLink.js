@@ -1,7 +1,5 @@
 import { Page, Document, StyleSheet, View, PDFViewer, Text, Font } from '@react-pdf/renderer';
-import { useState, useEffect } from 'react';
 import {h} from 'react-hyperscript-helpers';
-import { getDatasets } from '../pages/DataAccessRequestApplication';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
 
@@ -98,17 +96,19 @@ const ApprovalSection = (props => {
 
 export default function ApplicationDownloadLink(props) {
   const {darInfo, researcherProfile} = props;
-  const [translatedSRPs, setTranslatedSRPs] = useState(DataUseTranslation.translateDarInfo(darInfo));
-  const [isLoading, setIsLoading] = useState(true);
-  const [datasets, setDatasets] = useState();
-  console.log(darInfo);
+  const datasets = props.datasets.map((dataset) => {
+    const namePropertyObj = dataset.properties.find((property) =>  property.propertyName === "Dataset Name");
+    //using {description: value} so it can be listed via LabelListComponent
+    return {description: namePropertyObj.propertyValue};
+  });
+  const translatedSRPs = DataUseTranslation.translateDarInfo(darInfo);
 
   const getCollaborators = (darInfo, key) => {
     const collaborators = darInfo[key];
     if(!isEmpty(collaborators)) {
       return collaborators.map((collaborator) => {
         return collaborator.name;
-      }).concat(', ');
+      }).join(', ');
     } else {
       return '---';
     }
@@ -118,21 +118,7 @@ export default function ApplicationDownloadLink(props) {
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
 
-  useEffect(() => {
-    const init = async() => {
-      setTranslatedSRPs(DataUseTranslation.translateDarInfo(props.darInfo));
-      try{
-        const datasets = await getDatasets(props.darInfo);
-        setDatasets(datasets);
-        setIsLoading(false);
-      } catch(error) {
-        setIsLoading(false);
-      }
-    };
-    init();
-  }, [props.darInfo]);
-
-  return h(PDFViewer, {width: 1800, height: 800, isRendered: !isLoading}, [
+  return h(PDFViewer, {width: 1800, height: 800}, [
     h(Document, {style: styles.page}, [
       h(Page, {}, [ //Researcher Info Page
         h(View, {style: styles.page}, [

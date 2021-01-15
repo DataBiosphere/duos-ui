@@ -33,7 +33,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile } = this.props;
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets } = this.props;
     const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get( 'reviewVote')(accessElectionReview);
     const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get( 'reviewVote')(rpElectionReview);
     return div([
@@ -45,7 +45,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         //NOTE:DownloadLink was old component/ replaced with compoenent/pdfViewer for now
         //NOTE: PDFViewer is only used for development purposes, will replace with PDFLink when styling is complete
         // DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
-        h(ApplicationDownloadLink, {darInfo, researcherProfile})
+        h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
       ]),
       VoteSummary({
         isRendered: voteAsChair && !fp.isNil(accessVotes),

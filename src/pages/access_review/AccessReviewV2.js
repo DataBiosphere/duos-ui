@@ -3,7 +3,8 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import { DAR, Election, Researcher, Votes } from '../../libs/ajax';
+import { DAR, Election, Researcher, Votes, DataSet } from '../../libs/ajax';
+import { Notifications } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import * as fp from 'lodash/fp';
 
@@ -44,19 +45,30 @@ class AccessReviewV2 extends React.PureComponent {
     const rpElectionReview = fp.isNil(rpVoteId) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
     const rpElection = fp.isNil(rpElectionReview) ? null : rpElectionReview.election;
 
-    const { darInfo, consent } = await DAR.describeDarWithConsent(darId);
+    let datasets, darInfo, consent;
+
+    try{
+      darInfo = await DAR.getPartialDarRequest(darId);
+      const datasetsPromise = darInfo.datasetIds.map((id) => {
+        return DataSet.getDataSetsByDatasetId(id);
+      });
+      const consentPromise = DAR.getDarConsent(darId);
+      [consent, datasets] = await Promise.all([consentPromise, Promise.all(datasetsPromise)]);
+    } catch(error) {
+      Notifications.showError({text: 'Error initializing DAR Data'});
+    }
 
     // Vote information
     const allVotes = await Votes.getDarVotes(darId);
 
     // Researcher information
-    const researcherProfile = await Researcher.getResearcherProfile(darInfo.researcherId);
+    const researcherProfile = await Researcher.getResearcherProfile(darInfo.userId);
 
-    this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile });
+    this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
   }
 
   render() {
-    const { allVotes, voteAsChair, darInfo, darId, accessElection, consent, accessElectionReview, rpElection, rpElectionReview, researcherProfile } = this.state;
+    const { allVotes, voteAsChair, darInfo, darId, accessElection, consent, accessElectionReview, rpElection, rpElectionReview, researcherProfile, datasets } = this.state;
     const { history, match } = this.props;
 
     const currentUser = Storage.getCurrentUser();
@@ -92,7 +104,7 @@ class AccessReviewV2 extends React.PureComponent {
                 width: '70%',
               }
             },
-            [DarApplication({ voteAsChair, darId, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile })]
+            [DarApplication({ voteAsChair, darId, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets })]
           )
         ])
       ]

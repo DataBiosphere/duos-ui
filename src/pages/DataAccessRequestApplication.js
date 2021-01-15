@@ -19,25 +19,7 @@ import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 
-export const getDatasets = async(formData) => {
-  const dsIds = fp.get('datasetIds')(formData);
-  let datasets;
-  if (!fp.isNil(dsIds)) {
-    try {
-      datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-      formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
-    } catch(error) {
-      datasets = ['Error retreiving datasets for application'];
-      NotyUtil.showError({text: 'Error: failed to retreive datasets for application pdf'});
-    }
-  } else {
-    datasets = [];
-  }
-  return datasets;
-};
-
 class DataAccessRequestApplication extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
