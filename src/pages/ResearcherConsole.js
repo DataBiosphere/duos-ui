@@ -8,6 +8,7 @@ import { DAR } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
+import { Theme } from '../libs/theme';
 
 class ResearcherConsole extends Component {
 
@@ -137,7 +138,7 @@ class ResearcherConsole extends Component {
     return (
       div({ className: "container" }, [
         div({ className: "row no-margin" }, [
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+          div({ className: "col-xs-12 no-padding" }, [
             PageHeading({
               id: "researcherConsole",
               color: "common",
@@ -147,9 +148,9 @@ class ResearcherConsole extends Component {
             hr({ className: "section-separator" }),
           ]),
 
-          div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
+          div({ className: "col-xs-12 no-padding" }, [
             div({ className: "row no-margin" }, [
-              div({ className: "col-lg-9 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
+              div({ className: "col-md-9 col-sm-8 col-xs-12 no-padding" }, [
                 PageSubHeading({
                   id: "researcherConsoleAccess",
                   imgSrc: "/images/icon_access.png",
@@ -161,45 +162,45 @@ class ResearcherConsole extends Component {
 
               h(Link, {
                 id: "btn_createRequest",
-                className: "col-lg-3 col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", to: "/dar_application"
+                className: "col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", to: "/dar_application"
               }, [
                   div({ className: "all-icons add-access_white" }, []),
                   span({}, ["Create Data Access Request"]),
                 ]),
             ]),
 
-            div({ className: "jumbotron table-box" }, [
+            div({ style: Theme.lightTable }, [
               div({ className: "row no-margin" }, [
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Data Request ID"]),
-                div({ className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-header access-color" }, ["Project Title"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Date"]),
-                div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Status"]),
-                div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Cancel"]),
-                div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["Review"]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Data Request ID"]),
+                div({ style: Theme.textTableHead, className: "col-xs-4 access-color" }, ["Project Title"]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Date"]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 f-center access-color" }, ["Status"]),
+                div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Cancel"]),
+                div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Review"]),
               ]),
               hr({ className: "table-head-separator" }),
 
               this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(dar => {
                 return h(Fragment, { key: dar.frontEndId }, [
                   div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin tableRow" }, [
-                    div({ id: dar.frontEndId + "_darId", name: "darId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [dar.frontEndId]),
-                    div({ id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-lg-4 col-md-4 col-sm-4 col-xs-4 cell-body text" }, [dar.projectTitle]),
-                    div({ id: dar.frontEndId + "_createDate", name: "createDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(dar.createDate)]),
-                    div({ id: dar.frontEndId + "_electionStatus", name: "electionStatus", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
+                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_darId", name: "darId", className: "col-xs-2" }, [dar.frontEndId]),
+                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-xs-4" }, [dar.projectTitle]),
+                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_createDate", name: "createDate", className: "col-xs-2" }, [Utils.formatDate(dar.createDate)]),
+                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_electionStatus", name: "electionStatus", className: "col-xs-2 bold f-center" }, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, ["Submitted"]),
                       span({ isRendered: dar.electionStatus === 'Open' || dar.electionStatus === 'Final' || dar.electionStatus === 'PendingApproval' }, ["In review"]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, ["Canceled"]),
                       span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === false }, ["Denied"]),
                       span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === true }, ["Approved"]),
                     ]),
-                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center", disabled: dar.isCanceled }, [
+                    div({ className: "col-xs-1 cell-body f-center", disabled: dar.isCanceled }, [
                       button({
                         id: dar.frontEndId + "_btnCancel", name: "btn_cancel", isRendered: !dar.isCanceled, className: "cell-button cancel-color",
                         onClick: this.cancelDar, value: dar.dataRequestId
                       }, ["Cancel"]),
                       button({ isRendered: dar.isCanceled, className: "disabled" }, ["Canceled"]),
                     ]),
-                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
+                    div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
                         id: dar.frontEndId + "_btnReview", name: "btn_review", className: "cell-button hover-color"
                       }, [h(Link, {
@@ -223,16 +224,16 @@ class ResearcherConsole extends Component {
             div({ isRendered: ResearcherConsole.partialDars !== 0, className: "row no-margin" }, [
               PageSubHeading({
                 id: "researcherConsoleSavedAccess",
-                color: "default",
+                color: "access",
                 iconSize: "none",
                 title: "Saved Data Access Requests"
               }),
-              div({ className: "jumbotron table-box" }, [
+              div({ style: Theme.lightTable }, [
                 div({ className: "row no-margin" }, [
-                  div({ className: "col-lg-2 col-lg-offset-1 col-md-2 col-md-offset-1 col-sm-2 col-sm-offset-1 col-xs-2 col-xs-offset-1 cell-header default-color" }, ["Temporary id"]),
-                  div({ className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-header default-color" }, ["Project title"]),
-                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header default-color" }, ["Date"]),
-                  div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center default-color" }, ["Resume"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Temporary ID"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-5 col-xs-offset-1 access-color" }, ["Project Title"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Date"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-2 f-center access-color" }, ["Resume"]),
                 ]),
                 hr({ className: "table-head-separator" }),
 
@@ -240,16 +241,18 @@ class ResearcherConsole extends Component {
                   return h(Fragment, { key: pdar.partialDarCode }, [
                     div({ key: pdar.partialDarCode, id: pdar.partialDarCode, className: "row no-margin tableRowPartial" }, [
                       a({
-                        id: pdar.partialDarCode + "_btnDelete", name: "btn_delete", className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body delete-dar default-color",
+                        id: pdar.partialDarCode + "_btnDelete",
+                        name: "btn_delete",
+                        className: "col-xs-1 cell-body delete-dar default-color",
                         onClick: this.deletePartialDar, value: pdar.dataRequestId
                       }, [
                           span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
                         ]),
 
-                      div({ id: pdar.partialDarCode + "_partialId", name: "partialId", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [pdar.partialDarCode]),
-                      div({ id: pdar.partialDarCode + "_partialTitle", name: "partialTitle", className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 cell-body text" }, [pdar.projectTitle]),
-                      div({ id: pdar.partialDarCode + "_partialDate", name: "partialDate", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [Utils.formatDate(pdar.createDate)]),
-                      div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body f-center" }, [
+                      div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialId", name: "partialId", className: "col-xs-2" }, [pdar.partialDarCode]),
+                      div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialTitle", name: "partialTitle", className: "col-xs-5" }, [pdar.projectTitle]),
+                      div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialDate", name: "partialDate", className: "col-xs-2" }, [Utils.formatDate(pdar.createDate)]),
+                      div({className: "col-xs-2 cell-body f-center" }, [
                         button({
                           id: pdar.partialDarCode + '_btnResume',
                           name: 'btn_resume',
