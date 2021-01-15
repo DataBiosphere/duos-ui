@@ -38,7 +38,7 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
 
     const LARGE = {
       marginLeft: '55px'
-    }
+    };
 
     const NONE = {
       marginLeft: '0'

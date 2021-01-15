@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { div, hh, img, h2, span } from 'react-hyperscript-helpers'
+import { div, hh, img, h2, span } from 'react-hyperscript-helpers';
 
 export const PageHeading = hh(class PageHeading extends Component {
 
@@ -36,7 +36,7 @@ export const PageHeading = hh(class PageHeading extends Component {
 
     const LARGE = {
       marginLeft: '70px'
-    }
+    };
 
     const NONE = {
       marginLeft: '0'
