@@ -5,7 +5,7 @@ import isEmpty from 'lodash/fp/isEmpty';
 
 const styles = StyleSheet.create({
   page: {
-    margin: 50
+    padding: 50
   },
   header: {
     fontSize: 25,
@@ -119,9 +119,9 @@ export default function ApplicationDownloadLink(props) {
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
 
   return h(PDFViewer, {width: 1800, height: 800}, [
-    h(Document, {style: styles.page}, [
-      h(Page, {}, [ //Researcher Info Page
-        h(View, {style: styles.page}, [
+    h(Document, {}, [
+      h(Page, {style: styles.page}, [ //Researcher Info Page
+        h(View, {}, [
           h(Text, {style: styles.header}, [`${darInfo.darCode} Application`]),
           h(Text, {style: styles.subHeader}, ["Applicant Information"]),
           h(View, {style: styles.flexboxContainer}, [
@@ -155,8 +155,8 @@ export default function ApplicationDownloadLink(props) {
           h(SmallLabelTextComponent, {label: 'External Collaborators', text: externalCollaborators, style: {marginBottom: 20}})
         ])
       ]),
-      h(Page, {}, [ //Data Use Request Page
-        h(View, {style: styles.page}, [
+      h(Page, {style: styles.page}, [ //Data Use Request Page
+        h(View, {}, [
           h(Text, {style: styles.subHeader}, ['Data Access Request']),
           h(StandardLabelTextComponent, {label: 'Project Title', text: darInfo.projectTitle}),
           h(LabelListComponent, {label: 'Datasets Requested', list: datasets}),
