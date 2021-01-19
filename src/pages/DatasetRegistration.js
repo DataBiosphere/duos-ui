@@ -245,10 +245,10 @@ class DatasetRegistration extends Component {
   };
 
   // same as handleChange, but adds call to validate dataset name and only affects state if a change has been made
-  handleDatasetNameChange = (e) => {
+  handleDatasetNameChange = async (e) => {
     const value = e.target.value;
     if (this.state.datasetData.datasetName !== value) {
-      this.validateDatasetName(value);
+      await this.validateDatasetName(value);
       this.setState(prev => {
         prev.datasetData.datasetName = value;
         prev.disableOkBtn = false;
