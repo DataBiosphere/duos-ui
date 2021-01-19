@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { a, div, form, h, hr, i, small, span} from 'react-hyperscript-helpers';
-import ReactTooltip from 'react-tooltip';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
@@ -165,7 +164,6 @@ class DataAccessRequestApplication extends Component {
 
   async componentDidMount() {
     await this.init();
-    ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;

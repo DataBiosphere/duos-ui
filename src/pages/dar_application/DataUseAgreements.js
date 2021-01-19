@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { a, div, fieldset, h, h3, label, li, ol, ul, p, span} from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import { Alert } from '../../components/Alert';
-import ReactTooltip from 'react-tooltip';
 
 const StepAlertTemplate = (props) => {
   const ulLinkStyle = {
@@ -139,7 +138,6 @@ export default function DataUseAgreements(props) {
             className: 'f-right btn-primary access-background bold'
           }, ['Attest and Send']),
           ConfirmationDialogComponent,
-          h(ReactTooltip, { id: 'tip_clearNihAccount', place: 'right', effect: 'solid', multiline: true, className: 'tooltip-wrapper' }),
           a({
             id: 'btn_save', isRendered: isNil(darCode), onClick: partialSave,
             className: 'f-right btn-secondary access-color'
