@@ -4,7 +4,6 @@ import { Theme } from '../../libs/theme';
 import { Files } from '../../libs/ajax';
 import { AppSummary } from './AppSummary';
 import { VoteSummary } from './VoteSummary';
-// import { DownloadLink } from '../../components/DownloadLink';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import * as fp from 'lodash/fp';
 
@@ -42,9 +41,6 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           span({ style: HEADER_BOLD }, darInfo.projectTitle),
           span({ style: HEADER }, ' | ' + darInfo.darCode)
         ]),
-        //NOTE:DownloadLink was old component/ replaced with compoenent/pdfViewer for now
-        //NOTE: PDFViewer is only used for development purposes, will replace with PDFLink when styling is complete
-        // DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
         h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
       ]),
       VoteSummary({
