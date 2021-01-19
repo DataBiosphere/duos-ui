@@ -77,5 +77,5 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
     ]);
   }
 
-  })
+})
 ;
