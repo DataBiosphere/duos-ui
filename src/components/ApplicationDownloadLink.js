@@ -1,5 +1,5 @@
-import { Page, Document, StyleSheet, View, PDFViewer, Text} from '@react-pdf/renderer';
-import {h} from 'react-hyperscript-helpers';
+import { Page, Document, StyleSheet, View, /*PDFViewer,*/ PDFDownloadLink, Text} from '@react-pdf/renderer';
+import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
 
@@ -50,8 +50,12 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 20
-  }
+  },
 });
+
+const iconStyle = {
+  marginRight: '0.5rem'
+};
 
 const SmallLabelTextComponent = (props) => {
   const {label, text, style = {}} = props;
@@ -118,55 +122,63 @@ export default function ApplicationDownloadLink(props) {
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
 
-  return h(PDFViewer, {width: 1800, height: 800}, [
-    h(Document, {}, [
-      h(Page, {style: styles.page}, [ //Researcher Info Page
-        h(View, {}, [
-          h(Text, {style: styles.header}, [`${darInfo.darCode} Application`]),
-          h(Text, {style: styles.subHeader}, ["Applicant Information"]),
-          h(View, {style: styles.flexboxContainer}, [
-            h(SmallLabelTextComponent, {label: "NIH eRA Commons ID", text: researcherProfile.nihUsername, style:{marginRight: 30}}),
-            h(SmallLabelTextComponent, {label: "LinkedIn Profile", text: researcherProfile.linkedIn})
-          ]),
-          h(View, {style: styles.flexboxContainer}, [
-            h(SmallLabelTextComponent, {label: "ORC ID", text: researcherProfile.orcid, style:{marginRight: 30}}),
-            h(SmallLabelTextComponent, {label: "ResearcherGate ID", text: researcherProfile.orcid}),
-          ]),
-          h(View, {style: styles.flexboxContainer}, [
-            h(SmallLabelTextComponent, {label: "Researcher", text: researcherProfile.profileName, style:{marginRight: 30}}),
-            h(SmallLabelTextComponent, {label: "Principal Investigator", text: `${researcherProfile.isThePI ? researcherProfile.profileName : researcherProfile.piName}`})
-          ]),
-          h(View, {style: styles.flexboxContainer}, [
-            h(SmallLabelTextComponent, {label: "Institution", text: researcherProfile.institution, style:{marginRight: 30}}),
-            h(SmallLabelTextComponent, {label: "Department", text: researcherProfile.department})
-          ]),
-          h(View, {style: styles.flexboxContainer}, [
-            h(SmallLabelTextComponent, {label: "Location", text: `${researcherProfile.city}, ${researcherProfile.state}\n${researcherProfile.country}`,
-              style:{marginRight: 30}
-            }),
-            h(SmallLabelTextComponent, {label: "Researcher Email", text: researcherProfile.academicEmail}),
-          ]),
-          h(View, {style: styles.flexboxContainer}, [
-            h(SmallLabelTextComponent, {label: "Signing Official", text: darInfo.signingOfficial, style:{marginRight: 30}}),
-            h(SmallLabelTextComponent, {label: "IT Director", text: darInfo.itDirector})
-          ]),
-          h(SmallLabelTextComponent, {label: 'Lab Staff Collaborators', text: labCollaborators, style: {marginBottom: 20}}),
-          h(SmallLabelTextComponent, {label: 'Internal Collaborators', text: internalCollaborators, style: {marginBottom: 20}}),
-          h(SmallLabelTextComponent, {label: 'External Collaborators', text: externalCollaborators, style: {marginBottom: 20}})
-        ])
-      ]),
-      h(Page, {style: styles.page}, [ //Data Use Request Page
-        h(View, {}, [
-          h(Text, {style: styles.subHeader}, ['Data Access Request']),
-          h(StandardLabelTextComponent, {label: 'Project Title', text: darInfo.projectTitle}),
-          h(LabelListComponent, {label: 'Datasets Requested', list: datasets}),
-          h(LabelListComponent, {label: "Primary Structured Research Purposes", list: translatedSRPs.primary}),
-          h(LabelListComponent, {label: "Secondary Structured Research Purposes", list: translatedSRPs.secondary}),
-          h(ApprovalSection, {irb: darInfo.irbDocumentLocation, collaborator: darInfo.collaborationLetterLocation}),
-          h(StandardLabelTextComponent, {label: "Research Use Statement", text: darInfo.rus}),
-          h(StandardLabelTextComponent, {label: "Non-Technical Research Use Statement", text: darInfo.nonTechRus})
-        ])
+  // Use PDFViewer during development to see changes to the document immediately
+  // return h(PDFViewer, {width: 1800, height: 800}, [
+
+  const document = h(Document, {}, [
+    h(Page, {style: styles.page}, [ //Researcher Info Page
+      h(View, {}, [
+        h(Text, {style: styles.header}, [`${darInfo.darCode} Application`]),
+        h(Text, {style: styles.subHeader}, ["Applicant Information"]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "NIH eRA Commons ID", text: researcherProfile.nihUsername, style:{marginRight: 30}}),
+          h(SmallLabelTextComponent, {label: "LinkedIn Profile", text: researcherProfile.linkedIn})
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "ORC ID", text: researcherProfile.orcid, style:{marginRight: 30}}),
+          h(SmallLabelTextComponent, {label: "ResearcherGate ID", text: researcherProfile.orcid}),
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "Researcher", text: researcherProfile.profileName, style:{marginRight: 30}}),
+          h(SmallLabelTextComponent, {label: "Principal Investigator", text: `${researcherProfile.isThePI ? researcherProfile.profileName : researcherProfile.piName}`})
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "Institution", text: researcherProfile.institution, style:{marginRight: 30}}),
+          h(SmallLabelTextComponent, {label: "Department", text: researcherProfile.department})
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "Location", text: `${researcherProfile.city}, ${researcherProfile.state}\n${researcherProfile.country}`,
+            style:{marginRight: 30}
+          }),
+          h(SmallLabelTextComponent, {label: "Researcher Email", text: researcherProfile.academicEmail}),
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "Signing Official", text: darInfo.signingOfficial, style:{marginRight: 30}}),
+          h(SmallLabelTextComponent, {label: "IT Director", text: darInfo.itDirector})
+        ]),
+        h(SmallLabelTextComponent, {label: 'Lab Staff Collaborators', text: labCollaborators, style: {marginBottom: 20}}),
+        h(SmallLabelTextComponent, {label: 'Internal Collaborators', text: internalCollaborators, style: {marginBottom: 20}}),
+        h(SmallLabelTextComponent, {label: 'External Collaborators', text: externalCollaborators, style: {marginBottom: 20}})
       ])
+    ]),
+    h(Page, {style: styles.page}, [ //Data Use Request Page
+      h(View, {}, [
+        h(Text, {style: styles.subHeader}, ['Data Access Request']),
+        h(StandardLabelTextComponent, {label: 'Project Title', text: darInfo.projectTitle}),
+        h(LabelListComponent, {label: 'Datasets Requested', list: datasets}),
+        h(LabelListComponent, {label: "Primary Structured Research Purposes", list: translatedSRPs.primary}),
+        h(LabelListComponent, {label: "Secondary Structured Research Purposes", list: translatedSRPs.secondary}),
+        h(ApprovalSection, {irb: darInfo.irbDocumentLocation, collaborator: darInfo.collaborationLetterLocation}),
+        h(StandardLabelTextComponent, {label: "Research Use Statement", text: darInfo.rus}),
+        h(StandardLabelTextComponent, {label: "Non-Technical Research Use Statement", text: darInfo.nonTechRus})
+      ])
+    ])
+  ]);
+
+  return h(PDFDownloadLink, {fileName: `${darInfo.darCode}_Application_PDF`, document}, [
+    span({}, [
+      i({ className: 'glyphicon glyphicon-download-alt', style: iconStyle}),
+      'Download Application'
     ])
   ]);
 };
