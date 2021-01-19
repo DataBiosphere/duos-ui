@@ -3,6 +3,33 @@ import { div, hh, img, h2, span } from 'react-hyperscript-helpers';
 
 export const PageSubHeading = hh(class PageSubHeading extends Component {
 
+  margins(iconSize) {
+
+    const MEDIUM = {
+      marginLeft: '45px'
+    };
+
+    const LARGE = {
+      marginLeft: '55px'
+    };
+
+    const NONE = {
+      marginLeft: '0'
+    };
+
+    if (iconSize === 'none') {
+      return NONE;
+    }
+    else {
+      if (iconSize === 'large') {
+        return LARGE;
+      }
+      else {
+        return MEDIUM;
+      }
+    }
+  };
+
   render() {
 
     const HEADING = {
@@ -32,17 +59,7 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
       fontWeight: '500',
     };
 
-    const MEDIUM = {
-      marginLeft: '45px'
-    };
-
-    const LARGE = {
-      marginLeft: '55px'
-    };
-
-    const NONE = {
-      marginLeft: '0'
-    };
+    const MARGINS = this.margins(this.props.iconSize);
 
     return div({ style: HEADING }, [
       img({
@@ -52,11 +69,7 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
         alt: this.props.title,
         style: ICON
        }),
-      div( this.props.iconSize === 'none' ?
-        { style: NONE }
-        : this.props.iconSize === 'large' ?
-          { style: LARGE }
-          : { style: MEDIUM }, [
+      div( {style: MARGINS }, [
         h2({ id: this.props.id + "_title", className: this.props.color + "-color", style: TITLE }, [this.props.title]),
         span({ id: this.props.id + "_description", style: DESCRIPTION }, [this.props.description]),
       ])

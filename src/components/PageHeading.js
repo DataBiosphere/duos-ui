@@ -3,6 +3,33 @@ import { div, hh, img, h2, span } from 'react-hyperscript-helpers';
 
 export const PageHeading = hh(class PageHeading extends Component {
 
+  margins(iconSize) {
+
+    const MEDIUM = {
+      marginLeft: '55px'
+    };
+
+    const LARGE = {
+      marginLeft: '70px'
+    };
+
+    const NONE = {
+      marginLeft: '0'
+    };
+
+    if (iconSize === 'none') {
+      return NONE;
+      }
+      else {
+        if (iconSize === 'large') {
+          return LARGE;
+        }
+        else {
+          return MEDIUM;
+        }
+      }
+    };
+
   render() {
 
     const HEADING = {
@@ -30,18 +57,7 @@ export const PageHeading = hh(class PageHeading extends Component {
       lineBreak: 'auto'
     };
 
-    const MEDIUM = {
-      marginLeft: '55px'
-    };
-
-    const LARGE = {
-      marginLeft: '70px'
-    };
-
-    const NONE = {
-      marginLeft: '0'
-    };
-
+    const MARGINS = this.margins(this.props.iconSize);
 
     return div({ id: this.props.id + "_heading", style: HEADING}, [
       img({
@@ -51,11 +67,7 @@ export const PageHeading = hh(class PageHeading extends Component {
         alt: this.props.title,
         style: ICON
       }),
-      div(this.props.iconSize === 'none' ?
-        { style: NONE }
-        : this.props.iconSize === 'large' ?
-          { style: LARGE }
-          : { style: MEDIUM }, [
+      div({ style: MARGINS }, [
         h2({ id: this.props.id + "_title", className: this.props.color + "-color", style: TITLE}, [this.props.title]),
         span({ id: this.props.id + "_description", style: DESCRIPTION }, [this.props.description]),
       ]),
