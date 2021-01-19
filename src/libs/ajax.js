@@ -525,6 +525,17 @@ export const DataSet = {
     const url = `${await Config.getApiUrl()}/dataset/${datasetId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
     return await res.json();
+  },
+
+  validateDatasetName: async (name) => {
+    const url = `${await Config.getApiUrl()}/dataset/validate?name=${name}`;
+    try {
+      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      return await res.json();
+    }
+    catch (err) {
+      return -1;
+    }
   }
 };
 
