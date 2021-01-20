@@ -1,10 +1,10 @@
 import React from 'react';
-import { div, span, hh } from 'react-hyperscript-helpers';
+import { div, span, hh, h } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { Files } from '../../libs/ajax';
 import { AppSummary } from './AppSummary';
 import { VoteSummary } from './VoteSummary';
-import { DownloadLink } from '../../components/DownloadLink';
+import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import * as fp from 'lodash/fp';
 
 const SECTION = {
@@ -32,7 +32,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
   };
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile } = this.props;
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets } = this.props;
     const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get( 'reviewVote')(accessElectionReview);
     const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get( 'reviewVote')(rpElectionReview);
     return div([
@@ -41,7 +41,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           span({ style: HEADER_BOLD }, darInfo.projectTitle),
           span({ style: HEADER }, ' | ' + darInfo.darCode)
         ]),
-        DownloadLink({ label: 'Full Application', onDownload: this.downloadDAR })
+        h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
       ]),
       VoteSummary({
         isRendered: voteAsChair && !fp.isNil(accessVotes),

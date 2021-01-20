@@ -335,14 +335,12 @@ export const DataUseTranslation = {
   },
 
   translateDataUseRestrictions: async (dataUse) => {
-
     const processDefinedLimitations = (key, dataUse, consentTranslations) => {
       const targetKeys = ['hmbResearch', 'populationOriginsAncestry', 'generalUse'];
       const isHMBActive = dataUse.hmbResearch && isEmpty(dataUse.diseaseRestrictions);
       const isGeneralUseActive = dataUse.generalUse && !isHMBActive;
       const isPOAActive = !isGeneralUseActive && ! isHMBActive && isEmpty(dataUse.diseaseRestrictions);
       let statement;
-
       if(
         !targetKeys.includes(key) ||
         (key === 'hmbResearch' && isHMBActive) ||
@@ -382,7 +380,6 @@ export const DataUseTranslation = {
     const processingPromises = targetKeys.map((key) => {
       return processRestrictionStatements(key, dataUse);
     });
-
     restrictionStatements = await Promise.all(processingPromises);
     restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
     return restrictionStatements;
