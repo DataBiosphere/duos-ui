@@ -143,7 +143,7 @@ export const SignIn = hh(class SignIn extends Component {
       h(GoogleLogin,
         _.isNil(this.props.customStyle) ? defaultStyle : {
           render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
-            defaultStyle
+          defaultStyle
         });
   };
 
