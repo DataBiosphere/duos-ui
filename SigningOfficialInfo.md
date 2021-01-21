@@ -2,7 +2,6 @@
   <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
 </h1>
 
-
 ## DUOS for Signing Officials
 
 ### Library Cards
