@@ -1,4 +1,8 @@
 version: 2.1
-
-workflows:
-  version: 2
+jobs:
+  build:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run: echo "no-op"
