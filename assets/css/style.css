@@ -4,3 +4,8 @@ body {
   font-size: 16px !important;
   color: #00243c !important;
 }
+
+.center {
+  display: block;
+  margin: 10px auto;
+}
