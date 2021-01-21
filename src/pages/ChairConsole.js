@@ -1,4 +1,4 @@
-import _, { isNil } from 'lodash';
+import _, { isNil, merge } from 'lodash';
 import { Component, Fragment } from 'react';
 import { button, div, h, hh, hr, span, img } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
@@ -8,10 +8,14 @@ import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NavigationUtils, USER_ROLES } from '../libs/utils';
-import {Notifications} from '../libs/utils';
+import {Notifications, formatDate} from '../libs/utils';
 import { Theme } from '../libs/theme';
 
 const styles = {
+  PAGE: {
+    width: "83.4%",
+    margin: "0 auto"
+  },
   TITLE: {
     fontFamily: "Montserrat",
     fontWeight: Theme.font.weight.semibold,
@@ -22,7 +26,7 @@ const styles = {
     fontWeight: Theme.font.weight.regular,
     fontSize: Theme.font.size.small
   },
-  HEADERIMG: {
+  HEADER_IMG: {
     width: '60px',
     height: '60px',
   },
@@ -36,13 +40,102 @@ const styles = {
     paddingRight: '16px'
   },
   RIGHT_HEADER_SECTION: {
-    paddingTop: '4.75rem'
+    display: 'flex',
+    alignItems: 'flex-end'
   },
   LEFT_HEADER_SECTION: {
     display: 'flex',
     flexDirection: 'row',
     paddingTop: "3rem"
+  },
+  TABLE: {
+    CONTAINER: {
+      margin: "3rem auto"
+    },
+    HEADER_ROW: {
+      fontFamily: "Montserrat",
+      fontSize: "14px",
+      color: "#00243C",
+      fontWeight: Theme.font.weight.medium,
+      backgroundColor: "#f3f6f7",
+      display: "flex",
+      justifyContent: "center",
+      height: "51px"
+    },
+    RECORD_ROW: {
+      fontFamily: 'Montserrat',
+      fontWeight: Theme.font.weight.regular,
+      fontSize: "14px",
+      display: "flex",
+      justifyContent: "center",
+      height: "48px"
+    },
+    RECORD_TEXT: {
+      color: "#00243C"
+    },
+    DATA_REQUEST_TEXT: {
+      color: "#00609F",
+      fontWeight: Theme.font.weight.semibold
+    },
+    //NOTE: play around with the cell measurements
+    TITLE_CELL: {
+      width: "18%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+      margin: "0 2%"
+    },
+    DATA_ID_CELL: {
+      width: "10%",
+      margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    SUBMISSION_DATE_CELL: {
+      width: "10%",
+      margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    DAC_CELL: {
+      width: "10%",
+      margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    ELECTION_STATUS_CELL: {
+      width: "10%",
+      margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    ELECTION_ACTIONS_CELL: {
+      width: "23%",
+      margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    }
   }
+};
+
+const Records = (props) => {
+  const dataIDTextStyle = styles.TABLE.DATA_REQUEST_TEXT;
+  const recordTextStyle = styles.TABLE.RECORD_TEXT;
+  return props.electionList.map((election) => {
+    return div({style: styles.TABLE.RECORD_ROW}, [
+      div({style: Object.assign({}, styles.TABLE.DATA_ID_CELL, dataIDTextStyle)}, [election.frontEndId]),
+      div({style: Object.assign({}, styles.TABLE.TITLE_CELL, recordTextStyle)}, [election.projectTitle]),
+      div({style: Object.assign({}, styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [formatDate(election.createDate)]),
+      div({style: Object.assign({}, styles.TABLE.DAC_CELL, recordTextStyle)}, [election.dac.name]),
+      div({style: Object.assign({}, styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election.electionStatus]),
+      div({style: Object.assign({}, styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
+    ]);
+  });
 };
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -51,28 +144,14 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.state = {
       showModal: false,
       currentUser: {},
-      // dulLimit: 5,
       darLimit: 5,
-      // currentDulPage: 1,
       currentDarPage: 1,
-      // totalDulPendingVotes: 0,
       totalAccessPendingVotes: 0,
-      electionsList: {
-        // dul: [],
-        access: []
-      }
+      electionList: []
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
-
-
-  // handleDulPageChange = page => {
-  //   this.setState(prev => {
-  //     prev.currentDulPage = page;
-  //     return prev;
-  //   });
-  // };
 
   handleAccessPageChange = page => {
     this.setState(prev => {
@@ -80,14 +159,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       return prev;
     });
   };
-
-  // handleDulSizeChange = size => {
-  //   this.setState(prev => {
-  //     prev.dulLimit = size;
-  //     prev.currentDulPage = 1;
-  //     return prev;
-  //   });
-  // };
 
   handleAccessSizeChange = size => {
     this.setState(prev => {
@@ -98,12 +169,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   async componentDidMount() {
-    // // let currentUser = Storage.getCurrentUser();
-    // this.setState({
-    //   currentUser: currentUser
-    // }, () => {
-    //   this.init(currentUser);
-    // });
+
     await this.init();
   }
 
@@ -115,7 +181,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
         prev.currentUser = currentUser;
         // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
         // for more work related to ensuring closed elections aren't displayed here.
-        prev.electionsList.access = _.filter(pendingList.access, (e) => { return e.electionStatus !== 'Closed'; });
+        prev.electionList = _.filter(pendingList.access, (e) => { return e.electionStatus !== 'Closed'; });
         prev.totalAccessPendingVotes = pendingList.totalAccessPendingVotes;
         return prev;
       });
@@ -123,23 +189,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
     };
   };
-
-  // openDULReview = (voteId, referenceId) => (e) => {
-  //   this.props.history.push(`dul_review/${voteId}/${referenceId}`);
-  // };
-
-  // isDuLCollectEnabled = (pendingCase) => {
-  //   const pendingCaseDulCollectStatus = (pendingCase.alreadyVoted === true);
-  //   const dacId = _.get(pendingCase, 'dac.dacId', 0);
-  //   // if the pending case doesn't have a DAC, then any chair should be able to collect votes:
-  //   if (dacId === 0) { return pendingCaseDulCollectStatus; }
-  //   const dacChairRoles = _.filter(this.state.currentUser.roles, { 'name': USER_ROLES.chairperson, 'dacId': dacId });
-  //   return (!_.isEmpty(dacChairRoles)) && pendingCaseDulCollectStatus;
-  // };
-
-  // openDulCollect = (consentId) => (e) => {
-  //   this.props.history.push(`dul_collect/${consentId}`);
-  // };
 
   openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
     this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
@@ -189,10 +238,6 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.setState({ showModal: false });
   }
 
-  // handleSearchDul = (query) => {
-  //   this.setState({ searchDulText: query });
-  // };
-
   handleSearchDar = (query) => {
     this.setState({ searchDarText: query });
   };
@@ -213,138 +258,124 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
 
     return (
-      div({ className: 'row' }, [
-        div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
-
-          //START: header section
-          div({ style: {display: "flex", justifyContent: "space-between"}}, [
-            div({className: "left-header-section", style: styles.LEFT_HEADER_SECTION}, [
-              div({style: styles.ICON_CONTAINER}, [
-                img({
-                  id: 'lock-icon',
-                  src: '/images/lock-icon.png',
-                  style: styles.HEADERIMG
-                })
-              ]),
-              div({style: styles.HEADER_CONTAINER}, [
-                div({style: styles.TITLE}, ["Manage Data Access Request"]),
-                div({style: styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
-              ])
-            ]),
-            div({className: "right-header-section", style: styles.RIGHT_HEADER_SECTION}, [
-              h(SearchBox, {
-                id: 'chairConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' 
+      div({style: styles.PAGE}, [
+        div({ style: {display: "flex", justifyContent: "space-between"}}, [
+          div({className: "left-header-section", style: styles.LEFT_HEADER_SECTION}, [
+            div({style: styles.ICON_CONTAINER}, [
+              img({
+                id: 'lock-icon',
+                src: '/images/lock-icon.png',
+                style: styles.HEADER_IMG
               })
+            ]),
+            div({style: styles.HEADER_CONTAINER}, [
+              div({style: styles.TITLE}, ["Manage Data Access Request"]),
+              div({style: styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
             ])
           ]),
-          //   div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
-          //     // PageSubHeading({
-          //     //   id: 'chairConsoleAccess', imgSrc: '/images/icon_access.png', color: 'access', title: 'Data Access Request Review',
-          //     //   description: 'Select and ?'
-          //     // })
-          //     div({className: "chair-console-header row no-margin"}, [
-          //       div()
-          //       img({
-          //         id: 'lock-icon',
-          //         src: '/images/lock-icon.png',
-          //         style: styles.HEADERIMG
-          //       }),
-          //       div({style: {display: }}, [
-          //         div({style: styles.TITLE}, ["Manage Data Access Request"]),
-          //         div({style:styles.SMALL}, ['Select and manage Data Access Request for DAC Review'])
-          //       ])
-          //     ])
-          //   ]),
-          //   div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding' }, [
-          //     h(SearchBox,
-          //       { id: 'chairConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' })
-          //   ])
-          // ]),
-          //END: header section
-
-          div({ className: 'jumbotron table-box' }, [
-            div({ className: 'row no-margin' }, [
-              div({ className: twoColumnClass + ' cell-header access-color' }, ['Data Request Id']),
-              div({ className: threeColumnClass + ' cell-header access-color' }, ['Project Title']),
-              div({ className: twoColumnClass + ' cell-header access-color' }, ['DAC']),
-              div({ className: twoColumnClass + ' cell-header f-center access-color' }, [
-                'Review/Vote',
-                div({ isRendered: this.state.totalAccessPendingVotes > 0, id: 'accessPendingVoteCases', className: 'pcases-small-tag' }, [
-                  this.state.totalAccessPendingVotes
-                ])
-              ]),
-              div({ className: oneColumnClass + ' cell-header f-center access-color' }, ['Logged']),
-              div({ className: twoColumnClass + ' cell-header f-center access-color' }, [
-                'Actions'
-              ])
-            ]),
-
-            hr({ className: 'table-head-separator' }),
-
-            this.state.electionsList.access.filter(this.searchTable(searchDarText))
-              .slice((this.state.currentDarPage - 1) * darLimit, this.state.currentDarPage * darLimit)
-              .map((pendingCase, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({ className: 'row no-margin tableRowAccess' }, [
-                    div({
-                      id: pendingCase.frontEndId, name: 'darId', className: twoColumnClass + ' cell-body text',
-                      title: pendingCase.frontEndId
-                    }, [pendingCase.frontEndId]),
-                    div({
-                      id: pendingCase.frontEndId + '_projectTitle', name: 'projectTitle',
-                      className: threeColumnClass + ' cell-body text', title: pendingCase.projectTitle
-                    }, [pendingCase.projectTitle]),
-                    div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
-                      title: _.get(pendingCase, 'dac.name', '')
-                    }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({ isRendered: pendingCase.electionStatus !== 'Final', className: twoColumnClass + ' cell-body f-center' }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnVote',
-                        name: 'btn_voteAccess',
-                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId, pendingCase.alreadyVoted),
-                        className: 'cell-button cancel-color'
-                      }, [
-                        span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Log Final Vote'])
-                      ])
-                    ]),
-                    div({
-                      isRendered: pendingCase.electionStatus === 'Final',
-                      className: twoColumnClass + ' cell-body text f-center empty'
-                    }, []),
-
-                    div({
-                      id: pendingCase.frontEndId + '_logged', name: 'loggedAccess',
-                      className: oneColumnClass + ' cell-body text f-center'
-                    }, [pendingCase.logged]),
-
-                    div({
-                      isRendered: this.isAccessCollectEnabled(pendingCase),
-                      className: twoColumnClass + ' cell-body f-center'
-                    }, []),
-                    div({
-                      isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
-                      className: twoColumnClass + ' cell-body f-center'
-                    }, []),
-                    div({
-                      isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
-                      className: twoColumnClass + ' cell-body text f-center empty'
-                    }, [])
-                  ]),
-                  hr({ className: 'table-body-separator' })
-                ]);
-              }),
-            PaginatorBar({
-              name: 'access',
-              total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
-              limit: darLimit,
-              currentPage: this.state.currentDarPage,
-              onPageChange: this.handleAccessPageChange,
-              changeHandler: this.handleAccessSizeChange
+          div({className: "right-header-section", style: styles.RIGHT_HEADER_SECTION}, [
+            h(SearchBox, {
+              id: 'chairConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' 
             })
           ])
+        ]),
+        //NOTE: Flexbox vs CSS Grid
+        //Grid does not have universal support (Opera Mini does not support it)
+        div({style: styles.TABLE.CONTAINER}, [
+          div({style: styles.TABLE.HEADER_ROW}, [
+            div({style: styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
+            div({style: styles.TABLE.TITLE_CELL}, ["Project Title"]),
+            div({style: styles.TABLE.SUBMISSION_DATE_CELL}, ["Submission date"]),
+            div({style: styles.TABLE.DAC_CELL}, ["DAC"]),
+            div({style: styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
+            div({style: styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
+          ]),
+          h(Records, {electionList: this.state.electionList})
         ])
+        //START: old Chair console table for DAR
+        // div({ className: 'jumbotron table-box' }, [
+        //   div({ className: 'row no-margin' }, [
+        //     div({ className: twoColumnClass + ' cell-header access-color' }, ['Data Request Id']),
+        //     div({ className: threeColumnClass + ' cell-header access-color' }, ['Project Title']),
+        //     div({ className: twoColumnClass + ' cell-header access-color' }, ['DAC']),
+        //     div({ className: twoColumnClass + ' cell-header f-center access-color' }, [
+        //       'Review/Vote',
+        //       div({ isRendered: this.state.totalAccessPendingVotes > 0, id: 'accessPendingVoteCases', className: 'pcases-small-tag' }, [
+        //         this.state.totalAccessPendingVotes
+        //       ])
+        //     ]),
+        //     div({ className: oneColumnClass + ' cell-header f-center access-color' }, ['Logged']),
+        //     div({ className: twoColumnClass + ' cell-header f-center access-color' }, [
+        //       'Actions'
+        //     ])
+        //   ]),
+
+        //   hr({ className: 'table-head-separator' }),
+
+        //   this.state.electionsList.access.filter(this.searchTable(searchDarText))
+        //     .slice((this.state.currentDarPage - 1) * darLimit, this.state.currentDarPage * darLimit)
+        //     .map((pendingCase, rIndex) => {
+        //       return h(Fragment, { key: rIndex }, [
+        //         div({ className: 'row no-margin tableRowAccess' }, [
+        //           div({
+        //             id: pendingCase.frontEndId, name: 'darId', className: twoColumnClass + ' cell-body text',
+        //             title: pendingCase.frontEndId
+        //           }, [pendingCase.frontEndId]),
+        //           div({
+        //             id: pendingCase.frontEndId + '_projectTitle', name: 'projectTitle',
+        //             className: threeColumnClass + ' cell-body text', title: pendingCase.projectTitle
+        //           }, [pendingCase.projectTitle]),
+        //           div({
+        //             id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
+        //             title: _.get(pendingCase, 'dac.name', '')
+        //           }, [_.get(pendingCase, 'dac.name', '- -')]),
+        //           div({ isRendered: pendingCase.electionStatus !== 'Final', className: twoColumnClass + ' cell-body f-center' }, [
+        //             button({
+        //               id: pendingCase.frontEndId + '_btnVote',
+        //               name: 'btn_voteAccess',
+        //               onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId, pendingCase.alreadyVoted),
+        //               className: 'cell-button cancel-color'
+        //             }, [
+        //               span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
+        //               span({ isRendered: pendingCase.alreadyVoted === true }, ['Log Final Vote'])
+        //             ])
+        //           ]),
+        //           div({
+        //             isRendered: pendingCase.electionStatus === 'Final',
+        //             className: twoColumnClass + ' cell-body text f-center empty'
+        //           }, []),
+
+        //           div({
+        //             id: pendingCase.frontEndId + '_logged', name: 'loggedAccess',
+        //             className: oneColumnClass + ' cell-body text f-center'
+        //           }, [pendingCase.logged]),
+
+        //           div({
+        //             isRendered: this.isAccessCollectEnabled(pendingCase),
+        //             className: twoColumnClass + ' cell-body f-center'
+        //           }, []),
+        //           div({
+        //             isRendered: (pendingCase.alreadyVoted === true) && (pendingCase.electionStatus === 'Final'),
+        //             className: twoColumnClass + ' cell-body f-center'
+        //           }, []),
+        //           div({
+        //             isRendered: (!pendingCase.alreadyVoted) && (pendingCase.electionStatus !== 'Final'),
+        //             className: twoColumnClass + ' cell-body text f-center empty'
+        //           }, [])
+        //         ]),
+        //         hr({ className: 'table-body-separator' })
+        //       ]);
+        //     }),
+        //   PaginatorBar({
+        //     name: 'access',
+        //     total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
+        //     limit: darLimit,
+        //     currentPage: this.state.currentDarPage,
+        //     onPageChange: this.handleAccessPageChange,
+        //     changeHandler: this.handleAccessSizeChange
+        //   })
+        // ])
+        //END: old chair console for DAR
       ])
     );
   }

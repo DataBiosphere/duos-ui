@@ -16,6 +16,7 @@ export const Theme = {
     weight: {
       semibold: '600',
       regular: '400',
+      medium: '500'
     },
     size: {
       title: '28px',
