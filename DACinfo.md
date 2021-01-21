@@ -9,7 +9,6 @@
 
 <img src="duos-ui/assets/images/duos_process_flow.png" alt="DUOS Process Flow" width="900px" height="200px" class="center">
 
-
 Currently, when DAC’s receive data access requests they must decide if the proposed research use is within the bounds of the data’s use limitations.
 
 Unfortunately, data use limitations are often described with unique language across the various consent forms in which they appear (diagram left). Thus a DAC is left to attempt to interpret either the consent form, or the receive the original IRB’s interpretation (ex. NIH Institutional Certification, Broad Data Use Letter) to determine the official use limitations.

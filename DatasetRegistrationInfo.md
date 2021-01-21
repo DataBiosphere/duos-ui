@@ -1,4 +1,3 @@
-
 <h1 class="center">
   <img alt="DUOS" src="duos-ui/duos_logo.svg" class="center" width="140px" height="40px">
 </h1>
