@@ -1,6 +1,5 @@
 <h1 style="background-color:#00243c;">
-  <link rel="stylesheet" href="duos-ui/assets/css/style.css">
-  <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
+  <img alt="DUOS" src="duos-ui/duos_logo.svg" class="center" width="140px" height="40px">
 </h1>
 
 ## How To: Register your data in DUOS

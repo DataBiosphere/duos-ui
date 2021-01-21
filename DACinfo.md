@@ -1,12 +1,12 @@
 <h1 style="background-color:#00243c;">
-  <link rel="stylesheet" href="duos-ui/assets/css/style.css">
-  <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
+  <img alt="DUOS" src="duos-ui/duos_logo.svg" class="center" width="140px" height="40px">
 </h1>
 
 ## DUOS for DACs
 
 ### DACs must answer important questions about access to data, but often have to interpret complex and ambiguous inputs to those decisions
-<img src="duos_process_flow.png" alt="DUOS Process Flow" width="900px" height="200px" class="center">
+
+<img src="duos-ui/assets/images/duos_process_flow.png" alt="DUOS Process Flow" width="900px" height="200px" class="center">
 
 Currently, when DAC’s receive data access requests they must decide if the proposed research use is within the bounds of the data’s use limitations.
 
