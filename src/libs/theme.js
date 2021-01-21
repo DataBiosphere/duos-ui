@@ -36,20 +36,27 @@ export const Theme = {
     fontSize: '15px'
   },
   lightTable: {
-    margin: '25px 0 10px 0 !important',
-    borderRadius: '25px',
-    padding: '15px 25px !important',
+    margin: '25px 0 10px 0',
+    borderRadius: '10px',
+    padding: '15px',
     boxShadow: '3px 3px 0 #cccccc',
     height: 'auto',
     border: '1px solid #cccccc',
     background: '#ffffff',
   },
   textTableBody: {
-    font: {
-      weight: 'normal !important',
-      size: '14px !important',
-      color: '#000000'
-    },
-    padding: '10px 10px 5px 5px !important',
+    fontWeight: 'normal',
+    fontSize: '14px',
+    color: '#000000',
+    padding: '12px 5px 0 5px',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  },
+  textTableHead: {
+    minHeight: '43px',
+    fontSize: '16px',
+    padding: '10px',
+    fontWeight: '500'
   }
 };
