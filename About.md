@@ -1,4 +1,3 @@
-
 <h1 class="center">
   <img alt="DUOS" src="duos-ui/duos_logo.svg" class="center" width="140px" height="40px">
 </h1>
@@ -24,7 +23,6 @@ We will start on the left of our diagram...
 ### Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes
 
 <img src="duos-ui/assets/images/about_reducing_complexity.png" alt="Reducing Complexity" width="500px" height="250px" class="center">
-
 
 Let’s look at the present issue with consent forms.
 
