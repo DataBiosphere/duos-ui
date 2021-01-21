@@ -13,7 +13,7 @@ import { Theme } from '../libs/theme';
 
 const styles = {
   PAGE: {
-    width: "83.4%",
+    width: "90%",
     margin: "0 auto"
   },
   TITLE: {
@@ -68,7 +68,7 @@ const styles = {
       fontSize: "14px",
       display: "flex",
       justifyContent: "center",
-      height: "48px"
+      height: "48px",
     },
     RECORD_TEXT: {
       color: "#00243C"
@@ -126,8 +126,9 @@ const styles = {
 const Records = (props) => {
   const dataIDTextStyle = styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = styles.TABLE.RECORD_TEXT;
-  return props.electionList.map((election) => {
-    return div({style: styles.TABLE.RECORD_ROW}, [
+  return props.electionList.map((election, index) => {
+    const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
+    return div({style: Object.assign({}, borderStyle, styles.TABLE.RECORD_ROW)}, [
       div({style: Object.assign({}, styles.TABLE.DATA_ID_CELL, dataIDTextStyle)}, [election.frontEndId]),
       div({style: Object.assign({}, styles.TABLE.TITLE_CELL, recordTextStyle)}, [election.projectTitle]),
       div({style: Object.assign({}, styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [formatDate(election.createDate)]),
