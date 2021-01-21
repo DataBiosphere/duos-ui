@@ -8,6 +8,6 @@ body {
 .center {
   display: block;
   padding: 10px;
-  margin: 0 auto;
+  margin: 10px auto;
   background-color: #00243c;
 }
