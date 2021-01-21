@@ -90,7 +90,7 @@ class Home extends Component {
       buttonStyle,
       fontSize: '22px',
       height: '50px',
-      width: '600px'
+      width: '500px'
     };
 
     const readMoreStyle = {
