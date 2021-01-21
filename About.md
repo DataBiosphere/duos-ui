@@ -1,3 +1,7 @@
+<h1 style="background-color:#00243c;">
+  <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
+</h1>
+
 ## About DUOS
 
 ### Current State of Data Access
@@ -72,7 +76,10 @@ Having the permitted use of the data and the data access request both described 
 
 Currently, DACs using DUOS are able to review the algorithm’s suggested decision on comparing the permitted uses with the data access request prior to logging their final decision on a request.
 
-[![](http://img.youtube.com/vi/8ZyU34xpi4M/0.jpg)](http://www.youtube.com/watch?v=8ZyU34xpi4M "")
+<a href="http://www.youtube.com/watch?v=8ZyU34xpi4M">
+  <img alt="Automating Access" src="http://img.youtube.com/vi/8ZyU34xpi4M/0.jpg">
+</a>
 
-
-[![](http://img.youtube.com/vi/66NVIspHeho/0.jpg)](https://www.youtube.com/watch?v=66NVIspHeho&t=46s&ab_channel=NationalHumanGenomeResearchInstitute "")
+<a href="https://www.youtube.com/watch?v=66NVIspHeho&t=46s&ab_channel=NationalHumanGenomeResearchInstitute">
+  <img alt="Data Access Models" src="http://img.youtube.com/vi/66NVIspHeho/0.jpg">
+</a>

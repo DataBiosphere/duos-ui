@@ -1,3 +1,7 @@
+<h1 style="background-color:#00243c;">
+  <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
+</h1>
+
 ## DUOS for Researchers
 ### Making sure researchers can access the right data, right away
 Currently, researchers submit over 100,000 data access requests per year to data access committees across the globe. With the amount of researchers, research tools, and data rapidly increasing the demand for data and on data access committees is becoming unmanageable - meaning slow turnaround times for researchers on their data access requests.

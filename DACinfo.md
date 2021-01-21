@@ -1,3 +1,8 @@
+<h1 style="background-color:#00243c;">
+  <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
+</h1>
+
+
 ## DUOS for DACs
 
 ### DACs must answer important questions about access to data, but often have to interpret complex and ambiguous inputs to those decisions
