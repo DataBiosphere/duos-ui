@@ -1,0 +1,8 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - run: echo "no-op"
