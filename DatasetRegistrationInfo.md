@@ -1,5 +1,8 @@
-## How To: Register your data in DUOS
+<h1 style="background-color:#00243c;">
+  <img alt="DUOS" src="duos_logo.svg" class="center" width="140px" height="40px">
+</h1>
 
+## How To: Register your data in DUOS
 
 ### Researchers are often motivated or required to share their data.
 
