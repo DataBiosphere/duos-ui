@@ -86,6 +86,13 @@ class Home extends Component {
       margin: '2rem auto'
     };
 
+    const buttonStyleBig = {
+      buttonStyle,
+      fontSize: '22px',
+      height: '50px',
+      width: '500px'
+    };
+
     const readMoreStyle = {
       fontFamily: 'Montserrat',
       fontSize: '14px',
@@ -141,7 +148,21 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '60px 0 72px 0' } }, [
+          div({ className: 'row', style: { background: '#eff0f2', margin: '50px 0', padding: '48px 0 60px 0' } }, [
+            div({ className: 'row', style: { background: '#eff0f2', margin: '0 0 48px 0'} }, [
+              div({ className:'col-lg-6 col-md-6', style: { display: 'flex', justifyContent: 'center' }}, [
+                button({ className: 'btn-primary', style: buttonStyleBig }, [
+                  a({href: 'https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo', style: {color: '#fff'}, target: "_blank"}, ['Register a dataset in DUOS'])
+                ])
+              ]),
+              div({ className:'col-lg-6 col-md-6', style: { display: 'flex', justifyContent: 'center' }}, [
+                isLogged?
+                  button({ className: 'btn-primary', style: buttonStyleBig }, [
+                    a({href: '/dataset_catalog', style: {color: '#fff'}}, ['Submit a Data Access Request'])
+                  ]) :
+                  SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, customStyle: buttonStyleBig})
+              ])
+            ]),
             div({ className: 'col-lg-4 col-md-4'}, [
               p({ style: header }, ['Are you a DAC member?']),
               p({ style: description }, [
