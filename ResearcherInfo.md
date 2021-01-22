@@ -1,5 +1,5 @@
-<h1 class="header">
-  <img alt="DUOS" src="/duos-ui/duos_logo.svg" class="header" width="140px" height="40px">
+<h1>
+  <img alt="DUOS" src="/duos-ui/duos_logo.svg" width="140px" height="40px">
 </h1>
 
 ## DUOS for Researchers
