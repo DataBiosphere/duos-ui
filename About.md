@@ -1,12 +1,12 @@
-<h1 class="center">
-  <img alt="DUOS" src="/duos-ui/duos_logo.svg" class="center" width="140px" height="40px">
+<h1 class="header">
+  <img alt="DUOS" src="/duos-ui/duos_logo.svg" class="header" width="140px" height="40px">
 </h1>
 
 ## About DUOS
 
 ### Current State of Data Access
 
-<img src="/duos-ui/assets/images/about_current_access.png" alt="Current Access" width="800px" height="300px" class="center">
+<img src="/duos-ui/assets/images/about_current_access.png" alt="Current Access" width="800px" height="300px" class="image">
 
 Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data.
 
@@ -22,7 +22,7 @@ We will start on the left of our diagram...
 
 ### Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes
 
-<img src="/duos-ui/assets/images/about_reducing_complexity.png" alt="Reducing Complexity" width="500px" height="250px" class="center">
+<img src="/duos-ui/assets/images/about_reducing_complexity.png" alt="Reducing Complexity" width="500px" height="250px" class="image">
 
 Let’s look at the present issue with consent forms.
 
@@ -34,14 +34,14 @@ The Data Use Ontology is an official GA4GH standard now referenced by genomics r
 
 ### Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology
 
-<img src="/duos-ui/assets/images/about_consent_ontology.png" alt="Consent Ontology" width="600px" height="300px" class="center">
+<img src="/duos-ui/assets/images/about_consent_ontology.png" alt="Consent Ontology" width="600px" height="300px" class="image">
 
 
 Once the consent forms clearly distinguish permitted uses of the data using machine readable DUO terms, the data can be tagged and stored with its appropriate DUO terms. This enables investigators desiring to access the data to know up front whether or not they are likely to be granted access. Furthermore, having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.
 
 ### Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology
 
-<img src="/duos-ui/assets/images/about_clarity_complexity.png" alt="Clarity Complexity" width="800px" height="300px" class="center">
+<img src="/duos-ui/assets/images/about_clarity_complexity.png" alt="Clarity Complexity" width="800px" height="300px" class="image">
 
 Having clearly defined DUO terms for each dataset significantly facilitates the work of the DAC in determining if requests for the data are consistent with its permitted uses.
 
@@ -55,7 +55,7 @@ Further, DACs and Signing Officials often sign and/or negotiate a unique data ac
 
 ### A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests
 
-<img src="/duos-ui/assets/images/about_two_fold_approach.png" alt="Two Fold" width="600px" height="250px" class="center">
+<img src="/duos-ui/assets/images/about_two_fold_approach.png" alt="Two Fold" width="600px" height="250px" class="image">
 
 The DUOS team is working actively on process, policy, and software improvements to reduce or remove each of these issues impact on research.
 
@@ -65,13 +65,13 @@ To assist with identifying the legitimacy of the researcher and the heavy admini
 
 ### Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency
 
-<img src="/duos-ui/assets/images/about_dacs_compare.png" alt="DACs Compare" width="800px" height="300px" class="center">
+<img src="/duos-ui/assets/images/about_dacs_compare.png" alt="DACs Compare" width="800px" height="300px" class="image">
 
 With those improvements to the data access request process in place, DACs are then able to compare the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms. This significantly expedites the DACs review of a data access. On top of this, the Signing Official is no longer required to take part in the review and submission of each DAR, nor does a unique data access agreement need to be signed. Removing these elements of the process further expedites the process.
 
 ### With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs
 
-<img src="/duos-ui/assets/images/about_dacs_algorithm.png" alt="DACs Algorithm" width="800px" height="300px" class="center">
+<img src="/duos-ui/assets/images/about_dacs_algorithm.png" alt="DACs Algorithm" width="800px" height="300px" class="image">
 
 Having the permitted use of the data and the data access request both described in GA4GH Data Use Ontology terms, doesn’t just facilitate the DAC’s review - but given that the DUO terms are machine readable it means that we are able to use the DUOS algorithm to compare the permitted uses with the data access request instantly.
 

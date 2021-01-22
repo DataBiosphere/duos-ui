@@ -5,9 +5,14 @@ body {
   color: #00243c !important;
 }
 
-.center {
+.header {
   display: block;
   padding: 10px;
-  margin: 10px auto;
+  margin: 5px;
   background-color: #00243c;
+}
+
+.image {
+  display: block;
+  margin: 10px auto;
 }
