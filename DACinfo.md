@@ -1,4 +1,4 @@
-<h1>
+<h1 style="background-color: #00243c;">
   <img alt="DUOS" src="/duos-ui/duos_logo.svg" width="140px" height="40px">
 </h1>
 
