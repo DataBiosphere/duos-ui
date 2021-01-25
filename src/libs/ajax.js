@@ -266,7 +266,6 @@ export const DAR = {
     darInfo.country = rawDar.country;
     darInfo.status = rawDar.status;
     darInfo.restrictions = rawDar.restrictions;
-
     darInfo.hasAdminComment = researcher.rationale != null;
     darInfo.adminComment = researcher.rationale;
     const purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
@@ -284,6 +283,7 @@ export const DAR = {
     }
 
     darInfo.datasets = rawDar.datasets;
+    darInfo.datasetIds = rawDar.datasetIds;
     darInfo.pi = rawDar.investigator;
     darInfo.havePI = rawDar.havePI || rawDar.isThePI;
     darInfo.profileName = researcher.displayName;
