@@ -6,7 +6,7 @@
 
 ### DACs must answer important questions about access to data, but often have to interpret complex and ambiguous inputs to those decisions
 
-<img src="/duos-ui/assets/images/duos_process_flow.png" alt="DUOS Process Flow" width="900px" height="200px" class="image">
+<img src="/duos-ui/assets/images/duos_process_flow.png" alt="DUOS Process Flow" width="1200px" height="180px" class="image">
 
 Currently, when DAC’s receive data access requests they must decide if the proposed research use is within the bounds of the data’s use limitations.
 
