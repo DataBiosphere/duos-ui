@@ -17,8 +17,8 @@ No, you do not need to be a PI however you do need to have a Library Card (permi
 
 ### Do I need an eRA Commons account to apply for access, and how do I get one?
 Yes, you must have an eRA Commons account in order to request access to data via DUOS. If you do not have an eRA Commons, and would like to obtain one please follow the NIH instructions here:
-
-<span style="color:#337ab7"> <a href="https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/registration/investigators-and-other-users/era-commons-user-registration.htm"> eRA Commons User Registration </a> </span>
+ 
+<a style="color:#337ab7" href="https://grants.nih.gov/grants/how-to-apply-application-guide/prepare-to-apply-and-register/registration/investigators-and-other-users/era-commons-user-registration.htm"> eRA Commons User Registration </a>
 
 ### How long will it take for my data access request to be approved?
 Each DAC in DUOS is self-managed, meaning researchers may experience different average turnaround times from each DAC. DUOS’ aim is to decrease turnaround time as much as possible, while ensuring a thorough DAR review.
