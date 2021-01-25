@@ -52,6 +52,7 @@ Here are a few resources to help you get started:
   <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you don't pay for approved requestors' use of your data </a> </h4>
   <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you grant appropriate access to approved requestors </a> </h4>
 <br>
+
 ### How do I determine the data use limitations for my dataset(s)?
 
 DUOS is actively developing a tool to enable you to determine your datasets’ data use limitations according to the GA4GH
