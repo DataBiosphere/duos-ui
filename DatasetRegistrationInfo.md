@@ -11,12 +11,8 @@
 To register your data’s info in DUOS:
 
 1. You must first have your data available in a location where other researchers can access it, such as
-   Broad’s 
-   
-   <span style="color:#337ab7"> 
-     <a href="https://app.terra.bio"> Terra </a>
-   </span>
-    system. Note, DUOS does not store genomic data.
+   Broad’s <a style="color:#337ab7" href="https://app.terra.bio"> Terra </a> system. Note, DUOS does not store genomic
+   data.
 
 2. Once you’ve confirmed your data will be in an accessible location, you must have an organizational sign-off from your
    institution’s Signing Official on the DUOS Data Provider Agreement (download here), acknowledging you as an
@@ -47,20 +43,14 @@ access permissions, and for researchers to access and analyze the data in aggreg
 
 ### Do you have a recommendation on where to store data?
 
-Most DUOS users store their data in
-
-<span style="color: #337ab7">  
-  <a href="https://app.terra.bio"> Terra </a> 
-</span>
+Most DUOS users store their data in <a style="color: #337ab7" href="https://app.terra.bio"> Terra </a>
 Here are a few resources to help you get started:
 
-<span style="color: #337ab7">
-  <h4> <a href="https://support.terra.bio/hc/en-us/articles/360024743371-Intro-to-working-with-workspaces"> Terra's Workspace Structure </a> </h4>
-  <h4> <a href="https://support.terra.bio/hc/en-us/articles/360024056512-Uploading-to-a-workspace-Google-bucket"> Guidance on how to upload your data to Terra </a></h4>
-  <h5> <a href="https://support.terra.bio/hc/en-us/articles/360025758392-Managing-data-with-tables-"> More details </a> </h5>
-  <h4> <a href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you don't pay for approved requestors' use of your data </a> </h4>
-  <h4> <a href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you grant appropriate access to approved requestors </a> </h4>
-</span>
+  <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360024743371-Intro-to-working-with-workspaces"> Terra's Workspace Structure </a> </h4>
+  <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360024056512-Uploading-to-a-workspace-Google-bucket"> Guidance on how to upload your data to Terra </a></h4>
+  <h5> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360025758392-Managing-data-with-tables-"> More details </a> </h5>
+  <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you don't pay for approved requestors' use of your data </a> </h4>
+  <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you grant appropriate access to approved requestors </a> </h4>
 
 ### How do I determine the data use limitations for my dataset(s)?
 
@@ -76,5 +66,6 @@ Terra is not required for DACs to register their data in DUOS.
 
 ### Support or Contact
 
-Still having trouble? Click 'Contact Us' on our <span style="color: #337ab7"> <a href="https://duos.broadinstitute.org/home"> DUOS homepage </a> </span> and we’ll help you
-sort it out.
+Still having trouble? Click 'Contact Us' on
+our <a style="color: #337ab7" href="https://duos.broadinstitute.org/home"> DUOS homepage </a> and we’ll
+help you sort it out.
