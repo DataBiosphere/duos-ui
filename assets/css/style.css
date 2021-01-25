@@ -1,9 +1,5 @@
 body {
-  background: white !important;
-  font-family: "Montserrat", sans-serif !important;
   font-size: 16px !important;
-  color: #00243c !important;
-  margin-top: 0;
 }
 
 h2,
@@ -11,7 +7,11 @@ h3,
 h4,
 h5,
 body {
-  text-align: center;
+  text-align: left;
+  color: rgb(21, 59,80) !important;
+  margin: 0 50px;
+  font-family: "Montserrat", sans-serif !important;
+  background: white;
 }
 
 h1 {
