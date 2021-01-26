@@ -10,19 +10,18 @@
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/DACinfo"> Data Access Committee Information </a>
 
-#### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/DACinfo#dac-faqs"> Data Access Committee FAQs </a>
+#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/DACinfo#dac-faqs"> Data Access Committee FAQs </a>
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo"> Dataset Registration Information </a>
 
-#### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo#related-faqs"> Dataset Registration FAQs </a>
+#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo#related-faqs"> Dataset Registration FAQs </a>
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/ResearcherInfo"> Researcher Information </a>
 
-#### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/ResearcherInfo#researcher-faqs"> Researcher FAQs </a>
+#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/ResearcherInfo#researcher-faqs"> Researcher FAQs </a>
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo"> Signing Official Information </a>
 
-#### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#library-cards"> Library Cards</a>
+#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#library-cards"> Library Cards</a>
 
-#### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#signing-official-faqs"> Signing Official FAQs </a>
-
+#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#signing-official-faqs"> Signing Official FAQs </a>
