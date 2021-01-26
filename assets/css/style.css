@@ -9,10 +9,16 @@ h5,
 body {
   text-align: left;
   color: rgb(31, 59, 80) !important;
-  margin: 5px 100px !important;
+  margin: 5px 100px;
   font-family: "Montserrat", sans-serif !important;
   background: white;
-  margin-inline: 0;
+}
+
+h2,
+h3,
+h4,
+h5 {
+  margin-left: -5px;
 }
 
 h1 {
