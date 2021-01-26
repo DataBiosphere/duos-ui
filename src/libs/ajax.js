@@ -722,18 +722,6 @@ export const Email = {
 
 export const Files = {
 
-  // Get DUL File requires another field for fileName to be downloaded
-  // this field is required in the component
-  getDulFile: async (consentId, fileName) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-    return getFile(url, fileName);
-  },
-
-  getDulFileByElectionId: async (consentId, electionId, fileName) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?electionId=${electionId}`;
-    return getFile(url, fileName);
-  },
-
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;
     return getFile(url, fileName);

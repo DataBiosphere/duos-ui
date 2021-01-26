@@ -4,7 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { Election, Files } from '../libs/ajax';
+import { Election } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Config } from '../libs/config';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
@@ -125,10 +125,6 @@ class DulResultRecords extends Component {
     };
   }
 
-  downloadDUL = (e) => {
-    Files.getDulFileByElectionId(this.state.electionReview.election.referenceId, this.state.electionReview.election.electionId, this.state.electionReview.election.dulName);
-  };
-
   render() {
 
     const { chartData = {} } = this.state;
@@ -158,7 +154,6 @@ class DulResultRecords extends Component {
 
         h(TranslatedDULComponent, {
           restrictions: this.state.dataUse,
-          downloadDUL: this.downloadDUL,
           isDUL: true
         }),
 
