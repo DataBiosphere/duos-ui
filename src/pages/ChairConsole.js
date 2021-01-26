@@ -1,4 +1,4 @@
-import {filter, isEmpty, isNil, find} from 'lodash/fp';
+import {filter, isEmpty, isNil, find, cloneDeep} from 'lodash/fp';
 import Modal from 'react-modal';
 import { useState, useEffect, useCallback, useRef} from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
@@ -235,6 +235,7 @@ export const ChairConsole = (props) => {
   const [visibleList, setVisibleList] = useState([]);
   const [electionList, setElectionList] = useState([]);
   const [darDetails, setDarDetails] = useState({});
+  const [detailLoadingStatus, setDetailLoadingStatus] = useState(false);
   const darCache = useRef({});
 
   //NOTE: skeleton function for pagination feature, to be implemented/expanded/revised in later PR
@@ -261,14 +262,6 @@ export const ChairConsole = (props) => {
           const endIndex = darLimit > pendingList.length ? darLimit : pendingList.length;
           setVisibleList(filteredList.slice(0, endIndex));
         }
-        // this.setState(prev => {
-        //   prev.currentUser = currentUser;
-        //   // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
-        //   // for more work related to ensuring closed elections aren't displayed here.
-        //   prev.electionList = _.filter(pendingList.access, (e) => { return e.electionStatus !== 'Closed'; });
-        //   prev.totalAccessPendingVotes = pendingList.totalAccessPendingVotes;
-        //   return prev;
-        // });
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
       };
@@ -277,15 +270,16 @@ export const ChairConsole = (props) => {
   }, []);
 
   const openModal = async (referenceId) => {
-    const cachedDar = darCache.current[referenceId];
     let darInfo;
-     setShowModal(true);
+    const cachedDar = darCache.current[referenceId];
+    setDetailLoadingStatus(true);
+    setShowModal(true);
     if(isNil(cachedDar)) {
       try {
         darInfo = await DAR.describeDar(referenceId);
         const datasetNames = await getDatasetNames(darInfo.datasetIds);
         darInfo.datasetNames = datasetNames;
-        darCache.current[referenceId] = darInfo;
+        darCache.current[referenceId] = cloneDeep(darInfo);
       } catch(error) {
         Notifications.showError('Error: Failed to initialize dar information for modal');
       }
@@ -293,6 +287,7 @@ export const ChairConsole = (props) => {
       darInfo = cachedDar;
     }
     setDarDetails(darInfo);
+    setDetailLoadingStatus(false);
   };
 
   const closeModal = () => {
@@ -334,7 +329,7 @@ export const ChairConsole = (props) => {
       //NOTE: TODO -> continue working/styling out modal 
       //NOTE: add loading placeholders for content
       h(Modal, {
-        isRendered: !isEmpty(electionList), 
+        isRendered: !detailLoadingStatus,
         isOpen: showModal, 
         onRequestClose: closeModal,
         shouldCloseOnOverlayClick: true,
@@ -342,7 +337,7 @@ export const ChairConsole = (props) => {
           content: styles.MODAL.CONTENT
         }
       }, [
-        div({style: styles.MODAL.CONTENT}, [
+        div({style: styles.MODAL.CONTENT, isRendered: !detailLoadingStatus}, [
           div({style: styles.MODAL.DAR_SUBHEADER}, [`${darDetails.darCode}`]),
           div({style: styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
           h(ModalDetailRow, {
