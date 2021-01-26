@@ -71,6 +71,10 @@ const styles = {
     RECORD_TEXT: {
       color: "#00243C"
     },
+    DAR_TEXT_HOVER: {
+      cursor: 'pointer',
+      color: '#0cabc5d9'
+    },
     DATA_REQUEST_TEXT: {
       color: "#00609F",
       fontWeight: Theme.font.weight.semibold
@@ -201,12 +205,25 @@ const Records = (props) => {
   const {openModal} = props;
   const dataIDTextStyle = styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = styles.TABLE.RECORD_TEXT;
+
+   const applyDarTextHover = (e) => {
+    e.target.style.color = styles.TABLE.DAR_TEXT_HOVER.color;
+    e.target.style.cursor = styles.TABLE.DAR_TEXT_HOVER.cursor;
+  };
+
+  const removeDarTextHover = (e) => {
+    e.target.style.color = styles.TABLE.DATA_REQUEST_TEXT.color;
+  };
+
   return props.electionList.map((election, index) => {
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
     return div({style: Object.assign({}, borderStyle, styles.TABLE.RECORD_ROW), key: `${election.frontEndId}`}, [
       div({
         style: Object.assign({}, styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
-        onClick: (e) => openModal(election.referenceId)
+        onClick: (e) => openModal(election.referenceId),
+        isRendered: !isNil(election.frontEndId),
+        onMouseEnter: applyDarTextHover,
+        onMouseLeave: removeDarTextHover
       }, [election.frontEndId]),
       div({style: Object.assign({}, styles.TABLE.TITLE_CELL, recordTextStyle)}, [election.projectTitle]),
       div({style: Object.assign({}, styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [formatDate(election.createDate)]),
