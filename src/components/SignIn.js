@@ -6,7 +6,7 @@ import { Alert } from './Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
-import { setUserRoleStatuses, USER_ROLES } from '../libs/utils';
+import { Navigation, setUserRoleStatuses, USER_ROLES } from '../libs/utils';
 export const SignIn = hh(class SignIn extends Component {
 
   constructor(props) {
@@ -103,13 +103,7 @@ export const SignIn = hh(class SignIn extends Component {
   };
 
   redirect = (user) => {
-    const page = user.isAdmin ? '/admin_console' :
-      user.isChairPerson ? '/chair_console' :
-        user.isMember ? '/member_console' :
-          user.isResearcher ? '/dataset_catalog' :
-            user.isDataOwner ? '/data_owner_console' :
-              user.isAlumni ? '/summary_votes' : '/';
-    this.props.history.push(page);
+    Navigation.back(user, this.props.history);
     this.props.onSignIn();
   };
 
