@@ -6,6 +6,7 @@ import { div, h, img } from 'react-hyperscript-helpers';
 import { DAR, DataSet, PendingCases, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 // import { NavigationUtils, USER_ROLES } from '../libs/utils';
+import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
 import { Theme } from '../libs/theme';
 
@@ -314,26 +315,29 @@ const NewChairConsole = (props) => {
   }, []);
 
   const openModal = async (referenceId) => {
-    let darInfo;
+    let darInfo, researcherInfo, datasetNames;
     const cachedDar = darCache.current[referenceId];
     setDetailLoadingStatus(true);
     setShowModal(true);
     if(isNil(cachedDar)) {
       try {
-        darInfo = await DAR.describeDar(referenceId);
-        const researcherPromise = getResearcherProperties(darInfo.researcherId);
+        darInfo = await DAR.getPartialDarRequest(referenceId);
+        darInfo.researchType = DataUseTranslation.generateResearchTypes(darInfo);
+        const researcherPromise = getResearcherProperties(darInfo.userId);
         const datasetPromises = getDatasetNames(darInfo.datasetIds);
-        const [researcherInfo, datasetNames] = await Promise.all([researcherPromise, datasetPromises]);
+        [researcherInfo, datasetNames] = await Promise.all([researcherPromise, datasetPromises]);
         darInfo.datasetNames = datasetNames;
-        setResearcherDetails(researcherInfo);
+        darInfo.researcherInfo = researcherInfo;
         darCache.current[referenceId] = cloneDeep(darInfo);
       } catch(error) {
         Notifications.showError({text: 'Error: Failed to initialize dar information for modal'});
       }
     } else {
       darInfo = cachedDar;
+      researcherInfo = darInfo.researcherInfo;
     }
     setDarDetails(darInfo);
+    setResearcherDetails(researcherInfo);
     setDetailLoadingStatus(false);
   };
 
@@ -393,7 +397,7 @@ const NewChairConsole = (props) => {
               darDetails.havePI, 
               researcherDetails.isThePI,
               researcherDetails.displayName,
-              darDetails.piName
+              researcherDetails.piName || researcherDetails.investigator
             )
           }),
           h(ModalDetailRow, {
