@@ -134,7 +134,7 @@ export const Notifications = {
 };
 
 export const NavigationUtils = {
-  accessReviewPath: async () => {
+  accessReviewPath: () => {
     return "access_review";
   },
   dacChairConsolePath: async () => {
