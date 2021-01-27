@@ -6,11 +6,14 @@ import { StructuredDarRp } from './StructuredDarRp';
 import {Theme} from '../libs/theme';
 import * as Utils from '../libs/utils';
 import * as ld from 'lodash';
+import {DataUseTranslation} from '../libs/dataUseTranslation';
 
 export const ApplicationSummary = hh(class ApplicationSummary extends PureComponent {
 
   render() {
-    const { hasUseRestriction, mrDAR, darInfo, downloadDAR, researcherProfile } = this.props;
+    let {darInfo} = this.props;
+    const { hasUseRestriction, mrDAR, downloadDAR, researcherProfile } = this.props;
+    darInfo.purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
     return div({className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
       div({ className: 'panel-heading cm-boxhead access-color' }, [
