@@ -4,7 +4,7 @@
 
 ### Welcome to the DUOS User Guides!
 
-These pages can help you navigate issues, answer your FAQs, and provide an overview of the innovative work the DUOS team is advancing as you read! 
+These pages can help you navigate issues, answer your FAQs, and provide an overview of the multiple initiatives the DUOS team is leading! 
 
 Below you’ll find links to overview pages as well as pages for specific types of users and certain unique functionalities in DUOS. 
 
