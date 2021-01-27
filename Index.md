@@ -2,6 +2,14 @@
   <img alt="DUOS" src="/duos-ui/duos_logo.svg" width="140px" height="40px">
 </h1>
 
+Welcome to the DUOS User Guides!
+
+These pages can help you navigate issues, answer your FAQs, and provide an overview of the innovative work the DUOS team is advancing as you read! 
+
+Below you’ll find links to overview pages as well as pages for specific types of users and certain unique functionalities in DUOS. 
+
+If you don’t find what you’re looking for here - feel free to reach out to us by clicking on the ‘Contact Us’ link on the DUOS Home page.
+
 ## Index
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/About"> About DUOS </a>
@@ -25,3 +33,4 @@
 #### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#library-cards"> Library Cards</a>
 
 #### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#signing-official-faqs"> Signing Official FAQs </a>
+
