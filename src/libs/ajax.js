@@ -235,7 +235,7 @@ export const DAR = {
     const rawDarRes = await axios.get(`${apiUrl}/dar/v2/${darId}`, authOpts);
     const rawDar = rawDarRes.data;
     const researcher = await User.getById(rawDar.userId);
-    
+
     let darInfo = Models.dar;
     darInfo.hmb = rawDar.hmb;
     darInfo.methods = rawDar.methods;
