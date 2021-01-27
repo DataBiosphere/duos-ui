@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { div, i, span, b, a, hr, h} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
-import { Consent, Election, Files } from '../libs/ajax';
+import { Consent, Election } from '../libs/ajax';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 
 class DulPreview extends Component {
@@ -14,7 +14,6 @@ class DulPreview extends Component {
 
     this.back = this.back.bind(this);
     this.electionReview = this.electionReview.bind(this);
-    this.downloadDUL = this.downloadDUL.bind(this);
   }
 
   back() {
@@ -41,10 +40,6 @@ class DulPreview extends Component {
     this.electionReview();
   }
 
-  downloadDUL = () => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.consentPreview.dulName);
-  };
-
 
   render() {
 
@@ -53,7 +48,7 @@ class DulPreview extends Component {
       this.state.consentPreview.name
     ]);
 
-    const translatedDULStatements = h(TranslatedDULComponent,{restrictions: this.state.consentPreview.dataUse, isDUL: true, downloadDUL: this.downloadDUL});
+    const translatedDULStatements = h(TranslatedDULComponent,{restrictions: this.state.consentPreview.dataUse, isDUL: true});
 
     return (
 
