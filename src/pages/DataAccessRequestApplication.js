@@ -1,6 +1,5 @@
 import { Component } from 'react';
 import { a, div, form, h, hr, i, small, span} from 'react-hyperscript-helpers';
-import ReactTooltip from 'react-tooltip';
 import ResearcherInfo from './dar_application/ResearcherInfo';
 import DataAccessRequest from './dar_application/DataAccessRequest';
 import ResearchPurposeStatement from './dar_application/ResearchPurposeStatement';
@@ -20,7 +19,6 @@ import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 
 class DataAccessRequestApplication extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -165,12 +163,24 @@ class DataAccessRequestApplication extends Component {
 
   async componentDidMount() {
     await this.init();
-    ReactTooltip.rebuild();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
       return prev;
     });
+  }
+
+  async getDatasets(formData) {
+    const dsIds = fp.get('datasetIds')(formData);
+    let datasets;
+    if (!fp.isNil(dsIds)) {
+      datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
+      datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
+    } else {
+      datasets = [];
+    }
+
+    return datasets;
   }
 
   async init() {
@@ -180,11 +190,7 @@ class DataAccessRequestApplication extends Component {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
       formData = await DAR.getPartialDarRequest(dataRequestId);
-      const dsIds = fp.get('datasetIds')(formData);
-      if (!fp.isNil(dsIds)) {
-        const datasets = await Promise.all(fp.map((id) => DataSet.getDataSetsByDatasetId(id))(dsIds));
-        formData.datasets = fp.map(ds => this.formatDatasetForAutocomplete(ds))(datasets);
-      }
+      formData.datasets = await this.getDatasets(formData);
     } else {
       // Lastly, try to get the form data from local storage and clear out whatever was there previously
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');

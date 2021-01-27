@@ -4,7 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { CollectResultBox } from '../components/CollectResultBox';
-import { Election, Files, Email } from '../libs/ajax';
+import { Election, Email } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from '../libs/storage';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
@@ -77,12 +77,6 @@ class DulCollect extends Component {
       ]
     };
   };
-
-
-  downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.dulName);
-  };
-
 
   handlerReminder = (e) => (voteId) => {
     this.setState(prev => {
@@ -177,7 +171,7 @@ class DulCollect extends Component {
       b({ isRendered: this.state.consentGroupName, className: "pipe", dangerouslySetInnerHTML: { __html: this.state.consentGroupName } }, []),
       this.state.consentName
     ]);
-    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.dataUse, downloadDUL: this.downloadDUL, isDUL: true});
+    const translatedDULStatements = h(TranslatedDULComponent, {restrictions: this.state.dataUse, isDUL: true});
 
     return (
 

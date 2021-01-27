@@ -1,10 +1,10 @@
 import { Component } from 'react';
-import { div, button, hr, h4, a, span } from 'react-hyperscript-helpers';
+import { div, hr, h4, a, span } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitTriVoteBox } from '../components/SubmitTriVoteBox';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
-import { DAR, Files, DataSet, Consent, Votes } from '../libs/ajax';
+import { DAR, DataSet, Consent, Votes } from '../libs/ajax';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
 
 const APPROVE = "1";
@@ -61,7 +61,6 @@ class DataOwnerReview extends Component {
     this.submitVote = this.submitVote.bind(this);
     this.getDarInfo = this.getDarInfo.bind(this);
     this.getConsentInfo = this.getConsentInfo.bind(this);
-    this.downloadDUL = this.downloadDUL.bind(this);
     this.getVote = this.getVote.bind(this);
   }
 
@@ -183,10 +182,6 @@ class DataOwnerReview extends Component {
     this.props.history.goBack();
   };
 
-  downloadDUL = () => (e) => {
-    Files.getDulFile(this.state.consent.id, this.state.consent.data.dulName);
-  };
-
   async submitVote(answer, rationale) {
     let updatedVote = {};
 
@@ -297,15 +292,9 @@ class DataOwnerReview extends Component {
                 showModal: this.state.showDatasetSummaryModal,
                 onOKRequest: this.okDatasetSummaryModal,
                 onCloseRequest: this.closeDatasetSummaryModal
-              }),
-            ]),
-            div({ id: "dul", className: "panel-body cm-boxbody" }, [
-              button({
-                className: "col-lg-6 col-md-6 col-sm-8 col-xs-12 btn-secondary btn-reminder hover-color",
-                onClick: this.downloadDUL()
-              }, ["Download Data Use Letter"]),
+              })
             ])
-          ]),
+          ])
         ]),
 
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [

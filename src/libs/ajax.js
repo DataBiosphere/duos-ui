@@ -533,6 +533,17 @@ export const DataSet = {
     const url = `${await Config.getApiUrl()}/dataset/${datasetId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
     return await res.json();
+  },
+
+  validateDatasetName: async (name) => {
+    const url = `${await Config.getApiUrl()}/dataset/validate?name=${name}`;
+    try {
+      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      return await res.json();
+    }
+    catch (err) {
+      return -1;
+    }
   }
 };
 
@@ -604,6 +615,8 @@ export const Election = {
     return await res.json();
   },
 
+  // RP Election Information. Can be null for manual review DARs.
+  // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
   findRPElectionReview: async (electionId, isFinalAccess) => {
     const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -722,18 +735,6 @@ export const Email = {
 };
 
 export const Files = {
-
-  // Get DUL File requires another field for fileName to be downloaded
-  // this field is required in the component
-  getDulFile: async (consentId, fileName) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-    return getFile(url, fileName);
-  },
-
-  getDulFileByElectionId: async (consentId, electionId, fileName) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?electionId=${electionId}`;
-    return getFile(url, fileName);
-  },
 
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;

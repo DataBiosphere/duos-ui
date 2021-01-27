@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
 import {button, div, form, h, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
-import ReactTooltip from 'react-tooltip';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
@@ -31,7 +30,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async componentDidMount() {
     this.getResearcherProfile();
-    ReactTooltip.rebuild();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
@@ -137,7 +135,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
           return prev;
         });
       }
-      ReactTooltip.rebuild();
     });
   }
 
@@ -940,28 +937,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ['Continue later']),
 
                   ConfirmationDialog({
-                      title: 'Continue later',
-                      color: 'common',
-                      showModal: this.state.showDialogSave,
-                      action: { label: 'Yes', handler: this.dialogHandlerSave }
-                    }, [
-                      div({ className: 'dialog-description' },
-                        ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
-                    ]
+                    title: 'Continue later',
+                    color: 'common',
+                    showModal: this.state.showDialogSave,
+                    action: { label: 'Yes', handler: this.dialogHandlerSave }
+                  }, [
+                    div({ className: 'dialog-description' },
+                      ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
+                  ]
                   ),
-                  h(ReactTooltip, {
-                    id: 'tip_clearNihAccount',
-                    place: 'right',
-                    effect: 'solid',
-                    multiline: true,
-                    className: 'tooltip-wrapper'
-                  }),
-                  h(ReactTooltip, {
-                    id: 'tip_isthePI',
-                    effect: 'solid',
-                    multiline: true,
-                    className: 'tooltip-wrapper'
-                  })
                 ])
               ])
             ])

@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { div, b, span, a, h4, hr, i, h } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { Votes, Election, Consent, Files } from '../libs/ajax';
+import { Votes, Election, Consent } from '../libs/ajax';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Storage } from "../libs/storage";
 import { Navigation } from "../libs/utils";
@@ -89,10 +89,6 @@ class DulReview extends Component {
     }
   };
 
-  downloadDUL = (e) => {
-    Files.getDulFile(this.props.match.params.consentId, this.state.election.dulName);
-  };
-
   confirmationHandlerOK = (answer) => (e) => {
     this.setState({ showConfirmationDialog: false });
     Navigation.back(this.state.currentUser, this.props.history);
@@ -127,7 +123,7 @@ class DulReview extends Component {
         div({ className: "accordion-title dul-color" }, ["Were the data use limitations in the Data Use Letter accurately converted to structured limitations?"]),
         hr({ className: "section-separator" }),
         h4({ className: "hint" }, ["Please review the Data Use Letter and determine if the Data Use Limitations were accurately converted to Structured Limitations"]),
-        h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, downloadDUL: this.downloadDUL, isDUL: true}),
+        h(TranslatedDULComponent, {restrictions: this.state.consent.dataUse, isDUL: true}),
         div({ className: "col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2 col-sm-12 col-xs-12" }, [
           div({ className: "jumbotron box-vote dul-background-lighter" }, [
             SubmitVoteBox({

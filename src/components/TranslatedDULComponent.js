@@ -57,14 +57,6 @@ export default function TranslatedDULComponent(props) {
     className: 'italic hover-color',
   }, ['Download DUL machine-readable format']);
 
-  const dataUseLetterLink = a({
-    id: "btn_downloadDataUseLetter",
-    className: "col-lg-6 col-md-6 col-sm-6 col-xs-12 italic hover-color",
-    fileName: props.downloadDUL,
-    value: props.downloadDUL,
-    onClick: () => props.downloadDUL()
-  }, ["Download Data Use Letter"]);
-
   //panel formats differ depending on whether or not its used in DAR vs DUL
 
   const DARTemplate = div({ className: "data-use-container" }, [
@@ -72,7 +64,6 @@ export default function TranslatedDULComponent(props) {
       h4({}, ["Data Use Limitations"]),
     ]),
     ul({ id: "panel_dataUseLimitations", className: "panel-body cm-boxbody translated-restriction", style: {listStyle: 'none', marginTop: '0.8rem'}}, [translatedDULStatements]),
-    div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL)}, [dataUseLetterLink]),
     div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
   ]);
 
@@ -82,7 +73,6 @@ export default function TranslatedDULComponent(props) {
         div({ className: "panel-heading cm-boxhead dul-color" }, [
           h4({}, ["Data Use Limitations"]),
         ]),
-        div({id: "panel_dulLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.downloadDUL)}, [dataUseLetterLink]),
         div({id: "panel_mrlLink panel-body", className: "panel-body cm-boxbody translated-restriction", isRendered: !isNil(props.mrDUL)},[machineReadableLink])
       ]),
       div({ className: "data-use-panel", style: DULPanel }, [

@@ -1,19 +1,19 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import { div, h, hh, img, span } from 'react-hyperscript-helpers';
-import { Alert } from '../components/Alert';
+import { div, h, hh, img, span, button } from 'react-hyperscript-helpers';
+import { Alert } from './Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
-import { setUserRoleStatuses, USER_ROLES } from '../libs/utils';
+import { Navigation, setUserRoleStatuses, USER_ROLES } from '../libs/utils';
 export const SignIn = hh(class SignIn extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
       clientId: '',
-      error: {}
+      error: {},
     };
     this.getGoogleClientId();
   }
@@ -103,13 +103,7 @@ export const SignIn = hh(class SignIn extends Component {
   };
 
   redirect = (user) => {
-    const page = user.isAdmin ? 'admin_console' :
-      user.isChairPerson ? 'chair_console' :
-        user.isMember ? 'member_console' :
-          user.isResearcher ? 'dataset_catalog' :
-            user.isDataOwner ? 'data_owner_console' :
-              user.isAlumni ? 'summary_votes' : '/';
-    this.props.history.push(page);
+    Navigation.back(user, this.props.history);
     this.props.onSignIn();
   };
 
@@ -126,18 +120,25 @@ export const SignIn = hh(class SignIn extends Component {
   };
 
   renderSpinnerIfDisabled = (disabled) => {
+    const defaultStyle = {
+      scope: 'openid email profile',
+      height: '44px',
+      width: '180px',
+      theme: 'dark',
+      clientId: this.state.clientId,
+      onSuccess: this.responseGoogle,
+      onFailure: this.forbidden,
+      disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
+    };
     return disabled ?
       div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
         img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
       ]) :
-      h(GoogleLogin, {
-        scope: 'openid email profile',
-        theme: 'dark',
-        clientId: this.state.clientId,
-        onSuccess: this.responseGoogle,
-        onFailure: this.forbidden,
-        disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' },
-      });
+      h(GoogleLogin,
+        _.isNil(this.props.customStyle) ? defaultStyle : {
+          render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
+          ...defaultStyle
+        });
   };
 
   render() {
