@@ -297,7 +297,6 @@ const NewChairConsole = (props) => {
     const init = async() => {
       try {
         const currentUser = Storage.getCurrentUser();
-        //NOTE: this endpoint needs to be adjusted so that it searches based on server side user data rather than a front-end argument
         const caseList = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
         const pendingList = filter((e) => { return e.electionStatus !== 'Closed'; }, caseList.access);
 
