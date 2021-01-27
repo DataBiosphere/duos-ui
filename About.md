@@ -77,9 +77,16 @@ Having the permitted use of the data and the data access request both described 
 
 Currently, DACs using DUOS are able to review the algorithm’s suggested decision on comparing the permitted uses with the data access request prior to logging their final decision on a request.
 
+### DUOS Highlights in Video
+
+DUOS featured on GA4GH's Automating Access to Human Genomics Datasets Webinar
+
 <a href="http://www.youtube.com/watch?v=8ZyU34xpi4M">
   <img alt="Automating Access" src="http://img.youtube.com/vi/8ZyU34xpi4M/0.jpg">
 </a>
+
+
+DUOS featured on NHGRI's Genomic Data Sharing Policies Webinar
 
 <a href="https://www.youtube.com/watch?v=66NVIspHeho&t=46s&ab_channel=NationalHumanGenomeResearchInstitute">
   <img alt="Data Access Models" src="http://img.youtube.com/vi/66NVIspHeho/0.jpg">
