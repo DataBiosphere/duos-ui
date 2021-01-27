@@ -24,7 +24,6 @@ import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
 import FAQs from './pages/FAQs';
-import FinalAccessReview from './pages/FinalAccessReview';
 import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
@@ -111,8 +110,8 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dul_collect/:consentId" component={DulCollect} props={props}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/final_access_review/:referenceId/:electionId" component={FinalAccessReview} props={props}
-      rolesAllowed={[USER_ROLES.chairperson]} />
+    {/*<AuthenticatedRoute path="/final_access_review/:referenceId/:electionId" component={FinalAccessReview} props={props}*/}
+    {/*  rolesAllowed={[USER_ROLES.chairperson]} />*/}
     <AuthenticatedRoute path="/reviewed_cases" component={ReviewedCases} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <Route path="*" component={NotFound} />
