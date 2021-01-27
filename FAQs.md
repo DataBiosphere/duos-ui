@@ -70,7 +70,7 @@ If you are having issues with accessing the data and have already been granted a
 ### I received a DAR approval email from DUOS, but I have not received access to data. What do I do?
 If you are having issues with accessing the data and have already been granted access by the Data Custodian, please consider reaching out to the system administrator of the repository in which the data is stored. For DUOS datasets stored in Terra, you can reach the Terra customer support at terra-support@broadinstitute.zendesk.com.
 
-### If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.
+If you believe you have not yet been granted access to the data for which you are approved, please reach out to the Data Custodian listed for the respective datasets in the DUOS Dataset Catalog.
 
 ### How do I grant access to my lab staff after being approved for access to data?
 Subsequent access grants to lab staff members depend upon the repository in which the data is stored. For information on how to share access permissions with colleagues in Terra, contact Terra support at terra-support@broadinstitute.zendesk.com
