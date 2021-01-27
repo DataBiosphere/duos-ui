@@ -11,8 +11,7 @@
 To register your data’s info in DUOS:
 
 1. You must first have your data available in a location where other researchers can access it, such as
-   Broad’s <a style="color:#337ab7" href="https://app.terra.bio"> Terra </a> system. Note, DUOS does not store genomic
-   data.
+   Broad’s <a style="color:#337ab7" href="https://app.terra.bio"> Terra </a> system. Note, DUOS is not a data repository.
 
 2. Once you’ve confirmed your data will be in an accessible location, you must have an organizational sign-off from your
    institution’s Signing Official on the DUOS Data Provider Agreement (download here), acknowledging you as an
