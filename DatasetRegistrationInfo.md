@@ -47,7 +47,7 @@ Here are a few resources to help you get started:
 
   <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360024743371-Intro-to-working-with-workspaces"> Terra's Workspace Structure </a> </h4>
   <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360024056512-Uploading-to-a-workspace-Google-bucket"> Guidance on how to upload your data to Terra </a></h4>
-  <h5> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360025758392-Managing-data-with-tables-"> More details </a> </h5>
+  <h5> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360025758392-Managing-data-with-tables-"> Guidance on organizing your data using tables </a> </h5>
   <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360029801491-Using-Requester-Pays-workspaces-buckets"> Making sure you don't pay for approved requestors' use of your data </a> </h4>
   <h4> <a style="color: #337ab7" href="https://support.terra.bio/hc/en-us/articles/360025851892-Reader-writer-or-owner-Workspace-access-controls-explained"> Making sure you grant appropriate access to approved requestors </a> </h4>
 
