@@ -2,7 +2,7 @@
   <img alt="DUOS" src="/duos-ui/duos_logo.svg" width="140px" height="40px">
 </h1>
 
-Welcome to the DUOS User Guides!
+### Welcome to the DUOS User Guides!
 
 These pages can help you navigate issues, answer your FAQs, and provide an overview of the innovative work the DUOS team is advancing as you read! 
 
@@ -18,19 +18,18 @@ If you don’t find what you’re looking for here - feel free to reach out to u
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/DACinfo"> Data Access Committee Information </a>
 
-#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/DACinfo#dac-faqs"> Data Access Committee FAQs </a>
+#### <a style="color: #337ab7; margin-left:35px;" href="https://databiosphere.github.io/duos-ui/DACinfo#dac-faqs"> Data Access Committee FAQs </a>
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo"> Dataset Registration Information </a>
 
-#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo#related-faqs"> Dataset Registration FAQs </a>
+#### <a style="color: #337ab7; margin-left:35px;" href="https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo#related-faqs"> Dataset Registration FAQs </a>
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/ResearcherInfo"> Researcher Information </a>
 
-#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/ResearcherInfo#researcher-faqs"> Researcher FAQs </a>
+#### <a style="color: #337ab7; margin-left:35px;" href="https://databiosphere.github.io/duos-ui/ResearcherInfo#researcher-faqs"> Researcher FAQs </a>
 
 ### <a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo"> Signing Official Information </a>
 
-#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#library-cards"> Library Cards</a>
+#### <a style="color: #337ab7; margin-left:35px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#library-cards"> Library Cards</a>
 
-#### <a style="color: #337ab7; margin-left:25px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#signing-official-faqs"> Signing Official FAQs </a>
-
+#### <a style="color: #337ab7; margin-left:35px;" href="https://databiosphere.github.io/duos-ui/SigningOfficialInfo#signing-official-faqs"> Signing Official FAQs </a>
