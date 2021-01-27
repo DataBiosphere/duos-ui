@@ -391,6 +391,7 @@ export const DAR = {
     return res.data;
   },
 
+  //endpoint to be deprecated
   getDataAccessManage: async userId => {
     userId = userId === undefined ? '' : userId;
     const url = `${await Config.getApiUrl()}/dar/manage/?userId=${userId}`;
@@ -409,6 +410,13 @@ export const DAR = {
       return dar;
     });
     return dars;
+  },
+
+  //new manage endpoint, should be renamed once v1 variant is removed from use
+  getDataAccessManageV2: async() => {
+    const url = `${await Config.getApiUrl()}/dar/manage/v2`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   },
 
   updateDar: async (dar, id) => {

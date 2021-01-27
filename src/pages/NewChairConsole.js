@@ -1,11 +1,8 @@
-import {filter, isEmpty, isNil, find, cloneDeep} from 'lodash/fp';
+import {isEmpty, isNil} from 'lodash/fp';
 import Modal from 'react-modal';
-import { useState, useEffect, useRef} from 'react';
+import { useState, useEffect} from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
-// import { SearchBox } from '../components/SearchBox';
-import { DAR, DataSet, PendingCases, User } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-// import { NavigationUtils, USER_ROLES } from '../libs/utils';
+import { DAR} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
 import { Theme } from '../libs/theme';
@@ -171,41 +168,12 @@ const styles = {
   }
 };
 
-const getDatasetNames = async(datasetIds) => {
-  let datasetNames = [];
-  if(!isEmpty(datasetIds)) {
-    try{
-      const datasetPromises = datasetIds.map(datasetId => {
-        return DataSet.getDataSetsByDatasetId(datasetId);
-      });
-      const datasets = await Promise.all(datasetPromises);
-      datasetNames = datasets.map((dataset) => {
-        let nameProperty = find((property) => {
-          return property.propertyName === "Dataset Name";
-        }, dataset.properties);
-        return nameProperty.propertyValue;
-      });
-    } catch(error) {
-      Notifications.showError({text: 'Error: Failed to initilize datasets for modal'});
-    }
-  }
+const getDatasetNames = (datasets) => {
+  if(!datasets){return '';}
+  const datasetNames = datasets.map((dataset) => {
+    return dataset.label;
+  });
   return datasetNames.join('\n');
-};
-
-const getResearcherProperties = async(userId) => {
-  if(!isNil(userId)) {
-    let researcherProperties = {};
-    try{
-      const researcherInfo = await User.getById(userId);
-      researcherInfo.researcherProperties.forEach((property) => {
-        researcherProperties[property.propertyKey] = property.propertyValue;
-      });
-      return Object.assign({}, researcherInfo, researcherProperties);
-    }catch(error){
-      Notifications.showError({text: 'Error: Failed to initialize researcher information'});
-      return {};
-    }
-  }
 };
 
 const processResearchTypes = (researchTypes) => {
@@ -232,20 +200,20 @@ const Records = (props) => {
     e.target.style.color = styles.TABLE.DATA_REQUEST_TEXT.color;
   };
 
-  return props.electionList.map((election, index) => {
+  return props.electionList.map((electionInfo, index) => {
+    const {dar, dac, election} = electionInfo;
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
-    return div({style: Object.assign({}, borderStyle, styles.TABLE.RECORD_ROW), key: `${election.frontEndId}`}, [
+    return div({style: Object.assign({}, borderStyle, styles.TABLE.RECORD_ROW), key: `${dar.data.darCode}`}, [
       div({
         style: Object.assign({}, styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
-        onClick: (e) => openModal(election.referenceId),
-        isRendered: !isNil(election.frontEndId),
+        onClick: (e) => openModal(dar),
         onMouseEnter: applyDarTextHover,
         onMouseLeave: removeDarTextHover
-      }, [election.frontEndId]),
-      div({style: Object.assign({}, styles.TABLE.TITLE_CELL, recordTextStyle)}, [election.projectTitle]),
-      div({style: Object.assign({}, styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [formatDate(election.createDate)]),
-      div({style: Object.assign({}, styles.TABLE.DAC_CELL, recordTextStyle)}, [election.dac.name]),
-      div({style: Object.assign({}, styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election.electionStatus]),
+      }, [dar && dar.data ? dar.data.darCode : '- -']),
+      div({style: Object.assign({}, styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
+      div({style: Object.assign({}, styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
+      div({style: Object.assign({}, styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
+      div({style: Object.assign({}, styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
       div({style: Object.assign({}, styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
     ]);
   });
@@ -280,8 +248,6 @@ const NewChairConsole = (props) => {
   const [electionList, setElectionList] = useState([]);
   const [darDetails, setDarDetails] = useState({});
   const [detailLoadingStatus, setDetailLoadingStatus] = useState(false);
-  const [researcherDetails, setResearcherDetails] = useState({});
-  const darCache = useRef({});
 
   //NOTE: skeleton function for pagination feature, to be implemented/expanded/revised in later PR
   // const goToPage = useCallback((targetPage, currentPage, filteredList, darLimit) => {
@@ -296,10 +262,7 @@ const NewChairConsole = (props) => {
   useEffect(() => {
     const init = async() => {
       try {
-        const currentUser = Storage.getCurrentUser();
-        const caseList = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
-        const pendingList = filter((e) => { return e.electionStatus !== 'Closed'; }, caseList.access);
-
+        const pendingList = await DAR.getDataAccessManageV2();
         //NOTE: commented out code below are thoughts/pseudocode for pagination/search initialization
         // setTotalPendingVotes(pendingList.length);
         setElectionList(pendingList);
@@ -315,31 +278,18 @@ const NewChairConsole = (props) => {
     init();
   }, []);
 
-  const openModal = async (referenceId) => {
-    let darInfo, researcherInfo, datasetNames;
-    const cachedDar = darCache.current[referenceId];
-    setDetailLoadingStatus(true);
-    setShowModal(true);
-    if(isNil(cachedDar)) {
-      try {
-        darInfo = await DAR.getPartialDarRequest(referenceId);
-        darInfo.researchType = DataUseTranslation.generateResearchTypes(darInfo);
-        const researcherPromise = getResearcherProperties(darInfo.userId);
-        const datasetPromises = getDatasetNames(darInfo.datasetIds);
-        [researcherInfo, datasetNames] = await Promise.all([researcherPromise, datasetPromises]);
-        darInfo.datasetNames = datasetNames;
-        darInfo.researcherInfo = researcherInfo;
-        darCache.current[referenceId] = cloneDeep(darInfo);
-      } catch(error) {
-        Notifications.showError({text: 'Error: Failed to initialize dar information for modal'});
+  const openModal = async (darInfo) => {
+    let darData = darInfo.data;
+    if(!isNil(darData)) {
+      setDetailLoadingStatus(true);
+      setShowModal(true);
+      darData.researchType = DataUseTranslation.generateResearchTypes(darData);
+      if(!darData.datasetNames) {
+        darData.datasetNames = getDatasetNames(darData.datasets);
       }
-    } else {
-      darInfo = cachedDar;
-      researcherInfo = darInfo.researcherInfo;
+      setDarDetails(darData);
+      setDetailLoadingStatus(false);
     }
-    setDarDetails(darInfo);
-    setResearcherDetails(researcherInfo);
-    setDetailLoadingStatus(false);
   };
 
   const closeModal = () => {
@@ -369,11 +319,11 @@ const NewChairConsole = (props) => {
       div({style: styles.TABLE.CONTAINER}, [
         div({style: styles.TABLE.HEADER_ROW}, [
           div({style: styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
-          div({style: styles.TABLE.TITLE_CELL}, ["Project Title"]),
+          div({style: styles.TABLE.TITLE_CELL}, ["Project title"]),
           div({style: styles.TABLE.SUBMISSION_DATE_CELL}, ["Submission date"]),
           div({style: styles.TABLE.DAC_CELL}, ["DAC"]),
           div({style: styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
-          div({style: styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
+          div({style: styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
         //NOTE: for now table is rendering electionList (the full list), will implement controlled view as part of pagination PR
         h(Records, {isRendered: !isEmpty(electionList), electionList: electionList, openModal})
@@ -395,23 +345,23 @@ const NewChairConsole = (props) => {
           h(ModalDetailRow, {
             label: 'Primary Investigator',
             detail: returnPIName(
-              darDetails.havePI,
-              researcherDetails.isThePI,
-              researcherDetails.displayName,
-              researcherDetails.piName || researcherDetails.investigator
+              darDetails.havePi,
+              darDetails.isThePi,
+              darDetails.researcher,
+              darDetails.investigator
             )
           }),
           h(ModalDetailRow, {
             label: 'Researcher',
-            detail:researcherDetails.displayName || '- -'
+            detail: darDetails.researcher || '- -'
           }),
           h(ModalDetailRow, {
             label: 'Institution',
-            detail: researcherDetails.institution || '- -'
+            detail: darDetails.institution || '- -'
           }),
           h(ModalDetailRow, {
             label: 'Dataset(s)',
-            detail: darDetails.datasetNames
+            detail: darDetails.datasetNames || '- -'
           }),
           h(ModalDetailRow, {
             label: 'Type of Research',
