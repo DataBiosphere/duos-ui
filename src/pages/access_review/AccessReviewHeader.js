@@ -72,32 +72,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ style: SMALL }, "DAC Chairs can optionally vote as a member.")
             ])
           ]
-        ),
-        div([div(
-          [
-            button(
-              {
-                id: "btn_back",
-                onClick: () => Navigation.back(currentUser, history),
-                className: "button-outlined",
-                style: BUTTON,
-              },
-              "DAC Console"
-            )
-          ]
-        ),
-        div(
-          [
-            button(
-              {
-                onClick: () => this.openAccessReview(darId, voteId, rpVoteId),
-                className: "button-outlined",
-                style: BUTTON,
-              },
-              "Original DAR"
-            )
-          ]
-        )])
+        )
       ]
     );
   }

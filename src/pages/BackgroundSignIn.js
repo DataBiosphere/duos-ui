@@ -1,7 +1,7 @@
 import { User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { div, form, input, label, textarea, br, h } from 'react-hyperscript-helpers';
-import { USER_ROLES } from '../libs/utils';
+import { Navigation, USER_ROLES } from '../libs/utils';
 import { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { SpinnerComponent } from '../components/SpinnerComponent';
@@ -24,13 +24,7 @@ export default function BackgroundSignIn(props) {
     };
 
     const redirect = (user) => {
-      const page = user.isAdmin ? 'admin_console' :
-        user.isChairPerson ? 'chair_console' :
-          user.isMember ? 'member_console' :
-            user.isResearcher ? 'dataset_catalog' :
-              user.isDataOwner ? 'data_owner_console' :
-                user.isAlumni ? 'summary_votes' : '/';
-      history.push(page);
+      Navigation.back(user, history);
       if (onSignIn)
         onSignIn();
     };
