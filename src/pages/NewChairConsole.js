@@ -1,6 +1,6 @@
 import {filter, isEmpty, isNil, find, cloneDeep} from 'lodash/fp';
 import Modal from 'react-modal';
-import { useState, useEffect, useCallback, useRef} from 'react';
+import { useState, useEffect, useRef} from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
 // import { SearchBox } from '../components/SearchBox';
 import { DAR, DataSet, PendingCases, User } from '../libs/ajax';
@@ -181,16 +181,16 @@ const getDatasetNames = async(datasetIds) => {
       const datasets = await Promise.all(datasetPromises);
       datasetNames = datasets.map((dataset) => {
         let nameProperty = find((property) => {
-          return property.propertyName === "Dataset Name"
+          return property.propertyName === "Dataset Name";
         }, dataset.properties);
         return nameProperty.propertyValue;
       });
     } catch(error) {
-      Notifications.showError({text: 'Error: Failed to initilize datasets for modal'})
+      Notifications.showError({text: 'Error: Failed to initilize datasets for modal'});
     }
   }
   return datasetNames.join('\n');
-}
+};
 
 const getResearcherProperties = async(userId) => {
   if(!isNil(userId)) {
@@ -200,20 +200,20 @@ const getResearcherProperties = async(userId) => {
       researcherInfo.researcherProperties.forEach((property) => {
         researcherProperties[property.propertyKey] = property.propertyValue;
       });
-      return Object.assign({}, researcherInfo, researcherProperties); 
+      return Object.assign({}, researcherInfo, researcherProperties);
     }catch(error){
-      Notifications.showError({text: 'Error: Failed to initialize researcher information'})
+      Notifications.showError({text: 'Error: Failed to initialize researcher information'});
       return {};
     }
   }
-}
+};
 
 const processResearchTypes = (researchTypes) => {
   let researchStatements = '';
   if(!isEmpty(researchTypes)) {
     researchStatements = researchTypes.map(type => {
       return `${type.description} ${type.manualReview ? 'Requires manual review.' : ''}`;
-    })
+    });
   }
   return researchStatements;
 };
@@ -223,7 +223,7 @@ const Records = (props) => {
   const dataIDTextStyle = styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = styles.TABLE.RECORD_TEXT;
 
-   const applyDarTextHover = (e) => {
+  const applyDarTextHover = (e) => {
     e.target.style.color = styles.TABLE.DAR_TEXT_HOVER.color;
     e.target.style.cursor = styles.TABLE.DAR_TEXT_HOVER.cursor;
   };
@@ -261,7 +261,7 @@ const ModalDetailRow = (props) => {
 };
 
 const returnPIName = (havePI, isThePI, displayName, piName) => {
-  let returnName
+  let returnName;
   if(isThePI === "true") {
     returnName = displayName;
   }else if(havePI === "true") {
@@ -272,11 +272,11 @@ const returnPIName = (havePI, isThePI, displayName, piName) => {
 
 const NewChairConsole = (props) => {
   const [showModal, setShowModal] = useState(false);
-  const [darLimit, setDarLimit] = useState(5);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPendingVotes, setTotalPendingVotes] = useState(0);
-  const [filteredList, setFilteredList] = useState([]);
-  const [visibleList, setVisibleList] = useState([]);
+  // const [darLimit, setDarLimit] = useState(5);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [totalPendingVotes, setTotalPendingVotes] = useState(0);
+  // const [filteredList, setFilteredList] = useState([]);
+  // const [visibleList, setVisibleList] = useState([]);
   const [electionList, setElectionList] = useState([]);
   const [darDetails, setDarDetails] = useState({});
   const [detailLoadingStatus, setDetailLoadingStatus] = useState(false);
@@ -284,14 +284,14 @@ const NewChairConsole = (props) => {
   const darCache = useRef({});
 
   //NOTE: skeleton function for pagination feature, to be implemented/expanded/revised in later PR
-  const goToPage = useCallback((targetPage, currentPage, filteredList, darLimit) => {
-    const targetStartIndex = targetPage * currentPage - darLimit;
-    if(targetStartIndex + 1 < filteredList.length) {
-      const targetEndIndex = targetPage * currentPage;
-      setCurrentPage(targetPage);
-      setVisibleList(filteredList.slice(targetStartIndex, targetEndIndex));
-    }
-  }, [setCurrentPage, setVisibleList]);
+  // const goToPage = useCallback((targetPage, currentPage, filteredList, darLimit) => {
+  //   const targetStartIndex = targetPage * currentPage - darLimit;
+  //   if(targetStartIndex + 1 < filteredList.length) {
+  //     const targetEndIndex = targetPage * currentPage;
+  //     setCurrentPage(targetPage);
+  //     setVisibleList(filteredList.slice(targetStartIndex, targetEndIndex));
+  //   }
+  // }, [setCurrentPage, setVisibleList]);
 
   useEffect(() => {
     const init = async() => {
@@ -300,13 +300,15 @@ const NewChairConsole = (props) => {
         //NOTE: this endpoint needs to be adjusted so that it searches based on server side user data rather than a front-end argument
         const caseList = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
         const pendingList = filter((e) => { return e.electionStatus !== 'Closed'; }, caseList.access);
-        setTotalPendingVotes(pendingList.length);
+
+        //NOTE: commented out code below are thoughts/pseudocode for pagination/search initialization
+        // setTotalPendingVotes(pendingList.length);
         setElectionList(pendingList);
-        setFilteredList(pendingList);
-        if(pendingList.length > 0) {
-          const endIndex = darLimit > pendingList.length ? darLimit : pendingList.length;
-          setVisibleList(filteredList.slice(0, endIndex));
-        }
+        // setFilteredList(pendingList);
+        // if(pendingList.length > 0) {
+        //   const endIndex = darLimit > pendingList.length ? darLimit : pendingList.length;
+        //   setVisibleList(filteredList.slice(0, endIndex));
+        // }
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
       };
@@ -375,13 +377,13 @@ const NewChairConsole = (props) => {
           div({style: styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
         ]),
         //NOTE: for now table is rendering electionList (the full list), will implement controlled view as part of pagination PR
-        h(Records, {isRendered: !isEmpty(electionList), electionList: filteredList, openModal})
+        h(Records, {isRendered: !isEmpty(electionList), electionList: electionList, openModal})
       ]),
-      //NOTE: TODO -> continue working/styling out modal 
+      //NOTE: TODO -> continue working/styling out modal
       //NOTE: add loading placeholders for content
       h(Modal, {
         isRendered: !detailLoadingStatus,
-        isOpen: showModal, 
+        isOpen: showModal,
         onRequestClose: closeModal,
         shouldCloseOnOverlayClick: true,
         style: {
@@ -392,9 +394,9 @@ const NewChairConsole = (props) => {
           div({style: styles.MODAL.DAR_SUBHEADER}, [`${darDetails.darCode}`]),
           div({style: styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
           h(ModalDetailRow, {
-            label: 'Primary Investigator', 
+            label: 'Primary Investigator',
             detail: returnPIName(
-              darDetails.havePI, 
+              darDetails.havePI,
               researcherDetails.isThePI,
               researcherDetails.displayName,
               researcherDetails.piName || researcherDetails.investigator
