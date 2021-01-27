@@ -24,12 +24,12 @@ export default function BackgroundSignIn(props) {
     };
 
     const redirect = (user) => {
-      const page = user.isAdmin ? 'admin_console' :
-        user.isChairPerson ? 'chair_console' :
-          user.isMember ? 'member_console' :
-            user.isResearcher ? 'dataset_catalog' :
-              user.isDataOwner ? 'data_owner_console' :
-                user.isAlumni ? 'summary_votes' : '/';
+      const page = user.isAdmin ? '/admin_console' :
+        user.isChairPerson ? '/chair_console' :
+          user.isMember ? '/member_console' :
+            user.isResearcher ? '/dataset_catalog' :
+              user.isDataOwner ? '/data_owner_console' :
+                user.isAlumni ? '/summary_votes' : '/';
       history.push(page);
       if (onSignIn)
         onSignIn();

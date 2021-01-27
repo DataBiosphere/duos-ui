@@ -14,7 +14,7 @@ class DuosHeader extends Component {
     this.state = {
       showSupportRequestModal: false,
       hover: false,
-      dacChairPath: 'chair_console'
+      dacChairPath: '/chair_console'
     };
   };
 

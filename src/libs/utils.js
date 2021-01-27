@@ -140,7 +140,7 @@ export const NavigationUtils = {
   },
   dacChairConsolePath: async () => {
     const newChairConsoleEnabled = await Config.getFeatureFlag('newChairConsole');
-    return newChairConsoleEnabled ? "new_chair_console" : "chair_console";
+    return newChairConsoleEnabled ? "/new_chair_console" : "/chair_console";
   }
 };
 
