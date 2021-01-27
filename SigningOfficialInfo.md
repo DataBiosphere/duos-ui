@@ -14,7 +14,7 @@ To alleviate this burden on Signing Officials, DUOS is offering Signing Official
 
 This agreement allows a Signing Official to pre-authorize researchers from their institutions for a 1 year renewable term.
 
-<a style="color: #337ab7" href="/Data_Provider_Agreement.pdf" target="_blank"> Data Provider Agreement </a>
+<a style="color: #337ab7" href="https://databiosphere.github.io/duos-ui/Data_Provider_Agreement.pdf" target="_blank"> Data Provider Agreement </a>
 
 To issue your researchers this Library Card pre-authorization, please sign and send the DUOS Library Card Agreement (above) along with a list of the first and last name, and eRA Commmons ID of each researcher you will issue this privilege, to: DUOS-support@broadinstitute.zendesk.com
 
