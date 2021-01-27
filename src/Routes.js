@@ -6,7 +6,6 @@ import { USER_ROLES } from './libs/utils';
 import AccessCollect from './pages/AccessCollect';
 import AccessPreview from './pages/AccessPreview';
 import AccessResultRecords from './pages/AccessResultRecords';
-import AccessReview from './pages/AccessReview';
 import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
 import AdminManageDac from './pages/manage_dac/AdminManageDac';
@@ -99,8 +98,6 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/dul_results_record/:electionId" component={DulResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
-    <AuthenticatedRoute path="/access_review/:darId/:voteId/:rpVoteId?" component={AccessReview} props={props}
-      rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/new_access_review/:darId/:voteId/:rpVoteId?" component={AccessReviewV2} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}
     />
