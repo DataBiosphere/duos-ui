@@ -4,6 +4,7 @@ import { Theme } from '../../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
+import {User} from "../../libs/ajax";
 
 const LINK = {
   color: Theme.palette.link,
@@ -39,6 +40,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
     });
     // Changing state here doesn't trigger a re-render hence the need to force update.
     this.forceUpdate();
+    User.addViewedAlgoDecision(User.getMe())
   };
 
   formatMatchData = (matchData) => {

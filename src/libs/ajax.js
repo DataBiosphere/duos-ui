@@ -1020,6 +1020,12 @@ export const User = {
     const url = `${await Config.getApiUrl()}/dacuser/status/${userId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
     return res.json();
+  },
+
+  addViewedAlgoDecision: async (user) => {
+    const url = `${await Config.getApiUrl()}/user/${user}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'POST' }]));
+    return res.status;
   }
 
 };
