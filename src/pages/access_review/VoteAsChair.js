@@ -40,7 +40,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
     });
     // Changing state here doesn't trigger a re-render hence the need to force update.
     this.forceUpdate();
-    User.addViewedAlgoDecision(User.getMe())
+    User.addViewedAlgoDecision(User.getMe());
   };
 
   formatMatchData = (matchData) => {
