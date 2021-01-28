@@ -60,13 +60,6 @@ export const Consent = {
     return await res.json();
   },
 
-  // TODO: Remove unused endpoint from consent
-  // findDataUseLetterForConsent: async consentId => {
-  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/dul`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
-
   findConsentManage: async () => {
     const url = `${await Config.getApiUrl()}/consent/manage`;
     const res = await fetchOk(url, Config.authOpts());
