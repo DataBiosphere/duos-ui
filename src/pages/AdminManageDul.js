@@ -29,7 +29,6 @@ class AdminManageDul extends Component {
       electionsList: {
         dul: []
       },
-      searchDUL: '',
       showDialogArchive: false,
       showDialogCancel: false,
       showDialogCreate: false,
