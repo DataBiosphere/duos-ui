@@ -4,7 +4,6 @@ import { a, button, div, h, hr, input, label, span } from 'react-hyperscript-hel
 import Select from 'react-select';
 import ReactTooltip from 'react-tooltip';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { AddDulModal } from '../components/modals/AddDulModal';
 import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
@@ -30,8 +29,6 @@ class AdminManageDul extends Component {
       electionsList: {
         dul: []
       },
-      dulToEdit: {},
-      consentToEdit: {},
       searchDUL: '',
       showDialogArchive: false,
       showDialogCancel: false,
@@ -149,40 +146,6 @@ class AdminManageDul extends Component {
 
   open = (electionId, page) => {
     this.props.history.push(`${ page }/${ electionId }`);
-  };
-
-  async editDul(election) {
-    const consentData = await Consent.findConsentById(election.consentId);
-    this.setState({
-      dulToEdit: election,
-      consentToEdit: consentData,
-      showModal: true,
-      isEditMode: true
-    });
-  };
-
-  addDul = () => {
-    this.setState({
-      dulToEdit: null,
-      consentToEdit: null,
-      showModal: true,
-      isEditMode: false
-    });
-  };
-
-  closeAddDulModal = () => {
-    this.setState(prev => {
-      prev.showModal = false;
-      return prev;
-    });
-  };
-
-  okAddDulModal = async () => {
-    await this.getConsentManage();
-    this.setState(prev => {
-      prev.showModal = false;
-      return prev;
-    });
   };
 
   openDialogArchive = (election) => (e) => {
@@ -358,18 +321,7 @@ class AdminManageDul extends Component {
             })
           ]),
           div({ className: 'col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-            div({ className: 'col-lg-6 col-md-6 col-sm-7 col-xs-7' }, [
-              h(SearchBox, { id: 'manageDul', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dul' })
-            ]),
-
-            a({
-              id: 'btn_addDUL',
-              className: 'col-lg-6 col-md-6 col-sm-5 col-xs-5 btn-primary btn-add dul-background',
-              onClick: this.addDul
-            }, [
-              div({ className: 'all-icons add-dul_white' }),
-              span({}, ['Add Data Use Limitations'])
-            ])
+            h(SearchBox, { id: 'manageDul', searchHandler: this.handleSearchDul, pageHandler: this.handlePageChange, color: 'dul' })
           ])
         ]),
         div({ className: 'jumbotron table-box' }, [
@@ -379,7 +331,6 @@ class AdminManageDul extends Component {
             div({ className: 'col-1 cell-header dul-color' }, ['Election N°']),
             div({ className: 'col-1 cell-header dul-color' }, ['Date']),
             div({ className: 'col-1 cell-header dul-color' }, ['DAC']),
-            div({ className: 'col-1 cell-header f-center dul-color' }, ['Edit Record']),
             div({ className: 'col-1 cell-header f-center dul-color' }, ['Election status']),
             div({ className: 'col-1 cell-header f-center dul-color' }, ['Election actions'])
           ]),
@@ -437,19 +388,6 @@ class AdminManageDul extends Component {
                         name: 'dacName',
                         className: 'col-1 cell-body text'
                       }, [this.findDacNameForDacId(election.dacId)]),
-                      div({
-                          className: 'col-1 cell-body f-center',
-                          disabled: (election.electionStatus !== 'un-reviewed' || !election.editable)
-                        },
-                        [
-                          button({
-                            id: election.consentId + '_btnEditDUL',
-                            name: 'btn_editDul',
-                            className: 'cell-button hover-color',
-                            onClick: () => this.editDul(election)
-                          }, ['Edit'])
-
-                        ]),
                       div({ className: 'col-1 cell-body text f-center bold' }, [
                         span({ isRendered: election.electionStatus === 'un-reviewed' }, [
                           a({
@@ -551,16 +489,6 @@ class AdminManageDul extends Component {
             changeHandler: this.handleSizeChange
           })
         ]),
-
-        AddDulModal({
-          isRendered: this.state.showModal,
-          showModal: this.state.showModal,
-          isEditMode: this.state.isEditMode,
-          onOKRequest: this.okAddDulModal,
-          onCloseRequest: this.closeAddDulModal,
-          dul: this.state.dulToEdit,
-          editConsent: this.state.consentToEdit
-        }),
 
         ConfirmationDialog({
           isRendered: this.state.showDialogArchiveOpen,

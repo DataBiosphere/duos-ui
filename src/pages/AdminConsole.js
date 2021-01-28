@@ -2,7 +2,6 @@ import { Component } from 'react';
 import { div, hr } from 'react-hyperscript-helpers';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
-import { AddDulModal } from '../components/modals/AddDulModal';
 import { AddDacModal } from './manage_dac/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { AddDatasetModal } from '../components/modals/AddDatasetModal';
@@ -20,7 +19,6 @@ class AdminConsole extends Component {
     this.state = {
       currentUser: currentUser,
       showModal: false,
-      showAddDulModal: false,
       showAddDacModal: false,
       showAddUserModal: false,
       showAddDatasetModal: false,
@@ -61,13 +59,6 @@ class AdminConsole extends Component {
     );
   }
 
-  addDul = (e) => {
-    this.setState(prev => {
-      prev.showAddDulModal = true;
-      return prev;
-    });
-  };
-
   addDac = (e) => {
     this.setState(prev => {
       prev.showAddDacModal = true;
@@ -104,10 +95,6 @@ class AdminConsole extends Component {
   okModal = (name) => {
 
     switch (name) {
-      case 'editDul':
-        this.setState({ showAddDulModal: false });
-        this.props.history.push(`admin_manage_dul`);
-        break;
       case 'addUser':
         this.setState({showAddUserModal: false});
         this.props.history.push(`admin_manage_users`);
@@ -128,7 +115,6 @@ class AdminConsole extends Component {
 
   closeModal = (name) => {
     switch (name) {
-      case 'addDul': this.setState({ showAddDulModal: false }); break;
       case 'addDac': this.setState({ showAddDacModal: false }); break;
       case 'addUser': this.setState({ showAddUserModal: false }); break;
       case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
@@ -139,7 +125,6 @@ class AdminConsole extends Component {
 
   afterModalOpen = (name) => {
     switch (name) {
-      case 'addDul': this.setState(prev => { prev.showAddDulModal = false; return prev; }); break;
       case 'addDac': this.setState(prev => { prev.showAddDacModal = false; return prev; }); break;
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
       case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
@@ -177,29 +162,9 @@ class AdminConsole extends Component {
                   unreviewedCases: dulUnreviewedCases
                 }),
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-
-                AdminConsoleBox({
-                  id: 'btn_addDUL',
-                  clickHandler: this.addDul,
-                  color: 'dul',
-                  title: 'Add Data Use Limitations',
-                  description: 'Catalog a Data Use Limitation Record in the system',
-                  iconName: 'add-dul',
-                  iconSize: 'default',
-                }),
-                AddDulModal({
-                  isRendered: this.state.showAddDulModal,
-                  showModal: this.state.showAddDulModal,
-                  editMode: false,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen,
-                  dul: '',
-                  editConsent: ''
-                }),
-              ]),
+              div({
+                style: { margin: "10px", padding: "0px", display: "inline-block" },
+                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12" }, [])
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
