@@ -1,172 +1,11 @@
 import {isEmpty, isNil} from 'lodash/fp';
-import Modal from 'react-modal';
 import { useState, useEffect} from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
 import { DAR} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
-import { Theme } from '../libs/theme';
-
-const styles = {
-  PAGE: {
-    width: "90%",
-    margin: "0 auto"
-  },
-  TITLE: {
-    fontFamily: "Montserrat",
-    fontWeight: Theme.font.weight.semibold,
-    fontSize: Theme.font.size.title,
-  },
-  SMALL: {
-    fontFamily: 'Montserrat',
-    fontWeight: Theme.font.weight.regular,
-    fontSize: Theme.font.size.small
-  },
-  HEADER_IMG: {
-    width: '60px',
-    height: '60px',
-  },
-  HEADER_CONTAINER: {
-    display: 'flex',
-    flexDirection: "column"
-  },
-  ICON_CONTAINER: {
-    flexBasis: '76px',
-    height: '60px',
-    paddingRight: '16px'
-  },
-  RIGHT_HEADER_SECTION: {
-    display: 'flex',
-    alignItems: 'flex-end'
-  },
-  LEFT_HEADER_SECTION: {
-    display: 'flex',
-    flexDirection: 'row',
-    paddingTop: "3rem"
-  },
-  TABLE: {
-    CONTAINER: {
-      margin: "3rem auto"
-    },
-    HEADER_ROW: {
-      fontFamily: "Montserrat",
-      fontSize: "14px",
-      color: "#00243C",
-      fontWeight: Theme.font.weight.medium,
-      backgroundColor: "#f3f6f7",
-      display: "flex",
-      justifyContent: "center",
-      height: "51px"
-    },
-    RECORD_ROW: {
-      fontFamily: 'Montserrat',
-      fontWeight: Theme.font.weight.regular,
-      fontSize: "14px",
-      display: "flex",
-      justifyContent: "center",
-      height: "48px",
-    },
-    RECORD_TEXT: {
-      color: "#00243C"
-    },
-    DAR_TEXT_HOVER: {
-      cursor: 'pointer',
-      color: '#0cabc5d9'
-    },
-    DATA_REQUEST_TEXT: {
-      color: "#00609F",
-      fontWeight: Theme.font.weight.semibold
-    },
-    //NOTE: play around with the cell measurements
-    TITLE_CELL: {
-      width: "18%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
-      margin: "0 2%"
-    },
-    DATA_ID_CELL: {
-      width: "10%",
-      margin: "0 2%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
-    },
-    SUBMISSION_DATE_CELL: {
-      width: "10%",
-      margin: "0 2%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
-    },
-    DAC_CELL: {
-      width: "10%",
-      margin: "0 2%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
-    },
-    ELECTION_STATUS_CELL: {
-      width: "10%",
-      margin: "0 2%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
-    },
-    ELECTION_ACTIONS_CELL: {
-      width: "23%",
-      margin: "0 2%",
-      display: "flex",
-      justifyContent: "left",
-      alignItems: "center",
-    }
-  },
-  MODAL: {
-    CONTENT: {
-      height: "auto",
-      top: "20%",
-      bottom: "20%",
-      left: "20%",
-      right: "20%",
-      fontFamily: 'Montserrat',
-      padding: "2%"
-    },
-    DAR_SUBHEADER: {
-      display: 'flex',
-      fontFamily: 'Montserrat',
-      fontSize: '16px',
-      fontWeight: Theme.font.weight.semibold,
-      justifyContent: 'left',
-      color: "#777"
-    },
-    TITLE_HEADER: {
-      display: 'flex',
-      fontFamily: 'Montserrat',
-      fontSize: Theme.font.size.title,
-      fontWeight: Theme.font.weight.regular,
-      justifyContent: 'left',
-      marginBottom: '4%'
-    },
-    DAR_DETAIL_ROW: {
-      padding: '0 3%',
-      margin: '2% 0',
-      display: 'flex',
-      justifyContent: 'space-between'
-    },
-    DAR_LABEL: {
-      color: "#777777",
-      fontSize: '14px',
-      fontWeight: Theme.font.weight.semibold,
-      width: "25%",
-      textAlign: 'right'
-    },
-    DAR_DETAIL: {
-      fontSize: '16px',
-      fontWeight: Theme.font.weight.medium,
-      width: "70%"
-    }
-  }
-};
+import { Styles} from '../libs/theme';
+import DarModal from '../components/modals/DarModal';
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -176,101 +15,49 @@ const getDatasetNames = (datasets) => {
   return datasetNames.join('\n');
 };
 
-const processResearchTypes = (researchTypes) => {
-  let researchStatements = '';
-  if(!isEmpty(researchTypes)) {
-    researchStatements = researchTypes.map(type => {
-      return `${type.description} ${type.manualReview ? 'Requires manual review.' : ''}`;
-    });
-  }
-  return researchStatements;
-};
-
 const Records = (props) => {
   const {openModal} = props;
-  const dataIDTextStyle = styles.TABLE.DATA_REQUEST_TEXT;
-  const recordTextStyle = styles.TABLE.RECORD_TEXT;
+  const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
+  const recordTextStyle = Styles.TABLE.RECORD_TEXT;
 
   const applyDarTextHover = (e) => {
-    e.target.style.color = styles.TABLE.DAR_TEXT_HOVER.color;
-    e.target.style.cursor = styles.TABLE.DAR_TEXT_HOVER.cursor;
+    e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
+    e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
   };
 
   const removeDarTextHover = (e) => {
-    e.target.style.color = styles.TABLE.DATA_REQUEST_TEXT.color;
+    e.target.style.color = Styles.TABLE.DATA_REQUEST_TEXT.color;
   };
 
   return props.electionList.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
-    return div({style: Object.assign({}, borderStyle, styles.TABLE.RECORD_ROW), key: `${dar.data.darCode}`}, [
+    return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.darCode}`}, [
       div({
-        style: Object.assign({}, styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
+        style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
         onClick: (e) => openModal(dar),
         onMouseEnter: applyDarTextHover,
         onMouseLeave: removeDarTextHover
       }, [dar && dar.data ? dar.data.darCode : '- -']),
-      div({style: Object.assign({}, styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
-      div({style: Object.assign({}, styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
-      div({style: Object.assign({}, styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
-      div({style: Object.assign({}, styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
-      div({style: Object.assign({}, styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
+      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
     ]);
   });
 };
 
-const ModalDetailRow = (props) => {
-  return (
-    div({style: styles.MODAL.DAR_DETAIL_ROW}, [
-      div({style: styles.MODAL.DAR_LABEL}, [props.label]),
-      div({style: styles.MODAL.DAR_DETAIL}, [props.detail])
-    ])
-  );
-};
-
-const returnPIName = (havePI, isThePI, displayName, piName) => {
-  let returnName;
-  if(isThePI === "true") {
-    returnName = displayName;
-  }else if(havePI === "true") {
-    returnName = piName;
-  }
-  return returnName || '- -';
-};
-
-const NewChairConsole = (props) => {
+const NewChairConsole = () => {
   const [showModal, setShowModal] = useState(false);
-  // const [darLimit, setDarLimit] = useState(5);
-  // const [currentPage, setCurrentPage] = useState(1);
-  // const [totalPendingVotes, setTotalPendingVotes] = useState(0);
-  // const [filteredList, setFilteredList] = useState([]);
-  // const [visibleList, setVisibleList] = useState([]);
   const [electionList, setElectionList] = useState([]);
   const [darDetails, setDarDetails] = useState({});
-  const [detailLoadingStatus, setDetailLoadingStatus] = useState(false);
-
-  //NOTE: skeleton function for pagination feature, to be implemented/expanded/revised in later PR
-  // const goToPage = useCallback((targetPage, currentPage, filteredList, darLimit) => {
-  //   const targetStartIndex = targetPage * currentPage - darLimit;
-  //   if(targetStartIndex + 1 < filteredList.length) {
-  //     const targetEndIndex = targetPage * currentPage;
-  //     setCurrentPage(targetPage);
-  //     setVisibleList(filteredList.slice(targetStartIndex, targetEndIndex));
-  //   }
-  // }, [setCurrentPage, setVisibleList]);
 
   useEffect(() => {
     const init = async() => {
       try {
         const pendingList = await DAR.getDataAccessManageV2();
-        //NOTE: commented out code below are thoughts/pseudocode for pagination/search initialization
-        // setTotalPendingVotes(pendingList.length);
         setElectionList(pendingList);
-        // setFilteredList(pendingList);
-        // if(pendingList.length > 0) {
-        //   const endIndex = darLimit > pendingList.length ? darLimit : pendingList.length;
-        //   setVisibleList(filteredList.slice(0, endIndex));
-        // }
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
       };
@@ -281,14 +68,12 @@ const NewChairConsole = (props) => {
   const openModal = async (darInfo) => {
     let darData = darInfo.data;
     if(!isNil(darData)) {
-      setDetailLoadingStatus(true);
       setShowModal(true);
       darData.researchType = DataUseTranslation.generateResearchTypes(darData);
       if(!darData.datasetNames) {
         darData.datasetNames = getDatasetNames(darData.datasets);
       }
       setDarDetails(darData);
-      setDetailLoadingStatus(false);
     }
   };
 
@@ -297,78 +82,39 @@ const NewChairConsole = (props) => {
   };
 
   return (
-    div({style: styles.PAGE}, [
+    div({style: Styles.PAGE}, [
       div({ style: {display: "flex", justifyContent: "space-between"}}, [
-        div({className: "left-header-section", style: styles.LEFT_HEADER_SECTION}, [
-          div({style: styles.ICON_CONTAINER}, [
+        div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+          div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
               src: '/images/lock-icon.png',
-              style: styles.HEADER_IMG
+              style: Styles.HEADER_IMG
             })
           ]),
-          div({style: styles.HEADER_CONTAINER}, [
-            div({style: styles.TITLE}, ["Manage Data Access Request"]),
-            div({style: styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
+          div({style: Styles.HEADER_CONTAINER}, [
+            div({style: Styles.TITLE}, ["Manage Data Access Request"]),
+            div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
           ])
         ]),
-        div({className: "right-header-section", style: styles.RIGHT_HEADER_SECTION}, [
+        div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
           //NOTE:search bar should be added here, will implement alongside pagination since it has its hooks in it
         ])
       ]),
-      div({style: styles.TABLE.CONTAINER}, [
-        div({style: styles.TABLE.HEADER_ROW}, [
-          div({style: styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
-          div({style: styles.TABLE.TITLE_CELL}, ["Project title"]),
-          div({style: styles.TABLE.SUBMISSION_DATE_CELL}, ["Submission date"]),
-          div({style: styles.TABLE.DAC_CELL}, ["DAC"]),
-          div({style: styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
-          div({style: styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
+      div({style: Styles.TABLE.CONTAINER}, [
+        div({style: Styles.TABLE.HEADER_ROW}, [
+          div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
+          div({style: Styles.TABLE.TITLE_CELL}, ["Project title"]),
+          div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Submission date"]),
+          div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
+          div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
+          div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
         //NOTE: for now table is rendering electionList (the full list), will implement controlled view as part of pagination PR
         h(Records, {isRendered: !isEmpty(electionList), electionList: electionList, openModal})
       ]),
       //NOTE: TODO -> continue working/styling out modal
-      //NOTE: add loading placeholders for content
-      h(Modal, {
-        isRendered: !detailLoadingStatus,
-        isOpen: showModal,
-        onRequestClose: closeModal,
-        shouldCloseOnOverlayClick: true,
-        style: {
-          content: styles.MODAL.CONTENT
-        }
-      }, [
-        div({style: styles.MODAL.CONTENT, isRendered: !detailLoadingStatus}, [
-          div({style: styles.MODAL.DAR_SUBHEADER}, [`${darDetails.darCode}`]),
-          div({style: styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
-          h(ModalDetailRow, {
-            label: 'Primary Investigator',
-            detail: returnPIName(
-              darDetails.havePi,
-              darDetails.isThePi,
-              darDetails.researcher,
-              darDetails.investigator
-            )
-          }),
-          h(ModalDetailRow, {
-            label: 'Researcher',
-            detail: darDetails.researcher || '- -'
-          }),
-          h(ModalDetailRow, {
-            label: 'Institution',
-            detail: darDetails.institution || '- -'
-          }),
-          h(ModalDetailRow, {
-            label: 'Dataset(s)',
-            detail: darDetails.datasetNames || '- -'
-          }),
-          h(ModalDetailRow, {
-            label: 'Type of Research',
-            detail: processResearchTypes(darDetails.researchType)
-          })
-        ])
-      ])
+      h(DarModal, {showModal, closeModal, darDetails})
     ])
   );
 };
