@@ -1,4 +1,4 @@
-import { Page, Document, StyleSheet, View, PDFViewer, PDFDownloadLink, Text} from '@react-pdf/renderer';
+import { Page, Document, StyleSheet, View, /*PDFViewer*/ PDFDownloadLink, Text} from '@react-pdf/renderer';
 import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
