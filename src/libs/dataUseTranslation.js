@@ -95,9 +95,9 @@ const srpTranslations = {
     description: 'The dataset will be used for a study targeting a vulnerable population as defined in 456 CFR (children, prisoners, pregnant women, mentally disabled persons, or [SIGNIFICANTLY] economically or educationally disadvantaged persons).',
     manualReview: true
   },
-  populationMigration: {
+  population: {
     code: 'OTHER',
-    description: 'The dataset will be used for a study or population origins and/or migration patterns',
+    description: 'The dataset will be used to study variations within the general population (e.g., general substructure of a population).',
     manualReview: true
   },
   psychiatricTraits: {
@@ -246,7 +246,7 @@ export const DataUseTranslation = {
       statementArray = concat(statementArray)(srpTranslations.controls);
     }
 
-    if(darInfo.poa) {
+    if(darInfo.poa || darInfo.populationMigration) {
       statementArray = concat(statementArray)(srpTranslations.poa);
     }
 
@@ -283,9 +283,12 @@ export const DataUseTranslation = {
      *
      * Tracing this through to Ontology, both refer to http://purl.obolibrary.org/obo/DUO_0000011 which is POA
      */
-    if (darInfo.poa) {
+
+    //NOTE: additional check on hmb, diseases, and other are needed for older DARs where populationMigration - poa link was not established
+    if ((darInfo.poa || darInfo.populationMigration) && (!darInfo.hmb && !darInfo.diseases && !darInfo.other)) {
       dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa);
     }
+
     if (darInfo.diseases && !isEmpty(darInfo.ontologies)) {
       const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies));
       dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation));
@@ -325,11 +328,15 @@ export const DataUseTranslation = {
     if (darInfo.stigmatizedDiseases) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases);
     }
+    if(darInfo.population) {
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population);
+    }
+
     if (darInfo.vulnerablePopulation) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation);
     }
-    if(darInfo.populationMigration) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.populationMigration);
+    if(darInfo.population) {
+      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population);
     }
     if (darInfo.psychiatricTraits) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.psychiatricTraits);

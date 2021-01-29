@@ -775,6 +775,7 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.formData.hmb = true;
       prev.formData.poa = false;
+      prev.formData.populationMigration = false;
       prev.formData.diseases = false;
       prev.formData.other = false;
       prev.formData.otherText = '';
@@ -787,6 +788,12 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.formData.hmb = false;
       prev.formData.poa = true;
+      //populationMigration's value is the same as poa since they're the same question
+      //however business context requires the two questions to exist on both step 2 and 3
+      //therefore both keys needed to distinguish position in application
+      //therefore populationMigration (step 3 question) will have it's value set by poa
+      //ui element for populationMigration will be disables on step 3
+      prev.formData.populationMigration = true;
       prev.formData.diseases = false;
       prev.formData.other = false;
       prev.formData.otherText = '';
@@ -798,6 +805,7 @@ class DataAccessRequestApplication extends Component {
   setDiseases = (e) => {
     let applyToState = {
       poa: false,
+      populationMigration: false,
       other: false,
       otherText: ''
     };
@@ -826,6 +834,7 @@ class DataAccessRequestApplication extends Component {
     this.setState(prev => {
       prev.formData.hmb = false;
       prev.formData.poa = false;
+      prev.formData.populationMigration = false;
       prev.formData.diseases = false;
       prev.formData.other = true;
       prev.formData.ontologies = [];
@@ -899,6 +908,7 @@ class DataAccessRequestApplication extends Component {
       hmb: hmb,
       hmbHandler: this.setHmb,
       poa: poa,
+      populationMigration: this.state.formData.populationMigration,
       poaHandler: this.setPoa,
       diseases: diseases,
       diseasesHandler: this.setDiseases,
@@ -1092,7 +1102,14 @@ class DataAccessRequestApplication extends Component {
                 oneGender: this.state.formData.oneGender,
                 partialSave: this.partialSave,
                 pediatric: this.state.formData.pediatric,
-                populationMigration: this.state.formData.populationMigration,
+                /*
+                  NOTE: Assignment below is intentional. populationMigration and POA will have the same value with
+                  poa as the determinant variable. populationMigration will exists as an indicator of its presence on step 3.
+                  Values for both poa and populationMigration will be updated on selection handlers for step 2.
+                  Display value for step 3 need to be based off of poa since older DARs were not created under this standard
+                  Standard decision made on 01/28/2021, will add implementation date later
+                */
+                populationMigration: this.state.formData.poa,
                 prevPage: this.prevPage,
                 psychiatricTraits: this.state.formData.psychiatricTraits,
                 sexualDiseases: this.state.formData.sexualDiseases,
