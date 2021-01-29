@@ -24,7 +24,7 @@ export const YesNoRadioGroup = (props) => {
             id: "lbl_" + props.id + "_" + ix,
             htmlFor: "rad_" + id + "_" + ix,
             className: "radio-wrapper",
-            style: props.disabled ? {opacity: 0.6, cursor: "not-allowed"} : {}
+            style: disabled ? {opacity: 0.6, cursor: "not-allowed"} : {}
           }, [
             input({
               type: "radio",
