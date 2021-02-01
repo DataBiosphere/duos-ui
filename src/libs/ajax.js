@@ -412,12 +412,6 @@ export const DAR = {
     return res.data;
   },
 
-  updateDar: async (dar, id) => {
-    const url = `${await Config.getApiUrl()}/dar/${id}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dar), { method: 'PUT' }]));
-    return await res;
-  },
-
   getDarModalSummary: async (darId) => {
     const url = `${await Config.getApiUrl()}/dar/modalSummary/${darId}`;
     const res = await fetchOk(url, Config.authOpts());
