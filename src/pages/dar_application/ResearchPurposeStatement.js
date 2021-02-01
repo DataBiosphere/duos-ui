@@ -269,6 +269,9 @@ export default function ResearchPurposeStatement(props) {
             ]),
           ]),
 
+          //NOTE: Question should be disabled since answer is based on whether or not poa is selected
+          //Question will reamain here since Executive Board made conscious decision to leave step 3 questions as is
+          //Value equivalency is explained on DataAccessRequestApplication comments (in the middle of props assignment for this component)
           div({
             className: 'radio-question-container row no-margin', style: {
               backgroundColor: showValidationMessages && populationMigration.toString().length === 0 ? alertBackgroundColor : 'inherit'
@@ -278,19 +281,20 @@ export default function ResearchPurposeStatement(props) {
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               label({
-                className: 'control-label rp-choice-questions'
+                className: 'control-label rp-choice-questions',
               },
-              ['3.1.9 Does the research aim involve the study of Population Origins/Migration patterns?'])
+              ['3.1.9 Does the research aim involve the study of Population Origins/Migration patterns? (Answer is pre-determined based on selections made in Step 2)',
+              ])
             ]),
             div({
               className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'
             }, [
               YesNoRadioGroup({
                 value: populationMigration,
-                onChange: handleRadioChange,
                 id: 'populationMigration',
                 name: 'populationMigration',
-                required: true
+                required: true,
+                disabled: true
               })
             ]),
           ]),
