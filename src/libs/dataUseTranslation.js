@@ -328,10 +328,6 @@ export const DataUseTranslation = {
     if (darInfo.stigmatizedDiseases) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.stigmatizedDiseases);
     }
-    if(darInfo.population) {
-      dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.population);
-    }
-
     if (darInfo.vulnerablePopulation) {
       dataUseSummary.secondary = concat(dataUseSummary.secondary)(srpTranslations.vulnerablePopulation);
     }
