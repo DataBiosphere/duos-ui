@@ -1,4 +1,4 @@
-import { Page, Document, StyleSheet, View, /*PDFViewer,*/ PDFDownloadLink, Text} from '@react-pdf/renderer';
+import { Page, Document, StyleSheet, View, /*PDFViewer*/ PDFDownloadLink, Text} from '@react-pdf/renderer';
 import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
@@ -11,15 +11,15 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: 600,
     textAlign: "center",
-    marginBottom: 30
   },
   subHeader: {
-    fontSize: 20,
+    fontSize: 23,
     fontWeight: 800,
-    marginBottom: 20
+    marginBottom: 20,
+    marginTop: 40
   },
   smLabel: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 800,
     marginBottom: 10,
     marginRight: 30,
@@ -55,6 +55,23 @@ const styles = StyleSheet.create({
 
 const iconStyle = {
   marginRight: '0.5rem'
+};
+
+const CloudUseSection = (props) => {
+  const {cloudUse, localUse, anvilUse, cloudProvider, cloudProviderType, cloudProviderDescription} = props;
+  return h(View, {isRendered: cloudUse || localUse || anvilUse}, [
+    h(Text, {style: styles.label}, ["Cloud Use Statements"]),
+    h(View, {style: styles.section}, [
+      h(Text, {style: styles.text, isRendered: anvilUse}, ['All data storage and analysis for this project will be performed on the AnVIL']),
+      h(Text, {style: styles.text, isRendered: cloudUse}, ['Requested permission to use cloud computing to carry out research']),
+      h(Text, {style: styles.text, isRendered: localUse}, ['Requested permission to use local computing to carry out research'])
+    ]),
+    h(View, {style: styles.flexboxContainer, isRendered: cloudUse}, [
+      h(SmallLabelTextComponent, {text: cloudProvider, label: "Cloud Provider", style: {marginRight: 30}}),
+      h(SmallLabelTextComponent, {text: cloudProviderType, label : "Cloud Provider Type"}),
+    ]),
+    h(SmallLabelTextComponent, {text: cloudProviderDescription, label: "Cloud Provider Description", isRendered: cloudUse}),
+  ]);
 };
 
 const SmallLabelTextComponent = (props) => {
@@ -100,6 +117,7 @@ const ApprovalSection = (props => {
 
 export default function ApplicationDownloadLink(props) {
   const {darInfo, researcherProfile} = props;
+  const {cloudUse, localUse, anvilUse, cloudProvider, cloudProviderType, cloudProviderDescription} = darInfo;
   const datasets = props.datasets.map((dataset) => {
     const namePropertyObj = dataset.properties.find((property) =>  property.propertyName === "Dataset Name");
     //using {description: value} so it can be listed via LabelListComponent
@@ -158,10 +176,9 @@ export default function ApplicationDownloadLink(props) {
         ]),
         h(SmallLabelTextComponent, {label: 'Lab Staff Collaborators', text: labCollaborators, style: {marginBottom: 20}}),
         h(SmallLabelTextComponent, {label: 'Internal Collaborators', text: internalCollaborators, style: {marginBottom: 20}}),
-        h(SmallLabelTextComponent, {label: 'External Collaborators', text: externalCollaborators, style: {marginBottom: 20}})
-      ])
-    ]),
-    h(Page, {style: styles.page}, [ //Data Use Request Page
+        h(SmallLabelTextComponent, {label: 'External Collaborators', text: externalCollaborators, style: {marginBottom: 20}}),
+        h(CloudUseSection, {cloudUse, localUse, anvilUse, cloudProvider, cloudProviderType, cloudProviderDescription})
+      ]),
       h(View, {}, [
         h(Text, {style: styles.subHeader}, ['Data Access Request']),
         h(StandardLabelTextComponent, {label: 'Project Title', text: darInfo.projectTitle}),
