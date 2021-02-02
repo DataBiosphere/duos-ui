@@ -73,53 +73,6 @@ export const Consent = {
     });
   },
 
-  postConsent: async (consent) => {
-    consent.requiresManualReview = false;
-    consent.useRestriction = JSON.parse(consent.useRestriction);
-    consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent`;
-    try {
-      const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(consent), Config.authOpts(), { method: 'POST' }]));
-      if (res.ok) {
-        return true;
-      }
-    } catch (err) {
-      return await err.json().then(message => {
-        return message.message;
-      });
-    }
-  },
-
-  update: async (consent) => {
-    consent.requiresManualReview = false;
-    consent.useRestriction = JSON.parse(consent.useRestriction);
-    consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent/${consent.consentId}`;
-    try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(consent), { method: 'PUT' }]));
-      await res.json();
-      return true;
-    } catch (err) {
-      const message = await err.json();
-      return message.message;
-    }
-  },
-
-  postDul: async (consentId, fileName, file) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${fileName}`;
-    let formData = new FormData();
-    formData.append("data", new Blob([file], { type: 'text/plain' }));
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    return res.json().then(
-      () => {
-        return true;
-      },
-      (error) => {
-        return error;
-      }
-    );
-  },
-
   deleteConsent: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
