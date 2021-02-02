@@ -80,7 +80,7 @@ class HomeSigningOfficial extends Component {
               div({style: {marginTop: '2rem', marginBottom: '2rem'}},
                 [a({
                   id: 'link_downloadAgreement',
-                  href: '/Data_Provider_Agreement.pdf',
+                  href: '/Library_Card_Agreeement_2021.pdf',
                   target: '_blank',
                   className: 'btn-secondary btn-download-pdf hover-color',
                   style: {paddingBottom: '1rem'},
