@@ -58,7 +58,7 @@
   "devDependencies": {
     "@babel/traverse": "^7.12.12",
     "@babel/types": "^7.12.12",
-    "cypress": "6.3.0",
+    "cypress": "6.4.0",
     "eslint": "6.8.0",
     "eslint-config-react-app": "5.2.1",
     "eslint-plugin-flowtype": "4.7.0",
