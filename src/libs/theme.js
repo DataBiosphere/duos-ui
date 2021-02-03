@@ -174,6 +174,17 @@ export const Styles = {
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
+    },
+    FOOTER: {
+      display: 'flex',
+      color: "#00243C",
+      fontSize: '14px'
+    },
+    END_FOOTER_SECTION: {
+      width: "20%"
+    },
+    MIDDLE_FOOTER_SECTION: {
+      width: "25%"
     }
   },
   MODAL: {
