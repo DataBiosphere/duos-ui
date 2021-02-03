@@ -113,12 +113,8 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`dul_collect/${consentId}`);
   };
 
-  openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
-  };
-
   openAccessReview = (referenceId, voteId, rpVoteId, alreadyVoted) => async (e) => {
-    const pathStart = await NavigationUtils.accessReviewPath();
+    const pathStart = NavigationUtils.accessReviewPath();
     let chairFinal = false;
     if(this.state.currentUser && alreadyVoted) {
       chairFinal = this.state.currentUser.isChairPerson;

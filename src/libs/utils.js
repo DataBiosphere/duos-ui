@@ -134,9 +134,8 @@ export const Notifications = {
 };
 
 export const NavigationUtils = {
-  accessReviewPath: async () => {
-    const newDarUiEnabled = await Config.getFeatureFlag('newDarUi');
-    return newDarUiEnabled ? "new_access_review" : "access_review";
+  accessReviewPath: () => {
+    return "access_review";
   },
   dacChairConsolePath: async () => {
     const newChairConsoleEnabled = await Config.getFeatureFlag('newChairConsole');

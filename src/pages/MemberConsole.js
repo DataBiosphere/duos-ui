@@ -99,7 +99,7 @@ class MemberConsole extends Component {
   }
 
   openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
-    const pathStart = await NavigationUtils.accessReviewPath();
+    const pathStart = NavigationUtils.accessReviewPath();
     if (rpVoteId !== null) {
       this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
     } else {

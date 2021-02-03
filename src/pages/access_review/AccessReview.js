@@ -12,7 +12,7 @@ const SECTION = {
   margin: '16px',
 };
 
-class AccessReviewV2 extends React.PureComponent {
+class AccessReview extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -132,4 +132,4 @@ class AccessReviewV2 extends React.PureComponent {
     );
   }
 }
-export default AccessReviewV2;
+export default AccessReview;
