@@ -13,7 +13,7 @@ GCR_REPO_PROJ="broad-dsp-gcr-public"
 
 # Generate SA
 docker run --rm  -e VAULT_TOKEN="${VAULT_TOKEN}" \
-   broadinstitute/dsde-toolbox:latest vault read --format=json ${GCR_SVCACCT_VAULT} \
+   broadinstitute/dsde-toolbox:latest vault read --format=json "${GCR_SVCACCT_VAULT}" \
    | jq .data > "${SVCACCT_FILE}"
 
 # Build
