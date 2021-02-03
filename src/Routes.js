@@ -29,7 +29,7 @@ import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
 import InvalidRestrictions from './pages/InvalidRestrictions';
-import AccessReviewV2 from './pages/access_review/AccessReviewV2';
+import AccessReview from './pages/access_review/AccessReview';
 import MemberConsole from './pages/MemberConsole';
 import NewChairConsole from './pages/NewChairConsole';
 import NotFound from './pages/NotFound';
@@ -97,7 +97,7 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/dul_results_record/:electionId" component={DulResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
-    <AuthenticatedRoute path="/new_access_review/:darId/:voteId/:rpVoteId?" component={AccessReviewV2} props={props}
+    <AuthenticatedRoute path="/access_review/:darId/:voteId/:rpVoteId?" component={AccessReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}/>
     <AuthenticatedRoute path="/access_preview/:referenceId?/:electionId?" component={AccessPreview} props={props}
       rolesAllowed={[USER_ROLES.admin]} />

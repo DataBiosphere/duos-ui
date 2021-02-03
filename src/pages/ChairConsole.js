@@ -114,7 +114,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
   };
 
   openAccessReview = (referenceId, voteId, rpVoteId, alreadyVoted) => async (e) => {
-    const pathStart = await NavigationUtils.accessReviewPath();
+    const pathStart = NavigationUtils.accessReviewPath();
     let chairFinal = false;
     if(this.state.currentUser && alreadyVoted) {
       chairFinal = this.state.currentUser.isChairPerson;
