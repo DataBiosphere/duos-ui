@@ -176,15 +176,18 @@ export const Styles = {
       alignItems: "center",
     },
     FOOTER: {
+      backgroundColor: "#f3f6f7",
+      fontSize: '14px',
+      fontFamily: "Montserrat",
       display: 'flex',
-      color: "#00243C",
-      fontSize: '14px'
+      padding: '0 1%',
+      justifyContent: 'flex-end',
+      height: '51px'
     },
-    END_FOOTER_SECTION: {
-      width: "20%"
-    },
-    MIDDLE_FOOTER_SECTION: {
-      width: "25%"
+    FOOTER_SECTION: {
+      width: "100%",
+      display: 'flex',
+      justifyContent: 'center'
     }
   },
   MODAL: {
@@ -230,6 +233,12 @@ export const Styles = {
       fontSize: '16px',
       fontWeight: Theme.font.weight.medium,
       width: "70%"
+    }
+  },
+  PAGINATION_BAR: {
+    OPTION: {
+      flex: 1,
+      margin: "2%"
     }
   }
 };

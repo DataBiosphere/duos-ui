@@ -1,6 +1,6 @@
 import {isEmpty, isNil, includes, toLower, filter, cloneDeep} from 'lodash/fp';
 import { useState, useEffect, useRef} from 'react';
-import { div, h, img, input } from 'react-hyperscript-helpers';
+import { div, h, img, input, span } from 'react-hyperscript-helpers';
 import { DAR} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
@@ -17,27 +17,51 @@ const getDatasetNames = (datasets) => {
 };
 
 const PaginationBar = (props) => {
-  const {pageCount, goToPage} = props;
+  const {pageCount, goToPage, changeTableSize} = props;
   const currentPage = useRef(props.currentPage);
+  const tableSize = useRef(props.tableSize);
 
   useEffect(() => {
     currentPage.current.value = props.currentPage;
-  }, [props.currentPage]);
+    tableSize.current.value = props.tableSize;
+  }, [props.currentPage, props.tableSize]);
 
   return (
-    div({}, [
-      div({onClick: (e) => goToPage(toNumber(currentPage.current.value) - 1)}, ['Prev']),
-      div({}, [//insert middle style
-        'Page ',
-        input({
-          onChange: (e) => goToPage(toNumber(currentPage.current.value)),
-          type: 'text',
-          ref: currentPage,
-          defaultvalue: props.currentPage
-        }),
-        `of ${pageCount}`
+    div({style: Styles.TABLE.FOOTER}, [
+      div({style: {flex: 1}}),
+      div({style: {display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1}}, [
+        div({
+          onClick: (e) => goToPage(toNumber(currentPage.current.value) - 1),
+          style: {margin: '2%', flex: 1}
+        }, ['Prev']),
+        div({style: {margin: '2% 0', flex: 2}}, [
+          span({},['Page ']),
+          input({
+            onChange: (e) => goToPage(toNumber(currentPage.current.value)),
+            type: 'text',
+            pattern: '[0-9]+',
+            ref: currentPage,
+            defaultvalue: props.currentPage,
+            style: {width: '20%', textAlign: "center"}
+          }),
+          span({}, [` of ${pageCount}`])
+        ]),
+        div({
+          onClick: (e) => goToPage(toNumber(currentPage.current.value) + 1),
+          style: {margin: '2%', flex: 1}
+        }, ['Next']),
       ]),
-      div({onClick: (e) => goToPage(toNumber(currentPage.current.value) + 1)}, ['Next'])
+      div({style: {display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'flex-end'}}, [
+        span({style: {}}, ['Rows per page: ']),
+        input({
+          onChange: (e) => changeTableSize(tableSize.current.value),
+          type: 'text',
+          pattern: '[0-9]+',
+          ref: tableSize,
+          defaultvalue: props.tableSize,
+          style: {textAlign: "center", width: '20%',}
+        })
+      ])
     ])
   );
 };
@@ -63,7 +87,7 @@ const Records = (props) => {
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
-    return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}`}, [
+    return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}-${index}`}, [
       div({
         style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
         onClick: (e) => openModal(dar),
@@ -91,18 +115,25 @@ const NewChairConsole = () => {
 
   useEffect(() => {
     const init = async() => {
+      const initTableSize = 10;
       try {
         const pendingList = await DAR.getDataAccessManageV2();
         setElectionList(pendingList);
         setFilteredList(pendingList);
-        setTableSize(15);
-        setPageCount(Math.ceil(pendingList.length / 15));
+        setTableSize(initTableSize);
+        setPageCount(Math.ceil(pendingList.length / initTableSize));
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
       };
     };
     init();
   }, []);
+
+  useEffect(() => {
+    if(!isNil(filteredList) && !isNil(tableSize)) {
+      setPageCount(Math.ceil(filteredList.length / tableSize));
+    }
+  }, [filteredList, tableSize]);
 
   const openModal = async (darInfo) => {
     let darData = darInfo.data;
@@ -151,6 +182,12 @@ const NewChairConsole = () => {
     }
   };
 
+  const changeTableSize = (newTableSize) => {
+    if(!isEmpty(newTableSize) && newTableSize > 0) {
+      setTableSize(newTableSize);
+    }
+  };
+
   return (
     div({style: Styles.PAGE}, [
       div({ style: {display: "flex", justifyContent: "space-between"}}, [
@@ -189,19 +226,7 @@ const NewChairConsole = () => {
         //NOTE: for now table is rendering electionList (the full list), will implement controlled view as part of pagination PR
         h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize})
       ]),
-      div({style: Styles.TABLE.FOOTER}, [
-        div({style: Styles.TABLE.END_FOOTER_SECTION}, [
-
-        ]),
-        //NOTE: genericize this component, it can be reused
-        div({style: Styles.TABLE.MIDDLE_FOOTER_SECTION}, [
-          h(PaginationBar, {pageCount, currentPage, tableSize, goToPage})
-        ]),
-        div({styles: Styles.TABLE.END_FOOTER_SECTION}, [
-
-        ])
-      ]),
-      //NOTE: TODO -> continue working/styling out modal
+      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize}),
       h(DarModal, {showModal, closeModal, darDetails})
     ])
   );
