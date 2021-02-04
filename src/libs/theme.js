@@ -92,7 +92,8 @@ export const Styles = {
   },
   RIGHT_HEADER_SECTION: {
     display: 'flex',
-    alignItems: 'flex-end'
+    alignItems: 'flex-end',
+    width: '25%',
   },
   LEFT_HEADER_SECTION: {
     display: 'flex',
@@ -127,6 +128,9 @@ export const Styles = {
     DAR_TEXT_HOVER: {
       cursor: 'pointer',
       color: '#0cabc5d9'
+    },
+    RECORD_ROW_HOVER: {
+      backgroundColor: '#e2eef9'
     },
     DATA_REQUEST_TEXT: {
       color: "#00609F",
@@ -188,7 +192,34 @@ export const Styles = {
       width: "100%",
       display: 'flex',
       justifyContent: 'center'
-    }
+    },
+    PAGINATION_SECTION_OFFSET: {
+      flex: 1
+    },
+    PAGINATION_BUTTON_SECTION: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1
+    },
+    PAGINATION_BUTTON: {
+      margin: '2%',
+      flex: 1
+    },
+    PAGINATION_CURRENT_PAGE: {
+      margin: '2% 0',
+      flex: 2
+    },
+    PAGINATION_INPUT: {
+      textAlign: 'center',
+      width: '20%'
+    },
+    PAGINATION_TABLE_SIZE_SECTION: {
+      display: 'flex',
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'flex-end'
+    },
   },
   MODAL: {
     CONTENT: {
@@ -233,12 +264,6 @@ export const Styles = {
       fontSize: '16px',
       fontWeight: Theme.font.weight.medium,
       width: "70%"
-    }
-  },
-  PAGINATION_BAR: {
-    OPTION: {
-      flex: 1,
-      margin: "2%"
     }
   }
 };
