@@ -78,12 +78,6 @@ export const Consent = {
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
   },
 
-  findInvalidConsentRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/consent/invalid`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  }
-
 };
 
 export const DAC = {
@@ -377,12 +371,6 @@ export const DAR = {
     return await res.json();
   },
 
-  findDataAccessInvalidUseRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/dar/invalid`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {
@@ -591,13 +579,6 @@ export const Election = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
-
-  // TODO: Remove unused endpoint from consent
-  // findInvalidConsentRestriction: async () => {
-  //   const url = `${await Config.getApiUrl()}/consent/invalid`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return await res.json();
-  // },
 
   findReviewedDRs: async () => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/closed`;

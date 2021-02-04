@@ -28,7 +28,6 @@ import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
-import InvalidRestrictions from './pages/InvalidRestrictions';
 import AccessReview from './pages/access_review/AccessReview';
 import MemberConsole from './pages/MemberConsole';
 import NewChairConsole from './pages/NewChairConsole';
@@ -91,7 +90,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    <AuthenticatedRoute path="/invalid_restrictions" component={InvalidRestrictions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/access_result_records/:referenceId/:electionId" component={AccessResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
