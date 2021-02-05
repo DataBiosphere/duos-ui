@@ -33,7 +33,7 @@ class AccessReview extends React.PureComponent {
   }
 
   async darReviewAccess() {
-    const { darId, voteId, rpVoteId } = this.props.match.params;
+    const { darId, voteId } = this.props.match.params;
 
     // Access Election Information
     const getElectionInformaion = async(darId, voteId) => {
@@ -41,7 +41,7 @@ class AccessReview extends React.PureComponent {
         const accessVote = await Votes.getDarVote(darId, voteId);
         const accessElectionReview = await Election.findDataAccessElectionReview(accessVote.electionId, false);
         const accessElection = fp.isNil(accessElectionReview) ? null : accessElectionReview.election;
-        const rpElectionReview = fp.isNil(rpVoteId) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+        const rpElectionReview = fp.isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
         const rpElection = fp.isNil(rpElectionReview) ? null : rpElectionReview.election;
         return {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection};
       } catch(error) {

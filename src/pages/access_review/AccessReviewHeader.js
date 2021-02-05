@@ -1,8 +1,6 @@
 import React from 'react';
-import { div, button, img, hh } from 'react-hyperscript-helpers';
+import { div, img, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
-import { Storage } from '../../libs/storage';
-import { Navigation } from '../../libs/utils';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -16,26 +14,13 @@ const SMALL = {
   lineHeight: Theme.font.leading.dense,
 };
 
-const BUTTON = {
-  ...SMALL,
-  fontWeight: Theme.font.weight.semibold,
-  color: Theme.palette.secondary,
-};
-
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => {
-    if (rpVoteId !== null) {
-      this.props.history.push(`/access_review/${referenceId}/${voteId}/${rpVoteId}`);
-    } else {
-      this.props.history.push(`/access_review/${referenceId}/${voteId}`);
-    }
+  openAccessReview = (referenceId, voteId) => {
+    this.props.history.push(`/access_review/${referenceId}/${voteId}`);
   };
 
   render() {
-    const currentUser = Storage.getCurrentUser();
-    const { history } = this.props;
-    const { darId, voteId, rpVoteId } = this.props.match.params;
     return div(
       {
         style: {
