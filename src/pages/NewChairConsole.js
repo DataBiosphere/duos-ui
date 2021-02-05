@@ -34,7 +34,7 @@ const getElectionDate = (election) => {
     formattedString = formatDate(targetDate);
   }
   return formattedString;
-}
+};
 
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
@@ -114,7 +114,7 @@ const NewChairConsole = () => {
 
   const handleSearchChange = () => {
     setCurrentPage(1);
-    const searchTermValues = toLower(searchTerms.current.value).split(/\s|\,/);
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
     if(isEmpty(searchTermValues)) {
       setFilteredList(electionList);
     } else {
