@@ -41,7 +41,7 @@ class AccessReview extends React.PureComponent {
         const accessVote = await Votes.getDarVote(darId, voteId);
         const accessElectionReview = await Election.findDataAccessElectionReview(accessVote.electionId, false);
         const accessElection = fp.isNil(accessElectionReview) ? null : accessElectionReview.election;
-        const rpElectionReview = await Election.findRPElectionReview(accessElection.electionId, false);
+        const rpElectionReview = fp.isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
         const rpElection = fp.isNil(rpElectionReview) ? null : rpElectionReview.election;
         return {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection};
       } catch(error) {
