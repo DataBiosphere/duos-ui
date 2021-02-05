@@ -212,7 +212,8 @@ export const Styles = {
     },
     PAGINATION_INPUT: {
       textAlign: 'center',
-      width: '20%'
+      width: '20%',
+      fontFamily: 'Montserrat'
     },
     PAGINATION_TABLE_SIZE_SECTION: {
       display: 'flex',

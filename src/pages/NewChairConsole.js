@@ -26,6 +26,16 @@ const removeTextHover = (e, color) => {
   e.target.style.color = color;
 };
 
+const getElectionDate = (election) => {
+  let formattedString = '- -';
+  if(election) {
+    //NOTE: some elections have a createDate attribute but not a lastUpdate attributes
+    const targetDate = election.lastUpdate || election.createDate;
+    formattedString = formatDate(targetDate);
+  }
+  return formattedString;
+}
+
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
   const {openModal, currentPage, tableSize, applyTextHover, removeTextHover} = props;
@@ -46,7 +56,7 @@ const Records = (props) => {
         onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
       }, [dar && dar.data ? dar.data.darCode : '- -']),
       div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
@@ -117,7 +127,7 @@ const NewChairConsole = () => {
             const dar = electionData.dar ? electionData.dar.data : undefined;
             const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode)]) : [];
             const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
-            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(election.status), formatDate(election.lastUpdate)]) : [];
+            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(election.status), getElectionDate(election)]) : [];
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
         }
@@ -158,13 +168,16 @@ const NewChairConsole = () => {
           input({
             type: 'text',
             placeholder: 'Enter search terms',
-            style: { //Styling seems to only work when defined here, variable reference doesn't work
+            //Styling seems to only work when defined here, variable reference doesn't work
+            //Odds are there's a competing style, need to figure out where it's coming from
+            style: {
               width: '100%',
               border: '1px solid #cecece',
-              backgroundColor: 'aliceblue',
+              backgroundColor: '#f3f6f7',
               borderRadius: '5px',
-              height: '3rem',
-              paddingLeft: '2%'
+              height: '4rem',
+              paddingLeft: '2%',
+              fontFamily: 'Montserrat'
             },
             onChange:(e) => handleSearchChange(searchTerms.current),
             ref: searchTerms
@@ -175,7 +188,7 @@ const NewChairConsole = () => {
         div({style: Styles.TABLE.HEADER_ROW}, [
           div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
           div({style: Styles.TABLE.TITLE_CELL}, ["Project title"]),
-          div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Submission date"]),
+          div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Last Updated"]),
           div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
