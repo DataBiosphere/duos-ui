@@ -1,11 +1,12 @@
 import {isEmpty, isNil} from 'lodash/fp';
-import { useState, useEffect} from 'react';
-import { div, h, img } from 'react-hyperscript-helpers';
-import { DAR} from '../libs/ajax';
+import React, { useState, useEffect} from 'react';
+import {div, button, h, img, span} from 'react-hyperscript-helpers';
+import {DAR, Election} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
+import {ConfirmationDialog} from "../components/ConfirmationDialog";
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -16,6 +17,8 @@ const getDatasetNames = (datasets) => {
 };
 
 const Records = (props) => {
+  let showCreateDialog = false;
+  const history = props.history;
   const {openModal} = props;
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
@@ -28,6 +31,79 @@ const Records = (props) => {
   const removeDarTextHover = (e) => {
     e.target.style.color = Styles.TABLE.DATA_REQUEST_TEXT.color;
   };
+
+  const confirm = (dar) => ConfirmationDialog({
+    title: 'Open election?',
+    color: 'access',
+    isRendered: showCreateDialog,
+    showModal: showCreateDialog,
+    disableOkBtn: false,
+    disableNoBtn: false,
+    action: {
+      label: "Yes",
+      handler: createElection(dar)
+    },
+    alertMessage: "",
+    alertTitle: ""
+  }, [
+    div({ className: "dialog-description" }, [
+      span({}, ["Are you sure you want to open this election?"]),
+    ])
+  ])
+
+  function createElection(dar) {
+    if (window.confirm("Are you sure you would like to open this election?")) {
+      Election.createDARElection(dar.referenceId)
+        .then()
+        .catch(errorResponse => {
+          if (errorResponse.status === 500) {
+            alert("Email Service Error! The election was created but the participants couldnt be notified by Email.");
+          } else {
+            errorResponse.json().then(error =>
+              alert("Election cannot be created! " + error.message));
+          }
+        })
+      window.location.reload();
+    }
+  }
+
+  const createActionButton = (props, dar, e) => {
+    const name = "cell-button hover-color";
+    if (e !== null && e !== undefined) {
+      switch (e.status) {
+        case "Open" :
+          return button({
+            className: name,
+            onClick: () => history.push(`access_preview/${dar.referenceId}/?electionId=${e.electionId}`)
+            //href: `new_access_review/${dar.referenceId}/?electionId=${e.electionId}`,
+            // onClick: () => <Redirect
+            //   to={{ pathname: `new_access_review/${dar.dataRequestId}/?electionId=${e.electionId}`,
+            //   state: { from: props.location} }}>
+            // </Redirect>
+          }, ["Vote"]);
+        case "Final":
+          return button({
+            className: name,
+            onClick: () => createElection(dar)
+          }, ["Re-Open"]);
+        case "Canceled":
+          return button({
+            className: name,
+            onClick: () => createElection(dar)
+          }, ["Re-Open"]);
+        case "Closed":
+          return button({
+            className: name,
+            onClick: () => createElection(dar)
+          }, ["Re-Open"]);
+      }
+    }
+    return button({
+      className: name,
+      onClick: () => createElection(dar, e)
+    }, ['Open Election']);
+  }
+
 
   return props.electionList.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
@@ -43,12 +119,12 @@ const Records = (props) => {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(props, dar, election)])
     ]);
   });
 };
 
-const NewChairConsole = () => {
+const NewChairConsole = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [electionList, setElectionList] = useState([]);
   const [darDetails, setDarDetails] = useState({});
@@ -111,7 +187,7 @@ const NewChairConsole = () => {
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
         //NOTE: for now table is rendering electionList (the full list), will implement controlled view as part of pagination PR
-        h(Records, {isRendered: !isEmpty(electionList), electionList: electionList, openModal})
+        h(Records, {isRendered: !isEmpty(electionList), electionList: electionList, openModal, history: props.history})
       ]),
       //NOTE: TODO -> continue working/styling out modal
       h(DarModal, {showModal, closeModal, darDetails})
