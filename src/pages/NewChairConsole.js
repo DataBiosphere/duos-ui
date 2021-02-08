@@ -1,6 +1,7 @@
-import {isEmpty, isNil} from 'lodash/fp';
-import { useState, useEffect} from 'react';
-import {div, button, h, img, span} from 'react-hyperscript-helpers';
+
+import {isEmpty, isNil, includes, toLower, filter, cloneDeep} from 'lodash/fp';
+import { useState, useEffect, useRef} from 'react';
+import {div, button, h, img, input} from 'react-hyperscript-helpers';
 import {DAR, Election} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
@@ -8,6 +9,7 @@ import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import {ConfirmationDialog} from "../components/ConfirmationDialog";
 import {Storage} from '../libs/storage';
+import PaginationBar from '../components/PaginationBar';
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -15,6 +17,25 @@ const getDatasetNames = (datasets) => {
     return dataset.label;
   });
   return datasetNames.join('\n');
+};
+
+const applyTextHover = (e) => {
+  e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
+  e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
+};
+
+const removeTextHover = (e, color) => {
+  e.target.style.color = color;
+};
+
+const getElectionDate = (election) => {
+  let formattedString = '- -';
+  if(election) {
+    //NOTE: some elections have a createDate attribute but not a lastUpdate attributes
+    const targetDate = election.lastUpdate || election.createDate;
+    formattedString = formatDate(targetDate);
+  }
+  return formattedString;
 };
 
 const Records = (props) => {
@@ -111,17 +132,27 @@ const Records = (props) => {
   }
 
   return props.electionList.map((electionInfo, index) => {
+
+  //NOTE: currentPage is not zero-indexed
+  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover} = props;
+  const startIndex = (currentPage - 1) * tableSize;
+  const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
+  const visibleWindow = props.filteredList.slice(startIndex, endIndex);
+  const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
+  const recordTextStyle = Styles.TABLE.RECORD_TEXT;
+
+  return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
-    return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.darCode}`}, [
+    return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}-${index}`}, [
       div({
         style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
         onClick: (e) => openModal(dar),
-        onMouseEnter: applyDarTextHover,
-        onMouseLeave: removeDarTextHover
+        onMouseEnter: applyTextHover,
+        onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
       }, [dar && dar.data ? dar.data.darCode : '- -']),
       div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(dar, election, votes)])
@@ -132,19 +163,35 @@ const Records = (props) => {
 const NewChairConsole = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [electionList, setElectionList] = useState([]);
+  const [filteredList, setFilteredList] = useState([]);
+  const [tableSize, setTableSize] = useState();
   const [darDetails, setDarDetails] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
+  const searchTerms = useRef('');
 
   useEffect(() => {
     const init = async() => {
+      const initTableSize = 10;
+      setTableSize(initTableSize);
       try {
         const pendingList = await DAR.getDataAccessManageV2();
         setElectionList(pendingList);
+        setFilteredList(pendingList);
+        setPageCount(Math.ceil(pendingList.length / initTableSize));
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
       };
     };
     init();
   }, []);
+
+  useEffect(() => {
+    if(!isNil(filteredList) && !isNil(tableSize)) {
+      setPageCount(Math.ceil(filteredList.length / tableSize));
+    }
+  }, [filteredList, tableSize]);
+
   const openModal = async (darInfo) => {
     let darData = darInfo.data;
     if(!isNil(darData)) {
@@ -159,6 +206,42 @@ const NewChairConsole = (props) => {
 
   const closeModal = () => {
     setShowModal(false);
+  };
+
+  const handleSearchChange = () => {
+    setCurrentPage(1);
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    if(isEmpty(searchTermValues)) {
+      setFilteredList(electionList);
+    } else {
+      let newFilteredList = cloneDeep(electionList);
+      searchTermValues.forEach((splitTerm) => {
+        const term = splitTerm.trim();
+        if(!isEmpty(term)) {
+          newFilteredList = filter(electionData => {
+            const { election, dac} = electionData;
+            const dar = electionData.dar ? electionData.dar.data : undefined;
+            const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode)]) : [];
+            const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
+            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(election.status), getElectionDate(election)]) : [];
+            return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
+          }, newFilteredList);
+        }
+      });
+      setFilteredList(newFilteredList);
+    }
+  };
+
+  const goToPage = (currentPage) => {
+    if(currentPage > 0 && currentPage < pageCount + 1) {
+      setCurrentPage(currentPage);
+    }
+  };
+
+  const changeTableSize = (newTableSize) => {
+    if(!isEmpty(newTableSize) && newTableSize > 0) {
+      setTableSize(newTableSize);
+    }
   };
 
   return (
@@ -178,22 +261,37 @@ const NewChairConsole = (props) => {
           ])
         ]),
         div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
-          //NOTE:search bar should be added here, will implement alongside pagination since it has its hooks in it
+          input({
+            type: 'text',
+            placeholder: 'Enter search terms',
+            //Styling seems to only work when defined here, variable reference doesn't work
+            //Odds are there's a competing style, need to figure out where it's coming from
+            style: {
+              width: '100%',
+              border: '1px solid #cecece',
+              backgroundColor: '#f3f6f7',
+              borderRadius: '5px',
+              height: '4rem',
+              paddingLeft: '2%',
+              fontFamily: 'Montserrat'
+            },
+            onChange:(e) => handleSearchChange(searchTerms.current),
+            ref: searchTerms
+          })
         ])
       ]),
       div({style: Styles.TABLE.CONTAINER}, [
         div({style: Styles.TABLE.HEADER_ROW}, [
           div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
           div({style: Styles.TABLE.TITLE_CELL}, ["Project title"]),
-          div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Submission date"]),
+          div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Last Updated"]),
           div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        //NOTE: for now table is rendering electionList (the full list), will implement controlled view as part of pagination PR
-        h(Records, {isRendered: !isEmpty(electionList), electionList: electionList, openModal, history: props.history})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history})
       ]),
-      //NOTE: TODO -> continue working/styling out modal
+      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
       h(DarModal, {showModal, closeModal, darDetails})
     ])
   );

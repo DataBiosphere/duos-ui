@@ -137,6 +137,10 @@ class AdminConsole extends Component {
 
     const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
 
+    const consoleBoxPlaceholder = div({
+      style: { margin: "10px", padding: "0px", display: "inline-block" },
+      className: "col-lg-6 col-md-6 col-sm-12 col-xs-12" }, []);
+
     return (
 
       div({}, [
@@ -162,9 +166,7 @@ class AdminConsole extends Component {
                   unreviewedCases: dulUnreviewedCases
                 }),
               ]),
-              div({
-                style: { margin: "10px", padding: "0px", display: "inline-block" },
-                className: "col-lg-6 col-md-6 col-sm-12 col-xs-12" }, [])
+              consoleBoxPlaceholder
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -288,19 +290,7 @@ class AdminConsole extends Component {
                   onAfterOpen: this.afterModalOpen
                 })
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_invalidRequest',
-                  url: '/invalid_restrictions',
-                  color: 'common',
-                  title: 'Invalid Request Restrictions',
-                  description: 'Show Invalid Restrictions for Data Use Limitations and Data Access Requests',
-                  iconName: 'invalid-restrictions',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                })
-              ])
+              consoleBoxPlaceholder
             ])
           ])
         ])

@@ -98,13 +98,9 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId, rpVoteId) => async (e) => {
-    const pathStart = await NavigationUtils.accessReviewPath();
-    if (rpVoteId !== null) {
-      this.props.history.push(`${pathStart}/${referenceId}/${voteId}/${rpVoteId}`);
-    } else {
-      this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
-    }
+  openAccessReview = (referenceId, voteId) => async (e) => {
+    const pathStart = NavigationUtils.accessReviewPath();
+    this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
   };
 
   openDULReview = (consentId, voteId) => (e) => {
@@ -284,7 +280,7 @@ class MemberConsole extends Component {
                       className: oneColumnClass + ' cell-body text f-center'
                     }, [pendingCase.logged]),
                     div({
-                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId),
+                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId),
                       className: twoColumnClass + ' cell-body f-center'
                     }, [
                       button({
