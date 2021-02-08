@@ -1,4 +1,4 @@
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, span } from 'react-hyperscript-helpers';
 import { Alert } from '../Alert';
 import { Styles } from '../../libs/theme';
 import Modal from 'react-modal';
@@ -24,7 +24,7 @@ const returnPIName = (researcher) => {
     const piNameProp = find({propertyKey: "piName"})(properties);
     returnName = piNameProp.propertyValue;
   }
-  return returnName || '- -';
+  return returnName || researcher.displayName;
 };
 
 const returnInstitution = (researcher) => {
@@ -67,6 +67,10 @@ const DarModal = (props) => {
     }
   }, [
     div({style: Styles.MODAL.CONTENT}, [
+      span({
+        style: { float: 'right', cursor: 'pointer' },
+        onClick: closeModal,
+        className: "glyphicon glyphicon-remove default-color"}),
       div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
       div({style: { borderBottom: "1px solid #1F3B50" }}, []),
       h(ModalDetailRow, {
