@@ -1,11 +1,8 @@
-import {div, h} from 'react-hyperscript-helpers';
+import { div, h } from 'react-hyperscript-helpers';
 import { Alert } from '../Alert';
-import { User } from '../../libs/ajax';
 import { Styles } from '../../libs/theme';
-import { Notifications } from '../../libs/utils';
 import Modal from 'react-modal';
-import {find, isEmpty, isNil} from 'lodash/fp';
-import {useEffect, useState} from 'react';
+import { find, isEmpty, isNil } from 'lodash/fp';
 
 const ModalDetailRow = (props) => {
   return (
@@ -30,6 +27,11 @@ const returnPIName = (researcher) => {
   return returnName || '- -';
 };
 
+const returnInstitution = (researcher) => {
+  const piNameProp = find({propertyKey: "institution"})(researcher.researcherProperties);
+  return isNil(piNameProp) ? '- -' : piNameProp.propertyValue;
+};
+
 const processResearchTypes = (researchTypes) => {
   let researchStatements = '';
   if(!isEmpty(researchTypes)) {
@@ -49,28 +51,9 @@ const requiresManualReview = (darDetails) => {
     darDetails.vulnerablePopulation;
 };
 
-const getResearcher = async (userId) => {
-  return await User.getById(userId);
-};
-
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
-  const {showModal, closeModal, darDetails} = props;
-
-  const [researcher, setResearcher] = useState([]);
-  useEffect(() => {
-    const init = async() => {
-      try {
-        if (!isNil(darDetails.userId)) {
-          const researcher = await getResearcher(darDetails.userId);
-          setResearcher(researcher);
-        }
-      } catch(error) {
-        Notifications.showError({text: 'Error: Unable to retrieve researcher information'});
-      }
-    };
-    init();
-  }, []);
+  const {showModal, closeModal, darDetails, researcher} = props;
 
   return h(Modal, {
     isOpen: showModal,
@@ -100,7 +83,7 @@ const DarModal = (props) => {
       }),
       h(ModalDetailRow, {
         label: 'Institution',
-        detail: darDetails.institution || '- -'
+        detail: returnInstitution(researcher)
       }),
       h(ModalDetailRow, {
         label: 'Dataset(s)',
