@@ -28,8 +28,8 @@ const returnPIName = (researcher) => {
 };
 
 const returnInstitution = (researcher) => {
-  const piNameProp = find({propertyKey: "institution"})(researcher.researcherProperties);
-  return isNil(piNameProp) ? '- -' : piNameProp.propertyValue;
+  const institutionProp = find({propertyKey: "institution"})(researcher.researcherProperties);
+  return isNil(institutionProp) ? '- -' : institutionProp.propertyValue;
 };
 
 const processResearchTypes = (researchTypes) => {
