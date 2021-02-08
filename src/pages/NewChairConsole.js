@@ -1,5 +1,5 @@
 import {isEmpty, isNil} from 'lodash/fp';
-import React, { useState, useEffect} from 'react';
+import { useState, useEffect} from 'react';
 import {div, button, h, img, span} from 'react-hyperscript-helpers';
 import {DAR, Election} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
@@ -7,6 +7,7 @@ import {Notifications, formatDate} from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import {ConfirmationDialog} from "../components/ConfirmationDialog";
+import {Storage} from '../libs/storage';
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -19,6 +20,14 @@ const getDatasetNames = (datasets) => {
 const Records = (props) => {
   let showCreateDialog = false;
   const history = props.history;
+  let votes = [];
+  for (let i of props.electionList) {
+    for (let v of i.votes) {
+      if ((v.dacUserId === Storage.getCurrentUser().dacUserId) && (v.type === "DAC")) {
+        votes.push(v);
+      }
+    }
+  }
   const {openModal} = props;
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
@@ -67,19 +76,16 @@ const Records = (props) => {
     }
   }
 
-  const createActionButton = (props, dar, e) => {
+  const createActionButton = (dar, e, votes) => {
     const name = "cell-button hover-color";
     if (e !== null && e !== undefined) {
       switch (e.status) {
         case "Open" :
+         const vote = votes.filter(v => (v.electionId === e.electionId))[0];
+         console.log(vote);
           return button({
             className: name,
-            onClick: () => history.push(`access_preview/${dar.referenceId}/?electionId=${e.electionId}`)
-            //href: `new_access_review/${dar.referenceId}/?electionId=${e.electionId}`,
-            // onClick: () => <Redirect
-            //   to={{ pathname: `new_access_review/${dar.dataRequestId}/?electionId=${e.electionId}`,
-            //   state: { from: props.location} }}>
-            // </Redirect>
+            onClick: () => history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
           }, ["Vote"]);
         case "Final":
           return button({
@@ -104,7 +110,6 @@ const Records = (props) => {
     }, ['Open Election']);
   }
 
-
   return props.electionList.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
@@ -119,7 +124,7 @@ const Records = (props) => {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [election ? formatDate(election.lastUpdate) : '- -']),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(props, dar, election)])
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(dar, election, votes)])
     ]);
   });
 };
@@ -135,12 +140,11 @@ const NewChairConsole = (props) => {
         const pendingList = await DAR.getDataAccessManageV2();
         setElectionList(pendingList);
       } catch(error) {
-        Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
+        Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
       };
     };
     init();
   }, []);
-
   const openModal = async (darInfo) => {
     let darData = darInfo.data;
     if(!isNil(darData)) {
