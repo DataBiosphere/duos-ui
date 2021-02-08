@@ -2,6 +2,7 @@ import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import Modal from 'react-modal';
 import {isEmpty} from 'lodash/fp';
+import {Alert} from '../Alert';
 
 const ModalDetailRow = (props) => {
   return (
@@ -32,6 +33,15 @@ const processResearchTypes = (researchTypes) => {
   return researchStatements;
 };
 
+const requiresManualReview = (darDetails) => {
+  return darDetails.illegalBehavior ||
+    darDetails.poa ||
+    darDetails.psychiatricTraits ||
+    darDetails.sexualDiseases ||
+    darDetails.stigmatizedDiseases ||
+    darDetails.vulnerablePopulation;
+};
+
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
   const {showModal, closeModal, darDetails} = props;
@@ -41,12 +51,19 @@ const DarModal = (props) => {
     onRequestClose: closeModal,
     shouldCloseOnOverlayClick: true,
     style: {
-      content: Styles.MODAL.CONTENT
+      content: {
+        ...Styles.MODAL.CONTENT,
+        ...{boxShadow: '3px 3px 0 #cccccc', borderRadius: "10px"}
+      }
     }
   }, [
     div({style: Styles.MODAL.CONTENT}, [
-      div({style: Styles.MODAL.DAR_SUBHEADER}, [`${darDetails.darCode}`]),
       div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
+      div({style: { borderBottom: "1px solid #1F3B50" }}, []),
+      h(ModalDetailRow, {
+        label: 'Data Access Request Id',
+        detail: darDetails.darCode
+      }),
       h(ModalDetailRow, {
         label: 'Primary Investigator',
         detail: returnPIName(
@@ -71,7 +88,16 @@ const DarModal = (props) => {
       h(ModalDetailRow, {
         label: 'Type of Research',
         detail: processResearchTypes(darDetails.researchType)
-      })
+      }),
+      div({
+        isRendered: requiresManualReview(darDetails),
+        style: Styles.ALERT
+      }, [
+        Alert({
+          id: 'purposeStatementManualReview', type: 'danger',
+          title: 'This research involves studying a sensitive population and requires manual review.'
+        })
+      ])
     ])
   ]);
 };
