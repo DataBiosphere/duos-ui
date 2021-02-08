@@ -1,8 +1,11 @@
-import { div, h } from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
+import { Alert } from '../Alert';
+import { User } from '../../libs/ajax';
 import { Styles } from '../../libs/theme';
+import { Notifications } from '../../libs/utils';
 import Modal from 'react-modal';
-import {isEmpty} from 'lodash/fp';
-import {Alert} from '../Alert';
+import {find, isEmpty, isNil} from 'lodash/fp';
+import {useEffect, useState} from 'react';
 
 const ModalDetailRow = (props) => {
   return (
@@ -13,12 +16,16 @@ const ModalDetailRow = (props) => {
   );
 };
 
-const returnPIName = (havePI, isThePI, displayName, piName) => {
+const returnPIName = (researcher) => {
+  const properties = researcher.researcherProperties;
+  const isThePI = !isNil(find({propertyKey: "isThePI", propertyValue: true})(properties));
+  const havePI = !isNil(find({propertyKey: "havePI", propertyValue: true})(properties));
   let returnName;
-  if(isThePI === "true") {
-    returnName = displayName;
-  }else if(havePI === "true") {
-    returnName = piName;
+  if (isThePI) {
+    returnName = researcher.displayName;
+  } else if (havePI) {
+    const piNameProp = find({propertyKey: "piName"})(properties);
+    returnName = piNameProp.propertyValue;
   }
   return returnName || '- -';
 };
@@ -42,9 +49,28 @@ const requiresManualReview = (darDetails) => {
     darDetails.vulnerablePopulation;
 };
 
+const getResearcher = async (userId) => {
+  return await User.getById(userId);
+};
+
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
   const {showModal, closeModal, darDetails} = props;
+
+  const [researcher, setResearcher] = useState([]);
+  useEffect(() => {
+    const init = async() => {
+      try {
+        if (!isNil(darDetails.userId)) {
+          const researcher = await getResearcher(darDetails.userId);
+          setResearcher(researcher);
+        }
+      } catch(error) {
+        Notifications.showError({text: 'Error: Unable to retrieve researcher information'});
+      }
+    };
+    init();
+  }, []);
 
   return h(Modal, {
     isOpen: showModal,
@@ -66,16 +92,11 @@ const DarModal = (props) => {
       }),
       h(ModalDetailRow, {
         label: 'Primary Investigator',
-        detail: returnPIName(
-          darDetails.havePi,
-          darDetails.isThePi,
-          darDetails.researcher,
-          darDetails.investigator
-        )
+        detail: returnPIName(researcher)
       }),
       h(ModalDetailRow, {
         label: 'Researcher',
-        detail: darDetails.researcher || '- -'
+        detail: researcher.displayName || '- -'
       }),
       h(ModalDetailRow, {
         label: 'Institution',
