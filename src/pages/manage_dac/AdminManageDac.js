@@ -36,6 +36,7 @@ class AdminManageDac extends Component {
   }
 
   componentDidMount() {
+    // noinspection JSIgnoredPromiseFromCall
     this.fetchDacList();
   };
 
@@ -161,7 +162,7 @@ class AdminManageDac extends Component {
     return true;
   };
 
-  sort = (sortField, descendingOrder = false) => (event) => {
+  sort = (sortField, descendingOrder = false) => () => {
     let sorted = fp.sortBy(sortField)(this.state.dacs);
     if (descendingOrder) {
       sorted = fp.reverse(sorted);
@@ -218,7 +219,7 @@ class AdminManageDac extends Component {
 
           this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
-            .map((dac, eIndex) => {
+            .map(dac => {
               return (h(Fragment, { key: dac.dacId }, [
                 div({
                   id: dac.dacId,
