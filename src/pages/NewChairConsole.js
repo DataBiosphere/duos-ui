@@ -95,6 +95,7 @@ const Records = (props) => {
 
   const createActionButton = (dar, e, votes) => {
     const name = "cell-button hover-color";
+    const reopenButton = button({ className: name, onClick: () => createElection(dar) }, ["Re-Open"]);
     if (e !== null && e !== undefined) {
       switch (e.status) {
         case "Open" :
@@ -104,20 +105,11 @@ const Records = (props) => {
             onClick: () => history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
           }, ["Vote"]);
         case "Final":
-          return button({
-            className: name,
-            onClick: () => createElection(dar)
-          }, ["Re-Open"]);
+          return reopenButton;
         case "Canceled":
-          return button({
-            className: name,
-            onClick: () => createElection(dar)
-          }, ["Re-Open"]);
+          return reopenButton;
         case "Closed":
-          return button({
-            className: name,
-            onClick: () => createElection(dar)
-          }, ["Re-Open"]);
+          return reopenButton;
       }
     }
     return button({
