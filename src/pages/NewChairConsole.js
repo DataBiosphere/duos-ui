@@ -1,7 +1,7 @@
 
 import {isEmpty, isNil, includes, toLower, filter, cloneDeep} from 'lodash/fp';
 import { useState, useEffect, useRef} from 'react';
-import {div, button, h, img, input} from 'react-hyperscript-helpers';
+import {div, button, h, img, input, span} from 'react-hyperscript-helpers';
 import {DAR, Election} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
@@ -76,10 +76,10 @@ const Records = (props) => {
     alertMessage: "",
     alertTitle: ""
   }, [
-    div({ className: "dialog-description" }, [
+    div({className: "dialog-description"}, [
       span({}, ["Are you sure you want to open this election?"]),
     ])
-  ])
+  ]);
 
   function createElection(dar) {
     if (window.confirm("Are you sure you would like to open this election?")) {
@@ -102,8 +102,8 @@ const Records = (props) => {
     if (e !== null && e !== undefined) {
       switch (e.status) {
         case "Open" :
-         const vote = votes.filter(v => (v.electionId === e.electionId))[0];
-         console.log(vote);
+          const vote = votes.filter(v => (v.electionId === e.electionId))[0];
+          console.log(vote);
           return button({
             className: name,
             onClick: () => history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
@@ -133,30 +133,34 @@ const Records = (props) => {
 
   return props.electionList.map((electionInfo, index) => {
 
-  //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover} = props;
-  const startIndex = (currentPage - 1) * tableSize;
-  const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
-  const visibleWindow = props.filteredList.slice(startIndex, endIndex);
-  const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
-  const recordTextStyle = Styles.TABLE.RECORD_TEXT;
+    //NOTE: currentPage is not zero-indexed
+    const {openModal, currentPage, tableSize, applyTextHover, removeTextHover} = props;
+    const startIndex = (currentPage - 1) * tableSize;
+    const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
+    const visibleWindow = props.filteredList.slice(startIndex, endIndex);
+    const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
+    const recordTextStyle = Styles.TABLE.RECORD_TEXT;
 
-  return visibleWindow.map((electionInfo, index) => {
-    const {dar, dac, election} = electionInfo;
-    const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
-    return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}-${index}`}, [
-      div({
-        style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
-        onClick: (e) => openModal(dar),
-        onMouseEnter: applyTextHover,
-        onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
-      }, [dar && dar.data ? dar.data.darCode : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
-      div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(dar, election, votes)])
-    ]);
+    return visibleWindow.map((electionInfo, index) => {
+      const {dar, dac, election} = electionInfo;
+      const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
+      return div({
+        style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW),
+        key: `${dar.data.referenceId}-${index}`
+      }, [
+        div({
+          style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
+          onClick: (e) => openModal(dar),
+          onMouseEnter: applyTextHover,
+          onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
+        }, [dar && dar.data ? dar.data.darCode : '- -']),
+        div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
+        div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
+        div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
+        div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
+        div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(dar, election, votes)])
+      ]);
+    });
   });
 };
 
@@ -181,7 +185,7 @@ const NewChairConsole = (props) => {
         setPageCount(Math.ceil(pendingList.length / initTableSize));
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
-      };
+      }
     };
     init();
   }, []);
