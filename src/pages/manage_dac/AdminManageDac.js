@@ -8,7 +8,7 @@ import { PageHeading } from '../../components/PageHeading';
 import { PaginatorBar } from '../../components/PaginatorBar';
 import { SearchBox } from '../../components/SearchBox';
 import { DAC } from '../../libs/ajax';
-import * as ld from 'lodash';
+import * as fp from 'lodash/fp';
 
 
 const limit = 10;
@@ -43,9 +43,9 @@ class AdminManageDac extends Component {
     this._asyncRequest = DAC.list().then(
       dacs => {
         this._asyncRequest = null;
-        let sorted = ld.sortBy(dacs, 'name');
+        let sorted = fp.sortBy('name')(dacs);
         if (this.state.descendingOrder) {
-          sorted = ld.reverse(sorted);
+          sorted = fp.reverse(sorted);
         }
         this.setState(prev => {
           prev.currentPage = 1;
@@ -131,10 +131,11 @@ class AdminManageDac extends Component {
 
   viewDatasets = async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId);
+    const activeDatasets = fp.filter({ active: true })(datasets);
     this.setState(prev => {
       prev.showDatasetsModal = true;
       prev.selectedDac = selectedDac;
-      prev.selectedDatasets = datasets;
+      prev.selectedDatasets = activeDatasets;
       return prev;
     });
   };
@@ -161,9 +162,9 @@ class AdminManageDac extends Component {
   };
 
   sort = (sortField, descendingOrder = false) => (event) => {
-    let sorted = ld.sortBy(this.state.dacs, sortField);
+    let sorted = fp.sortBy(sortField)(this.state.dacs);
     if (descendingOrder) {
-      sorted = ld.reverse(sorted);
+      sorted = fp.reverse(sorted);
     }
     this.setState(prev => {
       prev.dacs = sorted;
