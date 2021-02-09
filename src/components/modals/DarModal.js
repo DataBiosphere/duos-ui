@@ -36,7 +36,7 @@ const processResearchTypes = (researchTypes) => {
   let researchStatements = '';
   if(!isEmpty(researchTypes)) {
     researchStatements = researchTypes.map(type => {
-      return `${type.description} ${type.manualReview ? 'Requires manual review.' : ''}`;
+      return `${type.description}`;
     });
   }
   return researchStatements;
@@ -60,9 +60,9 @@ const DarModal = (props) => {
     onRequestClose: closeModal,
     shouldCloseOnOverlayClick: true,
     style: {
-      content: {
-        ...Styles.MODAL.CONTENT,
-        ...{boxShadow: '3px 3px 0 #cccccc', borderRadius: "10px"}
+      content: { ...Styles.MODAL.CONTENT },
+      overlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }
     }
   }, [
