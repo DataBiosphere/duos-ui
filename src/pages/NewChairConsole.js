@@ -9,8 +9,7 @@ import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
 import {ConfirmationDialog} from "../components/ConfirmationDialog";
 import {Storage} from '../libs/storage';
-
-
+import DoneIcon from '@material-ui/icons/Done';
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -41,13 +40,12 @@ const getElectionDate = (election) => {
 
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover} = props;
+  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, showDialogCreate} = props;
   const startIndex = (currentPage - 1) * tableSize;
   const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
   const visibleWindow = props.filteredList.slice(startIndex, endIndex);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
-  let showCreateDialog = false;
   const history = props.history;
   let votes = [];
   for (let i of props.filteredList) {
@@ -58,29 +56,13 @@ const Records = (props) => {
     }
   }
 
-  const confirm = (dar) => ConfirmationDialog({
-    title: 'Open election?',
-    color: 'access',
-    isRendered: showCreateDialog,
-    showModal: showCreateDialog,
-    disableOkBtn: false,
-    disableNoBtn: false,
-    action: {
-      label: "Yes",
-      handler: createElection(dar)
-    },
-    alertMessage: "",
-    alertTitle: ""
-  }, [
-    div({className: "dialog-description"}, [
-      span({}, ["Are you sure you want to open this election?"]),
-    ])
-  ]);
-
-  function createElection(dar) {
-    if (window.confirm("Are you sure you would like to open this election?")) {
+  const createElection = (dar) => {
+    if (window.confirm("Are you sure?")) {
       Election.createDARElection(dar.referenceId)
-        .then()
+        .then(
+          alert(DoneIcon() + "Election successfully opened"),
+          //props.setShowDialogCreate(false)
+        )
         .catch(errorResponse => {
           if (errorResponse.status === 500) {
             alert("Email Service Error! The election was created but the participants couldnt be notified by Email.");
@@ -95,7 +77,6 @@ const Records = (props) => {
 
   const createActionButton = (dar, e, votes) => {
     const name = "cell-button hover-color";
-    const reopenButton = button({ className: name, onClick: () => createElection(dar) }, ["Re-Open"]);
     if (e !== null && e !== undefined) {
       switch (e.status) {
         case "Open" :
@@ -104,19 +85,18 @@ const Records = (props) => {
             className: name,
             onClick: () => history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
           }, ["Vote"]);
-        case "Final":
-          return reopenButton;
-        case "Canceled":
-          return reopenButton;
-        case "Closed":
-          return reopenButton;
+        default :
+          return button({ className: name, onClick: () =>  createElection(dar) },
+            //props.setShowDialogCreate(true)
+           // console.log(showDialogCreate);}},
+            ["Re-Open"]);
       }
     }
     return button({
       className: name,
-      onClick: () => createElection(dar, e)
+      onClick: () => createElection(dar)
     }, ['Open Election']);
-  }
+  };
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
@@ -146,6 +126,7 @@ const NewChairConsole = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const searchTerms = useRef('');
+  const [showDialogCreate, setShowDialogCreate]= useState(false);
 
   useEffect(() => {
     const init = async() => {
@@ -158,7 +139,7 @@ const NewChairConsole = (props) => {
         setPageCount(Math.ceil(pendingList.length / initTableSize));
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
-      };
+      }
     };
     init();
   }, []);
@@ -266,10 +247,26 @@ const NewChairConsole = (props) => {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, showDialogCreate, setShowDialogCreate})
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
-      h(DarModal, {showModal, closeModal, darDetails})
+      h(DarModal, {showModal, closeModal, darDetails}),
+      // ConfirmationDialog({
+      //   title: 'Open election?',
+      //   color: 'access',
+      //   isRendered: true,
+      //   showModal: true,
+      //   action: {
+      //     label: "Yes",
+      //     handler: (dar) => Records(props).createElection(dar)
+      //   },
+      //   alertMessage: "",
+      //   alertTitle: "",
+      // }, [
+      //   div({className: "dialog-description"}, [
+      //     span({}, ["Are you sure you want to open this election?"]),
+      //   ])
+      // ])
     ])
   );
 };
