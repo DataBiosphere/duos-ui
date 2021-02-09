@@ -47,6 +47,7 @@ const Records = (props) => {
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
   const history = props.history;
+  let darId;
   let votes = [];
   for (let i of props.filteredList) {
     for (let v of i.votes) {
@@ -56,13 +57,10 @@ const Records = (props) => {
     }
   }
 
-  const createElection = (dar) => {
-    if (window.confirm("Are you sure?")) {
-      Election.createDARElection(dar.referenceId)
-        .then(
-          alert(DoneIcon() + "Election successfully opened"),
-          //props.setShowDialogCreate(false)
-        )
+  const createElection = (answer) => {
+    if (answer) {
+      Election.createDARElection(darId)
+        .then()
         .catch(errorResponse => {
           if (errorResponse.status === 500) {
             alert("Email Service Error! The election was created but the participants couldnt be notified by Email.");
@@ -70,9 +68,17 @@ const Records = (props) => {
             errorResponse.json().then(error =>
               alert("Election cannot be created! " + error.message));
           }
-        })
+        });
+      alert("Election successfully opened.");
       window.location.reload();
+      //Notifications.showInformation({ text: "Election successfully opened"});
     }
+    ;
+  }
+
+  const handler = (id) => {
+    props.setShowDialogCreate(true);
+    darId = id;
   }
 
   const createActionButton = (dar, e, votes) => {
@@ -86,15 +92,16 @@ const Records = (props) => {
             onClick: () => history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
           }, ["Vote"]);
         default :
-          return button({ className: name, onClick: () =>  createElection(dar) },
-            //props.setShowDialogCreate(true)
-           // console.log(showDialogCreate);}},
+          return button({
+              className: name,
+              onClick: () => handler(dar.referenceId)
+            },
             ["Re-Open"]);
       }
     }
     return button({
       className: name,
-      onClick: () => createElection(dar)
+      onClick: () => handler(dar.referenceId)
     }, ['Open Election']);
   };
 
@@ -112,7 +119,7 @@ const Records = (props) => {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(dar, election, votes)])
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(dar, election, votes)]),
     ]);
   });
 };
@@ -126,7 +133,7 @@ const NewChairConsole = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const searchTerms = useRef('');
-  const [showDialogCreate, setShowDialogCreate]= useState(false);
+  const [showDialogCreate, setShowDialogCreate] = useState(false);
 
   useEffect(() => {
     const init = async() => {
@@ -251,22 +258,22 @@ const NewChairConsole = (props) => {
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
       h(DarModal, {showModal, closeModal, darDetails}),
-      // ConfirmationDialog({
-      //   title: 'Open election?',
-      //   color: 'access',
-      //   isRendered: true,
-      //   showModal: true,
-      //   action: {
-      //     label: "Yes",
-      //     handler: (dar) => Records(props).createElection(dar)
-      //   },
-      //   alertMessage: "",
-      //   alertTitle: "",
-      // }, [
-      //   div({className: "dialog-description"}, [
-      //     span({}, ["Are you sure you want to open this election?"]),
-      //   ])
-      // ])
+      ConfirmationDialog({
+        title: 'Open election?',
+        color: 'access',
+        isRendered: showDialogCreate,
+        showModal: showDialogCreate,
+        action: {
+          label: "Yes",
+          handler: Records.createElection
+        },
+        alertMessage: "",
+        alertTitle: "",
+      }, [
+        div({className: "dialog-description"}, [
+          span({}, ["Are you sure you want to open this election?"]),
+        ])
+      ])
     ])
   );
 };
