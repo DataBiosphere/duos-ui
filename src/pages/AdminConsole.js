@@ -94,7 +94,6 @@ class AdminConsole extends Component {
         this.setState({showAddDacModal: false});
         this.props.history.push(`admin_manage_dac`);
         break;
-
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }

@@ -608,7 +608,6 @@ export const Election = {
       return await res.json();
     }
   },
-  
   findConsentElectionByDarElection: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
     const res = await fetchOk(url, Config.authOpts());
