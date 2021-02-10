@@ -398,14 +398,6 @@ export const DAR = {
 
 export const DataSet = {
 
-  postDatasetFile: async (file, overwrite, userId) => {
-    const url = `${await Config.getApiUrl()}/dataset/${userId}?overwrite=${overwrite}`;
-    let formData = new FormData();
-    formData.append("data", new Blob([file], { type: 'text/plain' }));
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    return await res.json();
-  },
-
   postDatasetForm: async (form) => {
     const url = `${await Config.getApiUrl()}/dataset/v2`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(form), { method: 'POST' }]));
@@ -616,6 +608,7 @@ export const Election = {
       return await res.json();
     }
   },
+  
   findConsentElectionByDarElection: async (requestElectionId) => {
     const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
     const res = await fetchOk(url, Config.authOpts());
