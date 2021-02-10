@@ -142,7 +142,6 @@
   }
   .cTMEws .navbar-public,
   .cTMEws .navbar-logged {
-    float: left;
     text-align: left !important;
     display: inline-block !important;
   }

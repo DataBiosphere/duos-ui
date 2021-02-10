@@ -63,6 +63,13 @@ export const Theme = {
 };
 
 export const Styles = {
+  NAVBAR: {
+    DRAWER_LINK: {
+      font: 'Montserrat',
+      fontWeight: 400,
+      fontSize: '2rem'
+    }
+  },
   PAGE: {
     width: "90%",
     margin: "0 auto"

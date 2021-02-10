@@ -1,12 +1,27 @@
 import {Component} from 'react';
 import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
-import ResponsiveMenu from 'react-responsive-navbar';
+import Drawer from '@material-ui/core/Drawer';
+import Hidden from '@material-ui/core/Hidden';
+import {IconButton, List, ListItem} from '@material-ui/core';
+import MenuIcon from '@material-ui/icons/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
 import {NavigationUtils} from "../libs/utils";
+import { Styles } from '../libs/theme';
 
+const BasicListItem = (props) => {
+  const {isRendered, targetLink, label, goToLink} = props;
+  return (
+    h(ListItem, {
+      isRendered,
+      alignItems: 'center',
+      style: Styles.NAVBAR.DRAWER_LINK,
+      onClick: (e) => goToLink(targetLink)
+    }, [label])
+  );
+};
 class DuosHeader extends Component {
 
   constructor(props) {
@@ -14,7 +29,8 @@ class DuosHeader extends Component {
     this.state = {
       showSupportRequestModal: false,
       hover: false,
-      dacChairPath: '/chair_console'
+      dacChairPath: '/chair_console',
+      openDrawer: false
     };
   };
 
@@ -55,6 +71,18 @@ class DuosHeader extends Component {
       return prev;
     });
   };
+
+  toggleDrawer = (boolVal) => {
+    this.setState((prev) => {
+      prev.openDrawer = boolVal;
+      return prev;
+    });
+  };
+
+  goToLink = (link) => {
+    this.props.history.push(link);
+    this.toggleDrawer(false);
+  }
 
   render() {
 
@@ -122,6 +150,7 @@ class DuosHeader extends Component {
       onClick: this.supportRequestModal,
       "data-tip": "Need help? Contact us for some assistance", "data-for": "tip_requestAccess"
     }, [contactUsIcon, contactUsText]);
+
     const supportrequestModal = SupportRequestModal({
       showModal: this.state.showSupportRequestModal,
       onOKRequest: this.okSupportRequestModal,
@@ -130,102 +159,149 @@ class DuosHeader extends Component {
     });
 
     return (
-
       nav({ className: 'navbar-duos', role: 'navigation' }, [
-        div({ className: 'row no-margin' }, [
-          h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-            img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
-          ]),
-          h(ResponsiveMenu, {
-            changeMenuOn: '767px',
-            menuOpenButton: div({ className: 'navbar-open-icon' }, []),
-            menuCloseButton: div({ className: 'navbar-close-icon' }, []),
-            menu:
-              div({}, [
-                ul({ isRendered: isLogged, className: 'navbar-logged' }, [
-                  li({ className: 'dropdown user-li' }, [
-                    a({ id: 'sel_dacUser', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
-                      div({ id: 'dacUser' }, [
-                        currentUser.displayName,
-                        span({ className: 'caret caret-margin' })
-                      ]),
-                      small({ id: 'dacUserMail' }, [currentUser.email])
+        h(Hidden, {mdDown: true}, [
+          div({ className: 'row no-margin' }, [
+            h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
+              img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
+            ]),
+            //Standard navbar for medium sized displays and higher (pre-existing navbar)
+            div({}, [
+              ul({ isRendered: isLogged, className: 'navbar-logged' }, [
+                li({ className: 'dropdown user-li' }, [
+                  a({ id: 'sel_dacUser', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
+                    div({ id: 'dacUser' }, [
+                      currentUser.displayName,
+                      span({ className: 'caret caret-margin' })
                     ]),
-                    ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
-                      li([
-                        h(Link, { id: 'link_profile', to: '/profile' }, ['Your Profile'])
-                      ]),
-                      li({}, [a({ id: 'link_signOut', onClick: this.signOut }, ['Sign out'])])
-                    ])
+                    small({ id: 'dacUserMail' }, [currentUser.email])
                   ]),
-                  li({ isRendered: isAdmin }, [
-                    h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
-                  ]),
-
-                  li({ isRendered: isChairPerson }, [
-                    h(Link, { id: 'link_chairConsole', to: this.state.dacChairPath }, ['DAC Chair Console'])
-                  ]),
-
-                  li({ isRendered: isMember }, [
-                    h(Link, { id: 'link_memberConsole', to: '/member_console' }, ['DAC Member Console'])
-                  ]),
-
-                  li({ isRendered: isResearcher }, [
-                    h(Link, { id: 'link_researcherConsole', to: '/researcher_console' }, ['Researcher Console'])
-                  ]),
-
-                  li({ isRendered: isDataOwner }, [
-                    h(Link, { id: 'link_dataOwnerConsole', to: '/data_owner_console' }, ['Data Owner Console'])
-                  ]),
-
-                  li({ isRendered: isResearcher }, [
-                    h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
-                  ]),
-
-                  li({}, [
-                    h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])
-                  ]),
-
-                  li({ className: 'dropdown', isRendered: isAdmin }, [
-                    a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
-                      div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
+                  ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
+                    li([
+                      h(Link, { id: 'link_profile', to: '/profile' }, ['Your Profile'])
                     ]),
-                    ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
-                      li({}, [
-                        h(Link, { id: 'link_statistics', to: '/summary_votes' }, ['Votes Statistics'])
-                      ]),
-                      hr({ style: hrStyle }),
-                      li({}, [
-                        h(Link, {
-                          id: 'link_reviewedCases', to: '/reviewed_cases', isRendered: !(isDataOwner || isResearcher) || isAdmin
-                        }, ['Reviewed Cases Record'])
-                      ])
-                    ])
-                  ]),
-
-                  li({}, [
-                    h(Link, { id: 'link_datasetCatalog', isRendered: isLogged, to: '/dataset_catalog' }, ['Dataset Catalog'])
-                  ]),
-                  contactUsButton, supportrequestModal
+                    li({}, [a({ id: 'link_signOut', onClick: this.signOut }, ['Sign out'])])
+                  ])
+                ]),
+                li({ isRendered: isAdmin }, [
+                  h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
                 ]),
 
-                ul({ isRendered: !isLogged, className: 'navbar-public' }, [
-                  li({}, [
-                    h(Link, { id: 'link_about', className: 'navbar-duos-link', to: '/home_about' }, [
-                      div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
-                      span({ style: navbarDuosText }, ['About'])
-                    ])
+                li({ isRendered: isChairPerson }, [
+                  h(Link, { id: 'link_chairConsole', to: this.state.dacChairPath }, ['DAC Chair Console'])
+                ]),
+
+                li({ isRendered: isMember }, [
+                  h(Link, { id: 'link_memberConsole', to: '/member_console' }, ['DAC Member Console'])
+                ]),
+
+                li({ isRendered: isResearcher }, [
+                  h(Link, { id: 'link_researcherConsole', to: '/researcher_console' }, ['Researcher Console'])
+                ]),
+
+                li({ isRendered: isDataOwner }, [
+                  h(Link, { id: 'link_dataOwnerConsole', to: '/data_owner_console' }, ['Data Owner Console'])
+                ]),
+
+                li({ isRendered: isResearcher }, [
+                  h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
+                ]),
+
+                li({}, [
+                  h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])
+                ]),
+
+                li({ className: 'dropdown', isRendered: isAdmin }, [
+                  a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
+                    div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
                   ]),
-                  li({}, [
-                    h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
-                      div({ className: 'navbar-duos-icon-help', style: navbarDuosIcon }),
-                      span({ style: navbarDuosText }, ['FAQs'])
+                  ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
+                    li({}, [
+                      h(Link, { id: 'link_statistics', to: '/summary_votes' }, ['Votes Statistics'])
+                    ]),
+                    hr({ style: hrStyle }),
+                    li({}, [
+                      h(Link, {
+                        id: 'link_reviewedCases', to: '/reviewed_cases', isRendered: !(isDataOwner || isResearcher) || isAdmin
+                      }, ['Reviewed Cases Record'])
                     ])
-                  ]),
-                  contactUsButton, supportrequestModal
-                ])
+                  ])
+                ]),
+
+                li({}, [
+                  h(Link, { id: 'link_datasetCatalog', isRendered: isLogged, to: '/dataset_catalog' }, ['Dataset Catalog'])
+                ]),
+                contactUsButton, supportrequestModal
+              ]),
+
+              ul({ isRendered: !isLogged, className: 'navbar-public' }, [
+                li({}, [
+                  h(Link, { id: 'link_about', className: 'navbar-duos-link', to: '/home_about' }, [
+                    div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
+                    span({ style: navbarDuosText }, ['About'])
+                  ])
+                ]),
+                li({}, [
+                  h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
+                    div({ className: 'navbar-duos-icon-help', style: navbarDuosIcon }),
+                    span({ style: navbarDuosText }, ['FAQs'])
+                  ])
+                ]),
+                contactUsButton, supportrequestModal
               ])
-          })
+            ])
+          ]),
+        ]),
+        //NOTE: old navbar style is heavily dependent on css styles with element specific styles
+        //Hard to make that navbar flexible with material-ui's syntax
+        //For now I will use material-ui's hidden element to selectively render the two different navbars
+        //On a later PR I will look into rewriting the current navbar
+        h(Hidden, {lgUp: true}, [
+          div({style: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}, [
+            img({
+              style: duosLogoImage, src: '/images/duos_logo.svg',
+              alt: 'DUOS Logo',
+              onClick: (e) => this.goToLink('/home')
+            }),
+            h(IconButton, {size: 'small', onClick: (e) => this.toggleDrawer(true)}, [
+              h(MenuIcon, {
+                style: {color: 'white', fontSize: '6rem', flex: 1},
+                anchor: 'right',
+              }, [])
+            ]),
+            h(Drawer, {
+              anchor: 'right',
+              open: this.state.openDrawer,
+              style: {
+                // I have to give this a ridiculous z-index value because the current duos navbar has a z-index of 10000 via css
+                zIndex: 300000,
+              },
+              onClose: (e) => this.toggleDrawer(false)
+            }, [
+              h(List, {}, [
+                //NOTE: can make a seperate component for this (use map to render some links)
+                // h(ListItem, {
+                //   isRendered: isAdmin,
+                //   alignItems: 'center',
+                //   style: Styles.NAVBAR.DRAWER_LINK,
+                //   onClick: (e) => this.goToLink('/admin_console')
+                // }, [
+                //   'Admin Console'
+                // ]),
+                h(BasicListItem, {isRendered: isAdmin, targetLink: '/admin_console', label: 'Admin Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isChairPerson, targetLink: this.state.dacChairPath, label: 'DAC Chair Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isMember, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isResearcher, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isResearcher, taretLink: '/data_ownder_console', label: 'Data Owner Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isResearcher, targetLink: '/dar_application', label: 'Request Application', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: true, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
+                //NOTE: insert dropdown link here for statistics
+                h(BasicListItem, {isRendered: true, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
+                h(ListItem, {alignItems: 'center', style: Styles.NAVBAR.DRAWER_LINK, onClick: this.supportRequestModal}, ['Contact Us']),
+                supportrequestModal
+              ]),
+            ])
+          ])
         ])
       ])
     );
