@@ -10,9 +10,9 @@ const ConfirmationModal = (props) => {
   //can use an onConfirm with no parameters
   let confirmButton;
   if (isNil(id) && isNil(index)) {
-    confirmButton = button({className: "cell-button hover-color", onClick: () => onConfirm()}, ["Confirm"])
+    confirmButton = button({className: "cell-button hover-color", onClick: () => onConfirm()}, ["Confirm"]);
   } else {
-    confirmButton = button({className: "cell-button hover-color", onClick: () => onConfirm(id, index)}, ["Confirm"])
+    confirmButton = button({className: "cell-button hover-color", onClick: () => onConfirm(id, index)}, ["Confirm"]);
   }
 
   return h(Modal, {
