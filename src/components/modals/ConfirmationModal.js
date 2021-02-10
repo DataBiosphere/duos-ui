@@ -1,10 +1,9 @@
-import { button, div, h } from 'react-hyperscript-helpers';
-import { Styles } from '../../libs/theme';
+import {button, div, h} from 'react-hyperscript-helpers';
+import {Styles} from '../../libs/theme';
 import Modal from 'react-modal';
 
 const ConfirmationModal = (props) => {
   const {showConfirmation, setShowConfirmation, title, message, header, onConfirm, id} = props;
-  console.log("confirmation" + id);
   return h(Modal, {
     isOpen: showConfirmation,
     shouldCloseOnOverlayClick: true,
@@ -23,10 +22,10 @@ const ConfirmationModal = (props) => {
         ]),
         div({style: {width: "45%", float: "right"}}, [
           button({className: "cell-button hover-color", onClick: () => onConfirm(id)}, ["Confirm"])
+        ])
       ])
     ])
-  ])
- ])
+  ]);
 };
 
 export default ConfirmationModal;

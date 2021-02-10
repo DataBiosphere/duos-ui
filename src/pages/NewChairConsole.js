@@ -39,7 +39,7 @@ const getElectionDate = (election) => {
 
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, openConfirmation} = props;
+  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, openConfirmation, useEffect} = props;
   const startIndex = (currentPage - 1) * tableSize;
   const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
   const visibleWindow = props.filteredList.slice(startIndex, endIndex);
@@ -48,12 +48,12 @@ const Records = (props) => {
 
   const createActionButton = (electionInfo) => {
     const name = "cell-button hover-color";
-    const e = electionInfo.election
-    const dar = electionInfo.dar
+    const e = electionInfo.election;
+    const dar = electionInfo.dar;
     if (e !== null && e !== undefined) {
       switch (e.status) {
         case "Open" :
-          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes)
+          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
           const vote = head(votes);
           return button({
             className: name,
@@ -203,7 +203,7 @@ const NewChairConsole = (props) => {
     } else {
       Notifications.showError({text: "Could not open election. Contact us for support."});
     }
-    window.location.reload();
+    setElectionList(electionList);
   };
 
   return (
@@ -255,7 +255,6 @@ const NewChairConsole = (props) => {
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
       h(DarModal, {showModal, closeModal, darDetails}),
-      console.log(darDetails),
       h(ConfirmationModal, {
         showConfirmation,
         setShowConfirmation,
