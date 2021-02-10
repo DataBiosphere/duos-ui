@@ -215,25 +215,7 @@ class AdminConsole extends Component {
                   unreviewedCases: darUnreviewedCases
                 }),
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_addDataset',
-                  clickHandler: this.addDataset,
-                  color: 'dataset',
-                  title: 'Add Datasets',
-                  description: 'Upload Datasets associated with Data Use Limitations',
-                  iconName: 'add-dataset',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                }),
-                AddDatasetModal({
-                  showModal: this.state.showAddDatasetModal,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
-                })
-              ])
+              consoleBoxPlaceholder,
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
