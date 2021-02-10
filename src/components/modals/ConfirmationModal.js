@@ -3,30 +3,26 @@ import { Styles } from '../../libs/theme';
 import Modal from 'react-modal';
 
 const ConfirmationModal = (props) => {
-  //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
-  const {showModal, closeModal, title, message, header, onClick} = props;
-
+  const {showConfirmation, setShowConfirmation, title, message, header, onConfirm, id} = props;
+  console.log("confirmation" + id);
   return h(Modal, {
-    isOpen: showModal,
-    onRequestClose: closeModal,
+    isOpen: showConfirmation,
     shouldCloseOnOverlayClick: true,
-    title: title,
-    message: message,
-    header: header,
+    id: id,
     style: {
-      content: Styles.MODAL.CONTENT
+      content: Styles.MODAL.CONFIRMATION
     }
   }, [
-    div({style: Styles.MODAL.CONTENT}, [
+    div({style: Styles.MODAL.CONFIRMATION}, [
       div({style: Styles.MODAL.DAR_SUBHEADER}, [`${header}`]),
       div({style: Styles.MODAL.TITLE_HEADER}, [`${title}`]),
-      div({style: Styles.MODAL.TITLE_HEADER}, [`${message}`]),
-      div({className: 'row'}, [
-        div({}, [
-          button({onClick: closeModal}, ["Cancel"])
+      div({style: Styles.MODAL.DAR_DETAIL}, [`${message}`]),
+      div({style: {width: "40%", float: "right"}}, [
+        div({style: {width: "45%", float: "left"}}, [
+          button({className: "cell-button cancel-color", onClick: () => setShowConfirmation(false)}, ["Cancel"])
         ]),
-        div({}, [
-          button({onClick: onClick}, ["Confirm"])
+        div({style: {width: "45%", float: "right"}}, [
+          button({className: "cell-button hover-color", onClick: () => onConfirm(id)}, ["Confirm"])
       ])
     ])
   ])

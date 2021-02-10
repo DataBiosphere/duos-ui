@@ -232,6 +232,12 @@ export const Styles = {
       fontFamily: 'Montserrat',
       padding: "2%"
     },
+    CONFIRMATION: {
+      height: "250px",
+      inset: "20%",
+      fontFamily: 'Montserrat',
+      padding: "2%"
+    },
     DAR_SUBHEADER: {
       display: 'flex',
       fontFamily: 'Montserrat',

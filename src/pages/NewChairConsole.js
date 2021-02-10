@@ -1,6 +1,6 @@
 import {head, isEmpty, isNil, includes, toLower, filter, cloneDeep} from 'lodash/fp';
 import { useState, useEffect, useRef} from 'react';
-import { div, h, img, input, button, span } from 'react-hyperscript-helpers';
+import { div, h, img, input, button } from 'react-hyperscript-helpers';
 import { DAR, Election} from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import {Notifications, formatDate} from '../libs/utils';
@@ -8,7 +8,6 @@ import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
 import {Storage} from '../libs/storage';
-import DoneIcon from '@material-ui/icons/Done';
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 
 const getDatasetNames = (datasets) => {
@@ -40,12 +39,38 @@ const getElectionDate = (election) => {
 
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover } = props;
+  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, openConfirmation} = props;
   const startIndex = (currentPage - 1) * tableSize;
   const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
   const visibleWindow = props.filteredList.slice(startIndex, endIndex);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
+
+  const createActionButton = (electionInfo) => {
+    const name = "cell-button hover-color";
+    const e = electionInfo.election
+    const dar = electionInfo.dar
+    if (e !== null && e !== undefined) {
+      switch (e.status) {
+        case "Open" :
+          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes)
+          const vote = head(votes);
+          return button({
+            className: name,
+            onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
+          }, ["Vote"]);
+        default :
+          return button({
+            className: name,
+            onClick: () => openConfirmation(dar)
+          }, ["Re-Open"]);
+      }
+    }
+    return button({
+      className: name,
+      onClick: () => openConfirmation(dar)
+    }, ['Open Election']);
+  };
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
@@ -76,7 +101,6 @@ const NewChairConsole = (props) => {
   const [pageCount, setPageCount] = useState(1);
   const searchTerms = useRef('');
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [currentDarId, setCurrentDarId] = useState();
 
   useEffect(() => {
     const init = async() => {
@@ -116,6 +140,16 @@ const NewChairConsole = (props) => {
     setShowModal(false);
   };
 
+  const openConfirmation = (dar) => {
+    const darData = dar.data;
+    if (!isNil(darData)) {
+      setShowConfirmation(true);
+      setDarDetails(darData);
+    } else {
+      Notifications.showError({text:"Cannot open this election. Please contact us for support."});
+    }
+  };
+
   const handleSearchChange = () => {
     setCurrentPage(1);
     const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
@@ -152,59 +186,25 @@ const NewChairConsole = (props) => {
     }
   };
 
-  const closeConfirmation = () => {
-    setShowConfirmation(false);
-  };
-
-  const openConfirmation = (id) => {
-    setShowConfirmation(true);
-    setCurrentDarId(id)
-  }
-
-  const createActionButton = (electionInfo) => {
-    const name = "cell-button hover-color";
-    const e = electionInfo.election
-    const dar = electionInfo.dar
-    if (e !== null && e !== undefined) {
-      switch (e.status) {
-        case "Open" :
-          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes)
-          const vote = head(votes);
-          return button({
-            className: name,
-            onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
-          }, ["Vote"]);
-        default :
-          return button({
-              className: name,
-              onClick: () => openConfirmation(dar.referenceId)
-            },
-            ["Re-Open"]);
-      }
-    }
-    return button({
-      className: name,
-      onClick: () => openConfirmation(dar.referenceId)
-    }, ['Open Election']);
-  };
-
-  const createElection = (answer) => {
-    if (answer) {
-      Election.createDARElection(currentDarId)
+  const createElection = (darId) => {
+    if (darId !== null) {
+      Election.createDARElection(darId)
         .then()
         .catch(errorResponse => {
           if (errorResponse.status === 500) {
-            alert("Email Service Error! The election was created but the participants couldnt be notified by Email.");
+            Notifications.showError({text: "Email Service Error! The election was created but the participants couldnt be notified by Email."});
           } else {
             errorResponse.json().then(error =>
-              alert("Election cannot be created! " + error.message));
+              Notifications.showError({text: "Election cannot be created! " + error.message}));
           }
         });
-      window.location.reload();
-      Notifications.showInformation({ text: "Election successfully opened"});
+      setShowConfirmation(false);
+      Notifications.showSuccess({text: "Election successfully opened"});
+    } else {
+      Notifications.showError({text: "Could not open election. Contact us for support."});
     }
-    ;
-  }
+    window.location.reload();
+  };
 
   return (
     div({style: Styles.PAGE}, [
@@ -251,17 +251,19 @@ const NewChairConsole = (props) => {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation})
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
       h(DarModal, {showModal, closeModal, darDetails}),
+      console.log(darDetails),
       h(ConfirmationModal, {
         showConfirmation,
-        onRequestClose: closeConfirmation,
+        setShowConfirmation,
         title: "Open Election?",
-        message: "Are you sure you want the DAC to vote on this data access request",
+        message: "Are you sure you want the DAC to vote on this data access request?",
         header: darDetails.darCode,
-        onClick: createElection
+        onConfirm: createElection,
+        id: darDetails.referenceId
       })
     ])
   );
