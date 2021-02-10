@@ -244,15 +244,16 @@ export const Styles = {
       fontSize: '16px',
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
-      color: "#777"
+      color: "#1F3B50"
     },
     TITLE_HEADER: {
       display: 'flex',
       fontFamily: 'Montserrat',
       fontSize: Theme.font.size.title,
-      fontWeight: Theme.font.weight.regular,
+      fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
-      marginBottom: '4%'
+      marginBottom: '4%',
+      color: "#1F3B50"
     },
     DAR_DETAIL_ROW: {
       padding: '0 3%',
@@ -261,7 +262,7 @@ export const Styles = {
       justifyContent: 'space-between'
     },
     DAR_LABEL: {
-      color: "#777777",
+      color: "#1F3B50",
       fontSize: '14px',
       fontWeight: Theme.font.weight.semibold,
       width: "25%",
@@ -269,8 +270,12 @@ export const Styles = {
     },
     DAR_DETAIL: {
       fontSize: '16px',
-      fontWeight: Theme.font.weight.medium,
+      fontWeight: Theme.font.weight.regular,
       width: "70%"
     }
+  },
+  ALERT: {
+    fontSize: "15px",
+    textAlign: "center"
   }
 };

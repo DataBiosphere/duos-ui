@@ -1,7 +1,8 @@
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, span } from 'react-hyperscript-helpers';
+import { Alert } from '../Alert';
 import { Styles } from '../../libs/theme';
 import Modal from 'react-modal';
-import {isEmpty} from 'lodash/fp';
+import { find, isEmpty, isNil } from 'lodash/fp';
 
 const ModalDetailRow = (props) => {
   return (
@@ -12,57 +13,81 @@ const ModalDetailRow = (props) => {
   );
 };
 
-const returnPIName = (havePI, isThePI, displayName, piName) => {
+const returnPIName = (researcher) => {
+  const properties = researcher.researcherProperties;
+  const isThePI = !isNil(find({propertyKey: "isThePI", propertyValue: true})(properties));
+  const havePI = !isNil(find({propertyKey: "havePI", propertyValue: true})(properties));
   let returnName;
-  if(isThePI === "true") {
-    returnName = displayName;
-  }else if(havePI === "true") {
-    returnName = piName;
+  if (isThePI) {
+    returnName = researcher.displayName;
+  } else if (havePI) {
+    const piNameProp = find({propertyKey: "piName"})(properties);
+    returnName = piNameProp.propertyValue;
   }
-  return returnName || '- -';
+  return returnName || researcher.displayName;
+};
+
+const returnInstitution = (researcher) => {
+  const institutionProp = find({propertyKey: "institution"})(researcher.researcherProperties);
+  return isNil(institutionProp) ? '- -' : institutionProp.propertyValue;
 };
 
 const processResearchTypes = (researchTypes) => {
   let researchStatements = '';
   if(!isEmpty(researchTypes)) {
     researchStatements = researchTypes.map(type => {
-      return `${type.description} ${type.manualReview ? 'Requires manual review.' : ''}`;
+      return `${type.description}`;
     });
   }
   return researchStatements;
 };
 
+const requiresManualReview = (darDetails) => {
+  return darDetails.illegalBehavior ||
+    darDetails.poa ||
+    darDetails.psychiatricTraits ||
+    darDetails.sexualDiseases ||
+    darDetails.stigmatizedDiseases ||
+    darDetails.vulnerablePopulation;
+};
+
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
-  const {showModal, closeModal, darDetails} = props;
+  const {showModal, closeModal, darDetails, researcher} = props;
 
   return h(Modal, {
     isOpen: showModal,
     onRequestClose: closeModal,
     shouldCloseOnOverlayClick: true,
     style: {
-      content: Styles.MODAL.CONTENT
+      content: { ...Styles.MODAL.CONTENT },
+      overlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+      }
     }
   }, [
     div({style: Styles.MODAL.CONTENT}, [
-      div({style: Styles.MODAL.DAR_SUBHEADER}, [`${darDetails.darCode}`]),
+      span({
+        style: { float: 'right', cursor: 'pointer' },
+        onClick: closeModal,
+        className: "glyphicon glyphicon-remove default-color"}),
       div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
+      div({style: { borderBottom: "1px solid #1F3B50" }}, []),
+      h(ModalDetailRow, {
+        label: 'Data Access Request Id',
+        detail: darDetails.darCode
+      }),
       h(ModalDetailRow, {
         label: 'Primary Investigator',
-        detail: returnPIName(
-          darDetails.havePi,
-          darDetails.isThePi,
-          darDetails.researcher,
-          darDetails.investigator
-        )
+        detail: returnPIName(researcher)
       }),
       h(ModalDetailRow, {
         label: 'Researcher',
-        detail: darDetails.researcher || '- -'
+        detail: researcher.displayName || '- -'
       }),
       h(ModalDetailRow, {
         label: 'Institution',
-        detail: darDetails.institution || '- -'
+        detail: returnInstitution(researcher)
       }),
       h(ModalDetailRow, {
         label: 'Dataset(s)',
@@ -71,7 +96,16 @@ const DarModal = (props) => {
       h(ModalDetailRow, {
         label: 'Type of Research',
         detail: processResearchTypes(darDetails.researchType)
-      })
+      }),
+      div({
+        isRendered: requiresManualReview(darDetails),
+        style: Styles.ALERT
+      }, [
+        Alert({
+          id: 'purposeStatementManualReview', type: 'danger',
+          title: 'This research involves studying a sensitive population and requires manual review.'
+        })
+      ])
     ])
   ]);
 };
