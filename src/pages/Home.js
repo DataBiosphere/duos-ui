@@ -198,7 +198,7 @@ class Home extends Component {
               p({style: description}, [
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
-                a({href: 'home_dac_info', style: {color: '1F3B50', fontSize: '16px', fontWeight: 500}}, ['LEARN MORE'])
+                a({href: 'home_dac_info', style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}}, ['LEARN MORE'])
               ])
             ]),
             div({className: 'col-lg-4 col-md-4 '}, [
@@ -208,7 +208,7 @@ class Home extends Component {
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
                   href: 'home_signing_official',
-                  style: {color: '1F3B50', fontSize: '16px', fontWeight: 500}
+                  style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}
                 }, ['LEARN MORE'])
               ])
             ]),
@@ -219,7 +219,7 @@ class Home extends Component {
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
                   href: 'home_researcher_info',
-                  style: {color: '1F3B50', fontSize: '16px', fontWeight: 500}
+                  style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}
                 }, ['LEARN MORE'])
               ])
             ])
