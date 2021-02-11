@@ -194,12 +194,12 @@ const NewChairConsole = (props) => {
     if (darId !== null) {
       let copy;
       Election.createDARElection(darId)
-        .then(
-          Notifications.showSuccess({text: "Election successfully opened"}),
-          copy = cloneDeep(filteredList),
-          copy[index].election = { status: "Open", finalAccessVote: false },
-          setFilteredList(copy)
-        )
+        .then(() => {
+          Notifications.showSuccess({text: "Election successfully opened"});
+            copy = cloneDeep(filteredList);
+            copy[index].election = Object.assign( {}, copy[index].election, {status: "Open", finalAccessVote: false});
+            setFilteredList(copy);
+        })
         .catch(errorResponse => {
           if (errorResponse.status === 500) {
             Notifications.showError({text: "Email Service Error! The election was created but the participants couldnt be notified by Email."});
