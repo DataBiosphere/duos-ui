@@ -119,16 +119,16 @@ class Home extends Component {
                 }, ['register here'])
               ])
             ]),
-            div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}, [
-              img({style: duosLogo, alt: 'DUOS logo', src: '/images/duos_logo.svg'}),
-              h1({style: homeTitle}, ['Data Use Oversight System']),
-              div({className: 'hidden-xs', style: homeBannerDescription}, [
+            div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
+              img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
+              h1({ style: homeTitle }, ['Data Use Oversight System']),
+              div({ className: 'hidden-xs', style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ])
           ]),
-          div({ className: 'row'}, [
+          div({ className: 'row' }, [
             div({ style: { margin: '5rem auto 0', backgroundColor: 'white' } }, [
-              h1( { style: header }, ['What is DUOS and how does it work?']),
+              h1({ style: header }, ['What is DUOS and how does it work?']),
               h3({ style: subHeader },
                 ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
               div({}, [
@@ -144,7 +144,7 @@ class Home extends Component {
                   button({className: 'btn-primary', style: buttonStyle}, [
                     a({
                       href: 'https://databiosphere.github.io/duos-ui/DatasetRegistrationInfo',
-                      style: {color: '#fff'},
+                      style: { color: '#fff' },
                       target: "_blank"
                     }, ['Register a dataset in DUOS'])
                   ])
@@ -153,7 +153,10 @@ class Home extends Component {
                 div({className: 'col-md-5', style: {display: 'flex', justifyContent: 'center'}}, [
                   isLogged ?
                     button({className: 'btn-primary', style: buttonStyle}, [
-                      a({href: '/dataset_catalog', style: {color: '#fff'}}, ['Submit a Data Access Request'])
+                      a({
+                        href: '/dataset_catalog',
+                        style: { color: '#fff' }
+                        }, ['Submit a Data Access Request'])
                     ]) :
                     SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, customStyle: buttonStyle
                     })
@@ -175,10 +178,7 @@ class Home extends Component {
               p({ style: description }, [
                 'Click here to learn learn more about DUOS\' innovative Library Card \ninitiative and how to issue a Library Card to your researchers.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
-                a({
-                  href: 'home_signing_official',
-                  style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}
-                }, ['LEARN MORE'])
+                a({ href: 'home_signing_official', style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}, ['LEARN MORE'])
               ])
             ]),
             div({ className: 'col-lg-4 col-md-4' }, [
@@ -186,10 +186,7 @@ class Home extends Component {
               p({ style: description }, [
                 'Click here to learn more about how DUOS helps researchers and for details on making a data access request.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
-                a({
-                  href: 'home_researcher_info',
-                  style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}
-                }, ['LEARN MORE'])
+                a({ href: 'home_researcher_info', style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}, ['LEARN MORE'])
               ])
             ])
           ]),
