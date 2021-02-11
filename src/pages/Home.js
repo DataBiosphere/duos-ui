@@ -119,30 +119,22 @@ class Home extends Component {
                 }, ['register here'])
               ])
             ]),
-            div({
-              style: {
-                position: 'absolute',
-                width: '100%',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)'
-              }
-            }, [
+            div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}, [
               img({style: duosLogo, alt: 'DUOS logo', src: '/images/duos_logo.svg'}),
               h1({style: homeTitle}, ['Data Use Oversight System']),
               div({className: 'hidden-xs', style: homeBannerDescription}, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ])
           ]),
-          div({className: 'row'}, [
-            div({style: {margin: '5rem auto 0', backgroundColor: 'white'}}, [
-              h1({style: header}, ['What is DUOS and how does it work?']),
-              h3({style: subHeader},
+          div({ className: 'row'}, [
+            div({ style: { margin: '5rem auto 0', backgroundColor: 'white' } }, [
+              h1( { style: header }, ['What is DUOS and how does it work?']),
+              h3({ style: subHeader },
                 ['DUOS is a semi-automated data access management service which governs compliant \nsecondary use of human genomics data:']),
               div({}, [
                 img({
                   className: 'col-sm-10 hidden-xs',
-                  style: {padding: '1rem', margin: 'auto 8.25%'},
+                  style: { padding: '1rem', margin: 'auto 8.25%' },
                   alt: 'What is DUOS graphic',
                   src: '/images/DUOS_Homepage_diagram.svg'
                 })
@@ -201,7 +193,7 @@ class Home extends Component {
               ])
             ])
           ]),
-          div({ className: 'row', style: { margin: 'auto auto 5rem auto' }}, [
+          div({ className: 'row', style: { margin: 'auto auto 5rem auto' } }, [
             div({ className: 'col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-2' }, [
               div({}, [
                 h1({ style: header }, ['Overview of DUOS']),
