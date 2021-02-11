@@ -4,7 +4,6 @@ import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
 import { AddDacModal } from './manage_dac/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
-import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
 import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
@@ -21,7 +20,6 @@ class AdminConsole extends Component {
       showModal: false,
       showAddDacModal: false,
       showAddUserModal: false,
-      showAddDatasetModal: false,
       showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
@@ -73,13 +71,6 @@ class AdminConsole extends Component {
     });
   };
 
-  addDataset = (e) => {
-    this.setState(prev => {
-      prev.showAddDatasetModal = true;
-      return prev;
-    });
-  };
-
   async electionTimeout(e) {
     const timeOut = await ElectionTimeout.findApprovalExpirationTime();
     const isDataSetElection = await Election.isDataSetElectionOpen();
@@ -103,11 +94,6 @@ class AdminConsole extends Component {
         this.setState({showAddDacModal: false});
         this.props.history.push(`admin_manage_dac`);
         break;
-      case 'addDataset': {
-        this.setState({ showAddDatasetModal: false });
-        this.props.history.push(`dataset_catalog`);
-        break;
-      }
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -117,7 +103,6 @@ class AdminConsole extends Component {
     switch (name) {
       case 'addDac': this.setState({ showAddDacModal: false }); break;
       case 'addUser': this.setState({ showAddUserModal: false }); break;
-      case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -127,7 +112,6 @@ class AdminConsole extends Component {
     switch (name) {
       case 'addDac': this.setState(prev => { prev.showAddDacModal = false; return prev; }); break;
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
-      case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
       case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
     }
@@ -215,25 +199,7 @@ class AdminConsole extends Component {
                   unreviewedCases: darUnreviewedCases
                 }),
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_addDataset',
-                  clickHandler: this.addDataset,
-                  color: 'dataset',
-                  title: 'Add Datasets',
-                  description: 'Upload Datasets associated with Data Use Limitations',
-                  iconName: 'add-dataset',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                }),
-                AddDatasetModal({
-                  showModal: this.state.showAddDatasetModal,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
-                })
-              ])
+              consoleBoxPlaceholder,
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
