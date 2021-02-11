@@ -1,8 +1,9 @@
-import {Component} from 'react';
+import {Component, Fragment, useState} from 'react';
 import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
-import {IconButton, List, ListItem} from '@material-ui/core';
+import {IconButton, List, ListItem, Menu, MenuItem} from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
@@ -11,17 +12,78 @@ import './DuosHeader.css';
 import {NavigationUtils} from "../libs/utils";
 import { Styles } from '../libs/theme';
 
+const styles = {
+  drawerPaper: {
+    backgroundColor: '#00243c',
+    color: 'white',
+    fontFamily: 'Montserrat'
+  }
+};
+
+const applyPointer = (e) => {
+  e.target.style.cursor = 'pointer';
+};
+
 const BasicListItem = (props) => {
-  const {isRendered, targetLink, label, goToLink} = props;
+  const {isRendered, targetLink, label, goToLink, applyPointer} = props;
+
+  const onMouseEnter = applyPointer;
+
   return (
     h(ListItem, {
       isRendered,
       alignItems: 'center',
       style: Styles.NAVBAR.DRAWER_LINK,
-      onClick: (e) => goToLink(targetLink)
+      onClick: (e) => goToLink(targetLink),
+      onMouseEnter
     }, [label])
   );
 };
+
+const DropdownComponent = (props) => {
+  const {links, label, goToLink, isRendered, onMouseEnter} = props;
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const linkLabels = Object.keys(links);
+  const MenuItemTemplates = (keys, links) => {
+    return keys.map((label) => {
+      const link = links[label];
+      return h(MenuItem, {
+        onClick: (e) => goToLink(link),
+        alignItems: 'center',
+        isRendered,
+        onMouseEnter
+      }, [label]);
+    });
+  };
+
+  const handleClose = (e) => {
+    setAnchorEl(null);
+  };
+
+  return (
+    h(Fragment, {}, [
+      h(ListItem, {
+        isRendered,
+        alignItems: 'center',
+        style: StyleSheet.NavBAR.DRAWER_LINK,
+        onMouseEnter
+      }, [label]),
+      h(Menu, {
+        id: 'menu-item',
+        anchorEl,
+        keepMounted: true,
+        open: Boolean(anchorEl),
+        onClose: handleClose,
+        anchorOrigin: {
+          vertical: "center",
+          horizontal: "left"
+        }
+      }, MenuItemTemplates(linkLabels, links))
+    ])
+  );
+};
+
 class DuosHeader extends Component {
 
   constructor(props) {
@@ -54,6 +116,7 @@ class DuosHeader extends Component {
   supportRequestModal = () => {
     this.setState(prev => {
       prev.showSupportRequestModal = true;
+      prev.openDrawer = false;
       return prev;
     });
   };
@@ -85,7 +148,7 @@ class DuosHeader extends Component {
   }
 
   render() {
-
+    const { classes } = this.props;
     let isChairPerson = false;
     let isMember = false;
     let isAdmin = false;
@@ -272,6 +335,9 @@ class DuosHeader extends Component {
             h(Drawer, {
               anchor: 'right',
               open: this.state.openDrawer,
+              PaperProps: {
+                className: classes.drawerPaper
+              },
               style: {
                 // I have to give this a ridiculous z-index value because the current duos navbar has a z-index of 10000 via css
                 zIndex: 300000,
@@ -279,29 +345,21 @@ class DuosHeader extends Component {
               onClose: (e) => this.toggleDrawer(false)
             }, [
               h(List, {}, [
-                //NOTE: can make a seperate component for this (use map to render some links)
-                // h(ListItem, {
-                //   isRendered: isAdmin,
-                //   alignItems: 'center',
-                //   style: Styles.NAVBAR.DRAWER_LINK,
-                //   onClick: (e) => this.goToLink('/admin_console')
-                // }, [
-                //   'Admin Console'
-                // ]),
-                h(BasicListItem, {isRendered: isAdmin, targetLink: '/admin_console', label: 'Admin Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isChairPerson, targetLink: this.state.dacChairPath, label: 'DAC Chair Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isMember, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isResearcher, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isResearcher, taretLink: '/data_ownder_console', label: 'Data Owner Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isResearcher, targetLink: '/dar_application', label: 'Request Application', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: true, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
+                //NOTE: create user component to show logged in status (as well as dropdown options)
+                h(BasicListItem, {isRendered: isAdmin, applyPointer, targetLink: '/admin_console', label: 'Admin Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isChairPerson, applyPointer, targetLink: this.state.dacChairPath, label: 'DAC Chair Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isMember, applyPointer, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isResearcher, applyPointer, taretLink: '/data_ownder_console', label: 'Data Owner Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/dar_application', label: 'Request Application', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: true, applyPointer, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
                 //NOTE: insert dropdown link here for statistics
-                h(BasicListItem, {isRendered: true, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
-                h(ListItem, {alignItems: 'center', style: Styles.NAVBAR.DRAWER_LINK, onClick: this.supportRequestModal}, ['Contact Us']),
-                supportrequestModal
+                h(BasicListItem, {isRendered: true, applyPointer, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
+                h(ListItem, {alignItems: 'center', onMouseEnter: applyPointer, style: Styles.NAVBAR.DRAWER_LINK, onClick: this.supportRequestModal}, ['Contact Us']),
               ]),
             ])
-          ])
+          ]),
+          supportrequestModal
         ])
       ])
     );
@@ -309,4 +367,4 @@ class DuosHeader extends Component {
 
 }
 
-export default withRouter(DuosHeader);
+export default withRouter(withStyles(styles)(DuosHeader));
