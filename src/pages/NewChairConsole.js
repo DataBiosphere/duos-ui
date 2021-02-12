@@ -199,8 +199,10 @@ const NewChairConsole = (props) => {
         .then((newElection) => {
           Notifications.showSuccess({text: "Election successfully opened"});
           copy = cloneDeep(filteredList);
-          copy[parseInt(i)].election = newElection;
+          copy[parseInt(i, 10)].election = newElection;
           setFilteredList(copy);
+          const row = electionList.find(element => element.dar.referenceId === darId);
+          row.election = Object.assign({}, row.election, {status: "Open", finalAccessVote: false});
         })
         .catch((errorResponse) => {
           if (errorResponse.status === 500) {
