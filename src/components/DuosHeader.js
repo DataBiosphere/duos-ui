@@ -41,17 +41,17 @@ const BasicListItem = (props) => {
 };
 
 const DropdownComponent = (props) => {
-  const {links, label, goToLink, isRendered, onMouseEnter} = props;
+  const {dropdownLinks, label, goToLink, isRendered, onMouseEnter} = props;
   const [anchorEl, setAnchorEl] = useState(null);
+  const linkLabels = Object.keys(dropdownLinks);
 
-  const linkLabels = Object.keys(links);
-  const MenuItemTemplates = (keys, links) => {
+  const MenuItemTemplates = (keys, links, onMouseEnter) => {
     return keys.map((label) => {
-      const link = links[label];
+      const linkData = links[label];
       return h(MenuItem, {
-        onClick: (e) => goToLink(link),
+        onClick: (e) => goToLink(linkData.link),
         alignItems: 'center',
-        isRendered,
+        isRendered: linkData.isRendered,
         onMouseEnter
       }, [label]);
     });
@@ -61,25 +61,39 @@ const DropdownComponent = (props) => {
     setAnchorEl(null);
   };
 
+  const openDropdown = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  const id = `${label}-menu-dropdown`;
+
   return (
     h(Fragment, {}, [
       h(ListItem, {
+        "aria-haspopup": true,
+        "aria-controls": id,
         isRendered,
         alignItems: 'center',
-        style: StyleSheet.NavBAR.DRAWER_LINK,
-        onMouseEnter
+        style: Styles.NAVBAR.DRAWER_LINK,
+        onMouseEnter,
+        onClick: openDropdown
       }, [label]),
       h(Menu, {
-        id: 'menu-item',
+        id,
         anchorEl,
         keepMounted: true,
         open: Boolean(anchorEl),
         onClose: handleClose,
         anchorOrigin: {
-          vertical: "center",
+          vertical: "top",
           horizontal: "left"
-        }
-      }, MenuItemTemplates(linkLabels, links))
+        },
+        transformOrigin: {
+          vertical: "top",
+          horizontal: "right"
+        },
+        getContentAnchorEl: null
+      }, MenuItemTemplates(linkLabels, dropdownLinks, onMouseEnter))
     ])
   );
 };
@@ -149,6 +163,7 @@ class DuosHeader extends Component {
 
   render() {
     const { classes } = this.props;
+
     let isChairPerson = false;
     let isMember = false;
     let isAdmin = false;
@@ -165,6 +180,19 @@ class DuosHeader extends Component {
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
     }
+
+    const dropdownLinks = {
+      statistics: {
+        'Votes Statistics': {
+          isRendered: !(isDataOwner || isResearcher) || isAdmin,
+          link: '/summary_votes'
+        },
+        'Reviewed Cases Record': {
+          isRendered: !(isDataOwner || isResearcher) || isAdmin,
+          link: '/reviewed_cases'
+        }
+      }
+    };
 
     const duosLogoImage = {
       width: '140px',
@@ -340,7 +368,7 @@ class DuosHeader extends Component {
               },
               style: {
                 // I have to give this a ridiculous z-index value because the current duos navbar has a z-index of 10000 via css
-                zIndex: 300000,
+                zIndex: 100,
               },
               onClose: (e) => this.toggleDrawer(false)
             }, [
@@ -353,7 +381,7 @@ class DuosHeader extends Component {
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, taretLink: '/data_ownder_console', label: 'Data Owner Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/dar_application', label: 'Request Application', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: true, applyPointer, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
-                //NOTE: insert dropdown link here for statistics
+                h(DropdownComponent, {label: 'Statistics', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.statistics}),
                 h(BasicListItem, {isRendered: true, applyPointer, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
                 h(ListItem, {alignItems: 'center', onMouseEnter: applyPointer, style: Styles.NAVBAR.DRAWER_LINK, onClick: this.supportRequestModal}, ['Contact Us']),
               ]),
