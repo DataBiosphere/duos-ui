@@ -201,7 +201,7 @@ const NewChairConsole = (props) => {
           copy = cloneDeep(filteredList);
           copy[parseInt(i, 10)].election = newElection;
           setFilteredList(copy);
-          const row = electionList.find(element => element.dar.referenceId === darId);
+          const row = electionList.find((element) => element.dar.referenceId === darId);
           row.election = Object.assign({}, row.election, {status: "Open", finalAccessVote: false});
         })
         .catch((errorResponse) => {
