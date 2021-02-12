@@ -24,7 +24,7 @@ const srpTranslations = {
     const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
     return {
       code: 'DS',
-      description: 'Disease-related studies: ' + diseaseString,
+      description: 'The dataset will be used for disease related studies' + (!isEmpty(diseaseString) ? ` (${diseaseString})` : ''),
       manualReview: false
     };
   },
@@ -289,7 +289,7 @@ export const DataUseTranslation = {
       dataUseSummary.primary = concat(dataUseSummary.primary)(srpTranslations.poa);
     }
 
-    if (darInfo.diseases && !isEmpty(darInfo.ontologies)) {
+    if (darInfo.diseases) {
       const diseaseTranslation = srpTranslations.diseases(clone(darInfo.ontologies));
       dataUseSummary.primary = uniq(concat(dataUseSummary.primary)(diseaseTranslation));
     }
