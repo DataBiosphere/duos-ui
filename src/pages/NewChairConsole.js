@@ -148,7 +148,7 @@ const NewChairConsole = (props) => {
     const darData = dar.data;
     if (!isNil(darData)) {
       setShowConfirmation(true);
-      setCreateElectionInfo({id: darData.referenceId, name: darData.darCode, index: index});
+      setCreateElectionInfo({id: darData.referenceId, name: darData.darCode, index});
     } else {
       Notifications.showError({text:"Cannot open this election. Please contact us for support."});
     }
@@ -199,7 +199,7 @@ const NewChairConsole = (props) => {
         .then((newElection) => {
           Notifications.showSuccess({text: "Election successfully opened"});
           copy = cloneDeep(filteredList);
-          copy[i].election = newElection;
+          copy[parseInt(i)].election = newElection;
           setFilteredList(copy);
         })
         .catch((errorResponse) => {
