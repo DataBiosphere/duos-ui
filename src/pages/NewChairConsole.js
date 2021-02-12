@@ -193,11 +193,13 @@ const NewChairConsole = (props) => {
   const createElection = (darId, index) => {
     if (darId !== null) {
       let copy;
+      const i = index + ((currentPage - 1) * tableSize);
       Election.createDARElection(darId)
-        .then(() => {
+        .then(electionResponse => electionResponse.json())
+        .then((newElection) => {
           Notifications.showSuccess({text: "Election successfully opened"});
           copy = cloneDeep(filteredList);
-          copy[index].election = Object.assign( {}, copy[index].election, {status: "Open", finalAccessVote: false});
+          copy[i].election = newElection;
           setFilteredList(copy);
         })
         .catch(errorResponse => {
