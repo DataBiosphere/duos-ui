@@ -120,13 +120,6 @@ export const DAC = {
     return res.json();
   },
 
-  // TODO: Remove unused endpoint from consent
-  // membership: async (dacId) => {
-  //   const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
-
   autocompleteUsers: async (term) => {
     const url = `${await Config.getApiUrl()}/dac/users/${term}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -513,13 +506,6 @@ export const Election = {
     return getFile(url, 'datasetVotesSummary.txt');
   },
 
-  // TODO: Remove unused endpoint from consent
-  // findElection: async (consentId) => {
-  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
-
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -607,11 +593,6 @@ export const Election = {
       const res = await fetchOk(url, Config.authOpts());
       return await res.json();
     }
-  },
-  findConsentElectionByDarElection: async (requestElectionId) => {
-    const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
   }
 
 };
@@ -866,18 +847,6 @@ export const Researcher = {
 
 export const StatFiles = {
 
-  // TODO: Remove unused endpoint from consent
-  // getFile: async fileType => {
-  //   const url = `${await Config.getApiUrl()}/consent/cases/summary/file?fileType=${fileType}`;
-  //   let fileName = null;
-  //   if (fileType === 'TranslateDUL') {
-  //     fileName = "summary.txt";
-  //   } else if (fileType === 'DataAccess') {
-  //     fileName = "DAR_summary.txt";
-  //   }
-  //   return getFile(url, fileName);
-  // },
-
   getDARsReport: async (reportType, fileName) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${reportType}`;
     return getFile(url, fileName);
@@ -953,13 +922,6 @@ export const User = {
 
 export const Votes = {
 
-  // TODO: Remove unused endpoint from consent
-  // getAllVotes: async (consentId) => {
-  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/vote`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
-
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -1020,14 +982,6 @@ export const Votes = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return res.json();
   },
-
-
-  // TODO: Remove unused endpoint from consent
-  // findDar: async (requestId, voteId) => {
-  //   const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return await res.json();
-  // },
 
   updateDarVote: async (requestId, vote) => {
     const postObject = {};
