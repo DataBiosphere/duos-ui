@@ -7,7 +7,7 @@ import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
-import {Storage} from '../libs/storage';
+import {Storage} from "../libs/storage";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 
 const getDatasetNames = (datasets) => {
@@ -50,7 +50,7 @@ const Records = (props) => {
     const name = "cell-button hover-color";
     const e = electionInfo.election;
     const dar = electionInfo.dar;
-    if (e !== null && e !== undefined) {
+    if (e !== null) {
       switch (e.status) {
         case "Open" :
           const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
@@ -69,7 +69,7 @@ const Records = (props) => {
     return button({
       className: name,
       onClick: () => openConfirmation(dar, index)
-    }, ['Open Election']);
+    }, ["Open Election"]);
   };
 
   return visibleWindow.map((electionInfo, index) => {
@@ -195,18 +195,18 @@ const NewChairConsole = (props) => {
       let copy;
       const i = index + ((currentPage - 1) * tableSize);
       Election.createDARElection(darId)
-        .then(electionResponse => electionResponse.json())
+        .then((electionResponse) => electionResponse.json())
         .then((newElection) => {
           Notifications.showSuccess({text: "Election successfully opened"});
           copy = cloneDeep(filteredList);
           copy[i].election = newElection;
           setFilteredList(copy);
         })
-        .catch(errorResponse => {
+        .catch((errorResponse) => {
           if (errorResponse.status === 500) {
             Notifications.showError({text: "Email Service Error! The election was created but the participants couldnt be notified by Email."});
           } else {
-            errorResponse.json().then(error =>
+            errorResponse.json().then((error) =>
               Notifications.showError({text: "Election cannot be created! " + error.message}));
           }
         });

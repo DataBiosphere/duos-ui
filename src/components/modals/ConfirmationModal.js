@@ -1,6 +1,6 @@
-import {button, div, h} from 'react-hyperscript-helpers';
-import {Styles} from '../../libs/theme';
-import Modal from 'react-modal';
+import {button, div, h} from "react-hyperscript-helpers";
+import {Styles} from "../../libs/theme";
+import Modal from "react-modal";
 import {isNil} from "lodash";
 
 const ConfirmationModal = (props) => {
