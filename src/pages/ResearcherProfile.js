@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import {button, div, form, h, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
+import {button, div, form, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
@@ -12,6 +12,8 @@ import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
+
+const UnitedStatesOrEmpty = ["united states", "us", "united states of america", "usa", ''];
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -198,7 +200,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.state)) {
+    if (!this.isValidState(this.state.profile.state)) {
       state = true;
       showValidationMessages = true;
     }
@@ -259,6 +261,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let isValid = false;
     if (value !== '' && value !== null && value !== undefined) {
       isValid = true;
+    }
+    return isValid;
+  };
+
+  isValidState(value) {
+    let isValid = false;
+    if (UnitedStatesOrEmpty.includes(this.state.profile.country.toLowerCase())) {
+      if (value !== '' && value !== null && value !== undefined) {
+        isValid = true;
+      }
+    } else {
+      if (value !== null && value !== undefined) {
+        isValid = true;
+      }
     }
     return isValid;
   };
@@ -720,12 +736,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.state,
-                        required: true
+                        required: UnitedStatesOrEmpty.includes(this.state.profile.country.toLowerCase())
                       }),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.state && showValidationMessages
-                      }, ['State is required'])
+                      }, ['State is required if you live in the United States'])
                     ])
                   ])
                 ]),
