@@ -103,7 +103,7 @@ class Home extends Component {
     };
 
     const registerPositionStyle = {
-      padding: '1em',
+      padding: "1em",
       position: 'absolute',
       top: '6rem',
       right: "3rem",
