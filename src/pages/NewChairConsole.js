@@ -50,7 +50,7 @@ const Records = (props) => {
     const name = "cell-button hover-color";
     const e = electionInfo.election;
     const dar = electionInfo.dar;
-    if (e !== null) {
+    if (!isNil(e)) {
       switch (e.status) {
         case "Open" :
           const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
