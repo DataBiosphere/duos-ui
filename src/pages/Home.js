@@ -103,10 +103,10 @@ class Home extends Component {
     };
 
     const registerPositionStyle = {
-      padding: '1em 1em',
+      padding: '1em',
       position: 'absolute',
       top: '6rem',
-      right: '2rem',
+      right: '3rem',
       zIndex: 1000,
       margin: '3px'
     };
@@ -119,8 +119,8 @@ class Home extends Component {
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
             div({ isRendered: !isLogged, style: signInPositionStyle}, [
-              span({ style: {color: '#FFFFFF', position: 'relative' }}, ['Already registered?']),
-              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative'}})
+              span({ style: {color: '#FFFFFF' }}, ['Already registered?']),
+              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history })
             ]),
             div({isRendered: !isLogged, style: registerPositionStyle}, [
               span({ style: { color: '#FFFFFF' }}, ['If not, ',
