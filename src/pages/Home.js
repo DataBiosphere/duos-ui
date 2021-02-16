@@ -108,7 +108,7 @@ class Home extends Component {
       top: '6rem',
       right: "3rem",
       zIndex: 1000,
-      margin: '3px'
+      margin: "3px"
     };
 
 
