@@ -119,7 +119,7 @@ class Home extends Component {
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
             div({ isRendered: !isLogged, style: signInPositionStyle}, [
-              span({ style: {color: '#FFFFFF' }}, ['Already registered?']),
+              span({ style: {color: "#FFFFFF" }}, ['Already registered?']),
               SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history })
             ]),
             div({isRendered: !isLogged, style: registerPositionStyle}, [
