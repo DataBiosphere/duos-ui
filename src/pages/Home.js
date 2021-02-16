@@ -119,11 +119,11 @@ class Home extends Component {
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
             div({ isRendered: !isLogged, style: signInPositionStyle}, [
-              span({style: {color: '#FFFFFF', position: 'relative', margin: 'auto 0'}}, ['Already registered?']),
-              SignIn({props: this.props, onSignIn: () => onSignIn(), history: history, style: {position: 'relative'}}),
+              span({ style: {color: '#FFFFFF', position: 'relative' }}, ['Already registered?']),
+              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, style: { position: 'relative'}})
             ]),
             div({isRendered: !isLogged, style: registerPositionStyle}, [
-              span({style: {color: '#FFFFFF', padding: '10px'}}, ['If not, ',
+              span({ style: { color: '#FFFFFF' }}, ['If not, ',
                 a({
                   href: 'https://accounts.google.com/SignUp?continue:https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fauth%3Fopenid.realm%26scope%3Demail%2Bprofile%2Bopenid%26response_type%3Dpermission%26redirect_uri%3Dstoragerelay%3A%2F%2Fhttp%2Flocalhost%3A8000%3Fid%253Dauth721210%26ss_domain%3Dhttp%3A%2F%2Flocalhost%3A8000%26client_id%3D832251491634-smgc3b2pogqer1mmdrd3hrqic3leof3p.apps.googleusercontent.com%26fetch_basic_profile%3Dtrue%26hl%3Des-419%26from_login%3D1%26as%3D43c5de35a7316d00&ltmpl:popup',
                 }, ['register here'])
