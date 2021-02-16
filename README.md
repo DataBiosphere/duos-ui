@@ -49,7 +49,7 @@ npm start
 ```
 ### Running under Docker
 
-Choose an environment configuration file to mount to `/usr/share/nginx/html/config.json`
+Update your local environment configuration file and mount that to `/usr/share/nginx/html/config.json`
 
 ```
 docker build . -t duos
