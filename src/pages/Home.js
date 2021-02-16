@@ -98,7 +98,7 @@ class Home extends Component {
       padding: '1em 1em 0 0',
       alignItems: 'center',
       position: 'absolute',
-      top: '1rem',
+      top: '0',
       right: '1rem'};
 
     return (
