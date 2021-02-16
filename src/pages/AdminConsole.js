@@ -2,10 +2,8 @@ import { Component } from 'react';
 import { div, hr } from 'react-hyperscript-helpers';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
-import { AddDulModal } from '../components/modals/AddDulModal';
 import { AddDacModal } from './manage_dac/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
-import { AddDatasetModal } from '../components/modals/AddDatasetModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
 import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
@@ -20,10 +18,8 @@ class AdminConsole extends Component {
     this.state = {
       currentUser: currentUser,
       showModal: false,
-      showAddDulModal: false,
       showAddDacModal: false,
       showAddUserModal: false,
-      showAddDatasetModal: false,
       showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
       darUnreviewedCases: 0,
@@ -61,13 +57,6 @@ class AdminConsole extends Component {
     );
   }
 
-  addDul = (e) => {
-    this.setState(prev => {
-      prev.showAddDulModal = true;
-      return prev;
-    });
-  };
-
   addDac = (e) => {
     this.setState(prev => {
       prev.showAddDacModal = true;
@@ -78,13 +67,6 @@ class AdminConsole extends Component {
   addUser = (e) => {
     this.setState(prev => {
       prev.showAddUserModal = true;
-      return prev;
-    });
-  };
-
-  addDataset = (e) => {
-    this.setState(prev => {
-      prev.showAddDatasetModal = true;
       return prev;
     });
   };
@@ -104,10 +86,6 @@ class AdminConsole extends Component {
   okModal = (name) => {
 
     switch (name) {
-      case 'editDul':
-        this.setState({ showAddDulModal: false });
-        this.props.history.push(`admin_manage_dul`);
-        break;
       case 'addUser':
         this.setState({showAddUserModal: false});
         this.props.history.push(`admin_manage_users`);
@@ -116,11 +94,6 @@ class AdminConsole extends Component {
         this.setState({showAddDacModal: false});
         this.props.history.push(`admin_manage_dac`);
         break;
-      case 'addDataset': {
-        this.setState({ showAddDatasetModal: false });
-        this.props.history.push(`dataset_catalog`);
-        break;
-      }
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -128,10 +101,8 @@ class AdminConsole extends Component {
 
   closeModal = (name) => {
     switch (name) {
-      case 'addDul': this.setState({ showAddDulModal: false }); break;
       case 'addDac': this.setState({ showAddDacModal: false }); break;
       case 'addUser': this.setState({ showAddUserModal: false }); break;
-      case 'addDataset': this.setState({ showAddDatasetModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -139,10 +110,8 @@ class AdminConsole extends Component {
 
   afterModalOpen = (name) => {
     switch (name) {
-      case 'addDul': this.setState(prev => { prev.showAddDulModal = false; return prev; }); break;
       case 'addDac': this.setState(prev => { prev.showAddDacModal = false; return prev; }); break;
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
-      case 'addDataset': this.setState(prev => { prev.showAddDatasetModal = false; return prev; }); break;
       case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
     }
@@ -151,6 +120,10 @@ class AdminConsole extends Component {
   render() {
 
     const { currentUser, dulUnreviewedCases, darUnreviewedCases } = this.state;
+
+    const consoleBoxPlaceholder = div({
+      style: { margin: "10px", padding: "0px", display: "inline-block" },
+      className: "col-lg-6 col-md-6 col-sm-12 col-xs-12" }, []);
 
     return (
 
@@ -177,29 +150,7 @@ class AdminConsole extends Component {
                   unreviewedCases: dulUnreviewedCases
                 }),
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-
-                AdminConsoleBox({
-                  id: 'btn_addDUL',
-                  clickHandler: this.addDul,
-                  color: 'dul',
-                  title: 'Add Data Use Limitations',
-                  description: 'Catalog a Data Use Limitation Record in the system',
-                  iconName: 'add-dul',
-                  iconSize: 'default',
-                }),
-                AddDulModal({
-                  isRendered: this.state.showAddDulModal,
-                  showModal: this.state.showAddDulModal,
-                  editMode: false,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen,
-                  dul: '',
-                  editConsent: ''
-                }),
-              ]),
+              consoleBoxPlaceholder
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -248,25 +199,7 @@ class AdminConsole extends Component {
                   unreviewedCases: darUnreviewedCases
                 }),
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_addDataset',
-                  clickHandler: this.addDataset,
-                  color: 'dataset',
-                  title: 'Add Datasets',
-                  description: 'Upload Datasets associated with Data Use Limitations',
-                  iconName: 'add-dataset',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                }),
-                AddDatasetModal({
-                  showModal: this.state.showAddDatasetModal,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
-                })
-              ])
+              consoleBoxPlaceholder,
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
@@ -323,19 +256,7 @@ class AdminConsole extends Component {
                   onAfterOpen: this.afterModalOpen
                 })
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_invalidRequest',
-                  url: '/invalid_restrictions',
-                  color: 'common',
-                  title: 'Invalid Request Restrictions',
-                  description: 'Show Invalid Restrictions for Data Use Limitations and Data Access Requests',
-                  iconName: 'invalid-restrictions',
-                  iconSize: 'large',
-                  unreviewedCases: 0
-                })
-              ])
+              consoleBoxPlaceholder
             ])
           ])
         ])

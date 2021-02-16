@@ -6,7 +6,6 @@ import { USER_ROLES } from './libs/utils';
 import AccessCollect from './pages/AccessCollect';
 import AccessPreview from './pages/AccessPreview';
 import AccessResultRecords from './pages/AccessResultRecords';
-import AccessReview from './pages/AccessReview';
 import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
 import AdminManageDac from './pages/manage_dac/AdminManageDac';
@@ -25,13 +24,11 @@ import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
 import FAQs from './pages/FAQs';
-import FinalAccessReview from './pages/FinalAccessReview';
 import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
-import InvalidRestrictions from './pages/InvalidRestrictions';
-import AccessReviewV2 from './pages/access_review/AccessReviewV2';
+import AccessReview from './pages/access_review/AccessReview';
 import MemberConsole from './pages/MemberConsole';
 import NewChairConsole from './pages/NewChairConsole';
 import NotFound from './pages/NotFound';
@@ -93,31 +90,25 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
-    <AuthenticatedRoute path="/invalid_restrictions" component={InvalidRestrictions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/access_result_records/:referenceId/:electionId" component={AccessResultRecords} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
+      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/dul_results_record/:electionId" component={DulResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
-    <AuthenticatedRoute path="/access_review/:darId/:voteId/:rpVoteId?" component={AccessReview} props={props}
-      rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/new_access_review/:darId/:voteId/:rpVoteId?" component={AccessReviewV2} props={props}
-      rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}
-    />
+    <AuthenticatedRoute path="/access_review/:darId/:voteId" component={AccessReview} props={props}
+      rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}/>
     <AuthenticatedRoute path="/access_preview/:referenceId?/:electionId?" component={AccessPreview} props={props}
-      rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
+      rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/access_collect/:electionId/:referenceId" component={AccessCollect} props={props}
-      rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
+      rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dul_review/:voteId/:consentId" component={DulReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dul_preview/:consentId" component={DulPreview} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dul_collect/:consentId" component={DulCollect} props={props}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/final_access_review/:referenceId/:electionId" component={FinalAccessReview} props={props}
-      rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/reviewed_cases" component={ReviewedCases} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
+      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <Route path="*" component={NotFound} />
   </Switch>
 );

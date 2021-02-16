@@ -1,9 +1,9 @@
-import {isEmpty, isNil, includes, toLower, filter, cloneDeep} from 'lodash/fp';
-import { useState, useEffect, useRef} from 'react';
+import { isEmpty, isNil, includes, toLower, filter, cloneDeep } from 'lodash/fp';
+import { useState, useEffect, useRef } from 'react';
 import { div, h, img, input } from 'react-hyperscript-helpers';
-import { DAR} from '../libs/ajax';
+import { DAR, User } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
-import {Notifications, formatDate} from '../libs/utils';
+import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
@@ -70,6 +70,7 @@ const NewChairConsole = () => {
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState();
   const [darDetails, setDarDetails] = useState({});
+  const [researcher, setResearcher] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const searchTerms = useRef('');
@@ -84,8 +85,8 @@ const NewChairConsole = () => {
         setFilteredList(pendingList);
         setPageCount(Math.ceil(pendingList.length / initTableSize));
       } catch(error) {
-        Notifications.showError({text: 'Error: Unable to retreive data requests from server'});
-      };
+        Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
+      }
     };
     init();
   }, []);
@@ -98,13 +99,15 @@ const NewChairConsole = () => {
 
   const openModal = async (darInfo) => {
     let darData = darInfo.data;
-    if(!isNil(darData)) {
+    if (!isNil(darData)) {
       setShowModal(true);
       darData.researchType = DataUseTranslation.generateResearchTypes(darData);
       if(!darData.datasetNames) {
         darData.datasetNames = getDatasetNames(darData.datasets);
       }
       setDarDetails(darData);
+      const researcher = await User.getById(darData.userId);
+      setResearcher(researcher);
     }
   };
 
@@ -196,7 +199,7 @@ const NewChairConsole = () => {
         h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover})
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
-      h(DarModal, {showModal, closeModal, darDetails})
+      h(DarModal, {showModal, closeModal, darDetails, researcher})
     ])
   );
 };

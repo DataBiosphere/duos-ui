@@ -113,27 +113,16 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`dul_collect/${consentId}`);
   };
 
-  openFinalAccessReview = (referenceId, electionId, rpElectionId) => (e) => {
-    this.props.history.push(`${'final_access_review'}/${referenceId}/${electionId}`);
-  };
-
-  openAccessReview = (referenceId, voteId, rpVoteId, alreadyVoted) => async (e) => {
-    const pathStart = await NavigationUtils.accessReviewPath();
+  openAccessReview = (referenceId, voteId, alreadyVoted) => async (e) => {
+    const pathStart = NavigationUtils.accessReviewPath();
     let chairFinal = false;
     if(this.state.currentUser && alreadyVoted) {
       chairFinal = this.state.currentUser.isChairPerson;
     }
-    if (rpVoteId !== null) {
-      this.props.history.push(
-        `${pathStart}/${referenceId}/${voteId}/${rpVoteId}`,
-        {chairFinal}
-      );
-    } else {
-      this.props.history.push(
-        `${pathStart}/${referenceId}/${voteId}`,
-        {chairFinal}
-      );
-    }
+    this.props.history.push(
+      `${pathStart}/${referenceId}/${voteId}`,
+      {chairFinal}
+    );
   };
 
   isAccessCollectEnabled = (pendingCase) => {
@@ -335,7 +324,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                       button({
                         id: pendingCase.frontEndId + '_btnVote',
                         name: 'btn_voteAccess',
-                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.rpVoteId, pendingCase.alreadyVoted),
+                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.alreadyVoted),
                         className: 'cell-button cancel-color'
                       }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),

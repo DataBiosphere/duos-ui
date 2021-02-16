@@ -73,63 +73,10 @@ export const Consent = {
     });
   },
 
-  postConsent: async (consent) => {
-    consent.requiresManualReview = false;
-    consent.useRestriction = JSON.parse(consent.useRestriction);
-    consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent`;
-    try {
-      const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(consent), Config.authOpts(), { method: 'POST' }]));
-      if (res.ok) {
-        return true;
-      }
-    } catch (err) {
-      return await err.json().then(message => {
-        return message.message;
-      });
-    }
-  },
-
-  update: async (consent) => {
-    consent.requiresManualReview = false;
-    consent.useRestriction = JSON.parse(consent.useRestriction);
-    consent.dataUse = JSON.parse(consent.dataUse);
-    const url = `${await Config.getApiUrl()}/consent/${consent.consentId}`;
-    try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(consent), { method: 'PUT' }]));
-      await res.json();
-      return true;
-    } catch (err) {
-      const message = await err.json();
-      return message.message;
-    }
-  },
-
-  postDul: async (consentId, fileName, file) => {
-    const url = `${await Config.getApiUrl()}/consent/${consentId}/dul?fileName=${fileName}`;
-    let formData = new FormData();
-    formData.append("data", new Blob([file], { type: 'text/plain' }));
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    return res.json().then(
-      () => {
-        return true;
-      },
-      (error) => {
-        return error;
-      }
-    );
-  },
-
   deleteConsent: async (consentId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}`;
     return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
   },
-
-  findInvalidConsentRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/consent/invalid`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  }
 
 };
 
@@ -172,13 +119,6 @@ export const DAC = {
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
-
-  // TODO: Remove unused endpoint from consent
-  // membership: async (dacId) => {
-  //   const url = `${await Config.getApiUrl()}/dac/${dacId}/membership`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
 
   autocompleteUsers: async (term) => {
     const url = `${await Config.getApiUrl()}/dac/users/${term}`;
@@ -424,12 +364,6 @@ export const DAR = {
     return await res.json();
   },
 
-  findDataAccessInvalidUseRestriction: async () => {
-    const url = `${await Config.getApiUrl()}/dar/invalid`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {
@@ -456,14 +390,6 @@ export const DAR = {
 };
 
 export const DataSet = {
-
-  postDatasetFile: async (file, overwrite, userId) => {
-    const url = `${await Config.getApiUrl()}/dataset/${userId}?overwrite=${overwrite}`;
-    let formData = new FormData();
-    formData.append("data", new Blob([file], { type: 'text/plain' }));
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST', body: formData }]));
-    return await res.json();
-  },
 
   postDatasetForm: async (form) => {
     const url = `${await Config.getApiUrl()}/dataset/v2`;
@@ -580,13 +506,6 @@ export const Election = {
     return getFile(url, 'datasetVotesSummary.txt');
   },
 
-  // TODO: Remove unused endpoint from consent
-  // findElection: async (consentId) => {
-  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/election`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
-
   electionReviewResource: async (referenceId, type) => {
     const url = `${await Config.getApiUrl()}/electionReview?referenceId=${referenceId}&type=${type}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -639,13 +558,6 @@ export const Election = {
     return await res.json();
   },
 
-  // TODO: Remove unused endpoint from consent
-  // findInvalidConsentRestriction: async () => {
-  //   const url = `${await Config.getApiUrl()}/consent/invalid`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return await res.json();
-  // },
-
   findReviewedDRs: async () => {
     const url = `${await Config.getApiUrl()}/dataRequest/cases/closed`;
     const res = await fetchOk(url, Config.authOpts());
@@ -681,11 +593,6 @@ export const Election = {
       const res = await fetchOk(url, Config.authOpts());
       return await res.json();
     }
-  },
-  findConsentElectionByDarElection: async (requestElectionId) => {
-    const url = `${await Config.getApiUrl()}/election/consent/${requestElectionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
   }
 
 };
@@ -940,18 +847,6 @@ export const Researcher = {
 
 export const StatFiles = {
 
-  // TODO: Remove unused endpoint from consent
-  // getFile: async fileType => {
-  //   const url = `${await Config.getApiUrl()}/consent/cases/summary/file?fileType=${fileType}`;
-  //   let fileName = null;
-  //   if (fileType === 'TranslateDUL') {
-  //     fileName = "summary.txt";
-  //   } else if (fileType === 'DataAccess') {
-  //     fileName = "DAR_summary.txt";
-  //   }
-  //   return getFile(url, fileName);
-  // },
-
   getDARsReport: async (reportType, fileName) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${reportType}`;
     return getFile(url, fileName);
@@ -1027,13 +922,6 @@ export const User = {
 
 export const Votes = {
 
-  // TODO: Remove unused endpoint from consent
-  // getAllVotes: async (consentId) => {
-  //   const url = `${await Config.getApiUrl()}/consent/${consentId}/vote`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return res.json();
-  // },
-
   find: async (consentId, voteId) => {
     const url = `${await Config.getApiUrl()}/consent/${consentId}/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -1094,14 +982,6 @@ export const Votes = {
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
     return res.json();
   },
-
-
-  // TODO: Remove unused endpoint from consent
-  // findDar: async (requestId, voteId) => {
-  //   const url = `${await Config.getApiUrl()}/darRequest/${requestId}/vote/${voteId}`;
-  //   const res = await fetchOk(url, Config.authOpts());
-  //   return await res.json();
-  // },
 
   updateDarVote: async (requestId, vote) => {
     const postObject = {};

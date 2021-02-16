@@ -1,6 +1,7 @@
 import { div, input, span } from 'react-hyperscript-helpers';
 import { useRef, useEffect } from 'react';
 import { toNumber } from 'lodash';
+import { Theme } from '../libs/theme';
 
 //NOTE: This is a new pagination made to fit with the updated table look
 //Component does not use third-party libraries for pagination, whereas the old version relies on 'react-pagination'
@@ -25,7 +26,7 @@ export default function PaginationBar(props) {
           span({
             onClick: (e) => goToPage(toNumber(currentPage.current.value) - 1),
             onMouseEnter: applyTextHover,
-            onMouseLeave: (e) => removeTextHover(e, '#1f3b50'),
+            onMouseLeave: (e) => removeTextHover(e, Theme.palette.primary),
           },['Prev']),
         ]),
         div({style: Styles.TABLE.CURRENT_PAGE}, [
