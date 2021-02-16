@@ -1,7 +1,7 @@
 # Testing
 We use [Cypress](https://docs.cypress.io/) for testing.
 
-Choose an environment to test against:
+Update an environment config file to test against:
 ```
 cp config/dev.json public/config.json
 ``` 

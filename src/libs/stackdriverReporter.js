@@ -2,6 +2,7 @@ import { Storage } from './storage';
 import StackdriverErrorReporter from 'stackdriver-errors-js';
 import { Config } from './config';
 import * as ld from 'lodash';
+import isNil from "lodash/fp";
 
 const errorHandler = new StackdriverErrorReporter();
 
@@ -31,8 +32,10 @@ export const StackdriverReporter = {
   },
 
   start: async () => {
-    await StackdriverReporter.generateErrorConfig()
-      .then(config => errorHandler.start(config));
+    const config = await StackdriverReporter.generateErrorConfig();
+    if (!isNil(config) && !isNil(config.errorApiKey)) {
+      errorHandler.start(config);
+    }
   },
 
   report: async (msg) => {
