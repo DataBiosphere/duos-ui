@@ -120,7 +120,7 @@ class Home extends Component {
             img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
             div({ isRendered: !isLogged, style: signInPositionStyle}, [
               span({ style: {color: "#FFFFFF" }}, ['Already registered?']),
-              SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history })
+              SignIn({ props: this.props, onSignIn: () => onSignIn(), history })
             ]),
             div({isRendered: !isLogged, style: registerPositionStyle}, [
               span({ style: { color: '#FFFFFF' }}, ['If not, ',
