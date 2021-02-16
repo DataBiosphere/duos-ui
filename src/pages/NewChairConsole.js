@@ -191,7 +191,7 @@ const NewChairConsole = (props) => {
   };
 
   const createElection = (darId, index) => {
-    if (darId !== null) {
+    if (!isNil(darId)) {
       let copy;
       const i = index + ((currentPage - 1) * tableSize);
       Election.createDARElection(darId)
