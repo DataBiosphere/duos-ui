@@ -1,13 +1,14 @@
-import { isEmpty, isNil, includes, toLower, filter, cloneDeep } from 'lodash/fp';
+import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
-import { div, h, img, input } from 'react-hyperscript-helpers';
-import { DAR, User } from '../libs/ajax';
+import { div, h, img, input, button } from 'react-hyperscript-helpers';
+import { DAR, Election, User } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
-
+import {Storage} from "../libs/storage";
+import ConfirmationModal from "../components/modals/ConfirmationModal";
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -38,12 +39,38 @@ const getElectionDate = (election) => {
 
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover} = props;
+  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, openConfirmation} = props;
   const startIndex = (currentPage - 1) * tableSize;
   const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
   const visibleWindow = props.filteredList.slice(startIndex, endIndex);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
+
+  const createActionButton = (electionInfo, index) => {
+    const name = "cell-button hover-color";
+    const e = electionInfo.election;
+    const dar = electionInfo.dar;
+    if (!isNil(e)) {
+      switch (e.status) {
+        case "Open" :
+          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
+          const vote = head(votes);
+          return button({
+            className: name,
+            onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
+          }, ["Vote"]);
+        default :
+          return button({
+            className: name,
+            onClick: () => openConfirmation(dar, index)
+          }, ["Re-Open"]);
+      }
+    }
+    return button({
+      className: name,
+      onClick: () => openConfirmation(dar, index)
+    }, ["Open Election"]);
+  };
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election} = electionInfo;
@@ -59,12 +86,12 @@ const Records = (props) => {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, ['Placeholder for buttons. (font style is placeholder as well)'])
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(electionInfo, index)]),
     ]);
   });
 };
 
-const NewChairConsole = () => {
+const NewChairConsole = (props) => {
   const [showModal, setShowModal] = useState(false);
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
@@ -74,6 +101,8 @@ const NewChairConsole = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const searchTerms = useRef('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [createElectionInfo, setCreateElectionInfo,] = useState({id: null, name: null, index: null});
 
   useEffect(() => {
     const init = async() => {
@@ -115,6 +144,16 @@ const NewChairConsole = () => {
     setShowModal(false);
   };
 
+  const openConfirmation = (dar, index) => {
+    const darData = dar.data;
+    if (!isNil(darData)) {
+      setShowConfirmation(true);
+      setCreateElectionInfo({id: darData.referenceId, name: darData.darCode, index});
+    } else {
+      Notifications.showError({text:"Cannot open this election. Please contact us for support."});
+    }
+  };
+
   const handleSearchChange = () => {
     setCurrentPage(1);
     const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
@@ -148,6 +187,34 @@ const NewChairConsole = () => {
   const changeTableSize = (newTableSize) => {
     if(!isEmpty(newTableSize) && newTableSize > 0) {
       setTableSize(newTableSize);
+    }
+  };
+
+  const createElection = (darId, index) => {
+    if (!isNil(darId)) {
+      let copy;
+      const i = index + ((currentPage - 1) * tableSize);
+      Election.createDARElection(darId)
+        .then((electionResponse) => electionResponse.json())
+        .then((newElection) => {
+          Notifications.showSuccess({text: "Election successfully opened"});
+          copy = cloneDeep(filteredList);
+          copy[parseInt(i, 10)].election = newElection;
+          setFilteredList(copy);
+          const row = electionList.find((element) => element.dar.referenceId === darId);
+          row.election = Object.assign({}, row.election, {status: "Open", finalAccessVote: false});
+        })
+        .catch((errorResponse) => {
+          if (errorResponse.status === 500) {
+            Notifications.showError({text: "Email Service Error! The election was created but the participants couldnt be notified by Email."});
+          } else {
+            errorResponse.json().then((error) =>
+              Notifications.showError({text: "Election cannot be created! " + error.message}));
+          }
+        });
+      setShowConfirmation(false);
+    } else {
+      Notifications.showError({text: "Could not open election. Contact us for support."});
     }
   };
 
@@ -196,10 +263,20 @@ const NewChairConsole = () => {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation})
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
-      h(DarModal, {showModal, closeModal, darDetails, researcher})
+      h(DarModal, {showModal, closeModal, darDetails, researcher}),
+      h(ConfirmationModal, {
+        showConfirmation,
+        setShowConfirmation,
+        title: "Open Election?",
+        message: "Are you sure you want the DAC to vote on this data access request?",
+        header: createElectionInfo.name,
+        onConfirm: createElection,
+        id: createElectionInfo.id,
+        index: createElectionInfo.index
+      })
     ])
   );
 };
