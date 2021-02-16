@@ -106,7 +106,7 @@ class Home extends Component {
       padding: '1em',
       position: 'absolute',
       top: '6rem',
-      right: '3rem',
+      right: "3rem",
       zIndex: 1000,
       margin: '3px'
     };
