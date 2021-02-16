@@ -6,7 +6,7 @@
   font-family: "Montserrat", sans-serif;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26), 0 2px 10px 0 rgba(0, 0, 0, 0.16);
   position: relative;
-  z-index: 10000;
+  z-index: 500;
 }
 
 .navbar-duos li {

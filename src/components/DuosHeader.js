@@ -40,8 +40,13 @@ const BasicListItem = (props) => {
   );
 };
 
+/*
+  NOTE: I've made a dropdown component for statistics, but I'm willing to get rid of and use BasicListItem
+  Part of me feels like having the options as seperate items will be better for smaller devices since it'll be easier to click through
+  Note: user profile was split in this manner to show how that would work out
+*/
 const DropdownComponent = (props) => {
-  const {dropdownLinks, label, goToLink, isRendered, onMouseEnter} = props;
+  const {dropdownLinks, label, goToLink, isRendered, onMouseEnter, classes} = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const linkLabels = Object.keys(dropdownLinks);
 
@@ -52,6 +57,7 @@ const DropdownComponent = (props) => {
         onClick: (e) => goToLink(linkData.link),
         alignItems: 'center',
         isRendered: linkData.isRendered,
+        style: Styles.NAVBAR.DRAWER_LINK,
         onMouseEnter
       }, [label]);
     });
@@ -92,6 +98,9 @@ const DropdownComponent = (props) => {
           vertical: "top",
           horizontal: "right"
         },
+        MenuListProps: {
+          className: classes.drawerPaper
+        },
         getContentAnchorEl: null
       }, MenuItemTemplates(linkLabels, dropdownLinks, onMouseEnter))
     ])
@@ -124,6 +133,7 @@ class DuosHeader extends Component {
 
   signOut = () => {
     this.props.history.push('/home');
+    this.toggleDrawer(false);
     this.props.onSignOut();
   };
 
@@ -346,7 +356,7 @@ class DuosHeader extends Component {
         //NOTE: old navbar style is heavily dependent on css styles with element specific styles
         //Hard to make that navbar flexible with material-ui's syntax
         //For now I will use material-ui's hidden element to selectively render the two different navbars
-        //On a later PR I will look into rewriting the current navbar
+        //I'll look into rewriting the large navbar on a later PR
         h(Hidden, {lgUp: true}, [
           div({style: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}, [
             img({
@@ -367,23 +377,27 @@ class DuosHeader extends Component {
                 className: classes.drawerPaper
               },
               style: {
-                // I have to give this a ridiculous z-index value because the current duos navbar has a z-index of 10000 via css
-                zIndex: 100,
+                // I have to give this a ridiculous z-index value to keep the google sign in widget or register link from showing up on top
               },
               onClose: (e) => this.toggleDrawer(false)
             }, [
               h(List, {}, [
                 //NOTE: create user component to show logged in status (as well as dropdown options)
+                h(BasicListItem, {isRendered: isLogged, applyPointer, targetLink: '/profile', label: 'Your Profile', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isAdmin, applyPointer, targetLink: '/admin_console', label: 'Admin Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isChairPerson, applyPointer, targetLink: this.state.dacChairPath, label: 'DAC Chair Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isMember, applyPointer, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, taretLink: '/data_ownder_console', label: 'Data Owner Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/dar_application', label: 'Request Application', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: true, applyPointer, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
-                h(DropdownComponent, {label: 'Statistics', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.statistics}),
-                h(BasicListItem, {isRendered: true, applyPointer, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
+                h(DropdownComponent, {isRendered: isAdmin, label: 'Statistics', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.statistics, classes}),
+                h(BasicListItem, {isRendered: isLogged, applyPointer, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: !isLogged, applyPointer, targetLink: '/home_about', label: 'About', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: !isLogged, applyPointer, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
+                //contact us doesn't use the Basic List Item since it just makes the modal visible, which is different from the redirect functionality from basicList
                 h(ListItem, {alignItems: 'center', onMouseEnter: applyPointer, style: Styles.NAVBAR.DRAWER_LINK, onClick: this.supportRequestModal}, ['Contact Us']),
+                //passing in signOut as goToLink argument to execute logout flow
+                h(BasicListItem, {isRendered: isLogged, applyPointer,label: 'Sign Out', goToLink: this.signOut}),
               ]),
             ])
           ]),
