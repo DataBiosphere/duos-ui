@@ -1,4 +1,5 @@
 {
+  "Comments": "The values in this configuration are all publicly accessible values from the deployed application.",
   "env": "dev",
   "tag": "dev",
   "hash": "dev",
