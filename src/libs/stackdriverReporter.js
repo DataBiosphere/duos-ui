@@ -34,7 +34,7 @@ export const StackdriverReporter = {
   start: async () => {
     const config = await StackdriverReporter.generateErrorConfig();
     if (!isNil(config) && !isNil(config.errorApiKey)) {
-      errorHandler.start(config)
+      errorHandler.start(config);
     }
   },
 
