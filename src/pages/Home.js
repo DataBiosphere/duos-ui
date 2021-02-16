@@ -105,7 +105,7 @@ class Home extends Component {
     const registerPositionStyle = {
       padding: "1em",
       position: 'absolute',
-      top: '6rem',
+      top: "6rem",
       right: "3rem",
       zIndex: 1000,
       margin: "3px"
