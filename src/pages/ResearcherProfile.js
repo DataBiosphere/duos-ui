@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component } from 'react';
-import {button, div, form, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
+import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
@@ -12,8 +12,16 @@ import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
+import {getNames} from "country-list";
 
-const UnitedStatesOrEmpty = ["united states", "us", "united states of america", "usa", ''];
+const USA = option({ value: "United States of America"}, ["United States of America"]);
+const countryNames = getNames().map(name => option({value: name}, [name]));
+countryNames.splice(232, 1);
+countryNames.splice(0, 0, USA);
+const UsaStates = require('usa-states').UsaStates;
+const stateNames = (new UsaStates().arrayOf("names")).map(name => option({value: name}, [name]));
+console.log(stateNames);
+console.log(countryNames);
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -267,14 +275,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   isValidState(value) {
     let isValid = false;
-    if (UnitedStatesOrEmpty.includes(this.state.profile.country.toLowerCase())) {
-      if (value !== '' && value !== null && value !== undefined) {
-        isValid = true;
-      }
-    } else {
-      if (value !== null && value !== undefined) {
-        isValid = true;
-      }
+    if (value !== '' && value !== null && value !== undefined) {
+      isValid = true;
+    }
+    if (value !== null && value !== undefined) {
+      isValid = true;
     }
     return isValid;
   };
@@ -453,7 +458,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   // not valid properties for update.
   cloneProfile = (profile) => {
     return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
-  }
+  };
 
   render() {
     let completed = this.state.profile.completed;
@@ -728,16 +733,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }, ['City is required'])
                     ]),
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileState', className: 'control-label' }, ['State*']),
-                      input({
+                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State*']),
+                      select({
                         id: 'profileState',
                         name: 'state',
-                        type: 'text',
-                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.state,
-                        required: UnitedStatesOrEmpty.includes(this.state.profile.country.toLowerCase())
-                      }),
+                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        required: this.state.profile.country === (option({value: "United States of America"}, ["United States of America"]))
+                      }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.state && showValidationMessages
@@ -768,17 +772,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     ]),
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
                       label({ id: 'lbl_profileCountry', className: 'control-label' }, ['Country*']),
-                      input({
+                      select({
                         id: 'profileCountry',
                         name: 'country',
-                        type: 'text',
                         className: (this.state.invalidFields.country && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.country,
                         required: true
-                      }),
+                      }, countryNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.country && showValidationMessages
