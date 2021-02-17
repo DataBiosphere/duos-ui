@@ -391,7 +391,7 @@ class DuosHeader extends Component {
                 h(DropdownComponent, {isRendered: isAdmin, label: 'Statistics', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.statistics, classes}),
                 h(BasicListItem, {isRendered: isLogged, applyPointer, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: !isLogged, applyPointer, targetLink: '/home_about', label: 'About', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: !isLogged, applyPointer, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
+                h(BasicListItem, { applyPointer, targetLink: '/FAQs', label: 'FAQs', goToLink: this.goToLink}),
                 //contact us doesn't use the Basic List Item since it just makes the modal visible, which is different from the redirect functionality from basicList
                 h(ListItem, {alignItems: 'center', onMouseEnter: applyPointer, style: Styles.NAVBAR.DRAWER_LINK, onClick: this.supportRequestModal}, ['Contact Us']),
                 //passing in signOut as goToLink argument to execute logout flow
