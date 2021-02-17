@@ -76,8 +76,8 @@ const DropdownComponent = (props) => {
   return (
     h(Fragment, {}, [
       h(ListItem, {
-        "aria-haspopup": true,
-        "aria-controls": id,
+        'aria-haspopup': true,
+        'aria-controls': id,
         isRendered,
         alignItems: 'center',
         style: Styles.NAVBAR.DRAWER_LINK,
@@ -91,12 +91,12 @@ const DropdownComponent = (props) => {
         open: Boolean(anchorEl),
         onClose: handleClose,
         anchorOrigin: {
-          vertical: "top",
-          horizontal: "left"
+          vertical: 'top',
+          horizontal: 'left'
         },
         transformOrigin: {
-          vertical: "top",
-          horizontal: "right"
+          vertical: 'top',
+          horizontal: 'right'
         },
         MenuListProps: {
           className: classes.drawerPaper
