@@ -33,6 +33,7 @@ const BasicListItem = (props) => {
     h(ListItem, {
       isRendered,
       alignItems: 'center',
+      id: `menu-link-${label}`,
       style: Styles.NAVBAR.DRAWER_LINK,
       onClick: (e) => goToLink(targetLink),
       onMouseEnter
@@ -56,6 +57,7 @@ const DropdownComponent = (props) => {
       return h(MenuItem, {
         onClick: (e) => goToLink(linkData.link),
         alignItems: 'center',
+        id: `menu-link-${label}`,
         isRendered: linkData.isRendered,
         style: Styles.NAVBAR.DRAWER_LINK,
         onMouseEnter
@@ -306,10 +308,6 @@ class DuosHeader extends Component {
                   h(Link, { id: 'link_requestApplication', to: '/dar_application' }, ['Request Application'])
                 ]),
 
-                li({}, [
-                  h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])
-                ]),
-
                 li({ className: 'dropdown', isRendered: isAdmin }, [
                   a({ id: 'sel_statistics', role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
                     div({}, ['Statistics', span({ className: 'caret caret-margin' }, [])])
@@ -330,6 +328,7 @@ class DuosHeader extends Component {
                 li({}, [
                   h(Link, { id: 'link_datasetCatalog', isRendered: isLogged, to: '/dataset_catalog' }, ['Dataset Catalog'])
                 ]),
+                li({}, [h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])]),
                 contactUsButton, supportrequestModal
               ]),
 
@@ -338,6 +337,12 @@ class DuosHeader extends Component {
                   h(Link, { id: 'link_about', className: 'navbar-duos-link', to: '/home_about' }, [
                     div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
                     span({ style: navbarDuosText }, ['About'])
+                  ])
+                ]),
+                li({}, [
+                  h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
+                    div({ className: 'navbar-duos-icon-help', style: navbarDuosIcon }),
+                    span({ style: navbarDuosText }, ['FAQs'])
                   ])
                 ]),
                 contactUsButton, supportrequestModal
@@ -358,6 +363,7 @@ class DuosHeader extends Component {
             }),
             h(IconButton, {size: 'small', onClick: (e) => this.toggleDrawer(true)}, [
               h(MenuIcon, {
+                id: 'navbar-menu-icon',
                 style: {color: 'white', fontSize: '6rem', flex: 1},
                 anchor: 'right',
               }, [])
