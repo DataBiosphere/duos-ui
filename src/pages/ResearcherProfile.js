@@ -1,4 +1,4 @@
-import _, {isNil} from 'lodash';
+import _, { isNil, isEmpty } from 'lodash';
 import { Component } from 'react';
 import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -15,15 +15,15 @@ import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 
 const USA = option({ value: "United States of America"}, ["United States of America"]);
-const countries = getNames();
-const countryNames = countries.map((name) => option({value: name}, [name]));
-countryNames.splice(232, 1);
+const empty = option({ value: ""}, [""]);
+const countryNames = getNames().map((name) => option({value: name}, [name]));
+const index = countryNames.indexOf(USA);
+countryNames.splice(index, 1);
 countryNames.splice(0, 0, USA);
+countryNames.splice(0, 0, empty);
 const UsaStates = require('usa-states').UsaStates;
-const states = (new UsaStates().arrayOf("names"));
-states.splice(0,0,"N/A")
-const stateNames = (states.map((name) => option({value: name}, [name])));
-
+const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+stateNames.splice(0, 0, empty)
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -41,26 +41,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
-    this.getResearcherProfile();
+    await this.getResearcherProfile();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
-      return prev;
-    });
-
-    //remove all states and countries that are not on the official lists as a result
-    //of the old free-fill input boxes, set these to default values of USA for country
-    //and N/A for state, this will not be valid input thus the user will need to
-    //update their profile
-    this.setState((prev) => {
-      console.log(prev.profile.country);
-      if (!states.includes(prev.profile.state)) {
-        prev.profile.state = "N/A";
-      }
-      if (!countries.includes(prev.profile.country)) {
-        prev.profile.country = "United States of America";
-      }
       return prev;
     });
   };
@@ -82,7 +67,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         address2: '',
         city: '',
         completed: undefined,
-        country: "United States of America",
+        country: undefined,
         department: '',
         division: '',
         eRACommonsID: '',
@@ -97,7 +82,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         pubmedID: '',
         researcherGate: '',
         scientificURL: '',
-        state: "N/A",
+        state: undefined,
         zipcode: ''
       },
       showRequired: false,
@@ -230,7 +215,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValidCountry(this.state.profile.country)) {
+    if (!this.isValid(this.state.profile.country)) {
       country = true;
       showValidationMessages = true;
     }
@@ -291,22 +276,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   isValidState(value) {
+    const stateSelected = (!isNil(value) || !isEmpty(value)) && (value !== "N/A");
     const inUS = (this.state.profile.country === "United States of America");
-    if (inUS && !isNil(value) && states.includes(value)) {
+    if (inUS && stateSelected) {
       return true;
-    } else if (!inUS && !isNil(value)) {
-      return true;
-    } else {
-      return false;
     }
-  };
-
-  isValidCountry(value) {
-    let isValid = false;
-    if (!isNil(value) && countries.includes(value)) {
-      isValid = true;
-    }
-    return isValid;
+    return !inUS;
   };
 
   submit(event) {
@@ -703,6 +678,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     ])
                   ])
                 ]),
+
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
@@ -758,6 +734,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         isRendered: this.state.invalidFields.city && showValidationMessages
                       }, ['City is required'])
                     ]),
+
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
                       label({ id: 'lbl_profileState', className: 'control-label'}, ['State*']),
                       select({
@@ -766,7 +743,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         onChange: this.handleChange,
                         value: this.state.profile.state,
                         className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
-                        required: true
+                        required: true,
+                        disabled: (this.state.profile.country !== "United States of America")
                       }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
@@ -796,6 +774,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         isRendered: this.state.invalidFields.zipcode && showValidationMessages
                       }, ['Zip/Postal Code is required'])
                     ]),
+
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
                       label({ id: 'lbl_profileCountry', className: 'control-label' }, ['Country*']),
                       select({
