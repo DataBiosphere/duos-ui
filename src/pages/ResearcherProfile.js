@@ -41,8 +41,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
-
-    console.log("hit");
     this.getResearcherProfile();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
@@ -52,9 +50,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
 
     //remove all states and countries that are not on the official lists as a result
-    //of the old free-fill i\put boxes, set these to default values of USA for country
-    //and N/A for state, this will not be valid input thus will prompt the user to
-    //update their profile upon next login
+    //of the old free-fill input boxes, set these to default values of USA for country
+    //and N/A for state, this will not be valid input thus the user will need to
+    //update their profile before they will be able to submit a DAR
     this.setState((prev) => {
       if (!states.includes(this.state.profile.state)) {
         prev.profile.state = "N/A"
