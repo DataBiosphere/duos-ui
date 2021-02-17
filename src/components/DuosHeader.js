@@ -388,7 +388,7 @@ class DuosHeader extends Component {
                 h(BasicListItem, {isRendered: isChairPerson, applyPointer, targetLink: this.state.dacChairPath, label: 'DAC Chair Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isMember, applyPointer, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isResearcher, applyPointer, taretLink: '/data_ownder_console', label: 'Data Owner Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isDataOwner, applyPointer, targetLink: '/data_owner_console', label: 'Data Owner Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/dar_application', label: 'Request Application', goToLink: this.goToLink}),
                 h(DropdownComponent, {isRendered: isAdmin, label: 'Statistics', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.statistics, classes}),
                 h(BasicListItem, {isRendered: isLogged, applyPointer, targetLink: '/dataset_catalog', label: 'Dataset Catalog', goToLink: this.goToLink}),
