@@ -20,8 +20,6 @@ countryNames.splice(232, 1);
 countryNames.splice(0, 0, USA);
 const UsaStates = require('usa-states').UsaStates;
 const stateNames = (new UsaStates().arrayOf("names")).map(name => option({value: name}, [name]));
-console.log(stateNames);
-console.log(countryNames);
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -275,7 +273,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   isValidState(value) {
     let isValid = false;
-    if (value !== '' && value !== null && value !== undefined) {
+    if (this.value !== '' && value !== null && value !== undefined) {
       isValid = true;
     }
     if (value !== null && value !== undefined) {
