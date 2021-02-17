@@ -17,12 +17,12 @@ import {getNames} from "country-list";
 const USA = option({ value: "United States of America"}, ["United States of America"]);
 const NA = option({ value: "N/A"}, ["N/A"]);
 const countries = getNames();
-const countryNames = countries.map(name => option({value: name}, [name]));
+const countryNames = countries.map((name) => option({value: name}, [name]));
 countryNames.splice(232, 1);
 countryNames.splice(0, 0, USA);
 const UsaStates = require('usa-states').UsaStates;
 const states = (new UsaStates().arrayOf("names"));
-const stateNames = (states.map(name => option({value: name}, [name])));
+const stateNames = (states.map((name) => option({value: name}, [name])));
 stateNames.splice(0,0, NA);
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
@@ -55,10 +55,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     //update their profile before they will be able to submit a DAR
     this.setState((prev) => {
       if (!states.includes(this.state.profile.state)) {
-        prev.profile.state = "N/A"
+        prev.profile.state = "N/A";
       }
       if (!countries.includes(this.state.profile.country)) {
-        prev.profile.country = "United States of America"
+        prev.profile.country = "United States of America";
       }
       return prev;
     });
@@ -293,12 +293,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   isValidState(value) {
     let isValid = false;
     const inUS = this.state.profile.country === "United States of America";
-    if ( inUS && !isNil(value) && states.includes(value) ) {
+    if (inUS && !isNil(value) && states.includes(value)) {
       isValid = true;
-    } else {
-      if (!inUS && !isNil(value)) {
-        isValid = true;
-      }
+    }
+    if (!inUS && !isNil(value)) {
+      isValid = true;
     }
     return isValid;
   };
