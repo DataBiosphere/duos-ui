@@ -15,15 +15,15 @@ import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 
 const USA = option({ value: "United States of America"}, ["United States of America"]);
-const NA = option({ value: "N/A"}, ["N/A"]);
 const countries = getNames();
 const countryNames = countries.map((name) => option({value: name}, [name]));
 countryNames.splice(232, 1);
 countryNames.splice(0, 0, USA);
 const UsaStates = require('usa-states').UsaStates;
 const states = (new UsaStates().arrayOf("names"));
+states.splice(0,0,"N/A")
 const stateNames = (states.map((name) => option({value: name}, [name])));
-stateNames.splice(0,0, NA);
+
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -54,16 +54,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     //and N/A for state, this will not be valid input thus the user will need to
     //update their profile
     this.setState((prev) => {
-      if (!states.includes(this.state.profile.state)) {
+      console.log(prev.profile.country);
+      if (!states.includes(prev.profile.state)) {
         prev.profile.state = "N/A";
       }
-      if (!countries.includes(this.state.profile.country)) {
+      if (!countries.includes(prev.profile.country)) {
         prev.profile.country = "United States of America";
       }
       return prev;
     });
-
-  }
+  };
 
   initialState() {
     return {
@@ -291,14 +291,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   isValidState(value) {
-    let isValid = false;
-    const inUS = this.state.profile.country === "United States of America";
+    const inUS = (this.state.profile.country === "United States of America");
     if (inUS && !isNil(value) && states.includes(value)) {
-      isValid = true;
+      return true;
     } else if (!inUS && !isNil(value)) {
-      isValid = true;
+      return true;
+    } else {
+      return false;
     }
-    return isValid;
   };
 
   isValidCountry(value) {
