@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, {isNil} from 'lodash';
 import { Component } from 'react';
 import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -15,11 +15,15 @@ import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 
 const USA = option({ value: "United States of America"}, ["United States of America"]);
-const countryNames = getNames().map(name => option({value: name}, [name]));
+const NA = option({ value: "N/A"}, ["N/A"]);
+const countries = getNames();
+const countryNames = countries.map(name => option({value: name}, [name]));
 countryNames.splice(232, 1);
 countryNames.splice(0, 0, USA);
 const UsaStates = require('usa-states').UsaStates;
-const stateNames = (new UsaStates().arrayOf("names")).map(name => option({value: name}, [name]));
+const states = (new UsaStates().arrayOf("names"));
+const stateNames = (states.map(name => option({value: name}, [name])));
+stateNames.splice(0,0, NA);
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -37,6 +41,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
+
+    console.log("hit");
     this.getResearcherProfile();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
@@ -44,6 +50,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.notificationData = notificationData;
       return prev;
     });
+
+    //remove all states and countries that are not on the official lists as a result
+    //of the old free-fill i\put boxes, set these to default values of USA for country
+    //and N/A for state, this will not be valid input thus will prompt the user to
+    //update their profile upon next login
+    this.setState((prev) => {
+      if (!states.includes(this.state.profile.state)) {
+        prev.profile.state = "N/A"
+      }
+      if (!countries.includes(this.state.profile.country)) {
+        prev.profile.country = "United States of America"
+      }
+      return prev;
+    });
+
   }
 
   initialState() {
@@ -63,7 +84,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         address2: '',
         city: '',
         completed: undefined,
-        country: '',
+        country: "United States of America",
         department: '',
         division: '',
         eRACommonsID: '',
@@ -78,7 +99,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         pubmedID: '',
         researcherGate: '',
         scientificURL: '',
-        state: '',
+        state: "N/A",
         zipcode: ''
       },
       showRequired: false,
@@ -211,7 +232,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.country)) {
+    if (!this.isValidCountry(this.state.profile.country)) {
       country = true;
       showValidationMessages = true;
     }
@@ -273,10 +294,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   isValidState(value) {
     let isValid = false;
-    if (this.value !== '' && value !== null && value !== undefined) {
+    const inUS = this.state.profile.country === "United States of America";
+    if ( inUS && !isNil(value) && states.includes(value) ) {
       isValid = true;
+    } else {
+      if (!inUS && !isNil(value)) {
+        isValid = true;
+      }
     }
-    if (value !== null && value !== undefined) {
+    return isValid;
+  };
+
+  isValidCountry(value) {
+    let isValid = false;
+    if (!isNil(value) && countries.includes(value)) {
       isValid = true;
     }
     return isValid;
@@ -462,6 +493,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
+
     return (
 
       div({ className: 'container' }, [
@@ -738,7 +770,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         onChange: this.handleChange,
                         value: this.state.profile.state,
                         className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
-                        required: this.state.profile.country === (option({value: "United States of America"}, ["United States of America"]))
+                        required: true
                       }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
@@ -773,11 +805,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       select({
                         id: 'profileCountry',
                         name: 'country',
+                        onChange: this.handleChange,
+                        value: this.state.profile.country,
                         className: (this.state.invalidFields.country && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
-                        onChange: this.handleChange,
-                        value: this.state.profile.country,
                         required: true
                       }, countryNames ),
                       span({
