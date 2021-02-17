@@ -10,7 +10,7 @@ describe('About', function() {
     cy.url().should('include', 'home_about');
   });
 
-  it('About page loads from home - Web', function() {
+  it('About page loads from home - Mobile', function() {
     cy.viewport(600, 600);
     cy.visit('');
     cy.get('#navbar-menu-icon').click();
@@ -26,7 +26,7 @@ describe('About', function() {
     cy.contains('Data Use Oversight System');
   });
 
-  it('About page shows content - Web', function() {
+  it('About page shows content - Mobile', function() {
     cy.viewport(600, 600);
     cy.visit('');
     cy.get('#navbar-menu-icon').click();
