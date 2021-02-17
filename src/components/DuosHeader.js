@@ -1,16 +1,16 @@
-import {Component, Fragment, useState} from 'react';
-import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
-import Drawer from '@material-ui/core/Drawer';
-import Hidden from '@material-ui/core/Hidden';
-import {IconButton, List, ListItem, Menu, MenuItem} from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
-import MenuIcon from '@material-ui/icons/Menu';
-import {Link, withRouter} from 'react-router-dom';
-import {Storage} from '../libs/storage';
-import {SupportRequestModal} from './modals/SupportRequestModal';
-import './DuosHeader.css';
+import {Component, Fragment, useState} from "react";
+import {a, button, div, h, hr, img, li, nav, small, span, ul} from "react-hyperscript-helpers";
+import Drawer from "@material-ui/core/Drawer";
+import Hidden from "@material-ui/core/Hidden";
+import {IconButton, List, ListItem, Menu, MenuItem} from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
+import MenuIcon from "@material-ui/icons/Menu";
+import {Link, withRouter} from "react-router-dom";
+import {Storage} from "../libs/storage";
+import {SupportRequestModal} from "./modals/SupportRequestModal";
+import "./DuosHeader.css";
 import {NavigationUtils} from "../libs/utils";
-import { Styles } from '../libs/theme';
+import { Styles } from "../libs/theme";
 
 const styles = {
   drawerPaper: {
@@ -194,7 +194,7 @@ class DuosHeader extends Component {
     const dropdownLinks = {
       statistics: {
         'Votes Statistics': {
-          isRendered: !(isDataOwner || isResearcher) || isAdmin,
+          isRendered: true,
           link: '/summary_votes'
         },
         'Reviewed Cases Record': {
@@ -340,12 +340,6 @@ class DuosHeader extends Component {
                   h(Link, { id: 'link_about', className: 'navbar-duos-link', to: '/home_about' }, [
                     div({ className: 'navbar-duos-icon-about', style: navbarDuosIcon }),
                     span({ style: navbarDuosText }, ['About'])
-                  ])
-                ]),
-                li({}, [
-                  h(Link, { id: 'link_help', className: 'navbar-duos-link', to: '/FAQs' }, [
-                    div({ className: 'navbar-duos-icon-help', style: navbarDuosIcon }),
-                    span({ style: navbarDuosText }, ['FAQs'])
                   ])
                 ]),
                 contactUsButton, supportrequestModal
