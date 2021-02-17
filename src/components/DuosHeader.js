@@ -1,16 +1,16 @@
-import {Component, Fragment, useState} from "react";
-import {a, button, div, h, hr, img, li, nav, small, span, ul} from "react-hyperscript-helpers";
-import Drawer from "@material-ui/core/Drawer";
-import Hidden from "@material-ui/core/Hidden";
-import {IconButton, List, ListItem, Menu, MenuItem} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import MenuIcon from "@material-ui/icons/Menu";
-import {Link, withRouter} from "react-router-dom";
-import {Storage} from "../libs/storage";
-import {SupportRequestModal} from "./modals/SupportRequestModal";
-import "./DuosHeader.css";
-import {NavigationUtils} from "../libs/utils";
-import { Styles } from "../libs/theme";
+import {Component, Fragment, useState} from 'react';
+import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
+import Drawer from '@material-ui/core/Drawer';
+import Hidden from '@material-ui/core/Hidden';
+import {IconButton, List, ListItem, Menu, MenuItem} from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+import MenuIcon from '@material-ui/icons/Menu';
+import {Link, withRouter} from 'react-router-dom';
+import {Storage} from '../libs/storage';
+import {SupportRequestModal} from './modals/SupportRequestModal';
+import './DuosHeader.css';
+import {NavigationUtils} from '../libs/utils';
+import { Styles } from '../libs/theme';
 
 const styles = {
   drawerPaper: {
@@ -194,11 +194,9 @@ class DuosHeader extends Component {
     const dropdownLinks = {
       statistics: {
         'Votes Statistics': {
-          isRendered: true,
           link: '/summary_votes'
         },
         'Reviewed Cases Record': {
-          isRendered: !(isDataOwner || isResearcher) || isAdmin,
           link: '/reviewed_cases'
         }
       }
@@ -323,7 +321,7 @@ class DuosHeader extends Component {
                     hr({ style: hrStyle }),
                     li({}, [
                       h(Link, {
-                        id: 'link_reviewedCases', to: '/reviewed_cases', isRendered: !(isDataOwner || isResearcher) || isAdmin
+                        id: 'link_reviewedCases', to: '/reviewed_cases'
                       }, ['Reviewed Cases Record'])
                     ])
                   ])
