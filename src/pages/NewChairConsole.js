@@ -72,7 +72,7 @@ const Records = (props) => {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
           //Votes can have timestamps stored anywhere between these four key atttributes (result of older data)
           //Current votes (02/18/2021) store timestamps on updateDate
-          const isFinal = !isEmpty(votes.find(vote => !isNil(vote.createDate) || !isNil(vote.updateDate) || !isNil(vote.lastUpdate) || !isNil(vote.lastUpdateDate)));
+          const isFinal = !isEmpty(votes.find((vote) => !isNil(vote.createDate) || !isNil(vote.updateDate) || !isNil(vote.lastUpdate) || !isNil(vote.lastUpdateDate)));
           const vote = head(votes);
           return [
             button({
