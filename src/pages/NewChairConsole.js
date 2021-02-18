@@ -53,11 +53,9 @@ const Records = (props) => {
     if (!isNil(e)) {
       switch (e.status) {
         case "Open" :
-          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
-          const vote = head(votes);
           return button({
             className: name,
-            onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
+            onClick: () => props.history.push(`access_review/${dar.referenceId}`)
           }, ["Vote"]);
         default :
           return button({
