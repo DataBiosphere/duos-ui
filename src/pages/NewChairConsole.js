@@ -24,7 +24,7 @@ const processElectionStatus = (election, votes) => {
   let output;
   if(electionStatus === 'Open') {
     const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
-    output = `${completedVotes} / ${votes.length}`;
+    output = `Open (${completedVotes} / ${votes.length} votes)`;
   } else if (electionStatus === 'Final') {
     const finalVote = find((vote) => vote.type === 'Final' && !isNil(vote))(votes);
     output = finalVote ? 'Accepted' : 'Denied';
