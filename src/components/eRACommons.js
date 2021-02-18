@@ -2,9 +2,8 @@ import _ from 'lodash';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
-import { AuthenticateNIH, Researcher } from '../libs/ajax';
+import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
-import { Storage } from '../libs/storage';
 
 
 export const eRACommons = hh(class eRACommons extends React.Component {
@@ -21,7 +20,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     if (this.props.location !== undefined && this.props.location.search !== '') {
       this.authenticateAsNIHFCUser(this.props.location.search);
     } else {
-      this.getResearcherProperties();
+      this.getUserInfo();
     }
   };
 
@@ -34,10 +33,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   authenticateAsNIHFCUser = async (searchArg) => {
-    const currentUserId = Storage.getCurrentUser().dacUserId;
     let isFcUser = await this.verifyUser();
     if (!isFcUser) {
-      await Researcher.getPropertiesByResearcherId(currentUserId).then(
+      await User.getMe().then(
         (response) => isFcUser = this.registerUserToFC(response),
         () => this.setState({ nihError: true })
       );
@@ -47,7 +45,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       this.verifyToken(parsedToken).then(
         (decodedNihAccount) => {
           AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
-            () => this.getResearcherProperties(),
+            () => this.getUserInfo(),
             () => this.setState({ nihError: true })
           );
         },
@@ -56,9 +54,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     }
   };
 
-  getResearcherProperties = async () => {
-    const currentUserId = Storage.getCurrentUser().dacUserId;
-    Researcher.getPropertiesByResearcherId(currentUserId).then(response => {
+  getUserInfo = async () => {
+    User.getMe().then(response => {
       const isAuthorized = JSON.parse(_.get(response, 'eraAuthorized', "false"));
       const expirationCount = AuthenticateNIH.expirationCount(_.get(response, 'eraExpiration', 0));
       const nihValid = isAuthorized && expirationCount > 0;
@@ -109,7 +106,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   deleteNihAccount = async () => {
     AuthenticateNIH.eliminateAccount().then(
-      () => this.getResearcherProperties(),
+      () => this.getUserInfo(),
       () => this.setState({ nihError: true })
     );
   };
