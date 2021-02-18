@@ -64,24 +64,30 @@ const Records = (props) => {
     const name = "cell-button hover-color";
     const e = electionInfo.election;
     const dar = electionInfo.dar;
+    const currentUserId = Storage.getCurrentUser().dacUserId;
+
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' :
-          const votes = filter({type: 'DAC', dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
+          const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
+          //Votes can have timestamps stored anywhere between these four key atttributes (result of older data)
+          //Current votes (02/18/2021) store timestamps on updateDate
+          const isFinal = !isEmpty(votes.find(vote => !isNil(vote.createDate) || !isNil(vote.updateDate) || !isNil(vote.lastUpdate) || !isNil(vote.lastUpdateDate)));
           const vote = head(votes);
           return [
-            //NOTE: add conditional here to choose between vote and final vote
             button({
               className: `${name} vote-button`,
               style: {flex: 1},
               onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
-            }, ['Vote']),
+            }, [`${isFinal ? 'Final' : 'Vote'}`]),
             button({
               className: `${name} cancel-button`,
               style: {flex: 1},
               onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
             }, ['Cancel'])
           ];
+        case 'Final' :
+          return ['- -'];
         default :
           return button({
             className: name,
