@@ -1,4 +1,4 @@
-import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep } from 'lodash/fp';
+import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 import { div, h, img, input, button } from 'react-hyperscript-helpers';
 import { DAR, Election, User } from '../libs/ajax';
@@ -9,6 +9,30 @@ import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
 import {Storage} from "../libs/storage";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
+
+const wasVoteSubmitted = (vote) => {
+  const targetDate = vote.createDate || vote.updateDate || vote.lastUpdate || vote.lastUpdateDate;
+  return !isNil(targetDate);
+};
+
+const processElectionStatus = (election, votes) => {
+  const electionStatus = election.status;
+  if(!isEmpty(votes) && isNil(electionStatus)) {
+    return '- -';
+  }
+
+  let output;
+  if(electionStatus === 'Open') {
+    const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
+    output = `${completedVotes} / ${votes.length}`;
+  } else if (electionStatus === 'Final') {
+    const finalVote = find((vote) => vote.type === 'Final' && !isNil(vote))(votes);
+    output = finalVote ? 'Accepted' : 'Denied';
+  } else {
+    output = electionStatus;
+  }
+  return output;
+};
 
 const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
@@ -73,7 +97,7 @@ const Records = (props) => {
   };
 
   return visibleWindow.map((electionInfo, index) => {
-    const {dar, dac, election} = electionInfo;
+    const {dar, dac, election, votes} = electionInfo;
     const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
     return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}-${index}`}, [
       div({
@@ -85,7 +109,7 @@ const Records = (props) => {
       div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? election.status : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? processElectionStatus(election, votes) : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(electionInfo, index)]),
     ]);
   });
@@ -165,11 +189,11 @@ const NewChairConsole = (props) => {
         const term = splitTerm.trim();
         if(!isEmpty(term)) {
           newFilteredList = filter(electionData => {
-            const { election, dac} = electionData;
+            const { election, dac, votes} = electionData;
             const dar = electionData.dar ? electionData.dar.data : undefined;
             const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode)]) : [];
             const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
-            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(election.status), getElectionDate(election)]) : [];
+            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
         }
