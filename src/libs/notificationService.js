@@ -20,6 +20,18 @@ export const NotificationService = {
   },
 
   /**
+   * Get the raw banner content from GCS
+   * @returns {Promise<JSON>}
+   */
+  getActiveBanners: async () => {
+    const banners = await NotificationService.getBanners();
+    if (!fp.isEmpty(banners)) {
+      return fp.find({active: true})(banners);
+    }
+    return undefined;
+  },
+
+  /**
    * Get an individual banner by its id, and active status == true
    * @param id
    * @returns {Promise<JSON>}
