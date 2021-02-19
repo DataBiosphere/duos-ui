@@ -16,17 +16,18 @@ const wasVoteSubmitted = (vote) => {
 };
 
 const processElectionStatus = (election, votes) => {
+  let output;
   const electionStatus = election.status;
+
   if(!isEmpty(votes) && isNil(electionStatus)) {
     return '- -';
   }
 
-  let output;
   if(electionStatus === 'Open') {
     const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
     output = `Open (${completedVotes} / ${votes.length} votes)`;
   } else if (electionStatus === 'Final') {
-    const finalVote = find((vote) => vote.type === 'Final' && !isNil(vote))(votes);
+    const finalVote = find((voteData) => voteData.type === 'Final' && !isNil(voteData.vote))(votes);
     output = finalVote ? 'Accepted' : 'Denied';
   } else {
     output = electionStatus;
