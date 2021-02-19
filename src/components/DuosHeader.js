@@ -67,7 +67,7 @@ class DuosHeader extends Component {
   makeNotifications = () => {
     const dataList = [];
     const data = this.state.notificationData;
-    //JSON Object, indicating 1 notification only
+    //JSON Object, indicating 1 active notification only
     if (!data.hasOwnProperty('length')) {
       return Notification({notificationData: data});
     } else {
