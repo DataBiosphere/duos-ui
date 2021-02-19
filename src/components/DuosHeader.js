@@ -191,7 +191,6 @@ class DuosHeader extends Component {
   }
 
   render() {
-    const { classes } = this.props;
 
     let isChairPerson = false;
     let isMember = false;
