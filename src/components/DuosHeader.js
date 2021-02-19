@@ -9,6 +9,9 @@ import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
+import {NavigationUtils} from "../libs/utils";
+import { NotificationService } from '../libs/notificationService';
+import { Notification } from '../components/Notification';
 import {NavigationUtils} from '../libs/utils';
 import { Styles } from '../libs/theme';
 
@@ -117,6 +120,8 @@ class DuosHeader extends Component {
       showSupportRequestModal: false,
       hover: false,
       dacChairPath: '/chair_console',
+      notificationData: []
+      dacChairPath: '/chair_console',
       openDrawer: false
     };
   };
@@ -124,6 +129,11 @@ class DuosHeader extends Component {
   async componentDidMount() {
     let dacChairPath = await NavigationUtils.dacChairConsolePath();
     this.setState({dacChairPath: dacChairPath});
+    const notificationData =  await NotificationService.getActiveBanners();
+    this.setState(prev => {
+      prev.notificationData = notificationData;
+      return prev;
+    });
   }
 
   toggleHover = () => {
@@ -159,6 +169,23 @@ class DuosHeader extends Component {
       prev.showSupportRequestModal = false;
       return prev;
     });
+  };
+
+  makeNotifications = () => {
+    const dataList = [];
+    const data = this.state.notificationData;
+    //JSON Object, indicating 1 notification only
+    if (data.length === undefined) {
+      return Notification({notificationData: data});
+    } else {
+      //JSON Array, multiple active notifications
+      for (let i in data) {
+        if (data[i].hasOwnProperty("id")) {
+          dataList.push(this.state.notificationData[i]);
+        }
+      }
+      return dataList.map((d) => Notification({notificationData: d}))
+    }
   };
 
   toggleDrawer = (boolVal) => {
@@ -263,6 +290,7 @@ class DuosHeader extends Component {
     return (
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
+          this.makeNotifications(),
           div({ className: 'row no-margin' }, [
             h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
               img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
