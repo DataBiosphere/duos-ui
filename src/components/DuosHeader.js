@@ -180,7 +180,9 @@ class DuosHeader extends Component {
     } else {
       //JSON Array, multiple active notifications
       for (let i in data) {
-        dataList.push(data[i]);
+        if (data[parseInt(i)].hasOwnProperty("id")) {
+          dataList.push(data[parseInt(i)]);
+        }
       }
       return dataList.map((d) => Notification({notificationData: d}));
     }
