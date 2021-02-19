@@ -15,6 +15,12 @@ const wasVoteSubmitted = (vote) => {
   return !isNil(targetDate);
 };
 
+const wasFinalVoteSubmitted = (voteData) => {
+  const {type, vote} = voteData;
+  //vote status capitalizes final, election status does not
+  return type === 'FINAL' && !isNil(vote);
+};
+
 const processElectionStatus = (election, votes) => {
   let output;
   const electionStatus = election.status;
@@ -25,7 +31,7 @@ const processElectionStatus = (election, votes) => {
     const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
     output = `Open (${completedVotes} / ${votes.length} votes)`;
   } else if (electionStatus === 'Final') {
-    const finalVote = find((voteData) => voteData.type === 'Final' && !isNil(voteData.vote))(votes);
+    const finalVote = find(wasFinalVoteSubmitted)(votes);
     output = finalVote ? 'Accepted' : 'Denied';
   } else {
     output = electionStatus;
