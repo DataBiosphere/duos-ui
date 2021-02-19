@@ -70,17 +70,17 @@ const Records = (props) => {
       switch (e.status) {
         case 'Open' :
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
-          //Votes can have timestamps stored anywhere between these four key atttributes (result of older data)
-          //Current votes (02/18/2021) store timestamps on updateDate
-          const isFinal = !isEmpty(votes.find((vote) => !isNil(vote.createDate) || !isNil(vote.updateDate) || !isNil(vote.lastUpdate) || !isNil(vote.lastUpdateDate)));
+          const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           const vote = head(votes);
           return [
             button({
+              key: `vote-button-${e.referenceId}`,
               className: `${name} vote-button`,
               style: {flex: 1},
               onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
             }, [`${isFinal ? 'Final' : 'Vote'}`]),
             button({
+              key: `cancel-button-${e.referenceId}`,
               className: `${name} cancel-button`,
               style: {flex: 1},
               onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
@@ -90,12 +90,14 @@ const Records = (props) => {
           return ['- -'];
         default :
           return button({
+            key: `reopen-button-${e.referenceId}`,
             className: name,
             onClick: () => openConfirmation(dar, index)
           }, ["Re-Open"]);
       }
     }
     return button({
+      key: `open-button-${e.referenceId}`,
       className: name,
       onClick: () => openConfirmation(dar, index)
     }, ["Open Election"]);
