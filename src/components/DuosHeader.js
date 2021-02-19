@@ -24,7 +24,7 @@ class DuosHeader extends Component {
   async componentDidMount() {
     let dacChairPath = await NavigationUtils.dacChairConsolePath();
     this.setState({dacChairPath: dacChairPath});
-    const notificationData =  await NotificationService.getBanners();
+    const notificationData =  await NotificationService.getActiveBanners();
     this.setState(prev => {
       prev.notificationData = notificationData;
       return prev;
