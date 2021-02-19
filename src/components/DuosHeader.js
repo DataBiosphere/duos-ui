@@ -120,7 +120,7 @@ class DuosHeader extends Component {
       showSupportRequestModal: false,
       hover: false,
       dacChairPath: '/chair_console',
-      notificationData: []
+      notificationData: [],
       dacChairPath: '/chair_console',
       openDrawer: false
     };
@@ -145,14 +145,12 @@ class DuosHeader extends Component {
 
   signOut = () => {
     this.props.history.push('/home');
-    this.toggleDrawer(false);
     this.props.onSignOut();
   };
 
   supportRequestModal = () => {
     this.setState(prev => {
       prev.showSupportRequestModal = true;
-      prev.openDrawer = false;
       return prev;
     });
   };
@@ -288,6 +286,7 @@ class DuosHeader extends Component {
     });
 
     return (
+
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
           this.makeNotifications(),
