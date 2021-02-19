@@ -20,10 +20,8 @@ const processElectionStatus = (election, votes) => {
   const electionStatus = election.status;
 
   if(!isEmpty(votes) && isNil(electionStatus)) {
-    return '- -';
-  }
-
-  if(electionStatus === 'Open') {
+    output = '- -';
+  } else if(electionStatus === 'Open') {
     const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
     output = `Open (${completedVotes} / ${votes.length} votes)`;
   } else if (electionStatus === 'Final') {
