@@ -12,7 +12,6 @@ import './DuosHeader.css';
 import {NavigationUtils} from "../libs/utils";
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import {NavigationUtils} from '../libs/utils';
 import { Styles } from '../libs/theme';
 
 const styles = {
@@ -121,7 +120,6 @@ class DuosHeader extends Component {
       hover: false,
       dacChairPath: '/chair_console',
       notificationData: [],
-      dacChairPath: '/chair_console',
       openDrawer: false
     };
   };
@@ -172,19 +170,13 @@ class DuosHeader extends Component {
   makeNotifications = () => {
     const dataList = [];
     const data = this.state.notificationData;
-    //JSON Object, indicating 1 active notification only
-    if (!data.hasOwnProperty('length')) {
-      return Notification({notificationData: data});
-    } else {
-      //JSON Array, multiple active notifications
-      for (let i in data) {
-        if (data[parseInt(i)].hasOwnProperty("id")) {
-          dataList.push(data[parseInt(i)]);
-        }
+    for (let i in data) {
+      if (data[parseInt(i)].hasOwnProperty("id")) {
+        dataList.push(data[parseInt(i)]);
       }
-      return dataList.map((d) => Notification({notificationData: d}));
     }
-  };
+    return dataList.map((d, index) => (Notification({key: index, notificationData: d})));
+};
 
   toggleDrawer = (boolVal) => {
     this.setState((prev) => {

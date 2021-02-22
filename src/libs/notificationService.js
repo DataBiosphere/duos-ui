@@ -25,10 +25,7 @@ export const NotificationService = {
    */
   getActiveBanners: async () => {
     const banners = await NotificationService.getBanners();
-    if (!fp.isEmpty(banners)) {
-      return fp.find({active: true})(banners);
-    }
-    return undefined;
+    return banners.filter((element) => element.active === true);
   },
 
   /**
