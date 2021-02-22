@@ -67,18 +67,12 @@ class DuosHeader extends Component {
   makeNotifications = () => {
     const dataList = [];
     const data = this.state.notificationData;
-    //JSON Object, indicating 1 active notification only
-    if (!data.hasOwnProperty('length')) {
-      return Notification({notificationData: data});
-    } else {
-      //JSON Array, multiple active notifications
-      for (let i in data) {
-        if (data[parseInt(i)].hasOwnProperty("id")) {
-          dataList.push(data[parseInt(i)]);
-        }
+    for (let i in data) {
+      if (data[parseInt(i)].hasOwnProperty("id")) {
+        dataList.push(data[parseInt(i)]);
       }
-      return dataList.map((d) => Notification({notificationData: d}));
     }
+    return dataList.map((d) => Notification({notificationData: d}));
   };
 
   render() {
