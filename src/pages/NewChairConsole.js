@@ -28,6 +28,7 @@ const processElectionStatus = (election, votes) => {
   if(!isEmpty(votes) && isNil(electionStatus)) {
     output = '- -';
   } else if(electionStatus === 'Open') {
+    //React doesn't necessarily perform state updates quickly, if check will ensure data is present
     if(!isEmpty(votes) && !isNil(election)) {
       const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
       output = `Open (${completedVotes} / ${votes.length} votes)`;
