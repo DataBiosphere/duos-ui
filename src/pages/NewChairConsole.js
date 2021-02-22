@@ -1,7 +1,7 @@
 import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 import { div, h, img, input, button } from 'react-hyperscript-helpers';
-import { DAR, Election, User } from '../libs/ajax';
+import { DAR, Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
@@ -11,14 +11,16 @@ import {Storage} from "../libs/storage";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 
 const wasVoteSubmitted = (vote) => {
-  const targetDate = vote.createDate || vote.updateDate || vote.lastUpdate || vote.lastUpdateDate;
+  //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
+  //current code will always provide lastUpdate
+  const targetDate = vote.lastUpdate || vote.createDate || vote.updateDate || vote.lastUpdateDate;
   return !isNil(targetDate);
 };
 
-const wasFinalVoteSubmitted = (voteData) => {
+const wasFinalVoteTrue = (voteData) => {
   const {type, vote} = voteData;
   //vote status capitalizes final, election status does not
-  return type === 'FINAL' && !isNil(vote);
+  return type === 'FINAL' && vote === true;
 };
 
 const processElectionStatus = (election, votes) => {
@@ -28,13 +30,14 @@ const processElectionStatus = (election, votes) => {
   if(!isEmpty(votes) && isNil(electionStatus)) {
     output = '- -';
   } else if(electionStatus === 'Open') {
-    //React doesn't necessarily perform state updates quickly, if check will ensure data is present
+    //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
-      const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
-      output = `Open (${completedVotes} / ${votes.length} votes)`;
+      const dacVotes = filter((vote) => vote.type === 'DAC')(votes);
+      const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
+      output = `Open (${completedVotes} / ${dacVotes.length} votes)`;
     }
   } else if (electionStatus === 'Final') {
-    const finalVote = find(wasFinalVoteSubmitted)(votes);
+    const finalVote = find(wasFinalVoteTrue)(votes);
     output = finalVote ? 'Accepted' : 'Denied';
   } else {
     output = electionStatus;
@@ -217,14 +220,19 @@ export default function NewChairConsole(props) {
     }
   };
 
-  const updateLists = (updatedElection, darId, index, successText) => {
+  const updateLists = (updatedElection, darId, index, successText, votes = undefined) => {
     const i = index + ((currentPage - 1) * tableSize);
     let filteredListCopy = cloneDeep(filteredList);
     let electionListCopy = cloneDeep(electionList);
-    filteredListCopy[parseInt(i, 10)].election = updatedElection;
+    const targetFilterRow = filteredListCopy[parseInt(i, 10)];
+    const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
+    targetFilterRow.election = updatedElection;
+    targetElectionRow.election = cloneDeep(updatedElection);
+    if(!isNil(votes)) {
+      targetFilterRow.votes = votes;
+      targetElectionRow.votes = cloneDeep(votes);
+    }
     setFilteredList(filteredListCopy);
-    const row = electionListCopy.find((element) => element.dar.referenceId === darId);
-    row.election = Object.assign({}, row.election, updatedElection);
     setElectionList(electionListCopy);
     Notifications.showSuccess({text: successText});
   };
@@ -269,8 +277,9 @@ export default function NewChairConsole(props) {
     if (!isNil(darId)) {
       try{
         const updatedElection = await Election.createDARElection(darId);
+        const votes = await Votes.getDarVotes(darId);
         const successMsg = 'Election successfully opened';
-        updateLists(updatedElection, darId, index, successMsg);
+        updateLists(updatedElection, darId, index, successMsg, votes);
         setShowConfirmation(false);
       } catch(error) {
         const errorReturn = {text: 'Error: Failed to create election!'};
