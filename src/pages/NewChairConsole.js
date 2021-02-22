@@ -28,8 +28,10 @@ const processElectionStatus = (election, votes) => {
   if(!isEmpty(votes) && isNil(electionStatus)) {
     output = '- -';
   } else if(electionStatus === 'Open') {
-    const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
-    output = `Open (${completedVotes} / ${votes.length} votes)`;
+    if(!isEmpty(votes) && !isNil(election)) {
+      const completedVotes = (filter(wasVoteSubmitted)(votes)).length;
+      output = `Open (${completedVotes} / ${votes.length} votes)`;
+    }
   } else if (electionStatus === 'Final') {
     const finalVote = find(wasFinalVoteSubmitted)(votes);
     output = finalVote ? 'Accepted' : 'Denied';
@@ -68,34 +70,65 @@ const getElectionDate = (election) => {
 
 const Records = (props) => {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, openConfirmation} = props;
+  const {openModal, currentPage, tableSize, applyTextHover, removeTextHover, openConfirmation, updateLists} = props;
   const startIndex = (currentPage - 1) * tableSize;
   const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
   const visibleWindow = props.filteredList.slice(startIndex, endIndex);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
 
-  const createActionButton = (electionInfo, index) => {
+  const cancelElectionHandler = async (electionData, darId, index) => {
+    const targetElection = electionData.election;
+    const electionId = targetElection.electionId;
+    const electionPayload = Object.assign({}, electionData.election, {status: 'Canceled', finalAccessVote: 'false'});
+
+    try {
+      const updatedElection = await Election.updateElection(electionId, electionPayload);
+      const notification = 'Election has been cancelled';
+      updateLists(updatedElection, darId, index, notification);
+    } catch(error) {
+      Notifications.showError({text: 'Error: Failed to cancel selected Election'});
+    }
+  };
+
+  const createActionButtons = (electionInfo, index) => {
     const name = "cell-button hover-color";
     const e = electionInfo.election;
     const dar = electionInfo.dar;
+    const currentUserId = Storage.getCurrentUser().dacUserId;
+
     if (!isNil(e)) {
       switch (e.status) {
-        case "Open" :
-          const votes = filter({type: "DAC", dacUserId: Storage.getCurrentUser().dacUserId})(electionInfo.votes);
+        case 'Open' :
+          const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
+          const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           const vote = head(votes);
-          return button({
-            className: name,
-            onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
-          }, ["Vote"]);
+          return [
+            button({
+              key: `vote-button-${e.referenceId}`,
+              className: `${name} vote-button`,
+              style: {flex: 1},
+              onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
+            }, [`${isFinal ? 'Final' : 'Vote'}`]),
+            button({
+              key: `cancel-button-${e.referenceId}`,
+              className: `${name} cancel-button`,
+              style: {flex: 1},
+              onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
+            }, ['Cancel'])
+          ];
+        case 'Final' :
+          return ['- -'];
         default :
           return button({
+            key: `reopen-button-${e.referenceId}`,
             className: name,
             onClick: () => openConfirmation(dar, index)
           }, ["Re-Open"]);
       }
     }
     return button({
+      key: `open-election-dar-${dar.referenceId}`,
       className: name,
       onClick: () => openConfirmation(dar, index)
     }, ["Open Election"]);
@@ -115,12 +148,12 @@ const Records = (props) => {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? processElectionStatus(election, votes) : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButton(electionInfo, index)]),
+      div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButtons(electionInfo, index)]),
     ]);
   });
 };
 
-const NewChairConsole = (props) => {
+export default function NewChairConsole(props) {
   const [showModal, setShowModal] = useState(false);
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
@@ -183,6 +216,18 @@ const NewChairConsole = (props) => {
     }
   };
 
+  const updateLists = (updatedElection, darId, index, successText) => {
+    const i = index + ((currentPage - 1) * tableSize);
+    let filteredListCopy = cloneDeep(filteredList);
+    let electionListCopy = cloneDeep(electionList);
+    filteredListCopy[parseInt(i, 10)].election = updatedElection;
+    setFilteredList(filteredListCopy);
+    const row = electionListCopy.find((element) => element.dar.referenceId === darId);
+    row.election = Object.assign({}, row.election, updatedElection);
+    setElectionList(electionListCopy);
+    Notifications.showSuccess({text: successText});
+  };
+
   const handleSearchChange = () => {
     setCurrentPage(1);
     const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
@@ -219,31 +264,20 @@ const NewChairConsole = (props) => {
     }
   };
 
-  const createElection = (darId, index) => {
+  const createElection = async (darId, index) => {
     if (!isNil(darId)) {
-      let copy;
-      const i = index + ((currentPage - 1) * tableSize);
-      Election.createDARElection(darId)
-        .then((electionResponse) => electionResponse.json())
-        .then((newElection) => {
-          Notifications.showSuccess({text: "Election successfully opened"});
-          copy = cloneDeep(filteredList);
-          copy[parseInt(i, 10)].election = newElection;
-          setFilteredList(copy);
-          const row = electionList.find((element) => element.dar.referenceId === darId);
-          row.election = Object.assign({}, row.election, {status: "Open", finalAccessVote: false});
-        })
-        .catch((errorResponse) => {
-          if (errorResponse.status === 500) {
-            Notifications.showError({text: "Email Service Error! The election was created but the participants couldnt be notified by Email."});
-          } else {
-            errorResponse.json().then((error) =>
-              Notifications.showError({text: "Election cannot be created! " + error.message}));
-          }
-        });
-      setShowConfirmation(false);
-    } else {
-      Notifications.showError({text: "Could not open election. Contact us for support."});
+      try{
+        const updatedElection = await Election.createDARElection(darId);
+        const successMsg = 'Election successfully opened';
+        updateLists(updatedElection, darId, index, successMsg);
+        setShowConfirmation(false);
+      } catch(error) {
+        const errorReturn = {text: 'Error: Failed to create election!'};
+        if(error.status === 500) {
+          errorReturn.text = "Email Service Error! The election was created but the participants couldnt be notified by Email.";
+        }
+        Notifications.showError(errorReturn);
+      }
     }
   };
 
@@ -292,7 +326,7 @@ const NewChairConsole = (props) => {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists})
       ]),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
@@ -309,5 +343,3 @@ const NewChairConsole = (props) => {
     ])
   );
 };
-
-export default NewChairConsole;
