@@ -16,8 +16,8 @@ const SMALL = {
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
-  openAccessReview = (referenceId, voteId) => {
-    this.props.history.push(`/access_review/${referenceId}/${voteId}`);
+  openAccessReview = (referenceId) => {
+    this.props.history.push(`/access_review/${referenceId}`);
   };
 
   render() {
