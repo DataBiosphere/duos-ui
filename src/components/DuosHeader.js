@@ -208,7 +208,8 @@ class DuosHeader extends Component {
       width: '140px',
       height: '40px',
       padding: '0',
-      margin: '12px 64px 0 0'
+      margin: '12px 64px 0 0',
+      cursor: 'pointer'
     };
 
     const navbarDuosIcon = {
