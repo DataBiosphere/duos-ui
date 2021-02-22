@@ -256,6 +256,7 @@ class DataAccessRequestApplication extends Component {
   formatOntologyItems = (ontologies) => {
     const ontologyItems = ontologies.map((ontology) => {
       return {
+        //item being referenced as a way to backfill older ontologies that don't have a proper label attributes
         id: ontology.id || ontology.item.id,
         key: ontology.id || ontology.item.id,
         value: ontology.id || ontology.item.id,
@@ -593,10 +594,7 @@ class DataAccessRequestApplication extends Component {
       const userId = Storage.getCurrentUser().dacUserId;
       const {uploadedIrbDocument, uploadedCollaborationLetter} = this.state.step2;
       let formattedFormData = fp.cloneDeep(this.state.formData);
-      const ontologies = fp.map(ontology => ({
-        id: ontology.key,
-        label: ontology.value,
-      }))(this.state.formData.ontologies);
+      const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
 
       if (ontologies.length > 0) {
         formattedFormData.ontologies = ontologies;
@@ -670,11 +668,7 @@ class DataAccessRequestApplication extends Component {
       // DAR datasetIds needs to be a list of ids
       const datasetIds = fp.map('value')(this.state.formData.datasets);
       // DAR ontologies needs to be a list of id/labels.
-      const ontologies = fp.map((o) => ({
-        id: o.id || o.item.id,
-        label: o.label || o.item.label,
-        item: o.item
-      }))(this.state.formData.ontologies);
+      const ontologies = this.formatOntologyItems(this.state.formData.ontologies);
       this.setState(prev => {
         prev.formData.datasetIds = datasetIds;
         prev.formData.ontologies = ontologies;

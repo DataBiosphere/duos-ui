@@ -35,7 +35,7 @@ export default function PaginationBar(props) {
             onChange: (e) => goToPage(toNumber(currentPage.current.value)),
             type: 'text',
             ref: currentPage,
-            defaultvalue: props.currentPage,
+            defaultValue: props.currentPage,
             style: Styles.TABLE.PAGINATION_INPUT
           }),
           span({}, [` of ${pageCount}`])
@@ -56,7 +56,7 @@ export default function PaginationBar(props) {
           onChange: (e) => changeTableSize(tableSize.current.value),
           type: 'text',
           ref: tableSize,
-          defaultvalue: props.tableSize,
+          defaultValue: props.tableSize,
           style: Styles.TABLE.PAGINATION_INPUT
         })
       ])

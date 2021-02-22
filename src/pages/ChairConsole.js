@@ -113,14 +113,14 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     this.props.history.push(`dul_collect/${consentId}`);
   };
 
-  openAccessReview = (referenceId, voteId, alreadyVoted) => async (e) => {
+  openAccessReview = (referenceId, alreadyVoted) => async (e) => {
     const pathStart = NavigationUtils.accessReviewPath();
     let chairFinal = false;
     if(this.state.currentUser && alreadyVoted) {
       chairFinal = this.state.currentUser.isChairPerson;
     }
     this.props.history.push(
-      `${pathStart}/${referenceId}/${voteId}`,
+      `${pathStart}/${referenceId}`,
       {chairFinal}
     );
   };
@@ -324,7 +324,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
                       button({
                         id: pendingCase.frontEndId + '_btnVote',
                         name: 'btn_voteAccess',
-                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId, pendingCase.alreadyVoted),
+                        onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.alreadyVoted),
                         className: 'cell-button cancel-color'
                       }, [
                         span({ isRendered: (pendingCase.alreadyVoted === false) && (pendingCase.electionStatus !== 'Final') }, ['Vote']),
