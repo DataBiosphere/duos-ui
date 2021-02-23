@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import { filter } from 'lodash';
 import {Config} from './config';
 import $ from 'jquery';
 
@@ -25,7 +26,7 @@ export const NotificationService = {
    */
   getActiveBanners: async () => {
     const banners = await NotificationService.getBanners();
-    return banners.filter((note) => note.active === true);
+    return filter(banners, {active: true});
   },
 
   /**

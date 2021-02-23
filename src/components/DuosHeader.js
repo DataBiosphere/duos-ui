@@ -1,3 +1,4 @@
+import { map } from 'lodash';
 import {Component, Fragment, useState} from 'react';
 import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
@@ -9,7 +10,7 @@ import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
-import {NavigationUtils} from "../libs/utils";
+import {NavigationUtils} from '../libs/utils';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import { Styles } from '../libs/theme';
@@ -171,14 +172,7 @@ class DuosHeader extends Component {
   };
 
   makeNotifications = () => {
-    const dataList = [];
-    const data = this.state.notificationData;
-    for (let i in data) {
-      if (data[parseInt(i)].hasOwnProperty("id")) {
-        dataList.push(data[parseInt(i)]);
-      }
-    }
-    return dataList.map((d) => Notification({notificationData: d}));
+    return this.state.notificationData.map((d) => Notification({notificationData: d}));
   };
 
   toggleDrawer = (boolVal) => {
@@ -378,6 +372,7 @@ class DuosHeader extends Component {
         //I'll look into rewriting the large navbar on a later PR
         h(Hidden, {lgUp: true}, [
           div({style: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}, [
+            this.makeNotifications(),
             img({
               style: duosLogoImage, src: '/images/duos_logo.svg',
               alt: 'DUOS Logo',
