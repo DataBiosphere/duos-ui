@@ -170,7 +170,7 @@ class DuosHeader extends Component {
   };
 
   makeNotifications = () => {
-    return this.state.notificationData.map((d) => Notification({notificationData: d}));
+    return this.state.notificationData.map((d, index) => Notification({notificationData: d, key:index}));
   };
 
   toggleDrawer = (boolVal) => {
