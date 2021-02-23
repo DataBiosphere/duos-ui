@@ -56,8 +56,8 @@
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {
-    "@babel/traverse": "^7.12.17",
-    "@babel/types": "^7.12.17",
+    "@babel/traverse": "^7.13.0",
+    "@babel/types": "^7.13.0",
     "cypress": "6.5.0",
     "eslint": "6.8.0",
     "eslint-config-react-app": "5.2.1",
