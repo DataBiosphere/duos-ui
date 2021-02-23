@@ -1,4 +1,4 @@
-import { map } from 'lodash';
+
 import {Component, Fragment, useState} from 'react';
 import {a, button, div, h, hr, img, li, nav, small, span, ul} from 'react-hyperscript-helpers';
 import Drawer from '@material-ui/core/Drawer';
