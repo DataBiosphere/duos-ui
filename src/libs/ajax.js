@@ -1032,17 +1032,18 @@ export const AuthenticateNIH = {
 
   parseProfile: (profile) => {
     let fireCloudProfileObj = {};
+    let properties = profile.researcherProperties;
     fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.title = "DUOS Researcher";
     fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute = (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
+    fireCloudProfileObj.institute = (properties.institution !== undefined && properties.institution !== "") ? properties.institution : "n/a";
     fireCloudProfileObj.institutionalProgram = "n/a";
     fireCloudProfileObj.programLocationCity = "n/a";
     fireCloudProfileObj.programLocationState = "n/a";
     fireCloudProfileObj.programLocationCountry = "n/a";
-    fireCloudProfileObj.pi = (profile.havePi !== undefined && profile.havePi === true)
-      ? profile.piName : profile.isThePI === true
+    fireCloudProfileObj.pi = (properties.havePi !== undefined && properties.havePi === true)
+      ? properties.piName : properties.isThePI === true
         ? Storage.getCurrentUser().displayName : "n/a";
     fireCloudProfileObj.nonProfitStatus = "n/a";
     return fireCloudProfileObj;
