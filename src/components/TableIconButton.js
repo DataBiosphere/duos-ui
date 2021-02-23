@@ -1,9 +1,9 @@
-import {div} from 'react-hyperscript-helpers';
-import {Styles} from '../libs/theme';
+import { Styles } from '../libs/theme';
+import { h } from 'react-hyperscript-helpers';
+import { Block } from '@material-ui/icons';
 import { applyHoverEffects } from '../libs/utils';
 
-export default function TableTextButton(props) {
-
+export default function TableIconButton(props) {
   const onMouseEnterFn = (e) => {
     applyHoverEffects(e, hoverStyle);
   };
@@ -14,21 +14,21 @@ export default function TableTextButton(props) {
 
   const {
     onClick,
-    style = Styles.TABLE.TABLE_TEXT_BUTTON,
-    hoverStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER,
+    style = Styles.TABLE.TABLE_ICON_BUTTON, //NOTE: create defaults for icons
+    hoverStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER, //NOTE: create defaults for icons
     onMouseEnter = onMouseEnterFn,
     onMouseLeave = onMouseLeaveFn,
-    label,
     isRendered = true
   } = props;
 
+  //NOTE: switch this out with material ui icons setup
   return (
-    div({
+    h(Block, {
       style,
       onMouseEnter,
       onMouseLeave,
       isRendered,
       onClick
-    }, [label])
+    })
   );
-}
+};

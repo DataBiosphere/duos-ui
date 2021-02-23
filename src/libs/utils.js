@@ -3,6 +3,13 @@ import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
 import isNil from 'lodash/fp/isNil';
+import { forEach } from 'lodash';
+
+export const applyHoverEffects = (e, style) => {
+  forEach(style, (value, key) => {
+    e.target.style[key] = value;
+  });
+};
 
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {

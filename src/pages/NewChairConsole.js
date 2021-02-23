@@ -4,6 +4,7 @@ import { div, h, img, input } from 'react-hyperscript-helpers';
 import { DAR, Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import TableTextButton from '../components/TableTextButton';
+import TableIconButton from '../components/TableIconButton';
 import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
@@ -33,7 +34,7 @@ const processElectionStatus = (election, votes) => {
   } else if(electionStatus === 'Open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
-      const dacVotes = filter((vote) => vote.type === 'DAC')(votes);
+      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
       output = `Open (${completedVotes} / ${dacVotes.length} votes)`;
     }
@@ -97,7 +98,6 @@ const Records = (props) => {
   };
 
   const createActionButtons = (electionInfo, index) => {
-    const name = "cell-button hover-color";
     const e = electionInfo.election;
     const dar = electionInfo.dar;
     const currentUserId = Storage.getCurrentUser().dacUserId;
@@ -114,23 +114,21 @@ const Records = (props) => {
               onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`),
               label: isFinal ? 'Final' : 'Vote'
             }),
-            div({
+            h(TableIconButton, {
               key: `cancel-button-${e.referenceId}`,
-              className: `${name} cancel-button`,
-              style: {flex: 1},
-              onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
-            }, ['Cancel'])
+              onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
+            })
           ];
         default :
           return h(TableTextButton, {
             key: `reopen-button-${e.referenceId}`,
-            onClick: (e) => openConfirmation(dar, index),
+            onClick: () => openConfirmation(dar, index),
             label: 'Re-Open'
           });
       }
     }
     return h(TableTextButton, {
-      onClick: () => openConfirmation,
+      onClick: () => openConfirmation(dar, index),
       buttonKey: `open-election-dar-${dar.referenceId}`,
       label: 'Open Election'
     });

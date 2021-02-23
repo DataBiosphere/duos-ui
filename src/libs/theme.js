@@ -228,9 +228,9 @@ export const Styles = {
       alignItems: 'center',
       justifyContent: 'flex-end'
     },
-    TABLE_BUTTON: {
+    TABLE_TEXT_BUTTON: {
       display: 'flex',
-      width: '50%',
+      width: '45%',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: Theme.palette.secondary,
@@ -239,8 +239,19 @@ export const Styles = {
       borderRadius: '.3rem',
       cursor: 'pointer'
     },
-    TABLE_BUTTON_HOVER: {
+    TABLE_BUTTON_TEXT_HOVER: {
       backgroundColor: '#2FA4E7'
+    },
+    TABLE_BUTTON_ICON_HOVER: {
+      color: '#2FA4E7'
+    },
+    TABLE_ICON_BUTTON: {
+      display: 'flex',
+      width: '20%',
+      color: Theme.palette.secondary,
+      height: '60%',
+      borderRadius: '.3rem',
+      cursor: 'pointer'
     }
   },
   MODAL: {
