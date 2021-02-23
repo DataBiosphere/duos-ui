@@ -115,9 +115,7 @@ class AdminManageAccess extends Component {
           if (errorResponse.status === 500) {
             this.setState({ alertTitle: 'Email Service Error!', alertMessage: 'The election was created but the participants couldnt be notified by Email.', disableCancelBtn: false });
           } else {
-            errorResponse.json().then(error =>
-              this.setState({ alertTitle: 'Election cannot be created!', alertMessage: error.message, disableCancelBtn: false })
-            );
+            this.setState({ alertTitle: 'Election cannot be created!', alertMessage: errorResponse.message, disableCancelBtn: false });
           }
         });
     } else {
