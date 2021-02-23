@@ -52,7 +52,7 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: (user, history) => {
-    const page = user.isChairPerson ? '/chair_console'
+    const page = user.isChairPerson ? NavigationUtils.dacChairConsolePath()
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/dataset_catalog'
@@ -62,7 +62,7 @@ export const Navigation = {
     history.push(page);
   },
   console: (user, history) => {
-    const page = user.isChairPerson ? '/chair_console'
+    const page = user.isChairPerson ? NavigationUtils.dacChairConsolePath()
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/researcher_console'
