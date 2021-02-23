@@ -1,8 +1,9 @@
 import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
-import { div, h, img, input, button } from 'react-hyperscript-helpers';
+import { div, h, img, input } from 'react-hyperscript-helpers';
 import { DAR, Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
+import TableTextButton from '../components/TableTextButton';
 import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
@@ -108,34 +109,31 @@ const Records = (props) => {
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           const vote = head(votes);
           return [
-            button({
+            h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
-              className: `${name} vote-button`,
-              style: {flex: 1},
-              onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
-            }, [`${isFinal ? 'Final' : 'Vote'}`]),
-            button({
+              onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`),
+              label: isFinal ? 'Final' : 'Vote'
+            }),
+            div({
               key: `cancel-button-${e.referenceId}`,
               className: `${name} cancel-button`,
               style: {flex: 1},
               onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
             }, ['Cancel'])
           ];
-        case 'Final' :
-          return ['- -'];
         default :
-          return button({
+          return h(TableTextButton, {
             key: `reopen-button-${e.referenceId}`,
-            className: name,
-            onClick: () => openConfirmation(dar, index)
-          }, ["Re-Open"]);
+            onClick: (e) => openConfirmation(dar, index),
+            label: 'Re-Open'
+          });
       }
     }
-    return button({
-      key: `open-election-dar-${dar.referenceId}`,
-      className: name,
-      onClick: () => openConfirmation(dar, index)
-    }, ["Open Election"]);
+    return h(TableTextButton, {
+      onClick: () => openConfirmation,
+      buttonKey: `open-election-dar-${dar.referenceId}`,
+      label: 'Open Election'
+    });
   };
 
   return visibleWindow.map((electionInfo, index) => {

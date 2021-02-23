@@ -228,6 +228,20 @@ export const Styles = {
       alignItems: 'center',
       justifyContent: 'flex-end'
     },
+    TABLE_BUTTON: {
+      display: 'flex',
+      width: '50%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Theme.palette.secondary,
+      color: 'white',
+      height: '60%',
+      borderRadius: '.3rem',
+      cursor: 'pointer'
+    },
+    TABLE_BUTTON_HOVER: {
+      backgroundColor: '#2FA4E7'
+    }
   },
   MODAL: {
     CONTENT: {
