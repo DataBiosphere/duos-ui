@@ -98,9 +98,9 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId, voteId) => async (e) => {
+  openAccessReview = (referenceId) => async (e) => {
     const pathStart = NavigationUtils.accessReviewPath();
-    this.props.history.push(`${pathStart}/${referenceId}/${voteId}`);
+    this.props.history.push(`${pathStart}/${referenceId}`);
   };
 
   openDULReview = (consentId, voteId) => (e) => {
@@ -280,7 +280,7 @@ class MemberConsole extends Component {
                       className: oneColumnClass + ' cell-body text f-center'
                     }, [pendingCase.logged]),
                     div({
-                      onClick: this.openAccessReview(pendingCase.referenceId, pendingCase.voteId),
+                      onClick: this.openAccessReview(pendingCase.referenceId),
                       className: twoColumnClass + ' cell-body f-center'
                     }, [
                       button({

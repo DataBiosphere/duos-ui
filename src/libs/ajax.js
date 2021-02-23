@@ -574,7 +574,7 @@ export const Election = {
     const election = { status: 'Open', finalAccessVote: false };
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
     const res = await fetchOk(url, fp.mergeAll([Config.jsonBody(election), Config.authOpts(), { method: 'POST' }]));
-    return res;
+    return res.json();
   },
 
   isDataSetElectionOpen: async () => {
