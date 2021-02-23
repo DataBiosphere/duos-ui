@@ -371,8 +371,8 @@ class DuosHeader extends Component {
         //For now I will use material-ui's hidden element to selectively render the two different navbars
         //I'll look into rewriting the large navbar on a later PR
         h(Hidden, {lgUp: true}, [
+          this.makeNotifications(),
           div({style: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}, [
-            this.makeNotifications(),
             img({
               style: duosLogoImage, src: '/images/duos_logo.svg',
               alt: 'DUOS Logo',
