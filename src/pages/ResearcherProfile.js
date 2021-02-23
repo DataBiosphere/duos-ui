@@ -1,6 +1,7 @@
-import _ from 'lodash';
+import _, { isNil, isEmpty } from 'lodash';
 import { Component } from 'react';
-import {button, div, form, hh, hr, input, label, span, textarea } from 'react-hyperscript-helpers';
+import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
+
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
@@ -12,6 +13,18 @@ import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
+import {getNames} from "country-list";
+
+const USA = option({ value: "United States of America"}, ["United States of America"]);
+const empty = option({ value: ""}, [""]);
+const countryNames = getNames().map((name) => option({value: name}, [name]));
+const index = countryNames.indexOf(USA);
+countryNames.splice(index, 1);
+countryNames.splice(0, 0, USA);
+countryNames.splice(0, 0, empty);
+const UsaStates = require('usa-states').UsaStates;
+const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+stateNames.splice(0, 0, empty)
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -29,14 +42,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
-    this.getResearcherProfile();
+    await this.getResearcherProfile();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
       return prev;
     });
-  }
+  };
 
   initialState() {
     return {
@@ -55,7 +68,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         address2: '',
         city: '',
         completed: undefined,
-        country: '',
+        country: undefined,
         department: '',
         division: '',
         eRACommonsID: '',
@@ -70,7 +83,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         pubmedID: '',
         researcherGate: '',
         scientificURL: '',
-        state: '',
+        state: undefined,
         zipcode: ''
       },
       showRequired: false,
@@ -198,7 +211,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.state)) {
+    if (!this.isValidState(this.state.profile.state)) {
       state = true;
       showValidationMessages = true;
     }
@@ -261,6 +274,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       isValid = true;
     }
     return isValid;
+  };
+
+  isValidState(value) {
+    const stateSelected = (!isNil(value) || !isEmpty(value)) && (value !== "N/A");
+    const inUS = (this.state.profile.country === "United States of America");
+    if (inUS && stateSelected) {
+      return true;
+    }
+    return !inUS;
   };
 
   submit(event) {
@@ -437,12 +459,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   // not valid properties for update.
   cloneProfile = (profile) => {
     return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
-  }
+  };
 
   render() {
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
+
     return (
 
       div({ className: 'container' }, [
@@ -656,6 +679,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     ])
                   ])
                 ]),
+
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
@@ -711,21 +735,22 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         isRendered: this.state.invalidFields.city && showValidationMessages
                       }, ['City is required'])
                     ]),
+
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileState', className: 'control-label' }, ['State*']),
-                      input({
+                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State*']),
+                      select({
                         id: 'profileState',
                         name: 'state',
-                        type: 'text',
-                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         onChange: this.handleChange,
                         value: this.state.profile.state,
-                        required: true
-                      }),
+                        className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
+                        required: true,
+                        disabled: (this.state.profile.country !== "United States of America")
+                      }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.state && showValidationMessages
-                      }, ['State is required'])
+                      }, ['State is required if you live in the United States'])
                     ])
                   ])
                 ]),
@@ -750,19 +775,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         isRendered: this.state.invalidFields.zipcode && showValidationMessages
                       }, ['Zip/Postal Code is required'])
                     ]),
+
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
                       label({ id: 'lbl_profileCountry', className: 'control-label' }, ['Country*']),
-                      input({
+                      select({
                         id: 'profileCountry',
                         name: 'country',
-                        type: 'text',
+                        onChange: this.handleChange,
+                        value: this.state.profile.country,
                         className: (this.state.invalidFields.country && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
-                        onChange: this.handleChange,
-                        value: this.state.profile.country,
                         required: true
-                      }),
+                      }, countryNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
                         isRendered: this.state.invalidFields.country && showValidationMessages
