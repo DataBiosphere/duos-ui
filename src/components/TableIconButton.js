@@ -1,7 +1,7 @@
 import { Styles } from '../libs/theme';
 import { h } from 'react-hyperscript-helpers';
-import { Block } from '@material-ui/icons';
 import { applyHoverEffects } from '../libs/utils';
+import { isNil } from 'lodash';
 
 export default function TableIconButton(props) {
   const onMouseEnterFn = (e) => {
@@ -20,14 +20,15 @@ export default function TableIconButton(props) {
     onMouseLeave = onMouseLeaveFn,
     isRendered = true
   } = props;
+  const Icon = props.icon;
 
   //NOTE: switch this out with material ui icons setup
   return (
-    h(Block, {
+    h(Icon, {
       style,
       onMouseEnter,
       onMouseLeave,
-      isRendered,
+      isRendered: isRendered && !isNil(Icon),
       onClick
     })
   );

@@ -10,6 +10,7 @@ import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
 import {Storage} from "../libs/storage";
+import { Block } from '@material-ui/icons';
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 
 const wasVoteSubmitted = (vote) => {
@@ -101,7 +102,6 @@ const Records = (props) => {
     const e = electionInfo.election;
     const dar = electionInfo.dar;
     const currentUserId = Storage.getCurrentUser().dacUserId;
-
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' :
@@ -115,6 +115,7 @@ const Records = (props) => {
               label: isFinal ? 'Final' : 'Vote'
             }),
             h(TableIconButton, {
+              icon: Block,
               key: `cancel-button-${e.referenceId}`,
               onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
             })
