@@ -237,7 +237,8 @@ export const Styles = {
       color: 'white',
       height: '60%',
       borderRadius: '.3rem',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      marginRight: '10%'
     },
     TABLE_BUTTON_TEXT_HOVER: {
       backgroundColor: '#2FA4E7'
@@ -247,7 +248,7 @@ export const Styles = {
     },
     TABLE_ICON_BUTTON: {
       display: 'flex',
-      width: '20%',
+      width: 'auto',
       color: Theme.palette.secondary,
       height: '60%',
       borderRadius: '.3rem',

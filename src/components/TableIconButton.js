@@ -1,7 +1,17 @@
 import { Styles } from '../libs/theme';
-import { h } from 'react-hyperscript-helpers';
+import { h, span } from 'react-hyperscript-helpers';
 import { applyHoverEffects } from '../libs/utils';
+import { makeStyles } from '@material-ui/core';
 import { isNil } from 'lodash';
+
+const useStyles = makeStyles({
+  root: {
+    backgroundColor: 'inherit',
+    color: 'inherit',
+    pointerEvents: 'none',
+    fontSize: 28,
+  }
+});
 
 export default function TableIconButton(props) {
   const onMouseEnterFn = (e) => {
@@ -21,15 +31,17 @@ export default function TableIconButton(props) {
     isRendered = true
   } = props;
   const Icon = props.icon;
+  const classes = useStyles();
 
-  //NOTE: switch this out with material ui icons setup
+  //NOTE: span wrapper is needed for svg child elements due to flaky behavior onMouseEnter and onMouseLeave
+  // https://github.com/facebook/react/issues/4492 --> NOTE: though the issue is from the React repo, the bug is tied to browser specs, NOT React
   return (
-    h(Icon, {
-      style,
-      onMouseEnter,
-      onMouseLeave,
-      isRendered: isRendered && !isNil(Icon),
-      onClick
-    })
+    span({style, onMouseEnter, onMouseLeave}, [
+      h(Icon, {
+        isRendered: isRendered && !isNil(Icon),
+        onClick,
+        className: classes.root
+      })
+    ])
   );
 };
