@@ -126,7 +126,7 @@ const consentTranslations = {
     description: 'Use is permitted for a health, medical, or biomedical research purpose'
   },
   diseaseRestrictions: (restrictions) => {
-    if (restrictions.length < 1) { return 'Use is permitted for the specified disease(s): Not specified'; }
+    if (isEmpty(restrictions)) { return 'Use is permitted for the specified disease(s): Not specified'; }
     const restrictionList = restrictions.join(', ');
     return {
       code: 'DS',
