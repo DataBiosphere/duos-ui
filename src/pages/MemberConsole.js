@@ -167,10 +167,11 @@ class MemberConsole extends Component {
                       span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ['Editable'])
                     ]),
                     div({className: oneColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.logged]),
-                    div({className: twoColumnClass, style: {paddingtop: "0.5rem"}}, [
+                    div({onClick: this.openAccessReview(pendingCase.referenceId),
+                      className: twoColumnClass, style: {paddingtop: "0.5rem"}}, [
                       button({
                         id: pendingCase.frontEndId + '_btnVoteAccess', name: 'btn_voteAccess',
-                        className: 'cell-button ' + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
+                        className: 'cell-button hover-color'
                       }, [
                         span({ isRendered: pendingCase.alreadyVoted === false }, ['Vote']),
                         span({ isRendered: pendingCase.alreadyVoted === true }, ['Edit'])
