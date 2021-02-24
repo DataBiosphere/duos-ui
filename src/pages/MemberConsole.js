@@ -1,15 +1,12 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import {button, div, h, hr, img, input, span} from 'react-hyperscript-helpers';
-import { useRef } from 'react';
-import { PageHeading } from '../components/PageHeading';
-import { PageSubHeading } from '../components/PageSubHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
+import {button, div, h, hr, img, span} from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NavigationUtils } from '../libs/utils';
 import {Styles} from "../libs/theme";
+import PaginationBar from "../components/PaginationBar";
 
 class MemberConsole extends Component {
 
@@ -21,9 +18,7 @@ class MemberConsole extends Component {
     this.state = {
       currentUser: currentUser,
       showModal: false,
-      dulLimit: 5,
       accessLimit: 5,
-      currentDulPage: 1,
       currentAccessPage: 1,
       electionsList: {
         dul: [],
@@ -37,21 +32,6 @@ class MemberConsole extends Component {
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
   }
-
-  handleDulPageChange = page => {
-    this.setState(prev => {
-      prev.currentDulPage = page;
-      return prev;
-    });
-  };
-
-  handleDulSizeChange = size => {
-    this.setState(prev => {
-      prev.dulLimit = size;
-      prev.currentDulPage = 1;
-      return prev;
-    });
-  };
 
   handleAccessPageChange = page => {
     this.setState(prev => {
@@ -130,6 +110,7 @@ class MemberConsole extends Component {
     const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1 ';
     const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
     const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
+    const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
 
     return (
 
@@ -177,7 +158,7 @@ class MemberConsole extends Component {
               .filter(this.searchTable(searchDarText))
               .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
-                  div({style: Styles.TABLE.RECORD_ROW, paddingTop: '1rem'}, [
+                  div({style: Styles.TABLE.RECORD_ROW, paddingtop: '1rem'}, [
                     div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.frontEndId]),
                     div({className: threeColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.projectTitle]),
                     div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [_.get(pendingCase, 'dac.name', '- -')]),
@@ -187,7 +168,7 @@ class MemberConsole extends Component {
                       span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ['Editable'])
                     ]),
                     div({className: oneColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.logged]),
-                    div({className: twoColumnClass, style: {paddingTop: "0.5rem"}}, [
+                    div({className: twoColumnClass, style: {paddingtop: "0.5rem"}}, [
                       button({
                         id: pendingCase.frontEndId + '_btnVoteAccess', name: 'btn_voteAccess',
                         className: 'cell-button ' + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
@@ -200,14 +181,7 @@ class MemberConsole extends Component {
                   hr({ className: 'table-body-separator' })
                 ]);
               }),
-            PaginatorBar({
-              name: 'access',
-              total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,
-              limit: this.state.accessLimit,
-              currentPage: this.state.currentAccessPage,
-              onPageChange: this.handleAccessPageChange,
-              changeHandler: this.handleAccessSizeChange
-            })
+            h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange, Styles}),
           ])
       ])
     );

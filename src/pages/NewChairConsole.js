@@ -338,7 +338,7 @@ export default function NewChairConsole(props) {
         ]),
         h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists})
       ]),
-      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
+      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize}),
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
       h(ConfirmationModal, {
         showConfirmation,
