@@ -136,8 +136,7 @@ class MemberConsole extends Component {
                 ])
               ]),
               div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
-                h(SearchBox,
-                  { id: 'memberConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' })
+                h(SearchBox, { searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange })
               ])
             ]),
           ]),
