@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import { button, div, h, hr, span } from 'react-hyperscript-helpers';
+import {button, div, h, hr, img, input, span} from 'react-hyperscript-helpers';
+import { useRef } from 'react';
 import { PageHeading } from '../components/PageHeading';
 import { PageSubHeading } from '../components/PageSubHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
@@ -8,6 +9,7 @@ import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NavigationUtils } from '../libs/utils';
+import {Styles} from "../libs/theme";
 
 class MemberConsole extends Component {
 
@@ -30,8 +32,7 @@ class MemberConsole extends Component {
       },
       totalDulPendingVotes: 0,
       totalAccessPendingVotes: 0,
-      totalResearchPurposePendingVotes: 0
-
+      totalResearchPurposePendingVotes: 0,
     };
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
@@ -133,156 +134,60 @@ class MemberConsole extends Component {
     return (
 
       div({ className: 'container' }, [
-        div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
-          PageHeading({
-            id: 'memberConsole', color: 'common', title: 'Welcome to your DAC Member Console, ' + currentUser.displayName + '!',
-            description: 'These are your pending cases for review'
-          }),
-          hr({ className: 'section-separator' }),
-
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
-              PageSubHeading({
-                id: 'memberConsoleDul', imgSrc: '/images/icon_dul.png', color: 'dul', title: 'Data Use Limitations Review',
-                description: 'Were data use limitations accurately converted to a structured format?'
-              })
-            ]),
-            div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding' }, [
-              h(SearchBox, { id: 'memberConsoleDul', searchHandler: this.handleSearchDul, pageHandler: this.handleDulPageChange, color: 'dul' })
-            ])
+          div({style: Styles.HEADER_CONTAINER}, [
+            div({style: Styles.TITLE}, ['Welcome to your DAC Member Console, ' + currentUser.displayName + '!']),
+            div({style: Styles.SMALL}, ['These are your pending cases for review'])
           ]),
-
-          div({ className: 'jumbotron table-box' }, [
-            div({ className: 'row no-margin' }, [
-              div({ className: twoColumnClass + ' cell-header dul-color' }, ['Consent id']),
-              div({ className: threeColumnClass + ' cell-header dul-color' }, ['Consent Group Name']),
-              div({ className: twoColumnClass + ' cell-header dul-color' }, ['DAC']),
-              div({ className: twoColumnClass + ' cell-header f-center dul-color' }, ['Status']),
-              div({ className: oneColumnClass + ' cell-header f-center dul-color' }, ['Logged']),
-              div({ className: twoColumnClass + ' cell-header f-center dul-color' }, [
-                'Review/Vote',
-                div({ isRendered: this.state.totalDulPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalDulPendingVotes])
+          hr({ className: 'section-separator' }),
+          div({ className: 'row no-margin' }, [
+            div({ style: {display: "flex", justifyContent: "space-between"}}, [
+              div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+                div({style: Styles.ICON_CONTAINER}, [
+                  img({
+                    id: 'memberConsoleAccess',
+                    src: '/images/icon_access.png',
+                    style: Styles.HEADER_IMG
+                  })
+                ]),
+                div({style: Styles.HEADER_CONTAINER}, [
+                  div({style: Styles.TITLE}, ['Data Access Request Review']),
+                  div({style: Styles.SMALL}, ['Should data access be granted to this applicant?'])
+                ])
+              ]),
+              div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
+                h(SearchBox,
+                  { id: 'memberConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' })
               ])
             ]),
-            hr({ className: 'table-head-separator' }),
-
-            this.state.electionsList.dul
-              .filter(this.searchTable(searchDulText))
-              .slice((this.state.currentDulPage - 1) * this.state.dulLimit, this.state.currentDulPage * this.state.dulLimit).map((pendingCase, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({ className: 'row no-margin tableRowDul' }, [
-                    div({
-                      id: pendingCase.frontEndId + '_consentId', name: 'consentId', className: twoColumnClass + ' cell-body text',
-                      title: pendingCase.frontEndId
-                    }, [pendingCase.frontEndId]),
-                    div({
-                      id: pendingCase.frontEndId + '_consentGroup', name: 'consentGroup',
-                      className: threeColumnClass + ' cell-body text ' + (!pendingCase.consentGroupName ? 'empty' : ''),
-                      title: pendingCase.consentGroupName
-                    }, [pendingCase.consentGroupName]),
-                    div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
-                      title: _.get(pendingCase, 'dac.name', '')
-                    }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({
-                      id: pendingCase.frontEndId + '_statusDul', name: 'statusDul',
-                      className: twoColumnClass + ' cell-body text bold f-center'
-                    }, [
-                      span({ isRendered: pendingCase.isReminderSent === true }, ['URGENT!']),
-                      span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ['Pending']),
-                      span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ['Editable'])
-                    ]),
-                    div({
-                      id: pendingCase.frontEndId + '_logged', name: 'loggedDul',
-                      className: oneColumnClass + ' cell-body text f-center'
-                    }, [pendingCase.logged]),
-                    div({
-                      onClick: this.openDULReview(pendingCase.referenceId, pendingCase.voteId),
-                      className: twoColumnClass + ' cell-body f-center'
-                    }, [
-                      button({
-                        id: pendingCase.frontEndId + '_btnVoteDul', name: 'btn_voteDul',
-                        className: 'cell-button ' + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
-                      }, [
-                        span({ isRendered: pendingCase.alreadyVoted === false }, ['Vote']),
-                        span({ isRendered: pendingCase.alreadyVoted === true }, ['Edit'])
-                      ])
-                    ])
-                  ]),
-                  hr({ className: 'table-body-separator' })
-                ]);
-              }),
-            PaginatorBar({
-              name: 'dul',
-              total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
-              limit: this.state.dulLimit,
-              currentPage: this.state.currentDulPage,
-              onPageChange: this.handleDulPageChange,
-              changeHandler: this.handleDulSizeChange
-            })
           ]),
-
-          div({ className: 'row no-margin' }, [
-            div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
-              PageSubHeading({
-                id: 'memberConsoleAccess', imgSrc: '/images/icon_access.png', color: 'access', title: 'Data Access Request Review',
-                description: 'Should data access be granted to this applicant?'
-              })
-            ]),
-
-            div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12 search-wrapper no-padding' }, [
-              h(SearchBox,
-                { id: 'memberConsoleAccess', searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange, color: 'access' })
-            ])
-          ]),
-          div({ className: 'jumbotron table-box' }, [
-            div({ className: 'row no-margin' }, [
-              div({ className: twoColumnClass + ' cell-header access-color' }, ['Data Request Id']),
-              div({ className: threeColumnClass + ' cell-header access-color' }, ['Project Title']),
-              div({ className: twoColumnClass + ' cell-header access-color' }, ['DAC']),
-              div({ className: twoColumnClass + ' cell-header access-color f-center' }, ['Status']),
-              div({ className: oneColumnClass + ' cell-header access-color f-center' }, ['Logged']),
-              div({ className: twoColumnClass + ' cell-header access-color f-center' }, [
-                'Review/Vote',
+          div({ style: Styles.TABLE.CONTAINER }, [
+            div({style: Styles.TABLE.HEADER_ROW}, [
+              div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
+              div({style: Styles.TABLE.TITLE_CELL}, ["Project Title"]),
+              div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
+              div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Status"]),
+              div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Logged"]),
+              div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, [
+                "Review/Vote",
                 div({ isRendered: this.state.totalAccessPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalAccessPendingVotes])
               ])
             ]),
-
-            hr({ className: 'table-head-separator' }),
 
             this.state.electionsList.access
               .filter(this.searchTable(searchDarText))
               .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
                   div({ className: 'row no-margin tableRowAccess' }, [
-                    div({
-                      id: pendingCase.frontEndId + '_darId', name: 'darId', className: twoColumnClass + ' cell-body text',
-                      title: pendingCase.frontEndId
-                    }, [pendingCase.frontEndId]),
-                    div({
-                      id: pendingCase.frontEndId + '_projectTitle', name: 'projectTitle',
-                      className: threeColumnClass + ' cell-body text', title: pendingCase.projectTitle
-                    }, [pendingCase.projectTitle]),
-                    div({
-                      id: pendingCase.frontEndId + '_dacName', name: 'dacName', className: twoColumnClass + ' cell-body text',
-                      title: _.get(pendingCase, 'dac.name', '')
-                    }, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({
-                      id: pendingCase.frontEndId + '_statusAccess', name: 'statusAccess',
-                      className: twoColumnClass + ' cell-body text f-center bold'
-                    }, [
+                    div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, Styles.TABLE.RECORD_TEXT)}, [pendingCase.frontEndId]),
+                    div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, Styles.TABLE.RECORD_TEXT)}, [pendingCase.projectTitle]),
+                    div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, Styles.TABLE.RECORD_TEXT)}, [_.get(pendingCase, 'dac.name', '- -')]),
+                    div({style: Object.assign({}, Styles.TABLE.STATUS_CELL, Styles.TABLE.RECORD_TEXT)}, [
                       span({ isRendered: pendingCase.isReminderSent === true }, ['URGENT!']),
                       span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ['Pending']),
                       span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ['Editable'])
                     ]),
-                    div({
-                      id: pendingCase.frontEndId + '_loggedAccess', name: 'loggedAccess',
-                      className: oneColumnClass + ' cell-body text f-center'
-                    }, [pendingCase.logged]),
-                    div({
-                      onClick: this.openAccessReview(pendingCase.referenceId),
-                      className: twoColumnClass + ' cell-body f-center'
-                    }, [
+                    div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, Styles.TABLE.RECORD_TEXT)}, [pendingCase.logged]),
+                    div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, Styles.TABLE.RECORD_TEXT)}, [
                       button({
                         id: pendingCase.frontEndId + '_btnVoteAccess', name: 'btn_voteAccess',
                         className: 'cell-button ' + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
@@ -304,7 +209,6 @@ class MemberConsole extends Component {
               changeHandler: this.handleAccessSizeChange
             })
           ])
-        ])
       ])
     );
   }
