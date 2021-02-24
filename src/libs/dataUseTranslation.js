@@ -20,13 +20,17 @@ const srpTranslations = {
     manualReview: true
   },
   diseases: (diseases) => {
-    const diseaseArray = diseases.sort().map(disease => disease.label);
-    const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
-    return {
+    let outputStruct = {
       code: 'DS',
-      description: 'The dataset will be used for disease related studies' + (!isEmpty(diseaseString) ? ` (${diseaseString})` : ''),
+      description: 'The dataset will be used for disease related studies',
       manualReview: false
     };
+    if(!isEmpty(diseases)) {
+      const diseaseArray = diseases.sort().map((disease) => disease.label);
+      const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
+      outputStruct.description = outputStruct.description + ` (${diseaseString})`;
+    }
+    return outputStruct;
   },
   researchTypeDisease: {
     code: 'DS',
