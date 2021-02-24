@@ -1,4 +1,5 @@
 import * as fp from 'lodash/fp';
+import { filter } from 'lodash';
 import {Config} from './config';
 import $ from 'jquery';
 
@@ -17,6 +18,15 @@ export const NotificationService = {
     return $.getJSON(gcs + '/' + env + '_' + bannerFileName, (data) => {
       return data;
     });
+  },
+
+  /**
+   * Get the raw banner content from GCS
+   * @returns {Promise<JSON>}
+   */
+  getActiveBanners: async () => {
+    const banners = await NotificationService.getBanners();
+    return filter(banners, {active: true});
   },
 
   /**
