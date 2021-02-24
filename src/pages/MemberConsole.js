@@ -84,10 +84,6 @@ class MemberConsole extends Component {
     this.props.history.push(`${pathStart}/${referenceId}`);
   };
 
-  openDULReview = (consentId, voteId) => (e) => {
-    this.props.history.push(`dul_review/${voteId}/${consentId}`);
-  };
-
   handleSearchDul = (query) => {
     this.setState({ searchDulText: query });
   };
@@ -106,7 +102,7 @@ class MemberConsole extends Component {
 
   render() {
 
-    const { currentUser, searchDarText } = this.state;
+    const { searchDarText } = this.state;
     const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1 ';
     const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
     const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
@@ -115,11 +111,6 @@ class MemberConsole extends Component {
     return (
 
       div({ className: 'container' }, [
-          div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ['Welcome to your DAC Member Console, ' + currentUser.displayName + '!']),
-            div({style: Styles.SMALL}, ['These are your pending cases for review'])
-          ]),
-          hr({ className: 'section-separator' }),
           div({ className: 'row no-margin' }, [
             div({ style: {display: "flex", justifyContent: "space-between"}}, [
               div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
