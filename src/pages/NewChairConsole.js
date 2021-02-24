@@ -130,7 +130,7 @@ const Records = (props) => {
     }
     return h(TableTextButton, {
       onClick: () => openConfirmation(dar, index),
-      buttonKey: `open-election-dar-${dar.referenceId}`,
+      key: `open-election-dar-${dar.referenceId}`,
       label: 'Open Election'
     });
   };
