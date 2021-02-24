@@ -121,6 +121,17 @@ export const Styles = {
       justifyContent: "center",
       height: "51px"
     },
+    MEMBER_HEADER_ROW: {
+      paddingTop: "1.25rem",
+      fontFamily: "Montserrat",
+      fontSize: "14px",
+      color: "#00243C",
+      fontWeight: Theme.font.weight.medium,
+      backgroundColor: "#f3f6f7",
+      display: "flex",
+      justifyContent: "center",
+      height: "51px"
+    },
     RECORD_ROW: {
       fontFamily: 'Montserrat',
       fontWeight: Theme.font.weight.regular,
@@ -131,6 +142,10 @@ export const Styles = {
     },
     RECORD_TEXT: {
       color: "#00243C"
+    },
+    MEMBER_RECORD_TEXT: {
+      color: "#00243C",
+      paddingTop: "1.5rem"
     },
     DAR_TEXT_HOVER: {
       cursor: 'pointer',
@@ -182,6 +197,19 @@ export const Styles = {
     ELECTION_ACTIONS_CELL: {
       width: "23%",
       margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    HEADER_CELL: {
+      margin: "0 2%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    DAR_ID_CELL: {
+      width: '140px',
+      margin: "0 2rem",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",

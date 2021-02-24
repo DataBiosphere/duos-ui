@@ -126,8 +126,8 @@ class MemberConsole extends Component {
 
   render() {
 
-    const { currentUser, searchDulText, searchDarText } = this.state;
-    const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1';
+    const { currentUser, searchDarText } = this.state;
+    const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1 ';
     const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
     const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
 
@@ -144,8 +144,8 @@ class MemberConsole extends Component {
               div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
                 div({style: Styles.ICON_CONTAINER}, [
                   img({
-                    id: 'memberConsoleAccess',
-                    src: '/images/icon_access.png',
+                    id: 'lock-icon',
+                    src: '/images/lock-icon.png',
                     style: Styles.HEADER_IMG
                   })
                 ]),
@@ -161,13 +161,13 @@ class MemberConsole extends Component {
             ]),
           ]),
           div({ style: Styles.TABLE.CONTAINER }, [
-            div({style: Styles.TABLE.HEADER_ROW}, [
-              div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
-              div({style: Styles.TABLE.TITLE_CELL}, ["Project Title"]),
-              div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
-              div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Status"]),
-              div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Logged"]),
-              div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, [
+            div({style: Styles.TABLE.MEMBER_HEADER_ROW}, [
+              div({className: twoColumnClass}, ["Data Request ID"]),
+              div({className: threeColumnClass}, ["Project Title"]),
+              div({className: twoColumnClass}, ["DAC"]),
+              div({className: twoColumnClass}, ["Status"]),
+              div({className: oneColumnClass}, ["Logged"]),
+              div({className: twoColumnClass}, [
                 "Review/Vote",
                 div({ isRendered: this.state.totalAccessPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalAccessPendingVotes])
               ])
@@ -177,17 +177,17 @@ class MemberConsole extends Component {
               .filter(this.searchTable(searchDarText))
               .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
                 return h(Fragment, { key: rIndex }, [
-                  div({ className: 'row no-margin tableRowAccess' }, [
-                    div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, Styles.TABLE.RECORD_TEXT)}, [pendingCase.frontEndId]),
-                    div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, Styles.TABLE.RECORD_TEXT)}, [pendingCase.projectTitle]),
-                    div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, Styles.TABLE.RECORD_TEXT)}, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({style: Object.assign({}, Styles.TABLE.STATUS_CELL, Styles.TABLE.RECORD_TEXT)}, [
+                  div({style: Styles.TABLE.RECORD_ROW, paddingTop: '1rem'}, [
+                    div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.frontEndId]),
+                    div({className: threeColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.projectTitle]),
+                    div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [_.get(pendingCase, 'dac.name', '- -')]),
+                    div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [
                       span({ isRendered: pendingCase.isReminderSent === true }, ['URGENT!']),
                       span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ['Pending']),
                       span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ['Editable'])
                     ]),
-                    div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, Styles.TABLE.RECORD_TEXT)}, [pendingCase.logged]),
-                    div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, Styles.TABLE.RECORD_TEXT)}, [
+                    div({className: oneColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.logged]),
+                    div({className: twoColumnClass, style: {paddingTop: "0.5rem"}}, [
                       button({
                         id: pendingCase.frontEndId + '_btnVoteAccess', name: 'btn_voteAccess',
                         className: 'cell-button ' + (pendingCase.alreadyVoted ? 'default-color' : 'cancel-color')
