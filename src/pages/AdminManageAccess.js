@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
+import {a, button, div, h, hr, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
-import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
+import {Styles} from "../libs/theme";
 
 
 const limit = 10;
@@ -177,37 +177,42 @@ class AdminManageAccess extends Component {
   render() {
 
     const { searchDarText, currentPage, limit } = this.state;
+    const oneColumnClass = 'col-xs-1 ';
+    const twoColumnClass = 'col-xs-2';
+    const threeColumnClass = 'col-xs-3';
 
     return (
-      div({ className: "container container-wide" }, [
+      div({className: "container container-wide"}, [
+        div({style: {display: "flex", justifyContent: "space-between"}}, [
+          div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+            div({style: Styles.ICON_CONTAINER}, [
+              img({
+                id: 'lock-icon',
+                src: '/images/lock-icon.png',
+                style: Styles.HEADER_IMG
+              })
+            ]),
+            div({style: Styles.HEADER_CONTAINER}, [
+              div({style: Styles.TITLE}, ["Manage Data Access Request"]),
+              div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
+            ]),
+            ]),
 
-        div({ className: "row no-margin" }, [
-
-          div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
-            PageHeading({
-              id: "manageAccess", imgSrc: "/images/icon_manage_access.png", iconSize: "medium", color: "access",
-              title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review"
-            }),
+            div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
+              h(SearchBox, {searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange})
+            ]),
           ]),
 
-          div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-wrapper no-padding" }, [
-            h(SearchBox, { id: 'manageAccess', searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange, color: 'access' })
+        div({style: Styles.TABLE.CONTAINER}, [
+          div({style: Styles.TABLE.HEADER_ROW}, [
+            div({ className: twoColumnClass }, ["Data Request ID"]),
+            div({ className: threeColumnClass }, ["Project Title"]),
+            div({ className: oneColumnClass }, ["Date"]),
+            div({ className: oneColumnClass }, ["+ Info"]),
+            div({ className: oneColumnClass }, ['DAC']),
+            div({ className: twoColumnClass }, ["Election Status"]),
+            div({ className: twoColumnClass }, ["Election Actions"]),
           ]),
-        ]),
-
-
-        div({ className: "jumbotron table-box" }, [
-          div({ className: "row no-margin" }, [
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Data Request id"]),
-            div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header access-color" }, ["Project title"]),
-            div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header access-color" }, ["Date"]),
-            div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["+ Info"]),
-            div({ className: 'col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color' }, ['DAC']),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election status"]),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election actions"]),
-          ]),
-
-          hr({ className: "table-head-separator" }),
 
           this.state.darElectionList
             .filter(this.searchTable(searchDarText))
