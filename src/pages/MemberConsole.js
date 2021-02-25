@@ -103,9 +103,9 @@ class MemberConsole extends Component {
   render() {
 
     const { searchDarText } = this.state;
-    const oneColumnClass = 'col-lg-1 col-md-1 col-sm-1 col-xs-1 ';
-    const twoColumnClass = 'col-lg-2 col-md-2 col-sm-2 col-xs-2';
-    const threeColumnClass = 'col-lg-3 col-md-3 col-sm-3 col-xs-3';
+    const oneColumnClass = 'col-xs-1 ';
+    const twoColumnClass = 'col-xs-2';
+    const threeColumnClass = 'col-xs-3';
     const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
 
     return (
@@ -147,8 +147,9 @@ class MemberConsole extends Component {
             this.state.electionsList.access
               .filter(this.searchTable(searchDarText))
               .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
-                return h(Fragment, { key: rIndex }, [
-                  div({style: Styles.TABLE.RECORD_ROW, paddingtop: '1rem'}, [
+              const borderStyle = rIndex > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
+              return h(Fragment, { key: rIndex }, [
+                  div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
                     div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.frontEndId]),
                     div({className: threeColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.projectTitle]),
                     div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [_.get(pendingCase, 'dac.name', '- -')]),
@@ -168,8 +169,7 @@ class MemberConsole extends Component {
                         span({ isRendered: pendingCase.alreadyVoted === true }, ['Edit'])
                       ])
                     ])
-                  ]),
-                  hr({ className: 'table-body-separator' })
+                  ])
                 ]);
               }),
             h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange, Styles}),
