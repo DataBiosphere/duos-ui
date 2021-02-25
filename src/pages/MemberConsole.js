@@ -172,7 +172,7 @@ class MemberConsole extends Component {
                   ])
                 ]);
               }),
-            h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange, Styles}),
+            h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange}),
           ])
       ])
     );

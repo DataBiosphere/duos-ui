@@ -9,9 +9,8 @@ import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
 import {Styles} from "../libs/theme";
+import PaginationBar from "../components/PaginationBar";
 
-
-const limit = 10;
 
 class AdminManageAccess extends Component {
 
@@ -24,7 +23,7 @@ class AdminManageAccess extends Component {
       value: '',
       darElectionList: [],
       currentPage: 1,
-      limit: limit,
+      limit: 10,
       showDialogCancel: false,
       showDialogCreate: false,
       dacList: []
@@ -177,12 +176,13 @@ class AdminManageAccess extends Component {
   render() {
 
     const { searchDarText, currentPage, limit } = this.state;
+    const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
     const oneColumnClass = 'col-xs-1 ';
     const twoColumnClass = 'col-xs-2';
     const threeColumnClass = 'col-xs-3';
 
     return (
-      div({className: "container container-wide"}, [
+      div({style: Styles.PAGE}, [
         div({style: {display: "flex", justifyContent: "space-between"}}, [
           div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
             div({style: Styles.ICON_CONTAINER}, [
@@ -204,12 +204,12 @@ class AdminManageAccess extends Component {
           ]),
 
         div({style: Styles.TABLE.CONTAINER}, [
-          div({style: Styles.TABLE.HEADER_ROW}, [
+          div({style: Styles.TABLE.MEMBER_HEADER_ROW}, [
             div({ className: twoColumnClass }, ["Data Request ID"]),
             div({ className: threeColumnClass }, ["Project Title"]),
             div({ className: oneColumnClass }, ["Date"]),
-            div({ className: oneColumnClass }, ["+ Info"]),
-            div({ className: oneColumnClass }, ['DAC']),
+            div({ className: oneColumnClass }, ["Info"]),
+            div({ className: twoColumnClass }, ['DAC']),
             div({ className: twoColumnClass }, ["Election Status"]),
             div({ className: twoColumnClass }, ["Election Actions"]),
           ]),
@@ -218,43 +218,14 @@ class AdminManageAccess extends Component {
             .filter(this.searchTable(searchDarText))
             .filter(row => !row.isCanceled)
             .slice((currentPage - 1) * limit, currentPage * limit)
-            .map((dar) => {
+            .map((dar, index) => {
+              const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
               return h(Fragment, { key: dar.frontEndId }, [
-                div({
-                  id: dar.frontEndId,
-                  className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "")
-                }, [
-                    div({
-                      id: dar.frontEndId + "_darId", name: "darId",
-                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text"
-                    }, [
-                        div({
-                          id: dar.frontEndId + "_flagDarId",
-                          name: "flag_darId",
-                          isRendered: dar.needsApproval,
-                          className: "glyphicon glyphicon-exclamation-sign " +
-                            ((dar.dataSetElectionResult === 'Needs Approval') ? "access-color"
-                              : (dar.dataSetElectionResult === 'Denied') ? "cancel-color"
-                                : (dar.dataSetElectionResult === 'Approved')
-                                  ? "dataset-color" : "")
-                          , "data-tip": dar.dataSetElectionResult, "data-for": "tip_flag"
-                        }, []),
-                        span({ className: "list-highlighted-item", title: dar.frontEndId }, [dar.frontEndId])
-                      ]),
-                    div({
-                      id: dar.frontEndId + "_projectTitle",
-                      name: "projectTitle",
-                      className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text",
-                      title: dar.projectTitle
-                    }, [dar.projectTitle]),
-
-                    div({
-                      id: dar.frontEndId + "_createDate",
-                      name: "createDate",
-                      className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text"
-                    }, [Utils.formatDate(dar.createDate)]),
-
-                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
+                div({ style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
+                  div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: twoColumnClass }, [dar.frontEndId]),
+                  div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: threeColumnClass }, [dar.projectTitle]),
+                  div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: oneColumnClass }, [Utils.formatDate(dar.createDate)]),
+                  div({ style: {marginTop: "0.5rem", className: oneColumnClass }}, [
                       button({
                         id: dar.frontEndId + "_btnSummary",
                         name: "btn_summary",
@@ -262,10 +233,8 @@ class AdminManageAccess extends Component {
                         onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus)
                       }, ["Summary"]),
                     ]),
-                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text bold f-center" },
-                      [this.findDacNameForDacId(dar.dacId)]
-                    ),
-                    div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
+                    div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: twoColumnClass }, [this.findDacNameForDacId(dar.dacId)]),
+                    div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: twoColumnClass }, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
                         a({
                           id: dar.frontEndId + "_linkUnreviewed",
@@ -295,11 +264,11 @@ class AdminManageAccess extends Component {
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),
-                    div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
+                    div({ style: {paddingtop: "0.5rem", className: twoColumnClass }}, [
                       div({ className: "row no-margin" }, [
                         div({
                           isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final'),
-                          className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center",
+                          className: "col-sm-10 col-xs-9 ",
                           disabled: dar.electionStatus === 'PendingApproval'
                         }, [
                             button({
@@ -311,7 +280,7 @@ class AdminManageAccess extends Component {
                           ]),
                         div({
                           isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
-                          className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center"
+                          className: "col-sm-10 col-xs-9"
                         }, [
                             button({
                               id: dar.frontEndId + "_btnCancel",
@@ -321,7 +290,7 @@ class AdminManageAccess extends Component {
                             }, ["Cancel"]),
                           ]),
 
-                        div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
+                        div({ className: "col-sm-2 col-xs-3 bonafide-icon" }, [
                           a({
                             id: dar.frontEndId + "_flagBonafide",
                             name: "flag_bonafide",
@@ -353,8 +322,7 @@ class AdminManageAccess extends Component {
                         ])
                       ])
                     ])
-                  ]),
-                hr({ className: "table-body-separator" })
+                  ])
               ]);
             }),
           ApplicationSummaryModal({
@@ -399,14 +367,7 @@ class AdminManageAccess extends Component {
                 span({}, ["Are you sure you want to cancel the current election process? "]),
               ]),
             ]),
-          PaginatorBar({
-            total: this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length,
-            limit: limit,
-            pageCount: this.pageCount,
-            currentPage: currentPage,
-            onPageChange: this.handlePageChange,
-            changeHandler: this.handleSizeChange,
-          }),
+          h(PaginationBar, {pageCount: pageCount, currentPage: this.state.currentPage, tableSize: this.state.limit, goToPage: this.handlePageChange, changeTableSize: this.handleSizeChange}),
           h(ReactTooltip, {
             id: "tip_flag",
             place: 'right',
