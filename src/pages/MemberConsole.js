@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import {button, div, h, hr, img, span} from 'react-hyperscript-helpers';
+import {button, div, h, img, span} from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
@@ -110,7 +110,7 @@ class MemberConsole extends Component {
 
     return (
 
-      div({ className: 'container' }, [
+      div({style: Styles.PAGE}, [
           div({ className: 'row no-margin' }, [
             div({ style: {display: "flex", justifyContent: "space-between"}}, [
               div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
