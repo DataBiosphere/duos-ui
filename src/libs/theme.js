@@ -140,6 +140,13 @@ export const Styles = {
       justifyContent: "center",
       height: "48px",
     },
+    LEFT_RECORD_ROW: {
+      fontFamily: 'Montserrat',
+      fontSize: "14px",
+      display: "flex",
+      justifyContent: "left",
+      height: "48px",
+    },
     RECORD_TEXT: {
       color: "#00243C"
     },

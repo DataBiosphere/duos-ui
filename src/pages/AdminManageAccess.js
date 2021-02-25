@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import {a, button, div, h, hr, img, span} from 'react-hyperscript-helpers';
+import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
-import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
@@ -197,23 +196,20 @@ class AdminManageAccess extends Component {
               div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
             ]),
             ]),
-
             div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
               h(SearchBox, {searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange})
             ]),
           ]),
-
         div({style: Styles.TABLE.CONTAINER}, [
-          div({style: Styles.TABLE.MEMBER_HEADER_ROW}, [
-            div({ className: twoColumnClass }, ["Data Request ID"]),
-            div({ className: threeColumnClass }, ["Project Title"]),
-            div({ className: oneColumnClass }, ["Date"]),
-            div({ className: oneColumnClass }, ["Info"]),
-            div({ className: twoColumnClass }, ['DAC']),
-            div({ className: twoColumnClass }, ["Election Status"]),
-            div({ className: twoColumnClass }, ["Election Actions"]),
+          div({style: Styles.TABLE.HEADER_ROW}, [
+            div({ style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
+            div({ style: Styles.TABLE.TITLE_CELL }, ["Project Title"]),
+            div({ style: Styles.TABLE.SUBMISSION_DATE_CELL }, ["Date"]),
+            div({ style: Styles.TABLE.DAC_CELL }, ["Info"]),
+            div({ style: Styles.TABLE.DAC_CELL }, ['DAC']),
+            div({ style: Styles.TABLE.ELECTION_STATUS_CELL }, ["Election Status"]),
+            div({ style: Styles.TABLE.ELECTION_ACTIONS_CELL }, ["Election Actions"]),
           ]),
-
           this.state.darElectionList
             .filter(this.searchTable(searchDarText))
             .filter(row => !row.isCanceled)
@@ -221,76 +217,59 @@ class AdminManageAccess extends Component {
             .map((dar, index) => {
               const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
               return h(Fragment, { key: dar.frontEndId }, [
-                div({ style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
-                  div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: twoColumnClass }, [dar.frontEndId]),
-                  div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: threeColumnClass }, [dar.projectTitle]),
-                  div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: oneColumnClass }, [Utils.formatDate(dar.createDate)]),
-                  div({ style: {marginTop: "0.5rem", className: oneColumnClass }}, [
+                div({ style: Object.assign({}, borderStyle, Styles.TABLE.LEFT_RECORD_ROW), paddingtop: '1rem' }, [
+                  div({style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL)}, [dar.frontEndId]),
+                  div({style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL)}, [dar.projectTitle]),
+                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.SUBMISSION_DATE_CELL)}, [Utils.formatDate(dar.createDate)]),
+                  div({ style: Styles.TABLE.DAC_CELL}, [
                       button({
-                        id: dar.frontEndId + "_btnSummary",
-                        name: "btn_summary",
                         className: "cell-button hover-color",
                         onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus)
                       }, ["Summary"]),
                     ]),
-                    div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: twoColumnClass }, [this.findDacNameForDacId(dar.dacId)]),
-                    div({ style: Styles.TABLE.MEMBER_RECORD_TEXT, className: twoColumnClass }, [
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [this.findDacNameForDacId(dar.dacId)]),
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
-                        a({
-                          id: dar.frontEndId + "_linkUnreviewed",
-                          name: "link_unreviewed",
+                        a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed",
                           onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
                         }, ["Un-reviewed"]),
                       ]),
                       span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
-                        a({
-                          id: dar.frontEndId + "_linkOpen",
-                          name: "link_open",
+                        a({ id: dar.frontEndId + "_linkOpen", name: "link_open",
                           onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId)
                         }, ["Open"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, [
-                        a({
-                          id: dar.frontEndId + "_linkCanceled",
-                          name: "link_canceled",
+                        a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled",
                           onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
                         }, ["Canceled"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                        a({
-                          id: dar.frontEndId + "_linkReviewed",
-                          name: "link_reviewed",
+                        a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
                           onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId)
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),
-                    div({ style: {paddingtop: "0.5rem", className: twoColumnClass }}, [
-                      div({ className: "row no-margin" }, [
+                    div({style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_ACTIONS_CELL, {paddingTop: "0.5rem"})}, [
                         div({
                           isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final'),
-                          className: "col-sm-10 col-xs-9 ",
                           disabled: dar.electionStatus === 'PendingApproval'
-                        }, [
-                            button({
-                              id: dar.frontEndId + "_btnCreate",
-                              name: "btn_create",
+                        }, [button({
+                              style: {margin: "0 15px 5px 0"},
                               onClick: () => this.openDialogCreate(dar.dataRequestId),
                               className: "cell-button hover-color"
                             }, ["Create"]),
                           ]),
                         div({
                           isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
-                          className: "col-sm-10 col-xs-9"
-                        }, [
-                            button({
-                              id: dar.frontEndId + "_btnCancel",
-                              name: "btn_cancel",
+                        }, [button({
+                              style: {margin: "0 15px 5px 0"},
                               onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId),
                               className: "cell-button cancel-color"
                             }, ["Cancel"]),
                           ]),
 
-                        div({ className: "col-sm-2 col-xs-3 bonafide-icon" }, [
+                        div({ style: {margin: "0 15px 8px"}, className: "bonafide-icon" }, [
                           a({
                             id: dar.frontEndId + "_flagBonafide",
                             name: "flag_bonafide",
@@ -320,7 +299,6 @@ class AdminManageAccess extends Component {
                               }),
                             ])
                         ])
-                      ])
                     ])
                   ])
               ]);

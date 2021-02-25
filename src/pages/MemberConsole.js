@@ -111,7 +111,6 @@ class MemberConsole extends Component {
     return (
 
       div({style: Styles.PAGE}, [
-          div({ className: 'row no-margin' }, [
             div({ style: {display: "flex", justifyContent: "space-between"}}, [
               div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
                 div({style: Styles.ICON_CONTAINER}, [
@@ -130,7 +129,6 @@ class MemberConsole extends Component {
                 h(SearchBox, { searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange })
               ])
             ]),
-          ]),
           div({ style: Styles.TABLE.CONTAINER }, [
             div({style: Styles.TABLE.MEMBER_HEADER_ROW}, [
               div({className: twoColumnClass}, ["Data Request ID"]),
