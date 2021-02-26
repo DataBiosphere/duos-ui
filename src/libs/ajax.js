@@ -358,12 +358,6 @@ export const DAR = {
     return await res.json();
   },
 
-  hasUseRestriction: async (referenceId) => {
-    const url = `${await Config.getApiUrl()}/dar/hasUseRestriction/${referenceId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {

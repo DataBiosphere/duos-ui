@@ -17,7 +17,7 @@ class AccessPreview extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      hasUseRestriction: false,
+      hasUseRestriction: true,
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
@@ -49,16 +49,6 @@ class AccessPreview extends Component {
           prev.dataUse = consent.dataUse;
           prev.consentName = consent.name;
         });
-      }
-    );
-
-    DAR.hasUseRestriction(referenceId).then(
-      useRestriction => {
-        if (useRestriction.hasUseRestriction === true) {
-          this.setState(prev => {
-            prev.hasUseRestriction = true;
-          });
-        }
       }
     );
 
