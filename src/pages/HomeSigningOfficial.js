@@ -1,6 +1,7 @@
 import {Component} from 'react';
 import {a, div, h, h1, h3, p, img, span} from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
+import LibraryCardAgreement from '../assets/Library_Card_Agreement_2021.pdf';
 
 class HomeSigningOfficial extends Component {
 
@@ -80,7 +81,7 @@ class HomeSigningOfficial extends Component {
               div({style: {marginTop: '2rem', marginBottom: '2rem'}},
                 [a({
                   id: 'link_downloadAgreement',
-                  href: '/Library_Card_Agreement_2021.pdf',
+                  href: LibraryCardAgreement,
                   target: '_blank',
                   className: 'btn-secondary btn-download-pdf hover-color',
                   style: {paddingBottom: '1rem'},

@@ -103,7 +103,7 @@ const Records = (props) => {
 
     if (!isNil(e)) {
       switch (e.status) {
-        case 'Open' :
+        case 'Open' : {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           const vote = head(votes);
@@ -121,9 +121,10 @@ const Records = (props) => {
               onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
             }, ['Cancel'])
           ];
+        }
         case 'Final' :
           return ['- -'];
-        default :
+        default : 
           return button({
             key: `reopen-button-${e.referenceId}`,
             className: name,

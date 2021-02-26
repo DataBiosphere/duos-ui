@@ -21,11 +21,13 @@
     "no-unreachable": "warn",
     "no-console": "warn",
     "array-bracket-spacing": "warn",
+    "no-unused-vars": "warn",
+    "no-extra-semi": "warn",
     "react/jsx-filename-extension": [
       1,
       {
         "extensions": [
-          ".js"
+          ".js", ".jsx"
         ]
       }
     ],

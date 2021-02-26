@@ -91,16 +91,18 @@ export const AddUserModal = hh(class AddUserModal extends Component {
       roles: this.state.updatedRoles
     };
     switch (this.state.mode) {
-      case 'Add':
+      case 'Add': {
         const createdUser = await User.create(user);
         this.setState({ emailValid: createdUser });
         break;
-      case 'Edit':
+      }
+      case 'Edit': {
         user.dacUserId = this.state.user.dacUserId;
         const payload = { updatedUser: user };
         const updatedUser = await User.update(payload, this.state.user.dacUserId);
         this.setState({ emailValid: updatedUser });
         break;
+      }
       default:
         break;
     }

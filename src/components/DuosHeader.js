@@ -11,6 +11,9 @@ import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
 import {NavigationUtils} from '../libs/utils';
 import { Styles } from '../libs/theme';
+import DuosLogo from '../images/duos_logo.svg';
+import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
+import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 
 const styles = {
   drawerPaper: {
@@ -232,7 +235,7 @@ class DuosHeader extends Component {
       width: '100%'
     };
 
-    const contactUsSource = this.state.hover ? '/images/navbar_icon_contact_us_hover.svg' : '/images/navbar_icon_contact_us.svg';
+    const contactUsSource = this.state.hover ? contactUsHover : contactUsStandard;
     const contactUsIcon = isLogged ? '' : img({src: contactUsSource, style: {display: 'inline-block', margin: '0 8px 0 0', verticalAlign: 'baseline'}});
     const contactUsText = isLogged ? 'Contact Us': span({ style: navbarDuosText }, ['Contact Us']);
     const contactUsButton = button({
@@ -265,7 +268,7 @@ class DuosHeader extends Component {
         h(Hidden, {mdDown: true}, [
           div({ className: 'row no-margin' }, [
             h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-              img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
+              img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
             ]),
             //Standard navbar for medium sized displays and higher (pre-existing navbar)
             div({}, [
@@ -358,7 +361,7 @@ class DuosHeader extends Component {
         h(Hidden, {lgUp: true}, [
           div({style: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}, [
             img({
-              style: duosLogoImage, src: '/images/duos_logo.svg',
+              style: duosLogoImage, src: DuosLogo,
               alt: 'DUOS Logo',
               onClick: (e) => this.goToLink('/home')
             }),

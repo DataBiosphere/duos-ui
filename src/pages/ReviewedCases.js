@@ -6,6 +6,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
+import isNil from 'lodash/fp';
 
 
 class ReviewedCases extends Component {
@@ -52,7 +53,7 @@ class ReviewedCases extends Component {
     let data = this.state.electionsList.dul;
     let sortedData = data.sort(function(a, b) {
 
-      if (!a.hasOwnProperty(sortKey) || !b.hasOwnProperty(sortKey)) {
+      if ((isNil(a) || isNil(a[sortKey])) || (isNil(b) || isNil(b[sortKey]))) {
         // property doesn't exist on either object
         return 0;
       }
