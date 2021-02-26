@@ -2,13 +2,13 @@ import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
+import ConfirmationModal from "../components/modals/ConfirmationModal";
 
 
 class AdminManageAccess extends Component {
@@ -30,6 +30,16 @@ class AdminManageAccess extends Component {
     this.getElectionDarList = this.getElectionDarList.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
+    this.closeCreateConfirmation = this.closeCreateConfirmation.bind(this);
+    this.closeCancelConfirmation = this.closeCancelConfirmation.bind(this);
+  }
+
+  closeCreateConfirmation = () => {
+    this.setState({ showDialogCreate : false });
+  }
+
+  closeCancelConfirmation = () => {
+    this.setState( { showDialogCancel : false });
   }
 
   async getElectionDarList() {
@@ -77,12 +87,12 @@ class AdminManageAccess extends Component {
     });
   };
 
-  openDialogCancel(dataRequestId, electionId) {
-    this.setState({ showDialogCancel: true, dataRequestId: dataRequestId, electionId: electionId });
+  openDialogCancel(dataRequestId, electionId, frontEndId) {
+    this.setState({ showDialogCancel: true, dataRequestId: dataRequestId, electionId: electionId, frontEndId: frontEndId });
   };
 
-  openDialogCreate(dataRequestId) {
-    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId });
+  openDialogCreate(dataRequestId, frontEndId) {
+    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId, frontEndId: frontEndId });
   };
 
   dialogHandlerCancel = (answer) => (e) => {
@@ -176,9 +186,6 @@ class AdminManageAccess extends Component {
 
     const { searchDarText, currentPage, limit } = this.state;
     const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
-    const oneColumnClass = 'col-xs-1 ';
-    const twoColumnClass = 'col-xs-2';
-    const threeColumnClass = 'col-xs-3';
 
     return (
       div({style: Styles.PAGE}, [
@@ -256,7 +263,7 @@ class AdminManageAccess extends Component {
                           disabled: dar.electionStatus === 'PendingApproval'
                         }, [button({
                               style: {margin: "0 15px 5px 0"},
-                              onClick: () => this.openDialogCreate(dar.dataRequestId),
+                              onClick: () => this.openDialogCreate(dar.dataRequestId, dar.frontEndId),
                               className: "cell-button hover-color"
                             }, ["Create"]),
                           ]),
@@ -264,7 +271,7 @@ class AdminManageAccess extends Component {
                           isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
                         }, [button({
                               style: {margin: "0 15px 5px 0"},
-                              onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId),
+                              onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId, dar.frontEndId),
                               className: "cell-button cancel-color"
                             }, ["Cancel"]),
                           ]),
@@ -310,41 +317,22 @@ class AdminManageAccess extends Component {
             dataRequestId: this.state.dataRequestId,
             calledFromAdmin: true
           }),
-          ConfirmationDialog({
-            title: 'Create election?',
-            color: 'access',
-            isRendered: this.state.showDialogCreate,
-            showModal: this.state.showDialogCreate,
-            disableOkBtn: this.state.disableBtn,
-            disableNoBtn: this.state.disableCancelBtn,
-            action: {
-              label: "Yes",
-              handler: this.dialogHandlerCreate
-            },
-            alertMessage: this.state.alertMessage,
-            alertTitle: this.state.alertTitle
-          }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["Are you sure you want the DAC to vote on this case? "]),
-              ])
-            ]),
-
-          ConfirmationDialog({
-            title: 'Cancel election?',
-            color: 'cancel',
-            disableOkBtn: this.state.disableBtn,
-            disableNoBtn: this.state.disableCancelBtn,
-            isRendered: this.state.showDialogCancel,
-            showModal: this.state.showDialogCancel,
-            action: {
-              label: "Yes",
-              handler: this.dialogHandlerCancel
-            }
-          }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["Are you sure you want to cancel the current election process? "]),
-              ]),
-            ]),
+          h(ConfirmationModal, {
+            showConfirmation: this.state.showDialogCreate,
+            closeConfirmation: this.closeCreateConfirmation,
+            title: "Create Election?",
+            message: "Are you sure you want the DAC to vote on this data access request?",
+            header: this.state.frontEndId,
+            onConfirm: this.dialogHandlerCreate,
+          }),
+          h(ConfirmationModal, {
+            showConfirmation: this.state.showDialogCancel,
+            closeConfirmation: this.closeCancelConfirmation,
+            title: "Create Election?",
+            message: "Are you sure you want to cancel the current election process?",
+            header: this.state.frontEndId,
+            onConfirm: this.dialogHandlerCancel,
+          }),
           h(PaginationBar, {pageCount: pageCount, currentPage: this.state.currentPage, tableSize: this.state.limit, goToPage: this.handlePageChange, changeTableSize: this.handleSizeChange}),
           h(ReactTooltip, {
             id: "tip_flag",

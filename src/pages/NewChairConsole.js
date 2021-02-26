@@ -220,6 +220,10 @@ export default function NewChairConsole(props) {
     }
   };
 
+  const closeConfirmation = () => {
+    setShowConfirmation(false);
+  }
+
   const updateLists = (updatedElection, darId, index, successText, votes = undefined) => {
     const i = index + ((currentPage - 1) * tableSize);
     let filteredListCopy = cloneDeep(filteredList);
@@ -342,7 +346,7 @@ export default function NewChairConsole(props) {
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
       h(ConfirmationModal, {
         showConfirmation,
-        setShowConfirmation,
+        closeConfirmation,
         title: "Open Election?",
         message: "Are you sure you want the DAC to vote on this data access request?",
         header: createElectionInfo.name,
