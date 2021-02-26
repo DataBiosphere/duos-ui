@@ -25,7 +25,6 @@ class AdminManageAccess extends Component {
       darElectionList: [],
       currentPage: 1,
       limit: 10,
-      showDialogCancel: false,
       showDialogCreate: false,
       dacList: []
     };
@@ -33,15 +32,10 @@ class AdminManageAccess extends Component {
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
     this.closeCreateConfirmation = this.closeCreateConfirmation.bind(this);
-    this.closeCancelConfirmation = this.closeCancelConfirmation.bind(this);
   }
 
   closeCreateConfirmation = () => {
     this.setState({ showDialogCreate : false });
-  }
-
-  closeCancelConfirmation = () => {
-    this.setState( { showDialogCancel : false });
   }
 
   async getElectionDarList() {
