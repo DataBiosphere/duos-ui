@@ -97,7 +97,7 @@ class AdminManageAccess extends Component {
     try {
       const updatedElection = await Election.updateElection(electionId, electionToUpdate);
       this.updateLists(updatedElection, CANCEL);
-      Notifications.showSuccess("Election has been cancelled.");
+      Notifications.showSuccess({text: "Election has been cancelled."});
     } catch (error) {
       Notifications.showError({text: 'Error: Failed to cancel selected Election'});
     }
@@ -109,7 +109,7 @@ class AdminManageAccess extends Component {
     try {
       const updatedElection = await Election.createDARElection(this.state.dataRequestId);
       this.updateLists(updatedElection, CREATE);
-      Notifications.showSuccess("Election successfully created.");
+      Notifications.showSuccess({text: "Election successfully created."});
     } catch (errorResponse) {
       let errorMsg = '';
       if (errorResponse.status === 500) {
