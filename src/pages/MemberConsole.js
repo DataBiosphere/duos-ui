@@ -145,7 +145,7 @@ class MemberConsole extends Component {
               const borderStyle = rIndex > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
               const dacName = !isNil(pendingCase.dac) ? pendingCase.dac.name : "--";
               return h(Fragment, { key: rIndex }, [
-                  div({style: Object.assign({}, borderStyle, Styles.TABLE.LEFT_RECORD_ROW), paddingtop: '1rem' }, [
+                  div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [pendingCase.frontEndId]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL) }, [pendingCase.projectTitle]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DAC_CELL) }, [dacName]),

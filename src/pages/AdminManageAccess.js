@@ -222,7 +222,7 @@ class AdminManageAccess extends Component {
             .map((dar, index) => {
               const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
               return h(Fragment, { key: dar.frontEndId }, [
-                div({ style: Object.assign({}, borderStyle, Styles.TABLE.LEFT_RECORD_ROW), paddingtop: '1rem' }, [
+                div({ style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL)}, [dar.frontEndId]),
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL)}, [dar.projectTitle]),
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.SUBMISSION_DATE_CELL)}, [Utils.formatDate(dar.createDate)]),
