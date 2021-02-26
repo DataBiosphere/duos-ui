@@ -1,11 +1,12 @@
 import _ from 'lodash';
+import { isNil } from 'lodash/fp'
 import { Component, Fragment } from 'react';
-import {button, div, h, img, span} from 'react-hyperscript-helpers';
+import { button, div, h, img, span } from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NavigationUtils } from '../libs/utils';
-import {Styles} from "../libs/theme";
+import { Styles } from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 
 class MemberConsole extends Component {
@@ -103,9 +104,6 @@ class MemberConsole extends Component {
   render() {
 
     const { searchDarText } = this.state;
-    const oneColumnClass = 'col-xs-1 ';
-    const twoColumnClass = 'col-xs-2';
-    const threeColumnClass = 'col-xs-3';
     const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
 
     return (
@@ -131,35 +129,35 @@ class MemberConsole extends Component {
             ]),
           div({ style: Styles.TABLE.CONTAINER }, [
             div({style: Styles.TABLE.MEMBER_HEADER_ROW}, [
-              div({className: twoColumnClass}, ["Data Request ID"]),
-              div({className: threeColumnClass}, ["Project Title"]),
-              div({className: twoColumnClass}, ["DAC"]),
-              div({className: twoColumnClass}, ["Status"]),
-              div({className: oneColumnClass}, ["Logged"]),
-              div({className: twoColumnClass}, [
+              div({style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
+              div({style: Styles.TABLE.TITLE_CELL }, ["Project Title"]),
+              div({style: Styles.TABLE.DAC_CELL }, ["DAC"]),
+              div({style: Styles.TABLE.ELECTION_STATUS_CELL }, ["Status"]),
+              div({style: Styles.TABLE.DAC_CELL }, ["Logged"]),
+              div({style: Styles.TABLE.ELECTION_STATUS_CELL }, [
                 "Review/Vote",
                 div({ isRendered: this.state.totalAccessPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalAccessPendingVotes])
               ])
             ]),
-
             this.state.electionsList.access
               .filter(this.searchTable(searchDarText))
               .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
               const borderStyle = rIndex > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
+              const dacName = !isNil(pendingCase.dac) ? pendingCase.dac.name : "--";
               return h(Fragment, { key: rIndex }, [
-                  div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
-                    div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.frontEndId]),
-                    div({className: threeColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.projectTitle]),
-                    div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [_.get(pendingCase, 'dac.name', '- -')]),
-                    div({className: twoColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [
+                  div({style: Object.assign({}, borderStyle, Styles.TABLE.LEFT_RECORD_ROW), paddingtop: '1rem' }, [
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [pendingCase.frontEndId]),
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL) }, [pendingCase.projectTitle]),
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DAC_CELL) }, [dacName]),
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL) }, [
                       span({ isRendered: pendingCase.isReminderSent === true }, ['URGENT!']),
                       span({ isRendered: (pendingCase.status === 'pending') && (pendingCase.isReminderSent !== true) }, ['Pending']),
                       span({ isRendered: (pendingCase.status === 'editable') && (pendingCase.isReminderSent !== true) }, ['Editable'])
                     ]),
-                    div({className: oneColumnClass, style: Styles.TABLE.MEMBER_RECORD_TEXT}, [pendingCase.logged]),
-                    div({onClick: this.openAccessReview(pendingCase.referenceId),
-                      className: twoColumnClass, style: {paddingtop: "0.5rem"}}, [
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DAC_CELL)}, [pendingCase.logged]),
+                    div({  style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL, {paddingtop: "0.5rem"}) }, [
                       button({
+                        onClick: this.openAccessReview(pendingCase.referenceId),
                         id: pendingCase.frontEndId + '_btnVoteAccess', name: 'btn_voteAccess',
                         className: 'cell-button hover-color'
                       }, [

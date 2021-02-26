@@ -118,18 +118,17 @@ export const Styles = {
       fontWeight: Theme.font.weight.medium,
       backgroundColor: "#f3f6f7",
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "left",
       height: "51px"
     },
     MEMBER_HEADER_ROW: {
-      paddingTop: "1.25rem",
       fontFamily: "Montserrat",
       fontSize: "14px",
       color: "#00243C",
-      fontWeight: Theme.font.weight.medium,
       backgroundColor: "#f3f6f7",
+      fontWeight: "500",
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "left",
       height: "51px"
     },
     RECORD_ROW: {
