@@ -5,6 +5,7 @@ import { Navigation, USER_ROLES } from '../libs/utils';
 import { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { SpinnerComponent } from '../components/SpinnerComponent';
+import loadingImage from '../images/loading-indicator.svg';
 
 export default function BackgroundSignIn(props) {
   const location = useLocation();
@@ -101,7 +102,7 @@ export default function BackgroundSignIn(props) {
       h(SpinnerComponent, {
         show: true,
         name: 'loadingSpinner',
-        loadingImage: '/images/loading-indicator.svg'
+        loadingImage
       }, [])
     ]),
     form({

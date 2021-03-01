@@ -7,7 +7,7 @@ import { PageHeading } from '../components/PageHeading';
 import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
-
+import manageUsersIcon from "../images/icon_manage_users.png";
 
 class AdminManageUsers extends Component {
 
@@ -135,7 +135,7 @@ class AdminManageUsers extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "manageUsers", imgSrc: "/images/icon_manage_users.png", iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
+            PageHeading({ id: "manageUsers", imgSrc: manageUsersIcon, iconSize: "medium", color: "common", title: "Manage Users", description: "Select and manage users and their roles" }),
           ]),
           div({ className: "col-lg-5 col-md-5 col-sm-12 col-xs-12 search-wrapper no-padding" }, [
             div({ className: "col-lg-7 col-md-7 col-sm-7 col-xs-7" }, [
@@ -147,9 +147,9 @@ class AdminManageUsers extends Component {
               className: "col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary btn-add common-background no-margin",
               onClick: this.addUser
             }, [
-                div({ className: "all-icons add-user_white" }),
-                span({}, ["Add User"]),
-              ]),
+              div({ className: "all-icons add-user_white" }),
+              span({}, ["Add User"]),
+            ]),
 
             AddUserModal({
               isRendered: this.state.showAddUserModal,

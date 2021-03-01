@@ -16,6 +16,7 @@ import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
+import accessIcon from '../images/icon_access.png';
 
 
 class AccessResultRecords extends Component {
@@ -145,7 +146,7 @@ class AccessResultRecords extends Component {
 
           div({ className: 'col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding' }, [
             PageHeading({
-              id: 'recordAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
+              id: 'recordAccess', imgSrc: accessIcon, iconSize: 'medium',
               color: 'access', title: 'Data Access - Results Record'
             }),
             h(DataAccessRequestHeader, {

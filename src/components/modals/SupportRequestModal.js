@@ -9,6 +9,7 @@ import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
 import * as fp from 'lodash/fp';
+import addHelpIcon from '../../images/icon_add_help.png';
 
 Modal.setAppElement('#root');
 
@@ -241,7 +242,7 @@ export const SupportRequestModal = hh(
               ]),
               PageSubHeading({
                 id: 'SupportRequestModal',
-                imgSrc: '/images/icon_add_help.png',
+                imgSrc: addHelpIcon,
                 color: 'common',
                 title: 'Contact Us',
               }),

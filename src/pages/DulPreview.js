@@ -3,6 +3,7 @@ import { div, i, span, b, a, hr, h} from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { Consent, Election } from '../libs/ajax';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
+import dulIcon from "../images/icon_dul.png";
 
 class DulPreview extends Component {
 
@@ -57,7 +58,7 @@ class DulPreview extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding" }, [
             PageHeading({
               id: "previewDul",
-              imgSrc: "/images/icon_dul.png",
+              imgSrc: dulIcon,
               iconSize: "medium",
               color: "dul",
               title: "Data Use Limitations Congruence Preview",

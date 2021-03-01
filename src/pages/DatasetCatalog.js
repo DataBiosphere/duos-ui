@@ -13,7 +13,7 @@ import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
-
+import datasetIcon from '../images/icon_dataset_.png';
 
 class DatasetCatalog extends Component {
 
@@ -376,7 +376,7 @@ class DatasetCatalog extends Component {
             div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
               PageHeading({
                 id: 'datasetCatalog',
-                imgSrc: '/images/icon_dataset_.png',
+                imgSrc: datasetIcon,
                 iconSize: 'large',
                 color: 'dataset',
                 title: 'Dataset Catalog',

@@ -5,7 +5,8 @@ import { User } from '../../libs/ajax';
 import { USER_ROLES } from '../../libs/utils';
 import { Alert } from '../Alert';
 import { BaseModal } from '../BaseModal';
-
+import addUserIcon from '../../images/icon_add_user.png';
+import editUserIcon from '../../images/icon_edit_user.png';
 
 const adminRole = { 'roleId': 4, 'name': USER_ROLES.admin };
 const researcherRole = { 'roleId': 5, 'name': USER_ROLES.researcher };
@@ -179,7 +180,7 @@ export const AddUserModal = hh(class AddUserModal extends Component {
         disableOkBtn: !validForm,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
-        imgSrc: this.state.mode === 'Add' ? '/images/icon_add_user.png' : '/images/icon_edit_user.png',
+        imgSrc: this.state.mode === 'Add' ? addUserIcon : editUserIcon,
         color: 'common',
         title: this.state.mode === 'Add' ? 'Add User' : 'Edit User',
         description: this.state.mode === 'Add' ? 'Catalog a new User in the system' : 'Edit a User in the system',

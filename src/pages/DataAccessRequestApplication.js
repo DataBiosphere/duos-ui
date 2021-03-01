@@ -17,6 +17,7 @@ import * as fp from 'lodash/fp';
 import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
+import headingIcon from '../images/icon_add_access.png';
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -939,7 +940,7 @@ class DataAccessRequestApplication extends Component {
                 this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
             }, [
               PageHeading({
-                id: 'requestApplication', imgSrc: '/images/icon_add_access.png', iconSize: 'medium', color: 'access',
+                id: 'requestApplication', imgSrc: headingIcon, iconSize: 'medium', color: 'access',
                 title: 'Data Access Request Application',
                 description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate a newly developed semi-automated process of data access control.'
               })

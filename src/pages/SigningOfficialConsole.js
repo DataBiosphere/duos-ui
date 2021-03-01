@@ -6,7 +6,8 @@ import {PaginatorBar} from '../components/PaginatorBar';
 import {SearchBox} from '../components/SearchBox';
 import {PendingCases} from '../libs/ajax';
 import {Storage} from '../libs/storage';
-
+import manageUsersIcon from '../images/icon_manage_users.png';
+import accessIcon from '../images/icon_access.png';
 export const SigningOfficialConsole = hh(class ChairConsole extends Component {
 
   constructor(props) {
@@ -127,7 +128,7 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
               PageSubHeading({
-                id: 'chairConsoleDul', imgSrc: '/images/icon_manage_users.png', color: 'dataset', title: 'My Institution\'s Researchers',
+                id: 'chairConsoleDul', imgSrc: manageUsersIcon, color: 'dataset', title: 'My Institution\'s Researchers',
                 description: 'Records from all current and closed data access requests under your purveiw are below'
               })
             ]),
@@ -192,7 +193,7 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
               PageSubHeading({
-                id: 'chairConsoleAccess', imgSrc: '/images/icon_access.png', color: 'access', title: 'My Institution\'s Data Access Requests',
+                id: 'chairConsoleAccess', imgSrc: accessIcon, color: 'access', title: 'My Institution\'s Data Access Requests',
                 description: 'Records from all current and closed data access requests under your purview'
               })
             ]),

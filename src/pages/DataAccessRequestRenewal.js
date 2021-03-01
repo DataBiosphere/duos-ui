@@ -16,7 +16,7 @@ import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
 import LibraryCardAgreement from '../assets/Library_Card_Agreement_2021.pdf';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
-
+import addAccessIcon from '../images/icon_add_access.png';
 import './DataAccessRequestApplication.css';
 
 
@@ -636,7 +636,7 @@ class DataAccessRequestRenewal extends Component {
                 this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
             }, [
               PageHeading({
-                id: 'requestApplication', imgSrc: '/images/icon_add_access.png', iconSize: 'medium', color: 'access',
+                id: 'requestApplication', imgSrc: addAccessIcon, iconSize: 'medium', color: 'access',
                 title: 'Data Access Request Renewal',
                 description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate the renewal of your previously approved Data Access Request.'
               })

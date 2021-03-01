@@ -11,6 +11,7 @@ import { Models } from '../libs/models';
 import { Theme } from '../libs/theme';
 import * as ld from 'lodash';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
+import accessIcon from '../images/icon_access.png';
 
 class AccessPreview extends Component {
 
@@ -101,7 +102,7 @@ class AccessPreview extends Component {
         div({ className: 'row no-margin' }, [
           div({ className: 'col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding' }, [
             PageHeading({
-              id: 'previewAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
+              id: 'previewAccess', imgSrc: accessIcon, iconSize: 'medium',
               color: 'access', title: 'Data Access Congruence Preview'
             }),
             h(DataAccessRequestHeader, {

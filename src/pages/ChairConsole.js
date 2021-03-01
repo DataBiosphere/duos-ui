@@ -8,6 +8,8 @@ import { SearchBox } from '../components/SearchBox';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NavigationUtils, USER_ROLES } from '../libs/utils';
+import dulIcon from '../images/icon_dul.png';
+import accessIcon from '../images/icon_access.png';
 
 export const ChairConsole = hh(class ChairConsole extends Component {
 
@@ -187,7 +189,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
               PageSubHeading({
-                id: 'chairConsoleDul', imgSrc: '/images/icon_dul.png', color: 'dul', title: 'Data Use Limitations Review',
+                id: 'chairConsoleDul', imgSrc: dulIcon, color: 'dul', title: 'Data Use Limitations Review',
                 description: 'Were data use limitations accurately converted to a structured format?'
               })
             ]),
@@ -274,7 +276,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
           div({ className: 'row no-margin' }, [
             div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
               PageSubHeading({
-                id: 'chairConsoleAccess', imgSrc: '/images/icon_access.png', color: 'access', title: 'Data Access Request Review',
+                id: 'chairConsoleAccess', imgSrc: accessIcon, color: 'access', title: 'Data Access Request Review',
                 description: 'Should data access be granted to this applicant?'
               })
             ]),
