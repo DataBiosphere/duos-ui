@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import {_, isNil} from 'lodash';
+import { find, getOr } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
@@ -18,9 +19,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   componentDidMount = async () => {
     if (this.props.location !== undefined && this.props.location.search !== '') {
-      this.authenticateAsNIHFCUser(this.props.location.search);
+      await this.authenticateAsNIHFCUser(this.props.location.search);
     } else {
-      this.getUserInfo();
+      await this.getUserInfo();
     }
   };
 
@@ -56,14 +57,18 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   getUserInfo = async () => {
     User.getMe().then((response) => {
-      const isAuthorized = JSON.parse(_.get(response.researcherProperties, 'eraAuthorized', "false"));
-      const expirationCount = AuthenticateNIH.expirationCount(_.get(response.researcherProperties, 'eraExpiration', 0));
+      const props = response.researcherProperties;
+      const authProp = find({'propertyKey':'eraAuthorized'})(props);
+      const expProp = find({'propertyKey':'eraExpiration'})(props);
+      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
       const nihValid = isAuthorized && expirationCount > 0;
+      const nihUsernameProp = find({'propertyKey':'nihUsername'})(props);
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
-        prev.nihUsername = _.get(response.researcherProperties, 'nihUsername', '');
+        prev.nihUsername = isNil(nihUsernameProp) ? '' : getOr('', 'propertyValue')(nihUsernameProp);
         return prev;
       });
     });
