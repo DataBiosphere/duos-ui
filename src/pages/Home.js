@@ -128,7 +128,7 @@ class Home extends Component {
                 }, ['register here'])
               ])
             ]),
-            div({ style: { position: 'absolute', width: '100%', top: '52%', left: '50%', transform: 'translate(-50%, -50%)', margin: '0' }}, [
+            div({ style: { position: 'absolute', width: '100%', top: '52%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
               div({ className: 'hidden-xs', style: homeBannerDescription }, [
