@@ -34,7 +34,7 @@ class Home extends Component {
       height: '80px',
       width: '300px',
       display: 'block',
-      margin: '3rem auto',
+      margin: '0 auto 3rem',
       padding: '0 3rem'
     };
 
@@ -103,10 +103,9 @@ class Home extends Component {
     };
 
     const registerPositionStyle = {
-      padding: "1em",
       position: 'absolute',
-      top: "6rem",
-      right: "3rem",
+      top: "7.5rem",
+      right: "4rem",
       zIndex: 1000,
       margin: "3px"
     };
@@ -129,7 +128,7 @@ class Home extends Component {
                 }, ['register here'])
               ])
             ]),
-            div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
+            div({ style: { position: 'absolute', width: '100%', top: '52%', left: '50%', transform: 'translate(-50%, -50%)', margin: '0' }}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
               div({ className: 'hidden-xs', style: homeBannerDescription }, [
