@@ -1,4 +1,4 @@
-import {_, isNil} from 'lodash';
+import {get, isNil, isUndefined, merge } from 'lodash';
 import { find, getOr } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
@@ -90,8 +90,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         this.setState({ nihError: true });
         return false;
       });
-    if (_.isUndefined(isFcUser)) { return false; }
-    return _.get(isFcUser, 'enabled.google', false);
+    if (isUndefined(isFcUser)) { return false; }
+    return get(isFcUser, 'enabled.google', false);
   };
 
   registerUserToFC = async (properties) => {
@@ -145,11 +145,11 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       fontSize: '.9em',
       transition: 'all .2s ease'
     };
-    const validationErrorState = _.get(this.props, 'validationError', false) ? {
+    const validationErrorState = get(this.props, 'validationError', false) ? {
       color: '#D13B07'
     } : {};
     const buttonStyle =
-      _.merge(this.state.isHovered ? _.merge(buttonNormalState, buttonHoverState) : buttonNormalState, validationErrorState);
+      merge(this.state.isHovered ? merge(buttonNormalState, buttonHoverState) : buttonNormalState, validationErrorState);
     const nihErrorMessage = 'Something went wrong. Please try again.';
 
     return (
