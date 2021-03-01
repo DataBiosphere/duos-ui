@@ -189,7 +189,7 @@ export default function DataAccessRequest(props) {
     };
 
     updateDatasetsAndDULQuestions(datasets);
-  }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
+  }, [props.datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
 
   const renderDULQuestions = (darCode) => {
     let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions);
