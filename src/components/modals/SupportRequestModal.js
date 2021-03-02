@@ -330,7 +330,7 @@ export const SupportRequestModal = hh(
                       },
                     }, [
                       div({...getRootProps()}, [
-                        input({...getInputProps}),
+                        input({...getInputProps()}),
                         p({}, [
                           this.state.attachment.length === 0 ?
                             'Drag or Click to attach a files' :
