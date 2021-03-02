@@ -114,7 +114,11 @@ jobs:
       - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
+      - run:
+          name: build
+          command: CI=false npm run build --silent
+          environment:
+            NODE_OPTIONS: --max-old-space-size=8192
       - persist_to_workspace:
           root: .
           paths:
