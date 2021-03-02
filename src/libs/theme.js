@@ -149,6 +149,7 @@ export const Styles = {
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
+      wordBreak: 'break-word',
       margin: "0 2%"
     },
     DATA_ID_CELL: {
@@ -238,7 +239,8 @@ export const Styles = {
       height: '60%',
       borderRadius: '.3rem',
       cursor: 'pointer',
-      marginRight: '10%'
+      minHeight: '3rem',
+      margin: '2% 10% 2% 0'
     },
     TABLE_BUTTON_TEXT_HOVER: {
       backgroundColor: '#2FA4E7'
@@ -252,7 +254,8 @@ export const Styles = {
       color: Theme.palette.secondary,
       height: '60%',
       borderRadius: '.3rem',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      minHeight: '3rem',
     }
   },
   MODAL: {
