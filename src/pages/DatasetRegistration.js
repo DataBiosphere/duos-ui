@@ -619,6 +619,7 @@ class DatasetRegistration extends Component {
         prev.selectedDac = {};
       } else {
         prev.selectedDac = option.item;
+        prev.datasetData.dac = option.item;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
         prev.problemLoadingUpdateDataset = false;
