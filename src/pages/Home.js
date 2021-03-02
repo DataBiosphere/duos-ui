@@ -37,7 +37,7 @@ class Home extends Component {
       height: '80px',
       width: '300px',
       display: 'block',
-      margin: '3rem auto',
+      margin: '0 auto 3rem',
       padding: '0 3rem'
     };
 
@@ -106,10 +106,9 @@ class Home extends Component {
     };
 
     const registerPositionStyle = {
-      padding: "1em",
       position: 'absolute',
-      top: "6rem",
-      right: "3rem",
+      top: "7.5rem",
+      right: "4rem",
       zIndex: 1000,
       margin: "3px"
     };
@@ -169,7 +168,7 @@ class Home extends Component {
                       a({
                         href: '/dataset_catalog',
                         style: { color: '#fff' }
-                        }, ['Submit a Data Access Request'])
+                      }, ['Submit a Data Access Request'])
                     ]) :
                     SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, customStyle: buttonStyle
                     })

@@ -736,7 +736,7 @@ class DataAccessRequestApplication extends Component {
 
     let dataUseArray = await Promise.all(datasetPromises);
     dataUseArray.forEach((datasetRecord, index) => {
-      currentDatasets[index].dataUse = datasetRecord.dataUse;
+      currentDatasets[index].dataUse = datasetRecord.dataUse || {};
     });
     return currentDatasets;
   }
