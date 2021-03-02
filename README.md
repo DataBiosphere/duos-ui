@@ -53,5 +53,5 @@ Update your local environment configuration file and mount that to `/usr/share/n
 
 ```
 docker build . -t duos
-docker run -v config/dev.json:/usr/share/nginx/html/config.json:ro -p 80:80 duos:latest
+docker run -v ${PWD}/path/to/config.json:/usr/share/nginx/html/config.json:ro -p 80:8080 duos:latest
 ```
