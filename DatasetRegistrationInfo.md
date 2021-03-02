@@ -10,19 +10,16 @@
 
 To register your data’s info in DUOS:
 
-1. You must first have your data available in a location where other researchers can access it, such as
+1. You must either be the Chair of a Data Access Committee (DAC) or have written agreement from a DAC using DUOS that they will assume management of your data before you are able to proceed with registering your dataset.
+
+2. You must have your data available in a location where other researchers can access it, such as
    Broad’s <a style="color:#337ab7" href="https://app.terra.bio"> Terra </a> system. Note, DUOS is not a data repository.
 
-2. Once you’ve confirmed your data will be in an accessible location, you must have an organizational sign-off from your
-   institution’s Signing Official on the DUOS Data Provider Agreement (download here), acknowledging you as an
+3. Once you’ve confirmed your data will be in an accessible location, you must have an organizational sign-off from your
+   institution’s Signing Official on the DUOS Data Provider Agreement, acknowledging you as an
    Authorized Submission Representative to register your dataset in DUOS.
 
-3. You will then be allowed to complete a DUOS Dataset Registration form. In doing so, you will need to select a data
-   access committee (DAC) which will be responsible for reviewing and deciding on access requests for your data. You
-   must either be the Chair of the DAC or have written agreement from the DAC before they are able to assume management
-   of your dataset.
-
-4. Once the form is completed and the DAC confirms their willingness to manage access requests for the data, your data
+4. You will then be allowed to complete a DUOS Dataset Registration form. In doing so, you will need to select the DAC which will be responsible for reviewing and deciding on access requests for your data. Once the form is completed and the DAC confirms their willingness to manage access requests for the data, your data
    will be made available in the DUOS Dataset Catalog with a unique DUOS ID that serves as an accession identifier and
    can be shared with publishers and requestors.
 
