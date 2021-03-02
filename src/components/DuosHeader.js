@@ -10,6 +10,8 @@ import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
 import {NavigationUtils} from '../libs/utils';
+import { NotificationService } from '../libs/notificationService';
+import { Notification } from '../components/Notification';
 import { Styles } from '../libs/theme';
 
 const styles = {
@@ -116,7 +118,8 @@ class DuosHeader extends Component {
     this.state = {
       showSupportRequestModal: false,
       hover: false,
-      dacChairPath: '/chair_console',
+      dacChairPath: '',
+      notificationData: [],
       openDrawer: false
     };
   };
@@ -124,6 +127,11 @@ class DuosHeader extends Component {
   async componentDidMount() {
     let dacChairPath = await NavigationUtils.dacChairConsolePath();
     this.setState({dacChairPath: dacChairPath});
+    const notificationData =  await NotificationService.getActiveBanners();
+    this.setState(prev => {
+      prev.notificationData = notificationData;
+      return prev;
+    });
   }
 
   toggleHover = () => {
@@ -159,6 +167,10 @@ class DuosHeader extends Component {
       prev.showSupportRequestModal = false;
       return prev;
     });
+  };
+
+  makeNotifications = () => {
+    return this.state.notificationData.map((d, index) => Notification({notificationData: d, key:index}));
   };
 
   toggleDrawer = (boolVal) => {
@@ -264,6 +276,7 @@ class DuosHeader extends Component {
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
           div({ className: 'row no-margin' }, [
+            this.makeNotifications(),
             h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
               img({ style: duosLogoImage, src: '/images/duos_logo.svg', alt: 'DUOS Logo'})
             ]),
@@ -356,6 +369,7 @@ class DuosHeader extends Component {
         //For now I will use material-ui's hidden element to selectively render the two different navbars
         //I'll look into rewriting the large navbar on a later PR
         h(Hidden, {lgUp: true}, [
+          this.makeNotifications(),
           div({style: {display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}, [
             img({
               style: duosLogoImage, src: '/images/duos_logo.svg',

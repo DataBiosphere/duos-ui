@@ -14,7 +14,8 @@ export const Notification = (props) => {
   if (!fp.isEmpty(notificationData)) {
     const iconStyle = {
       marginRight: '2rem',
-      verticalAlign: 'middle',
+      marginLeft: '1rem',
+      marginBottom: '2px',
       height: 30,
       width: 30,
     };
@@ -41,8 +42,8 @@ export const Notification = (props) => {
       style: {padding: '.5rem', paddingTop: '1.5rem'},
       className: 'row no-margin alert alert-' + notificationData.level,
     }, [
-      div({style: {display: 'inline', float: 'left', paddingLeft: '.5rem'}}, [icon]),
-      div({style: {display: 'inline', paddingTop: '1.25rem'}}, [content]),
+      div({style: {float: 'left'}}, [icon]),
+      div({style: {marginTop: '0.5rem'}}, [content]),
     ]);
   }
 

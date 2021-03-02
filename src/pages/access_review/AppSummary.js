@@ -76,8 +76,8 @@ export const AppSummary = hh(class AppSummary extends React.Component {
     const { piName, profileName, institution, department, city, country } = researcherProfile;
     const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
-    const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj) => {
-      return span({style: TEXT}, restrictionObj.description);
+    const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {
+      return span({key: index, style: TEXT}, restrictionObj.description);
     });
     const StructuredLimitations = div({ style: ROOT}, [
       div({style: HEADER}, 'Data Use Structured Limitations'),

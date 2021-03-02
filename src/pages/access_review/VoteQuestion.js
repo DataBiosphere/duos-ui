@@ -38,7 +38,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
   setVote = (voteStatus, rationale) => {
     const { updateVote, voteId } = this.props;
     if (fp.isNil(rationale)) {
-      rationale = null;
+      rationale = '';
     }
     this.setState({
       voteStatus: voteStatus,

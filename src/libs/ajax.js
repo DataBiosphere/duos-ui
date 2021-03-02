@@ -1,5 +1,7 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
+import { find, getOr } from 'lodash/fp'
+import { isNil } from 'lodash';
 import { Config } from './config';
 import { Models } from './models';
 import { spinnerService } from './spinner-service';
@@ -1032,18 +1034,21 @@ export const AuthenticateNIH = {
 
   parseProfile: (profile) => {
     let fireCloudProfileObj = {};
+    const properties = profile.researcherProperties;
+    const instituteProp = find({'propertyKey': 'institution'})(properties);
+    const piProp = find({'propertyKey' : 'havePi'});
+    const isPiProp = find({'propertyKey' : 'isPi'});
+    const isPi = isNil(isPiProp) ? "n/a" : Storage.getCurrentUser().displayName;
     fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.title = "DUOS Researcher";
     fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute = (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
+    fireCloudProfileObj.institute = isNil(instituteProp) ? '' : getOr('', 'propertyValue')(instituteProp);
     fireCloudProfileObj.institutionalProgram = "n/a";
     fireCloudProfileObj.programLocationCity = "n/a";
     fireCloudProfileObj.programLocationState = "n/a";
     fireCloudProfileObj.programLocationCountry = "n/a";
-    fireCloudProfileObj.pi = (profile.havePi !== undefined && profile.havePi === true)
-      ? profile.piName : profile.isThePI === true
-        ? Storage.getCurrentUser().displayName : "n/a";
+    fireCloudProfileObj.pi = isNil(piProp) ? isPi : getOr( "n/a", 'propertyValue')(piProp);
     fireCloudProfileObj.nonProfitStatus = "n/a";
     return fireCloudProfileObj;
   },

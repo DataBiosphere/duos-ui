@@ -427,7 +427,7 @@ class DatasetCatalog extends Component {
                     th({ className: 'cell-size' }, ['Data Custodian']),
                     th({ className: 'cell-size' }, ['Consent ID']),
                     th({ className: 'cell-size' }, ['SC-ID']),
-                    th({ isRendered: this.state.isAdmin, className: 'cell-size' }, ['Approved Requestors'])
+                    th({ className: 'cell-size' }, ['Approved Requestors'])
                   ])
                 ]),
 
@@ -621,7 +621,7 @@ class DatasetCatalog extends Component {
                               '---')
                           ]),
 
-                          td({ isRendered: this.state.isAdmin, className: 'cell-size', style: Theme.textTableBody }, [
+                          td({ className: 'cell-size', style: Theme.textTableBody }, [
                             a({
                               id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => this.downloadList(dataSet),
                               className: 'enabled'
