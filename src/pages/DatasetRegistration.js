@@ -62,6 +62,7 @@ class DatasetRegistration extends Component {
         dac: '',
         consentId: '',
         needsApproval: false,
+        validName: false
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -162,7 +163,10 @@ class DatasetRegistration extends Component {
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.principalInvestigator = pi ? pi.propertyValue : '';
       prev.datasetData.needsApproval = needsApproval;
+      prev.datasetData.dac = dac;
       prev.selectedDac = dac;
+      let validName = this.validateDatasetName(prev.datasetData.datasetName);
+      prev.datasetData.validName = validName;
 
       return prev;
     });
@@ -289,7 +293,7 @@ class DatasetRegistration extends Component {
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
       this.isValid(formData.principalInvestigator) &&
-      //this.state.validName &&
+      this.state.datasetData.validName &&
       this.isValid(this.state.datasetData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
       this.isValid(formData.dataType) &&
@@ -303,10 +307,13 @@ class DatasetRegistration extends Component {
 
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
-      console.log(datasetId);
-      const isValid = (datasetId < 0);
+      let isValid = true;
+      //if this is not an update check to make sure this name is not already in use
+      if (fp.isEmpty(this.state.updateDataset)) {
+        isValid = (datasetId < 0);
+      }
       this.setState(prev => {
-        prev.validName = isValid;
+        prev.datasetData.validName = isValid;
         return prev;
       });
     });
