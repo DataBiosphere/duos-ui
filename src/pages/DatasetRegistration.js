@@ -289,19 +289,21 @@ class DatasetRegistration extends Component {
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
       this.isValid(formData.principalInvestigator) &&
-      this.state.validName &&
-      this.isValid(formData.datasetName) &&
+      //this.state.validName &&
+      this.isValid(this.state.datasetData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
       this.isValid(formData.dataType) &&
       this.isValid(formData.species) &&
       this.isValid(formData.phenotype) &&
       this.isValid(formData.nrParticipants) &&
       this.isValid(formData.description) &&
+      this.isValid(this.state.selectedDac) &&
       (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
   };
 
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
+      console.log(datasetId);
       const isValid = (datasetId < 0);
       this.setState(prev => {
         prev.validName = isValid;
