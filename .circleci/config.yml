@@ -9,7 +9,7 @@ executors:
       - image: cypress/base:10.16.3
         environment:
           TERM: xterm
-        resource_class: xlarge
+    resource_class: xlarge
 
 commands:
   push-env:
