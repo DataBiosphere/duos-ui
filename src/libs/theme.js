@@ -127,7 +127,7 @@ export const Styles = {
       fontSize: "14px",
       display: "flex",
       justifyContent: "center",
-      height: "48px",
+      padding: '0.8rem 0'
     },
     RECORD_TEXT: {
       color: "#00243C"
@@ -149,6 +149,7 @@ export const Styles = {
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
+      wordBreak: 'break-word',
       margin: "0 2%"
     },
     DATA_ID_CELL: {
@@ -228,6 +229,34 @@ export const Styles = {
       alignItems: 'center',
       justifyContent: 'flex-end'
     },
+    TABLE_TEXT_BUTTON: {
+      display: 'flex',
+      width: '45%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Theme.palette.secondary,
+      color: 'white',
+      height: '60%',
+      borderRadius: '.3rem',
+      cursor: 'pointer',
+      minHeight: '3rem',
+      margin: '2% 10% 2% 0'
+    },
+    TABLE_BUTTON_TEXT_HOVER: {
+      backgroundColor: '#2FA4E7'
+    },
+    TABLE_BUTTON_ICON_HOVER: {
+      color: '#2FA4E7'
+    },
+    TABLE_ICON_BUTTON: {
+      display: 'flex',
+      width: 'auto',
+      color: Theme.palette.secondary,
+      height: '60%',
+      borderRadius: '.3rem',
+      cursor: 'pointer',
+      minHeight: '3rem',
+    }
   },
   MODAL: {
     CONTENT: {
