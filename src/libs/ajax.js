@@ -1,15 +1,15 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import { find, getOr } from 'lodash/fp'
-import { isNil } from 'lodash';
-import { Config } from './config';
-import { Models } from './models';
-import { spinnerService } from './spinner-service';
-import { StackdriverReporter } from './stackdriverReporter';
-import { Storage } from './storage';
+import {find, getOr} from 'lodash/fp';
+import {isNil} from 'lodash';
+import {Config} from './config';
+import {Models} from './models';
+import {spinnerService} from './spinner-service';
+import {StackdriverReporter} from './stackdriverReporter';
+import {Storage} from './storage';
 import axios from 'axios';
-import { DataUseTranslation } from './dataUseTranslation';
-import { isFileEmpty } from './utils';
+import {DataUseTranslation} from './dataUseTranslation';
+import {isFileEmpty} from './utils';
 
 const dataTemplate = {
   accessTotal: [
@@ -360,12 +360,6 @@ export const DAR = {
     return await res.json();
   },
 
-  hasUseRestriction: async (referenceId) => {
-    const url = `${await Config.getApiUrl()}/dar/hasUseRestriction/${referenceId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {
@@ -446,8 +440,7 @@ export const DataSet = {
 
   updateDataset: async (datasetId, dataSetObject) => {
     const url = `${await Config.getApiUrl()}/dataset/${datasetId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
-    return await res.json();
+    return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
   },
 
   validateDatasetName: async (name) => {

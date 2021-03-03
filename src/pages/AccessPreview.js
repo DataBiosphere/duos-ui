@@ -18,7 +18,6 @@ class AccessPreview extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      hasUseRestriction: false,
       consentName: '',
       isQ1Expanded: true,
       isQ2Expanded: false,
@@ -50,16 +49,6 @@ class AccessPreview extends Component {
           prev.dataUse = consent.dataUse;
           prev.consentName = consent.name;
         });
-      }
-    );
-
-    DAR.hasUseRestriction(referenceId).then(
-      useRestriction => {
-        if (useRestriction.hasUseRestriction === true) {
-          this.setState(prev => {
-            prev.hasUseRestriction = true;
-          });
-        }
       }
     );
 
@@ -123,8 +112,7 @@ class AccessPreview extends Component {
             id: 'accessCollectVotes',
             onClick: this.toggleQ1,
             color: 'access',
-            title: this.state.hasUseRestriction ? 'Q1. Should data access be granted to this applicant?'
-              : 'Should data access be granted to this applicant?',
+            title: 'Q1. Should data access be granted to this applicant?',
             expanded: this.state.isQ1Expanded
           }, [
 
@@ -133,7 +121,6 @@ class AccessPreview extends Component {
               ApplicationSummary({
                 isRendered: !ld.isNil(this.state.darInfo) && !ld.isNil(this.state.researcherProfile),
                 mrDAR: null,
-                hasUseRestriction: this.state.hasUseRestriction,
                 darInfo: this.state.darInfo,
                 downloadDAR: this.downloadDAR,
                 researcherProfile: this.state.researcherProfile }),
@@ -150,7 +137,6 @@ class AccessPreview extends Component {
 
         div({ className: 'row no-margin' }, [
           CollapsiblePanel({
-            isRendered: this.state.hasUseRestriction,
             id: 'rpCollectVotes',
             onClick: this.toggleQ1,
             color: 'access',

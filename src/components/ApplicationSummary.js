@@ -12,7 +12,7 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
 
   render() {
     let {darInfo} = this.props;
-    const { hasUseRestriction, mrDAR, downloadDAR, researcherProfile } = this.props;
+    const { mrDAR, downloadDAR, researcherProfile } = this.props;
     darInfo.purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
     return div({className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
@@ -102,7 +102,7 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
             ])
           ]),
 
-          div({ isRendered: hasUseRestriction, className: 'row dar-summary' }, [
+          div({ className: 'row dar-summary' }, [
             div({ className: 'control-label access-color' }, ['Structured Research Purpose']),
             div({ className: 'response-label translated-restriction'}, [
               StructuredDarRp({
