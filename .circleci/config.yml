@@ -9,7 +9,6 @@ executors:
       - image: cypress/base:14.16.0
         environment:
           TERM: xterm
-    resource_class: large
 
 commands:
   push-env:
@@ -116,7 +115,7 @@ jobs:
           name: build
           command: CI=false npm run build
           environment:
-            NODE_OPTIONS: --max-old-space-size=8192
+            NODE_OPTIONS: --max-old-space-size=5120
       - persist_to_workspace:
           root: .
           paths:
@@ -138,7 +137,7 @@ jobs:
           name: build
           command: CI=false npm run build
           environment:
-            NODE_OPTIONS: --max-old-space-size=8192
+            NODE_OPTIONS: --max-old-space-size=5120
       - persist_to_workspace:
           root: .
           paths:
