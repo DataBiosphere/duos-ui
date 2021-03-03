@@ -62,7 +62,7 @@ class DatasetRegistration extends Component {
         dac: '',
         consentId: '',
         needsApproval: false,
-        validName: false
+        isValidName: false
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -166,7 +166,7 @@ class DatasetRegistration extends Component {
       prev.datasetData.dac = dac;
       prev.selectedDac = dac;
       let validName = this.validateDatasetName(prev.datasetData.datasetName);
-      prev.datasetData.validName = validName;
+      prev.datasetData.isValidName = validName;
 
       return prev;
     });
@@ -293,7 +293,7 @@ class DatasetRegistration extends Component {
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
       this.isValid(formData.principalInvestigator) &&
-      this.state.datasetData.validName &&
+      this.state.datasetData.isValidName &&
       this.isValid(this.state.datasetData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
       this.isValid(formData.dataType) &&
@@ -313,7 +313,7 @@ class DatasetRegistration extends Component {
         isValid = (datasetId < 0);
       }
       this.setState(prev => {
-        prev.datasetData.validName = isValid;
+        prev.datasetData.isValidName = isValid;
         return prev;
       });
     });
