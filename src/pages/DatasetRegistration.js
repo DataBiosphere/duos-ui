@@ -24,7 +24,6 @@ class DatasetRegistration extends Component {
       allDatasets: '',
       allDatasetNames: [],
       updateDataset: {},
-      nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
       showModal: false,
@@ -62,6 +61,7 @@ class DatasetRegistration extends Component {
         dac: '',
         consentId: '',
         needsApproval: false,
+        isValidName: false
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -71,15 +71,6 @@ class DatasetRegistration extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  };
-
-  onNihStatusUpdate = (nihValid) => {
-    if (this.state.nihValid !== nihValid) {
-      this.setState(prev => {
-        prev.nihValid = nihValid;
-        return prev;
-      });
-    }
   };
 
   async componentDidMount() {
@@ -162,7 +153,10 @@ class DatasetRegistration extends Component {
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.principalInvestigator = pi ? pi.propertyValue : '';
       prev.datasetData.needsApproval = needsApproval;
+      prev.datasetData.dac = dac;
       prev.selectedDac = dac;
+      let validName = this.validateDatasetName(prev.datasetData.datasetName);
+      prev.datasetData.isValidName = validName;
 
       return prev;
     });
@@ -289,22 +283,27 @@ class DatasetRegistration extends Component {
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
       this.isValid(formData.principalInvestigator) &&
-      this.state.validName &&
-      this.isValid(formData.datasetName) &&
+      this.state.datasetData.isValidName &&
+      this.isValid(this.state.datasetData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
       this.isValid(formData.dataType) &&
       this.isValid(formData.species) &&
       this.isValid(formData.phenotype) &&
       this.isValid(formData.nrParticipants) &&
       this.isValid(formData.description) &&
+      this.isValid(this.state.selectedDac) &&
       (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
   };
 
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
-      const isValid = (datasetId < 0);
+      let isValid = true;
+      //if this is not an update check to make sure this name is not already in use
+      if (fp.isEmpty(this.state.updateDataset)) {
+        isValid = (datasetId < 0);
+      }
       this.setState(prev => {
-        prev.validName = isValid;
+        prev.datasetData.isValidName = isValid;
         return prev;
       });
     });
@@ -610,6 +609,7 @@ class DatasetRegistration extends Component {
         prev.selectedDac = {};
       } else {
         prev.selectedDac = option.item;
+        prev.datasetData.dac = option.item;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
         prev.problemLoadingUpdateDataset = false;
