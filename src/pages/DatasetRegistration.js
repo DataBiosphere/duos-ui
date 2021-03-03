@@ -378,6 +378,7 @@ class DatasetRegistration extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
+
         if (this.state.showValidationMessages) {
           this.setState({showDialogSubmit: false});
         }
