@@ -24,7 +24,6 @@ class DatasetRegistration extends Component {
       allDatasets: '',
       allDatasetNames: [],
       updateDataset: {},
-      nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
       showModal: false,
@@ -72,15 +71,6 @@ class DatasetRegistration extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  };
-
-  onNihStatusUpdate = (nihValid) => {
-    if (this.state.nihValid !== nihValid) {
-      this.setState(prev => {
-        prev.nihValid = nihValid;
-        return prev;
-      });
-    }
   };
 
   async componentDidMount() {
@@ -388,7 +378,6 @@ class DatasetRegistration extends Component {
           prev.disableOkBtn = true;
           return prev;
         });
-
         if (this.state.showValidationMessages) {
           this.setState({showDialogSubmit: false});
         }
@@ -415,7 +404,7 @@ class DatasetRegistration extends Component {
             DataSet.updateDataset(datasetId, ds).then(resp => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
             }).catch(e => {
-              let errorMessage = 'Some errors occurred, the Dataset was not updated.';
+              let errorMessage = 'Some errors occurred, Dataset Registration couldn\'t be completed.';
               this.setState(prev => {
                 prev.problemSavingRequest = true;
                 prev.submissionSuccess = false;
