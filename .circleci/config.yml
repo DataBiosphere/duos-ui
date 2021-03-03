@@ -114,7 +114,7 @@ jobs:
       - run: npm install react-scripts --silent
       - run:
           name: build
-          command: CI=false npm run build --silent
+          command: CI=false npm run build
           environment:
             NODE_OPTIONS: --max-old-space-size=8192
       - persist_to_workspace:
