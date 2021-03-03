@@ -404,7 +404,7 @@ class DatasetRegistration extends Component {
             DataSet.updateDataset(datasetId, ds).then(resp => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
             }).catch(e => {
-              let errorMessage = 'Some errors occurred, Dataset Registration couldn\'t be completed.';
+              let errorMessage = 'Some errors occurred, the Dataset was not updated.';
               this.setState(prev => {
                 prev.problemSavingRequest = true;
                 prev.submissionSuccess = false;
