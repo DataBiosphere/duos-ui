@@ -353,6 +353,7 @@ export default function ResearcherInfo(props) {
               ]),
             ]),
             div({
+              isRendered: !anvilUse && anvilUse !== "",
               className: 'computing-use-container',
               style: {
                 backgroundColor: showValidationMessages && isCloudUseInvalid ? "rgba(243, 73, 73, 0.19)" : "inherit"

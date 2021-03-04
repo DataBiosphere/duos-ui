@@ -108,11 +108,10 @@ const Records = (props) => {
         case 'Open' : {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
-          const vote = head(votes);
           return [
             h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
-              onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`),
+              onClick: () => props.history.push(`access_review/${dar.referenceId}`),
               label: isFinal ? 'Final' : 'Vote'
             }),
             h(TableIconButton, {
