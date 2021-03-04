@@ -13,7 +13,8 @@ import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
-
+import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
+import addDatasetIcon from '../images/icon_dataset_add.png';
 class DatasetRegistration extends Component {
 
   constructor(props) {
@@ -747,7 +748,7 @@ class DatasetRegistration extends Component {
               className: ( 'col-lg-12 col-md-12 col-sm-12 ' )
             }, [
               PageHeading({
-                id: 'requestApplication', imgSrc: '/images/icon_dataset_add.png', iconSize: 'medium', color: 'dataset',
+                id: 'requestApplication', imgSrc: addDatasetIcon, iconSize: 'medium', color: 'dataset',
                 title: 'Dataset Registration',
                 description: 'This is an easy way to register a dataset in DUOS!'
               })
@@ -1471,7 +1472,7 @@ class DatasetRegistration extends Component {
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       a({
-                        id: 'link_downloadAgreement', href: 'Data_Provider_Agreement.pdf', target: '_blank',
+                        id: 'link_downloadAgreement', href: DataProviderAgreement, target: '_blank',
                         className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                       }, [
                         span({ className: 'glyphicon glyphicon-download' }),

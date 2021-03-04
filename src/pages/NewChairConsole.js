@@ -12,6 +12,7 @@ import PaginationBar from '../components/PaginationBar';
 import {Storage} from "../libs/storage";
 import { Block } from '@material-ui/icons';
 import ConfirmationModal from "../components/modals/ConfirmationModal";
+import lockIcon from '../images/lock-icon.png';
 
 const wasVoteSubmitted = (vote) => {
   //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
@@ -104,7 +105,7 @@ const Records = (props) => {
     const currentUserId = Storage.getCurrentUser().dacUserId;
     if (!isNil(e)) {
       switch (e.status) {
-        case 'Open' :
+        case 'Open' : {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           return [
@@ -119,6 +120,7 @@ const Records = (props) => {
               onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
             })
           ];
+        }
         default :
           return h(TableTextButton, {
             key: `reopen-button-${e.referenceId}`,
@@ -294,7 +296,7 @@ export default function NewChairConsole(props) {
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
-              src: '/images/lock-icon.png',
+              src: lockIcon,
               style: Styles.HEADER_IMG
             })
           ]),

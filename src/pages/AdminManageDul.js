@@ -9,7 +9,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Consent, DAC, Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
-
+import manageDULIcon from '../images/icon_manage_dul.png';
 
 const limit = 10;
 
@@ -312,7 +312,7 @@ class AdminManageDul extends Component {
           div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
             PageHeading({
               id: 'manageDul',
-              imgSrc: '/images/icon_manage_dul.png',
+              imgSrc: manageDULIcon,
               iconSize: 'medium',
               color: 'dul',
               title: 'Manage Data Use Limitations',

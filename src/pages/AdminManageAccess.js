@@ -9,7 +9,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
-
+import manageAccessIcon from "../images/icon_manage_access.png";
 
 const limit = 10;
 
@@ -185,7 +185,7 @@ class AdminManageAccess extends Component {
 
           div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
             PageHeading({
-              id: "manageAccess", imgSrc: "/images/icon_manage_access.png", iconSize: "medium", color: "access",
+              id: "manageAccess", imgSrc: manageAccessIcon, iconSize: "medium", color: "access",
               title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review"
             }),
           ]),

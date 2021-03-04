@@ -7,6 +7,7 @@ import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses, USER_ROLES } from '../libs/utils';
+import loadingIndicator from '../images/loading-indicator.svg';
 export const SignIn = hh(class SignIn extends Component {
 
   constructor(props) {
@@ -84,7 +85,7 @@ export const SignIn = hh(class SignIn extends Component {
     if (response.error === 'popup_closed_by_user') {
       this.setState(prev => {
         prev.error = {
-          description: span({}, ['Sign-in cancelled ... ', img({ height: '20px', src: '/images/loading-indicator.svg' })])
+          description: span({}, ['Sign-in cancelled ... ', img({ height: '20px', src: loadingIndicator })])
         };
         return prev;
       });
@@ -132,7 +133,7 @@ export const SignIn = hh(class SignIn extends Component {
     };
     return disabled ?
       div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
-        img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
+        img({ src: loadingIndicator, alt: 'spinner' })
       ]) :
       h(GoogleLogin,
         _.isNil(this.props.customStyle) ? defaultStyle : {
@@ -147,7 +148,7 @@ export const SignIn = hh(class SignIn extends Component {
 
     if (this.state.clientId === '') {
       googleLoginButton = div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
-        img({ src: '/images/loading-indicator.svg', alt: 'spinner' })
+        img({ src: loadingIndicator, alt: 'spinner' })
       ]);
     } else {
       googleLoginButton = h(GoogleLogin, {

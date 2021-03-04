@@ -9,7 +9,7 @@ import { PaginatorBar } from '../../components/PaginatorBar';
 import { SearchBox } from '../../components/SearchBox';
 import { DAC } from '../../libs/ajax';
 import * as fp from 'lodash/fp';
-
+import manageDACIcon from '../../images/icon_manage_dac.png';
 
 const limit = 10;
 const actionButtonStyle = { width: '40%', marginRight: '1rem' };
@@ -182,7 +182,7 @@ class AdminManageDac extends Component {
           div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding' }, [
             PageHeading({
               id: 'manageDac',
-              imgSrc: '/images/icon_manage_dac.png',
+              imgSrc: manageDACIcon,
               iconSize: 'large',
               color: 'common',
               title: 'Manage Data Access Committee',

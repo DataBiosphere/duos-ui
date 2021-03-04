@@ -1,26 +1,37 @@
 {
-  "extends": "react-app",
-  "parser": "babel-eslint",
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "parser": "@babel/eslint-parser",
   "env": {
     "node": true,
     "es6": true,
     "browser": true
   },
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
+  "settings": {
+    "react": {
+      "version": "detect"
     }
   },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": ["@babel"],
   "rules": {
+    "no-trailing-spaces": "warn",
+    "no-unreachable": "warn",
+    "no-console": "warn",
+    "array-bracket-spacing": "warn",
+    "no-unused-vars": "warn",
+    "no-extra-semi": "warn",
     "react/jsx-filename-extension": [
       1,
       {
         "extensions": [
-          ".js",
-          ".jsx"
+          ".js", ".jsx"
         ]
       }
     ],
+    "react/prop-types": "off",
     "indent": [
       "warn",
       2,
@@ -28,14 +39,9 @@
         "SwitchCase": 1
       }
     ],
-    "implicit-arrow-linebreak": "off",
-    "array-bracket-newline": "off",
-    "brace-style": "off",
-    "no-trailing-spaces": "warn",
-    "semi": "warn",
-    "no-unreachable": "warn",
-    "no-await-in-loop": "warn",
-    "no-console": "warn",
-    "array-bracket-spacing": "warn"
+    "@babel/implicit-arrow-linebreak": "off",
+    "@babel/array-bracket-newline": "off",
+    "@babel/brace-style": "off",
+    "@babel/semi": "warn"
   }
 }
