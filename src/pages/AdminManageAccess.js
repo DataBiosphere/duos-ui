@@ -1,17 +1,18 @@
 import _ from 'lodash';
 import { Component, Fragment } from 'react';
-import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
+import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
-import { PageHeading } from '../components/PageHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
-import { DAC, DAR, Election } from '../libs/ajax';
+import {DAC, DAR, Election} from '../libs/ajax';
 import * as Utils from '../libs/utils';
-import manageAccessIcon from "../images/icon_manage_access.png";
+import {Styles} from "../libs/theme";
+import PaginationBar from "../components/PaginationBar";
+import ConfirmationModal from "../components/modals/ConfirmationModal";
+import { Notifications } from '../libs/utils';
+import {cloneDeep} from "lodash/fp";
+import lockIcon from "../images/lock-icon.png";
 
-const limit = 10;
 
 class AdminManageAccess extends Component {
 
@@ -24,14 +25,18 @@ class AdminManageAccess extends Component {
       value: '',
       darElectionList: [],
       currentPage: 1,
-      limit: limit,
-      showDialogCancel: false,
+      limit: 10,
       showDialogCreate: false,
       dacList: []
     };
     this.getElectionDarList = this.getElectionDarList.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
     this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
+    this.closeCreateConfirmation = this.closeCreateConfirmation.bind(this);
+  }
+
+  closeCreateConfirmation = () => {
+    this.setState({ showDialogCreate : false });
   }
 
   async getElectionDarList() {
@@ -79,51 +84,54 @@ class AdminManageAccess extends Component {
     });
   };
 
-  openDialogCancel(dataRequestId, electionId) {
-    this.setState({ showDialogCancel: true, dataRequestId: dataRequestId, electionId: electionId });
+  openDialogCreate(dataRequestId, frontEndId) {
+    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId, frontEndId: frontEndId });
   };
 
-  openDialogCreate(dataRequestId) {
-    this.setState({ showDialogCreate: true, dataRequestId: dataRequestId });
-  };
-
-  dialogHandlerCancel = (answer) => (e) => {
-    this.setState({ disableBtn: answer, disableCancelBtn: answer });
-    if (answer === true) {
-      let electionToUpdate = {};
-      electionToUpdate.status = 'Canceled';
-      electionToUpdate.referenceId = this.state.dataRequestId;
-      electionToUpdate.electionId = this.state.electionId;
-      Election.updateElection(this.state.electionId, electionToUpdate).then(response => {
-        this.getElectionDarList();
-        this.setState({ showDialogCancel: false, disableBtn: false, disableCancelBtn: false });
-      });
-    } else {
-      this.setState({ showDialogCancel: false });
+  dialogHandlerCancel = async (dataRequestId, electionId) => {
+    const CANCEL = "Canceled";
+    this.setState({dataRequestId: dataRequestId, electionId: electionId });
+    let electionToUpdate = {};
+    electionToUpdate.status = 'Canceled';
+    electionToUpdate.referenceId = dataRequestId;
+    electionToUpdate.electionId = electionId;
+    try {
+      const updatedElection = await Election.updateElection(electionId, electionToUpdate);
+      this.updateLists(updatedElection, CANCEL);
+      Notifications.showSuccess({text: "Election has been cancelled."});
+    } catch (error) {
+      Notifications.showError({text: 'Error: Failed to cancel selected Election'});
     }
+    this.setState({ showDialogCancel: false });
   };
 
-  dialogHandlerCreate = (answer) => (e) => {
-    this.setState({ disableBtn: answer, disableCancelBtn: answer });
-    if (answer === true) {
-      Election.createDARElection(this.state.dataRequestId)
-        .then(value => {
-          this.getElectionDarList();
-          this.setState({ showDialogCreate: false, disableBtn: false, disableCancelBtn: false });
-        })
-        .catch(errorResponse => {
-          if (errorResponse.status === 500) {
-            this.setState({ alertTitle: 'Email Service Error!', alertMessage: 'The election was created but the participants couldnt be notified by Email.', disableCancelBtn: false });
-          } else {
-            this.setState({ alertTitle: 'Election cannot be created!', alertMessage: errorResponse.message, disableCancelBtn: false });
-          }
-        });
-    } else {
-      this.setState({ showDialogCreate: false, alertTitle: undefined, alertMessage: undefined });
+  dialogHandlerCreate = async () => {
+    const CREATE = "Open";
+    try {
+      const updatedElection = await Election.createDARElection(this.state.dataRequestId);
+      this.updateLists(updatedElection, CREATE);
+      Notifications.showSuccess({text: "Election successfully created."});
+    } catch (errorResponse) {
+      let errorMsg = '';
+      if (errorResponse.status === 500) {
+        errorMsg = "Email Service Error! The election was created but the participants couldnt be notified by Email.";
+      } else {
+        errorMsg = "Election cannot be created!";
+      }
+      Notifications.showError(errorMsg);
     }
+    this.setState({ showDialogCreate: false });
   };
 
-  openApplicationSummaryModal(dataRequestId, electionStatus) {
+  updateLists = (updatedElection, typeOfAction) => {
+    const electionListCopy = cloneDeep(this.state.darElectionList);
+    const targetElectionRow = electionListCopy.find((dar) => dar.referenceId === this.state.dataRequestId);
+    targetElectionRow.election = cloneDeep(updatedElection);
+    targetElectionRow.electionStatus = typeOfAction;
+    this.setState( {darElectionList: electionListCopy });
+  };
+
+  openApplicationSummaryModal(dataRequestId) {
     this.setState({ showModal: true, dataRequestId: dataRequestId, calledFromAdmin: true });
   };
 
@@ -175,148 +183,99 @@ class AdminManageAccess extends Component {
   };
 
   render() {
-
     const { searchDarText, currentPage, limit } = this.state;
+    const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
 
     return (
-      div({ className: "container container-wide" }, [
-
-        div({ className: "row no-margin" }, [
-
-          div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
-            PageHeading({
-              id: "manageAccess", imgSrc: manageAccessIcon, iconSize: "medium", color: "access",
-              title: "Manage Data Access Request", description: "Select and manage Data Access Request for DAC review"
-            }),
+      div({style: Styles.PAGE}, [
+        div({style: {display: "flex", justifyContent: "space-between"}}, [
+          div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+            div({style: Styles.ICON_CONTAINER}, [
+              img({
+                id: 'lock-icon',
+                src: lockIcon,
+                style: Styles.HEADER_IMG
+              })
+            ]),
+            div({style: Styles.HEADER_CONTAINER}, [
+              div({style: Styles.TITLE}, ["Manage Data Access Request"]),
+              div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
+            ]),
+            ]),
+            div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
+              h(SearchBox, {searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange})
+            ]),
           ]),
-
-          div({ className: "col-lg-4 col-md-4 col-sm-5 col-xs-12 search-wrapper no-padding" }, [
-            h(SearchBox, { id: 'manageAccess', searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange, color: 'access' })
+        div({style: Styles.TABLE.CONTAINER}, [
+          div({style: Styles.TABLE.HEADER_ROW}, [
+            div({ style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
+            div({ style: Styles.TABLE.TITLE_CELL }, ["Project Title"]),
+            div({ style: Styles.TABLE.SUBMISSION_DATE_CELL }, ["Date"]),
+            div({ style: Styles.TABLE.DAC_CELL }, ["Info"]),
+            div({ style: Styles.TABLE.DAC_CELL }, ['DAC']),
+            div({ style: Styles.TABLE.ELECTION_STATUS_CELL }, ["Election Status"]),
+            div({ style: Styles.TABLE.ELECTION_ACTIONS_CELL }, ["Election Actions"]),
           ]),
-        ]),
-
-
-        div({ className: "jumbotron table-box" }, [
-          div({ className: "row no-margin" }, [
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header access-color" }, ["Data Request id"]),
-            div({ className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-header access-color" }, ["Project title"]),
-            div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header access-color" }, ["Date"]),
-            div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color" }, ["+ Info"]),
-            div({ className: 'col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-header f-center access-color' }, ['DAC']),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election status"]),
-            div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-header f-center access-color" }, ["Election actions"]),
-          ]),
-
-          hr({ className: "table-head-separator" }),
-
           this.state.darElectionList
             .filter(this.searchTable(searchDarText))
             .filter(row => !row.isCanceled)
             .slice((currentPage - 1) * limit, currentPage * limit)
-            .map((dar) => {
+            .map((dar, index) => {
+              const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
               return h(Fragment, { key: dar.frontEndId }, [
-                div({
-                  id: dar.frontEndId,
-                  className: "row no-margin tableRow " + (dar.needsApproval ? "list-highlighted" : "")
-                }, [
-                    div({
-                      id: dar.frontEndId + "_darId", name: "darId",
-                      className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text"
-                    }, [
-                        div({
-                          id: dar.frontEndId + "_flagDarId",
-                          name: "flag_darId",
-                          isRendered: dar.needsApproval,
-                          className: "glyphicon glyphicon-exclamation-sign " +
-                            ((dar.dataSetElectionResult === 'Needs Approval') ? "access-color"
-                              : (dar.dataSetElectionResult === 'Denied') ? "cancel-color"
-                                : (dar.dataSetElectionResult === 'Approved')
-                                  ? "dataset-color" : "")
-                          , "data-tip": dar.dataSetElectionResult, "data-for": "tip_flag"
-                        }, []),
-                        span({ className: "list-highlighted-item", title: dar.frontEndId }, [dar.frontEndId])
-                      ]),
-                    div({
-                      id: dar.frontEndId + "_projectTitle",
-                      name: "projectTitle",
-                      className: "col-lg-3 col-md-3 col-sm-3 col-xs-3 cell-body text",
-                      title: dar.projectTitle
-                    }, [dar.projectTitle]),
-
-                    div({
-                      id: dar.frontEndId + "_createDate",
-                      name: "createDate",
-                      className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text"
-                    }, [Utils.formatDate(dar.createDate)]),
-
-                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body f-center" }, [
+                div({ style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
+                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL)}, [dar.frontEndId]),
+                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL)}, [dar.projectTitle]),
+                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.SUBMISSION_DATE_CELL)}, [Utils.formatDate(dar.createDate)]),
+                  div({ style: Styles.TABLE.DAC_CELL}, [
                       button({
-                        id: dar.frontEndId + "_btnSummary",
-                        name: "btn_summary",
                         className: "cell-button hover-color",
-                        onClick: () => this.openApplicationSummaryModal(dar.dataRequestId, dar.electionStatus)
+                        onClick: () => this.openApplicationSummaryModal(dar.dataRequestId)
                       }, ["Summary"]),
                     ]),
-                    div({ className: "col-lg-1 col-md-1 col-sm-1 col-xs-1 cell-body text bold f-center" },
-                      [this.findDacNameForDacId(dar.dacId)]
-                    ),
-                    div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text bold f-center" }, [
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [this.findDacNameForDacId(dar.dacId)]),
+                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
-                        a({
-                          id: dar.frontEndId + "_linkUnreviewed",
-                          name: "link_unreviewed",
+                        a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed",
                           onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
                         }, ["Un-reviewed"]),
                       ]),
                       span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
-                        a({
-                          id: dar.frontEndId + "_linkOpen",
-                          name: "link_open",
+                        a({ id: dar.frontEndId + "_linkOpen", name: "link_open",
                           onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId)
                         }, ["Open"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, [
-                        a({
-                          id: dar.frontEndId + "_linkCanceled",
-                          name: "link_canceled",
+                        a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled",
                           onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
                         }, ["Canceled"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                        a({
-                          id: dar.frontEndId + "_linkReviewed",
-                          name: "link_reviewed",
+                        a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
                           onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId)
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),
-                    div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 no-padding cell-body text" }, [
-                      div({ className: "row no-margin" }, [
+                    div({style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_ACTIONS_CELL, {paddingTop: "0.5rem"})}, [
                         div({
                           isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final'),
-                          className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center",
                           disabled: dar.electionStatus === 'PendingApproval'
-                        }, [
-                            button({
-                              id: dar.frontEndId + "_btnCreate",
-                              name: "btn_create",
-                              onClick: () => this.openDialogCreate(dar.dataRequestId),
+                        }, [button({
+                              style: {margin: "0 15px 5px 0"},
+                              onClick: () => this.openDialogCreate(dar.dataRequestId, dar.frontEndId),
                               className: "cell-button hover-color"
                             }, ["Create"]),
                           ]),
                         div({
                           isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
-                          className: "col-lg-10 col-md-10 col-sm-10 col-xs-9 cell-body f-center"
-                        }, [
-                            button({
-                              id: dar.frontEndId + "_btnCancel",
-                              name: "btn_cancel",
-                              onClick: () => this.openDialogCancel(dar.dataRequestId, dar.electionId),
+                        }, [button({
+                              style: {margin: "0 15px 5px 0"},
+                              onClick: () => this.dialogHandlerCancel(dar.dataRequestId, dar.electionId),
                               className: "cell-button cancel-color"
                             }, ["Cancel"]),
                           ]),
 
-                        div({ className: "col-lg-2 col-md-2 col-sm-2 col-xs-3 bonafide-icon cell-body text" }, [
+                        div({ style: {margin: "0 15px 8px"}, className: "bonafide-icon" }, [
                           a({
                             id: dar.frontEndId + "_flagBonafide",
                             name: "flag_bonafide",
@@ -346,10 +305,8 @@ class AdminManageAccess extends Component {
                               }),
                             ])
                         ])
-                      ])
                     ])
-                  ]),
-                hr({ className: "table-body-separator" })
+                  ])
               ]);
             }),
           ApplicationSummaryModal({
@@ -359,49 +316,23 @@ class AdminManageAccess extends Component {
             dataRequestId: this.state.dataRequestId,
             calledFromAdmin: true
           }),
-          ConfirmationDialog({
-            title: 'Create election?',
-            color: 'access',
-            isRendered: this.state.showDialogCreate,
-            showModal: this.state.showDialogCreate,
-            disableOkBtn: this.state.disableBtn,
-            disableNoBtn: this.state.disableCancelBtn,
-            action: {
-              label: "Yes",
-              handler: this.dialogHandlerCreate
-            },
-            alertMessage: this.state.alertMessage,
-            alertTitle: this.state.alertTitle
-          }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["Are you sure you want the DAC to vote on this case? "]),
-              ])
-            ]),
-
-          ConfirmationDialog({
-            title: 'Cancel election?',
-            color: 'cancel',
-            disableOkBtn: this.state.disableBtn,
-            disableNoBtn: this.state.disableCancelBtn,
-            isRendered: this.state.showDialogCancel,
-            showModal: this.state.showDialogCancel,
-            action: {
-              label: "Yes",
-              handler: this.dialogHandlerCancel
-            }
-          }, [
-              div({ className: "dialog-description" }, [
-                span({}, ["Are you sure you want to cancel the current election process? "]),
-              ]),
-            ]),
-          PaginatorBar({
-            total: this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length,
-            limit: limit,
-            pageCount: this.pageCount,
-            currentPage: currentPage,
-            onPageChange: this.handlePageChange,
-            changeHandler: this.handleSizeChange,
+          h(ConfirmationModal, {
+            showConfirmation: this.state.showDialogCreate,
+            closeConfirmation: this.closeCreateConfirmation,
+            title: "Create Election?",
+            message: "Are you sure you want the DAC to vote on this data access request?",
+            header: this.state.frontEndId,
+            onConfirm: this.dialogHandlerCreate,
           }),
+          h(ConfirmationModal, {
+            showConfirmation: this.state.showDialogCancel,
+            closeConfirmation: this.closeCancelConfirmation,
+            title: "Create Election?",
+            message: "Are you sure you want to cancel the current election process?",
+            header: this.state.frontEndId,
+            onConfirm: this.dialogHandlerCancel,
+          }),
+          h(PaginationBar, {pageCount: pageCount, currentPage: this.state.currentPage, tableSize: this.state.limit, goToPage: this.handlePageChange, changeTableSize: this.handleSizeChange}),
           h(ReactTooltip, {
             id: "tip_flag",
             place: 'right',
