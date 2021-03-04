@@ -29,13 +29,14 @@ export default function TableTextButton(props) {
 
   const {
     disabled = false,
-    hoverStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER
+    hoverStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER,
+    label
   } = props;
   const baseStyle = props.style || Styles.TABLE.TABLE_TEXT_BUTTON;
   const style = setStyle(disabled, baseStyle);
   const divAttributes = setDivAttributes(disabled, props, style);
 
   return (
-    div(divAttributes, [props.label])
+    div(divAttributes, [label])
   );
 }
