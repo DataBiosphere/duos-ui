@@ -6,14 +6,12 @@ import { ApplicationSummaryModal } from '../components/modals/ApplicationSummary
 import { SearchBox } from '../components/SearchBox';
 import {DAC, DAR, Election} from '../libs/ajax';
 import * as Utils from '../libs/utils';
-import manageAccessIcon from "../images/icon_manage_access.png";
-
-const limit = 10;
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 import { Notifications } from '../libs/utils';
 import {cloneDeep} from "lodash/fp";
+import lockIcon from "../images/lock-icon.png";
 
 
 class AdminManageAccess extends Component {
@@ -195,7 +193,7 @@ class AdminManageAccess extends Component {
             div({style: Styles.ICON_CONTAINER}, [
               img({
                 id: 'lock-icon',
-                src: '/images/lock-icon.png',
+                src: lockIcon,
                 style: Styles.HEADER_IMG
               })
             ]),
