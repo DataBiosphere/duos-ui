@@ -1,14 +1,18 @@
 import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
-import { div, h, img, input, button } from 'react-hyperscript-helpers';
+import { div, h, img, input } from 'react-hyperscript-helpers';
 import { DAR, Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
+import TableTextButton from '../components/TableTextButton';
+import TableIconButton from '../components/TableIconButton';
 import { Notifications, formatDate } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
 import {Storage} from "../libs/storage";
+import { Block } from '@material-ui/icons';
 import ConfirmationModal from "../components/modals/ConfirmationModal";
+import lockIcon from '../images/lock-icon.png';
 
 const wasVoteSubmitted = (vote) => {
   //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
@@ -32,7 +36,7 @@ const processElectionStatus = (election, votes) => {
   } else if(electionStatus === 'Open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
-      const dacVotes = filter((vote) => vote.type === 'DAC')(votes);
+      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
       output = `Open (${completedVotes} / ${dacVotes.length} votes)`;
     }
@@ -96,46 +100,40 @@ const Records = (props) => {
   };
 
   const createActionButtons = (electionInfo, index) => {
-    const name = "cell-button hover-color";
     const e = electionInfo.election;
     const dar = electionInfo.dar;
     const currentUserId = Storage.getCurrentUser().dacUserId;
-
     if (!isNil(e)) {
       switch (e.status) {
-        case 'Open' :
+        case 'Open' : {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
-          const vote = head(votes);
           return [
-            button({
+            h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
-              className: `${name} vote-button`,
-              style: {flex: 1},
-              onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`)
-            }, [`${isFinal ? 'Final' : 'Vote'}`]),
-            button({
+              onClick: () => props.history.push(`access_review/${dar.referenceId}`),
+              label: isFinal ? 'Final' : 'Vote'
+            }),
+            h(TableIconButton, {
+              icon: Block,
               key: `cancel-button-${e.referenceId}`,
-              className: `${name} cancel-button`,
-              style: {flex: 1},
-              onClick: (e) => cancelElectionHandler(electionInfo, dar.referenceId, index)
-            }, ['Cancel'])
+              onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
+            })
           ];
-        case 'Final' :
-          return ['- -'];
+        }
         default :
-          return button({
+          return h(TableTextButton, {
             key: `reopen-button-${e.referenceId}`,
-            className: name,
-            onClick: () => openConfirmation(dar, index)
-          }, ["Re-Open"]);
+            onClick: () => openConfirmation(dar, index),
+            label: 'Re-Open'
+          });
       }
     }
-    return button({
+    return h(TableTextButton, {
+      onClick: () => openConfirmation(dar, index),
       key: `open-election-dar-${dar.referenceId}`,
-      className: name,
-      onClick: () => openConfirmation(dar, index)
-    }, ["Open Election"]);
+      label: 'Open Election'
+    });
   };
 
   return visibleWindow.map((electionInfo, index) => {
@@ -302,7 +300,7 @@ export default function NewChairConsole(props) {
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
-              src: '/images/lock-icon.png',
+              src: lockIcon,
               style: Styles.HEADER_IMG
             })
           ]),

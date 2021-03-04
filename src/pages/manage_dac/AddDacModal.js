@@ -8,7 +8,8 @@ import { PromiseSerial } from '../../libs/utils';
 import { Alert } from '../../components/Alert';
 import { BaseModal } from '../../components/BaseModal';
 import { DacUsers } from './DacUsers';
-
+import editDACIcon from '../../images/icon_edit_dac.png';
+import addDACIcon from '../../images/icon_add_dac.png';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
@@ -235,7 +236,7 @@ export const AddDacModal = hh(class AddDacModal extends Component {
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.props.onAfterOpen,
-        imgSrc: this.state.isEditMode ? '/images/icon_edit_dac.png' : '/images/icon_add_dac.png',
+        imgSrc: this.state.isEditMode ? editDACIcon : addDACIcon,
         color: 'common',
         title: this.state.isEditMode ? 'Edit Data Access Committee' : 'Add Data Access Committee',
         description: this.state.isEditMode ? 'Edit a Data Access Committee' : 'Create a new Data Access Committee in the system',

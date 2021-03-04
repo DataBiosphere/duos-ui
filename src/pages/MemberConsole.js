@@ -8,6 +8,7 @@ import { Storage } from '../libs/storage';
 import { NavigationUtils } from '../libs/utils';
 import { Styles } from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
+import lockIcon from '../images/lock-icon.png';
 
 class MemberConsole extends Component {
 
@@ -114,7 +115,7 @@ class MemberConsole extends Component {
                 div({style: Styles.ICON_CONTAINER}, [
                   img({
                     id: 'lock-icon',
-                    src: '/images/lock-icon.png',
+                    src: lockIcon,
                     style: Styles.HEADER_IMG
                   })
                 ]),

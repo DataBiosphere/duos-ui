@@ -1,11 +1,11 @@
-import _ from 'lodash';
+import {get, isNil, isUndefined, merge } from 'lodash';
+import { find, getOr } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
-import { AuthenticateNIH, Researcher } from '../libs/ajax';
+import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
-import { Storage } from '../libs/storage';
-
+import eraIcon from "../images/era-commons-logo.png";
 
 export const eRACommons = hh(class eRACommons extends React.Component {
 
@@ -19,9 +19,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   componentDidMount = async () => {
     if (this.props.location !== undefined && this.props.location.search !== '') {
-      this.authenticateAsNIHFCUser(this.props.location.search);
+      await this.authenticateAsNIHFCUser(this.props.location.search);
     } else {
-      this.getResearcherProperties();
+      await this.getUserInfo();
     }
   };
 
@@ -34,10 +34,9 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   authenticateAsNIHFCUser = async (searchArg) => {
-    const currentUserId = Storage.getCurrentUser().dacUserId;
     let isFcUser = await this.verifyUser();
     if (!isFcUser) {
-      await Researcher.getPropertiesByResearcherId(currentUserId).then(
+      await User.getMe().then(
         (response) => isFcUser = this.registerUserToFC(response),
         () => this.setState({ nihError: true })
       );
@@ -47,7 +46,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       this.verifyToken(parsedToken).then(
         (decodedNihAccount) => {
           AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
-            () => this.getResearcherProperties(),
+            () => this.getUserInfo(),
             () => this.setState({ nihError: true })
           );
         },
@@ -56,17 +55,20 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     }
   };
 
-  getResearcherProperties = async () => {
-    const currentUserId = Storage.getCurrentUser().dacUserId;
-    Researcher.getPropertiesByResearcherId(currentUserId).then(response => {
-      const isAuthorized = JSON.parse(_.get(response, 'eraAuthorized', "false"));
-      const expirationCount = AuthenticateNIH.expirationCount(_.get(response, 'eraExpiration', 0));
+  getUserInfo = async () => {
+    User.getMe().then((response) => {
+      const props = response.researcherProperties;
+      const authProp = find({'propertyKey':'eraAuthorized'})(props);
+      const expProp = find({'propertyKey':'eraExpiration'})(props);
+      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
       const nihValid = isAuthorized && expirationCount > 0;
+      const nihUsernameProp = find({'propertyKey':'nihUsername'})(props);
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
-        prev.nihUsername = _.get(response, 'nihUsername', '');
+        prev.nihUsername = isNil(nihUsernameProp) ? '' : getOr('', 'propertyValue')(nihUsernameProp);
         return prev;
       });
     });
@@ -88,8 +90,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         this.setState({ nihError: true });
         return false;
       });
-    if (_.isUndefined(isFcUser)) { return false; }
-    return _.get(isFcUser, 'enabled.google', false);
+    if (isUndefined(isFcUser)) { return false; }
+    return get(isFcUser, 'enabled.google', false);
   };
 
   registerUserToFC = async (properties) => {
@@ -109,7 +111,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   deleteNihAccount = async () => {
     AuthenticateNIH.eliminateAccount().then(
-      () => this.getResearcherProperties(),
+      () => this.getUserInfo(),
       () => this.setState({ nihError: true })
     );
   };
@@ -120,7 +122,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       width: 38,
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'contain',
-      backgroundImage: 'url("/images/era-commons-logo.png")',
+      backgroundImage: `url(${eraIcon})`,
       display: 'inline-block'
     };
     const buttonHoverState = {
@@ -143,11 +145,11 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       fontSize: '.9em',
       transition: 'all .2s ease'
     };
-    const validationErrorState = _.get(this.props, 'validationError', false) ? {
+    const validationErrorState = get(this.props, 'validationError', false) ? {
       color: '#D13B07'
     } : {};
     const buttonStyle =
-      _.merge(this.state.isHovered ? _.merge(buttonNormalState, buttonHoverState) : buttonNormalState, validationErrorState);
+      merge(this.state.isHovered ? merge(buttonNormalState, buttonHoverState) : buttonNormalState, validationErrorState);
     const nihErrorMessage = 'Something went wrong. Please try again.';
 
     return (

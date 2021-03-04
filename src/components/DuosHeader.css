@@ -44,19 +44,19 @@
 }
 
 .navbar-duos-icon-about {
-  background: url('/images/navbar_icon_about.svg') no-repeat 0 0;
+  background: url('../images/navbar_icon_about.svg') no-repeat 0 0;
 }
 
 .navbar-duos-link:hover .navbar-duos-icon-about {
-  background: url('/images/navbar_icon_about_hover.svg') no-repeat 0 0;
+  background: url('../images/navbar_icon_about_hover.svg') no-repeat 0 0;
 }
 
 .navbar-duos-icon-help {
-  background: url('/images/navbar_icon_help.svg') no-repeat 0 0;
+  background: url('../images/navbar_icon_help.svg') no-repeat 0 0;
 }
 
 .navbar-duos-link:hover .navbar-duos-icon-help {
-  background: url('/images/navbar_icon_help_hover.svg') no-repeat 0 0;
+  background: url('../images/navbar_icon_help_hover.svg') no-repeat 0 0;
 }
 
 .user-li {
@@ -102,11 +102,11 @@
 }
 
 .navbar-open-icon {
-  background: url('/images/burger-icon.svg') no-repeat 0 0;
+  background: url('../images/burger-icon.svg') no-repeat 0 0;
 }
 
 .navbar-close-icon {
-  background: url('/images/close-icon.svg') no-repeat 0 0;
+  background: url('../images/close-icon.svg') no-repeat 0 0;
 }
 
 @media (min-width: 768px) {

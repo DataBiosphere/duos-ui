@@ -6,6 +6,9 @@ import { ApplicationSummaryModal } from '../components/modals/ApplicationSummary
 import { SearchBox } from '../components/SearchBox';
 import {DAC, DAR, Election} from '../libs/ajax';
 import * as Utils from '../libs/utils';
+import manageAccessIcon from "../images/icon_manage_access.png";
+
+const limit = 10;
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";

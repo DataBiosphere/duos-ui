@@ -2,6 +2,9 @@ import { Component } from 'react';
 import { a, button, div, h1, h3, img, p, span } from 'react-hyperscript-helpers';
 import { SignIn } from '../components/SignIn';
 import { ReadMore } from '../components/ReadMore';
+import homeHeaderBackground from '../images/home_header_background.png';
+import duosLogoImg from '../images/duos_logo.svg';
+import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
 
 class Home extends Component {
 
@@ -34,7 +37,7 @@ class Home extends Component {
       height: '80px',
       width: '300px',
       display: 'block',
-      margin: '3rem auto',
+      margin: '0 auto 3rem',
       padding: '0 3rem'
     };
 
@@ -103,10 +106,9 @@ class Home extends Component {
     };
 
     const registerPositionStyle = {
-      padding: "1em",
       position: 'absolute',
-      top: "6rem",
-      right: "3rem",
+      top: "7.5rem",
+      right: "4rem",
       zIndex: 1000,
       margin: "3px"
     };
@@ -117,7 +119,7 @@ class Home extends Component {
       div({ className: 'row' }, [
         div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
           div({ className: 'row', style: { backgroundColor: 'white', height: '350px', position: 'relative', margin: '-20px auto auto 0' }}, [
-            img({ style: { height: 'inherit', minWidth: '100%' }, src: '/images/home_header_background.png'}),
+            img({ style: { height: 'inherit', minWidth: '100%' }, src: homeHeaderBackground}),
             div({ isRendered: !isLogged, style: signInPositionStyle}, [
               span({ style: {color: "#FFFFFF" }}, ['Already registered?']),
               SignIn({ props: this.props, onSignIn: () => onSignIn(), history })
@@ -130,7 +132,7 @@ class Home extends Component {
               ])
             ]),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
-              img({ style: duosLogo , alt: 'DUOS logo', src: '/images/duos_logo.svg' }),
+              img({ style: duosLogo , alt: 'DUOS logo', src: duosLogoImg }),
               h1({ style: homeTitle }, ['Data Use Oversight System']),
               div({ className: 'hidden-xs', style: homeBannerDescription }, [
                 'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
@@ -146,7 +148,7 @@ class Home extends Component {
                   className: 'col-sm-10 hidden-xs',
                   style: { padding: '1rem', margin: 'auto 8.25%' },
                   alt: 'What is DUOS graphic',
-                  src: '/images/DUOS_Homepage_diagram.svg'
+                  src: duosDiagram
                 })
               ]),
               div({className: 'row', style: { background: 'white', margin: '0' } }, [
@@ -166,7 +168,7 @@ class Home extends Component {
                       a({
                         href: '/dataset_catalog',
                         style: { color: '#fff' }
-                        }, ['Submit a Data Access Request'])
+                      }, ['Submit a Data Access Request'])
                     ]) :
                     SignIn({ props: this.props, onSignIn: () => onSignIn(), history: history, customStyle: buttonStyle
                     })

@@ -13,7 +13,7 @@ import { SearchBox } from '../components/SearchBox';
 import { DAC, DAR, DataSet, Files } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
-
+import datasetIcon from '../images/icon_dataset_.png';
 
 class DatasetCatalog extends Component {
 
@@ -376,7 +376,7 @@ class DatasetCatalog extends Component {
             div({ className: 'col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding' }, [
               PageHeading({
                 id: 'datasetCatalog',
-                imgSrc: '/images/icon_dataset_.png',
+                imgSrc: datasetIcon,
                 iconSize: 'large',
                 color: 'dataset',
                 title: 'Dataset Catalog',
@@ -427,7 +427,7 @@ class DatasetCatalog extends Component {
                     th({ className: 'cell-size' }, ['Data Custodian']),
                     th({ className: 'cell-size' }, ['Consent ID']),
                     th({ className: 'cell-size' }, ['SC-ID']),
-                    th({ isRendered: this.state.isAdmin, className: 'cell-size' }, ['Approved Requestors'])
+                    th({ className: 'cell-size' }, ['Approved Requestors'])
                   ])
                 ]),
 
@@ -621,7 +621,7 @@ class DatasetCatalog extends Component {
                               '---')
                           ]),
 
-                          td({ isRendered: this.state.isAdmin, className: 'cell-size', style: Theme.textTableBody }, [
+                          td({ className: 'cell-size', style: Theme.textTableBody }, [
                             a({
                               id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => this.downloadList(dataSet),
                               className: 'enabled'

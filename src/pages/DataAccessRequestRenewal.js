@@ -14,7 +14,9 @@ import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
-
+import LibraryCardAgreement from '../assets/Library_Card_Agreement_2021.pdf';
+import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
+import addAccessIcon from '../images/icon_add_access.png';
 import './DataAccessRequestApplication.css';
 
 
@@ -634,7 +636,7 @@ class DataAccessRequestRenewal extends Component {
                 this.state.formData.darCode === null ? 'col-lg-12 col-md-12 col-sm-12 ' : 'col-xs-12 no-padding')
             }, [
               PageHeading({
-                id: 'requestApplication', imgSrc: '/images/icon_add_access.png', iconSize: 'medium', color: 'access',
+                id: 'requestApplication', imgSrc: addAccessIcon, iconSize: 'medium', color: 'access',
                 title: 'Data Access Request Renewal',
                 description: 'The section below includes a series of questions intended to allow our Data Access Committee to evaluate the renewal of your previously approved Data Access Request.'
               })
@@ -959,35 +961,35 @@ class DataAccessRequestRenewal extends Component {
                     )
                   ]),
 
-                div(
-                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-group'},
-                  [
-                    span({},
-                      ['Please paste the citation used in your publication here*']),
-                    input({
-                      type: 'text',
-                      name: 'projectTitle',
-                      id: 'inputTitle',
-                      maxLength: '256',
-                      value: this.state.formData.projectTitle,
-                      onChange: this.handleChange,
-                      className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                        'form-control required-field-error' :
-                        'form-control',
-                      required: true,
-                      disabled: this.state.formData.darCode !== null,
-                    }),
-                    span({
-                      className: 'cancel-color required-field-error-span',
-                      isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                    },
-                    ['Required field']),
-                  ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-group'},
+                    [
+                      span({},
+                        ['Please paste the citation used in your publication here*']),
+                      input({
+                        type: 'text',
+                        name: 'projectTitle',
+                        id: 'inputTitle',
+                        maxLength: '256',
+                        value: this.state.formData.projectTitle,
+                        onChange: this.handleChange,
+                        className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                        disabled: this.state.formData.darCode !== null,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ]),
 
 
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                     a({
-                      id: 'link_downloadAgreement', href: 'Library_Card_Agreeement_2021.pdf', target: '_blank',
+                      id: 'link_downloadAgreement', href: LibraryCardAgreement, target: '_blank',
                       className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                     }, [
                       span({ className: 'glyphicon glyphicon-download' }),
@@ -1686,7 +1688,7 @@ class DataAccessRequestRenewal extends Component {
 
                       div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                         a({
-                          id: 'link_downloadAgreement', href: '/Data_Provider_Agreement.pdf', target: '_blank',
+                          id: 'link_downloadAgreement', href: DataProviderAgreement, target: '_blank',
                           className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                         }, [
                           span({ className: 'glyphicon glyphicon-download' }),

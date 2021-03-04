@@ -6,12 +6,9 @@ executors:
       - image: google/cloud-sdk
   cypress:
     docker:
-      - image: cypress/base:10.16.3
+      - image: cypress/base:14.16.0
         environment:
           TERM: xterm
-  node:
-    docker:
-      - image: circleci/node:stretch
 
 commands:
   push-env:
@@ -114,7 +111,11 @@ jobs:
       - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
+      - run:
+          name: build
+          command: CI=false npm run build
+          environment:
+            NODE_OPTIONS: --max-old-space-size=5120
       - persist_to_workspace:
           root: .
           paths:
@@ -132,7 +133,11 @@ jobs:
       - run: cp config/base_config.json public/config.json
       - run: npm install --silent
       - run: npm install react-scripts --silent
-      - run: CI=false npm run build --silent
+      - run:
+          name: build
+          command: CI=false npm run build
+          environment:
+            NODE_OPTIONS: --max-old-space-size=5120
       - persist_to_workspace:
           root: .
           paths:

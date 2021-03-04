@@ -118,7 +118,7 @@ p.bottom-cta a {
   width: 54px; 
   height: 68px;
   margin: 20px auto 26px auto;
-  background-image: url('/images/icon-document.png');
+  background-image: url('../images/icon-document.png');
   background-repeat: no-repeat;
   background-position: center center;
 }

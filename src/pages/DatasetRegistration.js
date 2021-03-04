@@ -13,7 +13,8 @@ import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
-
+import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
+import addDatasetIcon from '../images/icon_dataset_add.png';
 class DatasetRegistration extends Component {
 
   constructor(props) {
@@ -24,7 +25,6 @@ class DatasetRegistration extends Component {
       allDatasets: '',
       allDatasetNames: [],
       updateDataset: {},
-      nihValid: false,
       disableOkBtn: false,
       showValidationMessages: false,
       showModal: false,
@@ -62,6 +62,7 @@ class DatasetRegistration extends Component {
         dac: '',
         consentId: '',
         needsApproval: false,
+        isValidName: false
       },
       problemSavingRequest: false,
       problemLoadingUpdateDataset: false,
@@ -71,15 +72,6 @@ class DatasetRegistration extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  };
-
-  onNihStatusUpdate = (nihValid) => {
-    if (this.state.nihValid !== nihValid) {
-      this.setState(prev => {
-        prev.nihValid = nihValid;
-        return prev;
-      });
-    }
   };
 
   async componentDidMount() {
@@ -162,7 +154,10 @@ class DatasetRegistration extends Component {
       prev.datasetData.researcher = researcher ? researcher.propertyValue : '';
       prev.datasetData.principalInvestigator = pi ? pi.propertyValue : '';
       prev.datasetData.needsApproval = needsApproval;
+      prev.datasetData.dac = dac;
       prev.selectedDac = dac;
+      let validName = this.validateDatasetName(prev.datasetData.datasetName);
+      prev.datasetData.isValidName = validName;
 
       return prev;
     });
@@ -289,22 +284,27 @@ class DatasetRegistration extends Component {
   validateRequiredFields(formData) {
     return this.isValid(formData.researcher) &&
       this.isValid(formData.principalInvestigator) &&
-      this.state.validName &&
-      this.isValid(formData.datasetName) &&
+      this.state.datasetData.isValidName &&
+      this.isValid(this.state.datasetData.datasetName) &&
       this.isValid(formData.datasetRepoUrl) &&
       this.isValid(formData.dataType) &&
       this.isValid(formData.species) &&
       this.isValid(formData.phenotype) &&
       this.isValid(formData.nrParticipants) &&
       this.isValid(formData.description) &&
+      this.isValid(this.state.selectedDac) &&
       (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
   };
 
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
-      const isValid = (datasetId < 0);
+      let isValid = true;
+      //if this is not an update check to make sure this name is not already in use
+      if (fp.isEmpty(this.state.updateDataset)) {
+        isValid = (datasetId < 0);
+      }
       this.setState(prev => {
-        prev.validName = isValid;
+        prev.datasetData.isValidName = isValid;
         return prev;
       });
     });
@@ -610,6 +610,7 @@ class DatasetRegistration extends Component {
         prev.selectedDac = {};
       } else {
         prev.selectedDac = option.item;
+        prev.datasetData.dac = option.item;
         prev.disableOkBtn = false;
         prev.problemSavingRequest = false;
         prev.problemLoadingUpdateDataset = false;
@@ -747,7 +748,7 @@ class DatasetRegistration extends Component {
               className: ( 'col-lg-12 col-md-12 col-sm-12 ' )
             }, [
               PageHeading({
-                id: 'requestApplication', imgSrc: '/images/icon_dataset_add.png', iconSize: 'medium', color: 'dataset',
+                id: 'requestApplication', imgSrc: addDatasetIcon, iconSize: 'medium', color: 'dataset',
                 title: 'Dataset Registration',
                 description: 'This is an easy way to register a dataset in DUOS!'
               })
@@ -1471,7 +1472,7 @@ class DatasetRegistration extends Component {
 
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       a({
-                        id: 'link_downloadAgreement', href: 'Data_Provider_Agreement.pdf', target: '_blank',
+                        id: 'link_downloadAgreement', href: DataProviderAgreement, target: '_blank',
                         className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
                       }, [
                         span({ className: 'glyphicon glyphicon-download' }),

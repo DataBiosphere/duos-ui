@@ -1,13 +1,15 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import { Config } from './config';
-import { Models } from './models';
-import { spinnerService } from './spinner-service';
-import { StackdriverReporter } from './stackdriverReporter';
-import { Storage } from './storage';
+import {find, getOr} from 'lodash/fp';
+import {isNil} from 'lodash';
+import {Config} from './config';
+import {Models} from './models';
+import {spinnerService} from './spinner-service';
+import {StackdriverReporter} from './stackdriverReporter';
+import {Storage} from './storage';
 import axios from 'axios';
-import { DataUseTranslation } from './dataUseTranslation';
-import { isFileEmpty } from './utils';
+import {DataUseTranslation} from './dataUseTranslation';
+import {isFileEmpty} from './utils';
 
 const dataTemplate = {
   accessTotal: [
@@ -358,12 +360,6 @@ export const DAR = {
     return await res.json();
   },
 
-  hasUseRestriction: async (referenceId) => {
-    const url = `${await Config.getApiUrl()}/dar/hasUseRestriction/${referenceId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   requiresManualReview: (object) => {
     var manualReview = false;
     object.forEach(function (element) {
@@ -444,8 +440,7 @@ export const DataSet = {
 
   updateDataset: async (datasetId, dataSetObject) => {
     const url = `${await Config.getApiUrl()}/dataset/${datasetId}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), { method: 'PUT' }]));
-    return await res.json();
+    return await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataSetObject), {method: 'PUT'}]));
   },
 
   validateDatasetName: async (name) => {
@@ -690,13 +685,11 @@ export const Match = {
   findMatch: async (consentId, purposeId) => {
     const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
     const res = await fetchOk(url, Config.authOpts());
-    let answer = {};
     try {
-      answer = await res.json();
-    } catch (error) {
-      answer = {};
-    } finally {
+      const answer = await res.json();
       return answer;
+    } catch (error) {
+      return {};
     }
   }
 };
@@ -1032,18 +1025,21 @@ export const AuthenticateNIH = {
 
   parseProfile: (profile) => {
     let fireCloudProfileObj = {};
+    const properties = profile.researcherProperties;
+    const instituteProp = find({'propertyKey': 'institution'})(properties);
+    const piProp = find({'propertyKey' : 'havePi'});
+    const isPiProp = find({'propertyKey' : 'isPi'});
+    const isPi = isNil(isPiProp) ? "n/a" : Storage.getCurrentUser().displayName;
     fireCloudProfileObj.firstName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.lastName = Storage.getCurrentUser().displayName;
     fireCloudProfileObj.title = "DUOS Researcher";
     fireCloudProfileObj.contactEmail = Storage.getCurrentUser().email;
-    fireCloudProfileObj.institute = (profile.institution !== undefined && profile.institution !== "") ? profile.institution : "n/a";
+    fireCloudProfileObj.institute = isNil(instituteProp) ? '' : getOr('', 'propertyValue')(instituteProp);
     fireCloudProfileObj.institutionalProgram = "n/a";
     fireCloudProfileObj.programLocationCity = "n/a";
     fireCloudProfileObj.programLocationState = "n/a";
     fireCloudProfileObj.programLocationCountry = "n/a";
-    fireCloudProfileObj.pi = (profile.havePi !== undefined && profile.havePi === true)
-      ? profile.piName : profile.isThePI === true
-        ? Storage.getCurrentUser().displayName : "n/a";
+    fireCloudProfileObj.pi = isNil(piProp) ? isPi : getOr( "n/a", 'propertyValue')(piProp);
     fireCloudProfileObj.nonProfitStatus = "n/a";
     return fireCloudProfileObj;
   },

@@ -20,13 +20,17 @@ const srpTranslations = {
     manualReview: true
   },
   diseases: (diseases) => {
-    const diseaseArray = diseases.sort().map(disease => disease.label);
-    const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
-    return {
+    let outputStruct = {
       code: 'DS',
-      description: 'The dataset will be used for disease related studies' + (!isEmpty(diseaseString) ? ` (${diseaseString})` : ''),
+      description: 'The dataset will be used for disease related studies',
       manualReview: false
     };
+    if(!isEmpty(diseases)) {
+      const diseaseArray = diseases.sort().map((disease) => disease.label);
+      const diseaseString = diseaseArray.length > 1 ? join('; ')(diseaseArray) : diseaseArray[0];
+      outputStruct.description = outputStruct.description + ` (${diseaseString})`;
+    }
+    return outputStruct;
   },
   researchTypeDisease: {
     code: 'DS',
@@ -122,7 +126,7 @@ const consentTranslations = {
     description: 'Use is permitted for a health, medical, or biomedical research purpose'
   },
   diseaseRestrictions: (restrictions) => {
-    if (restrictions.length < 1) { return 'Use is permitted for the specified disease(s): Not specified'; }
+    if (isEmpty(restrictions)) { return 'Use is permitted for the specified disease(s): Not specified'; }
     const restrictionList = restrictions.join(', ');
     return {
       code: 'DS',

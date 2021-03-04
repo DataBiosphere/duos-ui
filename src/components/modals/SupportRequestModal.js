@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { div, form, input, label, textarea, hh, h, select, span, option, section, button } from 'react-hyperscript-helpers';
+import { div, form, input, label, textarea, hh, h, select, span, option, section, button, p } from 'react-hyperscript-helpers';
 import { Support} from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import { Notifications } from '../../libs/utils';
@@ -9,6 +9,7 @@ import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import Dropzone from 'react-dropzone';
 import Modal from 'react-modal';
 import * as fp from 'lodash/fp';
+import addHelpIcon from '../../images/icon_add_help.png';
 
 Modal.setAppElement('#root');
 
@@ -241,7 +242,7 @@ export const SupportRequestModal = hh(
               ]),
               PageSubHeading({
                 id: 'SupportRequestModal',
-                imgSrc: '/images/icon_add_help.png',
+                imgSrc: addHelpIcon,
                 color: 'common',
                 title: 'Contact Us',
               }),
@@ -310,48 +311,47 @@ export const SupportRequestModal = hh(
                 div({className: 'form-group first-form-group'}, [
                   label({id: 'lbl_attachment', className: 'common-color'},
                     ['Attachment']),
-                  <Dropzone
-                    onDrop={acceptedFiles => this.attachmentChangeHandler(
-                      acceptedFiles)}>
-                    {({isDragActive, openUploader, getRootProps, getInputProps}) => (
-                      section({
-                        style: {
-                          backgroundColor: this.state.attachment.length !== 0 ?
-                            'transparent' :
-                            (isDragActive ? '#6898c1' : '#ebecee'),
-                          fontSize: 14,
-                          lineHeight: '30px',
-                          paddingLeft: '1rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          border: this.state.attachment.length === 0 ?
-                            '1px dashed' :
-                            'none',
-                        },
-                      }, [
-                        <div {...getRootProps()}>
-                          <input {...getInputProps()} />
-                          <p>{this.state.attachment.length === 0 ?
+                  h(Dropzone, {
+                    onDrop: acceptedFiles => this.attachmentChangeHandler(acceptedFiles)
+                  }, [({isDragActive, openUploader, getRootProps, getInputProps}) => (
+                    section({
+                      style: {
+                        backgroundColor: this.state.attachment.length !== 0 ?
+                          'transparent' :
+                          (isDragActive ? '#6898c1' : '#ebecee'),
+                        fontSize: 14,
+                        lineHeight: '30px',
+                        paddingLeft: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        border: this.state.attachment.length === 0 ?
+                          '1px dashed' :
+                          'none',
+                      },
+                    }, [
+                      div({...getRootProps()}, [
+                        input({...getInputProps()}),
+                        p({}, [
+                          this.state.attachment.length === 0 ?
                             'Drag or Click to attach a files' :
-                            (this.state.attachment.length === 1 ?
+                            this.state.attachment.length === 1 ?
                               this.state.attachment[0].name :
-                              this.state.attachment.length +
-                              ' files selected')}</p>
-                        </div>,
-                        div({isRendered: this.state.attachment.length === 0},
-                          [uploadIcon]),
-                        button({
-                          isRendered: this.state.attachment.length !== 0,
-                          style: {
-                            background: 'transparent',
-                            border: 'none',
-                            outline: 'none',
-                          },
-                          onClick: this.attachmentCancel,
-                        }, [closeIcon]),
-                      ])
-                    )}
-                  </Dropzone>,
+                              this.state.attachment.length + ' files selected'
+                        ])
+                      ]),
+                      div({isRendered: this.state.attachment.length === 0},
+                        [uploadIcon]),
+                      button({
+                        isRendered: this.state.attachment.length !== 0,
+                        style: {
+                          background: 'transparent',
+                          border: 'none',
+                          outline: 'none',
+                        },
+                        onClick: this.attachmentCancel,
+                      }, [closeIcon]),
+                    ])
+                  )])
                 ]),
                 !this.state.isLogged &&
                 div({className: 'form-group first-form-group'}, [

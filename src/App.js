@@ -7,6 +7,7 @@ import { Config } from './libs/config';
 import DuosFooter from './components/DuosFooter';
 import DuosHeader from './components/DuosHeader';
 import {useHistory} from 'react-router-dom';
+import loadingImage from './images/loading-indicator.svg';
 
 import { SpinnerComponent as Spinner } from './components/SpinnerComponent';
 import { StackdriverReporter } from './libs/stackdriverReporter';
@@ -77,7 +78,7 @@ function App() {
         div({ className: 'main' }, [
           h(DuosHeader, { onSignOut: signOut }),
           h(Spinner, {
-            name: 'mainSpinner', group: 'duos', loadingImage: '/images/loading-indicator.svg'
+            name: 'mainSpinner', group: 'duos', loadingImage
           }),
           h(Routes, { onSignIn: signIn, isLogged: isLoggedIn, env: env })
         ])

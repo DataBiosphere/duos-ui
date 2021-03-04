@@ -1,6 +1,12 @@
 import {Component} from 'react';
 import {div, h1, h3, p, img} from 'react-hyperscript-helpers';
-
+import aboutCurrentAccessImg from '../images/about_current_access.png';
+import reducingComplexityImg from '../images/about_reducing_complexity.png';
+import consentOntologyImg from '../images/about_consent_ontology.png';
+import clarityComplexityImg from '../images/about_clarity_complexity.png';
+import twoFoldImg from '../images/about_two_fold_approach.png';
+import dacsCompareImg from '../images/about_dacs_compare.png';
+import dacsAlgoImg from '../images/about_dacs_algorithm.png';
 class HomeAbout extends Component {
 
   render() {
@@ -60,7 +66,7 @@ class HomeAbout extends Component {
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
               }, ['Current State of Data Access']),
               img({
-                src: '/images/about_current_access.png',
+                src: aboutCurrentAccessImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Current state of data access',
                 style: imageWrapper
@@ -86,7 +92,7 @@ class HomeAbout extends Component {
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
               }, ['Reducing the complexity of determining permitted uses of data from consent forms with machine readable codes']),
               img({
-                src: '/images/about_reducing_complexity.png',
+                src: reducingComplexityImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Reducing the complexity',
                 style: imageWrapper
@@ -108,7 +114,7 @@ class HomeAbout extends Component {
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
               }, ['Making permitted data use clearer in consent forms through the GA4GH Data Use Ontology']),
               img({
-                src: '/images/about_consent_ontology.png',
+                src: consentOntologyImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'GA4GH Data Use Ontology',
                 style: imageWrapper
@@ -123,7 +129,7 @@ class HomeAbout extends Component {
                 style: aboutSectionTitle
               }, ['Clarity of permitted data use helps, but complexity still lies in free-text data access requests']),
               img({
-                src: '/images/about_clarity_complexity.png',
+                src: clarityComplexityImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Complexity still lies in free-text data access requests',
                 style: imageWrapper
@@ -147,7 +153,7 @@ class HomeAbout extends Component {
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
               }, ['A two-fold approach to improving data access requests: pre-authorizing researchers, and machine-readable access requests']),
               img({
-                src: '/images/about_two_fold_approach.png',
+                src: twoFoldImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Two-fold approach to improving data access requests',
                 style: imageWrapper
@@ -167,7 +173,7 @@ class HomeAbout extends Component {
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12'
               }, ['Now DACs can compare permitted uses and access requests with enhanced clarity and efficiency']),
               img({
-                src: '/images/about_dacs_compare.png',
+                src: dacsCompareImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Now DACs can compare',
                 style: imageWrapper
@@ -180,7 +186,7 @@ class HomeAbout extends Component {
             div({style: aboutSectionWrapper}, [
               h3({style: aboutSectionTitle}, ['With both permitted uses and access requests in machine readable terms, an algorithm can offer suggested decisions to DACs']),
               img({
-                src: '/images/about_dacs_algorithm.png',
+                src: dacsAlgoImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Algorithm can offer suggested decisions to DACs',
                 style: imageWrapper

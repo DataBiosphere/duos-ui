@@ -16,6 +16,7 @@ import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
+import accessIcon from '../images/icon_access.png';
 
 class AccessCollect extends Component {
 
@@ -369,7 +370,7 @@ class AccessCollect extends Component {
         div({ className: 'row no-margin' }, [
           div({ className: 'col-lg-10 col-md-9 col-sm-9 col-xs-12 no-padding' }, [
             PageHeading({
-              id: 'collectAccess', imgSrc: '/images/icon_access.png', iconSize: 'medium',
+              id: 'collectAccess', imgSrc: accessIcon, iconSize: 'medium',
               color: 'access', title: 'Collect votes for Data Access Congruence Review'
             }),
             h(DataAccessRequestHeader, {

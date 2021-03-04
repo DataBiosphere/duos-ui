@@ -43,7 +43,7 @@
 }
 
 .btn_gSignIn .icon {
-  background: url('/images/btn_google_light_normal_ios.svg') no-repeat;
+  background: url('../images/btn_google_light_normal_ios.svg') no-repeat;
   float: left;
   background-color: #fff;
   vertical-align: middle;

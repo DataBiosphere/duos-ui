@@ -1,5 +1,5 @@
 # base image
-FROM node:14.15.5 AS builder
+FROM node:14.16.0 AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory
@@ -15,7 +15,6 @@ COPY public /usr/src/app/public
 COPY package.json /usr/src/app/package.json
 COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm install --silent
-RUN npm install react-scripts@1.1.1 -g --silent
 RUN npm run build --silent
 
 FROM nginxinc/nginx-unprivileged:1.19.7-alpine

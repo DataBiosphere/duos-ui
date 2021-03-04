@@ -15,14 +15,10 @@ export class SpinnerComponent extends React.Component {
     }
 
     this.state = {
-      show: this.props.hasOwnProperty('show') ? this.props.show : false
+      show: this.props.show || false
     };
 
-    if (this.props.hasOwnProperty('spinnerService')) {
-      this.spinnerService = this.props.spinnerService;
-    } else {
-      this.spinnerService = spinnerService;
-    }
+    this.spinnerService = spinnerService;
 
     this.spinnerService._register(this);
   }
