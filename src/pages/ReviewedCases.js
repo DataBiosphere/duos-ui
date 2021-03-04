@@ -101,8 +101,8 @@ class ReviewedCases extends Component {
     this.props.history.push(`dul_results_record/${ electionId }`);
   };
 
-  openAccessResultRecords = (electionId, referenceId) => {
-    this.props.history.push(`access_result_records/${ referenceId }/${ electionId }`);
+  openAccessResultRecords = (referenceId) => {
+    this.props.history.push(`review_results/${ referenceId }`);
   };
 
   handleDulPageChange = page => {
@@ -288,7 +288,7 @@ class ReviewedCases extends Component {
                     name: 'btn_recordAccess',
                     className: 'cell-button hover-color',
                     'ui-sref': 'access_results_record({electionId: \'this.election.electionId \', referenceId: \'this.election.referenceId \'})',
-                    onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
+                    onClick: () => this.openAccessResultRecords(election.referenceId)
                   }, ['Record'])
                 ])
               ]),

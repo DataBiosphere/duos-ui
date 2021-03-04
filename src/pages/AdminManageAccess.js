@@ -131,16 +131,8 @@ class AdminManageAccess extends Component {
     this.setState({ showModal: false });
   };
 
-  open = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${dataRequestId}/?electionId=${electionId}`);
-  };
-
-  openAccessCollect = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${electionId}/${dataRequestId}/`);
-  };
-
-  openAccessResultRecord = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${dataRequestId}/${electionId}`);
+  open = (dataRequestId) => {
+    this.props.history.push(`review_results/${dataRequestId}`);
   };
 
   okApplicationSummaryModal() {
@@ -265,28 +257,28 @@ class AdminManageAccess extends Component {
                         a({
                           id: dar.frontEndId + "_linkUnreviewed",
                           name: "link_unreviewed",
-                          onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.open(dar.referenceId)
                         }, ["Un-reviewed"]),
                       ]),
                       span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
                         a({
                           id: dar.frontEndId + "_linkOpen",
                           name: "link_open",
-                          onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.open(dar.referenceId)
                         }, ["Open"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, [
                         a({
                           id: dar.frontEndId + "_linkCanceled",
                           name: "link_canceled",
-                          onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.open(dar.referenceId)
                         }, ["Canceled"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
                         a({
                           id: dar.frontEndId + "_linkReviewed",
                           name: "link_reviewed",
-                          onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.open(dar.referenceId)
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),
