@@ -112,7 +112,8 @@ const Records = (props) => {
             h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
               onClick: () => props.history.push(`access_review/${dar.referenceId}/${vote.voteId}`),
-              label: isFinal ? 'Final' : 'Vote'
+              label: isFinal ? 'Final' : 'Vote',
+              disabled: isNil(vote)
             }),
             h(TableIconButton, {
               icon: Block,
