@@ -110,8 +110,8 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
     <AuthenticatedRoute path="/reviewed_cases" component={ReviewedCases} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
-      <AuthenticatedRoute path="/review_results/:referenceId" component={ReviewResults} props={props}
-                          rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
+    <AuthenticatedRoute path="/review_results/:referenceId" component={ReviewResults} props={props}
+      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <Route path="*" component={NotFound} />
   </Switch>
 );
