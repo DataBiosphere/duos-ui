@@ -1,6 +1,7 @@
 import React from 'react';
 import { div, img, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
+import * as fp from 'lodash/fp';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -15,10 +16,14 @@ const SMALL = {
 };
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
-
-  openAccessReview = (referenceId) => {
-    this.props.history.push(`/access_review/${referenceId}`);
-  };
+  constructor(props) {
+    super(props);
+    if (!fp.isNil(props.dacChairMessage)) {
+      this.state = { dacChairMessage: props.dacChairMessage };
+    } else {
+      this.state = { dacChairMessage: "" };
+    }
+  }
 
   render() {
     return div(
@@ -54,7 +59,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ style: SMALL },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
-              div({ style: SMALL }, "DAC Chairs can optionally vote as a member.")
+              div({ style: SMALL }, this.state.dacChairMessage )
             ])
           ]
         )

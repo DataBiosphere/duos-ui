@@ -95,6 +95,7 @@ class AccessReview extends React.PureComponent {
     const chairVotes = fp.filter({ type: 'Chairperson', dacUserId: currentUser.dacUserId })(allVotes);
     const finalVotes = fp.filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
     const agreementVotes = fp.filter({ type: 'AGREEMENT', dacUserId: currentUser.dacUserId })(allVotes);
+    const dacChairMessage = "DAC Chairs can optionally vote as a member.";
 
     return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
       [
@@ -102,7 +103,7 @@ class AccessReview extends React.PureComponent {
           {
             id: 'header', style: SECTION
           },
-          [AccessReviewHeader({ history, match })]
+          [AccessReviewHeader({ history, match, dacChairMessage })]
         ),
         div({ id: 'body', style: { display: 'flex' } }, [
           div(
