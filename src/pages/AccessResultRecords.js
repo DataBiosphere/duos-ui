@@ -15,7 +15,7 @@ import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
 import accessIcon from '../images/icon_access.png';
-import {Notifications} from '../libs/utils';
+import { Notifications } from '../libs/utils';
 
 
 class AccessResultRecords extends Component {

@@ -18,7 +18,7 @@ import { Theme } from '../libs/theme';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 import accessIcon from '../images/icon_access.png';
 import ApplicationDownloadLink from '../components/ApplicationDownloadLink';
-import {Notifications} from '../libs/utils';
+import { Notifications } from '../libs/utils';
 
 class AccessCollect extends Component {
 

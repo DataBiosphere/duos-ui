@@ -3,10 +3,10 @@ import { div, hh, span, h, h4, label, button, ul, li, b, a } from 'react-hypersc
 import { Alert } from './Alert';
 import { LibraryCards } from './LibraryCards';
 import { StructuredDarRp } from './StructuredDarRp';
-import {Theme} from '../libs/theme';
+import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 import * as ld from 'lodash';
-import {DataUseTranslation} from '../libs/dataUseTranslation';
+import { DataUseTranslation } from '../libs/dataUseTranslation';
 import ApplicationDownloadLink from './ApplicationDownloadLink';
 
 export const ApplicationSummary = hh(class ApplicationSummary extends PureComponent {

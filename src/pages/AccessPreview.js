@@ -6,14 +6,14 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { StructuredDarRp } from '../components/StructuredDarRp';
-import {DAR, DataSet, Researcher} from '../libs/ajax';
+import { DAR, DataSet, Researcher } from '../libs/ajax';
 import { Models } from '../libs/models';
 import { Theme } from '../libs/theme';
 import * as ld from 'lodash';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 import accessIcon from '../images/icon_access.png';
 import ApplicationDownloadLink from '../components/ApplicationDownloadLink';
-import {Notifications} from '../libs/utils';
+import { Notifications } from '../libs/utils';
 
 class AccessPreview extends Component {
 
