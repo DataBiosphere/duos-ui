@@ -1,6 +1,6 @@
 import * as ld from 'lodash';
 import { Component, Fragment } from 'react';
-import { a, div, h, h3, h4, hr, i, span } from 'react-hyperscript-helpers';
+import {a, button, div, h, h3, h4, hr, i, span,} from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
@@ -305,7 +305,7 @@ class AccessCollect extends Component {
   async findDar() {
     await DAR.describeDar(this.props.match.params.referenceId).then(
       darInfo => {
-        this.getDarData(darInfo).then((datasets) => {
+        this.getDarDatasets(darInfo).then((datasets) => {
           this.setState({datasets: datasets});
           Researcher.getResearcherProfile(darInfo.researcherId).then(
             researcherProfile => {
@@ -320,7 +320,7 @@ class AccessCollect extends Component {
     );
   }
 
-  getDarData = async (darInfo) => {
+  getDarDatasets = async (darInfo) => {
     let datasets;
     try {
       const datasetsPromise = darInfo.datasetIds.map((id) => {
@@ -533,9 +533,9 @@ class AccessCollect extends Component {
                 ]),
                 div({ id: 'panel_researchPurpose', className: 'panel-body cm-boxbody' }, [
                   div({ style: { 'marginBottom': '10px' } }, [darInfo.rus]),
-                  div({isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile)}, [
-                    h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
-                  ])
+                  button({ isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile),
+                    className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'},
+                  [h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})])
                 ])
               ]),
 
