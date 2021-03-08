@@ -1,7 +1,6 @@
 import React from 'react';
 import { div, span, hh, h } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
-import { Files } from '../../libs/ajax';
 import { AppSummary } from './AppSummary';
 import { VoteSummary } from './VoteSummary';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
@@ -25,11 +24,6 @@ const HEADER_BOLD = {
 };
 
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
-
-  downloadDAR = () => {
-    const { darId } = this.props;
-    Files.getDARFile(darId);
-  };
 
   render() {
     const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets } = this.props;
