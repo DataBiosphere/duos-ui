@@ -1,6 +1,5 @@
 import * as ld from 'lodash';
 import isNil from 'lodash/fp/isNil';
-import isEmpty from 'lodash/fp/isEmpty';
 import { Component, Fragment } from 'react';
 import { a, div, h, h3, h4, hr, i, label, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
@@ -10,13 +9,13 @@ import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
-
-import { DAR, Election, Files, Match, Researcher, Votes } from '../libs/ajax';
+import {DAR, DataSet, Election, Match, Researcher, Votes} from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
 import accessIcon from '../images/icon_access.png';
+import {Notifications} from '../libs/utils';
 
 
 class AccessResultRecords extends Component {
@@ -96,13 +95,6 @@ class AccessResultRecords extends Component {
     return chartData;
   }
 
-
-
-  downloadDAR = (e) => {
-    Files.getDARFile(this.state.darElection.referenceId);
-  };
-
-
   toggleQ1 = (e) => {
     this.setState(prev => {
       prev.isQ1Expanded = !prev.isQ1Expanded;
@@ -130,7 +122,7 @@ class AccessResultRecords extends Component {
 
   render() {
 
-    const { darInfo, hasUseRestriction, mrDAR, showRPaccordion, researcherProfile } = this.state;
+    const { darInfo, hasUseRestriction, showRPaccordion, researcherProfile, datasets } = this.state;
 
     const backButton = div({ className: 'col-lg-2 col-md-3 col-sm-3 col-xs-12 no-padding' }, [
       a({ id: 'btn_back', onClick: this.goBack, className: 'btn-primary btn-back' }, [
@@ -170,11 +162,11 @@ class AccessResultRecords extends Component {
         }, [
           ApplicationSummary({
             isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile),
-            mrDAR: mrDAR,
+            mrDAR: null,
             hasUseRestriction: hasUseRestriction,
             darInfo: darInfo,
-            downloadDAR: this.downloadDAR,
-            researcherProfile: researcherProfile
+            researcherProfile: researcherProfile,
+            datasets: datasets
           }),
 
           div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
@@ -499,7 +491,7 @@ class AccessResultRecords extends Component {
       voteAgreement: voteAgreement,
       mrDAR: mrDAR
     };
-  };
+  }
 
   async showDULData(electionReview) {
     let election = electionReview.election;
@@ -515,7 +507,7 @@ class AccessResultRecords extends Component {
       chartDataDUL: this.getGraphData(electionReview.reviewVote),
       mrDUL: JSON.stringify(electionReview.consent.useRestriction, null, 2)
     };
-  };
+  }
 
   async vaultVote(consentId, referenceId) {
     const data = await Match.findMatch(consentId, referenceId);
@@ -538,14 +530,14 @@ class AccessResultRecords extends Component {
       };
     }
     return output;
-  };
+  }
 
   async electionAPICalls(electionId) {
     const darElection = await Election.findElectionById(electionId);
     return {
       darElection
     };
-  };
+  }
 
   async darAPICalls (referenceId) {
     const darInfo = await DAR.describeDar(referenceId);
@@ -554,13 +546,27 @@ class AccessResultRecords extends Component {
       darInfo,
       researcherProfile
     };
-  };
+  }
+
+  async getDarDatasets (darInfo) {
+    let datasets;
+    try {
+      const datasetsPromise = darInfo.datasetIds.map((id) => {
+        return DataSet.getDataSetsByDatasetId(id);
+      });
+      datasets = await Promise.all(datasetsPromise);
+    } catch(error) {
+      Notifications.showError({text: 'Error initializing DAR Datasets'});
+      return Promise.reject(error);
+    }
+    return datasets;
+  }
 
   //returns the most recent final vote
   async getFinalDACVote(electionId) {
     const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
     return {finalDACVote};
-  };
+  }
 
   async electionReviewCall(electionId) {
     let output = {
@@ -584,7 +590,7 @@ class AccessResultRecords extends Component {
     };
 
     return output;
-  };
+  }
 
   async electionRPCall(electionId, finalStatus = false) {
     let assignToState = {};
@@ -608,7 +614,7 @@ class AccessResultRecords extends Component {
     }
 
     return assignToState;
-  };
+  }
 
 
   async loadData() {
@@ -624,24 +630,20 @@ class AccessResultRecords extends Component {
       this.electionRPCall(electionId, false) //Election.findRPElectionReview(electionId, false (finalStatus))
     ]);
 
+    const datasets = await this.getDarDatasets(darAPIResults.darInfo);
     const {darData, electionReview, showDULData, vaultVote} = electionReviewResults;
-    const restrictions = darAPIResults.darInfo.restrictions;
     const consent = electionReview.consent;
 
     assignToState = Object.assign({}, darData, electionReview, showDULData, vaultVote, electionAPIResults, darAPIResults, finalDACVote, electionRPResults);
-    assignToState.hasUseRestrictions = !isNil(restrictions) && !isEmpty(restrictions);
     assignToState.consentName = consent.name;
     assignToState.dataUse = consent.dataUse;
-    //NOTE: need to add hasUseRestriction to the state object, but is there a way for me to pull it forward?
+    assignToState.datasets = datasets;
+    assignToState.researcherProfile = darAPIResults.researcherProfile;
 
     //NOTE: lot of election calls, they seem to have different contexts and have extra stuff added to them
     //On top of that it just gets a bunch of other stuff (votes, consent) objects attached to it and returned as a seperate data structure
     //Contextually the difference between each of these elections are not clear (TYPE is different, but what that entails is not obvious)
     //Similar questions with the various votes (rpVotes, finalDACVote).
-
-    //NOTE: the component currently uses hasRestrictions, which I found out to simply be a check on the restrictions attribute on a DAR
-    //Basically all it does is check if a value exists and returns the bool value
-    //So all I've done is simply check that value myself from the describeDar return value rather than use the endpoint
 
     //List of keys with mapped values
     //   electionId,
@@ -655,7 +657,6 @@ class AccessResultRecords extends Component {
     //   election: electionReviewResults.showDULData.election,
     //   downloadUrl: electionReviewResults.showDULData.downloadUrl,
     //   dulName: electionReviewResults.showDULData.dulName,
-    //   hasUseRestrictions: !isNil(restrictions) && !isEmpty(restrictions),
     //   status: electionReviewResults.showDULData.election.status,
     //   voteList: electionReviewResults.showDULData.voteList,
     //   chartDataDUL: electionReviewResults.showDULData.chartDataDUL,
