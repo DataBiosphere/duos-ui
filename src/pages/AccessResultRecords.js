@@ -15,7 +15,6 @@ import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import * as Utils from '../libs/utils';
 import accessIcon from '../images/icon_access.png';
-import { Notifications } from '../libs/utils';
 
 
 class AccessResultRecords extends Component {
@@ -548,20 +547,6 @@ class AccessResultRecords extends Component {
     };
   }
 
-  async getDarDatasets (darInfo) {
-    let datasets;
-    try {
-      const datasetsPromise = darInfo.datasetIds.map((id) => {
-        return DataSet.getDataSetsByDatasetId(id);
-      });
-      datasets = await Promise.all(datasetsPromise);
-    } catch(error) {
-      Notifications.showError({text: 'Error initializing DAR Datasets'});
-      return Promise.reject(error);
-    }
-    return datasets;
-  }
-
   //returns the most recent final vote
   async getFinalDACVote(electionId) {
     const finalDACVote = await Votes.getDarFinalAccessVote(electionId);
@@ -630,7 +615,7 @@ class AccessResultRecords extends Component {
       this.electionRPCall(electionId, false) //Election.findRPElectionReview(electionId, false (finalStatus))
     ]);
 
-    const datasets = await this.getDarDatasets(darAPIResults.darInfo);
+    const datasets = await DataSet.getDarDatasets(darAPIResults.darInfo.datasetIds);
     const {darData, electionReview, showDULData, vaultVote} = electionReviewResults;
     const consent = electionReview.consent;
 

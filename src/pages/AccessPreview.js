@@ -13,7 +13,6 @@ import * as ld from 'lodash';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 import accessIcon from '../images/icon_access.png';
 import ApplicationDownloadLink from '../components/ApplicationDownloadLink';
-import { Notifications } from '../libs/utils';
 
 class AccessPreview extends Component {
 
@@ -57,7 +56,7 @@ class AccessPreview extends Component {
 
     DAR.describeDar(referenceId).then(
       darInfo => {
-        this.getDarDatasets(darInfo).then((datasets) => {
+        DataSet.getDarDatasets(darInfo.datasetIds).then((datasets) => {
           this.setState({datasets: datasets});
         }).then(() => {
           Researcher.getResearcherProfile(darInfo.researcherId).then(
@@ -72,20 +71,6 @@ class AccessPreview extends Component {
       }
     );
   }
-
-  getDarDatasets = async (darInfo) => {
-    let datasets;
-    try {
-      const datasetsPromise = darInfo.datasetIds.map((id) => {
-        return DataSet.getDataSetsByDatasetId(id);
-      });
-      datasets = await Promise.all(datasetsPromise);
-    } catch(error) {
-      Notifications.showError({text: 'Error initializing DAR Datasets'});
-      return Promise.reject(error);
-    }
-    return datasets;
-  };
 
   toggleQ1 = (e) => {
     this.setState(prev => {

@@ -399,6 +399,15 @@ export const DataSet = {
     return await res.json();
   },
 
+  getDarDatasets: async (datasetIds) => {
+    let datasets;
+    const datasetsPromise = datasetIds.map((id) => {
+      return DataSet.getDataSetsByDatasetId(id);
+    });
+    datasets = await Promise.all(datasetsPromise);
+    return datasets;
+  },
+
   getDataSetsByDatasetId: async dataSetId => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}`;
     const res = await fetchOk(url, Config.authOpts());

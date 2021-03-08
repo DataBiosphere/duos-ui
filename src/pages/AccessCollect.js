@@ -18,7 +18,6 @@ import { Theme } from '../libs/theme';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 import accessIcon from '../images/icon_access.png';
 import ApplicationDownloadLink from '../components/ApplicationDownloadLink';
-import { Notifications } from '../libs/utils';
 
 class AccessCollect extends Component {
 
@@ -305,7 +304,7 @@ class AccessCollect extends Component {
   async findDar() {
     await DAR.describeDar(this.props.match.params.referenceId).then(
       darInfo => {
-        this.getDarDatasets(darInfo).then((datasets) => {
+        DataSet.getDarDatasets(darInfo.datasetIds).then((datasets) => {
           this.setState({datasets: datasets});
           Researcher.getResearcherProfile(darInfo.researcherId).then(
             researcherProfile => {
@@ -319,20 +318,6 @@ class AccessCollect extends Component {
       }
     );
   }
-
-  getDarDatasets = async (darInfo) => {
-    let datasets;
-    try {
-      const datasetsPromise = darInfo.datasetIds.map((id) => {
-        return DataSet.getDataSetsByDatasetId(id);
-      });
-      datasets = await Promise.all(datasetsPromise);
-    } catch(error) {
-      Notifications.showError({text: 'Error initializing DAR Datasets'});
-      return Promise.reject(error);
-    }
-    return datasets;
-  };
 
   getRPGraphData(type, reviewVote) {
     var yes = 0, no = 0, empty = 0;
