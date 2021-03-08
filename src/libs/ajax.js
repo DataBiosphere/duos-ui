@@ -628,11 +628,6 @@ export const Files = {
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;
     return getFile(url, fileName);
-  },
-
-  getDARFile: async (darId) => {
-    const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    return await getFile(url, null);
   }
 };
 
