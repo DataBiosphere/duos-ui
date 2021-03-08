@@ -1,6 +1,6 @@
 import * as ld from 'lodash';
 import { Component, Fragment } from 'react';
-import {a, button, div, h, h3, h4, hr, i, span,} from 'react-hyperscript-helpers';
+import { a, button, div, h, h3, h4, hr, i, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
