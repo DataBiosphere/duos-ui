@@ -9,7 +9,7 @@ import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
-import {DAR, DataSet, Election, Match, Researcher, Votes} from '../libs/ajax';
+import { DAR, DataSet, Election, Match, Researcher, Votes } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
