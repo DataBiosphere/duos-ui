@@ -1,6 +1,6 @@
 import * as ld from 'lodash';
 import { Component, Fragment } from 'react';
-import { a, button, div, h, h3, h4, hr, i, span } from 'react-hyperscript-helpers';
+import { a, div, h, h3, h4, hr, i, span } from 'react-hyperscript-helpers';
 import { ApplicationSummary } from '../components/ApplicationSummary';
 import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import { CollectResultBox } from '../components/CollectResultBox';
@@ -10,13 +10,15 @@ import { PageHeading } from '../components/PageHeading';
 import { SingleResultBox } from '../components/SingleResultBox';
 import { StructuredDarRp } from '../components/StructuredDarRp';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { DAR, Election, Email, Files, Researcher, DataSet } from '../libs/ajax';
+import { DAR, Election, Email, Researcher, DataSet } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Models } from '../libs/models';
 import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 import accessIcon from '../images/icon_access.png';
+import ApplicationDownloadLink from '../components/ApplicationDownloadLink';
+import {Notifications} from '../libs/utils';
 
 class AccessCollect extends Component {
 
@@ -89,9 +91,10 @@ class AccessCollect extends Component {
       rpVoteAccessList: [],
 
       darInfo: Models.dar,
-      researcherProfile: null
+      researcherProfile: null,
+      datasets: []
     };
-  };
+  }
 
   handlerReminder = (e) => (voteId) => {
     this.setState(prev => {
@@ -118,7 +121,7 @@ class AccessCollect extends Component {
 
   async sendReminder(voteId) {
     return await Email.sendReminderEmail(voteId);
-  };
+  }
 
   dialogHandlerReminder = (answer) => (e) => {
     this.setState({ showDialogReminder: false });
@@ -152,7 +155,7 @@ class AccessCollect extends Component {
 
   updateElection(election) {
     return Election.updateElection(election.electionId, election);
-  };
+  }
 
   confirmationRPHandlerOK = (answer) => async (e) => {
     if (answer === true) {
@@ -180,10 +183,6 @@ class AccessCollect extends Component {
       });
     }
 
-  };
-
-  downloadDAR() {
-    Files.getDARFile(this.state.election.referenceId);
   };
 
   accessCollectVote = (vote, rationale) => {
@@ -293,7 +292,7 @@ class AccessCollect extends Component {
       prev.openAccordion = true;
       return prev;
     });
-  };
+  }
 
   chunk(arr, size) {
     var newArr = [];
@@ -301,21 +300,38 @@ class AccessCollect extends Component {
       newArr.push(arr.slice(i, i + size));
     }
     return newArr;
-  };
+  }
 
   async findDar() {
     await DAR.describeDar(this.props.match.params.referenceId).then(
       darInfo => {
-        Researcher.getResearcherProfile(darInfo.researcherId).then(
-          researcherProfile => {
-            this.setState(prev => {
-              prev.darInfo = darInfo;
-              prev.researcherProfile = researcherProfile;
-              return prev;
+        this.getDarData(darInfo).then((datasets) => {
+          this.setState({datasets: datasets});
+          Researcher.getResearcherProfile(darInfo.researcherId).then(
+            researcherProfile => {
+              this.setState(prev => {
+                prev.darInfo = darInfo;
+                prev.researcherProfile = researcherProfile;
+                return prev;
+              });
             });
-          });
+        });
       }
     );
+  }
+
+  getDarData = async (darInfo) => {
+    let datasets;
+    try {
+      const datasetsPromise = darInfo.datasetIds.map((id) => {
+        return DataSet.getDataSetsByDatasetId(id);
+      });
+      datasets = await Promise.all(datasetsPromise);
+    } catch(error) {
+      Notifications.showError({text: 'Error initializing DAR Datasets'});
+      return Promise.reject(error);
+    }
+    return datasets;
   };
 
   getRPGraphData(type, reviewVote) {
@@ -365,6 +381,8 @@ class AccessCollect extends Component {
   }
 
   render() {
+    const { darInfo, datasets, researcherProfile } = this.state;
+
     return (
       div({ className: 'container container-wide' }, [
         div({ className: 'row no-margin' }, [
@@ -374,8 +392,8 @@ class AccessCollect extends Component {
               color: 'access', title: 'Collect votes for Data Access Congruence Review'
             }),
             h(DataAccessRequestHeader, {
-              isRendered: !ld.isEmpty(this.state.darInfo.datasets),
-              dar: this.state.darInfo,
+              isRendered: !ld.isEmpty(datasets),
+              dar: darInfo,
               consentName: this.state.consentName
             })
           ]),
@@ -403,12 +421,13 @@ class AccessCollect extends Component {
             div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
 
               ApplicationSummary({
-                isRendered: !ld.isNil(this.state.darInfo) && !ld.isNil(this.state.researcherProfile),
+                isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile),
                 mrDAR: null,
                 hasUseRestriction: this.state.hasUseRestriction,
-                darInfo: this.state.darInfo,
-                downloadDAR: this.downloadDAR,
-                researcherProfile: this.state.researcherProfile }),
+                darInfo: darInfo,
+                researcherProfile: researcherProfile,
+                datasets: datasets
+              }),
 
               div({
                 className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
@@ -513,10 +532,10 @@ class AccessCollect extends Component {
                   h4({}, ['Research Purpose'])
                 ]),
                 div({ id: 'panel_researchPurpose', className: 'panel-body cm-boxbody' }, [
-                  div({ style: { 'marginBottom': '10px' } }, [this.state.darInfo.rus]),
-                  button({
-                    className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color', onClick: () => this.downloadDAR()
-                  }, ['Download Full Application'])
+                  div({ style: { 'marginBottom': '10px' } }, [darInfo.rus]),
+                  div({isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile)}, [
+                    h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
+                  ])
                 ])
               ]),
 
@@ -526,7 +545,7 @@ class AccessCollect extends Component {
                 ]),
                 div({ style: {paddingLeft: '2rem'}}, [
                   StructuredDarRp({
-                    darInfo: this.state.darInfo,
+                    darInfo: darInfo,
                     headerStyle: { display: 'none' },
                     textStyle: Theme.legacy
                   })
