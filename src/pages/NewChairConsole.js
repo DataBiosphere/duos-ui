@@ -106,7 +106,7 @@ const Records = (props) => {
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' : {
-          const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
+          const votes = filter({type: 'DAC', dacUserId: currentUserId, electionId: e.electionId})(electionInfo.votes);
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           return [
             h(TableTextButton, {
