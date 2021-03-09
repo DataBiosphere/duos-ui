@@ -399,6 +399,15 @@ export const DataSet = {
     return await res.json();
   },
 
+  getDarDatasets: async (datasetIds) => {
+    let datasets;
+    const datasetsPromise = datasetIds.map((id) => {
+      return DataSet.getDataSetsByDatasetId(id);
+    });
+    datasets = await Promise.all(datasetsPromise);
+    return datasets;
+  },
+
   getDataSetsByDatasetId: async dataSetId => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -628,11 +637,6 @@ export const Files = {
   getApprovedUsersFile: async (fileName, dataSetId) => {
     const url = `${await Config.getApiUrl()}/dataset/${dataSetId}/approved/users`;
     return getFile(url, fileName);
-  },
-
-  getDARFile: async (darId) => {
-    const url = `${await Config.getApiUrl()}/dataRequest/${darId}/pdf`;
-    return await getFile(url, null);
   }
 };
 
