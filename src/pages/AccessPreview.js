@@ -6,12 +6,13 @@ import { CollapsiblePanel } from '../components/CollapsiblePanel';
 import DataAccessRequestHeader from '../components/DataAccessRequestHeader';
 import { PageHeading } from '../components/PageHeading';
 import { StructuredDarRp } from '../components/StructuredDarRp';
-import { DAR, Files, Researcher } from '../libs/ajax';
+import { DAR, DataSet, Researcher } from '../libs/ajax';
 import { Models } from '../libs/models';
 import { Theme } from '../libs/theme';
 import * as ld from 'lodash';
 import TranslatedDULComponent from '../components/TranslatedDULComponent';
 import accessIcon from '../images/icon_access.png';
+import ApplicationDownloadLink from '../components/ApplicationDownloadLink';
 
 class AccessPreview extends Component {
 
@@ -23,7 +24,8 @@ class AccessPreview extends Component {
       isQ2Expanded: false,
       dataUse: {},
       darInfo: Models.dar,
-      researcherProfile: null
+      researcherProfile: null,
+      datasets: []
     };
   }
 
@@ -54,22 +56,21 @@ class AccessPreview extends Component {
 
     DAR.describeDar(referenceId).then(
       darInfo => {
-        Researcher.getResearcherProfile(darInfo.researcherId).then(
-          researcherProfile => {
-            this.setState(prev => {
-              prev.darInfo = darInfo;
-              prev.researcherProfile = researcherProfile;
-              return prev;
+        DataSet.getDarDatasets(darInfo.datasetIds).then((datasets) => {
+          this.setState({datasets: datasets});
+        }).then(() => {
+          Researcher.getResearcherProfile(darInfo.researcherId).then(
+            researcherProfile => {
+              this.setState(prev => {
+                prev.darInfo = darInfo;
+                prev.researcherProfile = researcherProfile;
+                return prev;
+              });
             });
-          });
+        });
       }
     );
-
-  };
-
-  downloadDAR = () => {
-    Files.getDARFile(this.props.match.params.referenceId);
-  };
+  }
 
   toggleQ1 = (e) => {
     this.setState(prev => {
@@ -86,6 +87,7 @@ class AccessPreview extends Component {
   };
 
   render() {
+    const { darInfo, datasets, researcherProfile } = this.state;
     return (
       div({ className: 'container container-wide' }, [
         div({ className: 'row no-margin' }, [
@@ -95,8 +97,8 @@ class AccessPreview extends Component {
               color: 'access', title: 'Data Access Congruence Preview'
             }),
             h(DataAccessRequestHeader, {
-              isRendered: !_.isEmpty(this.state.darInfo.datasets),
-              dar: this.state.darInfo,
+              isRendered: !_.isEmpty(datasets),
+              dar: darInfo,
               consentName: this.state.consentName
             })
           ]),
@@ -119,11 +121,12 @@ class AccessPreview extends Component {
             div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
 
               ApplicationSummary({
-                isRendered: !ld.isNil(this.state.darInfo) && !ld.isNil(this.state.researcherProfile),
+                isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile),
                 mrDAR: null,
-                darInfo: this.state.darInfo,
-                downloadDAR: this.downloadDAR,
-                researcherProfile: this.state.researcherProfile }),
+                darInfo: darInfo,
+                researcherProfile: researcherProfile,
+                datasets: datasets
+              }),
 
               div({
                 className: 'col-lg-4 col-md-4 col-sm-12 col-xs-12 panel panel-primary cm-boxes',
@@ -150,9 +153,10 @@ class AccessPreview extends Component {
                   h4({}, ['Research Purpose'])
                 ]),
                 div({ id: 'panel_researchPurpose', className: 'panel-body cm-boxbody' }, [
-                  div({ style: { 'marginBottom': '10px' } }, [this.state.darInfo.rus]),
-                  button({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color', onClick: this.downloadDAR },
-                    ['Download Full Application'])
+                  div({ style: { 'marginBottom': '10px' } }, [darInfo.rus]),
+                  button({ isRendered: !ld.isNil(darInfo) && !ld.isNil(researcherProfile),
+                    className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'},
+                  [h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})])
                 ])
               ]),
 
@@ -162,7 +166,7 @@ class AccessPreview extends Component {
                 ]),
                 div({ style: {paddingLeft: '2rem'}}, [
                   StructuredDarRp({
-                    darInfo: this.state.darInfo,
+                    darInfo: darInfo,
                     headerStyle: { display: 'none' },
                     textStyle: Theme.legacy
                   })

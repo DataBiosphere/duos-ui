@@ -3,16 +3,17 @@ import { div, hh, span, h, h4, label, button, ul, li, b, a } from 'react-hypersc
 import { Alert } from './Alert';
 import { LibraryCards } from './LibraryCards';
 import { StructuredDarRp } from './StructuredDarRp';
-import {Theme} from '../libs/theme';
+import { Theme } from '../libs/theme';
 import * as Utils from '../libs/utils';
 import * as ld from 'lodash';
-import {DataUseTranslation} from '../libs/dataUseTranslation';
+import { DataUseTranslation } from '../libs/dataUseTranslation';
+import ApplicationDownloadLink from './ApplicationDownloadLink';
 
 export const ApplicationSummary = hh(class ApplicationSummary extends PureComponent {
 
   render() {
     let {darInfo} = this.props;
-    const { mrDAR, downloadDAR, researcherProfile } = this.props;
+    const { mrDAR, researcherProfile, datasets } = this.props;
     darInfo.purposeStatements = DataUseTranslation.generatePurposeStatement(darInfo);
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
     return div({className: 'col-lg-8 col-md-8 col-sm-12 col-xs-12 panel panel-primary cm-boxes' }, [
@@ -23,14 +24,14 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
       div({ id: 'panel_applicationSummary', className: 'panel-body row' }, [
         div({ className: 'col-lg-4 col-md-5 col-sm-5 col-xs-12' }, [
 
-          div({ isRendered: darInfo.havePI, className: 'row no-margin' }, [
+          div({ isRendered: (researcherProfile.havePI === "true"), className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['PI: ']),
             span({ id: 'lbl_principalInvestigator', className: 'response-label', style: { 'paddingLeft': '5px' } },
               [darInfo.pi])
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['Researcher: ']),
-            span({ id: 'lbl_researcher', className: 'response-label', style: { 'paddingLeft': '5px' } }, [darInfo.profileName])
+            span({ id: 'lbl_researcher', className: 'response-label', style: { 'paddingLeft': '5px' } }, [researcherProfile.profileName])
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label no-padding' }, ['Status: ']),
@@ -52,24 +53,24 @@ export const ApplicationSummary = hh(class ApplicationSummary extends PureCompon
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['Institution: ']),
-            span({ id: 'lbl_institution', className: 'response-label', style: { 'paddingLeft': '5px' } }, [darInfo.institution])
+            span({ id: 'lbl_institution', className: 'response-label', style: { 'paddingLeft': '5px' } }, [researcherProfile.institution])
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['Department: ']),
-            span({ id: 'lbl_department', className: 'response-label', style: { 'paddingLeft': '5px' } }, [darInfo.department])
+            span({ id: 'lbl_department', className: 'response-label', style: { 'paddingLeft': '5px' } }, [researcherProfile.department])
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['City: ']),
-            span({ id: 'lbl_state', className: 'response-label', style: { 'paddingLeft': '5px' } }, [darInfo.city])
+            span({ id: 'lbl_state', className: 'response-label', style: { 'paddingLeft': '5px' } }, [researcherProfile.city])
           ]),
           div({ className: 'row no-margin' }, [
             label({ className: 'control-label access-color' }, ['Country: ']),
-            span({ id: 'lbl_country', className: 'response-label', style: { 'paddingLeft': '5px' } }, [darInfo.country])
+            span({ id: 'lbl_country', className: 'response-label', style: { 'paddingLeft': '5px' } }, [researcherProfile.country])
           ]),
           button({
             id: 'btn_downloadFullApplication',
-            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 btn-secondary btn-download-pdf hover-color', onClick: downloadDAR
-          }, ['Download Full Application'])
+            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 btn-secondary btn-download-pdf hover-color'
+          }, [h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})])
         ]),
 
         div({ className: 'col-lg-8 col-md-7 col-sm-7 col-xs-12' }, [
