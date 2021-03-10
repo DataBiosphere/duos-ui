@@ -244,7 +244,7 @@ class AdminManageAccess extends Component {
                       ]),
                       span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
                         a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
-                          onClick: () => () => this.open(dar.referenceId)
+                          onClick: () => this.open(dar.referenceId)
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),
