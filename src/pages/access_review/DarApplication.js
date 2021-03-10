@@ -41,7 +41,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         isRendered: voteAsChair && !fp.isNil(accessVotes),
         question: 'Should data access be granted to this application?',
         questionNumber: '1',
-        votes: accessVotes
+        votes: accessVotes,
       }),
       VoteSummary({
         isRendered: voteAsChair && !fp.isNil(rpVotes),
