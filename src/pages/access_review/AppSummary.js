@@ -10,17 +10,6 @@ import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
 import isNil from "lodash/fp";
 
-const SUBHEADER = {
-  margin: '32px 0px 10px',
-  color: Theme.palette.primary,
-  opacity: '70%',
-  textTransform: 'uppercase',
-  fontSize: Theme.font.size.small,
-  lineHeight: Theme.font.leading.dense,
-  fontWeight: Theme.font.weight.semibold,
-  fontFamily: 'Montserrat',
-};
-
 const ROOT = {
   fontFamily: 'Montserrat',
   color: Theme.palette.primary,
