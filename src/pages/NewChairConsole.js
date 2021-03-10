@@ -42,7 +42,7 @@ const processElectionStatus = (election, votes) => {
     }
   } else if (electionStatus === 'Final') {
     const finalVote = find(wasFinalVoteTrue)(votes);
-    output = finalVote ? 'Accepted' : 'Denied';
+    output = finalVote ? 'Accepted' : 'Closed';
   } else {
     output = electionStatus;
   }
@@ -107,12 +107,11 @@ const Records = (props) => {
       switch (e.status) {
         case 'Open' : {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
-          const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           return [
             h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
               onClick: () => props.history.push(`access_review/${dar.referenceId}`),
-              label: isFinal ? 'Final' : 'Vote',
+              label: 'Vote',
               disabled: isEmpty(votes)
             }),
             h(TableIconButton, {
