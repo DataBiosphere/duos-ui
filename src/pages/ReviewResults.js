@@ -1,15 +1,30 @@
 import React from 'react';
-import {div} from 'react-hyperscript-helpers';
+import {div, h} from 'react-hyperscript-helpers';
 import {AccessReviewHeader} from './access_review/AccessReviewHeader';
-import {DAR, DataSet, Researcher, Votes} from '../libs/ajax';
+import {DAR, DataSet, Election, Researcher} from '../libs/ajax';
 import {Notifications} from '../libs/utils';
 import * as fp from 'lodash/fp';
-import {DarApplication} from "./access_review/DarApplication";
-import { Election } from '../libs/ajax';
+import ApplicationDownloadLink from "../components/ApplicationDownloadLink";
+import {VoteSummary} from "./access_review/VoteSummary";
+import {AppSummary} from "./access_review/AppSummary";
+import {Theme} from "../libs/theme";
 
 const SECTION = {
-  margin: '10px 16px',
+  margin: '20px',
 };
+
+const HEADER = {
+  fontSize: '18px',
+  lineHeight: Theme.font.leading.regular,
+  fontFamily: 'Montserrat',
+  color: Theme.palette.primary,
+};
+
+const HEADER_BOLD = {
+  ...HEADER,
+  fontWeight: Theme.font.weight.semibold,
+};
+
 
 class ReviewResults extends React.PureComponent {
   constructor(props) {
@@ -64,7 +79,7 @@ class ReviewResults extends React.PureComponent {
         console.log(accessElection);
       } catch (error) {
         //access election is null
-        Notifications.showError({text: 'Error initializing Data Access Election'});
+        Notifications.showInformation({text: 'A data access election has not yet been created for this DAR.'});
       }
       try {
         accessElectionReview = fp.isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
@@ -86,50 +101,49 @@ class ReviewResults extends React.PureComponent {
     const {accessElectionReview, accessElection, rpElectionReview} = electionData;
 
     this.setState({ darId, accessElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
-    // this.setState((prev) => {
-    //   prev.datasets = datasets;
-    //   prev.darInfo = darInfo;
-    //   prev.consent = consent;
-    //   prev.researcherProfile = researcherProfile;
-    //   return prev;
-    //});
-    // this.setState((prev) => {
-    //   prev.accessElection = accessElection;
-    //   prev.accessElectionReview = accessElectionReview;
-    //   prev.rpElectionReview = rpElectionReview;
-    //   return prev;
-    // });
-
   }
 
-  render() {
-    if (!fp.isNil(this.state)) {
+    render() {
+     if (!fp.isNil(this.state)) {
       const voteAsChair = true;
       const {history, match} = this.props;
       const {darId, darInfo, datasets, consent, researcherProfile, accessElection, accessElectionReview, rpElectionReview } = this.state;
 
-      return div({isRendered: !fp.isNil(this.state), id: 'container'}, [
-        div({id: 'header', style: SECTION}, [
+      const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get('reviewVote')(accessElectionReview);
+      const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get('reviewVote')(rpElectionReview);
+
+      return div({isRendered: !fp.isNil(this.state), id: 'container', style: {margin: '2rem'}}, [
+        div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
           AccessReviewHeader({history, match})
         ]),
-        div({isRendered: !fp.isNil(darId), id: 'application', style: {...SECTION, width: '80%'}},
-          [DarApplication({
-            voteAsChair,
-            darId,
-            darInfo,
-            accessElection,
-            consent,
-            accessElectionReview,
-            rpElectionReview,
-            researcherProfile,
-            datasets
+        div({style: {SECTION, display: 'flex'}}, [
+          div({style: {...HEADER_BOLD, marginLeft: '20px'}}, "Project Title: " + darInfo.projectTitle),
+          div({style: {...HEADER, marginLeft: '35px'}}, ' | '),
+          div({style: {...HEADER_BOLD, marginLeft: '35px', marginRight: '35px'}}, "ID: " + darInfo.darCode),
+          h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
+        ]),
+        div({style: {margin: '0 20px 20px'}}, [
+          AppSummary({darInfo, accessElection, consent, researcherProfile})
+        ]),
+        div({style: SECTION}, [
+          VoteSummary({
+            isRendered: voteAsChair,
+            question: 'Should data access be granted to this application?',
+            questionNumber: '1',
+            votes: !fp.isNil(accessVotes) ? accessVotes : []
           })
-          ],
-        )]
-      );
-    }
-    return null;
-  }
+        ]),
+        div({style: SECTION}, [
+          VoteSummary({
+            isRendered: voteAsChair,
+            question: 'Was the research purpose accurately converted to a structured format?',
+            questionNumber: '2',
+            votes: !fp.isNil(rpVotes) ? rpVotes : [],
+          })
+        ])
+      ])
+     }
+      return null;
+    };
 }
-
 export default ReviewResults;
