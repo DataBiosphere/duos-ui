@@ -8,6 +8,7 @@ import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
+import isNil from "lodash/fp";
 
 const SUBHEADER = {
   margin: '32px 0px 10px',
@@ -74,7 +75,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
     const { piName, profileName, institution, department, city, country } = researcherProfile;
-    const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
+    const mrDAR = !isNil(accessElection) ? JSON.stringify(accessElection.useRestriction, null, 2) : null;
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {
       return span({key: index, style: TEXT}, restrictionObj.description);
@@ -107,7 +108,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
             },
             [
               StructuredDarRp({darInfo: darInfo}),
-              div({},[
+              div({isRendered: !isNil(mrDAR)},[
                 DownloadLink({ label: 'DAR machine-readable format', onDownload: () => download('machine-readable-DAR.json', mrDAR) })
               ])
             ]
@@ -117,6 +118,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
               id: 'dusl',
               style: {
                 width: '50%',
+                margin: '24px 24px 0',
                 padding: '24px',
                 backgroundColor: Theme.palette.background.highlighted,
                 borderRadius: '9px',
