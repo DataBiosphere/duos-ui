@@ -4,27 +4,11 @@ import {AccessReviewHeader} from './access_review/AccessReviewHeader';
 import {DAR, DataSet, Election, Researcher} from '../libs/ajax';
 import {Notifications} from '../libs/utils';
 import * as fp from 'lodash/fp';
-import ApplicationDownloadLink from "../components/ApplicationDownloadLink";
-import {VoteSummary} from "./access_review/VoteSummary";
-import {AppSummary} from "./access_review/AppSummary";
-import {Theme} from "../libs/theme";
+import {DarApplication} from "./access_review/DarApplication";
 
 const SECTION = {
   margin: '20px',
 };
-
-const HEADER = {
-  fontSize: '18px',
-  lineHeight: Theme.font.leading.regular,
-  fontFamily: 'Montserrat',
-  color: Theme.palette.primary,
-};
-
-const HEADER_BOLD = {
-  ...HEADER,
-  fontWeight: Theme.font.weight.semibold,
-};
-
 
 class ReviewResults extends React.PureComponent {
   constructor(props) {
@@ -109,39 +93,14 @@ class ReviewResults extends React.PureComponent {
       const {history, match} = this.props;
       const {darId, darInfo, datasets, consent, researcherProfile, accessElection, accessElectionReview, rpElectionReview } = this.state;
 
-      const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get('reviewVote')(accessElectionReview);
-      const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get('reviewVote')(rpElectionReview);
-
       return div({isRendered: !fp.isNil(this.state), id: 'container', style: {margin: '2rem'}}, [
         div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
           AccessReviewHeader({history, match})
         ]),
-        div({style: {SECTION, display: 'flex'}}, [
-          div({style: {...HEADER_BOLD, marginLeft: '20px'}}, "Project Title: " + darInfo.projectTitle),
-          div({style: {...HEADER, marginLeft: '35px'}}, ' | '),
-          div({style: {...HEADER_BOLD, marginLeft: '35px', marginRight: '35px'}}, "ID: " + darInfo.darCode),
-          h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
-        ]),
-        div({style: {margin: '0 20px 20px'}}, [
-          AppSummary({darInfo, accessElection, consent, researcherProfile})
-        ]),
-        div({style: SECTION}, [
-          VoteSummary({
-            isRendered: voteAsChair,
-            question: 'Should data access be granted to this application?',
-            questionNumber: '1',
-            votes: !fp.isNil(accessVotes) ? accessVotes : []
-          })
-        ]),
-        div({style: SECTION}, [
-          VoteSummary({
-            isRendered: voteAsChair,
-            question: 'Was the research purpose accurately converted to a structured format?',
-            questionNumber: '2',
-            votes: !fp.isNil(rpVotes) ? rpVotes : [],
-          })
-        ])
-      ])
+        div({id: 'body', style: SECTION }, [
+          DarApplication({ voteAsChair, darId, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets })
+          ])
+        ]);
      }
       return null;
     };

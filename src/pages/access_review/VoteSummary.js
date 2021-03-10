@@ -16,6 +16,7 @@ const STYLE = {
   backgroundColor: Theme.palette.background.secondary,
   padding: 16,
   borderRadius: '9px',
+  margin: '16px 0'
 };
 
 const HEADER_STYLE = {
