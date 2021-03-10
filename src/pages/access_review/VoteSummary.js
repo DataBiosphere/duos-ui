@@ -6,6 +6,7 @@ import { Theme } from '../../libs/theme';
 import { Chart } from 'react-google-charts';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
+import {isEmpty} from "lodash";
 
 const STYLE = {
   color: Theme.palette.primary,
@@ -15,7 +16,7 @@ const STYLE = {
   fontFamily: 'Montserrat',
   backgroundColor: Theme.palette.background.secondary,
   padding: 16,
-  borderRadius: '0 9px 9px 0',
+  borderRadius: '9px',
 };
 
 const HEADER_STYLE = {
