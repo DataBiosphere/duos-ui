@@ -8,7 +8,7 @@ import * as fp from 'lodash/fp';
 
 const SECTION = {
   fontFamily: 'Montserrat',
-  margin: '2rem 0 2rem 0',
+  margin: '2rem 0 1rem 0',
   color: Theme.palette.primary,
   display: 'flex',
 };
@@ -30,11 +30,10 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
     const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get( 'reviewVote')(accessElectionReview);
     const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get( 'reviewVote')(rpElectionReview);
     return div([
-      div({ id: 'header', style: SECTION }, [
-        div({ style: { minWidth: '50%' } }, [
-          span({ style: HEADER_BOLD }, darInfo.projectTitle),
-          span({ style: HEADER }, ' | ' + darInfo.darCode)
-        ]),
+      div({ id: 'header', style: {...SECTION, display: 'flex' }}, [
+        div({style: {...HEADER_BOLD}}, "Project Title: " + darInfo.projectTitle),
+        div({style: {...HEADER, marginLeft: '35px'}}, ' | '),
+        div({style: {...HEADER_BOLD, marginLeft: '35px', marginRight: '35px'}}, "ID: " + darInfo.darCode),
         h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
       ]),
       VoteSummary({
