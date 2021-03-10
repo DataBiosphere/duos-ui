@@ -10,7 +10,7 @@ import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
 
 const SUBHEADER = {
-  margin: '32px 0px',
+  margin: '32px 0px 10px',
   color: Theme.palette.primary,
   opacity: '70%',
   textTransform: 'uppercase',
@@ -96,7 +96,6 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
     return div({ id: 'app-summary' },
       [
-        div({ style: SUBHEADER }, 'Application summary'),
         div({ style: { display: 'flex' } }, [
           div(
             {
@@ -129,13 +128,14 @@ export const AppSummary = hh(class AppSummary extends React.Component {
         div(
           {
             id: 'rp',
-            style: { margin: '32px 0px' },
+            style: { margin: '20px 0px' },
           },
           [ApplicationSection({ header: 'Research Purpose', content: darInfo.rus, headerColor: Theme.palette.primary, })]
         ),
         div(
           {
             id: 'applicant',
+            style: { margin: '20px 0px' }
           },
           [ApplicantInfo({
             researcherProfile: researcherProfile,
