@@ -238,12 +238,13 @@ export const Styles = {
       color: 'white',
       height: '60%',
       borderRadius: '.3rem',
-      cursor: 'pointer',
+      cursor: 'default',
       minHeight: '3rem',
       margin: '2% 10% 2% 0'
     },
     TABLE_BUTTON_TEXT_HOVER: {
-      backgroundColor: '#2FA4E7'
+      backgroundColor: '#2FA4E7',
+      cursor: 'pointer'
     },
     TABLE_BUTTON_ICON_HOVER: {
       color: '#2FA4E7'
