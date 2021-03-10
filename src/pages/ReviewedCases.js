@@ -45,7 +45,7 @@ class ReviewedCases extends Component {
       }
     };
     this.getReviewedConsents = this.getReviewedConsents.bind(this);
-    this.openAccessResultRecords = this.openAccessResultRecords.bind(this);
+    this.openAccessReviewResults = this.openAccessReviewResults.bind(this);
     this.openDulResultsRecord = this.openDulResultsRecord.bind(this);
 
   }
@@ -104,7 +104,7 @@ class ReviewedCases extends Component {
     this.props.history.push(`dul_results_record/${ electionId }`);
   };
 
-  openAccessResultRecords = (referenceId) => {
+  openAccessReviewResults = (referenceId) => {
     this.props.history.push(`review_results/${ referenceId }`);
   };
 
@@ -291,7 +291,7 @@ class ReviewedCases extends Component {
                     name: 'btn_recordAccess',
                     className: 'cell-button hover-color',
                     'ui-sref': 'access_results_record({electionId: \'this.election.electionId \', referenceId: \'this.election.referenceId \'})',
-                    onClick: () => this.openAccessResultRecords(election.referenceId)
+                    onClick: () => this.openAccessReviewResults(election.referenceId)
                   }, ['Record'])
                 ])
               ]),
