@@ -106,7 +106,11 @@ const Records = (props) => {
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' : {
-          const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
+          const votes = filter((v) => {
+            const belongsToUser = (currentUserId === v.dacUserId);
+            const targetTypes = (v.type === 'Chairperson' || v.type === 'DAC');
+            return belongsToUser && targetTypes;
+          })(electionInfo.votes);
           return [
             h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
