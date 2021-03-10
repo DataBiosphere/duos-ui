@@ -38,16 +38,16 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
       ]),
       VoteSummary({
-        isRendered: voteAsChair,
+        isRendered: voteAsChair && !fp.isNil(accessVotes),
         question: 'Should data access be granted to this application?',
         questionNumber: '1',
-        votes: !fp.isNil(accessVotes) ? accessVotes : []
+        votes: accessVotes
       }),
       VoteSummary({
         isRendered: voteAsChair && !fp.isNil(rpVotes),
         question: 'Was the research purpose accurately converted to a structured format?',
         questionNumber: '2',
-        votes: !fp.isNil(rpVotes) ? rpVotes : [],
+        votes: rpVotes,
       }),
       AppSummary({ darInfo, accessElection, consent, researcherProfile })
     ]);
