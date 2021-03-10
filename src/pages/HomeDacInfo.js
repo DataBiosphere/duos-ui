@@ -1,6 +1,7 @@
 import {Component} from 'react';
 import {div, h1, h3, img, p, span} from 'react-hyperscript-helpers';
-
+import currentAccessImg from '../images/about_current_access.png';
+import dacsAlgoImg from '../images/about_dacs_algorithm.png';
 class HomeDacInfo extends Component {
 
   render() {
@@ -65,10 +66,10 @@ class HomeDacInfo extends Component {
                 p({style: paragraph}, ['On the other hand (diagram right), researchers data access requests are often narrative scientific proposals of varying levels of depth and specificity as to the research proposed.']),
                 p({style: paragraph}, ['The inconsistency and lack of clarity in the terms used to describe data use use limitations and research proposals makes it difficult for DACs to answer the question of ',
                   span({style: {fontStyle: 'italics'}}, '“Is the proposed research within the bounds of the data use limitations?”')]),
-                img({style: imageWrapper, src: '/images/about_current_access.png', alt: 'current access'}),
+                img({style: imageWrapper, src: currentAccessImg, alt: 'current access'}),
                 p({style: paragraph}, ['To resolve this issue, the Global Alliance for Genomics and Health created a common vocabulary for data use limitations and proposed research, called the Data Use Ontology. The ontology is not only a standardized series of terms and definitions describing data use  but is also computer readable.']),
                 p({style: paragraph}, ['DUOS leverages the Data Use Ontology by enabling Data Depositors to describe their data use limitations with DUO terms, and Researchers to describe their research purposes with DUO terms. The result is that DACs using DUOS can compare data use limitations and research purposes using the same vocabulary of terms.']),
-                img({style: imageWrapper, src: '/images/about_dacs_algorithm.png', alt: 'algorithm'}),
+                img({style: imageWrapper, src: dacsAlgoImg, alt: 'algorithm'}),
                 p({style: paragraph}, ['Additionally, with the use limitations and proposed research in DUO terms, DUOS can enable an algorithm to compute the comparison of the data use limitations and proposed research in an attempt to replicate the decision the DAC would make. Through testing, the DUOS algorithm has seen >90% agreement with DACs. Currently, DACs are able to leverage the algorithm as a decision-support tool, reviewing the DUOS algorithm’s suggested decision prior to logging their own decision. If the DUOS algorithm proves to consistently decide as the DAC would, DACs may choose to use the DUOS algorithm to automatically respond to data access requests.'])
               ]),
             ]),

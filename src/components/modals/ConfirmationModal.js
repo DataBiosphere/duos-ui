@@ -4,7 +4,7 @@ import Modal from "react-modal";
 import {isNil} from "lodash";
 
 const ConfirmationModal = (props) => {
-  const {showConfirmation, setShowConfirmation, title, message, header, onConfirm, id, index} = props;
+  const {showConfirmation, closeConfirmation, title, message, header, onConfirm, id, index} = props;
 
   //id and index are optional parameters to onConfirm
   //can use an onConfirm with no parameters
@@ -28,7 +28,7 @@ const ConfirmationModal = (props) => {
       div({style: Styles.MODAL.DAR_DETAIL}, [`${message}`]),
       div({style: {width: "40%", float: "right"}}, [
         div({style: {width: "45%", float: "left"}}, [
-          button({className: "cell-button cancel-color", onClick: () => setShowConfirmation(false)}, ["Cancel"])
+          button({className: "cell-button cancel-color", onClick: () => closeConfirmation() }, ["Cancel"])
         ]),
         div({style: {width: "45%", float: "right"}}, [
           confirmButton

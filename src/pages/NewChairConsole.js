@@ -12,6 +12,7 @@ import PaginationBar from '../components/PaginationBar';
 import {Storage} from "../libs/storage";
 import { Block } from '@material-ui/icons';
 import ConfirmationModal from "../components/modals/ConfirmationModal";
+import lockIcon from '../images/lock-icon.png';
 
 const wasVoteSubmitted = (vote) => {
   //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
@@ -104,7 +105,7 @@ const Records = (props) => {
     const currentUserId = Storage.getCurrentUser().dacUserId;
     if (!isNil(e)) {
       switch (e.status) {
-        case 'Open' :
+        case 'Open' : {
           const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
           const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
           return [
@@ -120,6 +121,7 @@ const Records = (props) => {
               onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
             })
           ];
+        }
         default :
           return h(TableTextButton, {
             key: `reopen-button-${e.referenceId}`,
@@ -217,6 +219,10 @@ export default function NewChairConsole(props) {
     }
   };
 
+  const closeConfirmation = () => {
+    setShowConfirmation(false);
+  }
+
   const updateLists = (updatedElection, darId, index, successText, votes = undefined) => {
     const i = index + ((currentPage - 1) * tableSize);
     let filteredListCopy = cloneDeep(filteredList);
@@ -295,7 +301,7 @@ export default function NewChairConsole(props) {
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
-              src: '/images/lock-icon.png',
+              src: lockIcon,
               style: Styles.HEADER_IMG
             })
           ]),
@@ -335,11 +341,11 @@ export default function NewChairConsole(props) {
         ]),
         h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists})
       ]),
-      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover}),
+      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize}),
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
       h(ConfirmationModal, {
         showConfirmation,
-        setShowConfirmation,
+        closeConfirmation,
         title: "Open Election?",
         message: "Are you sure you want the DAC to vote on this data access request?",
         header: createElectionInfo.name,

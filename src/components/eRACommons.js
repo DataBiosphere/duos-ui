@@ -5,7 +5,7 @@ import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
 import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
-
+import eraIcon from "../images/era-commons-logo.png";
 
 export const eRACommons = hh(class eRACommons extends React.Component {
 
@@ -122,7 +122,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       width: 38,
       backgroundRepeat: 'no-repeat',
       backgroundSize: 'contain',
-      backgroundImage: 'url("/images/era-commons-logo.png")',
+      backgroundImage: `url(${eraIcon})`,
       display: 'inline-block'
     };
     const buttonHoverState = {

@@ -587,7 +587,6 @@ small {
 }
 
 .vote-update {
-  display: inline-block;
   font-size: 14px;
   font-weight: 500 !important;
   color: #2FA4E7 !important;
@@ -1208,7 +1207,7 @@ a .editable:hover, a .enabled:hover {
 }
 
 .library-icon {
-  background: url('/images/library_card_icon.png') no-repeat 0 0;
+  background: url('./images/library_card_icon.png') no-repeat 0 0;
   width: 38px;
   height: 24px;
   background-size: 32px 20px ;
@@ -1225,7 +1224,7 @@ a .editable:hover, a .enabled:hover {
   display: inline-block;
   width: 35px;
   height: 40px;
-  background: url('/images/admin_icons.png') no-repeat 0 0;
+  background: url('./images/admin_icons.png') no-repeat 0 0;
   overflow: hidden;
   text-indent: -15000px;
   margin: 7px 3px 0 0;
@@ -1677,6 +1676,7 @@ td:first-child .checkbox label {
 }
 
 input:-webkit-autofill {
+  box-shadow: 0 0 0px 1000px white inset;
   -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 

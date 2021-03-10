@@ -2,6 +2,7 @@ import React from 'react';
 import * as ld from 'lodash';
 import { div, hh, img } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
+import cardImg from '../../images/card.png';
 
 const HEADER = {
   margin: '10px 0px',
@@ -36,7 +37,7 @@ export const ApplicantInfo = hh(
         return div({ style: { margin: 3 } }, [
           img({
             id: 'card_' + card,
-            src: '/images/card.png',
+            src: cardImg,
             style: { width: 51, height: 40 },
           }),
           div(

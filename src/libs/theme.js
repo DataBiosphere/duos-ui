@@ -118,7 +118,7 @@ export const Styles = {
       fontWeight: Theme.font.weight.medium,
       backgroundColor: "#f3f6f7",
       display: "flex",
-      justifyContent: "center",
+      justifyContent: "left",
       height: "51px"
     },
     RECORD_ROW: {
@@ -126,8 +126,8 @@ export const Styles = {
       fontWeight: Theme.font.weight.regular,
       fontSize: "14px",
       display: "flex",
-      justifyContent: "center",
-      padding: '0.8rem 0'
+      justifyContent: "left",
+      height: "48px",
     },
     RECORD_TEXT: {
       color: "#00243C"

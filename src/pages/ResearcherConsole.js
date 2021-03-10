@@ -9,6 +9,7 @@ import { Storage } from '../libs/storage';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
 import { Theme } from '../libs/theme';
+import accessIcon from "../images/icon_access.png";
 
 class ResearcherConsole extends Component {
 
@@ -153,7 +154,7 @@ class ResearcherConsole extends Component {
               div({ className: "col-md-9 col-sm-8 col-xs-12 no-padding" }, [
                 PageSubHeading({
                   id: "researcherConsoleAccess",
-                  imgSrc: "/images/icon_access.png",
+                  imgSrc: accessIcon,
                   color: "access",
                   title: "Your Data Access Requests",
                   description: "List of your Data Access Requests"
