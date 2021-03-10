@@ -6,6 +6,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { PendingCases } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { SearchBox } from '../components/SearchBox';
+import datasetReviewIcon from "../images/icon_dataset_review.png";
 
 class DataOwnerConsole extends Component {
 
@@ -103,7 +104,7 @@ class DataOwnerConsole extends Component {
               div({ className: "col-lg-8 col-md-8 col-sm-7 col-xs-12 no-padding" }, [
                 PageSubHeading({
                   id: "dataOwnerConsole",
-                  imgSrc: "/images/icon_dataset_review.png",
+                  imgSrc: datasetReviewIcon,
                   iconSize: "large",
                   color: "dataset",
                   title: "Dataset Access Request Review",

@@ -1,4 +1,5 @@
 import { a, div, footer, img, li, ul } from 'react-hyperscript-helpers';
+import footerLogo from '../images/broad_logo_allwhite.png';
 
 function DuosFooter() {
 
@@ -27,7 +28,7 @@ function DuosFooter() {
   return (
     div({ style: footerStyle }, [
       footer({ style: mainFooterStyle }, [
-        img({ src: "/images/broad_logo_allwhite.png", style: footerLogoStyle, alt: "Broad Institute logo" }),
+        img({ src: footerLogo, style: footerLogoStyle, alt: "Broad Institute logo" }),
         ul({ className: "footer-links" }, [
           li({ className: "footer-links__item" }, ["\u00A9 Broad Institute"]),
           li({ className: "footer-links__item" }, [a({ target: '_blank', href: "https://www.broadinstitute.org/privacy-policy" }, ["Privacy Policy"]),]),

@@ -6,7 +6,10 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { Election } from '../libs/ajax';
 import * as Utils from '../libs/utils';
-
+import isNil from 'lodash/fp';
+import reviewedIcon from '../images/icon_reviewed.png';
+import dulIcon from '../images/icon_dul.png';
+import accessIcon from '../images/icon_access.png';
 
 class ReviewedCases extends Component {
 
@@ -52,7 +55,7 @@ class ReviewedCases extends Component {
     let data = this.state.electionsList.dul;
     let sortedData = data.sort(function(a, b) {
 
-      if (!a.hasOwnProperty(sortKey) || !b.hasOwnProperty(sortKey)) {
+      if ((isNil(a) || isNil(a[sortKey])) || (isNil(b) || isNil(b[sortKey]))) {
         // property doesn't exist on either object
         return 0;
       }
@@ -146,7 +149,7 @@ class ReviewedCases extends Component {
           div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
             PageHeading({
               id: 'reviewedCases',
-              imgSrc: '/images/icon_reviewed.png',
+              imgSrc: reviewedIcon,
               iconSize: 'medium',
               color: 'common',
               title: 'Reviewed Cases Record',
@@ -160,7 +163,7 @@ class ReviewedCases extends Component {
           div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
             PageSubHeading({
               id: 'reviewedCasesDul',
-              imgSrc: '/images/icon_dul.png',
+              imgSrc: dulIcon,
               color: 'dul',
               title: 'Data Use Limitations Reviewed Cases',
               description: 'List of Data Use Limitations Reviewed Cases and their results'
@@ -244,7 +247,7 @@ class ReviewedCases extends Component {
           div({ className: 'col-lg-8 col-md-8 col-sm-8 col-xs-12 no-padding' }, [
             PageSubHeading({
               id: 'reviewedCasesAccess',
-              imgSrc: '/images/icon_access.png',
+              imgSrc: accessIcon,
               color: 'access',
               title: 'Data Access Reviewed Cases',
               description: 'List of Data Access Request Reviewed Cases and their results'

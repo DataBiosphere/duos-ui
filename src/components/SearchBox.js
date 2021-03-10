@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { div, h, input, i, a } from 'react-hyperscript-helpers';
+import { input } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import './SearchBox.css';
 
@@ -28,14 +28,21 @@ export class SearchBox extends Component {
 
   render() {
     return (
-      div({ className: "search-box" }, [
-        i({ className: "glyphicon glyphicon-search " + this.props.color + "-color" }),
-        input({ id: "txt_search_" + this.props.id, type: "search", className: "form-control", placeholder: "Enter search term...", onChange: this.changeHandler, ref: this.myRef }),
-        a({ onClick: this.reset, className: "search-box-reset", "data-tip": "Clear Search", "data-for": "tip_clearSearch" }, [
-          i({ className: "glyphicon glyphicon-remove-circle dismiss-color" })
-        ]),
-        h(ReactTooltip, { id: "tip_clearSearch", place: 'top', effect: 'solid', className: 'tooltip-wrapper' })
-      ])
+      input({
+        type: "text",
+        placeholder: "Enter search terms",
+        onChange: this.changeHandler,
+        ref: this.myRef,
+        style: {
+          width: '100%',
+          border: '1px solid #cecece',
+          backgroundColor: '#f3f6f7',
+          borderRadius: '5px',
+          height: '4rem',
+          paddingLeft: '2%',
+          fontFamily: 'Montserrat'
+        }
+      })
     );
   }
 }

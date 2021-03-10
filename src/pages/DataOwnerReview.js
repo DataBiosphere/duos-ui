@@ -6,6 +6,7 @@ import { ApplicationSummaryModal } from '../components/modals/ApplicationSummary
 import { DatasetSummaryModal } from '../components/modals/DatasetSummaryModal';
 import { DAR, DataSet, Consent, Votes } from '../libs/ajax';
 import { ConfirmationDialog } from "../components/ConfirmationDialog";
+import datasetReviewIcon from "../images/icon_dataset_review.png";
 
 const APPROVE = "1";
 const DISAPPROVE = "0";
@@ -256,7 +257,7 @@ class DataOwnerReview extends Component {
       div({ className: "container container-wide" }, [
         div({ className: "row no-margin" }, [
           div({ className: "col-lg-7 col-md-7 col-sm-12 col-xs-12 no-padding" }, [
-            PageHeading({ id: "dataOwnerReview", imgSrc: "/images/icon_dataset_review.png", iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
+            PageHeading({ id: "dataOwnerReview", imgSrc: datasetReviewIcon, iconSize: "large", color: "dataset", title: "Dataset Access Request Review", description: "Should data access be granted to this applicant?" }),
           ]),
         ]),
         hr({ className: "section-separator" }),

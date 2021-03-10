@@ -1,15 +1,23 @@
 import { div, input, span } from 'react-hyperscript-helpers';
 import { useRef, useEffect } from 'react';
 import { toNumber } from 'lodash';
-import { Theme } from '../libs/theme';
+import {Styles, Theme} from '../libs/theme';
 
 //NOTE: This is a new pagination made to fit with the updated table look
 //Component does not use third-party libraries for pagination, whereas the old version relies on 'react-pagination'
 //Style works with Current Dar Table, but allows for modification with styles passed as a prop (though I expect to do some more fine-tuning with future implementations)
 export default function PaginationBar(props) {
-  const {pageCount, goToPage, changeTableSize, Styles, applyTextHover, removeTextHover} = props;
+  const {pageCount, goToPage, changeTableSize} = props;
   const currentPage = useRef(props.currentPage);
   const tableSize = useRef(props.tableSize);
+  const applyTextHover = (e) => {
+    e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
+    e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
+  };
+
+  const removeTextHover = (e, color) => {
+    e.target.style.color = color;
+  };
 
   useEffect(() => {
     currentPage.current.value = props.currentPage;

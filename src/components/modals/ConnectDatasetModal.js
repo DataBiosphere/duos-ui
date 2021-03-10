@@ -3,6 +3,7 @@ import { div, h, form, input, label, select, hh, option } from 'react-hyperscrip
 import { BaseModal } from '../BaseModal';
 import { Alert } from '../Alert';
 import { DatasetAssociation, DataSet } from '../../libs/ajax';
+import datasetLinkIcon from "../../images/icon_dataset_link.png";
 
 export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Component {
 
@@ -231,7 +232,7 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
         id: "connectDatasetModal",
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
-        imgSrc: "/images/icon_dataset_link.png",
+        imgSrc: datasetLinkIcon,
         color: "dataset",
         iconSize: 'large',
         title: "Connect Dataset with Data Owner",

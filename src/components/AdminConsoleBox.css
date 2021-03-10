@@ -21,7 +21,7 @@
     display: inline-block;
     width: 35px;
     height: 40px;
-    background: url('/images/admin_icons.png') no-repeat 0 0;
+    background: url('../images/admin_icons.png') no-repeat 0 0;
     overflow: hidden;
     vertical-align: top;
     margin: 8px 0 0 0;

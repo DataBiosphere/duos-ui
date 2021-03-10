@@ -1,6 +1,9 @@
 import {Component} from 'react';
 import {a, div, h, h1, h3, p, img, span} from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
+import LibraryCardAgreement from '../assets/Library_Card_Agreement_2021.pdf';
+import soApprovalImg from '../images/signing_official_approval.png';
+import soPreAuthImg from '../images/signing_official_preauthorize.png';
 
 class HomeSigningOfficial extends Component {
 
@@ -63,7 +66,7 @@ class HomeSigningOfficial extends Component {
             div({style: sectionBody}, [
               p({style: paragraph}, ['Currently, when a researcher makes a data access request they are not only required to obtain approval from the data access committee (DAC) which oversees the data, but also from their home instiution\'s Signing Official, who approves their request and acknowledges the acceptance of organizational liability in the case of data misuse.']),
               img({
-                src: '/images/signing_official_approval.png',
+                src: soApprovalImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Signing Officials approve DARs',
                 style: imageWrapper
@@ -71,7 +74,7 @@ class HomeSigningOfficial extends Component {
               p({style: paragraph}, ['Estimates show Signing Officials were required to approve at least 50,000 DARs in 2019 in the US. Based on feedback from numerous Signing Officials we understand Signing Officials primary concern in the approval of data access requests (DARs) to be primarily an endorsement or authorization of the researcher, rather than the proposed research.']),
               p({style: paragraph}, ['To alleviate this burden on Signing Officials, DUOS is offering Signing Officials the opportunity to pre-authorize researchers to submit DARs to DACs using DUOS, via our DUOS Library Card Agreement.']),
               img({
-                src: '/images/signing_official_preauthorize.png',
+                src: soPreAuthImg,
                 className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12',
                 alt: 'Alleviate burden on Signing Officials',
                 style: imageWrapper
@@ -80,7 +83,7 @@ class HomeSigningOfficial extends Component {
               div({style: {marginTop: '2rem', marginBottom: '2rem'}},
                 [a({
                   id: 'link_downloadAgreement',
-                  href: '/Library_Card_Agreement_2021.pdf',
+                  href: LibraryCardAgreement,
                   target: '_blank',
                   className: 'btn-secondary btn-download-pdf hover-color',
                   style: {paddingBottom: '1rem'},

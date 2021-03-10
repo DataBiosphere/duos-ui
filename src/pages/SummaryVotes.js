@@ -8,6 +8,9 @@ import { PendingCases, StatFiles, Summary } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { USER_ROLES } from '../libs/utils';
 import { Config } from '../libs/config';
+import statisticsIcon from "../images/icon_statistics.png";
+import dulIcon from "../images/icon_dul.png";
+import accessIcon from "../images/icon_access.png";
 
 const authDownloadRoles = [USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member];
 
@@ -111,7 +114,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding" }, [
             PageHeading({
               id: "summaryVotes",
-              imgSrc: "/images/icon_statistics.png",
+              imgSrc: statisticsIcon,
               iconSize: "large",
               color: "common",
               title: "Votes Statistics",
@@ -125,7 +128,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
             PageSubHeading({
               id: "summaryVotesDul",
-              imgSrc: "/images/icon_dul.png",
+              imgSrc: dulIcon,
               color: "dul",
               title: "Data Use Limitations Statistics",
               description: "Summary of votes on whether the consent limitations were accurately converted into a structured format"
@@ -165,7 +168,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           div({ className: "col-lg-10 col-md-9 col-sm-8 col-xs-12 no-padding" }, [
             PageSubHeading({
               id: "summaryVotesAccess",
-              imgSrc: "/images/icon_access.png",
+              imgSrc: accessIcon,
               color: "access",
               title: "Data Access Statistics",
               description: "Summary of votes on whether the researcher should be allowed to access a research study"

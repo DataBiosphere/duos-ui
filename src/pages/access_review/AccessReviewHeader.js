@@ -1,6 +1,7 @@
 import React from 'react';
 import { div, img, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
+import lockIcon from '../../images/lock-icon.png';
 import * as fp from 'lodash/fp';
 
 const TITLE = {
@@ -47,7 +48,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
           [
             img({
               id: 'lock-icon',
-              src: '/images/lock-icon.png',
+              src: lockIcon,
               style: {
                 width: '60px',
                 height: '60px',

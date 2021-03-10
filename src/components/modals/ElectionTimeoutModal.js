@@ -5,7 +5,7 @@ import { Alert } from '../Alert';
 import { ElectionTimeout } from '../../libs/ajax';
 import { Storage } from '../../libs/storage';
 import * as Utils from "../../libs/utils";
-
+import timeoutIcon from "../../images/icon_timeout.png";
 export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Component {
 
   constructor(props) {
@@ -93,7 +93,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
         showModal: this.props.showModal,
         onRequestClose: this.closeHandler,
         onAfterOpen: this.afterOpenHandler,
-        imgSrc: "/images/icon_timeout.png",
+        imgSrc: timeoutIcon,
         color: "common",
         iconName: 'manage-timeout',
         title: 'Set Data Owner election Timeout',
