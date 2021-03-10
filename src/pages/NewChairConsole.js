@@ -1,4 +1,4 @@
-import { head, isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
+import { isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 import { div, h, img, input } from 'react-hyperscript-helpers';
 import { DAR, Election, User, Votes } from '../libs/ajax';
@@ -42,7 +42,7 @@ const processElectionStatus = (election, votes) => {
     }
   } else if (electionStatus === 'Final') {
     const finalVote = find(wasFinalVoteTrue)(votes);
-    output = finalVote ? 'Accepted' : 'Denied';
+    output = finalVote ? 'Accepted' : 'Closed';
   } else {
     output = electionStatus;
   }
@@ -106,13 +106,17 @@ const Records = (props) => {
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' : {
-          const votes = filter({type: 'DAC', dacUserId: currentUserId})(electionInfo.votes);
-          const isFinal = !isEmpty(votes.find((voteData) => !isNil(voteData.vote)));
+          const votes = filter((v) => {
+            const belongsToUser = (currentUserId === v.dacUserId);
+            const targetTypes = (v.type === 'Chairperson' || v.type === 'DAC');
+            return belongsToUser && targetTypes;
+          })(electionInfo.votes);
           return [
             h(TableTextButton, {
               key: `vote-button-${e.referenceId}`,
               onClick: () => props.history.push(`access_review/${dar.referenceId}`),
-              label: isFinal ? 'Final' : 'Vote'
+              label: 'Vote',
+              disabled: isEmpty(votes)
             }),
             h(TableIconButton, {
               icon: Block,
