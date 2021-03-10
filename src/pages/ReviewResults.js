@@ -60,7 +60,6 @@ class ReviewResults extends React.PureComponent {
 
       try {
         accessElection = await Election.findElectionByDarId(darId);
-        console.log(accessElection);
       } catch (error) {
         //access election is null
         Notifications.showInformation({text: 'A data access election has not yet been created for this DAR.'});
