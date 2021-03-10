@@ -6,7 +6,6 @@ import { Theme } from '../../libs/theme';
 import { Chart } from 'react-google-charts';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
-import {isEmpty} from "lodash";
 
 const STYLE = {
   color: Theme.palette.primary,
