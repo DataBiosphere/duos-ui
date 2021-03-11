@@ -1,5 +1,5 @@
-import React from 'react';
-import {div, h} from 'react-hyperscript-helpers';
+import {useEffect, useState} from 'react';
+import {div} from 'react-hyperscript-helpers';
 import {AccessReviewHeader} from './access_review/AccessReviewHeader';
 import {DAR, DataSet, Election, Researcher} from '../libs/ajax';
 import {Notifications} from '../libs/utils';
@@ -10,98 +10,112 @@ const SECTION = {
   margin: '20px',
 };
 
-class ReviewResults extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.props = props;
-  }
+export default function ReviewResults(props) {
+  const [match] = useState(props.match);
+  const [darId] = useState(props.match.params.referenceId);
+  const [datasets, setDatasets] = useState();
+  const [darInfo, setDarInfo] = useState();
+  const [consent, setConsent] = useState();
+  const [researcherProfile, setResearcherProfile] = useState();
+  const [accessElection, setAccessElection] = useState();
+  const [accessElectionReview, setAccessElectionReview] = useState();
+  const [rpElectionReview, setRpElectionReview] = useState();
+  const [voteAsChair] = useState(true);
 
-  componentDidMount()  {
-    const darId = this.props.match.params.referenceId;
-    this.getData(darId);
-  }
+  useEffect(() => {
 
-  async getData(darId) {
-
-    //get information on datasets, consent, researcher, and access request
-    const getDarData = async (darId) => {
-      let datasets;
-      let darInfo;
-      let consent;
-      let researcherProfile;
-
-      try {
-        darInfo = await DAR.getPartialDarRequest(darId);
-        const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
-        const datasetsPromise = darInfo.datasetIds.map((id) => {
-          return DataSet.getDataSetsByDatasetId(id);
-        });
-        const consentPromise = await DAR.getDarConsent(darId);
-        [consent, datasets, researcherProfile] = await Promise.all([
-          consentPromise,
-          Promise.all(datasetsPromise),
-          researcherPromise
-        ]);
-
-      } catch (error) {
-        Notifications.showError({text: 'Error initializing DAR Data'});
-        return Promise.reject(error);
-      }
-
-      return {datasets, darInfo, consent, researcherProfile};
+    const [electionData, darData] = async (darId) => {
+      return await Promise.all([
+        getElectionInformation(darId),
+        getDarData(darId)
+      ]);
     };
-
-
-    //get information on access election and research purpose election
-    const getElectionInformation = async (darId) => {
-      let accessElection;
-      let accessElectionReview;
-      let rpElectionReview;
-
-      try {
-        accessElection = await Election.findElectionByDarId(darId);
-      } catch (error) {
-        //access election is null
-        Notifications.showInformation({text: 'There is not an active data access election for this DAR.'});
-      }
-      try {
-        accessElectionReview = fp.isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
-        rpElectionReview = fp.isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
-      } catch (error) {
-        Notifications.showError({text: 'Error initializing Election Data'});
-        return Promise.reject(error);
-      }
-      return { accessElection, accessElectionReview, rpElectionReview };
-    };
-
-
-    const [electionData, darData] = await Promise.all([
-      getElectionInformation(darId),
-      getDarData(darId)
-    ]);
 
     const {datasets, darInfo, consent, researcherProfile} = darData;
     const {accessElectionReview, accessElection, rpElectionReview} = electionData;
 
-    this.setState({ darId, accessElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
-  }
 
-    render() {
-     if (!fp.isNil(this.state)) {
-      const voteAsChair = true;
-      const {history, match} = this.props;
-      const {darId, darInfo, datasets, consent, researcherProfile, accessElection, accessElectionReview, rpElectionReview } = this.state;
+    setDarInfo(darInfo);
+    setConsent(consent);
+    setDatasets(datasets);
+    setResearcherProfile(researcherProfile);
+    setAccessElection(accessElection);
+    setAccessElectionReview(accessElectionReview);
+    setRpElectionReview(rpElectionReview);
 
-      return div({isRendered: !fp.isNil(this.state), id: 'container', style: {margin: '2rem'}}, [
-        div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
-          AccessReviewHeader({history, match})
-        ]),
-        div({id: 'body', style: SECTION }, [
-          DarApplication({ voteAsChair, darId, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets })
+  }, [darId]);
+
+  //get information on datasets, consent, researcher, and access request
+  const getDarData = async (darId) => {
+    let datasets;
+    let darInfo;
+    let consent;
+    let researcherProfile;
+
+    try {
+      darInfo = await DAR.getPartialDarRequest(darId);
+      const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
+      const datasetsPromise = darInfo.datasetIds.map((id) => {
+        return DataSet.getDataSetsByDatasetId(id);
+      });
+      const consentPromise = await DAR.getDarConsent(darId);
+      [consent, datasets, researcherProfile] = await Promise.all([
+        consentPromise,
+        Promise.all(datasetsPromise),
+        researcherPromise
+      ]);
+
+    } catch (error) {
+      Notifications.showError({text: 'Error initializing DAR Data'});
+      return Promise.reject(error);
+    }
+
+    return { darInfo, consent, datasets, researcherProfile };
+  };
+
+  //get information on access election and research purpose election
+  const getElectionInformation = async (darId) => {
+    let accessElection;
+    let accessElectionReview;
+    let rpElectionReview;
+
+    try {
+      accessElection = await Election.findElectionByDarId(darId);
+    } catch (error) {
+      //access election is null, this is expected in the case of a closed, unreviewed, or canceled election status
+      //so for these cases there is currently no way to display the vote information
+    }
+    try {
+      accessElectionReview = fp.isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
+      rpElectionReview = fp.isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+    } catch (error) {
+      Notifications.showError({text: 'Error initializing Election Data'});
+      return Promise.reject(error);
+    }
+
+    return { accessElection, accessElectionReview, rpElectionReview };
+  };
+
+    return (
+      (!fp.isNil(darInfo)) ?
+        div({id: 'container', style: {margin: '2rem'}}, [
+          div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
+            AccessReviewHeader({match})
+          ]),
+          div({id: 'body', style: SECTION}, [
+            DarApplication({
+              voteAsChair,
+              darId,
+              darInfo,
+              accessElection,
+              consent,
+              accessElectionReview,
+              rpElectionReview,
+              researcherProfile,
+              datasets
+            })
           ])
-        ]);
-     }
-      return null;
-    };
+        ])
+        : null
+);
 }
-export default ReviewResults;
