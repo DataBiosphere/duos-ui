@@ -1,8 +1,8 @@
 import {useEffect, useState} from 'react';
 import {div} from 'react-hyperscript-helpers';
 import {AccessReviewHeader} from './access_review/AccessReviewHeader';
-import {DAR, DataSet, Election, Researcher} from '../libs/ajax';
-import {Notifications} from '../libs/utils';
+import {Election} from '../libs/ajax';
+import {getDarData, Notifications} from '../libs/utils';
 import {isNil} from 'lodash/fp';
 import {DarApplication} from "./access_review/DarApplication";
 
@@ -23,40 +23,22 @@ export default function ReviewResults(props) {
   const [voteAsChair] = useState(true);
 
   useEffect(() => {
+    let darData;
+    let electionData;
+
     const getData = async (darId) => {
-      await Promise.all([
-        getElectionInformation(darId),
-        getDarData(darId)
+      [darData, electionData] = await Promise.all([
+        setDarData(darId),
+        getElectionInformation(darId)
       ]);
     }
+
     getData(darId);
+
   }, [darId]);
 
-  //get information on datasets, consent, researcher, and access request
-  const getDarData = async (darId) => {
-    let datasets;
-    let darInfo;
-    let consent;
-    let researcherProfile;
-
-    try {
-      darInfo = await DAR.getPartialDarRequest(darId);
-      const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
-      const datasetsPromise = darInfo.datasetIds.map((id) => {
-        return DataSet.getDataSetsByDatasetId(id);
-      });
-      const consentPromise = await DAR.getDarConsent(darId);
-      [consent, datasets, researcherProfile] = await Promise.all([
-        consentPromise,
-        Promise.all(datasetsPromise),
-        researcherPromise
-      ]);
-
-    } catch (error) {
-      Notifications.showError({text: 'Error initializing DAR Data'});
-      return Promise.reject(error);
-    }
-
+  const setDarData = async (darId) => {
+    const {datasets, darInfo, consent, researcherProfile} = await getDarData(darId);
     setDarInfo(darInfo);
     setConsent(consent);
     setDatasets(datasets);

@@ -3,8 +3,8 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import { DAR, Election, Researcher, Votes, DataSet } from '../../libs/ajax';
-import { Notifications } from '../../libs/utils';
+import { Election, Votes} from '../../libs/ajax';
+import { getDarData, Notifications } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import { isNil, filter } from 'lodash/fp';
 
@@ -46,32 +46,6 @@ class AccessReview extends React.PureComponent {
         Notifications.showError({text: 'Error initializing Election Data'});
         return Promise.reject(error);
       }
-    };
-
-    const getDarData = async(darId) => {
-      let datasets;
-      let darInfo;
-      let consent;
-      let researcherProfile;
-
-      try{
-        darInfo = await DAR.getPartialDarRequest(darId);
-        // Researcher information
-        const researcherPromise = Researcher.getResearcherProfile(darInfo.userId);
-        const datasetsPromise = darInfo.datasetIds.map((id) => {
-          return DataSet.getDataSetsByDatasetId(id);
-        });
-        const consentPromise = DAR.getDarConsent(darId);
-        [consent, datasets, researcherProfile] = await Promise.all([
-          consentPromise,
-          Promise.all(datasetsPromise),
-          researcherPromise
-        ]);
-      } catch(error) {
-        Notifications.showError({text: 'Error initializing DAR Data'});
-        return Promise.reject(error);
-      }
-      return {datasets, darInfo, consent, researcherProfile};
     };
 
     const [electionData, darData, allVotes] = await Promise.all([
