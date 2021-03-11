@@ -3,7 +3,7 @@ import {div} from 'react-hyperscript-helpers';
 import {AccessReviewHeader} from './access_review/AccessReviewHeader';
 import {DAR, DataSet, Election, Researcher} from '../libs/ajax';
 import {Notifications} from '../libs/utils';
-import * as fp from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import {DarApplication} from "./access_review/DarApplication";
 
 const SECTION = {
@@ -76,8 +76,8 @@ export default function ReviewResults(props) {
       //so for these cases there is currently no way to display the vote information
     }
     try {
-      accessElectionReview = fp.isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
-      rpElectionReview = fp.isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+      accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
+      rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
     } catch (error) {
       Notifications.showError({text: 'Error initializing Election Data'});
       return Promise.reject(error);
@@ -89,7 +89,7 @@ export default function ReviewResults(props) {
   };
 
     return (
-      (!fp.isNil(darInfo)) ?
+      (!isNil(darInfo)) ?
         div({id: 'container', style: {margin: '2rem'}}, [
           div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
             AccessReviewHeader({match})
