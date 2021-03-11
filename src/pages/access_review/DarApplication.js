@@ -1,8 +1,8 @@
 import React from 'react';
-import { div, hh, h, span } from 'react-hyperscript-helpers';
-import { Theme } from '../../libs/theme';
-import { AppSummary } from './AppSummary';
-import { VoteSummary } from './VoteSummary';
+import {div, h, hh, span} from 'react-hyperscript-helpers';
+import {Theme} from '../../libs/theme';
+import {AppSummary} from './AppSummary';
+import {VoteSummary} from './VoteSummary';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import * as fp from 'lodash/fp';
 
@@ -29,27 +29,30 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
     const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets } = this.props;
     const accessVotes = fp.isNil(accessElectionReview) ? null : fp.get( 'reviewVote')(accessElectionReview);
     const rpVotes = fp.isNil(rpElectionReview) ? null : fp.get( 'reviewVote')(rpElectionReview);
-    return div([
-      div({ id: 'header', style: SECTION }, [
-        div({ style: { minWidth: '50%' } }, [
-          span({ style: HEADER_BOLD }, darInfo.projectTitle),
-          span({ style: HEADER }, ' | ' + darInfo.darCode)
+    //only render the page if the data has been populated to avoid errors downstream
+    return !fp.isNil(datasets) && !fp.isNil(researcherProfile) ?
+      div([
+        div({id: 'header', style: SECTION}, [
+          div({style: {minWidth: '50%'}}, [
+            span({style: HEADER_BOLD}, darInfo.projectTitle),
+            span({style: HEADER}, ' | ' + darInfo.darCode)
+          ]),
+          h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
         ]),
-        h(ApplicationDownloadLink, {darInfo, researcherProfile, datasets})
-      ]),
-      VoteSummary({
-        isRendered: voteAsChair && !fp.isNil(accessVotes),
-        question: 'Should data access be granted to this application?',
-        questionNumber: '1',
-        votes: accessVotes,
-      }),
-      VoteSummary({
-        isRendered: voteAsChair && !fp.isNil(rpVotes),
-        question: 'Was the research purpose accurately converted to a structured format?',
-        questionNumber: '2',
-        votes: rpVotes,
-      }),
-      AppSummary({ darInfo, accessElection, consent, researcherProfile })
-    ]);
+        VoteSummary({
+          isRendered: voteAsChair && !fp.isNil(accessVotes),
+          question: 'Should data access be granted to this application?',
+          questionNumber: '1',
+          votes: accessVotes,
+        }),
+        VoteSummary({
+          isRendered: voteAsChair && !fp.isNil(rpVotes),
+          question: 'Was the research purpose accurately converted to a structured format?',
+          questionNumber: '2',
+          votes: rpVotes,
+        }),
+        AppSummary({darInfo, accessElection, consent, researcherProfile})
+      ])
+      : null;
   }
 });
