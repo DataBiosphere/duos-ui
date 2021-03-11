@@ -17,14 +17,6 @@ const SMALL = {
 };
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    if (!fp.isNil(props.dacChairMessage)) {
-      this.state = { dacChairMessage: props.dacChairMessage };
-    } else {
-      this.state = { dacChairMessage: "" };
-    }
-  }
 
   render() {
     return div(
@@ -60,7 +52,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ style: SMALL },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
-              div({ style: SMALL }, this.state.dacChairMessage )
+              div({ isRendered: !fp.isNil(this.props.message), style: SMALL }, this.props.message )
             ])
           ]
         )
