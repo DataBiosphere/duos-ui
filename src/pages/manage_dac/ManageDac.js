@@ -1,20 +1,21 @@
-import { Component, Fragment } from 'react';
-import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
+import {Component, Fragment} from 'react';
+import {a, button, div, h, hr, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { AddDacModal } from './AddDacModal';
-import { DacDatasetsModal } from '../../components/modals/DacDatasetsModal';
-import { DacMembersModal } from './DacMembersModal';
-import { PageHeading } from '../../components/PageHeading';
-import { PaginatorBar } from '../../components/PaginatorBar';
-import { SearchBox } from '../../components/SearchBox';
-import { DAC } from '../../libs/ajax';
+import {AddDacModal} from './AddDacModal';
+import {DacDatasetsModal} from '../../components/modals/DacDatasetsModal';
+import {DacMembersModal} from './DacMembersModal';
+import {PageHeading} from '../../components/PageHeading';
+import {PaginatorBar} from '../../components/PaginatorBar';
+import {SearchBox} from '../../components/SearchBox';
+import {DAC} from '../../libs/ajax';
 import * as fp from 'lodash/fp';
+import isNil from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
 
 const limit = 10;
 const actionButtonStyle = { width: '40%', marginRight: '1rem' };
 
-class AdminManageDac extends Component {
+class ManageDac extends Component {
 
   constructor(props) {
     super(props);
@@ -175,11 +176,11 @@ class AdminManageDac extends Component {
   };
 
   render() {
-    const { currentPage, limit, searchDacText } = this.state;
+    const {currentPage, limit, searchDacText} = this.state;
     return (
-      div({ className: 'container container-wide' }, [
-        div({ className: 'row no-margin' }, [
-          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding' }, [
+      div({className: 'container container-wide'}, [
+        div({className: 'row no-margin'}, [
+          div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding'}, [
             PageHeading({
               id: 'manageDac',
               imgSrc: manageDACIcon,
@@ -189,86 +190,106 @@ class AdminManageDac extends Component {
               description: 'Create and manage Data Access Commitee'
             })
           ]),
-          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-              h(SearchBox, { id: 'manageDac', searchHandler: this.handleSearchDac, pageHandler: this.handlePageChange, color: 'common' })
+          div({
+            isRendered: (this.props.match.params.role !== "chair"),
+            className: 'col-md-6 col-xs-12 search-wrapper no-padding'}, [
+            div({className: 'col-xs-6'}, [
+              h(SearchBox, {
+                id: 'manageDac',
+                searchHandler: this.handleSearchDac,
+                pageHandler: this.handlePageChange,
+                color: 'common'
+              })
             ]),
-
-            a({
-              id: 'btn_addDAC',
-              className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 btn-primary btn-add common-background',
-              onClick: this.addDac
-            }, [
-              div({ className: 'all-icons add-dac_white' }),
-              span({}, ['Add Data Access Committee'])
+              a({
+                id: 'btn_addDAC',
+                className: 'col-xs-6 btn-primary btn-add common-background',
+                onClick: this.addDac
+              }, [
+                div({className: 'all-icons add-dac_white'}),
+                span({}, ['Add Data Access Committee'])
+            ])
+          ]),
+          div({
+            isRendered: (this.props.match.params.role === "chair"),
+            className: 'search-wrapper no-padding'}, [
+            div({className: 'col-xs-6'}, [
+              h(SearchBox, {
+                id: 'manageDac',
+                searchHandler: this.handleSearchDac,
+                pageHandler: this.handlePageChange,
+                color: 'common'
+              })
             ])
           ])
         ]),
-        div({ className: 'jumbotron table-box' }, [
-          div({ className: 'grid-9-row' }, [
-            div({ className: 'col-2 cell-header cell-sort common-color',
-              onClick: this.sort('name', !this.state.descendingOrder)}, [
+        div({className: 'jumbotron table-box'}, [
+          div({className: 'grid-9-row'}, [
+            div({
+              className: 'col-2 cell-header cell-sort common-color',
+              onClick: this.sort('name', !this.state.descendingOrder)
+            }, [
               'DAC Name',
-              span({ className: 'glyphicon sort-icon glyphicon-sort' })]),
-            div({ className: 'col-3 cell-header common-color' }, ['DAC Description']),
-            div({ className: 'col-2 cell-header common-color' }, ['DAC Datasets']),
-            div({ className: 'col-2 cell-header f-center common-color' }, ['Actions'])
+              span({className: 'glyphicon sort-icon glyphicon-sort'})]),
+            div({className: 'col-3 cell-header common-color'}, ['DAC Description']),
+            div({className: 'col-2 cell-header common-color'}, ['DAC Datasets']),
+            div({className: 'col-2 cell-header f-center common-color'}, ['Actions'])
           ]),
 
-          hr({ className: 'table-head-separator' }),
+          hr({className: 'table-head-separator'}),
 
           this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map(dac => {
-              return (h(Fragment, { key: dac.dacId }, [
-                div({
-                  id: dac.dacId,
-                  className: 'grid-9-row tableRow'
-                }, [
+              return (h(Fragment, {key: dac.dacId}, [
                   div({
-                    id: dac.dacId + '_dacName',
-                    name: 'name',
-                    className: 'col-2 cell-body text bold',
-                    title: dac.name
-                  }, [dac.name]),
-                  div({
-                    id: dac.dacId + '_dacDescription',
-                    name: 'dacDescription',
-                    className: 'col-3 cell-body text',
-                    title: dac.description
-                  }, [dac.description]),
-                  div({
-                    className: 'col-2 cell-body'
+                    id: dac.dacId,
+                    className: 'grid-9-row tableRow'
                   }, [
-                    button({
-                      id: dac.dacId + '_dacDatasets',
-                      name: 'dacDatasets',
-                      className: 'cell-button hover-color',
-                      style: actionButtonStyle,
-                      onClick: () => this.viewDatasets(dac)
-                    }, ['View'])
+                    div({
+                      id: dac.dacId + '_dacName',
+                      name: 'name',
+                      className: 'col-2 cell-body text bold',
+                      title: dac.name
+                    }, [dac.name]),
+                    div({
+                      id: dac.dacId + '_dacDescription',
+                      name: 'dacDescription',
+                      className: 'col-3 cell-body text',
+                      title: dac.description
+                    }, [dac.description]),
+                    div({
+                      className: 'col-2 cell-body'
+                    }, [
+                      button({
+                        id: dac.dacId + '_dacDatasets',
+                        name: 'dacDatasets',
+                        className: 'cell-button hover-color',
+                        style: actionButtonStyle,
+                        onClick: () => this.viewDatasets(dac)
+                      }, ['View'])
+                    ]),
+                    div({
+                      className: 'col-2 cell-body f-center'
+                    }, [
+                      button({
+                        id: dac.dacId + '_btnViewDAC',
+                        name: 'btn_viewDac',
+                        className: 'cell-button hover-color',
+                        style: actionButtonStyle,
+                        onClick: () => this.viewMembers(dac)
+                      }, ['View']),
+                      button({
+                        id: dac.dacId + '_btnEditDAC',
+                        name: 'btn_editDac',
+                        className: 'cell-button hover-color',
+                        style: actionButtonStyle,
+                        onClick: () => this.editDac(dac)
+                      }, ['Edit'])
+                    ])
                   ]),
-                  div({
-                    className: 'col-2 cell-body f-center'
-                  }, [
-                    button({
-                      id: dac.dacId + '_btnViewDAC',
-                      name: 'btn_viewDac',
-                      className: 'cell-button hover-color',
-                      style: actionButtonStyle,
-                      onClick: () => this.viewMembers(dac)
-                    }, ['View']),
-                    button({
-                      id: dac.dacId + '_btnEditDAC',
-                      name: 'btn_editDac',
-                      className: 'cell-button hover-color',
-                      style: actionButtonStyle,
-                      onClick: () => this.editDac(dac)
-                    }, ['Edit'])
-                  ])
-                ]),
-                hr({ className: 'table-body-separator' })
-              ])
+                  hr({className: 'table-body-separator'})
+                ])
               );
             }),
           PaginatorBar({
@@ -308,4 +329,4 @@ class AdminManageDac extends Component {
   }
 }
 
-export default AdminManageDac;
+export default ManageDac;
