@@ -23,26 +23,13 @@ export default function ReviewResults(props) {
   const [voteAsChair] = useState(true);
 
   useEffect(() => {
-
-    const [electionData, darData] = async (darId) => {
-      return await Promise.all([
+    const getData = async (darId) => {
+      await Promise.all([
         getElectionInformation(darId),
         getDarData(darId)
       ]);
-    };
-
-    const {datasets, darInfo, consent, researcherProfile} = darData;
-    const {accessElectionReview, accessElection, rpElectionReview} = electionData;
-
-
-    setDarInfo(darInfo);
-    setConsent(consent);
-    setDatasets(datasets);
-    setResearcherProfile(researcherProfile);
-    setAccessElection(accessElection);
-    setAccessElectionReview(accessElectionReview);
-    setRpElectionReview(rpElectionReview);
-
+    }
+    getData(darId);
   }, [darId]);
 
   //get information on datasets, consent, researcher, and access request
@@ -70,7 +57,10 @@ export default function ReviewResults(props) {
       return Promise.reject(error);
     }
 
-    return { darInfo, consent, datasets, researcherProfile };
+    setDarInfo(darInfo);
+    setConsent(consent);
+    setDatasets(datasets);
+    setResearcherProfile(researcherProfile);
   };
 
   //get information on access election and research purpose election
@@ -93,7 +83,9 @@ export default function ReviewResults(props) {
       return Promise.reject(error);
     }
 
-    return { accessElection, accessElectionReview, rpElectionReview };
+    setAccessElection(accessElection);
+    setAccessElectionReview(accessElectionReview);
+    setRpElectionReview(rpElectionReview);
   };
 
     return (
