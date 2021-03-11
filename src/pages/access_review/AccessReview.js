@@ -6,7 +6,7 @@ import { DacVotePanel } from './DacVotePanel';
 import { DAR, Election, Researcher, Votes, DataSet } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
-import * as fp from 'lodash/fp';
+import { isNil, filter } from 'lodash/fp';
 
 const SECTION = {
   margin: '16px',
@@ -39,8 +39,8 @@ class AccessReview extends React.PureComponent {
     const getElectionInformation = async(darId) => {
       try{
         const accessElection = await Election.findElectionByDarId(darId);
-        const rpElectionReview = fp.isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
-        const rpElection = fp.isNil(rpElectionReview) ? null : rpElectionReview.election;
+        const rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+        const rpElection = isNil(rpElectionReview) ? null : rpElectionReview.election;
         return {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection};
       } catch(error) {
         Notifications.showError({text: 'Error initializing Election Data'});
@@ -91,10 +91,10 @@ class AccessReview extends React.PureComponent {
     const { history, match } = this.props;
 
     const currentUser = Storage.getCurrentUser();
-    const memberVotes = fp.filter({ type: 'DAC', dacUserId: currentUser.dacUserId })(allVotes);
-    const chairVotes = fp.filter({ type: 'Chairperson', dacUserId: currentUser.dacUserId })(allVotes);
-    const finalVotes = fp.filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
-    const agreementVotes = fp.filter({ type: 'AGREEMENT', dacUserId: currentUser.dacUserId })(allVotes);
+    const memberVotes = filter({ type: 'DAC', dacUserId: currentUser.dacUserId })(allVotes);
+    const chairVotes = filter({ type: 'Chairperson', dacUserId: currentUser.dacUserId })(allVotes);
+    const finalVotes = filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
+    const agreementVotes = filter({ type: 'AGREEMENT', dacUserId: currentUser.dacUserId })(allVotes);
     const dacChairMessage = "DAC Chairs can optionally vote as a member.";
 
     return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
@@ -103,7 +103,7 @@ class AccessReview extends React.PureComponent {
           {
             id: 'header', style: SECTION
           },
-          [AccessReviewHeader({ history, match, message: dacChairMessage })]
+          [AccessReviewHeader({ match, message: dacChairMessage })]
         ),
         div({ id: 'body', style: { display: 'flex' } }, [
           div(

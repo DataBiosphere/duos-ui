@@ -2,7 +2,7 @@ import React from 'react';
 import { div, img, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
-import * as fp from 'lodash/fp';
+import { isNil } from 'lodash/fp';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -52,7 +52,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ style: SMALL },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
-              div({ isRendered: !fp.isNil(this.props.message), style: SMALL }, this.props.message )
+              div({ isRendered: !isNil(this.props.message), style: SMALL }, this.props.message )
             ])
           ]
         )
