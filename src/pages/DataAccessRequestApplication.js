@@ -615,7 +615,7 @@ class DataAccessRequestApplication extends Component {
         //actual fix would involve generating a blank draft record that is saved on console button click
         //however that would fall outside the scope of this pr, which is already large enough due to refactored code
         let referenceId = formattedFormData.referenceId;
-        let darPartialResponse = this.updateDraftResponse(formattedFormData, referenceId);
+        let darPartialResponse = await this.updateDraftResponse(formattedFormData, referenceId);
         referenceId = darPartialResponse.referenceId;
 
         //execute saveDARDocuments method only if documents are required for the DAR
