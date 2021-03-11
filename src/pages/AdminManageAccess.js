@@ -139,7 +139,7 @@ class AdminManageAccess extends Component {
     this.setState({ showModal: false });
   };
 
-  open = (dataRequestId) => {
+  openReview = (dataRequestId) => {
     this.props.history.push(`review_results/${dataRequestId}`);
   };
 
@@ -229,22 +229,22 @@ class AdminManageAccess extends Component {
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
                         a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed",
-                          onClick: () => this.open(dar.referenceId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, ["Un-reviewed"]),
                       ]),
                       span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
                         a({ id: dar.frontEndId + "_linkOpen", name: "link_open",
-                          onClick: () => this.open(dar.referenceId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, ["Open"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, [
                         a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled",
-                          onClick: () => this.open(dar.referenceId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, ["Canceled"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
                         a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
-                          onClick: () => this.open(dar.referenceId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),
