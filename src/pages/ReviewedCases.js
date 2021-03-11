@@ -44,10 +44,6 @@ class ReviewedCases extends Component {
         access: []
       }
     };
-    this.getReviewedConsents = this.getReviewedConsents.bind(this);
-    this.openAccessReviewResults = this.openAccessReviewResults.bind(this);
-    this.openDulResultsRecord = this.openDulResultsRecord.bind(this);
-
   }
 
   sort = (sortKey, descendantOrder = false) => (event) => {
@@ -87,7 +83,7 @@ class ReviewedCases extends Component {
     this.getReviewedConsents();
   };
 
-  async getReviewedConsents() {
+  getReviewedConsents = async () => {
     const dul = await Election.findReviewedConsents();
     const access = await Election.findReviewedDRs();
 
@@ -98,7 +94,7 @@ class ReviewedCases extends Component {
       };
       return prev;
     });
-  }
+  };
 
   openDulResultsRecord = (electionId) => {
     this.props.history.push(`dul_results_record/${ electionId }`);
