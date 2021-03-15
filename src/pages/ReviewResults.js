@@ -11,8 +11,7 @@ const SECTION = {
 };
 
 export default function ReviewResults(props) {
-  const [match] = useState(props.match);
-  const [darId] = useState(props.match.params.referenceId);
+  const darId = props.match.params.referenceId;
   const [datasets, setDatasets] = useState();
   const [darInfo, setDarInfo] = useState();
   const [consent, setConsent] = useState();
@@ -74,7 +73,7 @@ export default function ReviewResults(props) {
       (!isNil(darInfo)) ?
         div({id: 'container', style: {margin: '2rem'}}, [
           div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
-            AccessReviewHeader({match})
+            AccessReviewHeader({})
           ]),
           div({id: 'body', style: SECTION}, [
             DarApplication({

@@ -53,6 +53,6 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
         }),
         AppSummary({darInfo, accessElection, consent, researcherProfile})
       ])
-      : null;
+      : div({});
   }
 });
