@@ -4,6 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
 import isNil from 'lodash/fp/isNil';
 import { forEach } from 'lodash';
+import {Styles} from "./theme";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -43,6 +44,23 @@ export const USER_ROLES = {
 
 export const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
+};
+
+export const getDatasetNames = (datasets) => {
+  if(!datasets){return '';}
+  const datasetNames = datasets.map((dataset) => {
+    return dataset.label;
+  });
+  return datasetNames.join('\n');
+};
+
+export const applyTextHover = (e) => {
+  e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
+  e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
+};
+
+export const removeTextHover = (e, color) => {
+  e.target.style.color = color;
 };
 
 export const setUserRoleStatuses = (user, Storage) => {

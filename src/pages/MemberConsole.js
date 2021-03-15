@@ -3,12 +3,14 @@ import { isNil } from 'lodash/fp'
 import { Component, Fragment } from 'react';
 import { button, div, h, img, span } from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
-import { PendingCases } from '../libs/ajax';
+import {PendingCases, User} from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import { NavigationUtils } from '../libs/utils';
+import {applyTextHover, getDatasetNames, NavigationUtils, removeTextHover} from '../libs/utils';
 import { Styles } from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import lockIcon from '../images/lock-icon.png';
+import DarModal from "../components/modals/DarModal";
+import {DataUseTranslation} from "../libs/dataUseTranslation";
 
 class MemberConsole extends Component {
 
@@ -30,9 +32,10 @@ class MemberConsole extends Component {
       totalDulPendingVotes: 0,
       totalAccessPendingVotes: 0,
       totalResearchPurposePendingVotes: 0,
+      showSummaryModal: false,
+      darData: null,
+      researcher: null
     };
-    this.handleOpenModal = this.handleOpenModal.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
   }
 
   handleAccessPageChange = page => {
@@ -50,11 +53,11 @@ class MemberConsole extends Component {
     });
   };
 
-  handleOpenModal() {
+  handleOpenModal = () =>{
     this.setState({ showModal: true });
   }
 
-  handleCloseModal() {
+  handleCloseModal= () => {
     this.setState({ showModal: false });
   }
 
@@ -104,8 +107,21 @@ class MemberConsole extends Component {
 
   render() {
 
-    const { searchDarText } = this.state;
+    const { searchDarText, showSummaryModal, darDetails, researcher } = this.state;
     const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
+    const closeSummaryModal = () => this.setState({ showSummaryModal: false });
+    const openSummaryModal = (dar) => {
+        console.log(dar);
+        this.setState({showSummaryModal: true, darData: dar });
+        if (!isNil(dar)) {
+          dar.researchType = DataUseTranslation.generateResearchTypes(dar);
+          if (!dar.datasetNames) {
+            dar.datasetNames = getDatasetNames(dar.datasets);
+          }
+          const researcher = async () => await User.getById(dar.userId);
+          this.setState({ researcher: researcher, darDetails: dar });
+        }
+      };
 
     return (
 
@@ -147,7 +163,12 @@ class MemberConsole extends Component {
               const dacName = !isNil(pendingCase.dac) ? pendingCase.dac.name : "--";
               return h(Fragment, { key: rIndex }, [
                   div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
-                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [pendingCase.frontEndId]),
+                    div({
+                      style: Object.assign({}, Styles.TABLE.DATA_ID_CELL,  Styles.TABLE.DATA_REQUEST_TEXT),
+                      onClick: () => openSummaryModal(pendingCase),
+                      onMouseEnter: applyTextHover,
+                      onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
+                    },  [pendingCase.frontEndId]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL) }, [pendingCase.projectTitle]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DAC_CELL) }, [dacName]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL) }, [
@@ -169,6 +190,7 @@ class MemberConsole extends Component {
                   ])
                 ]);
               }),
+            h(DarModal, { showModal: showSummaryModal, closeModal: closeSummaryModal, darDetails: darDetails, researcher: researcher }),
             h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange}),
           ])
       ])

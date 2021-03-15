@@ -1,8 +1,8 @@
-import { div, h, span } from 'react-hyperscript-helpers';
-import { Alert } from '../Alert';
-import { Styles } from '../../libs/theme';
+import {div, h, span} from 'react-hyperscript-helpers';
+import {Alert} from '../Alert';
+import {Styles} from '../../libs/theme';
 import Modal from 'react-modal';
-import { find, isEmpty, isNil } from 'lodash/fp';
+import {find, isEmpty, isNil} from 'lodash/fp';
 
 const ModalDetailRow = (props) => {
   return (
@@ -55,59 +55,63 @@ const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
   const {showModal, closeModal, darDetails, researcher} = props;
 
-  return h(Modal, {
-    isOpen: showModal,
-    onRequestClose: closeModal,
-    shouldCloseOnOverlayClick: true,
-    style: {
-      content: { ...Styles.MODAL.CONTENT },
-      overlay: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  if (!isNil(darDetails)) {
+    return h(Modal, {
+      isOpen: showModal,
+      onRequestClose: closeModal,
+      shouldCloseOnOverlayClick: true,
+      style: {
+        content: {...Styles.MODAL.CONTENT},
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }
       }
-    }
-  }, [
-    div({style: Styles.MODAL.CONTENT}, [
-      span({
-        style: { float: 'right', cursor: 'pointer' },
-        onClick: closeModal,
-        className: "glyphicon glyphicon-remove default-color"}),
-      div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
-      div({style: { borderBottom: "1px solid #1F3B50" }}, []),
-      h(ModalDetailRow, {
-        label: 'Data Access Request Id',
-        detail: darDetails.darCode
-      }),
-      h(ModalDetailRow, {
-        label: 'Primary Investigator',
-        detail: returnPIName(researcher)
-      }),
-      h(ModalDetailRow, {
-        label: 'Researcher',
-        detail: researcher.displayName || '- -'
-      }),
-      h(ModalDetailRow, {
-        label: 'Institution',
-        detail: returnInstitution(researcher)
-      }),
-      h(ModalDetailRow, {
-        label: 'Dataset(s)',
-        detail: darDetails.datasetNames || '- -'
-      }),
-      h(ModalDetailRow, {
-        label: 'Type of Research',
-        detail: processResearchTypes(darDetails.researchType)
-      }),
-      div({
-        isRendered: requiresManualReview(darDetails),
-        style: Styles.ALERT
-      }, [
-        Alert({
-          id: 'purposeStatementManualReview', type: 'danger',
-          title: 'This research involves studying a sensitive population and requires manual review.'
-        })
+    }, [
+      div({style: Styles.MODAL.CONTENT}, [
+        span({
+          style: {float: 'right', cursor: 'pointer'},
+          onClick: closeModal,
+          className: "glyphicon glyphicon-remove default-color"
+        }),
+        div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
+        div({style: {borderBottom: "1px solid #1F3B50"}}, []),
+        h(ModalDetailRow, {
+          label: 'Data Access Request Id',
+          detail: darDetails.darCode
+        }),
+        h(ModalDetailRow, {
+          label: 'Primary Investigator',
+          detail: returnPIName(researcher)
+        }),
+        h(ModalDetailRow, {
+          label: 'Researcher',
+          detail: researcher.displayName || '- -'
+        }),
+        h(ModalDetailRow, {
+          label: 'Institution',
+          detail: returnInstitution(researcher)
+        }),
+        h(ModalDetailRow, {
+          label: 'Dataset(s)',
+          detail: darDetails.datasetNames || '- -'
+        }),
+        h(ModalDetailRow, {
+          label: 'Type of Research',
+          detail: processResearchTypes(darDetails.researchType)
+        }),
+        div({
+          isRendered: requiresManualReview(darDetails),
+          style: Styles.ALERT
+        }, [
+          Alert({
+            id: 'purposeStatementManualReview', type: 'danger',
+            title: 'This research involves studying a sensitive population and requires manual review.'
+          })
+        ])
       ])
-    ])
-  ]);
+    ]);
+  }
+  return div({});
 };
 
 export default DarModal;
