@@ -33,6 +33,7 @@ export const SignIn = hh(class SignIn extends Component {
 
   responseGoogle = async (response) => {
     Storage.setGoogleData(response);
+    console.log(response);
     try{
       const userRes = await this.getUser();
       const user = Object.assign(userRes, setUserRoleStatuses(userRes, Storage));
@@ -45,7 +46,7 @@ export const SignIn = hh(class SignIn extends Component {
         this.props.history.push('/profile');
         setTimeout(() => {
           Storage.clearStorage();
-        }, 3000);
+        }, 3599);
       } catch(error) {
         try{
           const status = error.status;
