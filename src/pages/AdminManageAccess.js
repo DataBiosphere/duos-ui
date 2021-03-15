@@ -1,17 +1,19 @@
-import _ from 'lodash';
-import { Component, Fragment } from 'react';
+
+import {Component, Fragment} from 'react';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
-import { SearchBox } from '../components/SearchBox';
-import {DAC, DAR, Election} from '../libs/ajax';
+import {SearchBox} from '../components/SearchBox';
+import {DAC, DAR, Election, User} from '../libs/ajax';
 import * as Utils from '../libs/utils';
+import {applyTextHover, getDatasetNames, Notifications, removeTextHover} from '../libs/utils';
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
-import { Notifications } from '../libs/utils';
-import {cloneDeep} from "lodash/fp";
+import {cloneDeep, isNil} from "lodash/fp";
 import lockIcon from "../images/lock-icon.png";
+import DarModal from "../components/modals/DarModal";
+import {DataUseTranslation} from "../libs/dataUseTranslation";
+import _ from "lodash";
 
 
 class AdminManageAccess extends Component {
@@ -22,16 +24,14 @@ class AdminManageAccess extends Component {
       disableBtn: false,
       disableCancelBtn: false,
       showModal: false,
+      showSummaryModal: false,
       value: '',
       darElectionList: [],
+      dacList: [],
       currentPage: 1,
       limit: 10,
-      showDialogCreate: false,
-      dacList: []
+      showDialogCreate: false
     };
-    this.getElectionDarList = this.getElectionDarList.bind(this);
-    this.handleCloseModal = this.handleCloseModal.bind(this);
-    this.okApplicationSummaryModal = this.okApplicationSummaryModal.bind(this);
     this.closeCreateConfirmation = this.closeCreateConfirmation.bind(this);
   }
 
@@ -39,7 +39,7 @@ class AdminManageAccess extends Component {
     this.setState({ showDialogCreate : false });
   }
 
-  async getElectionDarList() {
+  getElectionDarList = async () => {
     let darElection = [];
 
     const elections = await DAR.getDataAccessManage();
@@ -131,14 +131,6 @@ class AdminManageAccess extends Component {
     this.setState( {darElectionList: electionListCopy });
   };
 
-  openApplicationSummaryModal(dataRequestId) {
-    this.setState({ showModal: true, dataRequestId: dataRequestId, calledFromAdmin: true });
-  };
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  };
-
   open = (page, electionId, dataRequestId) => {
     this.props.history.push(`${page}/${dataRequestId}/?electionId=${electionId}`);
   };
@@ -151,10 +143,6 @@ class AdminManageAccess extends Component {
     this.props.history.push(`${page}/${dataRequestId}/${electionId}`);
   };
 
-  okApplicationSummaryModal() {
-    this.setState({ showModal: false });
-  };
-
   openResearcherReview(page, dacUserId) {
     this.props.history.push(`${page}/${dacUserId}`);
   };
@@ -164,7 +152,7 @@ class AdminManageAccess extends Component {
   };
 
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
@@ -183,8 +171,23 @@ class AdminManageAccess extends Component {
   };
 
   render() {
-    const { searchDarText, currentPage, limit } = this.state;
+    const { searchDarText, currentPage, limit, darData, researcher, showSummaryModal } = this.state;
     const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
+    const closeSummaryModal = () => {
+      this.setState({ showSummaryModal: false });
+    };
+    const openSummaryModal = async (darData) => {
+      if (!isNil(darData)) {
+        this.setState({showSummaryModal: true });
+        darData.researchType = DataUseTranslation.generateResearchTypes(darData);
+        if(!darData.datasetNames) {
+          darData.datasetNames = getDatasetNames(darData.datasets);
+        }
+        this.setState({ darData: darData });
+        const researcher = await User.getById(darData.userId);
+        this.setState({researcher: researcher});
+      }
+    };
 
     return (
       div({style: Styles.PAGE}, [
@@ -211,7 +214,6 @@ class AdminManageAccess extends Component {
             div({ style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
             div({ style: Styles.TABLE.TITLE_CELL }, ["Project Title"]),
             div({ style: Styles.TABLE.SUBMISSION_DATE_CELL }, ["Date"]),
-            div({ style: Styles.TABLE.DAC_CELL }, ["Info"]),
             div({ style: Styles.TABLE.DAC_CELL }, ['DAC']),
             div({ style: Styles.TABLE.ELECTION_STATUS_CELL }, ["Election Status"]),
             div({ style: Styles.TABLE.ELECTION_ACTIONS_CELL }, ["Election Actions"]),
@@ -224,15 +226,14 @@ class AdminManageAccess extends Component {
               const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
               return h(Fragment, { key: dar.frontEndId }, [
                 div({ style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), paddingtop: '1rem' }, [
-                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL)}, [dar.frontEndId]),
+                  div({
+                    style: Object.assign({}, Styles.TABLE.DATA_ID_CELL,  Styles.TABLE.DATA_REQUEST_TEXT),
+                    onClick: () => openSummaryModal(dar),
+                    onMouseEnter: applyTextHover,
+                    onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
+                  }, [dar.frontEndId]),
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL)}, [dar.projectTitle]),
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.SUBMISSION_DATE_CELL)}, [Utils.formatDate(dar.createDate)]),
-                  div({ style: Styles.TABLE.DAC_CELL}, [
-                      button({
-                        className: "cell-button hover-color",
-                        onClick: () => this.openApplicationSummaryModal(dar.dataRequestId)
-                      }, ["Summary"]),
-                    ]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [this.findDacNameForDacId(dar.dacId)]),
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
@@ -309,13 +310,7 @@ class AdminManageAccess extends Component {
                   ])
               ]);
             }),
-          ApplicationSummaryModal({
-            isRendered: this.state.showModal,
-            showModal: this.state.showModal,
-            onCloseRequest: this.handleCloseModal,
-            dataRequestId: this.state.dataRequestId,
-            calledFromAdmin: true
-          }),
+          h(DarModal, { showSummaryModal, closeSummaryModal, darData, researcher }),
           h(ConfirmationModal, {
             showConfirmation: this.state.showDialogCreate,
             closeConfirmation: this.closeCreateConfirmation,
