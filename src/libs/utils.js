@@ -172,7 +172,7 @@ export const getDarData = async (darId) => {
     ]);
 
   } catch (error) {
-    Notifications.showError({text: 'Error initializing DAR Data'});
+    Notifications.showError({text: 'Error retrieving Data Access Request information, please contact support.'});
     return Promise.reject(error);
   }
 
