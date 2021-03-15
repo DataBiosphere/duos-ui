@@ -3,7 +3,7 @@ import {a, button, div, h1, h3, img, p, span} from 'react-hyperscript-helpers';
 import {SignIn} from '../components/SignIn';
 import {ReadMore} from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
-import duosLogoImg from '../images/duos-logo.svg';
+import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
 
 class Home extends Component {
