@@ -1,9 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { Config } from './config';
+import {Config} from './config';
 import isNil from 'lodash/fp/isNil';
-import { forEach } from 'lodash';
+import {forEach} from 'lodash';
+import {DAR, DataSet, Researcher} from "./ajax";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -148,6 +149,34 @@ export const NavigationUtils = {
     const newChairConsoleEnabled = await Config.getFeatureFlag('newChairConsole');
     return newChairConsoleEnabled ? "/new_chair_console" : "/chair_console";
   }
+};
+
+//get information on datasets, consent, researcher, and access request
+export const getDarData = async (darId) => {
+  let datasets;
+  let darInfo;
+  let consent;
+  let researcherProfile;
+
+  try {
+    darInfo = await DAR.getPartialDarRequest(darId);
+    const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
+    const datasetsPromise = darInfo.datasetIds.map((id) => {
+      return DataSet.getDataSetsByDatasetId(id);
+    });
+    const consentPromise = await DAR.getDarConsent(darId);
+    [consent, datasets, researcherProfile] = await Promise.all([
+      consentPromise,
+      Promise.all(datasetsPromise),
+      researcherPromise
+    ]);
+
+  } catch (error) {
+    Notifications.showError({text: 'Error retrieving Data Access Request information, please contact support.'});
+    return Promise.reject(error);
+  }
+
+  return {datasets, darInfo, consent, researcherProfile};
 };
 
 /**
