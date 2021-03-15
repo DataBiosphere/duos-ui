@@ -13,7 +13,7 @@ import {NavigationUtils} from '../libs/utils';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import { Styles } from '../libs/theme';
-import DuosLogo from '../images/duos_logo.svg';
+import DuosLogo from '../images/duos-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 
@@ -220,7 +220,6 @@ class DuosHeader extends Component {
     };
 
     const duosLogoImage = {
-      width: '140px',
       height: '40px',
       padding: '0',
       margin: '12px 64px 0 0',
