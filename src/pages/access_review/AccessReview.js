@@ -26,7 +26,7 @@ class AccessReview extends React.PureComponent {
 
   updateVote = () => {
     this.darReviewAccess();
-  };
+  }
 
   componentDidMount() {
     this.darReviewAccess();
