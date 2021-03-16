@@ -43,12 +43,14 @@ const processResearchTypes = (researchTypes) => {
 };
 
 const requiresManualReview = (darDetails) => {
-  return darDetails.illegalBehavior ||
+  return (isNil(darDetails.requiresManualReview)) ?
+    (darDetails.illegalBehavior ||
     darDetails.poa ||
     darDetails.psychiatricTraits ||
     darDetails.sexualDiseases ||
     darDetails.stigmatizedDiseases ||
-    darDetails.vulnerablePopulation;
+    darDetails.vulnerablePopulation)
+    : darDetails.requiresManualReview;
 };
 
 const DarModal = (props) => {
