@@ -218,13 +218,13 @@ class DuosHeader extends Component {
         }
       },
       chair: {
-      'Manage DARs': {
-        link: this.state.dacChairPath
-      },
-      'Manage DACs': {
-        link: '/manage_dac/chair'
+        'Manage DARs': {
+          link: this.state.dacChairPath
+        },
+        'Manage DACs': {
+          link: '/manage_dac/chair'
+        }
       }
-    }
     };
 
     const duosLogoImage = {
