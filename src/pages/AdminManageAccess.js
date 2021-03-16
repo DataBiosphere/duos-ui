@@ -34,7 +34,7 @@ class AdminManageAccess extends Component {
 
   closeCreateConfirmation = () => {
     this.setState({ showDialogCreate : false });
-  }
+  };
 
   getElectionDarList = async () => {
     let darElection = [];
@@ -56,7 +56,7 @@ class AdminManageAccess extends Component {
     await this.getElectionDarList();
     await this.getDACs();
     ReactTooltip.rebuild();
-  };
+  }
 
   getDACs = async () => {
     const dacs = await DAC.list();
@@ -83,7 +83,7 @@ class AdminManageAccess extends Component {
 
   openDialogCreate(dataRequestId, frontEndId) {
     this.setState({ showDialogCreate: true, dataRequestId: dataRequestId, frontEndId: frontEndId });
-  };
+  }
 
   dialogHandlerCancel = async (dataRequestId, electionId) => {
     const CANCEL = "Canceled";
@@ -128,18 +128,13 @@ class AdminManageAccess extends Component {
     this.setState( {darElectionList: electionListCopy });
   };
 
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
-  };
-
   openReview = (dataRequestId) => {
     this.props.history.push(`review_results/${dataRequestId}`);
   };
 
   openResearcherReview(page, dacUserId) {
     this.props.history.push(`${page}/${dacUserId}`);
-  };
+  }
 
   handleSearchDar = (query) => {
     this.setState({ searchDarText: query });
@@ -167,6 +162,9 @@ class AdminManageAccess extends Component {
   render() {
     const { showModal, searchDarText, currentPage, limit, darDetails, researcher } = this.state;
     const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
+    const handleCloseModal = () => {
+      this.setState({ showModal: false });
+    };
     const openSummaryModal = async (dar) => {
       let darDetails = await DAR.getDarModalSummary(dar.dataRequestId);
       let researcherPromise;
@@ -174,7 +172,6 @@ class AdminManageAccess extends Component {
         darDetails.researchType = DataUseTranslation.generateResearchTypes(darDetails);
         researcherPromise = await User.getById(darDetails.userId);
         if (!darDetails.datasetNames) {
-          console.log("hit4");
           darDetails.datasetNames = getDatasetNames(darDetails.datasets);
         }
       }
@@ -196,11 +193,11 @@ class AdminManageAccess extends Component {
               div({style: Styles.TITLE}, ["Manage Data Access Request"]),
               div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
             ]),
-            ]),
-            div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
-              h(SearchBox, {searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange})
-            ]),
           ]),
+          div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
+            h(SearchBox, {searchHandler: this.handleSearchDar, pageHandler: this.handlePageChange})
+          ]),
+        ]),
         div({style: Styles.TABLE.CONTAINER}, [
           div({style: Styles.TABLE.HEADER_ROW}, [
             div({ style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
@@ -226,83 +223,83 @@ class AdminManageAccess extends Component {
                   }, [dar.frontEndId]),
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.TITLE_CELL)}, [dar.projectTitle]),
                   div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.SUBMISSION_DATE_CELL)}, [Utils.formatDate(dar.createDate)]),
-                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [this.findDacNameForDacId(dar.dacId)]),
-                    div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
-                      span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
-                        a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed",
-                          onClick: () => this.openReview(dar.referenceId)
-                        }, ["Un-reviewed"]),
-                      ]),
-                      span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
-                        a({ id: dar.frontEndId + "_linkOpen", name: "link_open",
-                          onClick: () => this.openReview(dar.referenceId)
-                        }, ["Open"]),
-                      ]),
-                      span({ isRendered: dar.electionStatus === 'Canceled' }, [
-                        a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled",
-                          onClick: () => this.openReview(dar.referenceId)
-                        }, ["Canceled"]),
-                      ]),
-                      span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
-                        a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
-                          onClick: () => this.openReview(dar.referenceId)
-                        }, [!dar.electionVote ? 'Denied' : 'Approved']),
-                      ]),
+                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.DATA_ID_CELL) }, [this.findDacNameForDacId(dar.dacId)]),
+                  div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
+                    span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
+                      a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed",
+                        onClick: () => this.openReview(dar.referenceId)
+                      }, ["Un-reviewed"]),
                     ]),
-                    div({style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_ACTIONS_CELL, {paddingTop: "0.5rem"})}, [
-                        div({
-                          isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final'),
-                          disabled: dar.electionStatus === 'PendingApproval'
-                        }, [button({
-                              style: {margin: "0 15px 5px 0"},
-                              onClick: () => this.openDialogCreate(dar.dataRequestId, dar.frontEndId),
-                              className: "cell-button hover-color"
-                            }, ["Create"]),
-                          ]),
-                        div({
-                          isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
-                        }, [button({
-                              style: {margin: "0 15px 5px 0"},
-                              onClick: () => this.dialogHandlerCancel(dar.dataRequestId, dar.electionId),
-                              className: "cell-button cancel-color"
-                            }, ["Cancel"]),
-                          ]),
+                    span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
+                      a({ id: dar.frontEndId + "_linkOpen", name: "link_open",
+                        onClick: () => this.openReview(dar.referenceId)
+                      }, ["Open"]),
+                    ]),
+                    span({ isRendered: dar.electionStatus === 'Canceled' }, [
+                      a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled",
+                        onClick: () => this.openReview(dar.referenceId)
+                      }, ["Canceled"]),
+                    ]),
+                    span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
+                      a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
+                        onClick: () => this.openReview(dar.referenceId)
+                      }, [!dar.electionVote ? 'Denied' : 'Approved']),
+                    ]),
+                  ]),
+                  div({style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_ACTIONS_CELL, {paddingTop: "0.5rem"})}, [
+                    div({
+                      isRendered: (dar.electionStatus !== 'Open') && (dar.electionStatus !== 'Final'),
+                      disabled: dar.electionStatus === 'PendingApproval'
+                    }, [button({
+                      style: {margin: "0 15px 5px 0"},
+                      onClick: () => this.openDialogCreate(dar.dataRequestId, dar.frontEndId),
+                      className: "cell-button hover-color"
+                    }, ["Create"]),
+                    ]),
+                    div({
+                      isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
+                    }, [button({
+                      style: {margin: "0 15px 5px 0"},
+                      onClick: () => this.dialogHandlerCancel(dar.dataRequestId, dar.electionId),
+                      className: "cell-button cancel-color"
+                    }, ["Cancel"]),
+                    ]),
 
-                        div({ style: {margin: "0 15px 8px"}, className: "bonafide-icon" }, [
-                          a({
-                            id: dar.frontEndId + "_flagBonafide",
-                            name: "flag_bonafide",
-                            onClick: () => this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)
-                          }, [
-                              span({
-                                className: "glyphicon glyphicon-thumbs-up dataset-color",
-                                isRendered: dar.status === 'approved',
-                                "data-tip": "Bonafide researcher",
-                                "data-for": "tip_bonafide"
-                              }),
-                              span({
-                                className: "glyphicon glyphicon-thumbs-down cancel-color",
-                                isRendered: dar.status === 'rejected',
-                                "data-tip": "Non-Bonafide researcher",
-                                "data-for": "tip_nonBonafide"
-                              }),
-                              span({
-                                className: "glyphicon glyphicon-hand-right hover-color",
-                                isRendered: dar.status === 'pending',
-                                "data-tip": "Researcher review pending",
-                                "data-for": "tip_pendingReview"
-                              }),
-                              span({
-                                className: "glyphicon glyphicon-hand-right dismiss-color",
-                                isRendered: dar.status === null
-                              }),
-                            ])
-                        ])
+                    div({ style: {margin: "0 15px 8px"}, className: "bonafide-icon" }, [
+                      a({
+                        id: dar.frontEndId + "_flagBonafide",
+                        name: "flag_bonafide",
+                        onClick: () => this.openResearcherReview('researcher_review', dar.ownerUser.dacUserId)
+                      }, [
+                        span({
+                          className: "glyphicon glyphicon-thumbs-up dataset-color",
+                          isRendered: dar.status === 'approved',
+                          "data-tip": "Bonafide researcher",
+                          "data-for": "tip_bonafide"
+                        }),
+                        span({
+                          className: "glyphicon glyphicon-thumbs-down cancel-color",
+                          isRendered: dar.status === 'rejected',
+                          "data-tip": "Non-Bonafide researcher",
+                          "data-for": "tip_nonBonafide"
+                        }),
+                        span({
+                          className: "glyphicon glyphicon-hand-right hover-color",
+                          isRendered: dar.status === 'pending',
+                          "data-tip": "Researcher review pending",
+                          "data-for": "tip_pendingReview"
+                        }),
+                        span({
+                          className: "glyphicon glyphicon-hand-right dismiss-color",
+                          isRendered: dar.status === null
+                        }),
+                      ])
                     ])
                   ])
+                ])
               ]);
             }),
-          h(DarModal, { showModal, closeModal: this.handleCloseModal(), darDetails, researcher }),
+          h(DarModal, { showModal, closeModal: handleCloseModal, darDetails, researcher }),
           h(ConfirmationModal, {
             showConfirmation: this.state.showDialogCreate,
             closeConfirmation: this.closeCreateConfirmation,
