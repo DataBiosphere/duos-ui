@@ -22,11 +22,8 @@ export default function ReviewResults(props) {
   const [voteAsChair] = useState(true);
 
   useEffect(() => {
-    let darData;
-    let electionData;
-
     const getData = async (darId) => {
-      [darData, electionData] = await Promise.all([
+       await Promise.all([
         setDarData(darId),
         getElectionInformation(darId)
       ]);

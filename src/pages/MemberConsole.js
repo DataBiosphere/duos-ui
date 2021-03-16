@@ -3,10 +3,11 @@ import { isNil } from 'lodash/fp'
 import { Component, Fragment } from 'react';
 import { button, div, h, img, span } from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
-import { DAR, PendingCases} from '../libs/ajax';
+import { DAR, PendingCases, User} from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import {applyTextHover, getDatasetNames, NavigationUtils, removeTextHover} from '../libs/utils';
 import { Styles } from "../libs/theme";
+import {DataUseTranslation} from '../libs/dataUseTranslation';
 import PaginationBar from "../components/PaginationBar";
 import lockIcon from '../images/lock-icon.png';
 import DarModal from "../components/modals/DarModal";
@@ -108,15 +109,14 @@ class MemberConsole extends Component {
     const closeSummaryModal = () => this.setState({ showModal: false });
     const openSummaryModal = async (dar) => {
       let darDetails = await DAR.getDarModalSummary(dar.dataRequestId);
-      // if (!isNil(darDetails)) {
-      //   darDetails.researchType = DataUseTranslation.generateResearchTypes(dar);
-      //   if (!darDetails.datasetNames) {
-      //     darDetails.datasetNames = getDatasetNames(darDetails.datasets);
-      //   }
-      //   const researcher = async () => await User.getById(darDetails.userId);
-      //   this.setState({ researcher, darDetails});
-      // }
-      this.setState({showModal: true, darDetails: darDetails});
+      if (!isNil(darDetails)) {
+        darDetails.researchType = DataUseTranslation.generateResearchTypes(darDetails);
+        if (!darDetails.datasetNames) {
+          darDetails.datasetNames = getDatasetNames(darDetails.datasets);
+        }
+        const researcher = await User.getById(darDetails.userId);
+      }
+      this.setState({showModal: true, darDetails: darDetails, researcher: researcher});
     };
 
     return (

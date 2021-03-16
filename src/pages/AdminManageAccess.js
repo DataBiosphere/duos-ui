@@ -3,13 +3,14 @@ import { Component, Fragment } from 'react';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
-import {DAC, DAR, Election} from '../libs/ajax';
+import {DAC, DAR, Election, User } from '../libs/ajax';
 import * as Utils from '../libs/utils';
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
-import { Notifications, applyTextHover, removeTextHover } from '../libs/utils';
-import {cloneDeep} from "lodash/fp";
+import {DataUseTranslation} from '../libs/dataUseTranslation';
+import { Notifications, applyTextHover, removeTextHover, getDatasetNames } from '../libs/utils';
+import { cloneDeep, isNil } from "lodash/fp";
 import lockIcon from "../images/lock-icon.png";
 import DarModal from '../components/modals/DarModal';
 
@@ -164,22 +165,20 @@ class AdminManageAccess extends Component {
   };
 
   render() {
-    const { showModal, searchDarText, currentPage, limit, darData, researcher } = this.state;
+    const { showModal, searchDarText, currentPage, limit, darDetails, researcher } = this.state;
     const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
-    const closeSummaryModal = () => {
-      this.setState({ showModal: false });
-    };
     const openSummaryModal = async (dar) => {
       let darDetails = await DAR.getDarModalSummary(dar.dataRequestId);
-      // if (!isNil(darDetails)) {
-      //   darDetails.researchType = DataUseTranslation.generateResearchTypes(dar);
-      //   if (!darDetails.datasetNames) {
-      //     darDetails.datasetNames = getDatasetNames(darDetails.datasets);
-      //   }
-      //   const researcher = async () => await User.getById(darDetails.userId);
-      //   this.setState({ researcher, darDetails});
-      // }
-      this.setState({showModal: true, darDetails: darDetails});
+      let researcherPromise;
+      if (!isNil(darDetails)) {
+        darDetails.researchType = DataUseTranslation.generateResearchTypes(darDetails);
+        researcherPromise = await User.getById(darDetails.userId);
+        if (!darDetails.datasetNames) {
+          console.log("hit4");
+          darDetails.datasetNames = getDatasetNames(darDetails.datasets);
+        }
+      }
+      this.setState({showModal: true, darDetails: darDetails, researcher: researcherPromise });
     };
 
     return (
@@ -303,7 +302,7 @@ class AdminManageAccess extends Component {
                   ])
               ]);
             }),
-          h(DarModal, { showModal, closeSummaryModal, darData, researcher }),
+          h(DarModal, { showModal, closeModal: this.handleCloseModal(), darDetails, researcher }),
           h(ConfirmationModal, {
             showConfirmation: this.state.showDialogCreate,
             closeConfirmation: this.closeCreateConfirmation,
