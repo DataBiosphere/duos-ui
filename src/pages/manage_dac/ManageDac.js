@@ -8,10 +8,12 @@ import {PageHeading} from '../../components/PageHeading';
 import {PaginatorBar} from '../../components/PaginatorBar';
 import {SearchBox} from '../../components/SearchBox';
 import {DAC, User} from '../../libs/ajax';
-import { filter, reverse, sortBy, contains } from'lodash/fp';
+import {contains, filter, reverse, sortBy} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
 
 const limit = 10;
+const CHAIR = "Chairperson";
+const ADMIN = "Admin";
 const actionButtonStyle = { width: '40%', marginRight: '1rem' };
 
 class ManageDac extends Component {
@@ -31,14 +33,15 @@ class ManageDac extends Component {
       alertMessage: undefined,
       alertTitle: undefined,
       selectedDac: {},
-      selectedDatasets: []
+      selectedDatasets: [],
+      dacIDs: []
     };
   }
 
   componentDidMount() {
+    this.getUserRole();
     // noinspection JSIgnoredPromiseFromCall
     this.fetchDacList();
-    this.getUserRole();
   }
 
   fetchDacList = async () => {
@@ -48,6 +51,9 @@ class ManageDac extends Component {
         let sorted = sortBy('name')(dacs);
         if (this.state.descendingOrder) {
           sorted = reverse(sorted);
+        }
+        if (this.state.userRole === CHAIR) {
+          sorted = sorted.filter((dac) => this.state.dacIDs.includes(dac.dacId));
         }
         this.setState(prev => {
           prev.currentPage = 1;
@@ -62,10 +68,23 @@ class ManageDac extends Component {
 
   getUserRole = async () => {
     let roles;
+    let dacIDs = [];
+    let res;
     await User.getMe().then(
-      (result) => roles = result.roles.map((role) => role.name)
+      (result) => {
+        res = result,
+          roles = res.roles.map((role) => role.name),
+          res.roles.forEach((role) => {
+            if (role.name === CHAIR) {
+              dacIDs.push(role.dacId);
+            }
+          })
+      }
     );
-    const role =  contains("Admin")(roles) ? "Admin" : "Chair";
+    const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
+    if (role === CHAIR) {
+      this.setState({dacIDs: dacIDs})
+    }
     this.setState({userRole: role});
   };
 
