@@ -2,16 +2,16 @@ import _ from 'lodash';
 import { Component, Fragment } from 'react';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
 import { SearchBox } from '../components/SearchBox';
 import {DAC, DAR, Election} from '../libs/ajax';
 import * as Utils from '../libs/utils';
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
-import { Notifications } from '../libs/utils';
+import { Notifications, applyTextHover, removeTextHover } from '../libs/utils';
 import {cloneDeep} from "lodash/fp";
 import lockIcon from "../images/lock-icon.png";
+import DarModal from '../components/modals/DarModal';
 
 
 class AdminManageAccess extends Component {
