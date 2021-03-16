@@ -50,7 +50,7 @@ export const sleep = (milliseconds) => {
 export const getDatasetNames = (datasets) => {
   if(!datasets){return '';}
   const datasetNames = datasets.map((dataset) => {
-    return dataset.label;
+    return ((dataset.label) ?  dataset.label : dataset.name);
   });
   return datasetNames.join('\n');
 };
