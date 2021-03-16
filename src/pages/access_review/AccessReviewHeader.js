@@ -2,6 +2,7 @@ import React from 'react';
 import { div, img, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
+import { isNil } from 'lodash/fp';
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -16,10 +17,6 @@ const SMALL = {
 };
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
-
-  openAccessReview = (referenceId) => {
-    this.props.history.push(`/access_review/${referenceId}`);
-  };
 
   render() {
     return div(
@@ -55,7 +52,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ style: SMALL },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
-              div({ style: SMALL }, "DAC Chairs can optionally vote as a member.")
+              div({ isRendered: !isNil(this.props.message), style: SMALL }, this.props.message )
             ])
           ]
         )

@@ -8,17 +8,7 @@ import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
-
-const SUBHEADER = {
-  margin: '32px 0px',
-  color: Theme.palette.primary,
-  opacity: '70%',
-  textTransform: 'uppercase',
-  fontSize: Theme.font.size.small,
-  lineHeight: Theme.font.leading.dense,
-  fontWeight: Theme.font.weight.semibold,
-  fontFamily: 'Montserrat',
-};
+import isNil from "lodash/fp";
 
 const ROOT = {
   fontFamily: 'Montserrat',
@@ -74,7 +64,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
     const { piName, profileName, institution, department, city, country } = researcherProfile;
-    const mrDAR = JSON.stringify(accessElection.useRestriction, null, 2);
+    const mrDAR = !isNil(accessElection) ? JSON.stringify(accessElection.useRestriction, null, 2) : null;
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {
       return span({key: index, style: TEXT}, restrictionObj.description);
@@ -96,7 +86,6 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
     return div({ id: 'app-summary' },
       [
-        div({ style: SUBHEADER }, 'Application summary'),
         div({ style: { display: 'flex' } }, [
           div(
             {
@@ -108,7 +97,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
             },
             [
               StructuredDarRp({darInfo: darInfo}),
-              div({},[
+              div({isRendered: !isNil(mrDAR)},[
                 DownloadLink({ label: 'DAR machine-readable format', onDownload: () => download('machine-readable-DAR.json', mrDAR) })
               ])
             ]
@@ -118,6 +107,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
               id: 'dusl',
               style: {
                 width: '50%',
+                margin: '24px 24px 0',
                 padding: '24px',
                 backgroundColor: Theme.palette.background.highlighted,
                 borderRadius: '9px',
@@ -129,13 +119,14 @@ export const AppSummary = hh(class AppSummary extends React.Component {
         div(
           {
             id: 'rp',
-            style: { margin: '32px 0px' },
+            style: { margin: '20px 0px' },
           },
           [ApplicationSection({ header: 'Research Purpose', content: darInfo.rus, headerColor: Theme.palette.primary, })]
         ),
         div(
           {
             id: 'applicant',
+            style: { margin: '20px 0px' }
           },
           [ApplicantInfo({
             researcherProfile: researcherProfile,

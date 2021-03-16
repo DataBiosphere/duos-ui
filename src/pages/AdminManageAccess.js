@@ -1,19 +1,17 @@
-
-import {Component, Fragment} from 'react';
+import _ from 'lodash';
+import { Component, Fragment } from 'react';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import {SearchBox} from '../components/SearchBox';
-import {DAC, DAR, Election, User} from '../libs/ajax';
+import { ApplicationSummaryModal } from '../components/modals/ApplicationSummaryModal';
+import { SearchBox } from '../components/SearchBox';
+import {DAC, DAR, Election} from '../libs/ajax';
 import * as Utils from '../libs/utils';
-import {applyTextHover, getDatasetNames, Notifications, removeTextHover} from '../libs/utils';
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
-import {cloneDeep, isNil} from "lodash/fp";
+import { Notifications } from '../libs/utils';
+import {cloneDeep} from "lodash/fp";
 import lockIcon from "../images/lock-icon.png";
-import DarModal from "../components/modals/DarModal";
-import {DataUseTranslation} from "../libs/dataUseTranslation";
-import _ from "lodash";
 
 
 class AdminManageAccess extends Component {
@@ -129,16 +127,13 @@ class AdminManageAccess extends Component {
     this.setState( {darElectionList: electionListCopy });
   };
 
-  open = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${dataRequestId}/?electionId=${electionId}`);
+
+  handleCloseModal() {
+    this.setState({ showModal: false });
   };
 
-  openAccessCollect = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${electionId}/${dataRequestId}/`);
-  };
-
-  openAccessResultRecord = (page, electionId, dataRequestId) => {
-    this.props.history.push(`${page}/${dataRequestId}/${electionId}`);
+  openReview = (dataRequestId) => {
+    this.props.history.push(`review_results/${dataRequestId}`);
   };
 
   openResearcherReview(page, dacUserId) {
@@ -236,22 +231,22 @@ class AdminManageAccess extends Component {
                     div({ style: Object.assign({}, Styles.TABLE.RECORD_TEXT, Styles.TABLE.ELECTION_STATUS_CELL)}, [
                       span({ isRendered: dar.electionStatus === 'un-reviewed' }, [
                         a({ id: dar.frontEndId + "_linkUnreviewed", name: "link_unreviewed",
-                          onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, ["Un-reviewed"]),
                       ]),
                       span({ isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final') }, [
                         a({ id: dar.frontEndId + "_linkOpen", name: "link_open",
-                          onClick: () => this.openAccessCollect('access_collect', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, ["Open"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Canceled' }, [
                         a({ id: dar.frontEndId + "_linkCanceled", name: "link_canceled",
-                          onClick: () => this.open('access_preview', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, ["Canceled"]),
                       ]),
                       span({ isRendered: dar.electionStatus === 'Closed' || dar.electionStatus === 'PendingApproval' }, [
                         a({ id: dar.frontEndId + "_linkReviewed", name: "link_reviewed",
-                          onClick: () => this.openAccessResultRecord('access_result_records', dar.electionId, dar.dataRequestId)
+                          onClick: () => this.openReview(dar.referenceId)
                         }, [!dar.electionVote ? 'Denied' : 'Approved']),
                       ]),
                     ]),

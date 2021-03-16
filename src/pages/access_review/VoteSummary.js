@@ -15,7 +15,8 @@ const STYLE = {
   fontFamily: 'Montserrat',
   backgroundColor: Theme.palette.background.secondary,
   padding: 16,
-  borderRadius: '0 9px 9px 0',
+  borderRadius: '9px',
+  margin: '16px 0'
 };
 
 const HEADER_STYLE = {

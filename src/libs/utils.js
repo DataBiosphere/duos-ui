@@ -4,6 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
 import isNil from 'lodash/fp/isNil';
 import { forEach } from 'lodash';
+import {DAR, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
 
 export const applyHoverEffects = (e, style) => {
@@ -76,8 +77,8 @@ export const setUserRoleStatuses = (user, Storage) => {
 };
 
 export const Navigation = {
-  back: (user, history) => {
-    const page = user.isChairPerson ? NavigationUtils.dacChairConsolePath()
+  back: async (user, history) => {
+    const page = user.isChairPerson ? await NavigationUtils.dacChairConsolePath()
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/dataset_catalog'
@@ -86,8 +87,8 @@ export const Navigation = {
                 : '/';
     history.push(page);
   },
-  console: (user, history) => {
-    const page = user.isChairPerson ? NavigationUtils.dacChairConsolePath()
+  console: async (user, history) => {
+    const page = user.isChairPerson ? await NavigationUtils.dacChairConsolePath()
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/researcher_console'
@@ -166,6 +167,34 @@ export const NavigationUtils = {
     const newChairConsoleEnabled = await Config.getFeatureFlag('newChairConsole');
     return newChairConsoleEnabled ? "/new_chair_console" : "/chair_console";
   }
+};
+
+//get information on datasets, consent, researcher, and access request
+export const getDarData = async (darId) => {
+  let datasets;
+  let darInfo;
+  let consent;
+  let researcherProfile;
+
+  try {
+    darInfo = await DAR.getPartialDarRequest(darId);
+    const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
+    const datasetsPromise = darInfo.datasetIds.map((id) => {
+      return DataSet.getDataSetsByDatasetId(id);
+    });
+    const consentPromise = await DAR.getDarConsent(darId);
+    [consent, datasets, researcherProfile] = await Promise.all([
+      consentPromise,
+      Promise.all(datasetsPromise),
+      researcherPromise
+    ]);
+
+  } catch (error) {
+    Notifications.showError({text: 'Error retrieving Data Access Request information, please contact support.'});
+    return Promise.reject(error);
+  }
+
+  return {datasets, darInfo, consent, researcherProfile};
 };
 
 /**
