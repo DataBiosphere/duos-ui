@@ -3,14 +3,13 @@ import { isNil } from 'lodash/fp'
 import { Component, Fragment } from 'react';
 import { button, div, h, img, span } from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
-import {PendingCases, User} from '../libs/ajax';
+import { DAR, PendingCases} from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import {applyTextHover, getDatasetNames, NavigationUtils, removeTextHover} from '../libs/utils';
 import { Styles } from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import lockIcon from '../images/lock-icon.png';
 import DarModal from "../components/modals/DarModal";
-import {DataUseTranslation} from "../libs/dataUseTranslation";
 
 class MemberConsole extends Component {
 
@@ -32,9 +31,6 @@ class MemberConsole extends Component {
       totalDulPendingVotes: 0,
       totalAccessPendingVotes: 0,
       totalResearchPurposePendingVotes: 0,
-      showSummaryModal: false,
-      darData: null,
-      researcher: null
     };
   }
 
@@ -98,7 +94,7 @@ class MemberConsole extends Component {
   };
 
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query !== undefined) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
@@ -107,21 +103,21 @@ class MemberConsole extends Component {
 
   render() {
 
-    const { searchDarText, showSummaryModal, darDetails, researcher } = this.state;
+    const { searchDarText, showModal, darDetails, researcher } = this.state;
     const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
-    const closeSummaryModal = () => this.setState({ showSummaryModal: false });
-    const openSummaryModal = (dar) => {
-        console.log(dar);
-        this.setState({showSummaryModal: true, darData: dar });
-        if (!isNil(dar)) {
-          dar.researchType = DataUseTranslation.generateResearchTypes(dar);
-          if (!dar.datasetNames) {
-            dar.datasetNames = getDatasetNames(dar.datasets);
-          }
-          const researcher = async () => await User.getById(dar.userId);
-          this.setState({ researcher: researcher, darDetails: dar });
-        }
-      };
+    const closeSummaryModal = () => this.setState({ showModal: false });
+    const openSummaryModal = async (dar) => {
+      let darDetails = await DAR.getDarModalSummary(dar.dataRequestId);
+      // if (!isNil(darDetails)) {
+      //   darDetails.researchType = DataUseTranslation.generateResearchTypes(dar);
+      //   if (!darDetails.datasetNames) {
+      //     darDetails.datasetNames = getDatasetNames(darDetails.datasets);
+      //   }
+      //   const researcher = async () => await User.getById(darDetails.userId);
+      //   this.setState({ researcher, darDetails});
+      // }
+      this.setState({showModal: true, darDetails: darDetails});
+    };
 
     return (
 
@@ -190,7 +186,7 @@ class MemberConsole extends Component {
                   ])
                 ]);
               }),
-            h(DarModal, { showModal: showSummaryModal, closeModal: closeSummaryModal, darDetails: darDetails, researcher: researcher }),
+            h(DarModal, { showModal: showModal, closeModal: closeSummaryModal, darDetails: darDetails, researcher: researcher }),
             h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange}),
           ])
       ])

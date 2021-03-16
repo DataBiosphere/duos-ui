@@ -24,15 +24,13 @@ class AdminManageAccess extends Component {
       disableBtn: false,
       disableCancelBtn: false,
       showModal: false,
-      showSummaryModal: false,
       value: '',
       darElectionList: [],
-      dacList: [],
       currentPage: 1,
       limit: 10,
-      showDialogCreate: false
+      showDialogCreate: false,
+      dacList: []
     };
-    this.closeCreateConfirmation = this.closeCreateConfirmation.bind(this);
   }
 
   closeCreateConfirmation = () => {
@@ -171,22 +169,22 @@ class AdminManageAccess extends Component {
   };
 
   render() {
-    const { searchDarText, currentPage, limit, darData, researcher, showSummaryModal } = this.state;
+    const { showModal, searchDarText, currentPage, limit, darData, researcher } = this.state;
     const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
     const closeSummaryModal = () => {
-      this.setState({ showSummaryModal: false });
+      this.setState({ showModal: false });
     };
-    const openSummaryModal = async (darData) => {
-      if (!isNil(darData)) {
-        this.setState({showSummaryModal: true });
-        darData.researchType = DataUseTranslation.generateResearchTypes(darData);
-        if(!darData.datasetNames) {
-          darData.datasetNames = getDatasetNames(darData.datasets);
-        }
-        this.setState({ darData: darData });
-        const researcher = await User.getById(darData.userId);
-        this.setState({researcher: researcher});
-      }
+    const openSummaryModal = async (dar) => {
+      let darDetails = await DAR.getDarModalSummary(dar.dataRequestId);
+      // if (!isNil(darDetails)) {
+      //   darDetails.researchType = DataUseTranslation.generateResearchTypes(dar);
+      //   if (!darDetails.datasetNames) {
+      //     darDetails.datasetNames = getDatasetNames(darDetails.datasets);
+      //   }
+      //   const researcher = async () => await User.getById(darDetails.userId);
+      //   this.setState({ researcher, darDetails});
+      // }
+      this.setState({showModal: true, darDetails: darDetails});
     };
 
     return (
@@ -310,7 +308,7 @@ class AdminManageAccess extends Component {
                   ])
               ]);
             }),
-          h(DarModal, { showSummaryModal, closeSummaryModal, darData, researcher }),
+          h(DarModal, { showModal, closeSummaryModal, darData, researcher }),
           h(ConfirmationModal, {
             showConfirmation: this.state.showDialogCreate,
             closeConfirmation: this.closeCreateConfirmation,
