@@ -1,7 +1,7 @@
-import {Component} from 'react';
-import {a, button, div, h1, h3, img, p, span} from 'react-hyperscript-helpers';
-import {SignIn} from '../components/SignIn';
-import {ReadMore} from '../components/ReadMore';
+import { Component } from 'react';
+import { a, button, div, h1, h3, img, p, span } from 'react-hyperscript-helpers';
+import { SignIn } from '../components/SignIn';
+import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
@@ -34,8 +34,8 @@ class Home extends Component {
     };
 
     const duosLogo = {
-      position: 'relative',
-      width: '250px',
+      height: '80px',
+      width: '300px',
       display: 'block',
       margin: '0 auto 3rem',
       padding: '0 3rem'
@@ -133,11 +133,9 @@ class Home extends Component {
             ]),
             div({ style: { position: 'absolute', width: '100%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}, [
               img({ style: duosLogo , alt: 'DUOS logo', src: duosLogoImg }),
-              div({ style: { position: 'absolute', width: '100%', top: '60%'}}, [
-                h1({ style: homeTitle }, ['Data Use Oversight System']),
-                div({ className: 'hidden-xs', style: homeBannerDescription }, [
-                  'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
-              ])
+              h1({ style: homeTitle }, ['Data Use Oversight System']),
+              div({ className: 'hidden-xs', style: homeBannerDescription }, [
+                'Expediting data access for researchers, by facilitating and \nenhancing data access committee\'s workflows'])
             ])
           ]),
           div({ className: 'row' }, [
