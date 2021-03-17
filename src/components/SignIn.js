@@ -25,15 +25,14 @@ export const SignIn = hh(class SignIn extends Component {
       prev.clientId = clientKey;
       return prev;
     });
-  }
+  };
 
   getUser = async () => {
     return await User.getMe();
-  }
+  };
 
   responseGoogle = async (response) => {
     Storage.setGoogleData(response);
-    console.log(response);
     try{
       const userRes = await this.getUser();
       const user = Object.assign(userRes, setUserRoleStatuses(userRes, Storage));
