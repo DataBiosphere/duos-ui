@@ -220,7 +220,7 @@ class DuosHeader extends Component {
     };
 
     const duosLogoImage = {
-      height: '40px',
+      height: '50px',
       padding: '0',
       margin: '12px 64px 0 0',
       cursor: 'pointer'
@@ -277,11 +277,11 @@ class DuosHeader extends Component {
     return (
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
+          // this.makeNotifications(),
+          h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
+            img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
+          ]),
           div({ className: 'row no-margin' }, [
-            this.makeNotifications(),
-            h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-              img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
-            ]),
             //Standard navbar for medium sized displays and higher (pre-existing navbar)
             div({}, [
               ul({ isRendered: isLogged, className: 'navbar-logged' }, [
