@@ -7,14 +7,15 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAC, DAR, DataSet} from '../libs/ajax';
+import {DAC, DataSet} from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
-import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
+import { formatOntologyItems, getOntologies, searchOntologies } from "../libs/utils";
+
 class DatasetRegistration extends Component {
 
   constructor(props) {
@@ -94,8 +95,8 @@ class DatasetRegistration extends Component {
     });
     if (!fp.isEmpty(this.state.updateDataset)) {
       this.prefillDatasetFields(this.state.updateDataset);
-      const ontologies = await this.getOntologies(this.state.formData.diseases);
-      const formattedOntologies = this.formatOntologyItems(ontologies);
+      const ontologies = await getOntologies(this.state.formData.diseases);
+      const formattedOntologies = formatOntologyItems(ontologies);
       this.setState(prev => {
         prev.formData.ontologies = formattedOntologies;
         prev.formData.diseases = !fp.isEmpty(ontologies);
@@ -164,19 +165,6 @@ class DatasetRegistration extends Component {
 
     if (!fp.isEmpty(dataset.dataUse)) {
       this.prefillDataUseFields(dataset.dataUse);
-    }
-  };
-
-  async getOntologies(urls) {
-    if (fp.isEmpty(urls)) {
-      return [];
-    }
-    else {
-      let ontologies = await Promise.all(
-        urls.map(url => searchOntology(url)
-          .then(data => { return data; })
-        ));
-      return ontologies;
     }
   };
 
@@ -436,22 +424,6 @@ class DatasetRegistration extends Component {
     return !valid;
   };
 
-  searchOntologies = (query, callback) => {
-    let options = [];
-    DAR.getAutoCompleteOT(query).then(
-      items => {
-        options = items.map(function(item) {
-          return {
-            key: item.id,
-            value: item.id,
-            label: item.label,
-            item: item,
-          };
-        });
-        callback(options);
-      });
-  };
-
   setNeedsApproval = (value) => {
     this.setState(prev => {
       prev.datasetData.needsApproval = value;
@@ -685,19 +657,6 @@ class DatasetRegistration extends Component {
     }
     return result;
   }
-
-  formatOntologyItems = (ontologies) => {
-    const ontologyItems = ontologies.map((ontology) => {
-      return {
-        id: ontology.id || ontology.item.id,
-        key: ontology.id || ontology.item.id,
-        value: ontology.id || ontology.item.id,
-        label: ontology.label || ontology.item.label,
-        item: ontology || ontology.item
-      };
-    });
-    return ontologyItems;
-  };
 
   render() {
 
@@ -1157,7 +1116,7 @@ class DatasetRegistration extends Component {
                                 id: 'sel_diseases',
                                 isDisabled: isUpdateDataset || !diseases,
                                 isMulti: true,
-                                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                loadOptions: (query, callback) => searchOntologies(query, callback),
                                 onChange: (option) => this.onOntologiesChange(option),
                                 value: ontologies,
                                 placeholder: 'Please enter one or more diseases',
