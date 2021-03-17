@@ -277,7 +277,7 @@ class DuosHeader extends Component {
     return (
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
-          // this.makeNotifications(),
+          this.makeNotifications(),
           h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
             img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
           ]),
