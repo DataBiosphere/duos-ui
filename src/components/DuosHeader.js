@@ -222,7 +222,7 @@ class DuosHeader extends Component {
           link: this.state.dacChairPath
         },
         'Manage DACs': {
-          link: '/manage_dac/chair'
+          link: '/manage_dac'
         }
       }
     };
@@ -323,7 +323,7 @@ class DuosHeader extends Component {
                     ]),
                     hr({ style: hrStyle }),
                     li({}, [
-                      h(Link, { id: 'link_manageDac', to: '/manage_dac/chair'}, ['Manage DACs'])
+                      h(Link, { id: 'link_manageDac', to: '/manage_dac'}, ['Manage DACs'])
                     ])
                   ])
                 ]),
