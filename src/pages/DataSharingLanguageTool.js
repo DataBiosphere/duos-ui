@@ -1,11 +1,12 @@
-import {useEffect, useState} from "react";
+
 import {Styles} from "../libs/theme";
-import {br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
+import { button, div, h, label, span, textarea} from "react-hyperscript-helpers";
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
 import {isNil} from "lodash/fp";
 import {formatOntologyItems, getOntologies, searchOntologies} from "../libs/utils";
 import {DataUseTranslation} from "../libs/dataUseTranslation";
+import {useState} from "react";
 
 const buttonStyle = { marginBottom: '2rem', color: '#777' };
 
@@ -27,18 +28,8 @@ export default function DataSharingLanguageTool(props) {
   const [npoa, setNpoa] = useState(false);
   const [secOther, setSecOther] = useState(false);
   const [secOtherText, setSecOtherText] = useState();
-  const [sdsl, setSdsl] = useState();
+  const [sdsl, setSdsl] = useState("");
 
-  //useEffect();
-
-  const handleCheckboxChange = (e) => {
-    const field = e.target.name;
-    const value = e.target.checked;
-    this.setState(prev => {
-      prev[field] = value;
-      return prev;
-    });
-  };
 
   const isTypeOfResearchInvalid = () => {
     return !(general || hmb || (diseases && !isNil(ontologies)) || (other && !isNil(otherText)));
@@ -48,7 +39,11 @@ export default function DataSharingLanguageTool(props) {
   const generate = () => {
     const darInfo = { general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
       hmb: hmb, methods: nmds, poa: npoa, forProfit: npu };
-    setSdsl(DataUseTranslation.translateDarInfo(darInfo));
+    const dataUse = (DataUseTranslation.translateDarInfo(darInfo));
+    dataUse.primary.forEach((summary) => {sdsl.concat(summary.description).concat(" ")});
+    dataUse.secondary.forEach((summary) => sdsl.concat(summary.description).concat(" "));
+    console.log(sdsl);
+     setSdsl(sdsl);
   };
 
   return (
@@ -246,7 +241,7 @@ export default function DataSharingLanguageTool(props) {
           button({
             style: {marginLeft: '15px'},
             className: 'button',
-            onClick: () => generate,
+            onClick: () => generate(),
           }, ["Generate Standardized Data Sharing Language"]),
           div(
             {className: 'col-xs-12 rp-group'}, [
