@@ -26,14 +26,14 @@ export default function DataSharingLanguageTool(props) {
   const [npu, setNpu] = useState(false);
   const [sdsl, setSdsl] = useState("");
 
-  const isTypeOfResearchInvalid = () => {
-    return !(general || hmb || (diseases && !isNil(ontologies)) || (other && !isNil(otherText)));
+  const isTypeOfResearchValid = () => {
+    return (general || hmb || (diseases && !isNil(ontologies)) || other );
   };
 
   const generate = () => {
-    isTypeOfResearchInvalid() ?
-      Notifications.showError("Please answer question 1")
-      : generateHelper();
+    isTypeOfResearchValid() ?
+      generateHelper()
+      : Notifications.showError({text: "Please complete question 1"});
   };
 
   const generateHelper = () => {
@@ -51,11 +51,11 @@ export default function DataSharingLanguageTool(props) {
   };
 
   return (
-    div({style: Styles.PAGE}, [
-      div({style: Styles.TITLE}, [
+    div({style: {...Styles.PAGE, color: '#1f3b50' }}, [
+      div({style: {...Styles.TITLE, marginTop: '3.5rem'}}, [
         "Standardized Data Sharing Language Tool"
       ]),
-      div({style: Styles.SMALL}, [
+      div({style: {...Styles.SMALL, marginTop: '1rem'}}, [
         "This tool is made publicly available by the DUOS team for anyone" +
         " interested in leveraging standardized data sharing language in their" +
         " consent forms. The tool leverages the Global Alliance for Genomics " +
@@ -70,12 +70,11 @@ export default function DataSharingLanguageTool(props) {
       div({className: 'form-group', style: {marginTop: '1rem'}}, [
         label({style: Styles.MEDIUM}, [
           '1. Choose the permitted data uses for your study\'s data ', br(),
-          span({style: Styles.SMALL}, ['First, you must determine what type of secondary use is permitted for you study\'s data.' +
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['First, you must determine what type of secondary use is permitted for you study\'s data.' +
           ' You do this by selecting one of the options in the following section:']),
         ]),
         div({}, [
           RadioButton({
-            style: Styles.SMALL,
             value: 'general',
             defaultChecked: general,
             onClick: () => {
@@ -83,12 +82,10 @@ export default function DataSharingLanguageTool(props) {
             },
             label: 'General Research Use: ',
             description: 'use is permitted for any research purpose',
-            labelStyle: {...Styles.SMALL, color: '#1f3b50'},
-            descriptionStyle: {...Styles.SMALL, color: '#1f3b50'}
+            sdsl: true
           }),
 
           RadioButton({
-            style: {buttonStyle},
             value: 'hmb',
             defaultChecked: hmb,
             onClick: () => {
@@ -96,10 +93,10 @@ export default function DataSharingLanguageTool(props) {
             },
             label: 'Health/Medical/Biomedical Use: ',
             description: 'use is permitted for any health, medical, or biomedical purpose',
+            sdsl: true
           }),
 
           RadioButton({
-            style: {buttonStyle},
             value: 'diseases',
             defaultChecked: diseases,
             onClick: () => {
@@ -107,6 +104,7 @@ export default function DataSharingLanguageTool(props) {
             },
             label: 'Disease-related studies: ',
             description: 'use is permitted for research on the specified disease',
+            sdsl: true
           }),
 
           div({
@@ -124,19 +122,19 @@ export default function DataSharingLanguageTool(props) {
           ]),
 
           RadioButton({
-            style: {buttonStyle},
             value: 'other',
             defaultChecked: other,
             onClick: () => {
               setOther(!other), setHmb(false), setDiseases(false), setGeneral(false);
             },
-            label: 'Other Use:',
+            label: 'Other Use: ',
             description: 'permitted research use is defined as follows: ',
+            sdsl: true
           }),
 
           textarea({
             className: 'form-control',
-            onBlur: (e) => setOtherText(e),
+            onBlur: (e) => setOtherText(e.target.value),
             maxLength: '512',
             rows: '2',
             required: other,
@@ -149,76 +147,75 @@ export default function DataSharingLanguageTool(props) {
       div({className: 'form-group', style: {marginTop: '2rem'}}, [
         label({style: Styles.MEDIUM}, [
           '2. Choose any additional constraints you need to put on future uses of your data', br(),
-          span({style: Styles.SMALL}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
         ]),
         div({}, [
           RadioButton({
-            style: {buttonStyle},
             value: 'nmds',
             defaultChecked: nmds,
             onClick: () => setNmds(!nmds),
             label: 'No methods development or validation studies (NMDS)',
-            description: '',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'gso',
             defaultChecked: gso,
             onClick: () => setGso(!gso),
-            label: 'Genetic Studies Only (GSO)'
+            label: 'Genetic Studies Only (GSO)',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'pub',
             defaultChecked: pub,
             onClick: () => setPub(!pub),
-            label: 'Publication Required (PUB)'
+            label: 'Publication Required (PUB)',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'col',
             defaultChecked: col,
             onClick: () => setCol(!col),
-            label: 'Collaboration Required (COL)'
+            label: 'Collaboration Required (COL)',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'irb',
             defaultChecked: irb,
             onClick: () => setIrb(!irb),
-            label: 'Ethics Approval Required (IRB)'
+            label: 'Ethics Approval Required (IRB)',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'gs',
             defaultChecked: gs,
             onClick: () => setGs(!gs),
-            label: 'Geographic Restriction (GS-)'
+            label: 'Geographic Restriction (GS-)',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'mor',
             defaultChecked: mor,
             onClick: () => setMor(!mor),
-            label: 'Publication Moratorium (MOR)'
+            label: 'Publication Moratorium (MOR)',
+            sdsl: true
           }),
           RadioButton({
-            style: {buttonStyle},
             value: 'npu',
             defaultChecked: npu,
             onClick: () => setNpu(!npu),
-            label: 'Non-Profit Use Only (NPU)'
+            label: 'Non-Profit Use Only (NPU)',
+            sdsl: true
           })
         ])
       ]),
 
       div({className: 'form-group'}, [
-        label({style: {...Styles.MEDIUM, marginBottom: '0rem'}}, [
-          '3. Generate your suggested Standardized Data Sharing Language below!', br(),
-          span({style: Styles.SMALL}, ['If your selections above are complete, press generate and the suggesteed consent form text ' +
-          'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below']),
+        label({style: Styles.MEDIUM}, [
+          '3. Generate your suggested Standardized Data Sharing Language below', br(),
+          span({style: Styles.MEDIUM_DESCRIPTION}, ['If your selections above are complete, press generate and the suggested consent form text ' +
+          'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below.']),
           button({
-            style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '1.5rem'},
+            style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '2rem'},
             className: 'button',
             onClick: () => generate(),
           }, ["Generate Standardized Data Sharing Language"]),

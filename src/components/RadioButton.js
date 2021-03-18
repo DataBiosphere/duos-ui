@@ -7,7 +7,7 @@ export const RadioButton = (props) => {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
-    fontFamily: '\'Roboto\', sans-serif',
+    fontFamily: props.sdsl ? 'Montserrat' : '\'Roboto\', sans-serif',
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
   };
@@ -36,7 +36,7 @@ export const RadioButton = (props) => {
 
   const labelStyle = {
     cursor: props.disabled ? 'not-allowed' : 'pointer',
-    color: '#603B9B',
+    color: props.sdsl ? '#1f3b50' : '#603B9B',
     fontSize: 15,
     fontWeight: 'normal',
   };

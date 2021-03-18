@@ -87,8 +87,13 @@ export const Styles = {
   MEDIUM: {
     fontFamily: 'Montserrat',
     fontWeight: Theme.font.weight.semibold,
-    fontSize: '16px',
+    fontSize: '18px',
     margin: '15px 0'
+  },
+  MEDIUM_DESCRIPTION: {
+    fontFamily: 'Montserrat',
+    fontWeight: Theme.font.weight.regular,
+    fontSize: '15px',
   },
   HEADER_IMG: {
     width: '60px',
