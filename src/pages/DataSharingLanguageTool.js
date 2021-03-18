@@ -3,7 +3,7 @@ import {br, button, div, h, label, span, textarea} from "react-hyperscript-helpe
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
 import {isNil} from "lodash/fp";
-import {formatOntologyItems, getOntologies, searchOntologies} from "../libs/utils";
+import {Notifications, searchOntologies} from "../libs/utils";
 import {DataUseTranslation} from "../libs/dataUseTranslation";
 import {useState} from "react";
 
@@ -13,7 +13,7 @@ export default function DataSharingLanguageTool(props) {
   const [general, setGeneral] = useState(false);
   const [hmb, setHmb] = useState(false);
   const [diseases, setDiseases] = useState(false);
-  const [ontologies, setOntologies] = formatOntologyItems(getOntologies(diseases));
+  const [ontologies, setOntologies] = useState();
   const [other, setOther] = useState(false);
   const [otherText, setOtherText] = useState();
   const [nmds, setNmds] = useState(false);
@@ -24,29 +24,30 @@ export default function DataSharingLanguageTool(props) {
   const [gs, setGs] = useState(false);
   const [mor, setMor] = useState(false);
   const [npu, setNpu] = useState(false);
-  const [npoa, setNpoa] = useState(false);
-  const [secOther, setSecOther] = useState(false);
-  const [secOtherText, setSecOtherText] = useState();
   const [sdsl, setSdsl] = useState("");
-
 
   const isTypeOfResearchInvalid = () => {
     return !(general || hmb || (diseases && !isNil(ontologies)) || (other && !isNil(otherText)));
   };
 
-
   const generate = () => {
+    isTypeOfResearchInvalid() ?
+      Notifications.showError("Please answer question 1")
+      : generateHelper();
+  };
+
+  const generateHelper = () => {
     const darInfo = {
       general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
-      hmb: hmb, methods: nmds, poa: npoa, forProfit: npu
+      hmb: hmb, methods: nmds, forProfit: !npu
     };
+    const summaries = [];
     const dataUse = (DataUseTranslation.translateDarInfo(darInfo));
     dataUse.primary.forEach((summary) => {
-      sdsl.concat(summary.description).concat(" ");
+      summaries.push(summary.description);
     });
-    dataUse.secondary.forEach((summary) => sdsl.concat(summary.description).concat(" "));
-    console.log(sdsl);
-    setSdsl(sdsl);
+    dataUse.secondary.forEach((summary) => summaries.push(summary.description));
+    setSdsl(summaries.join(" "));
   };
 
   return (
@@ -115,7 +116,7 @@ export default function DataSharingLanguageTool(props) {
               isDisabled: !diseases,
               isMulti: true,
               loadOptions: (query, callback) => searchOntologies(query, callback),
-              onChange: (option) => setOntologies(option),
+              onChange: (option) => option ? setOntologies(option) : setOntologies,
               value: ontologies,
               placeholder: 'Please enter one or more diseases',
               classNamePrefix: 'select',
@@ -211,12 +212,11 @@ export default function DataSharingLanguageTool(props) {
         ])
       ]),
 
-      div({className: 'form-group', style: {marginTop: '1rem'}}, [
+      div({className: 'form-group'}, [
         label({style: {...Styles.MEDIUM, marginBottom: '0rem'}}, [
           '3. Generate your suggested Standardized Data Sharing Language below!', br(),
           span({style: Styles.SMALL}, ['If your selections above are complete, press generate and the suggesteed consent form text ' +
           'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below']),
-
           button({
             style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '1.5rem'},
             className: 'button',
