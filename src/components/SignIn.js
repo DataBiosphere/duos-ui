@@ -43,9 +43,6 @@ export const SignIn = hh(class SignIn extends Component {
         this.setUserRoleStatuses(registeredUser, Storage);
         this.props.onSignIn(); //is this async?
         this.props.history.push('/profile');
-        setTimeout(() => {
-          Storage.clearStorage();
-        }, 3599);
       } catch(error) {
         try{
           const status = error.status;

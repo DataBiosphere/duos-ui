@@ -112,9 +112,6 @@ export default function BackgroundSignIn(props) {
       onSubmit: (e) => {
         e.preventDefault();
         setAccessToken(formToken);
-        setTimeout(() => {
-          Storage.clearStorage();
-        }, 3599);
       }
     }, [
       div({ className: 'form-group' }, [
