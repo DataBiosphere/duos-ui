@@ -1100,7 +1100,7 @@ const axiosPostOk = async (apiUrl, dar, config) => {
 };
 
 const axiosPutOk = async (apiUrl, dar, config) => {
-  const res = await axios.put(apiUrl, config);
+  const res = await axios.put(apiUrl, dar, config);
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
