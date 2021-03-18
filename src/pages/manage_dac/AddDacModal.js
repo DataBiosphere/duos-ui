@@ -13,6 +13,7 @@ import addDACIcon from '../../images/icon_add_dac.png';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
+const CHAIRPERSON = 'Chairperson';
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -266,7 +267,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 onChange: this.handleChange,
                 name: 'name',
                 className: 'form-control col-lg-12 vote-input',
-                required: true
+                required: true,
+                disabled: this.props.userRole === CHAIRPERSON
               })
             ])
           ]),
@@ -283,7 +285,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 onChange: this.handleChange,
                 name: 'description',
                 className: 'form-control col-lg-12 vote-input',
-                required: true
+                required: true,
+                disabled: this.props.userRole === CHAIRPERSON
               })
             ])
           ]),

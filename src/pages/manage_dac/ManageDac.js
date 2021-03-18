@@ -73,17 +73,17 @@ class ManageDac extends Component {
     await User.getMe().then(
       (result) => {
         res = result,
-          roles = res.roles.map((role) => role.name),
-          res.roles.forEach((role) => {
-            if (role.name === CHAIR) {
-              dacIDs.push(role.dacId);
-            }
-          })
+        roles = res.roles.map((role) => role.name),
+        res.roles.forEach((role) => {
+          if (role.name === CHAIR) {
+            dacIDs.push(role.dacId);
+          }
+        });
       }
     );
     const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
     if (role === CHAIR) {
-      this.setState({dacIDs: dacIDs})
+      this.setState({dacIDs: dacIDs});
     }
     this.setState({userRole: role});
   };
@@ -219,7 +219,7 @@ class ManageDac extends Component {
             })
           ]),
           div({
-            isRendered: (userRole === "Admin"),
+            isRendered: (userRole === ADMIN),
             className: 'col-md-6 col-xs-12 search-wrapper no-padding'}, [
             div({className: 'col-xs-6'}, [
               h(SearchBox, {
@@ -239,7 +239,7 @@ class ManageDac extends Component {
             ])
           ]),
           div({
-            isRendered: (userRole === "Chair"),
+            isRendered: (userRole === CHAIR),
             className: 'search-wrapper no-padding'}, [
             div({className: 'col-xs-6'}, [
               h(SearchBox, {
@@ -349,7 +349,8 @@ class ManageDac extends Component {
             isEditMode: this.state.isEditMode,
             onOKRequest: this.okAddDacModal,
             onCloseRequest: this.closeAddDacModal,
-            dac: this.state.selectedDac
+            dac: this.state.selectedDac,
+            userRole: userRole
           })
         ])
       ])
