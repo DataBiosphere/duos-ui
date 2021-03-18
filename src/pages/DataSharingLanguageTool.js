@@ -1,6 +1,5 @@
-
 import {Styles} from "../libs/theme";
-import { button, div, h, label, span, textarea} from "react-hyperscript-helpers";
+import {br, button, div, h, label, span, textarea} from "react-hyperscript-helpers";
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
 import {isNil} from "lodash/fp";
@@ -8,7 +7,7 @@ import {formatOntologyItems, getOntologies, searchOntologies} from "../libs/util
 import {DataUseTranslation} from "../libs/dataUseTranslation";
 import {useState} from "react";
 
-const buttonStyle = { marginBottom: '2rem', color: '#777' };
+const buttonStyle = {marginBottom: '2rem', color: '#777'};
 
 export default function DataSharingLanguageTool(props) {
   const [general, setGeneral] = useState(false);
@@ -37,13 +36,17 @@ export default function DataSharingLanguageTool(props) {
 
 
   const generate = () => {
-    const darInfo = { general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
-      hmb: hmb, methods: nmds, poa: npoa, forProfit: npu };
+    const darInfo = {
+      general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
+      hmb: hmb, methods: nmds, poa: npoa, forProfit: npu
+    };
     const dataUse = (DataUseTranslation.translateDarInfo(darInfo));
-    dataUse.primary.forEach((summary) => {sdsl.concat(summary.description).concat(" ")});
+    dataUse.primary.forEach((summary) => {
+      sdsl.concat(summary.description).concat(" ");
+    });
     dataUse.secondary.forEach((summary) => sdsl.concat(summary.description).concat(" "));
     console.log(sdsl);
-     setSdsl(sdsl);
+    setSdsl(sdsl);
   };
 
   return (
@@ -63,196 +66,169 @@ export default function DataSharingLanguageTool(props) {
         " in their consent forms and then suggests corresponding text for the " +
         "consent form below, based on the MRCG."
       ]),
-      div({className: 'form-group'}, [
-        span({className: 'control-label rp-title-question'}, [
-          '1. Choose the permitted data uses for your study\'s data',
-          span({},
-            ['First, you must determine what type of secondary use is permitted for you study\'s data.' +
-                ' You do this by selecting one of the options in the following section:']),
+      div({className: 'form-group', style: {marginTop: '1rem'}}, [
+        label({style: Styles.MEDIUM}, [
+          '1. Choose the permitted data uses for your study\'s data ', br(),
+          span({style: Styles.SMALL}, ['First, you must determine what type of secondary use is permitted for you study\'s data.' +
+          ' You do this by selecting one of the options in the following section:']),
+        ]),
+        div({}, [
+          RadioButton({
+            style: Styles.SMALL,
+            value: 'general',
+            defaultChecked: general,
+            onClick: () => {
+              setGeneral(!general), setHmb(false), setDiseases(false), setOther(false);
+            },
+            label: 'General Research Use: ',
+            description: 'use is permitted for any research purpose',
+            labelStyle: {...Styles.SMALL, color: '#1f3b50'},
+            descriptionStyle: {...Styles.SMALL, color: '#1f3b50'}
+          }),
 
-          div({className: 'col-xs-12'}, [
-            RadioButton({
-              style: Styles.SMALL,
-              value: 'general',
-              defaultChecked: general,
-              onClick: () => {setGeneral(!general), setHmb(false), setDiseases(false), setOther(false); },
-              label: 'General Research Use: ',
-              description: 'use is permitted for any research purpose',
-            }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'hmb',
+            defaultChecked: hmb,
+            onClick: () => {
+              setHmb(!hmb), setGeneral(false), setDiseases(false), setOther(false);
+            },
+            label: 'Health/Medical/Biomedical Use: ',
+            description: 'use is permitted for any health, medical, or biomedical purpose',
+          }),
 
-            RadioButton({
-              style: { buttonStyle },
-              value: 'hmb',
-              defaultChecked: hmb,
-              onClick: () => {setHmb(!hmb), setGeneral(false), setDiseases(false), setOther(false); },
-              label: 'Health/Medical/Biomedical Use: ',
-              description: 'use is permitted for any health, medical, or biomedical purpose',
-            }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'diseases',
+            defaultChecked: diseases,
+            onClick: () => {
+              setDiseases(!diseases), setHmb(false), setGeneral(false), setOther(false);
+            },
+            label: 'Disease-related studies: ',
+            description: 'use is permitted for research on the specified disease',
+          }),
 
-            RadioButton({
-              style: { buttonStyle },
-              value: 'diseases',
-              defaultChecked: diseases,
-              onClick: () => {setDiseases(!diseases), setHmb(false), setGeneral(false), setOther(false); },
-              label: 'Disease-related studies: ',
-              description: 'use is permitted for research on the specified disease',
-            }),
-            div({
-              style: {buttonStyle, marginBottom: '10px', cursor: diseases ? 'pointer' : 'not-allowed'},
-            }, [
-              h(AsyncSelect, {
-                isDisabled: !diseases,
-                isMulti: true,
-                loadOptions: (query, callback) => searchOntologies(query, callback),
-                onChange: (option) => setOntologies(option),
-                value: ontologies,
-                placeholder: 'Please enter one or more diseases',
-                classNamePrefix: 'select',
-              }),
-            ]),
-
-            RadioButton({
-              style: { buttonStyle },
-              value: 'other',
-              defaultChecked: other,
-              onClick: () => {setOther(!other), setHmb(false), setDiseases(false), setGeneral(false); },
-              label: 'Other Use:',
-              description: 'permitted research use is defined as follows: ',
-            }),
-
-            textarea({
-              className: 'form-control',
-              onBlur: (e) => setOtherText(e),
-              maxLength: '512',
-              rows: '2',
-              required: other,
-              disabled: !other,
-              placeholder: 'Please specify if selected (max. 512 characters)',
+          div({
+            style: {buttonStyle, marginBottom: '10px', cursor: diseases ? 'pointer' : 'not-allowed'},
+          }, [
+            h(AsyncSelect, {
+              isDisabled: !diseases,
+              isMulti: true,
+              loadOptions: (query, callback) => searchOntologies(query, callback),
+              onChange: (option) => setOntologies(option),
+              value: ontologies,
+              placeholder: 'Please enter one or more diseases',
+              classNamePrefix: 'select',
             }),
           ]),
 
-          div({className: 'form-group'}, [
-            div(
-              {className: ' col-xs-12 rp-group'}, [
-                label({className: 'control-label rp-title-question'}, [
-                  '2. Choose any additional constraints you need to put on future uses of your data',
-                  span({}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
-                ]),
-              ]),
-          ]),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'other',
+            defaultChecked: other,
+            onClick: () => {
+              setOther(!other), setHmb(false), setDiseases(false), setGeneral(false);
+            },
+            label: 'Other Use:',
+            description: 'permitted research use is defined as follows: ',
+          }),
 
-          div(
-            {className: 'col-xs-12 rp-group'}, [
-              RadioButton({
-                style: { buttonStyle },
-                value: 'nmds',
-                defaultChecked: nmds,
-                onClick: () => setNmds(!nmds),
-                label: 'No methods development or validation studies (NMDS)',
-                description: '',
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'gso',
-                defaultChecked: gso,
-                onClick: () => setGso(!gso),
-                label: 'Genetic Studies Only (GSO)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'pub',
-                defaultChecked: pub,
-                onClick: () => setPub(!pub),
-                label: 'Publication Required (PUB)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'col',
-                defaultChecked: col,
-                onClick: () => setCol(!col),
-                label: 'Collaboration Required (COL)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'irb',
-                defaultChecked: irb,
-                onClick: () => setIrb(!irb),
-                label: 'Ethics Approval Required (IRB)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'gs',
-                defaultChecked: gs,
-                onClick: () => setGs(!gs),
-                label: 'Geographic Restriction (GS-)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'mor',
-                defaultChecked: mor,
-                onClick: () => setMor(!mor),
-                label: 'Publication Moratorium (MOR)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'npoa',
-                defaultChecked: npoa,
-                onClick: () => setNpoa(!npoa),
-                label: 'No Populations Origins or Ancestry Research (NPOA)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'npu',
-                defaultChecked: npu,
-                onClick: () => setNpu(!npu),
-                label: 'Non-Profit Use Only (NPU)'
-              }),
-              RadioButton({
-                style: { buttonStyle },
-                value: 'secOther',
-                defaultChecked: secOther,
-                onClick: () => setSecOther(!secOther),
-                label: '\'Other Secondary Use Terms:\''
-              }),
-              div(
-                {className: 'col-xs-12 rp-group'}, [
-                  textarea({
-                    defaultValue: secOtherText,
-                    onBlur: (e) => setSecOtherText(e),
-                    name: 'secOtherText',
-                    className: 'form-control',
-                    rows: '6',
-                    required: secOther,
-                    disabled: !secOther,
-                    placeholder: 'Note - adding free text data use terms in the box will inhibit your dataset from being read by the DUOS Algorithm for decision support.',
-                  })
-                ]),
-            ]),
-          div({className: 'form-group'}, [
-            div(
-              {className: ' col-xs-12 rp-group'}, [
-                label({className: 'control-label rp-title-question'}, [
-                  '3. Generate your suggested Standardized Data Sharing Language below!',
-                  span({}, ['If your selections above are complete, press generate and the suggesteed consent form text ' +
-                'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below']),
-                ]),
-              ]),
-          ]),
+          textarea({
+            className: 'form-control',
+            onBlur: (e) => setOtherText(e),
+            maxLength: '512',
+            rows: '2',
+            required: other,
+            disabled: !other,
+            placeholder: 'Please specify if selected (max. 512 characters)',
+          }),
+        ]),
+      ]),
+
+      div({className: 'form-group', style: {marginTop: '2rem'}}, [
+        label({style: Styles.MEDIUM}, [
+          '2. Choose any additional constraints you need to put on future uses of your data', br(),
+          span({style: Styles.SMALL}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
+        ]),
+        div({}, [
+          RadioButton({
+            style: {buttonStyle},
+            value: 'nmds',
+            defaultChecked: nmds,
+            onClick: () => setNmds(!nmds),
+            label: 'No methods development or validation studies (NMDS)',
+            description: '',
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'gso',
+            defaultChecked: gso,
+            onClick: () => setGso(!gso),
+            label: 'Genetic Studies Only (GSO)'
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'pub',
+            defaultChecked: pub,
+            onClick: () => setPub(!pub),
+            label: 'Publication Required (PUB)'
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'col',
+            defaultChecked: col,
+            onClick: () => setCol(!col),
+            label: 'Collaboration Required (COL)'
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'irb',
+            defaultChecked: irb,
+            onClick: () => setIrb(!irb),
+            label: 'Ethics Approval Required (IRB)'
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'gs',
+            defaultChecked: gs,
+            onClick: () => setGs(!gs),
+            label: 'Geographic Restriction (GS-)'
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'mor',
+            defaultChecked: mor,
+            onClick: () => setMor(!mor),
+            label: 'Publication Moratorium (MOR)'
+          }),
+          RadioButton({
+            style: {buttonStyle},
+            value: 'npu',
+            defaultChecked: npu,
+            onClick: () => setNpu(!npu),
+            label: 'Non-Profit Use Only (NPU)'
+          })
+        ])
+      ]),
+
+      div({className: 'form-group', style: {marginTop: '1rem'}}, [
+        label({style: {...Styles.MEDIUM, marginBottom: '0rem'}}, [
+          '3. Generate your suggested Standardized Data Sharing Language below!', br(),
+          span({style: Styles.SMALL}, ['If your selections above are complete, press generate and the suggesteed consent form text ' +
+          'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below']),
+
           button({
-            style: {marginLeft: '15px'},
+            style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '1.5rem'},
             className: 'button',
             onClick: () => generate(),
           }, ["Generate Standardized Data Sharing Language"]),
-          div(
-            {className: 'col-xs-12 rp-group'}, [
-              textarea({
-                defaultValue: sdsl,
-                className: 'form-control',
-                rows: '12',
-                required: false,
-              })
-            ])
-        ])
+          textarea({
+            defaultValue: sdsl,
+            className: 'form-control',
+            rows: '12',
+            required: false,
+          })
+        ]),
       ])
     ])
   );
