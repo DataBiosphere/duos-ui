@@ -167,7 +167,7 @@ export const DAR = {
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
     const authOpts = Config.authOpts();
-    const rawDarRes = await axios.get(`${apiUrl}/dar/v2/${darId}`, authOpts);
+    const rawDarRes = await axiosGetOk(`${apiUrl}/dar/v2/${darId}`, authOpts);
     const rawDar = rawDarRes.data;
     const researcher = await User.getById(rawDar.userId);
 
@@ -250,14 +250,14 @@ export const DAR = {
   //v2 update for dar partials
   updateDarDraft: async (dar, referenceId) => {
     const url = `${await Config.getApiUrl()}/dar/v2/draft/${referenceId}`;
-    const res = await axios.put(url, dar, Config.authOpts());
+    const res = await axiosPutOk(url, dar, Config.authOpts());
     return res.data;
   },
 
   //api endpoint for v2 draft submission
   postDarDraft: async(dar) => {
     const url = `${await Config.getApiUrl()}/dar/v2/draft/`;
-    const res = await axios.post(url, dar, Config.authOpts());
+    const res = await axiosPostOk(url, dar, Config.authOpts());
     return res.data;
   },
 
@@ -293,7 +293,7 @@ export const DAR = {
   postDar: async (dar) => {
     const filteredDar = fp.omit(['createDate', 'sortDate', 'data_access_request_id'])(dar);
     const url = `${await Config.getApiUrl()}/dar/v2`;
-    const res = axios.post(url, filteredDar, Config.authOpts());
+    const res = axiosPostOk(url, filteredDar, Config.authOpts());
     return await res.data;
   },
 
@@ -322,7 +322,7 @@ export const DAR = {
       'Accept': 'application/octet-stream'
     });
     const url = `${await Config.getApiUrl()}/dar/v2/${referenceId}/${fileType}`;
-    const res = await axios.get(url, authOpts);
+    const res = await axiosGetOk(url, authOpts);
     return res.data;
   },
 
@@ -350,7 +350,7 @@ export const DAR = {
   //new manage endpoint, should be renamed once v1 variant is removed from use
   getDataAccessManageV2: async() => {
     const url = `${await Config.getApiUrl()}/dar/manage/v2`;
-    const res = await axios.get(url, Config.authOpts());
+    const res = await axiosGetOk(url, Config.authOpts());
     return res.data;
   },
 
@@ -380,7 +380,7 @@ export const DAR = {
       let formData = new FormData();
       formData.append("file", file);
       const url = `${await Config.getApiUrl()}/dar/v2/${darId}/${fileType}`;
-      return axios.post(url, formData, authOpts);
+      return axiosPostOk(url, formData, authOpts);
     }
   }
 };
@@ -857,19 +857,19 @@ export const User = {
   //Instead, use getById for more predictable results
   getByEmail: async email => {
     const url = `${await Config.getApiUrl()}/dacuser/${email}`;
-    const res = await axios.get(url, Config.authOpts());
+    const res = await axiosGetOk(url, Config.authOpts());
     return res.data;
   },
 
   getMe: async () => {
     const url = `${await Config.getApiUrl()}/user/me`;
-    const res = await axios.get(url, Config.authOpts());
+    const res = await axiosGetOk(url, Config.authOpts());
     return res.data;
   },
 
   getById: async id => {
     const url = `${await Config.getApiUrl()}/user/${id}`;
-    const res = await axios.get(url, Config.authOpts());
+    const res = await axiosGetOk(url, Config.authOpts());
     return res.data;
   },
 
@@ -1081,6 +1081,33 @@ export const AuthenticateNIH = {
 
 };
 
+const axiosGetOk = async (apiUrl, config) => {
+  const res = await axios.get(apiUrl, config);
+  if (!res.ok && res.status === 401) {
+    Storage.clearStorage();
+    window.location.href = '/home';
+  }
+  return res.ok ? res : Promise.reject(res);
+};
+
+const axiosPostOk = async (apiUrl, dar, config) => {
+  const res = await axios.post(apiUrl, dar, config);
+  if (!res.ok && res.status === 401) {
+    Storage.clearStorage();
+    window.location.href = '/home';
+  }
+  return res.ok ? res : Promise.reject(res);
+};
+
+const axiosPutOk = async (apiUrl, dar, config) => {
+  const res = await axios.put(apiUrl, config);
+  if (!res.ok && res.status === 401) {
+    Storage.clearStorage();
+    window.location.href = '/home';
+  }
+  return res.ok ? res : Promise.reject(res);
+};
+
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
@@ -1098,6 +1125,10 @@ const fetchOk = async (...args) => {
 const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
+  if (!res.ok && res.status === 401) {
+    Storage.clearStorage();
+    window.location.href = '/home';
+  }
   if (res.status >= 500) {
     await reportError(args[0], res.status);
   }
