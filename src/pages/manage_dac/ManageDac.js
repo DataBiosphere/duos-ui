@@ -39,10 +39,15 @@ class ManageDac extends Component {
   }
 
   componentDidMount() {
-    this.getUserRole();
-    // noinspection JSIgnoredPromiseFromCall
-    this.fetchDacList();
+    this.getAllData();
   }
+
+  getAllData = async () => {
+    await Promise.all([
+      this.getUserRole(),
+      this.fetchDacList()
+    ]);
+  };
 
   fetchDacList = async () => {
     this._asyncRequest = DAC.list().then(
