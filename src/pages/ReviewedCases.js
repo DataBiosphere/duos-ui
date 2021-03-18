@@ -44,10 +44,6 @@ class ReviewedCases extends Component {
         access: []
       }
     };
-    this.getReviewedConsents = this.getReviewedConsents.bind(this);
-    this.openAccessResultRecords = this.openAccessResultRecords.bind(this);
-    this.openDulResultsRecord = this.openDulResultsRecord.bind(this);
-
   }
 
   sort = (sortKey, descendantOrder = false) => (event) => {
@@ -87,7 +83,7 @@ class ReviewedCases extends Component {
     this.getReviewedConsents();
   };
 
-  async getReviewedConsents() {
+  getReviewedConsents = async () => {
     const dul = await Election.findReviewedConsents();
     const access = await Election.findReviewedDRs();
 
@@ -98,14 +94,14 @@ class ReviewedCases extends Component {
       };
       return prev;
     });
-  }
+  };
 
   openDulResultsRecord = (electionId) => {
     this.props.history.push(`dul_results_record/${ electionId }`);
   };
 
-  openAccessResultRecords = (electionId, referenceId) => {
-    this.props.history.push(`access_result_records/${ referenceId }/${ electionId }`);
+  openAccessReviewResults = (referenceId) => {
+    this.props.history.push(`review_results/${ referenceId }`);
   };
 
   handleDulPageChange = page => {
@@ -291,7 +287,7 @@ class ReviewedCases extends Component {
                     name: 'btn_recordAccess',
                     className: 'cell-button hover-color',
                     'ui-sref': 'access_results_record({electionId: \'this.election.electionId \', referenceId: \'this.election.referenceId \'})',
-                    onClick: () => this.openAccessResultRecords(election.electionId, election.referenceId)
+                    onClick: () => this.openAccessReviewResults(election.referenceId)
                   }, ['Record'])
                 ])
               ]),

@@ -65,7 +65,7 @@ export const ApplicantInfo = hh(
             this.formatResearcherInfo(content)),
           div({ isRendered: !ld.isEmpty(libraryCards) },
             [
-              div({ style: HEADER }, 'Library Cards'),
+              div({ style: {...HEADER, margin: '20px 0'} }, 'Library Cards'),
               div({ style: { display: 'flex', flexFlow: 'row wrap' } },
                 this.formatLibraryCard(libraryCards)),
             ]),

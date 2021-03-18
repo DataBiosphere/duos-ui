@@ -3,9 +3,6 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import { USER_ROLES } from './libs/utils';
-import AccessCollect from './pages/AccessCollect';
-import AccessPreview from './pages/AccessPreview';
-import AccessResultRecords from './pages/AccessResultRecords';
 import AdminConsole from './pages/AdminConsole';
 import AdminManageAccess from './pages/AdminManageAccess';
 import ManageDac from './pages/manage_dac/ManageDac';
@@ -38,6 +35,7 @@ import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
 import SigningOfficialConsole from './pages/SigningOfficialConsole';
 import ReviewedCases from './pages/ReviewedCases';
+import ReviewResults from './pages/ReviewResults'
 import NIHPilotInfo from './pages/NIHPilotInfo';
 import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
@@ -91,16 +89,10 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
     <AuthenticatedRoute path="/researcher_review/:dacUserId" component={ResearcherReview} props={props} rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/access_result_records/:referenceId/:electionId" component={AccessResultRecords} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/dul_results_record/:electionId" component={DulResultRecords} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson, USER_ROLES.member, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/access_review/:darId" component={AccessReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]}/>
-    <AuthenticatedRoute path="/access_preview/:referenceId?/:electionId?" component={AccessPreview} props={props}
-      rolesAllowed={[USER_ROLES.admin]} />
-    <AuthenticatedRoute path="/access_collect/:electionId/:referenceId" component={AccessCollect} props={props}
-      rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dul_review/:voteId/:consentId" component={DulReview} props={props}
       rolesAllowed={[USER_ROLES.member, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dul_preview/:consentId" component={DulPreview} props={props}
@@ -108,6 +100,8 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/dul_collect/:consentId" component={DulCollect} props={props}
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
     <AuthenticatedRoute path="/reviewed_cases" component={ReviewedCases} props={props}
+      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
+    <AuthenticatedRoute path="/review_results/:referenceId" component={ReviewResults} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <Route path="*" component={NotFound} />
   </Switch>
