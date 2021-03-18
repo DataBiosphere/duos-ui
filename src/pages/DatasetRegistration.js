@@ -14,7 +14,8 @@ import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
-import { formatOntologyItems, getOntologies, searchOntologies } from "../libs/utils";
+import { searchOntologies } from "../libs/utils";
+import {searchOntology} from "../libs/ontologyService";
 
 class DatasetRegistration extends Component {
 
@@ -73,7 +74,7 @@ class DatasetRegistration extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  };
+  }
 
   async componentDidMount() {
     await this.init();
@@ -95,15 +96,15 @@ class DatasetRegistration extends Component {
     });
     if (!fp.isEmpty(this.state.updateDataset)) {
       this.prefillDatasetFields(this.state.updateDataset);
-      const ontologies = await getOntologies(this.state.formData.diseases);
-      const formattedOntologies = formatOntologyItems(ontologies);
+      const ontologies = await this.getOntologies(this.state.formData.diseases);
+      const formattedOntologies = this.formatOntologyItems(ontologies);
       this.setState(prev => {
         prev.formData.ontologies = formattedOntologies;
         prev.formData.diseases = !fp.isEmpty(ontologies);
         return prev;
       });
     }
-  };
+  }
 
   async init() {
     const { datasetId } = this.props.match.params;
@@ -126,7 +127,7 @@ class DatasetRegistration extends Component {
         }
       });
     }
-  };
+  }
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
@@ -166,7 +167,20 @@ class DatasetRegistration extends Component {
     if (!fp.isEmpty(dataset.dataUse)) {
       this.prefillDataUseFields(dataset.dataUse);
     }
-  };
+  }
+
+  async getOntologies(urls) {
+    if (fp.isEmpty(urls)) {
+      return [];
+    }
+    else {
+      let ontologies = await Promise.all(
+        urls.map(url => searchOntology(url)
+          .then(data => { return data; })
+        ));
+      return ontologies;
+    }
+  }
 
   prefillDataUseFields(dataUse) {
     let methods = dataUse.methodsResearch;
@@ -205,15 +219,15 @@ class DatasetRegistration extends Component {
       prev.formData.generalUse = generalUse;
       return prev;
     });
-  };
+  }
 
   handleOpenModal() {
     this.setState({ showModal: true });
-  };
+  }
 
   handleCloseModal() {
     this.setState({ showModal: false });
-  };
+  }
 
   handleChange = (e) => {
     const field = e.target.name;
@@ -282,7 +296,7 @@ class DatasetRegistration extends Component {
       this.isValid(formData.description) &&
       this.isValid(this.state.selectedDac) &&
       (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
-  };
+  }
 
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
@@ -296,7 +310,7 @@ class DatasetRegistration extends Component {
         return prev;
       });
     });
-  };
+  }
 
   // generates the css classnames based on what's in the dataset name field and if we have tried to submit
   showDatasetNameErrorHighlight(name, showValidationMessages) {
@@ -318,9 +332,9 @@ class DatasetRegistration extends Component {
     else {
       return this.state.validName ? 'form-control' : 'form-control required-field-error';
     }
-  };
+  }
 
-  attestAndSave = (e) => {
+  attestAndSave = () => {
     this.setState( prev => {
       let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
@@ -343,9 +357,9 @@ class DatasetRegistration extends Component {
       isValid = true;
     }
     return isValid;
-  };
+  }
 
-  dialogHandlerSubmit = (answer) => (e) => {
+  dialogHandlerSubmit = (answer) => () => {
     if (answer === true) {
       let ontologies = [];
       for (let ontology of this.state.formData.ontologies) {
@@ -429,7 +443,7 @@ class DatasetRegistration extends Component {
       prev.datasetData.needsApproval = value;
       return prev;
     });
-  }
+  };
 
   setGeneralUse = () => {
     this.setState(prev => {
@@ -444,7 +458,7 @@ class DatasetRegistration extends Component {
       prev.submissionSuccess = false;
       return prev;
     });
-  }
+  };
 
   setHmb = () => {
     this.setState(prev => {
@@ -523,7 +537,7 @@ class DatasetRegistration extends Component {
       });
   };
 
-  back = (e) => {
+  back = () => {
     this.props.history.goBack();
   };
 
@@ -563,7 +577,7 @@ class DatasetRegistration extends Component {
     }
 
     return properties;
-  }
+  };
 
   dacOptions = () => {
     return this.state.dacList.map(function(item) {
@@ -656,7 +670,20 @@ class DatasetRegistration extends Component {
       result.generalUse = data.generalUse;
     }
     return result;
-  }
+  };
+
+  formatOntologyItems = (ontologies) => {
+    const ontologyItems = ontologies.map((ontology) => {
+      return {
+        id: ontology.id || ontology.item.id,
+        key: ontology.id || ontology.item.id,
+        value: ontology.id || ontology.item.id,
+        label: ontology.label || ontology.item.label,
+        item: ontology || ontology.item
+      };
+    });
+    return ontologyItems;
+  };
 
   render() {
 

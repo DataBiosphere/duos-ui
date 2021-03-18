@@ -2,11 +2,9 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import {Config} from './config';
-import {isNil, map} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import {forEach} from 'lodash';
 import {DAR, DataSet, Researcher} from "./ajax";
-import * as fp from "lodash/fp";
-import {searchOntology} from "./ontologyService";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -195,19 +193,6 @@ export const PromiseSerial = funcs =>
       func().then(Array.prototype.concat.bind(result))),
   Promise.resolve([]));
 
-export const getOntologies = async (urls) =>  {
-  if (fp.isEmpty(urls)) {
-    return [];
-  }
-  else {
-    let ontologies = await Promise.all(
-      urls.map(url => searchOntology(url)
-        .then(data => { return data; })
-      ));
-    return ontologies;
-  }
-};
-
 export const searchOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
@@ -222,16 +207,4 @@ export const searchOntologies = (query, callback) => {
       });
       callback(options);
     });
-};
-
-export const formatOntologyItems = (ontologies) => {
-  return map((ontology) => {
-    return {
-      id: ontology.id || ontology.item.id,
-      key: ontology.id || ontology.item.id,
-      value: ontology.id || ontology.item.id,
-      label: ontology.label || ontology.item.label,
-      item: ontology || ontology.item
-    };
-  })(ontologies);
 };
