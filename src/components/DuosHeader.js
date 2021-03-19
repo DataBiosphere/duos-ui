@@ -13,7 +13,7 @@ import {NavigationUtils} from '../libs/utils';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import { Styles } from '../libs/theme';
-import DuosLogo from '../images/duos_logo.svg';
+import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 
@@ -228,8 +228,7 @@ class DuosHeader extends Component {
     };
 
     const duosLogoImage = {
-      width: '140px',
-      height: '40px',
+      height: '50px',
       padding: '0',
       margin: '12px 64px 0 0',
       cursor: 'pointer'
@@ -286,11 +285,11 @@ class DuosHeader extends Component {
     return (
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
+          this.makeNotifications(),
+          h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
+            img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
+          ]),
           div({ className: 'row no-margin' }, [
-            this.makeNotifications(),
-            h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-              img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
-            ]),
             //Standard navbar for medium sized displays and higher (pre-existing navbar)
             div({}, [
               ul({ isRendered: isLogged, className: 'navbar-logged' }, [
