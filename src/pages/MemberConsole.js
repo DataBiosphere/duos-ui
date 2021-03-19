@@ -108,7 +108,7 @@ class MemberConsole extends Component {
     const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
     const closeSummaryModal = () => this.setState({ showModal: false });
     const openSummaryModal = async (dar) => {
-      let darDetails = await DAR.getDarModalSummary(dar.dataRequestId);
+      let darDetails = await DAR.getDarModalSummary(dar.referenceId);
       let researcherPromise;
       if (!isNil(darDetails)) {
         darDetails.researchType = DataUseTranslation.generateResearchTypes(darDetails);
