@@ -342,9 +342,9 @@ export default function NewChairConsole(props) {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists}),
+        h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize})
       ]),
-      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize}),
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
       h(ConfirmationModal, {
         showConfirmation,

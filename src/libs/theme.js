@@ -109,7 +109,9 @@ export const Styles = {
   },
   TABLE: {
     CONTAINER: {
-      margin: "3rem auto"
+      margin: "3rem auto",
+      border: '0.5px solid lightGray',
+      borderRadius: '10px'
     },
     HEADER_ROW: {
       fontFamily: "Montserrat",
