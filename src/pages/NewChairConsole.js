@@ -309,7 +309,7 @@ export default function NewChairConsole(props) {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ["Manage Data Access Request"]),
+            div({style: Styles.TITLE}, ["DAC Chair Console"]),
             div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
           ])
         ]),
