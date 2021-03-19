@@ -17,7 +17,7 @@ import {isFileEmpty} from './utils';
 axios.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  if (error.status === 401) {
+  if (error.response.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
   }
