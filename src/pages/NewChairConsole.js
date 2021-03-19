@@ -203,7 +203,7 @@ export default function NewChairConsole(props) {
         darData.datasetNames = getDatasetNames(darData.datasets);
       }
       setDarDetails(darData);
-      const researcher = await User.getById(darData.userId);
+      const researcher = await User.getById(darInfo.userId);
       setResearcher(researcher);
     }
   };
