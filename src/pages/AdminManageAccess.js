@@ -299,7 +299,7 @@ class AdminManageAccess extends Component {
                 ])
               ]);
             }),
-          h(DarModal, { showModal, closeModal: handleCloseModal, darDetails, researcher }),
+          h(DarModal, {isRendered: !isNil(darDetails), showModal, closeModal: handleCloseModal, darDetails, researcher }),
           h(ConfirmationModal, {
             showConfirmation: this.state.showDialogCreate,
             closeConfirmation: this.closeCreateConfirmation,

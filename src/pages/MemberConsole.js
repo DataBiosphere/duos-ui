@@ -186,7 +186,7 @@ class MemberConsole extends Component {
                 ])
               ]);
             }),
-          h(DarModal, { showModal, closeModal: closeSummaryModal, darDetails, researcher }),
+          h(DarModal, {isRendered: !isNil(darDetails), showModal, closeModal: closeSummaryModal, darDetails, researcher }),
           h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange}),
         ])
       ])
