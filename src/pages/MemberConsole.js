@@ -120,7 +120,7 @@ class MemberConsole extends Component {
                   })
                 ]),
                 div({style: Styles.HEADER_CONTAINER}, [
-                  div({style: Styles.TITLE}, ['Data Access Request Review']),
+                  div({style: Styles.TITLE}, ['DAC Member Console']),
                   div({style: Styles.SMALL}, ['Should data access be granted to this applicant?'])
                 ])
               ]),

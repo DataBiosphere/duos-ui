@@ -309,7 +309,7 @@ export default function NewChairConsole(props) {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ["Manage Data Access Request"]),
+            div({style: Styles.TITLE}, ["DAC Chair Console"]),
             div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
           ])
         ]),
@@ -342,9 +342,9 @@ export default function NewChairConsole(props) {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists}),
+        h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize})
       ]),
-      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize}),
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
       h(ConfirmationModal, {
         showConfirmation,
@@ -358,4 +358,4 @@ export default function NewChairConsole(props) {
       })
     ])
   );
-};
+}
