@@ -50,7 +50,7 @@ class AdminManageAccess extends Component {
       prev.darElectionList = darElection;
       return prev;
     });
-  };
+  }
 
   async componentDidMount() {
     await this.getElectionDarList();
@@ -85,7 +85,9 @@ class AdminManageAccess extends Component {
     this.setState({ showDialogCreate: true, dataRequestId: dataRequestId, frontEndId: frontEndId });
   }
 
-  dialogHandlerCancel = async (dataRequestId, electionId) => {
+  dialogHandlerCancel = async (dar) => {
+    const dataRequestId = dar.dataRequestId;
+    const electionId = dar.election ? dar.election.electionId : dar.electionId;
     const CANCEL = "Canceled";
     this.setState({dataRequestId: dataRequestId, electionId: electionId });
     let electionToUpdate = {};

@@ -11,6 +11,19 @@ import axios from 'axios';
 import {DataUseTranslation} from './dataUseTranslation';
 import {isFileEmpty} from './utils';
 
+//define axios interceptor
+//to log out user and redirect to home when response has 401 status
+//return responses with statuses in the 200s and reject the rest
+axios.interceptors.response.use(function (response) {
+  return response;
+}, function (error) {
+  if (error.response.status === 401) {
+    Storage.clearStorage();
+    window.location.href = '/home';
+  }
+  return Promise.reject(error);
+});
+
 const dataTemplate = {
   accessTotal: [
     ['Results', 'Votes'],
@@ -1100,6 +1113,10 @@ const fetchAny = async (...args) => {
   const res = await fetch(...args);
   if (res.status >= 500) {
     await reportError(args[0], res.status);
+  }
+  if (!res.ok && res.status === 401) {
+    Storage.clearStorage();
+    window.location.href = '/home';
   }
   spinnerService.hideAll();
   return res;

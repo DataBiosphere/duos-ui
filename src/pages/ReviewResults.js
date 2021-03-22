@@ -50,8 +50,8 @@ export default function ReviewResults(props) {
     try {
       accessElection = await Election.findElectionByDarId(darId);
     } catch (error) {
-      //access election is null, this is expected in the case of a closed, unreviewed, or canceled election status
-      //so for these cases there is currently no way to display the vote information
+      //access election is null, this is expected for a dar with an unreviewed election status
+      //so there is no vote information to display
     }
     try {
       accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
