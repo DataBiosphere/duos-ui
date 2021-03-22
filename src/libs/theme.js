@@ -199,8 +199,8 @@ export const Styles = {
       padding: '0 1%',
       justifyContent: 'flex-end',
       height: '51px',
-      borderTopLeftRadius: '10px',
-      borderTopRightRadius: '10px'
+      borderBottomLeftRadius: '10px',
+      borderBottomRightRadius: '10px'
     },
     FOOTER_SECTION: {
       width: "100%",
