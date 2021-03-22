@@ -121,7 +121,9 @@ export const Styles = {
       backgroundColor: "#f3f6f7",
       display: "flex",
       justifyContent: "left",
-      height: "51px"
+      height: "51px",
+      borderTopLeftRadius: '10px',
+      borderTopRightRadius: '10px'
     },
     RECORD_ROW: {
       fontFamily: 'Montserrat',
@@ -196,7 +198,9 @@ export const Styles = {
       display: 'flex',
       padding: '0 1%',
       justifyContent: 'flex-end',
-      height: '51px'
+      height: '51px',
+      borderTopLeftRadius: '10px',
+      borderTopRightRadius: '10px'
     },
     FOOTER_SECTION: {
       width: "100%",
