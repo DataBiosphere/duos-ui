@@ -122,8 +122,8 @@ export const Styles = {
       display: "flex",
       justifyContent: "left",
       height: "51px",
-      borderTopLeftRadius: '10px',
-      borderTopRightRadius: '10px'
+      borderTopLeftRadius: 'inherit',
+      borderTopRightRadius: 'inherit'
     },
     RECORD_ROW: {
       fontFamily: 'Montserrat',
@@ -199,8 +199,8 @@ export const Styles = {
       padding: '0 1%',
       justifyContent: 'flex-end',
       height: '51px',
-      borderBottomLeftRadius: '10px',
-      borderBottomRightRadius: '10px'
+      borderBottomLeftRadius: 'inherit',
+      borderBottomRightRadius: 'inherit'
     },
     FOOTER_SECTION: {
       width: "100%",
