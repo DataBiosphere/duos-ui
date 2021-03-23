@@ -7,7 +7,8 @@ import {DacMembersModal} from './DacMembersModal';
 import {PageHeading} from '../../components/PageHeading';
 import {PaginatorBar} from '../../components/PaginatorBar';
 import {SearchBox} from '../../components/SearchBox';
-import {DAC, User} from '../../libs/ajax';
+import {DAC} from '../../libs/ajax';
+import {Storage} from '../../libs/storage';
 import {contains, filter, reverse, sortBy} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
 
@@ -72,21 +73,10 @@ class ManageDac extends Component {
   };
 
   getUserRole = async () => {
-    let roles;
-    let dacIDs = [];
-    let res;
-    await User.getMe().then(
-      (result) => {
-        res = result,
-        roles = res.roles.map((role) => role.name),
-        res.roles.forEach((role) => {
-          if (role.name === CHAIR) {
-            dacIDs.push(role.dacId);
-          }
-        });
-      }
-    );
+    const currentUser = Storage.getCurrentUser();
+    const roles = currentUser.roles.map(r => r.name);
     const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
+    const dacIDs = currentUser.roles.filter(r => r.name === CHAIR).map(role => role.dacId);
     if (role === CHAIR) {
       this.setState({dacIDs: dacIDs});
     }
