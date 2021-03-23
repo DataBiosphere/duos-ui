@@ -36,7 +36,7 @@ log_repo() {
   } &> /dev/null # Hide output from these commands
 }
 
-log_repo "https://github.com/DataBiosphere/duos-ui" "DUOS" "production_"
+log_repo "https://github.com/DataBiosphere/duos-ui" "DUOS" "staging_"
 log_repo "https://github.com/DataBiosphere/consent" "Consent" "RC_"
 log_repo "https://github.com/DataBiosphere/consent-ontology" "Ontology" "RC_"
 printf '\n'
