@@ -1,20 +1,18 @@
 import _ from 'lodash';
-import get from 'lodash/get';
 import { Component, Fragment } from 'react';
 import {a, button, div, h, img, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { SearchBox } from '../components/SearchBox';
-import {DAC, DAR, DataSet as Dataset, Election, User} from '../libs/ajax';
+import {DAC, DAR, Election, User} from '../libs/ajax';
 import * as Utils from '../libs/utils';
 import {Styles} from "../libs/theme";
 import PaginationBar from "../components/PaginationBar";
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 import {DataUseTranslation} from '../libs/dataUseTranslation';
-import { Notifications, applyTextHover, removeTextHover } from '../libs/utils';
-import { cloneDeep, isNil } from "lodash/fp";
+import {Notifications, applyTextHover, removeTextHover, getDatasets} from '../libs/utils';
+import {cloneDeep, isNil} from "lodash/fp";
 import lockIcon from "../images/lock-icon.png";
 import DarModal from '../components/modals/DarModal';
-import {filter} from "lodash/collection";
 
 
 class AdminManageAccess extends Component {
@@ -67,20 +65,6 @@ class AdminManageAccess extends Component {
       prev.dacList = dacs;
       return prev;
     });
-  };
-
-  getDatasets = async (darDetails) => {
-    let datasets;
-    await Dataset.getDarDatasets(darDetails.datasetIds).then((resp) => {
-      datasets = resp;
-    });
-    datasets = datasets.map((dataset) => {
-      return filter({"propertyName":"Dataset Name"})(dataset.properties);
-    });
-    console.log(datasets);
-    datasets.map((prop) => {return get(prop, 'propertyValue', '')});
-    console.log(datasets);
-    this.setState({ datasets: datasets});
   };
 
   handlePageChange = page => {
@@ -179,21 +163,22 @@ class AdminManageAccess extends Component {
   };
 
   render() {
-    const { showModal, searchDarText, currentPage, limit, darDetails, datasets, researcher } = this.state;
+    const { showModal, searchDarText, currentPage, limit, darDetails, researcher } = this.state;
     const pageCount = Math.ceil((this.state.darElectionList.filter(this.searchTable(searchDarText)).filter(row => !row.isCanceled).length).toFixed(1) / limit);
     const handleCloseModal = () => {
       this.setState({ showModal: false });
     };
     const openSummaryModal = async (dar) => {
       let darDetails;
+      let datasetNames;
       await DAR.describeDar(dar.dataRequestId).then((resp) => { darDetails = resp; });
       let researcherPromise;
       if (!isNil(darDetails)) {
         darDetails.researchType = DataUseTranslation.generateResearchTypes(darDetails);
         await User.getById(darDetails.researcherId).then((resp) => { researcherPromise = resp; });
+        await getDatasets(darDetails).then((resp)=> { datasetNames = resp; });
       }
-      const datasets = await this.getDatasets(darDetails);
-      this.setState({showModal: true, darDetails: darDetails, datasets: datasets, researcher: researcherPromise });
+      this.setState({showModal: true, darDetails: darDetails, datasets: datasetNames, researcher: researcherPromise });
     };
 
     return (
@@ -317,7 +302,7 @@ class AdminManageAccess extends Component {
                 ])
               ]);
             }),
-          h(DarModal, {isRendered: !isNil(darDetails), showModal, closeModal: handleCloseModal, darDetails, datasets, researcher }),
+          h(DarModal, {isRendered: !isNil(darDetails), showModal, closeModal: handleCloseModal, darDetails, datasets: this.state.datasets, researcher }),
           h(ConfirmationModal, {
             showConfirmation: this.state.showDialogCreate,
             closeConfirmation: this.closeCreateConfirmation,

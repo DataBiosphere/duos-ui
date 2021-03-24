@@ -5,7 +5,7 @@ import { button, div, h, img, span } from 'react-hyperscript-helpers';
 import { SearchBox } from '../components/SearchBox';
 import { DAR, PendingCases, User} from '../libs/ajax';
 import { Storage } from '../libs/storage';
-import {applyTextHover, getDatasetNames, NavigationUtils, removeTextHover} from '../libs/utils';
+import {applyTextHover, getDatasets, NavigationUtils, removeTextHover} from '../libs/utils';
 import { Styles } from "../libs/theme";
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import PaginationBar from "../components/PaginationBar";
@@ -108,17 +108,18 @@ class MemberConsole extends Component {
     const pageCount = Math.ceil((this.state.electionsList.access.filter(this.searchTable(searchDarText)).length).toFixed(1) / (this.state.accessLimit));
     const closeSummaryModal = () => this.setState({ showModal: false });
     const openSummaryModal = async (dar) => {
-      let darDetails = await DAR.getDarModalSummary(dar.referenceId);
+      let darDetails;
+      await DAR.describeDar(dar.referenceId).then((resp) => { darDetails = resp; });
       let researcherPromise;
+      let datasets;
       if (!isNil(darDetails)) {
         darDetails.researchType = DataUseTranslation.generateResearchTypes(darDetails);
-        researcherPromise = await User.getById(darDetails.userId);
-        if (!darDetails.datasetNames) {
-          darDetails.datasetNames = getDatasetNames(darDetails.datasets);
-        }
+        await User.getById(darDetails.researcherId).then((resp) => { researcherPromise = resp; });
+        await getDatasets(darDetails).then((resp) => { datasets = resp; });
       }
-      this.setState({showModal: true, darDetails: darDetails, researcher: researcherPromise });
+      this.setState({showModal: true, darDetails: darDetails, datasets: datasets, researcher: researcherPromise });
     };
+
     return (
 
       div({style: Styles.PAGE}, [
@@ -186,7 +187,7 @@ class MemberConsole extends Component {
                 ])
               ]);
             }),
-          h(DarModal, {isRendered: !isNil(darDetails), showModal, closeModal: closeSummaryModal, darDetails, researcher }),
+          h(DarModal, {isRendered: !isNil(darDetails), showModal, closeModal: closeSummaryModal, darDetails, datasets: this.state.datasets, researcher }),
           h(PaginationBar, {pageCount, currentPage: this.state.currentAccessPage, tableSize: this.state.accessLimit, goToPage: this.handleAccessPageChange, changeTableSize: this.handleAccessSizeChange}),
         ])
       ])
