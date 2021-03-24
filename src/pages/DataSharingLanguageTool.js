@@ -43,8 +43,11 @@ export default function DataSharingLanguageTool() {
 
   const generateHelper = () => {
     const darInfo = {
+      //remove the methods and forProfit properties
       general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
       hmb: hmb, methods: !nmds, forProfit: !npu
+      //make a list of all the states set to true and pass that in as restrictions to
+      //dataUseTranslation.getConsentTranslations(restrictions)
     };
     const summaries = [];
     const dataUse = (DataUseTranslation.translateDarInfo(darInfo));
