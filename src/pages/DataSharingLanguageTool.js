@@ -1,5 +1,5 @@
 import {Styles} from "../libs/theme";
-import {br, button, div, h, label, span, textarea} from "react-hyperscript-helpers";
+import {br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
 import {isNil} from "lodash/fp";
@@ -7,9 +7,10 @@ import {Notifications, searchOntologies} from "../libs/utils";
 import {DataUseTranslation} from "../libs/dataUseTranslation";
 import {useState} from "react";
 
-const buttonStyle = {marginBottom: '2rem', color: '#777'};
+const buttonStyle = { marginBottom: '2rem', color: '#777' };
+const labelStyle = { fontFamily: 'Montserrat', fontSize: '15px' };
 
-export default function DataSharingLanguageTool(props) {
+export default function DataSharingLanguageTool() {
   const [general, setGeneral] = useState(false);
   const [hmb, setHmb] = useState(false);
   const [diseases, setDiseases] = useState(false);
@@ -30,6 +31,10 @@ export default function DataSharingLanguageTool(props) {
     return (general || hmb || (diseases && !isNil(ontologies)) || other );
   };
 
+  const clearOtherTextBox = () => {
+    document.getElementById('other_text').value = "";
+  };
+
   const generate = () => {
     isTypeOfResearchValid() ?
       generateHelper()
@@ -39,7 +44,7 @@ export default function DataSharingLanguageTool(props) {
   const generateHelper = () => {
     const darInfo = {
       general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
-      hmb: hmb, methods: nmds, forProfit: !npu
+      hmb: hmb, methods: !nmds, forProfit: !npu
     };
     const summaries = [];
     const dataUse = (DataUseTranslation.translateDarInfo(darInfo));
@@ -78,33 +83,36 @@ export default function DataSharingLanguageTool(props) {
             value: 'general',
             defaultChecked: general,
             onClick: () => {
-              setGeneral(!general), setHmb(false), setDiseases(false), setOther(false);
+              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
             },
             label: 'General Research Use: ',
             description: 'use is permitted for any research purpose',
-            sdsl: true
+            font: 'Montserrat',
+            color: '#1f3b50'
           }),
 
           RadioButton({
             value: 'hmb',
             defaultChecked: hmb,
             onClick: () => {
-              setHmb(!hmb), setGeneral(false), setDiseases(false), setOther(false);
+              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
             },
             label: 'Health/Medical/Biomedical Use: ',
             description: 'use is permitted for any health, medical, or biomedical purpose',
-            sdsl: true
+            font: 'Montserrat',
+            color: '#1f3b50'
           }),
 
           RadioButton({
             value: 'diseases',
             defaultChecked: diseases,
             onClick: () => {
-              setDiseases(!diseases), setHmb(false), setGeneral(false), setOther(false);
+              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), clearOtherTextBox();
             },
             label: 'Disease-related studies: ',
             description: 'use is permitted for research on the specified disease',
-            sdsl: true
+            font: 'Montserrat',
+            color: '#1f3b50'
           }),
 
           div({
@@ -125,11 +133,12 @@ export default function DataSharingLanguageTool(props) {
             value: 'other',
             defaultChecked: other,
             onClick: () => {
-              setOther(!other), setHmb(false), setDiseases(false), setGeneral(false);
+              setOther(true), setHmb(false), setDiseases(false), setGeneral(false), setOntologies([]);
             },
             label: 'Other Use: ',
             description: 'permitted research use is defined as follows: ',
-            sdsl: true
+            font: 'Montserrat',
+            color: '#1f3b50'
           }),
 
           textarea({
@@ -139,73 +148,130 @@ export default function DataSharingLanguageTool(props) {
             rows: '2',
             required: other,
             disabled: !other,
+            id: 'other_text',
             placeholder: 'Please specify if selected (max. 512 characters)',
           }),
         ]),
       ]),
 
       div({className: 'form-group', style: {marginTop: '2rem'}}, [
-        label({style: Styles.MEDIUM}, [
+        label({style: {...Styles.MEDIUM, marginBottom: '5px'}}, [
           '2. Choose any additional constraints you need to put on future uses of your data', br(),
           span({style: Styles.MEDIUM_DESCRIPTION}, ['Then if necessary, you may choose additional terms on your study\'s data to govern it\'s use by adding requirements or limitations.']),
         ]),
+
         div({}, [
-          RadioButton({
-            value: 'nmds',
-            defaultChecked: nmds,
-            onClick: () => setNmds(!nmds),
-            label: 'No methods development or validation studies (NMDS)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'gso',
-            defaultChecked: gso,
-            onClick: () => setGso(!gso),
-            label: 'Genetic Studies Only (GSO)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'pub',
-            defaultChecked: pub,
-            onClick: () => setPub(!pub),
-            label: 'Publication Required (PUB)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'col',
-            defaultChecked: col,
-            onClick: () => setCol(!col),
-            label: 'Collaboration Required (COL)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'irb',
-            defaultChecked: irb,
-            onClick: () => setIrb(!irb),
-            label: 'Ethics Approval Required (IRB)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'gs',
-            defaultChecked: gs,
-            onClick: () => setGs(!gs),
-            label: 'Geographic Restriction (GS-)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'mor',
-            defaultChecked: mor,
-            onClick: () => setMor(!mor),
-            label: 'Publication Moratorium (MOR)',
-            sdsl: true
-          }),
-          RadioButton({
-            value: 'npu',
-            defaultChecked: npu,
-            onClick: () => setNpu(!npu),
-            label: 'Non-Profit Use Only (NPU)',
-            sdsl: true
-          })
+          div({className: 'checkbox'}, [
+            input({
+              checked: nmds,
+              onChange: (e) => setNmds(e.target.checked),
+              id: 'checkNMDS',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkNMDS',
+            }, ['No methods development or validation studies (NMDS)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: gso,
+              onChange: (e) => setGso(e.target.checked),
+              id: 'checkGSO',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkGSO',
+            }, ['Genetic Studies Only (GSO)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: pub,
+              onChange: (e) => setPub(e.target.checked),
+              id: 'checkPUB',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkPUB',
+            }, ['Publication Required (PUB)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: col,
+              onChange: (e) => setCol(e.target.checked),
+              id: 'checkCOL',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkCOL',
+            }, ['Collaboration Required (COL)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: irb,
+              onChange: (e) => setIrb(e.target.checked),
+              id: 'checkIRB',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkIRB',
+            }, ['Ethics Approval Required (IRB)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: gs,
+              onChange: (e) => setGs(e.target.checked),
+              id: 'checkGS',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkGS',
+            }, ['Geographic Restriction (GS-)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: mor,
+              onChange: (e) => setMor(e.target.checked),
+              id: 'checkMoratorium',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkMoratorium',
+            }, ['Publication Moratorium (MOR)']),
+          ]),
+
+          div({className: 'checkbox'}, [
+            input({
+              checked: npu,
+              onChange: (e) => setNpu(e.target.checked),
+              id: 'checkNPU',
+              type: 'checkbox',
+            }),
+            label({
+              style: labelStyle,
+              className: 'regular-checkbox',
+              htmlFor: 'checkNPU',
+            }, ['Non-Profit Use Only (NPU)']),
+          ])
         ])
       ]),
 
