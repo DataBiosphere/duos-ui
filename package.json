@@ -62,7 +62,7 @@
     "cypress": "6.8.0",
     "eslint": "^7.22.0",
     "eslint-plugin-flowtype": "5.4.0",
-    "eslint-plugin-react": "7.22.0",
+    "eslint-plugin-react": "7.23.1",
     "start-server-and-test": "1.12.1"
   },
   "browserslist": [
