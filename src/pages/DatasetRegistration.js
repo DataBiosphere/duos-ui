@@ -72,7 +72,7 @@ class DatasetRegistration extends Component {
 
     this.handleOpenModal = this.handleOpenModal.bind(this);
     this.handleCloseModal = this.handleCloseModal.bind(this);
-  };
+  }
 
   async componentDidMount() {
     await this.init();
@@ -102,7 +102,7 @@ class DatasetRegistration extends Component {
         return prev;
       });
     }
-  };
+  }
 
   async init() {
     const { datasetId } = this.props.match.params;
@@ -125,7 +125,7 @@ class DatasetRegistration extends Component {
         }
       });
     }
-  };
+  }
 
   // fill out the form fields with old dataset properties if they already exist
   prefillDatasetFields(dataset) {
@@ -165,7 +165,7 @@ class DatasetRegistration extends Component {
     if (!fp.isEmpty(dataset.dataUse)) {
       this.prefillDataUseFields(dataset.dataUse);
     }
-  };
+  }
 
   async getOntologies(urls) {
     if (fp.isEmpty(urls)) {
@@ -178,7 +178,7 @@ class DatasetRegistration extends Component {
         ));
       return ontologies;
     }
-  };
+  }
 
   prefillDataUseFields(dataUse) {
     let methods = dataUse.methodsResearch;
@@ -217,15 +217,15 @@ class DatasetRegistration extends Component {
       prev.formData.generalUse = generalUse;
       return prev;
     });
-  };
+  }
 
   handleOpenModal() {
     this.setState({ showModal: true });
-  };
+  }
 
   handleCloseModal() {
     this.setState({ showModal: false });
-  };
+  }
 
   handleChange = (e) => {
     const field = e.target.name;
@@ -294,7 +294,7 @@ class DatasetRegistration extends Component {
       this.isValid(formData.description) &&
       this.isValid(this.state.selectedDac) &&
       (!fp.isEmpty(this.state.updateDataset) || !this.isTypeOfResearchInvalid());
-  };
+  }
 
   async validateDatasetName(name) {
     return DataSet.validateDatasetName(name).then(datasetId => {
@@ -308,7 +308,7 @@ class DatasetRegistration extends Component {
         return prev;
       });
     });
-  };
+  }
 
   // generates the css classnames based on what's in the dataset name field and if we have tried to submit
   showDatasetNameErrorHighlight(name, showValidationMessages) {
@@ -323,16 +323,16 @@ class DatasetRegistration extends Component {
       }
       // if the old dataset name has been edited
       else {
-        return this.state.validName ? 'form-control' : 'form-control required-field-error';
+        return this.state.datasetData.isValidName ? 'form-control' : 'form-control required-field-error';
       }
     }
     // if a new dataset name is being edited
     else {
-      return this.state.validName ? 'form-control' : 'form-control required-field-error';
+      return this.state.datasetData.isValidName ? 'form-control' : 'form-control required-field-error';
     }
-  };
+  }
 
-  attestAndSave = (e) => {
+  attestAndSave = () => {
     this.setState( prev => {
       let allValid = this.validateRequiredFields(prev.datasetData);
       if (allValid) {
@@ -355,9 +355,9 @@ class DatasetRegistration extends Component {
       isValid = true;
     }
     return isValid;
-  };
+  }
 
-  dialogHandlerSubmit = (answer) => (e) => {
+  dialogHandlerSubmit = (answer) => () => {
     if (answer === true) {
       let ontologies = [];
       for (let ontology of this.state.formData.ontologies) {
@@ -386,7 +386,7 @@ class DatasetRegistration extends Component {
         else {
           let ds = this.formatFormData(formData);
           if (fp.isEmpty(this.state.updateDataset)) {
-            DataSet.postDatasetForm(ds).then(resp => {
+            DataSet.postDatasetForm(ds).then(() => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
             }).catch(e => {
               let errorMessage = (e.status === 409) ?
@@ -403,9 +403,9 @@ class DatasetRegistration extends Component {
           }
           else {
             const { datasetId } = this.props.match.params;
-            DataSet.updateDataset(datasetId, ds).then(resp => {
+            DataSet.updateDataset(datasetId, ds).then(() => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
-            }).catch(e => {
+            }).catch(() => {
               let errorMessage = 'Some errors occurred, the Dataset was not updated.';
               this.setState(prev => {
                 prev.problemSavingRequest = true;
@@ -457,7 +457,7 @@ class DatasetRegistration extends Component {
       prev.datasetData.needsApproval = value;
       return prev;
     });
-  }
+  };
 
   setGeneralUse = () => {
     this.setState(prev => {
@@ -472,7 +472,7 @@ class DatasetRegistration extends Component {
       prev.submissionSuccess = false;
       return prev;
     });
-  }
+  };
 
   setHmb = () => {
     this.setState(prev => {
@@ -551,7 +551,7 @@ class DatasetRegistration extends Component {
       });
   };
 
-  back = (e) => {
+  back = () => {
     this.props.history.goBack();
   };
 
@@ -591,7 +591,7 @@ class DatasetRegistration extends Component {
     }
 
     return properties;
-  }
+  };
 
   dacOptions = () => {
     return this.state.dacList.map(function(item) {
@@ -684,7 +684,7 @@ class DatasetRegistration extends Component {
       result.generalUse = data.generalUse;
     }
     return result;
-  }
+  };
 
   formatOntologyItems = (ontologies) => {
     const ontologyItems = ontologies.map((ontology) => {
@@ -843,7 +843,7 @@ class DatasetRegistration extends Component {
                           className: 'cancel-color required-field-error-span',
                           isRendered: fp.includes('required-field-error', this.showDatasetNameErrorHighlight(this.state.datasetData.datasetName, showValidationMessages))
                         },
-                        [this.state.validName ? 'Required field' : 'Dataset Name already in use']),
+                        [this.state.datasetData.isValidName ? 'Required field' : 'Dataset Name already in use']),
                       ])
                   ]),
 
