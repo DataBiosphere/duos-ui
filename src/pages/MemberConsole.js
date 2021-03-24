@@ -123,6 +123,39 @@ class MemberConsole extends Component {
     return (
 
       div({style: Styles.PAGE}, [
+            div({ style: {display: "flex", justifyContent: "space-between"}}, [
+              div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
+                div({style: Styles.ICON_CONTAINER}, [
+                  img({
+                    id: 'lock-icon',
+                    src: lockIcon,
+                    style: Styles.HEADER_IMG
+                  })
+                ]),
+                div({style: Styles.HEADER_CONTAINER}, [
+                  div({style: Styles.TITLE}, ['DAC Member Console']),
+                  div({style: Styles.SMALL}, ['Should data access be granted to this applicant?'])
+                ])
+              ]),
+              div({className: "right-header-section", style: Styles.RIGHT_HEADER_SECTION}, [
+                h(SearchBox, { searchHandler: this.handleSearchDar, pageHandler: this.handleAccessPageChange })
+              ])
+            ]),
+          div({ style: Styles.TABLE.CONTAINER }, [
+            div({style: Styles.TABLE.HEADER_ROW}, [
+              div({style: Styles.TABLE.DATA_ID_CELL }, ["Data Request ID"]),
+              div({style: Styles.TABLE.TITLE_CELL }, ["Project Title"]),
+              div({style: Styles.TABLE.DAC_CELL }, ["DAC"]),
+              div({style: Styles.TABLE.ELECTION_STATUS_CELL }, ["Status"]),
+              div({style: Styles.TABLE.DAC_CELL }, ["Logged"]),
+              div({style: Styles.TABLE.ELECTION_STATUS_CELL }, [
+                "Review/Vote",
+                div({ isRendered: this.state.totalAccessPendingVotes > 0, className: 'pcases-small-tag' }, [this.state.totalAccessPendingVotes])
+              ])
+            ]),
+            this.state.electionsList.access
+              .filter(this.searchTable(searchDarText))
+              .slice((this.state.currentAccessPage - 1) * this.state.accessLimit, this.state.currentAccessPage * this.state.accessLimit).map((pendingCase, rIndex) => {
         div({ style: {display: "flex", justifyContent: "space-between"}}, [
           div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
             div({style: Styles.ICON_CONTAINER}, [

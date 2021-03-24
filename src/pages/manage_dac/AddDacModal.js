@@ -13,6 +13,8 @@ import addDACIcon from '../../images/icon_add_dac.png';
 
 export const CHAIR = 'chair';
 export const MEMBER = 'member';
+const CHAIRPERSON = 'Chairperson';
+const ADMIN = "Admin";
 
 export const AddDacModal = hh(class AddDacModal extends Component {
 
@@ -36,10 +38,12 @@ export const AddDacModal = hh(class AddDacModal extends Component {
   okHandler = async () => {
     let currentDac = this.state.dac;
     if (this.state.dirtyFlag) {
-      if (this.state.isEditMode) {
-        await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
-      } else {
-        currentDac = await DAC.create(currentDac.name, currentDac.description);
+      if (this.props.userRole === ADMIN) {
+        if (this.state.isEditMode) {
+          await DAC.update(currentDac.dacId, currentDac.name, currentDac.description);
+        } else {
+          currentDac = await DAC.create(currentDac.name, currentDac.description);
+        }
       }
 
       // Order here is important. Since users cannot have multiple roles in the
@@ -266,7 +270,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 onChange: this.handleChange,
                 name: 'name',
                 className: 'form-control col-lg-12 vote-input',
-                required: true
+                required: true,
+                disabled: this.props.userRole === CHAIRPERSON
               })
             ])
           ]),
@@ -283,7 +288,8 @@ export const AddDacModal = hh(class AddDacModal extends Component {
                 onChange: this.handleChange,
                 name: 'description',
                 className: 'form-control col-lg-12 vote-input',
-                required: true
+                required: true,
+                disabled: this.props.userRole === CHAIRPERSON
               })
             ])
           ]),

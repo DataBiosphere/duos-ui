@@ -1,20 +1,23 @@
-import { Component, Fragment } from 'react';
-import { a, button, div, h, hr, span } from 'react-hyperscript-helpers';
+import {Component, Fragment} from 'react';
+import {a, button, div, h, hr, span} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { AddDacModal } from './AddDacModal';
-import { DacDatasetsModal } from '../../components/modals/DacDatasetsModal';
-import { DacMembersModal } from './DacMembersModal';
-import { PageHeading } from '../../components/PageHeading';
-import { PaginatorBar } from '../../components/PaginatorBar';
-import { SearchBox } from '../../components/SearchBox';
-import { DAC } from '../../libs/ajax';
-import * as fp from 'lodash/fp';
+import {AddDacModal} from './AddDacModal';
+import {DacDatasetsModal} from '../../components/modals/DacDatasetsModal';
+import {DacMembersModal} from './DacMembersModal';
+import {PageHeading} from '../../components/PageHeading';
+import {PaginatorBar} from '../../components/PaginatorBar';
+import {SearchBox} from '../../components/SearchBox';
+import {DAC} from '../../libs/ajax';
+import {Storage} from '../../libs/storage';
+import {contains, filter, reverse, sortBy, map} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
 
 const limit = 10;
+const CHAIR = "Chairperson";
+const ADMIN = "Admin";
 const actionButtonStyle = { width: '40%', marginRight: '1rem' };
 
-class AdminManageDac extends Component {
+class ManageDac extends Component {
 
   constructor(props) {
     super(props);
@@ -31,22 +34,32 @@ class AdminManageDac extends Component {
       alertMessage: undefined,
       alertTitle: undefined,
       selectedDac: {},
-      selectedDatasets: []
+      selectedDatasets: [],
+      dacIDs: []
     };
   }
 
   componentDidMount() {
-    // noinspection JSIgnoredPromiseFromCall
-    this.fetchDacList();
+    this.getAllData();
+  }
+
+  getAllData = async () => {
+    await Promise.all([
+      this.getUserRole(),
+      this.fetchDacList()
+    ]);
   };
 
   fetchDacList = async () => {
     this._asyncRequest = DAC.list().then(
       dacs => {
         this._asyncRequest = null;
-        let sorted = fp.sortBy('name')(dacs);
+        let sorted = sortBy('name')(dacs);
         if (this.state.descendingOrder) {
-          sorted = fp.reverse(sorted);
+          sorted = reverse(sorted);
+        }
+        if (this.state.userRole === CHAIR) {
+          sorted = sorted.filter((dac) => this.state.dacIDs.includes(dac.dacId));
         }
         this.setState(prev => {
           prev.currentPage = 1;
@@ -57,7 +70,19 @@ class AdminManageDac extends Component {
         });
       }
     );
-  }
+  };
+
+  getUserRole = async () => {
+    const currentUser = Storage.getCurrentUser();
+    const roles = currentUser.roles.map(r => r.name);
+    const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
+    let dacIDs = filter({name: CHAIR})(currentUser.roles);
+    dacIDs = map('dacId')(dacIDs);
+    if (role === CHAIR) {
+      this.setState({dacIDs: dacIDs});
+    }
+    this.setState({userRole: role});
+  };
 
   componentWillUnmount() {
     if (this._asyncRequest) {
@@ -132,7 +157,7 @@ class AdminManageDac extends Component {
 
   viewDatasets = async (selectedDac) => {
     const datasets = await DAC.datasets(selectedDac.dacId);
-    const activeDatasets = fp.filter({ active: true })(datasets);
+    const activeDatasets = filter({ active: true })(datasets);
     this.setState(prev => {
       prev.showDatasetsModal = true;
       prev.selectedDac = selectedDac;
@@ -163,9 +188,9 @@ class AdminManageDac extends Component {
   };
 
   sort = (sortField, descendingOrder = false) => () => {
-    let sorted = fp.sortBy(sortField)(this.state.dacs);
+    let sorted = sortBy(sortField)(this.state.dacs);
     if (descendingOrder) {
-      sorted = fp.reverse(sorted);
+      sorted = reverse(sorted);
     }
     this.setState(prev => {
       prev.dacs = sorted;
@@ -175,11 +200,11 @@ class AdminManageDac extends Component {
   };
 
   render() {
-    const { currentPage, limit, searchDacText } = this.state;
+    const {currentPage, limit, searchDacText, userRole} = this.state;
     return (
-      div({ className: 'container container-wide' }, [
-        div({ className: 'row no-margin' }, [
-          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding' }, [
+      div({className: 'container container-wide'}, [
+        div({className: 'row no-margin'}, [
+          div({className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 no-padding'}, [
             PageHeading({
               id: 'manageDac',
               imgSrc: manageDACIcon,
@@ -189,38 +214,58 @@ class AdminManageDac extends Component {
               description: 'Create and manage Data Access Commitee'
             })
           ]),
-          div({ className: 'col-lg-6 col-md-6 col-sm-12 col-xs-12 search-wrapper no-padding' }, [
-            div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-              h(SearchBox, { id: 'manageDac', searchHandler: this.handleSearchDac, pageHandler: this.handlePageChange, color: 'common' })
+          div({
+            isRendered: (userRole === ADMIN),
+            className: 'col-md-6 col-xs-12 search-wrapper no-padding'}, [
+            div({className: 'col-xs-6'}, [
+              h(SearchBox, {
+                id: 'manageDac',
+                searchHandler: this.handleSearchDac,
+                pageHandler: this.handlePageChange,
+                color: 'common'
+              })
             ]),
-
             a({
               id: 'btn_addDAC',
-              className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 btn-primary btn-add common-background',
+              className: 'col-xs-6 btn-primary btn-add common-background',
               onClick: this.addDac
             }, [
-              div({ className: 'all-icons add-dac_white' }),
+              div({className: 'all-icons add-dac_white'}),
               span({}, ['Add Data Access Committee'])
+            ])
+          ]),
+          div({
+            isRendered: (userRole === CHAIR),
+            className: 'search-wrapper no-padding'}, [
+            div({className: 'col-xs-6'}, [
+              h(SearchBox, {
+                id: 'manageDac',
+                searchHandler: this.handleSearchDac,
+                pageHandler: this.handlePageChange,
+                color: 'common'
+              })
             ])
           ])
         ]),
-        div({ className: 'jumbotron table-box' }, [
-          div({ className: 'grid-9-row' }, [
-            div({ className: 'col-2 cell-header cell-sort common-color',
-              onClick: this.sort('name', !this.state.descendingOrder)}, [
+        div({className: 'jumbotron table-box'}, [
+          div({className: 'grid-9-row'}, [
+            div({
+              className: 'col-2 cell-header cell-sort common-color',
+              onClick: this.sort('name', !this.state.descendingOrder)
+            }, [
               'DAC Name',
-              span({ className: 'glyphicon sort-icon glyphicon-sort' })]),
-            div({ className: 'col-3 cell-header common-color' }, ['DAC Description']),
-            div({ className: 'col-2 cell-header common-color' }, ['DAC Datasets']),
-            div({ className: 'col-2 cell-header f-center common-color' }, ['Actions'])
+              span({className: 'glyphicon sort-icon glyphicon-sort'})]),
+            div({className: 'col-3 cell-header common-color'}, ['DAC Description']),
+            div({className: 'col-2 cell-header common-color'}, ['DAC Datasets']),
+            div({className: 'col-2 cell-header f-center common-color'}, ['Actions'])
           ]),
 
-          hr({ className: 'table-head-separator' }),
+          hr({className: 'table-head-separator'}),
 
           this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map(dac => {
-              return (h(Fragment, { key: dac.dacId }, [
+              return (h(Fragment, {key: dac.dacId}, [
                 div({
                   id: dac.dacId,
                   className: 'grid-9-row tableRow'
@@ -267,7 +312,7 @@ class AdminManageDac extends Component {
                     }, ['Edit'])
                   ])
                 ]),
-                hr({ className: 'table-body-separator' })
+                hr({className: 'table-body-separator'})
               ])
               );
             }),
@@ -300,7 +345,8 @@ class AdminManageDac extends Component {
             isEditMode: this.state.isEditMode,
             onOKRequest: this.okAddDacModal,
             onCloseRequest: this.closeAddDacModal,
-            dac: this.state.selectedDac
+            dac: this.state.selectedDac,
+            userRole: userRole
           })
         ])
       ])
@@ -308,4 +354,4 @@ class AdminManageDac extends Component {
   }
 }
 
-export default AdminManageDac;
+export default ManageDac;
