@@ -120,7 +120,9 @@ export const Styles = {
   },
   TABLE: {
     CONTAINER: {
-      margin: "3rem auto"
+      margin: "3rem auto",
+      border: '0.5px solid lightGray',
+      borderRadius: '10px'
     },
     HEADER_ROW: {
       fontFamily: "Montserrat",
@@ -130,7 +132,9 @@ export const Styles = {
       backgroundColor: "#f3f6f7",
       display: "flex",
       justifyContent: "left",
-      height: "51px"
+      height: "51px",
+      borderTopLeftRadius: 'inherit',
+      borderTopRightRadius: 'inherit'
     },
     RECORD_ROW: {
       fontFamily: 'Montserrat',
@@ -205,7 +209,9 @@ export const Styles = {
       display: 'flex',
       padding: '0 1%',
       justifyContent: 'flex-end',
-      height: '51px'
+      height: '51px',
+      borderBottomLeftRadius: 'inherit',
+      borderBottomRightRadius: 'inherit'
     },
     FOOTER_SECTION: {
       width: "100%",

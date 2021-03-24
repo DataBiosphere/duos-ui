@@ -92,7 +92,7 @@ class AdminConsole extends Component {
         break;
       case 'addDac':
         this.setState({showAddDacModal: false});
-        this.props.history.push(`admin_manage_dac`);
+        this.props.history.push(`manage_dac`);
         break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
@@ -206,7 +206,7 @@ class AdminConsole extends Component {
               div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
                 AdminConsoleBox({
                   id: 'btn_manageDAC',
-                  url: '/admin_manage_dac',
+                  url: '/manage_dac',
                   color: 'common',
                   title: 'Manage Data Access Committee',
                   description: 'Create and manage Data Access Committees',

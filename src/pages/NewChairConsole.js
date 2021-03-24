@@ -5,7 +5,7 @@ import { DAR, Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import TableTextButton from '../components/TableTextButton';
 import TableIconButton from '../components/TableIconButton';
-import { Notifications, formatDate } from '../libs/utils';
+import {Notifications, formatDate, getDatasetNames, applyTextHover, removeTextHover} from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
@@ -47,23 +47,6 @@ const processElectionStatus = (election, votes) => {
     output = electionStatus;
   }
   return output;
-};
-
-const getDatasetNames = (datasets) => {
-  if(!datasets){return '';}
-  const datasetNames = datasets.map((dataset) => {
-    return dataset.label;
-  });
-  return datasetNames.join('\n');
-};
-
-const applyTextHover = (e) => {
-  e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
-  e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
-};
-
-const removeTextHover = (e, color) => {
-  e.target.style.color = color;
 };
 
 const getElectionDate = (election) => {
@@ -203,7 +186,7 @@ export default function NewChairConsole(props) {
         darData.datasetNames = getDatasetNames(darData.datasets);
       }
       setDarDetails(darData);
-      const researcher = await User.getById(darData.userId);
+      const researcher = await User.getById(darInfo.userId);
       setResearcher(researcher);
     }
   };
@@ -309,7 +292,7 @@ export default function NewChairConsole(props) {
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
-            div({style: Styles.TITLE}, ["Manage Data Access Request"]),
+            div({style: Styles.TITLE}, ["DAC Chair Console"]),
             div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
           ])
         ]),
@@ -342,9 +325,9 @@ export default function NewChairConsole(props) {
           div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
           div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
         ]),
-        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists})
+        h(Records, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, applyTextHover, removeTextHover, history: props.history, openConfirmation, updateLists}),
+        h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize})
       ]),
-      h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize}),
       h(DarModal, {showModal, closeModal, darDetails, researcher}),
       h(ConfirmationModal, {
         showConfirmation,
@@ -358,4 +341,4 @@ export default function NewChairConsole(props) {
       })
     ])
   );
-};
+}

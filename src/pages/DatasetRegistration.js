@@ -325,12 +325,12 @@ class DatasetRegistration extends Component {
       }
       // if the old dataset name has been edited
       else {
-        return this.state.validName ? 'form-control' : 'form-control required-field-error';
+        return this.state.datasetData.isValidName ? 'form-control' : 'form-control required-field-error';
       }
     }
     // if a new dataset name is being edited
     else {
-      return this.state.validName ? 'form-control' : 'form-control required-field-error';
+      return this.state.datasetData.isValidName ? 'form-control' : 'form-control required-field-error';
     }
   }
 
@@ -388,7 +388,7 @@ class DatasetRegistration extends Component {
         else {
           let ds = this.formatFormData(formData);
           if (fp.isEmpty(this.state.updateDataset)) {
-            DataSet.postDatasetForm(ds).then(resp => {
+            DataSet.postDatasetForm(ds).then(() => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
             }).catch(e => {
               let errorMessage = (e.status === 409) ?
@@ -405,9 +405,9 @@ class DatasetRegistration extends Component {
           }
           else {
             const { datasetId } = this.props.match.params;
-            DataSet.updateDataset(datasetId, ds).then(resp => {
+            DataSet.updateDataset(datasetId, ds).then(() => {
               this.setState({ showDialogSubmit: false, submissionSuccess: true });
-            }).catch(e => {
+            }).catch(() => {
               let errorMessage = 'Some errors occurred, the Dataset was not updated.';
               this.setState(prev => {
                 prev.problemSavingRequest = true;
@@ -829,7 +829,7 @@ class DatasetRegistration extends Component {
                           className: 'cancel-color required-field-error-span',
                           isRendered: fp.includes('required-field-error', this.showDatasetNameErrorHighlight(this.state.datasetData.datasetName, showValidationMessages))
                         },
-                        [this.state.validName ? 'Required field' : 'Dataset Name already in use']),
+                        [this.state.datasetData.isValidName ? 'Required field' : 'Dataset Name already in use']),
                       ])
                   ]),
 

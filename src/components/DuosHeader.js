@@ -13,7 +13,7 @@ import {NavigationUtils} from '../libs/utils';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import { Styles } from '../libs/theme';
-import DuosLogo from '../images/duos_logo.svg';
+import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
 
@@ -216,12 +216,19 @@ class DuosHeader extends Component {
         'Reviewed Cases Record': {
           link: '/reviewed_cases'
         }
+      },
+      chair: {
+        'Manage DARs': {
+          link: this.state.dacChairPath
+        },
+        'Manage DACs': {
+          link: '/manage_dac'
+        }
       }
     };
 
     const duosLogoImage = {
-      width: '140px',
-      height: '40px',
+      height: '50px',
       padding: '0',
       margin: '12px 64px 0 0',
       cursor: 'pointer'
@@ -278,11 +285,11 @@ class DuosHeader extends Component {
     return (
       nav({ className: 'navbar-duos', role: 'navigation' }, [
         h(Hidden, {mdDown: true}, [
+          this.makeNotifications(),
+          h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
+            img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
+          ]),
           div({ className: 'row no-margin' }, [
-            this.makeNotifications(),
-            h(Link, { id: 'link_logo', to: '/home', className: 'navbar-brand' }, [
-              img({ style: duosLogoImage, src: DuosLogo, alt: 'DUOS Logo'})
-            ]),
             //Standard navbar for medium sized displays and higher (pre-existing navbar)
             div({}, [
               ul({ isRendered: isLogged, className: 'navbar-logged' }, [
@@ -305,8 +312,19 @@ class DuosHeader extends Component {
                   h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
                 ]),
 
-                li({ isRendered: isChairPerson }, [
-                  h(Link, { id: 'link_chairConsole', to: this.state.dacChairPath }, ['DAC Chair Console'])
+                li({ className: 'dropdown', isRendered: isChairPerson }, [
+                  a({ role: 'button', className: 'dropdown-toggle', 'data-toggle': 'dropdown' }, [
+                    div({}, ['DAC Chair Console', span({ className: 'caret caret-margin' }, [])])
+                  ]),
+                  ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
+                    li({}, [
+                      h(Link, { id: 'link_chairConsole', to: this.state.dacChairPath }, ['Manage DARs'])
+                    ]),
+                    hr({ style: hrStyle }),
+                    li({}, [
+                      h(Link, { id: 'link_manageDac', to: '/manage_dac'}, ['Manage DACs'])
+                    ])
+                  ])
                 ]),
 
                 li({ isRendered: isMember }, [
@@ -401,7 +419,7 @@ class DuosHeader extends Component {
                 //NOTE: create user component to show logged in status (as well as dropdown options)
                 h(BasicListItem, {isRendered: isLogged, applyPointer, targetLink: '/profile', label: 'Your Profile', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isAdmin, applyPointer, targetLink: '/admin_console', label: 'Admin Console', goToLink: this.goToLink}),
-                h(BasicListItem, {isRendered: isChairPerson, applyPointer, targetLink: this.state.dacChairPath, label: 'DAC Chair Console', goToLink: this.goToLink}),
+                h(DropdownComponent, {isRendered: isChairPerson, label: 'DAC Chair Console', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.chair, classes}),
                 h(BasicListItem, {isRendered: isMember, applyPointer, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isDataOwner, applyPointer, targetLink: '/data_owner_console', label: 'Data Owner Console', goToLink: this.goToLink}),
