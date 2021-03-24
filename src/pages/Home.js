@@ -218,9 +218,9 @@ class Home extends Component {
                         target: '_blank'
                       }, ['Machine Readable Consent Guidance.']),
                       " For help determining your data's permitted uses, try our ",
-                      (Link, { to: '/data_sharing_language_tool', style: {cursor: 'pointer', color: '#337ab7'}}, ['Data Sharing Language Tool']),
+                      (Link, { to: '/data_sharing_language_tool', className: 'hover-color'}, ['Data Sharing Language Tool']),
                       " which follows GA4GH guidelines."
-                    ]),
+                    ])
                   ],
                   moreContent: [
                     div({}, [
