@@ -4,8 +4,9 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
 import isNil from 'lodash/fp/isNil';
 import { forEach } from 'lodash';
-import {DAR, DataSet, Researcher} from "./ajax";
+import {DAR, DataSet as Dataset, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
+import {find, map} from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -53,6 +54,18 @@ export const getDatasetNames = (datasets) => {
     return ((dataset.label) ?  dataset.label : dataset.name);
   });
   return datasetNames.join('\n');
+};
+
+export const getDatasets = async (darDetails) => {
+  let datasets;
+  await Dataset.getDarDatasets(darDetails.datasetIds).then((resp) => {
+    datasets = resp;
+  });
+  datasets = datasets.map((dataset) => {
+    return find({"propertyName":"Dataset Name"})(dataset.properties);
+  });
+  datasets = map(prop => prop.propertyValue)(datasets);
+  return datasets;
 };
 
 export const applyTextHover = (e) => {
