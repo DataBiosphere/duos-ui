@@ -97,7 +97,7 @@ const DarModal = (props) => {
       }),
       h(ModalDetailRow, {
         label: 'Dataset(s)',
-        detail: getDatasets()
+        detail: getDatasets(darDetails, datasets)
       }),
       h(ModalDetailRow, {
         label: 'Type of Research',
