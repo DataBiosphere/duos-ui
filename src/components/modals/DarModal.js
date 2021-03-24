@@ -1,8 +1,8 @@
-import { div, h, span } from 'react-hyperscript-helpers';
-import { Alert } from '../Alert';
-import { Styles } from '../../libs/theme';
+import {div, h, span} from 'react-hyperscript-helpers';
+import {Alert} from '../Alert';
+import {Styles} from '../../libs/theme';
 import Modal from 'react-modal';
-import { find, isEmpty, isNil } from 'lodash/fp';
+import {find, isEmpty, isNil} from 'lodash/fp';
 
 const ModalDetailRow = (props) => {
   return (
@@ -11,6 +11,10 @@ const ModalDetailRow = (props) => {
       div({style: Styles.MODAL.DAR_DETAIL}, [props.detail])
     ])
   );
+};
+
+const getDatasets = (darDetails, datasets) => {
+  return isNil(darDetails) ? [] : isNil(datasets) ? darDetails.datasetNames : datasets;
 };
 
 const returnPIName = (researcher) => {
@@ -43,24 +47,25 @@ const processResearchTypes = (researchTypes) => {
 };
 
 const requiresManualReview = (darDetails) => {
-  return darDetails.illegalBehavior ||
+  return (isNil(darDetails.requiresManualReview)) ?
+    (darDetails.illegalBehavior ||
     darDetails.poa ||
     darDetails.psychiatricTraits ||
     darDetails.sexualDiseases ||
     darDetails.stigmatizedDiseases ||
-    darDetails.vulnerablePopulation;
+    darDetails.vulnerablePopulation)
+    : darDetails.requiresManualReview;
 };
 
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
-  const {showModal, closeModal, darDetails, researcher} = props;
-
+  const {showModal, closeModal, darDetails, datasets, researcher} = props;
   return h(Modal, {
     isOpen: showModal,
     onRequestClose: closeModal,
     shouldCloseOnOverlayClick: true,
     style: {
-      content: { ...Styles.MODAL.CONTENT },
+      content: {...Styles.MODAL.CONTENT},
       overlay: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
       }
@@ -68,11 +73,12 @@ const DarModal = (props) => {
   }, [
     div({style: Styles.MODAL.CONTENT}, [
       span({
-        style: { float: 'right', cursor: 'pointer' },
+        style: {float: 'right', cursor: 'pointer'},
         onClick: closeModal,
-        className: "glyphicon glyphicon-remove default-color"}),
+        className: "glyphicon glyphicon-remove default-color"
+      }),
       div({style: Styles.MODAL.TITLE_HEADER}, [`${darDetails.projectTitle}`]),
-      div({style: { borderBottom: "1px solid #1F3B50" }}, []),
+      div({style: {borderBottom: "1px solid #1F3B50"}}, []),
       h(ModalDetailRow, {
         label: 'Data Access Request Id',
         detail: darDetails.darCode
@@ -91,7 +97,7 @@ const DarModal = (props) => {
       }),
       h(ModalDetailRow, {
         label: 'Dataset(s)',
-        detail: darDetails.datasetNames || '- -'
+        detail: getDatasets(darDetails, datasets)
       }),
       h(ModalDetailRow, {
         label: 'Type of Research',

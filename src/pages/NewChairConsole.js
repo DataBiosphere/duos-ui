@@ -5,7 +5,7 @@ import { DAR, Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import TableTextButton from '../components/TableTextButton';
 import TableIconButton from '../components/TableIconButton';
-import { Notifications, formatDate } from '../libs/utils';
+import {Notifications, formatDate, getDatasetNames, applyTextHover, removeTextHover} from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
@@ -47,23 +47,6 @@ const processElectionStatus = (election, votes) => {
     output = electionStatus;
   }
   return output;
-};
-
-const getDatasetNames = (datasets) => {
-  if(!datasets){return '';}
-  const datasetNames = datasets.map((dataset) => {
-    return dataset.label;
-  });
-  return datasetNames.join('\n');
-};
-
-const applyTextHover = (e) => {
-  e.target.style.color = Styles.TABLE.DAR_TEXT_HOVER.color;
-  e.target.style.cursor = Styles.TABLE.DAR_TEXT_HOVER.cursor;
-};
-
-const removeTextHover = (e, color) => {
-  e.target.style.color = color;
 };
 
 const getElectionDate = (election) => {
