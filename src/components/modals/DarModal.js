@@ -13,6 +13,10 @@ const ModalDetailRow = (props) => {
   );
 };
 
+const getDatasets = (darDetails, datasets) => {
+  return isNil(darDetails) ? [] : isNil(datasets) ? darDetails.datasetNames : datasets;
+};
+
 const returnPIName = (researcher) => {
   const properties = researcher.researcherProperties;
   const isThePI = !isNil(find({propertyKey: "isThePI", propertyValue: true})(properties));
@@ -55,7 +59,7 @@ const requiresManualReview = (darDetails) => {
 
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
-  const {showModal, closeModal, darDetails, researcher} = props;
+  const {showModal, closeModal, darDetails, datasets, researcher} = props;
   return h(Modal, {
     isOpen: showModal,
     onRequestClose: closeModal,
@@ -93,7 +97,7 @@ const DarModal = (props) => {
       }),
       h(ModalDetailRow, {
         label: 'Dataset(s)',
-        detail: darDetails.datasetNames || '- -'
+        detail: getDatasets()
       }),
       h(ModalDetailRow, {
         label: 'Type of Research',
