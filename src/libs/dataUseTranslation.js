@@ -167,6 +167,32 @@ const consentTranslations = {
   }
 };
 
+export const getConsentTranslations = (restrictions) => {
+  let result = [];
+  if (restrictions.includes("NMDS")) {
+    result.push(consentTranslations.methodsResearch.description);
+  }
+  if (restrictions.includes("GSO")) {
+    result.push(consentTranslations.geneticStudiesOnly.description);
+  }
+  if (restrictions.includes("NPU")) {
+    result.push(consentTranslations.commercialUse.description);
+  }
+  if (restrictions.includes("PUB")) {
+    result.push(consentTranslations.publicationResults.description);
+  }
+  if (restrictions.includes("COL")) {
+    result.push(consentTranslations.collaboratorRequired.description);
+  }
+  if (restrictions.includes("IRB")) {
+    result.push(consentTranslations.ethicsApprovalRequired.description);
+  }
+  if (restrictions.includes("GS-")) {
+    result.push(consentTranslations.geographicalRestrictions.description);
+  }
+  return result;
+};
+
 const getOntologyName = async(obolibraryURL) => {
   const ontology = await searchOntology(obolibraryURL);
   return ontology.label;
