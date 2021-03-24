@@ -9,7 +9,7 @@ import {PaginatorBar} from '../../components/PaginatorBar';
 import {SearchBox} from '../../components/SearchBox';
 import {DAC} from '../../libs/ajax';
 import {Storage} from '../../libs/storage';
-import {contains, filter, reverse, sortBy} from 'lodash/fp';
+import {contains, filter, reverse, sortBy, map} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
 
 const limit = 10;
@@ -76,7 +76,8 @@ class ManageDac extends Component {
     const currentUser = Storage.getCurrentUser();
     const roles = currentUser.roles.map(r => r.name);
     const role = contains(ADMIN)(roles) ? ADMIN : CHAIR;
-    const dacIDs = currentUser.roles.filter(r => r.name === CHAIR).map(role => role.dacId);
+    let dacIDs = filter({name: CHAIR})(currentUser.roles);
+    dacIDs = map('dacId')(dacIDs);
     if (role === CHAIR) {
       this.setState({dacIDs: dacIDs});
     }
