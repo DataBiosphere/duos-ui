@@ -55,13 +55,11 @@ export default function DataSharingLanguageTool() {
     }
     await DataUseTranslation.translateDataUseRestrictions(dataUse)
       .then((resp) => { translatedDataUse = resp; });
-    console.log(translatedDataUse);
     translatedDataUse = translatedDataUse.forEach((sentence) => {
       return (typeof sentence === 'object') ?
         sdsl.push(" " + sentence.description)
         : sdsl.push(" " + sentence);
     });
-    console.log(sdsl);
     setSdsl(sdsl);
   };
 
