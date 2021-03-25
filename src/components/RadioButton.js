@@ -7,7 +7,7 @@ export const RadioButton = (props) => {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
-    //fontFamily: '\'Roboto\', sans-serif',
+    fontFamily: '\'Roboto\', sans-serif',
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     position: 'relative',
   };
@@ -42,7 +42,7 @@ export const RadioButton = (props) => {
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     color: '#603B9B',
     fontSize: 15,
-    fontWeight: 'normal',
+    fontWeight: '500',
 
   };
   const labelStyle = props.style? fp.merge(basicLabelStyle, props.style) : basicLabelStyle;
