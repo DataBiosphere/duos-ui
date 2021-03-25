@@ -41,21 +41,28 @@ export default function DataSharingLanguageTool() {
       : Notifications.showError({text: "Please complete question 1"});
   };
 
-  const generateHelper = () => {
-    const darInfo = {
-      //remove the methods and forProfit properties
-      general: general, diseases: diseases, ontologies: ontologies, other: other, otherText: otherText,
-      hmb: hmb, methods: !nmds, forProfit: !npu
-      //make a list of all the states set to true and pass that in as restrictions to
-      //dataUseTranslation.getConsentTranslations(restrictions)
+  const generateHelper = async () => {
+    const dataUse = {
+      generalUse: general, diseaseRestrictions: ontologies, populationOriginsAncestry: null,
+      hmbResearch: hmb, methodsResearch: nmds, geneticStudiesOnly: gso, commercialUse: npu,
+      publicationResults: pub, collaboratorRequired: col, ethicsApprovalRequired: irb,
+      geographicalRestrictions: gs
     };
-    const summaries = [];
-    const dataUse = (DataUseTranslation.translateDarInfo(darInfo));
-    dataUse.primary.forEach((summary) => {
-      summaries.push(summary.description);
+    let translatedDataUse;
+    let sdsl = [];
+    if (!isNil(otherText)) {
+      sdsl.push(otherText);
+    }
+    await DataUseTranslation.translateDataUseRestrictions(dataUse)
+      .then((resp) => { translatedDataUse = resp; });
+    console.log(translatedDataUse);
+    translatedDataUse = translatedDataUse.forEach((sentence) => {
+      return (typeof sentence === 'object') ?
+        sdsl.push(" " + sentence.description)
+        : sdsl.push(" " + sentence);
     });
-    dataUse.secondary.forEach((summary) => summaries.push(summary.description));
-    setSdsl(summaries.join(" "));
+    console.log(sdsl);
+    setSdsl(sdsl);
   };
 
   return (
@@ -146,6 +153,7 @@ export default function DataSharingLanguageTool() {
 
           textarea({
             className: 'form-control',
+            value: otherText,
             onBlur: (e) => setOtherText(e.target.value),
             maxLength: '512',
             rows: '2',
