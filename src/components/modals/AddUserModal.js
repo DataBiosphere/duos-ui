@@ -77,6 +77,11 @@ export const AddUserModal = hh(class AddUserModal extends Component {
   }
 
   OKHandler = async (event) => {
+    let user = {
+      displayName: this.state.displayName,
+      emailPreference: this.state.emailPreference,
+      roles: this.state.updatedRoles
+    };
     event.persist();
     this.setState({
       submitted: true
@@ -85,14 +90,9 @@ export const AddUserModal = hh(class AddUserModal extends Component {
     if (validForm === false) {
       return;
     }
-    let user = {
-      displayName: this.state.displayName,
-      email: this.state.email,
-      emailPreference: this.state.emailPreference,
-      roles: this.state.updatedRoles
-    };
     switch (this.state.mode) {
       case 'Add': {
+        user.email = this.state.email;
         const createdUser = await User.create(user);
         this.setState({ emailValid: createdUser });
         break;
