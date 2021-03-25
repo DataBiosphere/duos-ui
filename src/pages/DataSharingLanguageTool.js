@@ -2,7 +2,7 @@ import {Styles} from "../libs/theme";
 import {br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
-import {isNil} from "lodash/fp";
+import {isNil, isEmpty} from "lodash/fp";
 import {Notifications, searchOntologies} from "../libs/utils";
 import {DataUseTranslation} from "../libs/dataUseTranslation";
 import {useState} from "react";
@@ -46,7 +46,7 @@ export default function DataSharingLanguageTool() {
     };
     let translatedDataUse;
     let sdsl = [];
-    if (!isNil(otherText)) {
+    if (!isNil(otherText) && !isEmpty(otherText)) {
       sdsl.push(otherText);
     }
     await DataUseTranslation.translateDataUseRestrictions(dataUse)
@@ -91,7 +91,7 @@ export default function DataSharingLanguageTool() {
             },
             label: 'General Research Use: ',
             description: 'use is permitted for any research purpose',
-            style: { font: 'Montserrat', color: '#1f3b50'}
+            style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
 
           RadioButton({
@@ -102,7 +102,7 @@ export default function DataSharingLanguageTool() {
             },
             label: 'Health/Medical/Biomedical Use: ',
             description: 'use is permitted for any health, medical, or biomedical purpose',
-            style: { font: 'Montserrat', color: '#1f3b50'}
+            style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
 
           RadioButton({
@@ -113,7 +113,7 @@ export default function DataSharingLanguageTool() {
             },
             label: 'Disease-related studies: ',
             description: 'use is permitted for research on the specified disease',
-            style: { font: 'Montserrat', color: '#1f3b50'}
+            style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
 
           div({
@@ -138,7 +138,7 @@ export default function DataSharingLanguageTool() {
             },
             label: 'Other Use: ',
             description: 'permitted research use is defined as follows: ',
-            style: { font: 'Montserrat', color: '#1f3b50'}
+            style: { fontFamily: 'Montserrat', color: '#1f3b50'}
           }),
 
           textarea({
