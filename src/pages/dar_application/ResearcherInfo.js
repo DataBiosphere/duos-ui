@@ -228,7 +228,7 @@ export default function ResearcherInfo(props) {
               }),
               span({
                 className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
-              }, ['Required field'])
+              }, ['Required field, your Profile must have a PI'])
             ])
           ])
         ]),
