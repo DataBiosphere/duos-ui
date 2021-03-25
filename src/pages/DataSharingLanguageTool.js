@@ -31,10 +31,6 @@ export default function DataSharingLanguageTool() {
     return (general || hmb || (diseases && !isNil(ontologies)) || other );
   };
 
-  const clearOtherTextBox = () => {
-    document.getElementById('other_text').value = "";
-  };
-
   const generate = () => {
     isTypeOfResearchValid() ?
       generateHelper()
@@ -91,36 +87,33 @@ export default function DataSharingLanguageTool() {
             value: 'general',
             defaultChecked: general,
             onClick: () => {
-              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
+              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), setOtherText("");
             },
             label: 'General Research Use: ',
             description: 'use is permitted for any research purpose',
-            font: 'Montserrat',
-            color: '#1f3b50'
+            style: { font: 'Montserrat', color: '#1f3b50'}
           }),
 
           RadioButton({
             value: 'hmb',
             defaultChecked: hmb,
             onClick: () => {
-              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
+              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), setOtherText("");
             },
             label: 'Health/Medical/Biomedical Use: ',
             description: 'use is permitted for any health, medical, or biomedical purpose',
-            font: 'Montserrat',
-            color: '#1f3b50'
+            style: { font: 'Montserrat', color: '#1f3b50'}
           }),
 
           RadioButton({
             value: 'diseases',
             defaultChecked: diseases,
             onClick: () => {
-              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), clearOtherTextBox();
+              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), setOtherText("");
             },
             label: 'Disease-related studies: ',
             description: 'use is permitted for research on the specified disease',
-            font: 'Montserrat',
-            color: '#1f3b50'
+            style: { font: 'Montserrat', color: '#1f3b50'}
           }),
 
           div({
@@ -145,8 +138,7 @@ export default function DataSharingLanguageTool() {
             },
             label: 'Other Use: ',
             description: 'permitted research use is defined as follows: ',
-            font: 'Montserrat',
-            color: '#1f3b50'
+            style: { font: 'Montserrat', color: '#1f3b50'}
           }),
 
           textarea({
