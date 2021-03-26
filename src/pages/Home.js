@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { a, button, div, h1, h3, img, p, span } from 'react-hyperscript-helpers';
+import { a, button, div, h, h1, h3, img, p, span } from 'react-hyperscript-helpers';
 import { SignIn } from '../components/SignIn';
 import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
@@ -218,7 +218,7 @@ class Home extends Component {
                         target: '_blank'
                       }, ['Machine Readable Consent Guidance.']),
                       " For help determining your data's permitted uses, try our ",
-                      (Link, { to: '/data_sharing_language_tool', className: 'hover-color'}, ['Data Sharing Language Tool']),
+                      h(Link, { to: '/data_sharing_language_tool'}, ['Data Sharing Language Tool']),
                       " which follows GA4GH guidelines."
                     ])
                   ],

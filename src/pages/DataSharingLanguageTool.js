@@ -23,7 +23,6 @@ export default function DataSharingLanguageTool() {
   const [col, setCol] = useState(false);
   const [irb, setIrb] = useState(false);
   const [gs, setGs] = useState(false);
-  const [mor, setMor] = useState(false);
   const [npu, setNpu] = useState(false);
   const [sdsl, setSdsl] = useState("");
 
@@ -244,20 +243,6 @@ export default function DataSharingLanguageTool() {
               className: 'regular-checkbox',
               htmlFor: 'checkGS',
             }, ['Geographic Restriction (GS-)']),
-          ]),
-
-          div({className: 'checkbox'}, [
-            input({
-              checked: mor,
-              onChange: (e) => setMor(e.target.checked),
-              id: 'checkMoratorium',
-              type: 'checkbox',
-            }),
-            label({
-              style: labelStyle,
-              className: 'regular-checkbox',
-              htmlFor: 'checkMoratorium',
-            }, ['Publication Moratorium (MOR)']),
           ]),
 
           div({className: 'checkbox'}, [
