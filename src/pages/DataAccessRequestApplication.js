@@ -205,7 +205,7 @@ class DataAccessRequestApplication extends Component {
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
-      formData.investigator = '--';
+      formData.investigator = '';
     } else {
       formData.investigator = rpProperties.piName;
     }
