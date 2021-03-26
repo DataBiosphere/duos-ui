@@ -628,7 +628,7 @@ class DataAccessRequestApplication extends Component {
         await DAR.postDar(updatedFormData);
         this.setState({
           showDialogSubmit: false
-        }, Navigation.console(Storage.getCurrentUser(), this.props.history));
+        }, Navigation.console(Storage.getCurrentUser(), this.props.history).response);
       } catch (error) {
         this.setState({
           showDialogSubmit: false
