@@ -32,7 +32,7 @@ export default function PaginationBar(props) {
           style: Styles.TABLE.PAGINATION_BUTTON
         }, [
           span({
-            onClick: (e) => goToPage(toNumber(currentPage.current.value) - 1),
+            onClick: () => goToPage(toNumber(currentPage.current.value) - 1),
             onMouseEnter: applyTextHover,
             onMouseLeave: (e) => removeTextHover(e, Theme.palette.primary),
           },['Prev']),
@@ -40,7 +40,7 @@ export default function PaginationBar(props) {
         div({style: Styles.TABLE.CURRENT_PAGE}, [
           span({},['Page ']),
           input({
-            onChange: (e) => goToPage(toNumber(currentPage.current.value)),
+            onChange: () => goToPage(toNumber(currentPage.current.value)),
             type: 'text',
             ref: currentPage,
             defaultValue: props.currentPage,
@@ -52,7 +52,7 @@ export default function PaginationBar(props) {
           style: Styles.TABLE.PAGINATION_BUTTON
         }, [
           span({
-            onClick: (e) => goToPage(toNumber(currentPage.current.value) + 1),
+            onClick: () => goToPage(toNumber(currentPage.current.value) + 1),
             onMouseEnter: applyTextHover,
             onMouseLeave: (e) => removeTextHover(e, '#1f3b50')
           }, ['Next'])
@@ -61,7 +61,7 @@ export default function PaginationBar(props) {
       div({style: Styles.TABLE.PAGINATION_TABLE_SIZE_SECTION}, [
         span({style: {marginRight: '2%'}}, ['Rows per page: ']),
         input({
-          onChange: (e) => changeTableSize(tableSize.current.value),
+          onChange: () => changeTableSize(tableSize.current.value),
           type: 'text',
           ref: tableSize,
           defaultValue: props.tableSize,
@@ -70,4 +70,4 @@ export default function PaginationBar(props) {
       ])
     ])
   );
-};
+}

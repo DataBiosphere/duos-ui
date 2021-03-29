@@ -6,7 +6,7 @@ import isNil from 'lodash/fp/isNil';
 import { forEach } from 'lodash';
 import {DAR, DataSet as Dataset, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
-import {find, map} from "lodash/fp";
+import { find, map, isEmpty, filter } from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -223,3 +223,48 @@ export const PromiseSerial = funcs =>
     promise.then(result =>
       func().then(Array.prototype.concat.bind(result))),
   Promise.resolve([]));
+
+export const getElectionDate = (election) => {
+  let formattedString = '- -';
+  if(election) {
+    //NOTE: some elections have a createDate attribute but not a lastUpdate attributes
+    const targetDate = election.lastUpdate || election.createDate;
+    formattedString = formatDate(targetDate);
+  }
+  return formattedString;
+};
+
+export const wasVoteSubmitted =(vote) => {
+  //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
+  //current code will always provide lastUpdate
+  const targetDate = vote.lastUpdate || vote.createDate || vote.updateDate || vote.lastUpdateDate;
+  return !isNil(targetDate);
+};
+
+export const wasFinalVoteTrue = (voteData) => {
+  const {type, vote} = voteData;
+  //vote status capitalizes final, election status does not
+  return type === 'FINAL' && vote === true;
+};
+export const processElectionStatus = (election, votes) => {
+  let output;
+  const electionStatus = election.status;
+
+  if(!isEmpty(votes) && isNil(electionStatus)) {
+    output = '- -';
+  } else if(electionStatus === 'Open') {
+    //Null check since react doesn't necessarily perform prop updates immediately
+    if(!isEmpty(votes) && !isNil(election)) {
+      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
+      const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
+      output = `Open (${completedVotes} / ${dacVotes.length} votes)`;
+    }
+  } else if (electionStatus === 'Final') {
+    const finalVote = find(wasFinalVoteTrue)(votes);
+    output = finalVote ? 'Accepted' : 'Closed';
+  } else {
+    output = electionStatus;
+  }
+  return output;
+};
+
