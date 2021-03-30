@@ -276,7 +276,6 @@ export const calcFilteredListPosition = (index, currentPage, tableSize) => {
   return index + ((currentPage - 1) * tableSize);
 };
 
-//NOTE: a lot of arguments that I need to put in the function if I want it to be used as a util function
 export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
   return (updatedElection, darId, i, successText, votes = undefined) => {
     const index = i + ((currentPage - 1) * tableSize);
