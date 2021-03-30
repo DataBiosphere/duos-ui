@@ -151,7 +151,7 @@ class DataAccessRequestApplication extends Component {
         return prev;
       });
     }
-  }
+  };
 
   onNihStatusUpdate = (nihValid) => {
     if (this.state.nihValid !== nihValid) {
@@ -205,7 +205,7 @@ class DataAccessRequestApplication extends Component {
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
       formData.investigator = rpProperties.profileName;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
-      formData.investigator = '--';
+      formData.investigator = '';
     } else {
       formData.investigator = rpProperties.piName;
     }
@@ -243,7 +243,7 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
 
-  };
+  }
 
   formatDatasetForAutocomplete = (dataset) => {
     const nameProp = fp.find({"propertyName":"Dataset Name"})(dataset.properties);
@@ -252,7 +252,7 @@ class DataAccessRequestApplication extends Component {
       value: dataset.dataSetId,
       label: nameProp.propertyValue
     };
-  }
+  };
 
   formatOntologyItems = (ontologies) => {
     const ontologyItems = ontologies.map((ontology) => {
@@ -273,7 +273,7 @@ class DataAccessRequestApplication extends Component {
       state.showValidationMessages = value;
       return state;
     });
-  }
+  };
 
   checkValidations() {
     if (this.state.showValidationMessages === true && this.state.step === 1) {
@@ -283,7 +283,7 @@ class DataAccessRequestApplication extends Component {
     } else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
     }
-  };
+  }
 
   handleRadioChange = (e, field, value) => {
     if (value === 'true') {
@@ -301,21 +301,21 @@ class DataAccessRequestApplication extends Component {
   };
 
   //NOTE: use nextPage and previous page instead of having individual go to pages for each step
-  nextPage = (e) => {
+  nextPage = () => {
     this.setState(prev => {
       prev.step = prev.step + 1;
       return prev;
     });
     window.scrollTo(0,0);
-  }
+  };
 
-  prevPage = (e) => {
+  prevPage = () => {
     this.setState(prev => {
       prev.step = prev.step - 1;
       return prev;
     });
     window.scrollTo(0,0);
-  }
+  };
 
   goToStep = (step = 1) => {
     this.setState(prev => {
@@ -323,9 +323,9 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     window.scrollTo(0, 0);
-  }
+  };
 
-  attestAndSave = (e) => {
+  attestAndSave = () => {
     let invalidStep1 = this.verifyStep1();
     let invalidStep2 = this.verifyStep2();
     let invalidStep3 = this.verifyStep3();
@@ -345,7 +345,7 @@ class DataAccessRequestApplication extends Component {
       isValid = true;
     }
     return isValid;
-  };
+  }
 
   //NOTE: seperated out check functionality from state updates in original function to make it easier to follow
   step1InvalidChecks = () => {
@@ -472,7 +472,7 @@ class DataAccessRequestApplication extends Component {
       return prev;
     });
     return showValidationMessages;
-  };
+  }
 
   verifyStep2() {
     //defined attribute keys for dynamic DUL based questions
@@ -524,7 +524,7 @@ class DataAccessRequestApplication extends Component {
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
     const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
     return dulInvalid || datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
-  };
+  }
 
   isGenderValid(gender, oneGender) {
     let isValidGender = false;
@@ -547,7 +547,7 @@ class DataAccessRequestApplication extends Component {
       this.isValid(this.state.formData.populationMigration) &&
       this.isValid(this.state.formData.psychiatricTraits) &&
       this.isValid(this.state.formData.notHealth));
-  }
+  };
 
   verifyStep3() {
     let invalid = false;
@@ -567,7 +567,7 @@ class DataAccessRequestApplication extends Component {
     return invalid;
   }
 
-  partialSave = (e) => {
+  partialSave = () => {
     this.setState({ showDialogSave: true });
   };
 
@@ -578,7 +578,7 @@ class DataAccessRequestApplication extends Component {
     irbUpdate = await DAR.uploadDARDocument(uploadedIrbDocument, referenceId, 'irbDocument');
     collaborationUpdate = await DAR.uploadDARDocument(uploadedCollaborationLetter, referenceId, 'collaborationDocument');
     return assign({}, irbUpdate.data, collaborationUpdate.data);
-  }
+  };
 
   updateDraftResponse = (formattedFormData, referenceId) => {
     let darPartialResponse;
@@ -588,7 +588,7 @@ class DataAccessRequestApplication extends Component {
       darPartialResponse = DAR.postDarDraft(formattedFormData);
     }
     return darPartialResponse;
-  }
+  };
 
   submitDARFormData = async (answer) => {
     if (answer === true) {
@@ -642,9 +642,9 @@ class DataAccessRequestApplication extends Component {
         showDialogSubmit: false
       });
     }
-  }
+  };
 
-  dialogHandlerSubmit = (answer) => (e) => {
+  dialogHandlerSubmit = (answer) => () => {
     this.setState(prev => {
       prev.disableOkButton = true;
       return prev;
@@ -660,7 +660,7 @@ class DataAccessRequestApplication extends Component {
     });
   };
 
-  dialogHandlerSave = (answer) => (e) => {
+  dialogHandlerSave = (answer) => () => {
     this.setState(prev => {
       prev.disableOkBtn = true;
       return prev;
@@ -739,9 +739,9 @@ class DataAccessRequestApplication extends Component {
       currentDatasets[index].dataUse = datasetRecord.dataUse || {};
     });
     return currentDatasets;
-  }
+  };
 
-  onDatasetsChange = async (currentDatasets, action) => {
+  onDatasetsChange = async (currentDatasets) => {
     let updatedDatasets = null;
     if(!isNil(currentDatasets) && !isEmpty(currentDatasets)) {
       updatedDatasets = await this.addDataUseToDataset(fp.cloneDeep(currentDatasets));
@@ -845,7 +845,7 @@ class DataAccessRequestApplication extends Component {
     });
   };
 
-  back = (e) => {
+  back = () => {
     this.props.history.goBack();
   };
 
@@ -957,7 +957,7 @@ class DataAccessRequestApplication extends Component {
 
             a({
               id: 'btn_step_1',
-              onClick: (e => this.goToStep(1, false)),
+              onClick: (() => this.goToStep(1, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 1 ? 'active' : '')
             }, [
@@ -968,7 +968,7 @@ class DataAccessRequestApplication extends Component {
 
             a({
               id: 'btn_step_2',
-              onClick: (e => this.goToStep(2, false)),
+              onClick: (() => this.goToStep(2, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 2 ? 'active' : '')
             }, [
@@ -979,7 +979,7 @@ class DataAccessRequestApplication extends Component {
 
             a({
               id: 'btn_step_3',
-              onClick: (e => this.goToStep(3, false)),
+              onClick: (() => this.goToStep(3, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 3 ? 'active' : '')
             }, [
@@ -990,7 +990,7 @@ class DataAccessRequestApplication extends Component {
 
             a({
               id: 'btn_step_4',
-              onClick: (e => this.goToStep(4, false)),
+              onClick: (() => this.goToStep(4, false)),
               className: 'col-lg-3 col-md-3 col-sm-12 col-xs-12 access-color jumbotron box-vote multi-step-title '
                 + (this.state.step === 4 ? 'active' : '')
             }, [
