@@ -9,12 +9,21 @@ import { Styles} from '../libs/theme';
 import {Storage} from "../libs/storage";
 import { Block } from '@material-ui/icons';
 
-export default function DarElectionRecords (props) {
+////////////////////
+//HELPER FUNCTIONS//
+////////////////////
+const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
+  if(!isEmpty(filteredList)) {
+    const startIndex = (currentPage - 1) * tableSize;
+    const endIndex = (currentPage * tableSize);
+    return filteredList.slice(startIndex, endIndex);
+  }
+};
+
+export default function DarElectionRecords(props) {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, openConfirmation, updateLists } = props;
-  const startIndex = (currentPage - 1) * tableSize;
-  const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
-  const visibleWindow = props.filteredList.slice(startIndex, endIndex);
+  const { openModal, currentPage, tableSize, openConfirmation, updateLists, filteredList } = props;
+  const visibleWindow = calcVisibleWindow(currentPage, tableSize, filteredList);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
 
@@ -72,7 +81,7 @@ export default function DarElectionRecords (props) {
       key: `open-election-dar-${dar.referenceId}`,
       label: 'Open Election'
     });
-  }, [updateLists, openConfirmation, props.history]);
+  }, [openConfirmation, props.history, updateLists]);
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election, votes} = electionInfo;
@@ -91,4 +100,4 @@ export default function DarElectionRecords (props) {
       div({style: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle)}, [createActionButtons(electionInfo, index)]),
     ]);
   });
-};
+}
