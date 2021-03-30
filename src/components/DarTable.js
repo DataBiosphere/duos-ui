@@ -5,11 +5,11 @@ import { Election, User, Votes } from '../libs/ajax';
 import { DataUseTranslation } from '../libs/dataUseTranslation';
 import TableTextButton from '../components/TableTextButton';
 import TableIconButton from '../components/TableIconButton';
-import { Notifications, getDatasetNames, applyTextHover, removeTextHover, getElectionDate, processElectionStatus } from '../libs/utils';
-import { Styles} from '../libs/theme';
+import { Notifications, getDatasetNames, applyTextHover, removeTextHover, getElectionDate, processElectionStatus, updateLists, calcFilteredListPosition } from '../libs/utils';
+import { Styles } from '../libs/theme';
 import DarModal from '../components/modals/DarModal';
 import PaginationBar from '../components/PaginationBar';
-import {Storage} from "../libs/storage";
+import { Storage } from "../libs/storage";
 import { Block } from '@material-ui/icons';
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 
@@ -36,7 +36,7 @@ const calcPageCount = (tableSize, filteredList) => {
 //////////////////
 const ElectionRecords = (props) => {
   //NOTE: currentPage is not zero-indexed
-  const {openModal, currentPage, tableSize, openConfirmation, updateLists } = props;
+  const { openModal, currentPage, tableSize, openConfirmation } = props;
   const startIndex = (currentPage - 1) * tableSize;
   const endIndex = currentPage * tableSize; //NOTE: endIndex is exclusive, not inclusive
   const visibleWindow = props.filteredList.slice(startIndex, endIndex);
@@ -97,7 +97,7 @@ const ElectionRecords = (props) => {
       key: `open-election-dar-${dar.referenceId}`,
       label: 'Open Election'
     });
-  }, [updateLists, openConfirmation, props.history]);
+  }, [openConfirmation, props.history]);
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election, votes} = electionInfo;
@@ -126,7 +126,7 @@ export default function DarTable(props) {
   const initialTableSize = 10;
   const initialPage = 1;
 
-  const { filteredList = [], updateLists, history, getElectionDate } = props;
+  const { filteredList = [], history, getElectionDate } = props;
   const [tableSize, setTableSize] = useState(initialTableSize);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [darDetails, setDarDetails] = useState({});
@@ -137,6 +137,8 @@ export default function DarTable(props) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [createElectionInfo, setCreateElectionInfo] = useState({});
+
+  const updateLists = props.getUpdateLists();
 
   useEffect(() => {
     setPageCount(calcPageCount(tableSize, filteredList));
@@ -190,11 +192,11 @@ export default function DarTable(props) {
   const createElection = async (darId, index) => {
     if (!isNil(darId)) {
       try{
-        debugger; // eslint-disable-line
         const updatedElection = await Election.createDARElection(darId);
         const votes = await Votes.getDarVotes(darId);
         const successMsg = 'Election successfully opened';
-        updateLists(updatedElection, darId, index, successMsg, votes);
+        const filterListIndex = calcFilteredListPosition(index, currentPage, tableSize);
+        updateLists(updatedElection, darId, filterListIndex, successMsg, votes);
         setShowConfirmation(false);
       } catch(error) {
         const errorReturn = {text: 'Error: Failed to create election!'};

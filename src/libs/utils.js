@@ -6,7 +6,7 @@ import isNil from 'lodash/fp/isNil';
 import { forEach } from 'lodash';
 import {DAR, DataSet as Dataset, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
-import { find, map, isEmpty, filter } from "lodash/fp";
+import { find, map, isEmpty, filter, cloneDeep } from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -224,6 +224,9 @@ export const PromiseSerial = funcs =>
       func().then(Array.prototype.concat.bind(result))),
   Promise.resolve([]));
 
+//////////////////////////////////
+//DAR CONSOLES UTILITY FUNCTIONS//
+/////////////////////////////////
 export const getElectionDate = (election) => {
   let formattedString = '- -';
   if(election) {
@@ -246,6 +249,7 @@ export const wasFinalVoteTrue = (voteData) => {
   //vote status capitalizes final, election status does not
   return type === 'FINAL' && vote === true;
 };
+
 export const processElectionStatus = (election, votes) => {
   let output;
   const electionStatus = election.status;
@@ -268,3 +272,26 @@ export const processElectionStatus = (election, votes) => {
   return output;
 };
 
+export const calcFilteredListPosition = (index, currentPage, tableSize) => {
+  return index + ((currentPage - 1) * tableSize);
+};
+
+//NOTE: a lot of arguments that I need to put in the function if I want it to be used as a util function
+export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
+  return (updatedElection, darId, i, successText, votes = undefined) => {
+    const index = i + ((currentPage - 1) * tableSize);
+    let filteredListCopy = cloneDeep(filteredList);
+    let electionListCopy = cloneDeep(electionList);
+    const targetFilterRow = filteredListCopy[parseInt(index, 10)];
+    const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
+    targetFilterRow.election = updatedElection;
+    targetElectionRow.election = cloneDeep(updatedElection);
+    if(!isNil(votes)) {
+      targetFilterRow.votes = votes;
+      targetElectionRow.votes = cloneDeep(votes);
+    }
+    setFilteredList(filteredListCopy);
+    setElectionList(electionListCopy);
+    Notifications.showSuccess({text: successText});
+  };
+};

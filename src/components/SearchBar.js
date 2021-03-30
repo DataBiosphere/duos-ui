@@ -4,7 +4,7 @@ import { div, input } from 'react-hyperscript-helpers';
 import { Styles} from '../libs/theme';
 
 export default function SearchBar(props) {
-  const {handleSearchChange} = props;
+  const { handleSearchChange } = props;
   const searchTerms = useRef('');
   const style = props.style ? props.style : {
     width: '100%',

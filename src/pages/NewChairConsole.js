@@ -1,5 +1,5 @@
 import { isEmpty, isNil, includes, toLower, filter, cloneDeep } from 'lodash/fp';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
 import { DAR } from '../libs/ajax';
 import SearchBar from '../components/SearchBar';
@@ -7,6 +7,7 @@ import { Notifications, getElectionDate, processElectionStatus } from '../libs/u
 import { Styles} from '../libs/theme';
 import DarTable from '../components/DarTable';
 import lockIcon from '../images/lock-icon.png';
+import { updateLists as updateListsInit } from '../libs/utils';
 
 export default function NewChairConsole(props) {
   const [electionList, setElectionList] = useState([]);
@@ -29,24 +30,9 @@ export default function NewChairConsole(props) {
     init();
   }, []);
 
-  //NOTE: stays in parent, should be modified
-  //element update done in child, parent will slice original and update element to trigger re-render
-  const updateLists = (updatedElection, darId, index, successText, votes = undefined) => {
-    const i = index + ((currentPage - 1) * tableSize);
-    let filteredListCopy = cloneDeep(filteredList);
-    let electionListCopy = cloneDeep(electionList);
-    const targetFilterRow = filteredListCopy[parseInt(i, 10)];
-    const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
-    targetFilterRow.election = updatedElection;
-    targetElectionRow.election = cloneDeep(updatedElection);
-    if(!isNil(votes)) {
-      targetFilterRow.votes = votes;
-      targetElectionRow.votes = cloneDeep(votes);
-    }
-    setFilteredList(filteredListCopy);
-    setElectionList(electionListCopy);
-    Notifications.showSuccess({text: successText});
-  };
+  const getUpdateLists = useCallback(() => {
+    return updateListsInit(filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize);
+  }, [filteredList, electionList, currentPage, tableSize]);
 
   //NOTE: stays in parent, should be sent as prop to search bar
   const handleSearchChange = (searchTerms) => {
@@ -91,7 +77,7 @@ export default function NewChairConsole(props) {
         ]),
         h(SearchBar, {handleSearchChange})
       ]),
-      h(DarTable, {updateLists, filteredList, history: props.history, processElectionStatus, getElectionDate}, [])
+      h(DarTable, {getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate,}, [])
     ])
   );
 }
