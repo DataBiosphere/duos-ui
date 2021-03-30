@@ -372,13 +372,17 @@ export const DataUseTranslation = {
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
           let resolvedLabels = [];
-          try {
-            const ontologyPromises = value.map(ontologyId => {
-              return getOntologyName(ontologyId);
-            });
-            resolvedLabels = await Promise.all(ontologyPromises);
-          } catch (error) {
-            Notifications.showError({text: 'Ontology API Request Error'});
+          if (!value.isEmpty && !isNil(value[0].label)) {
+            resolvedLabels = value.map((ont) => ont.label);
+          } else {
+            try {
+              const ontologyPromises = value.map(ontologyId => {
+                return getOntologyName(ontologyId);
+              });
+              resolvedLabels = await Promise.all(ontologyPromises);
+            } catch (error) {
+              Notifications.showError({text: 'Ontology API Request Error'});
+            }
           }
           resp = consentTranslations.diseaseRestrictions(resolvedLabels);
         } else {

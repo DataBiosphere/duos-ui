@@ -41,6 +41,7 @@ import { Status } from './pages/Status';
 import { SummaryVotes } from './pages/SummaryVotes';
 import HomeResearcherInfo from "./pages/HomeResearcherInfo";
 import BackgroundSignIn from './pages/BackgroundSignIn';
+import DataSharingLanguageTool from "./pages/DataSharingLanguageTool";
 
 
 const Routes = (props) => (
@@ -64,6 +65,7 @@ const Routes = (props) => (
     <Route path="/election404" component={Election404} />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
+    <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />

@@ -7,14 +7,16 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAC, DAR, DataSet} from '../libs/ajax';
+import {DAC, DataSet} from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
-import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
+import { searchOntologies } from "../libs/utils";
+import {searchOntology} from "../libs/ontologyService";
+
 class DatasetRegistration extends Component {
 
   constructor(props) {
@@ -434,22 +436,6 @@ class DatasetRegistration extends Component {
       (this.state.formData.other === true && !fp.isEmpty(this.state.formData.primaryOtherText))
     );
     return !valid;
-  };
-
-  searchOntologies = (query, callback) => {
-    let options = [];
-    DAR.getAutoCompleteOT(query).then(
-      items => {
-        options = items.map(function(item) {
-          return {
-            key: item.id,
-            value: item.id,
-            label: item.label,
-            item: item,
-          };
-        });
-        callback(options);
-      });
   };
 
   setNeedsApproval = (value) => {
@@ -1157,7 +1143,7 @@ class DatasetRegistration extends Component {
                                 id: 'sel_diseases',
                                 isDisabled: isUpdateDataset || !diseases,
                                 isMulti: true,
-                                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                loadOptions: (query, callback) => searchOntologies(query, callback),
                                 onChange: (option) => this.onOntologiesChange(option),
                                 value: ontologies,
                                 placeholder: 'Please enter one or more diseases',

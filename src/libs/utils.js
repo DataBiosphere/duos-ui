@@ -1,10 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { Config } from './config';
-import isNil from 'lodash/fp/isNil';
-import { forEach } from 'lodash';
-import {DAR, DataSet as Dataset, DataSet, Researcher} from "./ajax";
+import {Config} from './config';
+import {isNil} from 'lodash/fp';
+import {forEach} from 'lodash';
+import {DAR, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
 import {find, map} from "lodash/fp";
 
@@ -58,7 +58,7 @@ export const getDatasetNames = (datasets) => {
 
 export const getDatasets = async (darDetails) => {
   let datasets;
-  await Dataset.getDarDatasets(darDetails.datasetIds).then((resp) => {
+  await DataSet.getDarDatasets(darDetails.datasetIds).then((resp) => {
     datasets = resp;
   });
   datasets = datasets.map((dataset) => {
@@ -223,3 +223,19 @@ export const PromiseSerial = funcs =>
     promise.then(result =>
       func().then(Array.prototype.concat.bind(result))),
   Promise.resolve([]));
+
+export const searchOntologies = (query, callback) => {
+  let options = [];
+  DAR.getAutoCompleteOT(query).then(
+    items => {
+      options = items.map(function(item) {
+        return {
+          key: item.id,
+          value: item.id,
+          label: item.label,
+          item: item,
+        };
+      });
+      callback(options);
+    });
+};

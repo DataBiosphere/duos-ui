@@ -3,7 +3,7 @@ import * as fp from 'lodash/fp';
 
 export const RadioButton = (props) => {
 
-  const wrapperStyle = {
+  const basicWrapperStyle = {
     fontSize: 15,
     lineHeight: '2rem',
     color: 333,
@@ -12,7 +12,9 @@ export const RadioButton = (props) => {
     position: 'relative',
   };
 
-  const uncheckedStyle = {
+  const wrapperStyle = props.style ? fp.merge(basicWrapperStyle, props.style) : basicWrapperStyle;
+
+  const basicUnchecked = {
     fontSize: 15,
     lineHeight: '1.5rem',
     color: 333,
@@ -28,18 +30,22 @@ export const RadioButton = (props) => {
     border: '1px solid #999999',
   };
 
+  const uncheckedStyle = props.style ? fp.merge(basicUnchecked, props.style) : basicUnchecked;
+
   const checkedStyle = fp.merge(uncheckedStyle, {
     boxShadow: 'rgb(0, 0, 0) 0 0 0 1px',
     backgroundColor: '#2196F3',
     border: '2px solid white',
   });
 
-  const labelStyle = {
+  const basicLabelStyle = {
     cursor: props.disabled ? 'not-allowed' : 'pointer',
     color: '#603B9B',
     fontSize: 15,
-    fontWeight: 'normal',
+    fontWeight: '500',
+
   };
+  const labelStyle = props.style? fp.merge(basicLabelStyle, props.style) : basicLabelStyle;
 
   const descriptionStyle = {
     marginLeft: '.25rem',
