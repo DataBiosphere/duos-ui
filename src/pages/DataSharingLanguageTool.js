@@ -142,7 +142,6 @@ export default function DataSharingLanguageTool() {
 
           textarea({
             className: 'form-control',
-            value: otherText,
             onBlur: (e) => setOtherText(e.target.value),
             maxLength: '512',
             rows: '2',
@@ -265,7 +264,7 @@ export default function DataSharingLanguageTool() {
         label({style: Styles.MEDIUM}, [
           '3. Generate your suggested Standardized Data Sharing Language below', br(),
           span({style: Styles.MEDIUM_DESCRIPTION}, ['If your selections above are complete, press generate and the suggested consent form text ' +
-          'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below.']),
+          'based on the GA4GH Data Use Ontology and Machine Readable Consent Guidance will appear below.']),
           button({
             style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '2rem'},
             className: 'button',

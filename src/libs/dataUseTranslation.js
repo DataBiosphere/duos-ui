@@ -372,7 +372,7 @@ export const DataUseTranslation = {
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
           let resolvedLabels = [];
-          if (!value.isEmpty && !isNil(value[0].label)) {
+          if (!isNil(value[0]) && !isNil(value[0].label)) {
             resolvedLabels = value.map((ont) => ont.label);
           } else {
             try {
