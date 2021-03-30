@@ -279,7 +279,8 @@ export default function DataSharingLanguageTool() {
             className: 'form-control',
             rows: '12',
             required: false,
-            readOnly: true
+            readOnly: true,
+            style: {backgroundColor: '#fff'}
           })
         ]),
       ])
