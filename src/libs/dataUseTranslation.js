@@ -148,7 +148,7 @@ const consentTranslations = {
   },
   commercialUse: {
     code: 'NPU',
-    description: 'Use is limited to non-profit and non-commercial research'
+    description: 'Use is limited to non-profit and non-commercial'
   },
   publicationResults: {
     code: 'PUB',
@@ -385,9 +385,7 @@ export const DataUseTranslation = {
               Notifications.showError({text: 'Ontology API Request Error'});
             }
           }
-          if (!isNil(head(resolvedLabels))) {
-            resp = consentTranslations.diseaseRestrictions(resolvedLabels);
-          }
+          resp = consentTranslations.diseaseRestrictions(resolvedLabels);
         } else {
           resp = processDefinedLimitations(key, dataUse, consentTranslations);
         }
