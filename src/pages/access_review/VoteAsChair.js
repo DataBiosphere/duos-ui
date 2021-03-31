@@ -20,7 +20,7 @@ const LINK_SECTION = {
 
 const ERROR = {
   fontSize: '12px',
-  fontWeight: '400',
+  fontWeight: '500',
   textTransform: 'none',
   margin: '12px 0',
   color: 'red'
