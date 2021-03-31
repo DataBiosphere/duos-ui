@@ -1,5 +1,5 @@
 import {Styles} from "../libs/theme";
-import {br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
+import {a, br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
 import {isNil, isEmpty} from "lodash/fp";
@@ -67,13 +67,17 @@ export default function DataSharingLanguageTool() {
         "This tool is made publicly available by the DUOS team for anyone" +
         " interested in leveraging standardized data sharing language in their" +
         " consent forms. The tool leverages the Global Alliance for Genomics " +
-        "and Health’s (GA4GH) companion standards of the Data Use Ontology (DUO) " +
-        "and Machine Readable Consent Guidance (MRCG). The DUO is a structured " +
-        "vocabulary describing permitted data uses and the MRCG is a suggested " +
-        "representation of those uses in consent form language. This tool enables" +
-        " users to easily define what types of data use they would like permitted" +
-        " in their consent forms and then suggests corresponding text for the " +
-        "consent form below, based on the MRCG."
+        "and Health’s (GA4GH) companion standards of the ",
+        a({href: 'https://github.com/EBISPOT/DUO' , target:"_blank", rel:"noopener noreferrer"
+        }, ["Data Use Ontology (DUO)"]),
+        " and ",
+        a({href: 'https://drive.google.com/file/d/102_I0_phOGs9YSmPx7It9CSt1sHFJ87C/view', target: '_blank', rel: 'noreferrer noopener'
+        }, ['Machine Readable Consent Guidance (MRCG)']),
+        ". The DUO is a structured vocabulary describing permitted data uses and " +
+        "the MRCG is a suggested representation of those uses in consent form language. " +
+        "This tool enables users to easily define what types of data use they would " +
+        "like permitted in their consent forms and then suggests corresponding text " +
+        "for the consent form below, based on the MRCG."
       ]),
       div({className: 'form-group', style: {marginTop: '1rem'}}, [
         label({style: Styles.MEDIUM}, [
@@ -142,7 +146,6 @@ export default function DataSharingLanguageTool() {
 
           textarea({
             className: 'form-control',
-            value: otherText,
             onBlur: (e) => setOtherText(e.target.value),
             maxLength: '512',
             rows: '2',
@@ -265,7 +268,7 @@ export default function DataSharingLanguageTool() {
         label({style: Styles.MEDIUM}, [
           '3. Generate your suggested Standardized Data Sharing Language below', br(),
           span({style: Styles.MEDIUM_DESCRIPTION}, ['If your selections above are complete, press generate and the suggested consent form text ' +
-          'based on the GA4GH Data Use Ontology and Machine readable Consent Guidance will appear below.']),
+          'based on the GA4GH Data Use Ontology and Machine Readable Consent Guidance will appear below.']),
           button({
             style: {...Styles.TABLE.TABLE_TEXT_BUTTON, marginBottom: '2rem'},
             className: 'button',
@@ -276,6 +279,8 @@ export default function DataSharingLanguageTool() {
             className: 'form-control',
             rows: '12',
             required: false,
+            readOnly: true,
+            style: {backgroundColor: '#fff'}
           })
         ]),
       ])
