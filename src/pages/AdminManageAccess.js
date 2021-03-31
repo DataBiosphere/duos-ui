@@ -263,7 +263,7 @@ class AdminManageAccess extends Component {
                       isRendered: (dar.electionStatus === 'Open') || (dar.electionStatus === 'Final'),
                     }, [button({
                       style: {margin: "0 15px 5px 0"},
-                      onClick: () => this.dialogHandlerCancel(dar.dataRequestId, dar.electionId),
+                      onClick: () => this.dialogHandlerCancel(dar),
                       className: "cell-button cancel-color"
                     }, ["Cancel"]),
                     ]),
