@@ -87,7 +87,6 @@ class AdminManageAccess extends Component {
   }
 
   dialogHandlerCancel = async (dar) => {
-    console.log(dar);
     const dataRequestId = dar.dataRequestId;
     const electionId = dar.election ? dar.election.electionId : dar.electionId;
     const CANCEL = "Canceled";
