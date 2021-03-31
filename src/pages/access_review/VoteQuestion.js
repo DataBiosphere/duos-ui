@@ -1,7 +1,7 @@
 import React from 'react';
 import { div, textarea, fieldset, h, input, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
-import * as fp from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 
 const HEADER = {
   fontSize: Theme.font.size.header,
@@ -37,7 +37,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
 
   setVote = (voteStatus, rationale) => {
     const { updateVote, voteId } = this.props;
-    if (fp.isNil(rationale)) {
+    if (isNil(rationale)) {
       rationale = '';
     }
     this.setState({
@@ -48,7 +48,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
   };
 
   render() {
-    const { label, question, id, rationale, selectedOption, disabled } = this.props;
+    const { label, question, id, rationale, selectedOption, disabled, hasLibraryCard } = this.props;
     const disabledProp = disabled ? { disabled: true } : {};
 
     return div({ style: { marginBottom: '24px' } },
@@ -61,6 +61,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
             ...disabledProp,
             type: 'radio',
             id: id + '-yes',
+            disabled: hasLibraryCard === false,
             onChange: () => this.setVote(true, this.state.rationale),
             checked: selectedOption === null ? false : selectedOption === true, // field will be checked if vote was previously submitted
           }),
@@ -87,7 +88,7 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
           rows: '5',
           placeholder: 'OPTIONAL: Describe your rationale or add comments here',
           onChange: e => this.setVote(this.state.voteStatus, e.target.value),
-          value: fp.isNil(rationale) ? '' : rationale
+          value: isNil(rationale) ? '' : rationale
         })
       ]);
   }
