@@ -2,7 +2,7 @@ import {Styles} from "../libs/theme";
 import {a, br, button, div, h, input, label, span, textarea} from "react-hyperscript-helpers";
 import {RadioButton} from "../components/RadioButton";
 import AsyncSelect from "react-select/async/dist/react-select.esm";
-import {isNil, isEmpty} from "lodash/fp";
+import {isNil, isEmpty, head} from "lodash/fp";
 import {Notifications, searchOntologies} from "../libs/utils";
 import {DataUseTranslation} from "../libs/dataUseTranslation";
 import {useState} from "react";
@@ -14,9 +14,9 @@ export default function DataSharingLanguageTool() {
   const [general, setGeneral] = useState(false);
   const [hmb, setHmb] = useState(false);
   const [diseases, setDiseases] = useState(false);
-  const [ontologies, setOntologies] = useState();
+  const [ontologies, setOntologies] = useState([]);
   const [other, setOther] = useState(false);
-  const [otherText, setOtherText] = useState();
+  const [otherText, setOtherText] = useState("");
   const [nmds, setNmds] = useState(false);
   const [gso, setGso] = useState(false);
   const [pub, setPub] = useState(false);
@@ -27,7 +27,11 @@ export default function DataSharingLanguageTool() {
   const [sdsl, setSdsl] = useState("");
 
   const isTypeOfResearchValid = () => {
-    return (general || hmb || (diseases && !isNil(ontologies)) || other );
+    return (general || hmb || (diseases && (!isNil(head(ontologies)))) || (other && (!isEmpty(otherText))));
+  };
+
+  const clearOtherTextBox = () => {
+    document.getElementById('other_text').value = "";
   };
 
   const generate = () => {
@@ -45,7 +49,7 @@ export default function DataSharingLanguageTool() {
     };
     let translatedDataUse;
     let sdsl = [];
-    if (!isNil(otherText) && !isEmpty(otherText)) {
+    if (other) {
       sdsl.push(otherText);
     }
     await DataUseTranslation.translateDataUseRestrictions(dataUse)
@@ -90,7 +94,7 @@ export default function DataSharingLanguageTool() {
             value: 'general',
             defaultChecked: general,
             onClick: () => {
-              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), setOtherText("");
+              setGeneral(true), setHmb(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
             },
             label: 'General Research Use: ',
             description: 'use is permitted for any research purpose',
@@ -101,7 +105,7 @@ export default function DataSharingLanguageTool() {
             value: 'hmb',
             defaultChecked: hmb,
             onClick: () => {
-              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), setOtherText("");
+              setHmb(true), setGeneral(false), setDiseases(false), setOther(false), setOntologies([]), clearOtherTextBox();
             },
             label: 'Health/Medical/Biomedical Use: ',
             description: 'use is permitted for any health, medical, or biomedical purpose',
@@ -112,7 +116,7 @@ export default function DataSharingLanguageTool() {
             value: 'diseases',
             defaultChecked: diseases,
             onClick: () => {
-              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), setOtherText("");
+              setDiseases(true), setHmb(false), setGeneral(false), setOther(false), clearOtherTextBox();
             },
             label: 'Disease-related studies: ',
             description: 'use is permitted for research on the specified disease',
