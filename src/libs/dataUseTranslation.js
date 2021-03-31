@@ -5,6 +5,7 @@ import join from 'lodash/fp/join';
 import concat from 'lodash/fp/concat';
 import clone from 'lodash/fp/clone';
 import uniq from 'lodash/fp/uniq';
+import head from 'lodash/fp/head';
 import { searchOntology } from '../libs/ontologyService';
 import { Notifications } from '../libs/utils';
 
@@ -372,7 +373,7 @@ export const DataUseTranslation = {
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
           let resolvedLabels = [];
-          if (!isNil(value[0]) && !isNil(value[0].label)) {
+          if (!isNil(head(value)) && !isNil(value[0].label)) {
             resolvedLabels = value.map((ont) => ont.label);
           } else {
             try {
