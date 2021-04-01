@@ -5,6 +5,7 @@ import join from 'lodash/fp/join';
 import concat from 'lodash/fp/concat';
 import clone from 'lodash/fp/clone';
 import uniq from 'lodash/fp/uniq';
+import head from 'lodash/fp/head';
 import { searchOntology } from '../libs/ontologyService';
 import { Notifications } from '../libs/utils';
 
@@ -147,7 +148,7 @@ const consentTranslations = {
   },
   commercialUse: {
     code: 'NPU',
-    description: 'Use is limited to non-profit and non-commercial'
+    description: 'Use is limited to non-profit and non-commercial research'
   },
   publicationResults: {
     code: 'PUB',
@@ -372,15 +373,21 @@ export const DataUseTranslation = {
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
           let resolvedLabels = [];
-          try {
-            const ontologyPromises = value.map(ontologyId => {
-              return getOntologyName(ontologyId);
-            });
-            resolvedLabels = await Promise.all(ontologyPromises);
-          } catch (error) {
-            Notifications.showError({text: 'Ontology API Request Error'});
+          if (!isNil(head(value)) && !isNil(value[0].label)) {
+            resolvedLabels = value.map((ont) => ont.label);
+          } else {
+            try {
+              const ontologyPromises = value.map(ontologyId => {
+                return getOntologyName(ontologyId);
+              });
+              resolvedLabels = await Promise.all(ontologyPromises);
+            } catch (error) {
+              Notifications.showError({text: 'Ontology API Request Error'});
+            }
           }
-          resp = consentTranslations.diseaseRestrictions(resolvedLabels);
+          if (!isNil(head(resolvedLabels))) {
+            resp = consentTranslations.diseaseRestrictions(resolvedLabels);
+          }
         } else {
           resp = processDefinedLimitations(key, dataUse, consentTranslations);
         }

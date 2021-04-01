@@ -82,7 +82,7 @@ export default function ResearcherInfo(props) {
           name: 'anvil-use-approval-status',
           checked: option.value === anvilUse,
           value: option.value,
-          onChange: (e) => (formFieldChange({name: 'anvilUse', value: option.value}))
+          onChange: () => (formFieldChange({name: 'anvilUse', value: option.value}))
         }),
         span({ className: "radio-check"}),
         span({ className: "radio-label"}, [option.label])
@@ -150,7 +150,7 @@ export default function ResearcherInfo(props) {
               div({ isRendered: checkCollaborator !== true, className: 'display-inline' }, ['*']),
               div({ isRendered: checkCollaborator === true, className: 'display-inline italic' }, [' (optional)']),
               span({ className: 'default-color' },
-                ['Please autenticate with ',
+                ['Please authenticate with ',
                   a({ target: '_blank', href: 'https://era.nih.gov/reg-accounts/register-commons.htm' }, ['eRA Commons']), ' in order to proceed. Your ORCID iD is optional.'
                 ])
             ])
@@ -228,7 +228,7 @@ export default function ResearcherInfo(props) {
               }),
               span({
                 className: 'cancel-color required-field-error-span', isRendered: (invalidInvestigator) && (showValidationMessages)
-              }, ['Required field'])
+              }, ['Required field, ensure your Profile has a PI listed, or that you are selected as the PI'])
             ])
           ])
         ]),

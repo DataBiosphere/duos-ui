@@ -1,10 +1,11 @@
 import { Component } from 'react';
-import { a, button, div, h1, h3, img, p, span } from 'react-hyperscript-helpers';
+import { a, button, div, h, h1, h3, img, p, span } from 'react-hyperscript-helpers';
 import { SignIn } from '../components/SignIn';
 import { ReadMore } from '../components/ReadMore';
 import homeHeaderBackground from '../images/home_header_background.png';
 import duosLogoImg from '../images/duos_logo.svg';
 import duosDiagram from '../images/DUOS_Homepage_diagram.svg';
+import {Link} from "react-router-dom";
 
 class Home extends Component {
 
@@ -215,8 +216,11 @@ class Home extends Component {
                       a({
                         href: 'https://www.ga4gh.org/genomic-data-toolkit/regulatory-ethics-toolkit/#:~:text=Machine%20Readable%20Consent%20Guidance&text=Machine%20readable%20consent%20language%20is,to%20for%20their%20research%20purposes',
                         target: '_blank'
-                      }, ['Machine Readable Consent Guidance.'])
-                    ]),
+                      }, ['Machine Readable Consent Guidance.']),
+                      " For help determining your data's permitted uses, try our ",
+                      h(Link, { to: '/data_sharing_language_tool'}, ['Data Sharing Language Tool']),
+                      " which follows GA4GH guidelines."
+                    ])
                   ],
                   moreContent: [
                     div({}, [

@@ -7,14 +7,16 @@ import { Alert } from '../components/Alert';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import {DAC, DAR, DataSet} from '../libs/ajax';
+import {DAC, DataSet} from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
-import { searchOntology } from '../libs/ontologyService';
 import { Storage } from '../libs/storage';
 import * as fp from 'lodash/fp';
 import AsyncSelect from 'react-select/async';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addDatasetIcon from '../images/icon_dataset_add.png';
+import { searchOntologies } from "../libs/utils";
+import {searchOntology} from "../libs/ontologyService";
+
 class DatasetRegistration extends Component {
 
   constructor(props) {
@@ -434,22 +436,6 @@ class DatasetRegistration extends Component {
       (this.state.formData.other === true && !fp.isEmpty(this.state.formData.primaryOtherText))
     );
     return !valid;
-  };
-
-  searchOntologies = (query, callback) => {
-    let options = [];
-    DAR.getAutoCompleteOT(query).then(
-      items => {
-        options = items.map(function(item) {
-          return {
-            key: item.id,
-            value: item.id,
-            label: item.label,
-            item: item,
-          };
-        });
-        callback(options);
-      });
   };
 
   setNeedsApproval = (value) => {
@@ -1084,7 +1070,7 @@ class DatasetRegistration extends Component {
                     [
                       span({className: 'control-label rp-title-question dataset-color'}, [
                         '2.1 Primary Data Use Terms* ',
-                        span({},
+                        span({style: {marginBottom:'1.5rem'}},
                           ['Please select one of the following data use permissions for your dataset.']),
                         div({
                           style: {'marginLeft': '15px'},
@@ -1103,10 +1089,6 @@ class DatasetRegistration extends Component {
                           {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'},
                           [
                             RadioButton({
-                              style: {
-                                marginBottom: '2rem',
-                                color: '#777',
-                              },
                               id: 'checkGeneral',
                               name: 'checkPrimary',
                               value: 'general',
@@ -1118,10 +1100,6 @@ class DatasetRegistration extends Component {
                             }),
 
                             RadioButton({
-                              style: {
-                                marginBottom: '2rem',
-                                color: '#777',
-                              },
                               id: 'checkHmb',
                               name: 'checkPrimary',
                               value: 'hmb',
@@ -1133,10 +1111,6 @@ class DatasetRegistration extends Component {
                             }),
 
                             RadioButton({
-                              style: {
-                                marginBottom: '2rem',
-                                color: '#777',
-                              },
                               id: 'checkDisease',
                               name: 'checkPrimary',
                               value: 'diseases',
@@ -1148,6 +1122,7 @@ class DatasetRegistration extends Component {
                             }),
                             div({
                               style: {
+                                marginTop: '1rem',
                                 marginBottom: '2rem',
                                 color: '#777',
                                 cursor: diseases ? 'pointer' : 'not-allowed',
@@ -1157,7 +1132,7 @@ class DatasetRegistration extends Component {
                                 id: 'sel_diseases',
                                 isDisabled: isUpdateDataset || !diseases,
                                 isMulti: true,
-                                loadOptions: (query, callback) => this.searchOntologies(query, callback),
+                                loadOptions: (query, callback) => searchOntologies(query, callback),
                                 onChange: (option) => this.onOntologiesChange(option),
                                 value: ontologies,
                                 placeholder: 'Please enter one or more diseases',
@@ -1166,10 +1141,6 @@ class DatasetRegistration extends Component {
                             ]),
 
                             RadioButton({
-                              style: {
-                                marginBottom: '2rem',
-                                color: '#777',
-                              },
                               id: 'checkOther',
                               name: 'checkPrimary',
                               value: 'other',
@@ -1181,6 +1152,7 @@ class DatasetRegistration extends Component {
                             }),
 
                             textarea({
+                              style: {margin: '1rem 0'},
                               className: 'form-control',
                               defaultValue: primaryOtherText,
                               onBlur: (e) => this.setOtherText(e, 'primary'),
@@ -1481,37 +1453,32 @@ class DatasetRegistration extends Component {
                     ]),
                   ]),
 
-                  div({ className: 'row no-margin' }, [
+                  div({ className: 'row no-margin'}, [
                     div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                       label({ style: controlLabelStyle, className: 'default-color' },
                         ['Do you want to make this dataset publicly available in the DUOS dataset catalog and able to receive data access requests under the assigned DAC above?']),
 
-                      RadioButton({
-                        style: {
-                          marginBottom: '2rem',
-                          marginLeft: '2rem',
-                          color: '#777',
-                        },
-                        id: 'checkNeedsApproval_yes',
-                        name: 'checkNeedsApproval',
-                        value: 'yes',
-                        defaultChecked: !needsApproval,
-                        onClick: () => this.setNeedsApproval(false),
-                        label: 'Yes'
-                      }),
+                      div({style: {display: 'flex'}}, [
+                        RadioButton({
+                          id: 'checkNeedsApproval_yes',
+                          name: 'checkNeedsApproval',
+                          value: 'yes',
+                          defaultChecked: !needsApproval,
+                          onClick: () => this.setNeedsApproval(false),
+                          label: 'Yes'
+                        }),
 
-                      RadioButton({
-                        style: {
-                          margin: '2rem',
-                          color: '#777',
-                        },
-                        id: 'checkNeedsApproval_no',
-                        name: 'checkNeedsApproval',
-                        value: 'no',
-                        defaultChecked: needsApproval,
-                        onClick: () => this.setNeedsApproval(true),
-                        label: 'No'
-                      }),
+                        div({style: {width: '10%'}}),
+
+                        RadioButton({
+                          id: 'checkNeedsApproval_no',
+                          name: 'checkNeedsApproval',
+                          value: 'no',
+                          defaultChecked: needsApproval,
+                          onClick: () => this.setNeedsApproval(true),
+                          label: 'No'
+                        }),
+                      ]),
                     ]),
                   ]),
 
