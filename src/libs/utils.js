@@ -2,11 +2,10 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import { Config } from './config';
-import isNil from 'lodash/fp/isNil';
 import { forEach } from 'lodash';
 import {DAR, DataSet as Dataset, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
-import { find, map, isEmpty, filter, cloneDeep } from "lodash/fp";
+import { find, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -250,7 +249,7 @@ export const wasFinalVoteTrue = (voteData) => {
   return type === 'FINAL' && vote === true;
 };
 
-export const processElectionStatus = (election, votes) => {
+export const processElectionStatus = (election, votes, showVotes) => {
   let output;
   const electionStatus = election.status;
 
@@ -261,7 +260,8 @@ export const processElectionStatus = (election, votes) => {
     if(!isEmpty(votes) && !isNil(election)) {
       const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
-      output = `Open (${completedVotes} / ${dacVotes.length} votes)`;
+      const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
+      output = `Open${showVotes ? outputSuffix : ''}`;
     }
   } else if (electionStatus === 'Final') {
     const finalVote = find(wasFinalVoteTrue)(votes);
@@ -292,5 +292,33 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
     setFilteredList(filteredListCopy);
     setElectionList(electionListCopy);
     Notifications.showSuccess({text: successText});
+  };
+};
+
+//Helper function, search bar handler for DAC Chair console and AdminManageAccess
+//NOTE: May need to write a separate version for AdminManageAccess, need to explore more
+export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
+  return (searchTerms) => {
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    if(isEmpty(searchTermValues)) {
+      setFilteredList(electionList);
+    } else {
+      let newFilteredList = cloneDeep(electionList);
+      searchTermValues.forEach((splitTerm) => {
+        const term = splitTerm.trim();
+        if(!isEmpty(term)) {
+          newFilteredList = filter(electionData => {
+            const { election, dac, votes} = electionData;
+            const dar = electionData.dar ? electionData.dar.data : undefined;
+            const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode)]) : [];
+            const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
+            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
+            return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
+          }, newFilteredList);
+        }
+      });
+      setFilteredList(newFilteredList);
+    }
+    setCurrentPage(1);
   };
 };

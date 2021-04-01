@@ -1,14 +1,14 @@
 import { isEmpty, isNil } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { Election, User, Votes } from '../libs/ajax';
-import { DataUseTranslation } from '../libs/dataUseTranslation';
-import { Notifications, getDatasetNames, calcFilteredListPosition } from '../libs/utils';
-import { Styles } from '../libs/theme';
-import DarModal from '../components/modals/DarModal';
-import PaginationBar from '../components/PaginationBar';
-import ConfirmationModal from "../components/modals/ConfirmationModal";
-import DarElectionRecords from '../components/DarElectionRecords';
+import { Election, User, Votes } from '../../libs/ajax';
+import { DataUseTranslation } from '../../libs/dataUseTranslation';
+import { Notifications, getDatasetNames, calcFilteredListPosition } from '../../libs/utils';
+import { Styles } from '../../libs/theme';
+import DarModal from '../modals/DarModal';
+import PaginationBar from '../PaginationBar';
+import ConfirmationModal from "../modals/ConfirmationModal";
+import DarElectionRecords from './DarElectionRecords';
 
 ////////////////////
 //HELPER FUNCTIONS//
@@ -26,16 +26,10 @@ const calcPageCount = (tableSize, filteredList) => {
 //////////////////
 export default function DarTable(props) {
 
-  const initialTableSize = 10;
-  const initialPage = 1;
-
-  const { filteredList, history } = props;
-  const [tableSize, setTableSize] = useState(initialTableSize);
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  const { filteredList, history, consoleType, extraOptions, currentPage, setCurrentPage, tableSize, setTableSize } = props;
   const [darDetails, setDarDetails] = useState({});
   const [researcher, setResearcher] = useState({});
-  const [pageCount, setPageCount] = useState(calcPageCount(initialTableSize, filteredList));
-  //NOTE: see if modal can be created within this component. If not, get setShowModal from props
+  const [pageCount, setPageCount] = useState(calcPageCount(tableSize, filteredList));
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [createElectionInfo, setCreateElectionInfo] = useState({});
@@ -118,7 +112,18 @@ export default function DarTable(props) {
         div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
         div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
       ]),
-      h(DarElectionRecords, {isRendered: !isEmpty(filteredList), filteredList, openModal, currentPage, tableSize, history, openConfirmation, updateLists}),
+      h(DarElectionRecords, {
+        isRendered: !isEmpty(filteredList),
+        filteredList,
+        openModal,
+        currentPage,
+        tableSize,
+        history,
+        openConfirmation,
+        updateLists,
+        consoleType,
+        extraOptions
+      }),
       h(PaginationBar, {pageCount, currentPage, tableSize, goToPage, changeTableSize})
     ]),
     h(DarModal, {showModal, closeModal, darDetails, researcher}),
