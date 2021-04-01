@@ -1,8 +1,9 @@
 import { isEmpty } from 'lodash/fp';
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, a } from 'react-hyperscript-helpers';
 import { applyTextHover, removeTextHover, getElectionDate, processElectionStatus } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import DarTableActions from './DarTableActions';
+import { Theme } from '../../libs/theme';
 
 ////////////////////
 //HELPER FUNCTIONS//
@@ -15,10 +16,23 @@ const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
   }
 };
 
+const goToReviewResults = (dar, history) => {
+  if(dar && dar.referenceId) {
+    history.push(`review_results/${dar.referenceId}`);
+  }
+};
+const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
+  const tag = consoleType === 'manageAccess' ? a : div;
+  return tag({
+    style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
+      color: consoleType === 'manageAccess' ? Theme.palette.link : 'black' //color adjustment for manage console
+    }),
+    onClick: () => consoleType === 'manageAccess' && goToReviewResults(dar, history)
+  }, [election ? processElectionStatus(election, votes, showVotes) : '- -']);
+};
+
 export default function DarElectionRecords(props) {
   //NOTE: currentPage is not zero-indexed
-  //NOTE: addExtraButtons -> base output is perfectly formatted for DAC Chair. Other consoles (AdminManageAccess for example), has extra buttons
-  //Also does not show vote button (since that's a DAC Chair specific feature)
   const { openModal, currentPage, tableSize, openConfirmation, updateLists, filteredList, consoleType, extraOptions, history } = props;
   const visibleWindow = calcVisibleWindow(currentPage, tableSize, filteredList);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
@@ -38,7 +52,7 @@ export default function DarElectionRecords(props) {
       div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle)}, [election ? processElectionStatus(election, votes, showVotes) : '- -']),
+      electionStatusTemplate(consoleType, dar, election, recordTextStyle, votes, showVotes, history),
       h(DarTableActions, {
         baseStyle: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle),
         updateLists,

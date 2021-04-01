@@ -31,7 +31,6 @@ export default function DarTableActions(props) {
     }
   };
 
-  //function only fires on mount, not on re-render
   useEffect(() => {
     if(!isNil(dar) && !isNil(dar.data)) {
       const userId = dar.userId;
