@@ -20,13 +20,14 @@ const cancelElectionHandler = async (election, darId, updateLists, index) => {
 };
 
 export default function DarTableCancelButton(props) {
-  const {election, darReferenceId, index, updateLists, isIcon, addHoverStyle = {}, addBaseStyle = {}} = props;
+  const {election, darReferenceId, index, updateLists, isIcon, addHoverStyle = {}, addBaseStyle = {}, disabled} = props;
   const TargetComponent = isIcon ? TableIconButton : TableTextButton;
   const baseHoverStyle = isIcon ? Styles.TABLE.TABLE_BUTTON_ICON_HOVER : Styles.TABLE.TABLE_BUTTON_TEXT_HOVER;
   const baseStyle = isIcon ? Styles.TABLE.TABLE_ICON_BUTTON : Styles.TABLE.TABLE_TEXT_BUTTON;
 
   const attributes = {
     key: `cancel-button-${election.referenceId}`,
+    disabled,
     onClick: () => cancelElectionHandler(election, darReferenceId, updateLists, index),
     style: Object.assign({}, baseStyle, addBaseStyle),
     hoverStyle: Object.assign({}, baseHoverStyle, addHoverStyle)

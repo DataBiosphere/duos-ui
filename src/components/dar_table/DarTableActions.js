@@ -1,4 +1,4 @@
-import { isEmpty, filter, isNil } from 'lodash/fp';
+import { isEmpty, filter, isNil, find } from 'lodash/fp';
 import { User } from '../../libs/ajax';
 import { h, div, span, a } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -12,6 +12,7 @@ export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
   const { election, dar, votes } = electionInfo;
   const [researcher, setResearcher] = useState({});
+  const chairVote = find((vote) => vote.type === 'Chairperson')(votes);
   //template type is used to initialize general visibility options for buttons
   //extraOptions is an object that contains boolean values for more granular control. Will be applied after template
   //EXAMPLE: You want to use the chair setup but would like to see researcher buttons.
@@ -35,13 +36,16 @@ export default function DarTableActions(props) {
     if(!isNil(dar) && !isNil(dar.data)) {
       const userId = dar.userId;
       const init = async(userId) => {
-        ReactTooltip.rebuild();
         const user = await User.getById(userId);
         setResearcher(user);
       };
       init(userId);
     }
   }, [dar]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, [researcher]);
 
   let visibilityOptions = templates[consoleType];
   if(!isEmpty(extraOptions)) {
@@ -52,13 +56,13 @@ export default function DarTableActions(props) {
     return !isNil(election) && election.status === 'Open';
   };
 
-  const goToResearcherReview = (id) => {
-    this.props.history.push(`researcher_review/${id}`);
+  const goToResearcherReview = (history, id) => {
+    history.push(`researcher_review/${id}`);
   };
 
   //NOTE: template is pretty much lifted from the old ManageAccess page
   //only difference is it's being generated in function form
-  const createResearcherButtons = (dar, showResearcher) => {
+  const createResearcherButtons = (dar, showResearcher, history) => {
     const referenceId = dar.referenceId;
     return div({
       key: `researcher-buttons-${referenceId}`,
@@ -70,7 +74,7 @@ export default function DarTableActions(props) {
         id: dar.referenceId + "_flagBonafide",
         key: dar.referenceId + "_flagBonafide",
         name: "flag_bonafide",
-        onClick: () => goToResearcherReview(dar.userId)
+        onClick: () => goToResearcherReview(history,dar.userId)
       }, [
         span({
           className: "glyphicon glyphicon-thumbs-up dataset-color",
@@ -126,16 +130,18 @@ export default function DarTableActions(props) {
           index,
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
-          isRendered: isElectionOpen(election)
+          isRendered: isElectionOpen(election),
+          disabled: isNil(chairVote) && consoleType === 'chair'
         }),
         h(DarTableOpenButton, {
           dar,
           index,
           openConfirmation,
           label: 'Open',
-          isRendered: !isElectionOpen(election)
+          isRendered: !isElectionOpen(election),
+          disabled: isNil(chairVote) && consoleType === 'chair'
         }),
-        createResearcherButtons(dar, visibilityOptions.showResearcher, election),
+        createResearcherButtons(dar, visibilityOptions.showResearcher, history),
         h(ReactTooltip, {
           id: "tip_flag",
           place: 'right',
