@@ -1,4 +1,4 @@
-import { isEmpty, isNil, includes, toLower, filter, cloneDeep, find } from 'lodash/fp';
+import { isEmpty, isNil, includes, map, toLower, filter, cloneDeep, find } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 import { div, h, img, input } from 'react-hyperscript-helpers';
 import { DAR, Election, User, Votes } from '../libs/ajax';
@@ -85,7 +85,10 @@ const Records = (props) => {
   const createActionButtons = (electionInfo, index) => {
     const e = electionInfo.election;
     const dar = electionInfo.dar;
-    const currentUserId = Storage.getCurrentUser().dacUserId;
+    const dacId = electionInfo.dac.dacId;
+    const currentUser = Storage.getCurrentUser();
+    const chairDacIds = map((role) => {return role.dacId;})(filter({roleId: 2})(currentUser.roles));
+    const currentUserId = currentUser.dacUserId;
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' : {
@@ -94,32 +97,39 @@ const Records = (props) => {
             const targetTypes = (v.type === 'Chairperson' || v.type === 'DAC');
             return belongsToUser && targetTypes;
           })(electionInfo.votes);
-          return [
-            h(TableTextButton, {
-              key: `vote-button-${e.referenceId}`,
-              onClick: () => props.history.push(`access_review/${dar.referenceId}`),
-              label: 'Vote',
-              disabled: isEmpty(votes)
-            }),
-            h(TableIconButton, {
-              icon: Block,
-              key: `cancel-button-${e.referenceId}`,
-              onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
-            })
-          ];
+          const voteButton = h(TableTextButton, {
+            key: `vote-button-${e.referenceId}`,
+            onClick: () => props.history.push(`access_review/${dar.referenceId}`),
+            label: 'Vote',
+            disabled: isEmpty(votes)
+          });
+          if (chairDacIds.includes(dacId)) {
+            return [
+              voteButton,
+              h(TableIconButton, {
+                icon: Block,
+                key: `cancel-button-${e.referenceId}`,
+                onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
+              })
+            ];
+          } else {
+            return [voteButton];
+          }
         }
         default :
           return h(TableTextButton, {
             key: `reopen-button-${e.referenceId}`,
             onClick: () => openConfirmation(dar, index),
-            label: 'Re-Open'
+            label: 'Re-Open',
+            disabled: !chairDacIds.includes(dacId)
           });
       }
     }
     return h(TableTextButton, {
       onClick: () => openConfirmation(dar, index),
       key: `open-election-dar-${dar.referenceId}`,
-      label: 'Open Election'
+      label: 'Open Election',
+      disabled: !chairDacIds.includes(dacId)
     });
   };
 
@@ -207,7 +217,7 @@ export default function NewChairConsole(props) {
 
   const closeConfirmation = () => {
     setShowConfirmation(false);
-  }
+  };
 
   const updateLists = (updatedElection, darId, index, successText, votes = undefined) => {
     const i = index + ((currentPage - 1) * tableSize);
