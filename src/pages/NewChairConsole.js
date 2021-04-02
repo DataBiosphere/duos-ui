@@ -97,24 +97,20 @@ const Records = (props) => {
             const targetTypes = (v.type === 'Chairperson' || v.type === 'DAC');
             return belongsToUser && targetTypes;
           })(electionInfo.votes);
-          const voteButton = h(TableTextButton, {
-            key: `vote-button-${e.referenceId}`,
-            onClick: () => props.history.push(`access_review/${dar.referenceId}`),
-            label: 'Vote',
-            disabled: isEmpty(votes)
-          });
-          if (chairDacIds.includes(dacId)) {
-            return [
-              voteButton,
-              h(TableIconButton, {
-                icon: Block,
-                key: `cancel-button-${e.referenceId}`,
-                onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
-              })
-            ];
-          } else {
-            return [voteButton];
-          }
+          return [
+            h(TableTextButton, {
+              key: `vote-button-${e.referenceId}`,
+              onClick: () => props.history.push(`access_review/${dar.referenceId}`),
+              label: 'Vote',
+              disabled: isEmpty(votes)
+            }),
+            h(TableIconButton, {
+              isRendered: chairDacIds.includes(dacId),
+              icon: Block,
+              key: `cancel-button-${e.referenceId}`,
+              onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
+            })
+          ];
         }
         default :
           return h(TableTextButton, {
