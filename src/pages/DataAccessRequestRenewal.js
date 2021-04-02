@@ -14,7 +14,7 @@ import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import * as fp from 'lodash/fp';
-import LibraryCardAgreement from '../assets/Library_Card_Agreement_2021.pdf';
+import { LibraryCardAgreement } from '../components/LibraryCardAgreement';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addAccessIcon from '../images/icon_add_access.png';
 import './DataAccessRequestApplication.css';
@@ -189,7 +189,7 @@ class DataAccessRequestRenewal extends Component {
       return prev;
     });
 
-  };
+  }
 
   getOntologies(formData) {
     let ontologies = {};
@@ -217,11 +217,11 @@ class DataAccessRequestRenewal extends Component {
 
   handleOpenModal() {
     this.setState({ showModal: true });
-  };
+  }
 
   handleCloseModal() {
     this.setState({ showModal: false });
-  };
+  }
 
   handleChange = (e) => {
     const field = e.target.name;
@@ -240,7 +240,7 @@ class DataAccessRequestRenewal extends Component {
     } else if (this.state.showValidationMessages === true && this.state.step === 3) {
       this.verifyStep3();
     }
-  };
+  }
 
   handleCheckboxChange = (e) => {
     const field = e.target.name;
@@ -273,7 +273,7 @@ class DataAccessRequestRenewal extends Component {
     }, () => this.checkValidations());
   };
 
-  step1 = (e) => {
+  step1 = () => {
     this.setState(prev => {
       prev.step = 1;
       return prev;
@@ -281,7 +281,7 @@ class DataAccessRequestRenewal extends Component {
     window.scrollTo(0, 0);
   };
 
-  step2 = (e) => {
+  step2 = () => {
     this.setState(prev => {
       prev.step = 2;
       return prev;
@@ -289,7 +289,7 @@ class DataAccessRequestRenewal extends Component {
     window.scrollTo(0, 0);
   };
 
-  step3 = (e) => {
+  step3 = () => {
     this.setState(prev => {
       prev.step = 3;
       return prev;
@@ -297,7 +297,7 @@ class DataAccessRequestRenewal extends Component {
     window.scrollTo(0, 0);
   };
 
-  step4 = (e) => {
+  step4 = () => {
     this.setState(prev => {
       prev.step = 4;
       return prev;
@@ -305,7 +305,7 @@ class DataAccessRequestRenewal extends Component {
     window.scrollTo(0, 0);
   };
 
-  attestAndSave = (e) => {
+  attestAndSave = () => {
     let invalidStep1 = this.verifyStep1();
     let invalidStep2 = this.verifyStep2();
     let invalidStep3 = this.verifyStep3();
@@ -320,7 +320,7 @@ class DataAccessRequestRenewal extends Component {
       isValid = true;
     }
     return isValid;
-  };
+  }
 
   verifyStep1() {
     let isResearcherInvalid = false,
@@ -358,7 +358,7 @@ class DataAccessRequestRenewal extends Component {
       return prev;
     });
     return showValidationMessages;
-  };
+  }
 
   verifyStep2() {
     const datasetsInvalid = fp.isEmpty(this.state.formData.datasets);
@@ -367,7 +367,7 @@ class DataAccessRequestRenewal extends Component {
     const rusInvalid = fp.isEmpty(this.state.formData.rus);
     const summaryInvalid = fp.isEmpty(this.state.formData.nonTechRus);
     return datasetsInvalid || titleInvalid || typeOfResearchInvalid || rusInvalid || summaryInvalid;
-  };
+  }
 
   isGenderValid(gender, oneGender) {
     let isValidGender = false;
@@ -406,11 +406,11 @@ class DataAccessRequestRenewal extends Component {
     return invalid;
   }
 
-  partialSave = (e) => {
+  partialSave = () => {
     this.setState({ showDialogSave: true });
   };
 
-  dialogHandlerSubmit = (answer) => (e) => {
+  dialogHandlerSubmit = (answer) => () => {
     if (answer === true) {
       let ontologies = [];
       for (let ontology of this.state.formData.ontologies) {
@@ -451,9 +451,9 @@ class DataAccessRequestRenewal extends Component {
       prev.disableOkBtn = false;
       return prev;
     });
-  };
+  }
 
-  dialogHandlerSave = (answer) => (e) => {
+  dialogHandlerSave = (answer) => () => {
     this.setState(prev => {
       prev.disableOkBtn = true;
       return prev;
@@ -481,7 +481,7 @@ class DataAccessRequestRenewal extends Component {
 
   savePartial() {
     this.saveDAR(null);
-  };
+  }
 
   saveDAR(response) {
   }
@@ -505,7 +505,7 @@ class DataAccessRequestRenewal extends Component {
       callback(options);
     });
 
-  };
+  }
 
   /**
    * HMB, POA, Diseases, and Other/OtherText are all mutually exclusive
@@ -582,7 +582,7 @@ class DataAccessRequestRenewal extends Component {
     });
   };
 
-  back = (e) => {
+  back = () => {
     this.props.history.goBack();
   };
 
@@ -988,13 +988,7 @@ class DataAccessRequestRenewal extends Component {
 
 
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                    a({
-                      id: 'link_downloadAgreement', href: LibraryCardAgreement, target: '_blank',
-                      className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                    }, [
-                      span({ className: 'glyphicon glyphicon-download' }),
-                      'Add Another Publication'
-                    ])
+                    LibraryCardAgreement
                   ])
                 ]),
 
@@ -1084,30 +1078,30 @@ class DataAccessRequestRenewal extends Component {
                     )
                   ]),
 
-                div(
-                  {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-group'},
-                  [
-                    span({},
-                      ['Please paste the citation used in your presentation here*']),
-                    input({
-                      type: 'text',
-                      name: 'projectTitle',
-                      id: 'inputTitle',
-                      maxLength: '256',
-                      value: this.state.formData.projectTitle,
-                      onChange: this.handleChange,
-                      className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
-                        'form-control required-field-error' :
-                        'form-control',
-                      required: true,
-                      disabled: this.state.formData.darCode !== null,
-                    }),
-                    span({
-                      className: 'cancel-color required-field-error-span',
-                      isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                    },
-                    ['Required field']),
-                  ]),
+                  div(
+                    {className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group rp-group'},
+                    [
+                      span({},
+                        ['Please paste the citation used in your presentation here*']),
+                      input({
+                        type: 'text',
+                        name: 'projectTitle',
+                        id: 'inputTitle',
+                        maxLength: '256',
+                        value: this.state.formData.projectTitle,
+                        onChange: this.handleChange,
+                        className: (fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages) ?
+                          'form-control required-field-error' :
+                          'form-control',
+                        required: true,
+                        disabled: this.state.formData.darCode !== null,
+                      }),
+                      span({
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                      },
+                      ['Required field']),
+                    ]),
 
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
                     a({
