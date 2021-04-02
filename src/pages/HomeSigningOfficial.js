@@ -1,7 +1,7 @@
 import {Component} from 'react';
-import {a, div, h, h1, h3, p, img, span} from 'react-hyperscript-helpers';
+import { div, h, h1, h3, p, img } from 'react-hyperscript-helpers';
 import Mailto from 'react-protected-mailto';
-import LibraryCardAgreement from '../assets/Library_Card_Agreement_2021.pdf';
+import { LibraryCardAgreement } from '../components/LibraryCardAgreement';
 import soApprovalImg from '../images/signing_official_approval.png';
 import soPreAuthImg from '../images/signing_official_preauthorize.png';
 
@@ -80,17 +80,9 @@ class HomeSigningOfficial extends Component {
                 style: imageWrapper
               }),
               p({style: paragraph}, ['This agreement allows a Signing Official to pre-authorize researchers from their institutions for a 1 year renewable term.']),
-              div({style: {marginTop: '2rem', marginBottom: '2rem'}},
-                [a({
-                  id: 'link_downloadAgreement',
-                  href: LibraryCardAgreement,
-                  target: '_blank',
-                  className: 'btn-secondary btn-download-pdf hover-color',
-                  style: {paddingBottom: '1rem'},
-                }, [
-                  span({className: 'glyphicon glyphicon-download'}),
-                  'Download DUOS Library Card Agreement'])
-                ]),
+              div({style: {marginTop: '2rem', marginBottom: '2rem'}}, [
+                LibraryCardAgreement
+              ]),
               div({style: {fontWeight: 600}}, [
                 p({style: paragraph}, ['To issue your researchers this Library Card pre-authorization, please sign and send the DUOS Library Card Agreement (above) along with a list of the first and last name, and eRA Commmons ID of each researcher you will issue this privilege, to: ',
                   h(Mailto, {email: 'DUOS-support@broadinstitute.zendesk.com'})

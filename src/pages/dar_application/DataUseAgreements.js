@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { a, div, fieldset, h, h3, label, li, ol, ul, p, span} from 'react-hyperscript-helpers';
 import isNil from 'lodash/fp/isNil';
 import { Alert } from '../../components/Alert';
+import { LibraryCardAgreement } from '../../components/LibraryCardAgreement';
 
 const StepAlertTemplate = (props) => {
   const ulLinkStyle = {
@@ -15,13 +16,13 @@ const StepAlertTemplate = (props) => {
   return (
     ul({style: ulLinkStyle}, [
       li({isRendered: props.step1Invalid}, [
-        a({key: 'step1-alert', onClick: (e => props.goToStep(1))}, ['Step 1'])
+        a({key: 'step1-alert', onClick: (() => props.goToStep(1))}, ['Step 1'])
       ]),
       li({isRendered: props.step2Invalid}, [
-        a({key: 'step2-alert', onClick: (e => props.goToStep(2))}, ['Step 2'])
+        a({key: 'step2-alert', onClick: (() => props.goToStep(2))}, ['Step 2'])
       ]),
       li({isRendered: props.step3Invalid}, [
-        a({key: 'step3-alert', onClick: (e => props.goToStep(3))}, ['Step 3'])
+        a({key: 'step3-alert', onClick: (() => props.goToStep(3))}, ['Step 3'])
       ])
     ])
   );
@@ -91,13 +92,7 @@ export default function DataUseAgreements(props) {
               ]),
 
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
-                a({
-                  id: 'link_downloadAgreement', href: '/Library_Card_Agreement_2021.pdf', target: '_blank',
-                  className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12 btn-secondary btn-download-pdf hover-color'
-                }, [
-                  span({ className: 'glyphicon glyphicon-download' }),
-                  'DUOS Library Card Agreement'
-                ])
+                LibraryCardAgreement
               ]),
 
               div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
