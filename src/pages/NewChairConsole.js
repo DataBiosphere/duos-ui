@@ -89,7 +89,7 @@ const Records = (props) => {
     const currentUser = Storage.getCurrentUser();
     const chairDacIds = map((role) => {return role.dacId;})(filter({roleId: 2})(currentUser.roles));
     const currentUserId = currentUser.dacUserId;
-    const isChair = chairDacIds.includes(dacId);
+    const isChairForThisDAC = chairDacIds.includes(dacId);
     if (!isNil(e)) {
       switch (e.status) {
         case 'Open' : {
@@ -106,7 +106,7 @@ const Records = (props) => {
               disabled: isEmpty(votes)
             }),
             h(TableIconButton, {
-              isRendered: isChair,
+              isRendered: isChairForThisDAC,
               icon: Block,
               key: `cancel-button-${e.referenceId}`,
               onClick: () => cancelElectionHandler(electionInfo, dar.referenceId, index)
@@ -118,7 +118,7 @@ const Records = (props) => {
             key: `reopen-button-${e.referenceId}`,
             onClick: () => openConfirmation(dar, index),
             label: 'Re-Open',
-            disabled: !isChair
+            isRendered: isChairForThisDAC
           });
       }
     }
@@ -126,7 +126,7 @@ const Records = (props) => {
       onClick: () => openConfirmation(dar, index),
       key: `open-election-dar-${dar.referenceId}`,
       label: 'Open Election',
-      disabled: !isChair
+      isRendered: isChairForThisDAC
     });
   };
 
