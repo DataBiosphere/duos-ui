@@ -1,8 +1,6 @@
 import { isEmpty, filter, isNil, find } from 'lodash/fp';
-import { User } from '../../libs/ajax';
 import { h, div, span, a } from 'react-hyperscript-helpers';
-import ReactTooltip from 'react-tooltip';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Storage } from '../../libs/storage';
 import DarTableVoteButton from './DarTableVoteButton';
 import DarTableOpenButton from './DarTableOpenButton';
@@ -10,9 +8,13 @@ import DarTableCancelButton from './DarTableCancelButton';
 
 export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
-  const { election, dar, votes } = electionInfo;
-  const [researcher, setResearcher] = useState({});
-  const chairVote = find((vote) => vote.type === 'Chairperson')(votes);
+  const { election, dar, votes, researcher, dac } = electionInfo;
+  const currentUser = Storage.getCurrentUser();
+  const currentUserId = useMemo(() => Storage.getCurrentUser.dacUserId, []);
+  const currentUserRoles = currentUser.roles;
+  const isChair = !isEmpty(currentUserRoles) && !isEmpty(dac) && !isEmpty(
+    find((role) => role.name === 'Chairperson' && role.dacId === dac.dacId)(currentUser.roles)
+  );
   //template type is used to initialize general visibility options for buttons
   //extraOptions is an object that contains boolean values for more granular control. Will be applied after template
   //EXAMPLE: You want to use the chair setup but would like to see researcher buttons.
@@ -31,21 +33,6 @@ export default function DarTableActions(props) {
     }
   };
 
-  useEffect(() => {
-    if(!isNil(dar) && !isNil(dar.data)) {
-      const userId = dar.userId;
-      const init = async(userId) => {
-        const user = await User.getById(userId);
-        setResearcher(user);
-      };
-      init(userId);
-    }
-  }, [dar]);
-
-  useEffect(() => {
-    ReactTooltip.rebuild();
-  }, [researcher]);
-
   let visibilityOptions = templates[consoleType];
   if(!isEmpty(extraOptions)) {
     Object.assign(visibilityOptions, extraOptions);
@@ -61,7 +48,7 @@ export default function DarTableActions(props) {
 
   //NOTE: template is pretty much lifted from the old ManageAccess page
   //only difference is it's being generated in function form
-  const createResearcherButtons = (dar, showResearcher, history) => {
+  const createResearcherButtons = (dar, showResearcher, history, researcher) => {
     const referenceId = dar.referenceId;
     return div({
       key: `researcher-buttons-${referenceId}`,
@@ -78,36 +65,29 @@ export default function DarTableActions(props) {
         span({
           className: "glyphicon glyphicon-thumbs-up dataset-color",
           key: `tip-bonafide-${referenceId}`,
-          isRendered: researcher.status === 'approved',
-          "data-tip": "Bonafide researcher",
-          "data-for": "tip_bonafide"
+          isRendered: !isEmpty(researcher) && researcher.status === 'approved',
         }),
         span({
           key: `tip-non-bonafide-${referenceId}`,
           className: "glyphicon glyphicon-thumbs-down cancel-color",
-          isRendered: researcher.status === 'rejected',
-          "data-tip": "Non-Bonafide researcher",
-          "data-for": "tip_nonBonafide"
+          isRendered: !isEmpty(researcher) && researcher.status === 'rejected',
         }),
         span({
           key: `tip-pending-review-${referenceId}`,
           className: "glyphicon glyphicon-hand-right hover-color",
-          isRendered: researcher.status === 'pending',
-          "data-tip": "Researcher review pending",
-          "data-for": "tip_pendingReview"
+          isRendered: !isEmpty(researcher) && researcher.status === 'pending',
         }),
         span({
           key: `dismiss-${referenceId}`,
           className: "glyphicon glyphicon-hand-right dismiss-color",
-          isRendered: researcher.status === null
+          isRendered: !isEmpty(researcher) && researcher.status === null
         }),
       ])
     ]);
   };
 
-  const template = (election, dar, votes, history, index, visibilityOptions, baseStyle) => {
+  const template = (election, dar, votes, history, index, visibilityOptions, baseStyle, currentUserId) => {
     const darReferenceId = dar.referenceId;
-    const currentUserId = Storage.getCurrentUser().dacUserId;
     const targetVotes = filter((v) => {
       const belongsToUser = (currentUserId === v.dacUserId);
       const targetTypes = (v.type === 'Chairperson' || v.type === 'DAC');
@@ -115,7 +95,7 @@ export default function DarTableActions(props) {
     })(votes);
 
     return ([
-      div({style: baseStyle}, [
+      div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar)}, [
         h(DarTableVoteButton, {
           election,
           history,
@@ -130,7 +110,7 @@ export default function DarTableActions(props) {
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
           isRendered: isElectionOpen(election),
-          disabled: isNil(chairVote) && consoleType === 'chair'
+          disabled: isNil(isChair) && consoleType === 'chair'
         }),
         h(DarTableOpenButton, {
           dar,
@@ -138,40 +118,12 @@ export default function DarTableActions(props) {
           openConfirmation,
           label: 'Open',
           isRendered: !isElectionOpen(election),
-          disabled: isNil(chairVote) && consoleType === 'chair'
+          disabled: isNil(isChair) && consoleType === 'chair'
         }),
-        createResearcherButtons(dar, visibilityOptions.showResearcher, history),
-        h(ReactTooltip, {
-          id: "tip_flag",
-          place: 'right',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper',
-        }),
-        h(ReactTooltip, {
-          id: "tip_bonafide",
-          place: 'left',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: "tip_pendingReview",
-          place: 'left',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
-        h(ReactTooltip, {
-          id: "tip_nonBonafide",
-          place: 'left',
-          effect: 'solid',
-          multiline: true,
-          className: 'tooltip-wrapper'
-        }),
+        createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher),
       ])
     ]);
   };
 
-  return template(election, dar, votes, history, index, visibilityOptions, baseStyle);
+  return template(election, dar, votes, history, index, visibilityOptions, baseStyle, currentUserId);
 }
