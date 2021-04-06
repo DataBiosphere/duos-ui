@@ -9,6 +9,7 @@ import DarModal from '../modals/DarModal';
 import PaginationBar from '../PaginationBar';
 import ConfirmationModal from "../modals/ConfirmationModal";
 import DarElectionRecords from './DarElectionRecords';
+import ReactTooltip from 'react-tooltip';
 
 ////////////////////
 //HELPER FUNCTIONS//
@@ -22,7 +23,7 @@ const calcPageCount = (tableSize, filteredList) => {
 };
 
 //////////////////
-//MAIN COMOPNENT//
+//MAIN COMPONENT//
 //////////////////
 export default function DarTable(props) {
 
@@ -38,6 +39,18 @@ export default function DarTable(props) {
 
   useEffect(() => {
     setPageCount(calcPageCount(tableSize, filteredList));
+    //NOTE: The old ManageAdminAccess used ReactTooltip incorrectly
+    //Code had created four tooltip instances for all records
+    //ReactTooltip only needs one instance (placed on the parent)
+    //any DOM element with the attribute "data-tip" will have a tooltip rendered
+    //If dealing with dynamic content, you'll have to rebind new elements to the ReactTooltip instance
+    //Therefore call ReactTooltip.rebuild on the parent component
+    //Use timeout to ensure that the rebuild fires after the child component has rendered
+    //clear timeout after callback function fires to avoid side-effects
+    const timeout = setTimeout(() => {
+      ReactTooltip.rebuild();
+      clearTimeout(timeout);
+    }, 500);
   }, [currentPage, tableSize, filteredList]);
 
   const openModal = useCallback(async(darInfo) => {
@@ -136,6 +149,17 @@ export default function DarTable(props) {
       onConfirm: createElection,
       id: createElectionInfo.id,
       index: createElectionInfo.index
+    }),
+    //You only need one instance of ReactTooltip rendered for all tooltips (if they follow the same styling)
+    //Only create multiple instances if there is enough of a difference in appearance to warrant it
+    //ReactTooltip instance only needs to be rendered on a higher level component
+    //Theory: If all tooltips in this app are the same, you could just initialize this element on the highest level of the app
+    //Above theory requires more research into the current usage within the app
+    h(ReactTooltip, {
+      place: 'left',
+      effect: 'solid',
+      multiline: 'true',
+      className: 'tooltip-wrapper'
     })
   ]);
 }
