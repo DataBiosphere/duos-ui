@@ -25,7 +25,6 @@ const UsaStates = require('usa-states').UsaStates;
 const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
 stateNames.splice(0, 0, empty);
 
-
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   constructor(props) {
