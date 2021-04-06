@@ -322,6 +322,7 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
     setCurrentPage(1);
   };
 };
+
 export const searchOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
@@ -336,4 +337,21 @@ export const searchOntologies = (query, callback) => {
       });
       callback(options);
     });
+};
+
+export const setStyle = (disabled, baseStyle) => {
+  const opacity = disabled ? 0.5 : 1;
+  return {opacity, ...baseStyle};
+};
+
+export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave) => {
+  let attributes;
+  if(!disabled) {
+    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip};
+  }
+  attributes = {style, disabled, "data-tip": dataTip};
+  if(!isEmpty(dataTip)) {
+    attributes["data-tip"] = dataTip;
+  }
+  return attributes;
 };
