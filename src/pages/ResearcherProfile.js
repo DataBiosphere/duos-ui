@@ -50,6 +50,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.notificationData = notificationData;
       prev.profile.academicEmail = currentUser.email;
       prev.currentUser = currentUser;
+      prev.isResearcher = currentUser.isResearcher;
       return prev;
     });
   }
@@ -57,7 +58,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   initialState() {
     return {
       loading: true,
-      isResearcher: Storage.getCurrentUser().isResearcher,
       hasLibraryCard: false,
       fieldStatus: {},
       showDialogSubmit: false,
