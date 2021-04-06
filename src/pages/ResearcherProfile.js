@@ -31,7 +31,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     super(props);
     this.state = this.initialState();
 
-    this.getResearcherProfile = this.getResearcherProfile.bind(this);
     this.clearNotRelatedPIFields = this.clearNotRelatedPIFields.bind(this);
     this.clearCommonsFields = this.clearCommonsFields.bind(this);
     this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
@@ -42,7 +41,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async componentDidMount() {
     const currentUser = Storage.getCurrentUser();
-    await this.getResearcherProfile();
+    await this.getResearcherProfile(currentUser);
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
@@ -109,8 +108,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     };
   }
 
-  async getResearcherProfile() {
-    const currentUser = Storage.getCurrentUser();
+  getResearcherProfile = async (currentUser) => {
     let rp = {};
     let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
     const user = await User.getByEmail(currentUser.email);
