@@ -48,7 +48,7 @@ export default function DarTableActions(props) {
   };
   //NOTE: template is pretty much lifted from the old ManageAccess page
   //only difference is it's being generated in function form
-  const createResearcherButtons = (dar, showResearcher, history, researcher) => {
+  const createResearcherButtons = (dar, showResearcher, history, researcher = {}) => {
     const referenceId = dar.referenceId;
     return div({
       key: `researcher-buttons-${referenceId}`,
