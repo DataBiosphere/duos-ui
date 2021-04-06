@@ -14,7 +14,6 @@ export default function DarTableActions(props) {
   const currentUserRoles = currentUser.roles;
   const chairVote = find((role) => role.name === 'Chairperson' && role.dacId === dac.dacId)(currentUser.roles);
   const isChair = !isEmpty(currentUserRoles) && !isEmpty(dac) && !isNil(chairVote);
-  debugger; // eslint-disable-line
   //template type is used to initialize general visibility options for buttons
   //extraOptions is an object that contains boolean values for more granular control. Will be applied after template
   //EXAMPLE: You want to use the chair setup but would like to see researcher buttons.
