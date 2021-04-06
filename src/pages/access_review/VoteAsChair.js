@@ -2,7 +2,7 @@ import React from 'react';
 import { div, a, span, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
-import * as fp from 'lodash/fp';
+import {isNil, head, get, getOr} from 'lodash/fp';
 import * as moment from 'moment';
 
 const LINK = {
@@ -18,6 +18,14 @@ const LINK_SECTION = {
   alignItems: 'center',
 };
 
+const ERROR = {
+  fontSize: '12px',
+  fontWeight: '500',
+  textTransform: 'none',
+  margin: '12px 0',
+  color: 'red'
+};
+
 export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
 
   constructor(props) {
@@ -30,7 +38,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   componentDidMount() {
     this.props.getVotes();
     this.props.getMatchData();
-  };
+  }
 
   toggleMatchData = () => {
     this.setState(prev => {
@@ -42,10 +50,10 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   formatMatchData = (matchData) => {
-    const failure = JSON.stringify(fp.getOr('false')('failed')(matchData)).toLowerCase() === 'true';
-    const vote = JSON.stringify(fp.getOr('false')('match')(matchData)).toLowerCase() === 'true';
+    const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
+    const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
     const voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
-    const createDateString = moment(fp.get('createDate')(matchData)).format('YYYY-MM-DD');
+    const createDateString = moment(get('createDate')(matchData)).format('YYYY-MM-DD');
     const style = { marginLeft: '2rem', fontWeight: 'normal', textTransform: 'none' };
     return div({}, [
       div({},['DUOS Algorithm Decision:', span({style: style}, [voteString])]),
@@ -54,31 +62,34 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   render() {
-    const { vote, rpVote, onUpdate, matchData, accessElectionOpen, rpElectionOpen } = this.props;
-    const accessVoteQuestion = fp.isNil(vote) ?
+    const { vote, rpVote, onUpdate, matchData, accessElectionOpen, rpElectionOpen, libraryCards } = this.props;
+    const hasLibraryCard = !isNil(head(libraryCards));
+    const errorMessage = "The Researcher must have a Library Card before this DAR can be approved.";
+    const accessVoteQuestion = isNil(vote) ?
       div({}, []) :
       VoteQuestion({
         id: 'access-vote',
-        isRendered: !fp.isNil(vote),
+        isRendered: !isNil(vote),
         label: 'Question 1:',
         question: 'Should data access be granted to this applicant?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
-        voteId: fp.isNil(vote) ? null : vote.voteId,
-        rationale: fp.isNil(vote.rationale) ? '' : vote.rationale,
-        selectedOption: fp.isNil(vote) ? null : vote.vote,
-        disabled: !accessElectionOpen
+        voteId: isNil(vote) ? null : vote.voteId,
+        rationale: isNil(vote.rationale) ? '' : vote.rationale,
+        selectedOption: isNil(vote) ? null : vote.vote,
+        disabled: !accessElectionOpen,
+        hasLibraryCard: hasLibraryCard
       });
-    const rpVoteQuestion = fp.isNil(rpVote) ?
+    const rpVoteQuestion = isNil(rpVote) ?
       div({}, []) :
       VoteQuestion({
         id: 'rp-vote',
-        isRendered: !fp.isNil(rpVote),
+        isRendered: !isNil(rpVote),
         label: 'Question 2:',
         question: 'Was the research purpose accurately converted to a structured format?',
         updateVote: (id, selectedOption, rationale) => onUpdate(id, selectedOption, rationale),
-        voteId: fp.isNil(rpVote) ? null : rpVote.voteId,
-        rationale: fp.isNil(rpVote.rationale) ? '' : rpVote.rationale,
-        selectedOption: fp.isNil(rpVote) ? null : rpVote.vote,
+        voteId: isNil(rpVote) ? null : rpVote.voteId,
+        rationale: isNil(rpVote.rationale) ? '' : rpVote.rationale,
+        selectedOption: isNil(rpVote) ? null : rpVote.vote,
         disabled: !rpElectionOpen
       });
     return div({ id: 'chair-vote' }, [
@@ -92,7 +103,8 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
       ]),
       div({ style: {color: this.state.viewMatchResults ? 'inherit' : 'transparent'} }, [
         this.formatMatchData(matchData)
-      ])
+      ]),
+      div({ style: ERROR, isRendered: hasLibraryCard === false}, [errorMessage])
     ]);
   }
 });
