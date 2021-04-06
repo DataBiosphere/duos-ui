@@ -66,7 +66,7 @@ class MemberConsole extends Component {
     let currentUser = Storage.getCurrentUser();
 
     const duls = await PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
-    const dars = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
+    const dars = await PendingCases.findDataRequestPendingCases();
 
     this.setState(prev => {
       prev.currentUser = currentUser;
