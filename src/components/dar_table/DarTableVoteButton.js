@@ -7,6 +7,7 @@ export default function VoteButton(props) {
     key: `vote-button-${election.referenceId}`,
     onClick: () => history.push(`access_review/${darReferenceId}`),
     label: 'Vote',
-    disabled
+    disabled,
+    dataTip: disabled ? 'You do not have permission to vote on this election' : 'Vote on Election'
   });
 }

@@ -26,7 +26,7 @@ class AccessReview extends React.PureComponent {
 
   updateVote = () => {
     this.darReviewAccess();
-  }
+  };
 
   componentDidMount() {
     this.darReviewAccess();
@@ -70,6 +70,7 @@ class AccessReview extends React.PureComponent {
     const finalVotes = filter({ type: 'FINAL', dacUserId: currentUser.dacUserId })(allVotes);
     const agreementVotes = filter({ type: 'AGREEMENT', dacUserId: currentUser.dacUserId })(allVotes);
     const dacChairMessage = "DAC Chairs can optionally vote as a member.";
+    const libraryCards = isNil(researcherProfile) ? [] : researcherProfile.libraryCards;
 
     return div({ isRendered: darInfo != null, id: 'container', style: { margin: 'auto' } },
       [
@@ -88,7 +89,7 @@ class AccessReview extends React.PureComponent {
                 width: '30%',
               }
             },
-            [DacVotePanel({ history, memberVotes, chairVotes, finalVotes, agreementVotes, darId, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote })]
+            [DacVotePanel({ history, memberVotes, chairVotes, finalVotes, agreementVotes, darId, accessElection, rpElection, consent, voteAsChair, selectChair: this.selectChair, updateVote: this.updateVote, libraryCards })]
           ),
           div(
             {

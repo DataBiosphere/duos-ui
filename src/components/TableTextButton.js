@@ -19,22 +19,23 @@ export default function TableTextButton(props) {
     return {opacity, ...baseStyle};
   };
 
-  const setDivAttributes = (disabled, props, style) => {
+  const setDivAttributes = (disabled, props, style, dataTip) => {
     if(!disabled) {
       const {onClick, onMouseEnter = onMouseEnterFn, onMouseLeave = onMouseLeaveFn} = props;
-      return {onClick, onMouseEnter, onMouseLeave, style};
+      return {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip};
     }
-    return {style, disabled};
+    return {style, disabled, "data-tip": dataTip};
   };
 
   const {
     disabled = false,
     hoverStyle = Styles.TABLE.TABLE_BUTTON_TEXT_HOVER,
-    label
+    label,
+    dataTip
   } = props;
   const baseStyle = props.style || Styles.TABLE.TABLE_TEXT_BUTTON;
   const style = setStyle(disabled, baseStyle);
-  const divAttributes = setDivAttributes(disabled, props, style);
+  const divAttributes = setDivAttributes(disabled, props, style, dataTip);
 
   return (
     div(divAttributes, [label])

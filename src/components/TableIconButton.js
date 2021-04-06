@@ -28,7 +28,8 @@ export default function TableIconButton(props) {
     hoverStyle = Styles.TABLE.TABLE_BUTTON_ICON_HOVER, //NOTE: create defaults for icons
     onMouseEnter = onMouseEnterFn,
     onMouseLeave = onMouseLeaveFn,
-    isRendered = true
+    isRendered = true,
+    dataTip
   } = props;
   const Icon = props.icon;
   const classes = useStyles();
@@ -36,7 +37,7 @@ export default function TableIconButton(props) {
   //NOTE: span wrapper is needed for svg child elements due to flaky behavior onMouseEnter and onMouseLeave
   // https://github.com/facebook/react/issues/4492 --> NOTE: though the issue is from the React repo, the bug is tied to browser specs, NOT React
   return (
-    span({style, onMouseEnter, onMouseLeave, onClick}, [
+    span({style, onMouseEnter, onMouseLeave, onClick, "data-tip": dataTip}, [
       h(Icon, {
         isRendered: isRendered && !isNil(Icon),
         className: classes.root

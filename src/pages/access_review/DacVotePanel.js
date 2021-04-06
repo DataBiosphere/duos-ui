@@ -321,7 +321,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   };
 
   render() {
-    const { voteAsChair, selectChair, chairVotes } = this.props;
+    const { voteAsChair, selectChair, chairVotes, libraryCards } = this.props;
     const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData, accessElectionOpen, rpElectionOpen } = this.state;
 
     // If we have an open election, theme the button based on the alert status.
@@ -376,7 +376,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               vote: chairAccessVote,
               rpVote: chairRpVote,
               accessElectionOpen: accessElectionOpen,
-              rpElectionOpen: rpElectionOpen
+              rpElectionOpen: rpElectionOpen,
+              libraryCards: libraryCards
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),

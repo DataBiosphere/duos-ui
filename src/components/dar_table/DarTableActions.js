@@ -8,13 +8,13 @@ import DarTableCancelButton from './DarTableCancelButton';
 
 export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
-  const { election, dar, votes, researcher, dac } = electionInfo;
+  const { election, dar, votes, researcher = {}, dac = {} } = electionInfo;
   const currentUser = Storage.getCurrentUser();
   const currentUserId = useMemo(() => Storage.getCurrentUser.dacUserId, []);
   const currentUserRoles = currentUser.roles;
-  const isChair = !isEmpty(currentUserRoles) && !isEmpty(dac) && !isEmpty(
-    find((role) => role.name === 'Chairperson' && role.dacId === dac.dacId)(currentUser.roles)
-  );
+  const chairVote = find((role) => role.name === 'Chairperson' && role.dacId === dac.dacId)(currentUser.roles);
+  const isChair = !isEmpty(currentUserRoles) && !isEmpty(dac) && !isNil(chairVote);
+  debugger; // eslint-disable-line
   //template type is used to initialize general visibility options for buttons
   //extraOptions is an object that contains boolean values for more granular control. Will be applied after template
   //EXAMPLE: You want to use the chair setup but would like to see researcher buttons.
@@ -114,7 +114,7 @@ export default function DarTableActions(props) {
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
           isRendered: isElectionOpen(election),
-          disabled: isNil(isChair) && consoleType !== 'manageAccess'
+          disabled: !isChair && consoleType !== 'manageAccess'
         }),
         h(DarTableOpenButton, {
           dar,
@@ -122,7 +122,7 @@ export default function DarTableActions(props) {
           openConfirmation,
           label: 'Open',
           isRendered: !isElectionOpen(election),
-          disabled: isNil(isChair) && consoleType !== 'manageAccess'
+          disabled: !isChair && consoleType !== 'manageAccess'
         }),
         createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
       ])

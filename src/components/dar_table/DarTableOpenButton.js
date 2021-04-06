@@ -7,6 +7,7 @@ export default function OpenButton(props) {
     onClick: () => openConfirmation(dar, index),
     key: `${label}-election-dar-${dar.referenceId}`,
     label,
-    disabled
+    disabled,
+    dataTip: disabled ? "You do not have permission to open this election" : "Open Election"
   });
 }
