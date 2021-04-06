@@ -24,7 +24,7 @@ countryNames.splice(0, 0, empty);
 const UsaStates = require('usa-states').UsaStates;
 const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
 stateNames.splice(0, 0, empty);
-const currentUser = Storage.getCurrentUser();
+
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -42,11 +42,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
+    const currentUser = Storage.getCurrentUser();
     await this.getResearcherProfile();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
+      prev.profile.academicEmail = currentUser.email;
+      prev.currentUser = currentUser;
       return prev;
     });
   }
@@ -54,7 +57,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   initialState() {
     return {
       loading: true,
-      isResearcher: currentUser.isResearcher,
+      isResearcher: Storage.getCurrentUser().isResearcher,
       hasLibraryCard: false,
       fieldStatus: {},
       showDialogSubmit: false,
@@ -108,8 +111,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async getResearcherProfile() {
+    const currentUser = Storage.getCurrentUser();
     let rp = {};
-    let profile = await Researcher.getResearcherProfile(currentUser().dacUserId);
+    let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
     const user = await User.getByEmail(currentUser.email);
     if (profile.profileName === undefined) {
       profile.profileName = user.displayName;
@@ -407,7 +411,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   updateResearcher(profile) {
     const profileClone = this.cloneProfile(profile);
-    Researcher.updateProperties(currentUser.dacUserId, true, profileClone).then(()=> {
+    Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone).then(()=> {
       this.saveUser().then(() => {
         this.setState({ showDialogSubmit: false });
         this.props.history.push({ pathname: 'dataset_catalog' });
@@ -448,7 +452,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       let profile = this.state.profile;
       profile.completed = false;
       const profileClone = this.cloneProfile(profile);
-      Researcher.updateProperties(currentUser.dacUserId, false, profileClone);
+      Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
@@ -513,7 +517,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: 'profileAcademicEmail',
                     name: 'academicEmail',
                     type: 'email',
-                    defaultValue: currentUser.email,
                     value: this.state.profile.academicEmail,
                     className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ?
                       'form-control required-field-error' :
