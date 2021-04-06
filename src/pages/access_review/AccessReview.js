@@ -49,12 +49,12 @@ class AccessReview extends React.PureComponent {
       }
     };
 
-    const [darData, allVotes] = await Promise.all([
+    const [darData, allVotes, electionData] = await Promise.all([
       getDarData(darId),
       //Vote information
       Votes.getDarVotes(darId),
+      getElectionInformation(darId)
     ]);
-    const electionData = await getElectionInformation(darData.darInfo.referenceId);
     const {datasets, darInfo, consent, researcherProfile} = darData;
     const {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection} = electionData;
 
