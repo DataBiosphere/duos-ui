@@ -38,7 +38,9 @@ class AccessReview extends React.PureComponent {
     // Access Election Information
     const getElectionInformation = async(darId) => {
       try{
+        // const accessVote = await Votes.getDarVote(darId, voteId);
         const accessElection = await Election.findElectionByDarId(darId);
+        const accessElectionReview = await Election.findDataAccessElectionReview(accessElection.electionId, false);
         const rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
         const rpElection = isNil(rpElectionReview) ? null : rpElectionReview.election;
         return {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection};
@@ -48,12 +50,12 @@ class AccessReview extends React.PureComponent {
       }
     };
 
-    const [electionData, darData, allVotes] = await Promise.all([
-      getElectionInformation(darId),
+    const [darData, allVotes] = await Promise.all([
       getDarData(darId),
       //Vote information
       Votes.getDarVotes(darId),
     ]);
+    const electionData = await getElectionInformation(darData.darInfo.referenceId);
     const {datasets, darInfo, consent, researcherProfile} = darData;
     const {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection} = electionData;
 

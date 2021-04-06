@@ -514,8 +514,8 @@ export const Election = {
 
   findElectionByDarId: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   },
 
   downloadDatasetVotesForDARElection: async (requestId) => {
