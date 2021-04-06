@@ -47,10 +47,7 @@ export default function DarTable(props) {
     //Therefore call ReactTooltip.rebuild on the parent component
     //Use timeout to ensure that the rebuild fires after the child component has rendered
     //clear timeout after callback function fires to avoid side-effects
-    const timeout = setTimeout(() => {
-      ReactTooltip.rebuild();
-      clearTimeout(timeout);
-    }, 500);
+    ReactTooltip.rebuild();
   }, [currentPage, tableSize, filteredList]);
 
   const openModal = useCallback(async(darInfo) => {
