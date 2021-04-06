@@ -80,7 +80,7 @@ export const SigningOfficialConsole = hh(class ChairConsole extends Component {
       }
     );
 
-    PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
+    PendingCases.findDataRequestPendingCases().then(
       dars => {
         this.setState(prev => {
           prev.electionsList.access = dars.access;

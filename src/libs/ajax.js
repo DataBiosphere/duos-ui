@@ -712,8 +712,8 @@ export const Match = {
 
 export const PendingCases = {
 
-  findDataRequestPendingCasesByUser: async (userId) => {
-    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/${userId}`;
+  findDataRequestPendingCases: async () => {
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending`;
     const res = await fetchOk(url, Config.authOpts());
     const dars = await res.json();
     let resp = {
