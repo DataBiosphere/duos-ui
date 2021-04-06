@@ -340,9 +340,8 @@ export const DAR = {
   },
 
   //endpoint to be deprecated
-  getDataAccessManage: async userId => {
-    userId = userId === undefined ? '' : userId;
-    const url = `${await Config.getApiUrl()}/dar/manage/?userId=${userId}`;
+  getDataAccessManage: async() => {
+    const url = `${await Config.getApiUrl()}/dar/manage`;
     const res = await fetchOk(url, Config.authOpts());
     let dars = await res.json();
     dars.map(dar => {
