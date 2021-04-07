@@ -263,7 +263,10 @@ export const processElectionStatus = (election, votes, showVotes) => {
       const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
       output = `Open${showVotes ? outputSuffix : ''}`;
     }
-  } else if (electionStatus === 'Final') {
+  //some elections have electionStatus === Final, others have electionStatus === Closed
+  //both are, in this step of the process, technically referring to a closed election
+  //therefore both values must be checked for
+  } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
     const finalVote = find(wasFinalVoteTrue)(votes);
     output = finalVote ? 'Accepted' : 'Closed';
   } else {
