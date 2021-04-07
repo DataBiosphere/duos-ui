@@ -107,7 +107,7 @@ class ResearcherConsole extends Component {
 
   init(currentUser) {
 
-    DAR.getDataAccessManage(currentUser.dacUserId).then(
+    DAR.getDataAccessManage().then(
       dars => {
         this.setState({
           dars: dars,

@@ -85,7 +85,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
       }
     );
 
-    PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId).then(
+    PendingCases.findDataRequestPendingCases().then(
       dars => {
         this.setState(prev => {
           // Filter vote-able elections. See https://broadinstitute.atlassian.net/browse/DUOS-789
