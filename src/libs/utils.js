@@ -348,8 +348,9 @@ export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter
   let attributes;
   if(!disabled) {
     attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip};
+  } else {
+    attributes = {style, disabled, "data-tip": dataTip};
   }
-  attributes = {style, disabled, "data-tip": dataTip};
   if(!isEmpty(dataTip)) {
     attributes["data-tip"] = dataTip;
   }

@@ -10,7 +10,7 @@ export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
   const { election, dar, votes, researcher = {}, dac = {} } = electionInfo;
   const currentUser = Storage.getCurrentUser();
-  const currentUserId = useMemo(() => Storage.getCurrentUser.dacUserId, []);
+  const currentUserId = currentUser.dacUserId;
   const currentUserRoles = currentUser.roles;
   const chairVote = find((role) => role.name === 'Chairperson' && role.dacId === dac.dacId)(currentUser.roles);
   const isChair = !isEmpty(currentUserRoles) && !isEmpty(dac) && !isNil(chairVote);
