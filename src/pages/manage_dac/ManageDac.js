@@ -137,7 +137,7 @@ class ManageDac extends Component {
   };
 
   handleDeleteDac = async () => {
-    await DAC.delete(this.state.selectedDac.dacId).then((response) => {
+    await DAC.delete(this.state.selectedDac.dacId).then(() => {
       this.setState(prev => {
         prev.showConfirmationModal = false;
         prev.currentPage = 1;
