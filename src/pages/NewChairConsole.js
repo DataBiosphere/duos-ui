@@ -40,7 +40,9 @@ const processElectionStatus = (election, votes) => {
       const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
       output = `Open (${completedVotes} / ${dacVotes.length} votes)`;
     }
-  } else if (electionStatus === 'Final') {
+    //some databases have Closed set as electionStatus, some have Final
+    //they effectively mean the same thing, however string check needs to be done on both
+  } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
     const finalVote = find(wasFinalVoteTrue)(votes);
     output = finalVote ? 'Accepted' : 'Closed';
   } else {
@@ -85,7 +87,7 @@ const Records = (props) => {
   const createActionButtons = (electionInfo, index) => {
     const e = electionInfo.election;
     const dar = electionInfo.dar;
-    const dacId = electionInfo.dac.dacId;
+    const dacId = isNil(electionInfo.dac) ? null: electionInfo.dac.dacId;
     const currentUser = Storage.getCurrentUser();
     const chairDacIds = map((role) => {return role.dacId;})(filter({roleId: 2})(currentUser.roles));
     const currentUserId = currentUser.dacUserId;
@@ -136,7 +138,7 @@ const Records = (props) => {
     return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${dar.data.referenceId}-${index}`}, [
       div({
         style: Object.assign({}, Styles.TABLE.DATA_ID_CELL, dataIDTextStyle),
-        onClick: (e) => openModal(dar),
+        onClick: () => openModal(dar),
         onMouseEnter: applyTextHover,
         onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
       }, [dar && dar.data ? dar.data.darCode : '- -']),
@@ -318,7 +320,7 @@ export default function NewChairConsole(props) {
               paddingLeft: '2%',
               fontFamily: 'Montserrat'
             },
-            onChange:(e) => handleSearchChange(searchTerms.current),
+            onChange:() => handleSearchChange(searchTerms.current),
             ref: searchTerms
           })
         ])
