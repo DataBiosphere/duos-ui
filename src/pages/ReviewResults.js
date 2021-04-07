@@ -23,11 +23,11 @@ export default function ReviewResults(props) {
 
   useEffect(() => {
     const getData = async (darId) => {
-       await Promise.all([
+      await Promise.all([
         setDarData(darId),
         getElectionInformation(darId)
       ]);
-    }
+    };
 
     getData(darId);
 

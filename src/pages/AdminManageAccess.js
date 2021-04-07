@@ -14,7 +14,6 @@ import {cloneDeep, isNil} from "lodash/fp";
 import lockIcon from "../images/lock-icon.png";
 import DarModal from '../components/modals/DarModal';
 
-
 class AdminManageAccess extends Component {
 
   constructor(props) {
