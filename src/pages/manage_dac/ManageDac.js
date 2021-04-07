@@ -9,8 +9,12 @@ import {PaginatorBar} from '../../components/PaginatorBar';
 import {SearchBox} from '../../components/SearchBox';
 import {DAC} from '../../libs/ajax';
 import {Storage} from '../../libs/storage';
-import {contains, filter, reverse, sortBy, map} from 'lodash/fp';
+import {contains, filter, reverse, sortBy, map, isEmpty} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import TableIconButton from "../../components/TableIconButton";
+import {Delete} from "@material-ui/icons";
+import {Notifications} from "../../libs/utils";
 
 const limit = 10;
 const CHAIR = "Chairperson";
@@ -27,6 +31,7 @@ class ManageDac extends Component {
       showDacModal: false,
       showDatasetsModal: false,
       showMembersModal: false,
+      showConfirmationModal: false,
       value: '',
       limit: limit,
       dacs: [],
@@ -112,6 +117,37 @@ class ManageDac extends Component {
       prev.selectedDac = selectedDac;
       return prev;
     });
+  };
+
+  deleteDac = async (selectedDac) => {
+    await DAC.datasets(selectedDac.dacId).then((response) => {
+      isEmpty(response) ?
+        this.setState(prev => {
+          prev.showConfirmationModal = true;
+          prev.isEditMode = false;
+          prev.selectedDac = selectedDac;
+          return prev;
+        })
+        : Notifications.showError({text: "All datasets assigned to this DAC must be reassigned before this can be deleted."});
+    });
+  };
+
+  closeConfirmation = () => {
+    this.setState({ showConfirmationModal: false });
+  };
+
+  handleDeleteDac = async () => {
+    await DAC.delete(this.state.selectedDac.dacId).then((response) => {
+      this.setState(prev => {
+        prev.showConfirmationModal = false;
+        prev.currentPage = 1;
+        return prev;
+      });
+      Notifications.showSuccess({text: "DAC successfully deleted."});
+    }).catch(() => {
+      Notifications.showError({text: "DAC could not be deleted."});
+    });
+    await this.fetchDacList();
   };
 
   addDac = () => {
@@ -294,7 +330,8 @@ class ManageDac extends Component {
                     }, ['View'])
                   ]),
                   div({
-                    className: 'col-2 cell-body f-center'
+                    className: 'col-2 cell-body f-center',
+                    style: {display: 'flex'}
                   }, [
                     button({
                       id: dac.dacId + '_btnViewDAC',
@@ -309,7 +346,13 @@ class ManageDac extends Component {
                       className: 'cell-button hover-color',
                       style: actionButtonStyle,
                       onClick: () => this.editDac(dac)
-                    }, ['Edit'])
+                    }, ['Edit']),
+                    h(TableIconButton, {
+                      style: {paddingTop: '.5rem', color: '#00609f'},
+                      isRendered: userRole === ADMIN,
+                      onClick: () => this.deleteDac(dac),
+                      icon: Delete
+                    })
                   ])
                 ]),
                 hr({className: 'table-body-separator'})
@@ -347,6 +390,14 @@ class ManageDac extends Component {
             onCloseRequest: this.closeAddDacModal,
             dac: this.state.selectedDac,
             userRole: userRole
+          }),
+          h(ConfirmationModal, {
+            showConfirmation: this.state.showConfirmationModal,
+            closeConfirmation: this.closeConfirmation,
+            title: "Delete DAC?",
+            message: "Are you sure you want to delete this Data Access Committee?",
+            header: this.state.selectedDac.name,
+            onConfirm: this.handleDeleteDac,
           })
         ])
       ])
