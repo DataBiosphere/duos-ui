@@ -1,6 +1,5 @@
 import { isEmpty, filter, isNil, find } from 'lodash/fp';
 import { h, div, span, a } from 'react-hyperscript-helpers';
-import { useMemo } from 'react';
 import { Storage } from '../../libs/storage';
 import DarTableVoteButton from './DarTableVoteButton';
 import DarTableOpenButton from './DarTableOpenButton';
