@@ -418,7 +418,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async saveUser() {
     const currentUserUpdate = Storage.getCurrentUser();
-    delete currentUserUpdate.email;
+    //delete currentUserUpdate.email;
     currentUserUpdate.displayName = this.state.profile.profileName;
     currentUserUpdate.additionalEmail = this.state.additionalEmail;
     currentUserUpdate.roles = this.state.roles;
