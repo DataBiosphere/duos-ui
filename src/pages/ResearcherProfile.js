@@ -14,29 +14,11 @@ import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 
-const USA = option({ value: "United States of America"}, ["United States of America"]);
-const empty = option({ value: ""}, [""]);
-const countryNames = getNames().map((name) => option({value: name}, [name]));
-const index = countryNames.indexOf(USA);
-countryNames.splice(index, 1);
-countryNames.splice(0, 0, USA);
-countryNames.splice(0, 0, empty);
-const UsaStates = require('usa-states').UsaStates;
-const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
-stateNames.splice(0, 0, empty);
-
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   constructor(props) {
     super(props);
     this.state = this.initialState();
-
-    this.clearNotRelatedPIFields = this.clearNotRelatedPIFields.bind(this);
-    this.clearCommonsFields = this.clearCommonsFields.bind(this);
-    this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
-    this.saveProfile = this.saveProfile.bind(this);
-    this.submit = this.submit.bind(this);
-    this.saveUser = this.saveUser.bind(this);
   }
 
   async componentDidMount() {
@@ -149,7 +131,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         });
       }
     });
-  }
+  };
 
   handleChange = (event) => {
     let field = event.target.name;
@@ -285,7 +267,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return !inUS;
   }
 
-  submit(event) {
+  submit = (event) => {
     this.setState({ validateFields: true });
     event.preventDefault();
     let errorsShowed = false;
@@ -305,7 +287,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         return prev;
       });
     }
-  }
+  };
 
   handleRadioChange = (e, field, value) => {
 
@@ -328,7 +310,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  clearNotRelatedPIFields() {
+  clearNotRelatedPIFields = () => {
     this.clearCommonsFields();
     this.setState(prev => {
       prev.profile.havePI = '';
@@ -336,35 +318,34 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }, () => {
       this.clearPIData();
     });
+  };
 
-  }
-
-  clearNoHasPIFields() {
+  clearNoHasPIFields = () => {
     this.clearPIData();
     this.clearCommonsFields();
-  }
+  };
 
-  clearCommonsFields() {
+  clearCommonsFields = () => {
     this.setState(prev => {
       prev.profile.eRACommonsID = '';
       prev.profile.pubmedID = '';
       prev.profile.scientificURL = '';
       return prev;
     });
-  }
+  };
 
-  clearPIData() {
+  clearPIData = () => {
     this.setState(prev => {
       prev.profile.piName = '';
       prev.profile.piEmail = '';
       return prev;
     });
-  }
+  };
 
-  saveProfile(event) {
+  saveProfile = (event) => {
     event.preventDefault();
     this.setState({ showDialogSave: true });
-  }
+  };
 
   cleanObject = (obj) => {
     for (let key in obj) {
@@ -375,28 +356,28 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return obj;
   };
 
-  saveProperties(profile) {
+  saveProperties = async (profile) => {
     Researcher.createProperties(profile).then(()=> {
       this.saveUser().then(() => {
         this.setState({ showDialogSubmit: false });
         this.props.history.push({ pathname: 'dataset_catalog' });
       });
     });
-  }
+  };
 
-  dialogHandlerSubmit = (answer) => () => {
+  dialogHandlerSubmit = (answer) => async () => {
     if (answer === true) {
       if (this.state.isResearcher) {
         let profile = this.state.profile;
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          this.saveProperties(profile);
+          await this.saveProperties(profile);
         } else {
-          this.updateResearcher(profile);
+          await this.updateResearcher(profile);
         }
       } else {
-        this.saveUser().then(resp => {
+        await this.saveUser().then(resp => {
           this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
         });
       }
@@ -406,7 +387,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   };
 
-  updateResearcher(profile) {
+  updateResearcher = (profile) => {
     const profileClone = this.cloneProfile(profile);
     Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone).then(()=> {
       this.saveUser().then(() => {
@@ -414,9 +395,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.props.history.push({ pathname: 'dataset_catalog' });
       });
     });
-  }
+  };
 
-  async saveUser() {
+  saveUser = async () => {
     const currentUserUpdate = Storage.getCurrentUser();
     //temporarily, include the email in the payload passed to consent
     //bc this is causing failures on staging without the backend changes that go with it
@@ -429,7 +410,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
     return updatedUser;
-  }
+  };
 
   handleCheckboxChange = (e) => {
     const value = e.target.checked;
@@ -465,7 +446,28 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
   };
 
+  generateCountryNames = () => {
+    const USA = option({ value: "United States of America"}, ["United States of America"]);
+    const empty = option({ value: ""}, [""]);
+    const countryNames = getNames().map((name) => option({value: name}, [name]));
+    const index = countryNames.indexOf(USA);
+    countryNames.splice(index, 1);
+    countryNames.splice(0, 0, USA);
+    countryNames.splice(0, 0, empty);
+    return countryNames;
+  };
+
+  generateStateNames = () => {
+    const empty = option({ value: ""}, [""]);
+    const UsaStates = require('usa-states').UsaStates;
+    const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+    stateNames.splice(0, 0, empty);
+    return stateNames;
+  };
+
   render() {
+    const countryNames = this.generateCountryNames();
+    const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
     const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
