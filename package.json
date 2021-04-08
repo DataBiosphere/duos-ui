@@ -57,7 +57,7 @@
     "@babel/eslint-plugin": "^7.13.10",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/preset-react": "^7.13.13",
-    "cypress": "7.0.0",
+    "cypress": "7.0.1",
     "eslint": "^7.23.0",
     "eslint-plugin-flowtype": "5.6.0",
     "eslint-plugin-react": "7.23.1",
