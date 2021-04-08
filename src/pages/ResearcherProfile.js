@@ -418,7 +418,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   async saveUser() {
     const currentUserUpdate = Storage.getCurrentUser();
-    delete currentUserUpdate.email;
+    //temporarily, include the email in the payload passed to consent
+    //bc this is causing failures on staging without the backend changes that go with it
+    // this change will be reverted in DUOS-1167 once the next monolith release occurs
+    //delete currentUserUpdate.email;
     currentUserUpdate.displayName = this.state.profile.profileName;
     currentUserUpdate.additionalEmail = this.state.additionalEmail;
     currentUserUpdate.roles = this.state.roles;
