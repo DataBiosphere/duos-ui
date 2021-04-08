@@ -1,4 +1,4 @@
-import _, { isNil, isEmpty } from 'lodash';
+import {omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
 import { Component } from 'react';
 import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -106,20 +106,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
-      if (_.isEmpty(currentUser.roles)) {
+      if (isEmpty(currentUser.roles)) {
         prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
       } else {
         prev.roles = currentUser.roles;
       }
       prev.researcherProfile = profile;
-      let key;
-      for (key in profile) {
-        if (key === 'checkNotifications') {
-          prev.profile[key] = profile[key] === 'true';
-        } else {
-          prev.profile[key] = profile[key];
-        }
-
+      prev.profile = profile;
+      // This ensures that we have a boolean for `checkNotifications`
+      if (!isNil(get(null, 'checkNotifications', profile))) {
+        prev.profile.checkNotifications = get(false, 'checkNotifications', profile) === 'true';
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
       return prev;
@@ -348,12 +344,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   cleanObject = (obj) => {
-    for (let key in obj) {
-      if (obj[key] === '') {
-        delete obj[key];
-      }
-    }
-    return obj;
+    // Removes any zero length properties from a copy of the object
+    return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
   };
 
   saveProperties = async (profile) => {
@@ -441,7 +433,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   // When posting a user's researcher properties, library cards and entries are
   // not valid properties for update.
   cloneProfile = (profile) => {
-    return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
   };
 
   generateCountryNames = () => {
