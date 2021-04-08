@@ -357,12 +357,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   saveProperties = async (profile) => {
-    Researcher.createProperties(profile).then(()=> {
-      this.saveUser().then(() => {
-        this.setState({ showDialogSubmit: false });
-        this.props.history.push({ pathname: 'dataset_catalog' });
-      });
-    });
+    await Researcher.createProperties(profile);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
   };
 
   dialogHandlerSubmit = (answer) => async () => {
@@ -387,7 +385,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   };
 
-  updateResearcher = (profile) => {
+  updateResearcher = async (profile) => {
     const profileClone = this.cloneProfile(profile);
     Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone).then(()=> {
       this.saveUser().then(() => {
