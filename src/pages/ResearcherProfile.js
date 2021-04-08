@@ -562,7 +562,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     eRACommons({
                       className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
-                      onNihStatusUpdate: (nihValid) => {},
+                      onNihStatusUpdate: () => {},
                       location: this.props.location
                     }),
                     div({ className: '' }, [
@@ -936,7 +936,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: 'col-lg-8 col-md-6 col-sm-6 col-xs-6' }, [
                   button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
-                    span({ isRendered: ((!completed || completed === undefined)) && this.state.isResearcher }, ['Submit']),
+                    span({ isRendered: (!completed || false) && this.state.isResearcher }, ['Submit']),
                     span({ isRendered: (completed === true || !this.state.isResearcher) }, ['Update'])
                   ]),
                   ConfirmationDialog({
