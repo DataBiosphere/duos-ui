@@ -366,9 +366,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
           await this.updateResearcher(profile);
         }
       } else {
-        await this.saveUser().then(resp => {
-          this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
-        });
+        const savedUser = await this.saveUser();
+        this.setState({ isResearcher: savedUser.isResearcher, showDialogSubmit: false });
       }
 
     } else {
