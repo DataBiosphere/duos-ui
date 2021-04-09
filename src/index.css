@@ -713,6 +713,124 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
   box-shadow: none;
 }
 
+@-webkit-keyframes tableRowPulse {
+  0% {
+    background-color: aliceblue;
+  }
+  50% {
+    background-color: white
+  }
+  100% {
+    background-color: aliceblue;
+  }
+}
+
+@-moz-keyframes tableRowPulse {
+  0% {
+    background-color: aliceblue;
+  }
+  50% {
+    background-color: white
+  }
+  100% {
+    background-color: aliceblue;
+  }
+}
+
+@-o-keyframes tableRowPulse {
+  0% {
+    background-color: aliceblue;
+  }
+  50% {
+    background-color: white
+  }
+  100% {
+    background-color: aliceblue;
+  }
+}
+
+@keyframes tableRowPulse {
+  0% {
+    background-color: aliceblue;
+  }
+  50% {
+    background-color: white
+  }
+  100% {
+    background-color: aliceblue;
+  }
+}
+
+@-webkit-keyframes tableHeaderFooterPulse {
+  0% {
+    background-color: rgb(205, 216, 220);
+  }
+
+  50% {
+    background-color: rgb(243, 246, 247);
+  }
+
+  100% {
+    background-color: rgb(205, 216, 220);
+  }
+}
+
+@-moz-keyframes tableHeaderFooterPulse {
+  0% {
+    background-color: rgb(205, 216, 220);
+  }
+
+  50% {
+    background-color: rgb(243, 246, 247);
+  }
+
+  100% {
+    background-color: rgb(205, 216, 220);
+  }
+}
+
+@-o-keyframes tableHeaderFooterPulse {
+  0% {
+    background-color: rgb(205, 216, 220);
+  }
+
+  50% {
+    background-color: rgb(243, 246, 247);
+  }
+
+  100% {
+    background-color: rgb(205, 216, 220);
+  }
+}
+
+@keyframes tableHeaderFooterPulse {
+  0% {
+    background-color: rgb(205, 216, 220);
+  }
+
+  50% {
+    background-color: rgb(243, 246, 247);
+  }
+
+  100% {
+    background-color: rgb(205, 216, 220);
+  }
+}
+
+.table-row-loader {
+  -webkit-animation: tableRowPulse 5s infinite;
+  -moz-animation: tableRowPulse 5s infinite;
+  -o-animation: tableRowPulse 5s infinite;
+  animation: tableRowPulse 5s infinite;
+}
+
+.table-header-footer-loader {
+  -webkit-animation: tableHeaderFooterPulse 5s infinite;
+  -moz-animation: tableHeaderFooterPulse 5s infinite;
+  -o-animation: tableHeaderFooterPulse 5s infinite;
+  animation: tableHeaderFooterPulse 5s infinite;
+}
+
 /***************************************************Buttons, Radios & Checkboxes*/
 
 .radio-inline {

@@ -5,6 +5,7 @@ import SearchBar from '../components/SearchBar';
 import { Notifications, getElectionDate, processElectionStatus, darSearchHandler } from '../libs/utils';
 import { Styles} from '../libs/theme';
 import DarTable from '../components/dar_table/DarTable';
+import DarTableSkeletonLoader from '../components/dar_table/DarTableSkeletonLoader';
 import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 
@@ -13,6 +14,7 @@ export default function NewChairConsole(props) {
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const init = async() => {
@@ -20,8 +22,10 @@ export default function NewChairConsole(props) {
         const pendingList = await DAR.getDataAccessManageV2();
         setElectionList(pendingList);
         setFilteredList(pendingList);
+        setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
+        setIsLoading(false);
       }
     };
     init();
@@ -57,7 +61,8 @@ export default function NewChairConsole(props) {
         ]),
         h(SearchBar, {handleSearchChange})
       ]),
-      h(DarTable, {getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate, consoleType: 'chair', currentPage, setCurrentPage, tableSize, setTableSize})
+      h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate, consoleType: 'chair', currentPage, setCurrentPage, tableSize, setTableSize}),
+      h(DarTableSkeletonLoader, {isRendered: isLoading})
     ])
   );
 }

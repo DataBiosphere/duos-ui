@@ -155,7 +155,7 @@ export default function DarTable(props) {
     h(ReactTooltip, {
       place: 'left',
       effect: 'solid',
-      multiline: 'true',
+      multiline: true,
       className: 'tooltip-wrapper'
     })
   ]);
