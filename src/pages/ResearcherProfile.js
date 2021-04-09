@@ -1,4 +1,4 @@
-import _, { isNil, isEmpty } from 'lodash';
+import {omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
 import { Component } from 'react';
 import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -10,33 +10,14 @@ import { Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
-
-const USA = option({ value: "United States of America"}, ["United States of America"]);
-const empty = option({ value: ""}, [""]);
-const countryNames = getNames().map((name) => option({value: name}, [name]));
-const index = countryNames.indexOf(USA);
-countryNames.splice(index, 1);
-countryNames.splice(0, 0, USA);
-countryNames.splice(0, 0, empty);
-const UsaStates = require('usa-states').UsaStates;
-const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
-stateNames.splice(0, 0, empty);
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   constructor(props) {
     super(props);
     this.state = this.initialState();
-
-    this.clearNotRelatedPIFields = this.clearNotRelatedPIFields.bind(this);
-    this.clearCommonsFields = this.clearCommonsFields.bind(this);
-    this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
-    this.saveProfile = this.saveProfile.bind(this);
-    this.submit = this.submit.bind(this);
-    this.saveUser = this.saveUser.bind(this);
   }
 
   async componentDidMount() {
@@ -124,20 +105,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
-      if (_.isEmpty(currentUser.roles)) {
+      if (isEmpty(currentUser.roles)) {
         prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
       } else {
         prev.roles = currentUser.roles;
       }
       prev.researcherProfile = profile;
-      let key;
-      for (key in profile) {
-        if (key === 'checkNotifications') {
-          prev.profile[key] = profile[key] === 'true';
-        } else {
-          prev.profile[key] = profile[key];
-        }
-
+      prev.profile = profile;
+      // This ensures that we have a boolean for `checkNotifications`
+      if (!isNil(get(profile, 'checkNotifications', null))) {
+        prev.profile.checkNotifications = get(profile, 'checkNotifications', 'false') === 'true';
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
       return prev;
@@ -149,7 +126,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         });
       }
     });
-  }
+  };
 
   handleChange = (event) => {
     let field = event.target.name;
@@ -285,7 +262,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return !inUS;
   }
 
-  submit(event) {
+  submit = (event) => {
     this.setState({ validateFields: true });
     event.preventDefault();
     let errorsShowed = false;
@@ -305,7 +282,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         return prev;
       });
     }
-  }
+  };
 
   handleRadioChange = (e, field, value) => {
 
@@ -328,7 +305,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  clearNotRelatedPIFields() {
+  clearNotRelatedPIFields = () => {
     this.clearCommonsFields();
     this.setState(prev => {
       prev.profile.havePI = '';
@@ -336,69 +313,61 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }, () => {
       this.clearPIData();
     });
+  };
 
-  }
-
-  clearNoHasPIFields() {
+  clearNoHasPIFields = () => {
     this.clearPIData();
     this.clearCommonsFields();
-  }
+  };
 
-  clearCommonsFields() {
+  clearCommonsFields = () => {
     this.setState(prev => {
       prev.profile.eRACommonsID = '';
       prev.profile.pubmedID = '';
       prev.profile.scientificURL = '';
       return prev;
     });
-  }
+  };
 
-  clearPIData() {
+  clearPIData = () => {
     this.setState(prev => {
       prev.profile.piName = '';
       prev.profile.piEmail = '';
       return prev;
     });
-  }
-
-  saveProfile(event) {
-    event.preventDefault();
-    this.setState({ showDialogSave: true });
-  }
-
-  cleanObject = (obj) => {
-    for (let key in obj) {
-      if (obj[key] === '') {
-        delete obj[key];
-      }
-    }
-    return obj;
   };
 
-  saveProperties(profile) {
-    Researcher.createProperties(profile).then(()=> {
-      this.saveUser().then(() => {
-        this.setState({ showDialogSubmit: false });
-        this.props.history.push({ pathname: 'dataset_catalog' });
-      });
-    });
-  }
+  saveProfile = (event) => {
+    event.preventDefault();
+    this.setState({ showDialogSave: true });
+  };
 
-  dialogHandlerSubmit = (answer) => () => {
+  cleanObject = (obj) => {
+    // Removes any zero length properties from a copy of the object
+    return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
+  };
+
+  saveProperties = async (profile) => {
+    await Researcher.createProperties(profile);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
+  };
+
+  dialogHandlerSubmit = (answer) => async () => {
     if (answer === true) {
       if (this.state.isResearcher) {
         let profile = this.state.profile;
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          this.saveProperties(profile);
+          await this.saveProperties(profile);
         } else {
-          this.updateResearcher(profile);
+          await this.updateResearcher(profile);
         }
       } else {
-        this.saveUser().then(resp => {
-          this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
-        });
+        const savedUser = await this.saveUser();
+        this.setState({ isResearcher: savedUser.isResearcher, showDialogSubmit: false });
       }
 
     } else {
@@ -406,17 +375,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   };
 
-  updateResearcher(profile) {
+  updateResearcher = async (profile) => {
     const profileClone = this.cloneProfile(profile);
-    Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone).then(()=> {
-      this.saveUser().then(() => {
-        this.setState({ showDialogSubmit: false });
-        this.props.history.push({ pathname: 'dataset_catalog' });
-      });
-    });
-  }
+    await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
+  };
 
-  async saveUser() {
+  saveUser = async () => {
     const currentUserUpdate = Storage.getCurrentUser();
     //temporarily, include the email in the payload passed to consent
     //bc this is causing failures on staging without the backend changes that go with it
@@ -429,7 +396,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
     return updatedUser;
-  }
+  };
 
   handleCheckboxChange = (e) => {
     const value = e.target.checked;
@@ -447,12 +414,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  dialogHandlerSave = (answer) => () => {
+  dialogHandlerSave = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
       const profileClone = this.cloneProfile(profile);
-      Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
+      await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
@@ -462,13 +429,34 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   // When posting a user's researcher properties, library cards and entries are
   // not valid properties for update.
   cloneProfile = (profile) => {
-    return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+  };
+
+  generateCountryNames = () => {
+    const USA = option({ value: "United States of America"}, ["United States of America"]);
+    const empty = option({ value: ""}, [""]);
+    const countryNames = getNames().map((name) => option({value: name}, [name]));
+    const index = countryNames.indexOf(USA);
+    countryNames.splice(index, 1);
+    countryNames.splice(0, 0, USA);
+    countryNames.splice(0, 0, empty);
+    return countryNames;
+  };
+
+  generateStateNames = () => {
+    const empty = option({ value: ""}, [""]);
+    const UsaStates = require('usa-states').UsaStates;
+    const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+    stateNames.splice(0, 0, empty);
+    return stateNames;
   };
 
   render() {
+    const countryNames = this.generateCountryNames();
+    const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
-    const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
+    const libraryCards = get(researcherProfile, 'libraryCards', []);
 
     return (
 
@@ -570,14 +558,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     eRACommons({
                       className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
-                      onNihStatusUpdate: (nihValid) => {},
+                      onNihStatusUpdate: () => {},
                       location: this.props.location
                     }),
                     div({ className: '' }, [
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
                       LibraryCards({
                         style: { display: 'flex', flexFlow: 'row wrap' },
-                        isRendered: !ld.isNil(researcherProfile),
+                        isRendered: !isNil(researcherProfile),
                         libraryCards: libraryCards
                       })
                     ])
@@ -944,7 +932,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: 'col-lg-8 col-md-6 col-sm-6 col-xs-6' }, [
                   button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
-                    span({ isRendered: ((!completed || completed === undefined)) && this.state.isResearcher }, ['Submit']),
+                    span({ isRendered: (!completed || false) && this.state.isResearcher }, ['Submit']),
                     span({ isRendered: (completed === true || !this.state.isResearcher) }, ['Update'])
                   ]),
                   ConfirmationDialog({
