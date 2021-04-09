@@ -10,7 +10,6 @@ import { Researcher, User } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 
@@ -460,7 +459,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
-    const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
+    const libraryCards = get(researcherProfile, 'libraryCards', []);
 
     return (
 
@@ -569,7 +568,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
                       LibraryCards({
                         style: { display: 'flex', flexFlow: 'row wrap' },
-                        isRendered: !ld.isNil(researcherProfile),
+                        isRendered: !isNil(researcherProfile),
                         libraryCards: libraryCards
                       })
                     ])
