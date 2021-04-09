@@ -113,8 +113,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.researcherProfile = profile;
       prev.profile = profile;
       // This ensures that we have a boolean for `checkNotifications`
-      if (!isNil(get(null, 'checkNotifications', profile))) {
-        prev.profile.checkNotifications = get(false, 'checkNotifications', profile) === 'true';
+      if (!isNil(get(profile, 'checkNotifications', null))) {
+        prev.profile.checkNotifications = get(profile, 'checkNotifications', 'false') === 'true';
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
       return prev;
