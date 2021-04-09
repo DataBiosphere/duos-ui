@@ -142,7 +142,7 @@ export const Styles = {
       fontSize: "14px",
       display: "flex",
       justifyContent: "left",
-      height: "48px",
+      padding: "0.8rem 0"
     },
     RECORD_TEXT: {
       color: "#00243C"
