@@ -378,12 +378,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   updateResearcher = async (profile) => {
     const profileClone = this.cloneProfile(profile);
-    Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone).then(()=> {
-      this.saveUser().then(() => {
-        this.setState({ showDialogSubmit: false });
-        this.props.history.push({ pathname: 'dataset_catalog' });
-      });
-    });
+    await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
   };
 
   saveUser = async () => {
