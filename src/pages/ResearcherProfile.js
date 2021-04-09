@@ -415,12 +415,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  dialogHandlerSave = (answer) => () => {
+  dialogHandlerSave = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
       const profileClone = this.cloneProfile(profile);
-      Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
+      await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
