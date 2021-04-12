@@ -1,6 +1,6 @@
 import {omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
 import { Component } from 'react';
-import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
@@ -12,6 +12,7 @@ import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
+import ReactTooltip from "react-tooltip";
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -50,7 +51,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         address2: '',
         city: '',
         completed: undefined,
-        country: undefined,
+        country: '',
         department: '',
         division: '',
         eRACommonsID: '',
@@ -140,6 +141,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.researcherFieldsValidation();
       }
     });
+    //clear out state field if the user selects
+    //another country or clears out the country field
+    if (field === "country") {
+      if (value !== "United States of America") {
+        this.setState(prev => {
+          prev.profile.state = "";
+          return prev;
+        }, () => {
+          if (this.state.validateFields) {
+            this.researcherFieldsValidation();
+          }
+        });
+      }
+    }
   };
 
   researcherFieldsValidation() {
@@ -254,8 +269,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   isValidState(value) {
-    const stateSelected = (!isNil(value) || !isEmpty(value)) && (value !== "N/A");
-    const inUS = (this.state.profile.country === "United States of America");
+    const stateSelected = (!isNil(value) || !isEmpty(value));
+    const inUS = (this.state.profile.country === "United States of America" || this.state.profile.country === "");
     if (inUS && stateSelected) {
       return true;
     }
@@ -723,7 +738,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     ]),
 
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State*']),
+                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State*',
+                        span({
+                          isRendered: !(this.state.profile.country == "" || this.state.profile.country == "United States of America"),
+                          className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                          "data-tip": "State cannot be selected if a non-US Country is selected.",
+                          'data-for': 'tip_profilestate',
+                        })
+                      ]),
                       select({
                         id: 'profileState',
                         name: 'state',
@@ -731,7 +753,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         value: this.state.profile.state,
                         className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true,
-                        disabled: (this.state.profile.country !== "United States of America")
+                        disabled: (this.state.profile.country !== "" && this.state.profile.country !== "United States of America")
                       }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
@@ -957,6 +979,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
                   ]
                   ),
+                  h(ReactTooltip, {
+                    id: "tip_profilestate",
+                    place: 'left',
+                    effect: 'solid',
+                    multiline: true,
+                    className: 'tooltip-wrapper'
+                  }),
+                  h(ReactTooltip, {
+                    id: "tip_isthePI",
+                    place: 'left',
+                    effect: 'solid',
+                    multiline: true,
+                    className: 'tooltip-wrapper'
+                  })
                 ])
               ])
             ])
