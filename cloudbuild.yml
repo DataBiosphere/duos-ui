@@ -10,7 +10,7 @@ steps:
         '${_REGISTRY_HOST}/$PROJECT_ID/$REPO_NAME/${_IMAGE}:${BRANCH_NAME}',
         '.'
     ]
-    timeout: 500s
+    timeout: 800s
 images:
   - '${_REGISTRY_HOST}/$PROJECT_ID/$REPO_NAME/${_IMAGE}:${BRANCH_NAME}-${COMMIT_SHA}'
   - '${_REGISTRY_HOST}/$PROJECT_ID/$REPO_NAME/${_IMAGE}:${BRANCH_NAME}-${SHORT_SHA}'
