@@ -1,7 +1,7 @@
 import { div } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 
-export default function DarTableSkeletonLoader(props) {
+export default function TableSkeletonLoader(props) {
 
   const { tableHeaderTemplate, tableRowLoadingTemplate } = props;
 
