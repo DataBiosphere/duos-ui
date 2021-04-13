@@ -172,7 +172,7 @@ export const Styles = {
       margin: "0 2%",
       display: "flex",
       justifyContent: "left",
-      alignItems: "center",
+      alignItems: "center"
     },
     SUBMISSION_DATE_CELL: {
       width: "10%",
