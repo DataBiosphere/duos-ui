@@ -18,7 +18,7 @@ export const applyHoverEffects = (e, style) => {
 export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
   let id = datasetId[0].toString();
   let data = find({"value" : id})(datasets);
-  return isNil(data) ? "--" : getDatasetNames([data]);
+  return isNil(data) ? '- -' : getDatasetNames([data]);
 };
 
 export const formatDate = (dateval) => {
