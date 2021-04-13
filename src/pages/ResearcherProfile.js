@@ -721,7 +721,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileCity', className: 'control-label' }, ['City* ']),
+                      label({ id: 'lbl_profileCity', className: 'control-label' }, ['City*']),
                       input({
                         id: 'profileCity',
                         name: 'city',
