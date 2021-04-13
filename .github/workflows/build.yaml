@@ -47,12 +47,12 @@ jobs:
           -e "VAULT_TOKEN=${{ steps.vault-token-get.outputs.vault-token }}" \
           -e "VAULT_ADDR=${VAULT_ADDR}" \
           vault:1.1.0 \
-          vault read -field=base64_encoded_json ${VAULT_PATH_GCR} | base64 -d | jq -r '.client_email' | base64)
+          vault read -field=base64_encoded_json ${VAULT_PATH_GCR} | base64 -d | jq -r '.client_email')
         GCR_KEY=$(docker run --rm --cap-add IPC_LOCK \
           -e "VAULT_TOKEN=${{ steps.vault-token-get.outputs.vault-token }}" \
           -e "VAULT_ADDR=${VAULT_ADDR}" \
           vault:1.1.0 \
-          vault read -field=base64_encoded_json ${VAULT_PATH_GCR} | base64 -d | jq -r '.private_key' | base64)
+          vault read -field=base64_encoded_json ${VAULT_PATH_GCR})
         echo ::set-output name=gcr-email::$GCR_EMAIL
         echo ::add-mask::$GCR_EMAIL
         echo ::set-output name=gcr-key::$GCR_KEY
