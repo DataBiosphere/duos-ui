@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from 'lodash/fp';
+import { isEmpty, isNil, assign } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { Election, User, Votes } from '../../libs/ajax';
@@ -10,6 +10,29 @@ import PaginationBar from '../PaginationBar';
 import ConfirmationModal from "../modals/ConfirmationModal";
 import DarElectionRecords from './DarElectionRecords';
 import ReactTooltip from 'react-tooltip';
+
+////////////////////
+//EXPORTED PARTIAL//
+////////////////////
+export const tableHeaderTemplate = [
+  div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
+  div({style: Styles.TABLE.TITLE_CELL}, ["Project title"]),
+  div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Last Updated"]),
+  div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
+  div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
+  div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
+];
+const loadingMarginOverwrite = {margin: '1rem 2%'};
+
+export const tableRowLoadingTemplate = [
+  div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.TITLE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.DAC_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.ELECTION_STATUS_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.ELECTION_ACTIONS_CELL, loadingMarginOverwrite), className: 'text-placeholder'})
+];
+
 
 ////////////////////
 //HELPER FUNCTIONS//
@@ -114,14 +137,7 @@ export default function DarTable(props) {
 
   return div({className: 'dar-table-component'}, [
     div({style: Styles.TABLE.CONTAINER}, [
-      div({style: Styles.TABLE.HEADER_ROW}, [
-        div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
-        div({style: Styles.TABLE.TITLE_CELL}, ["Project title"]),
-        div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Last Updated"]),
-        div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
-        div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
-        div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
-      ]),
+      div({style: Styles.TABLE.HEADER_ROW}, [tableHeaderTemplate]),
       h(DarElectionRecords, {
         isRendered: !isEmpty(filteredList),
         filteredList,
@@ -155,7 +171,7 @@ export default function DarTable(props) {
     h(ReactTooltip, {
       place: 'left',
       effect: 'solid',
-      multiline: 'true',
+      multiline: true,
       className: 'tooltip-wrapper'
     })
   ]);
