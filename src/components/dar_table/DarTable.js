@@ -127,14 +127,7 @@ export default function DarTable(props) {
 
   return div({className: 'dar-table-component'}, [
     div({style: Styles.TABLE.CONTAINER}, [
-      div({style: Styles.TABLE.HEADER_ROW}, [
-        div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
-        div({style: Styles.TABLE.TITLE_CELL}, ["Project title"]),
-        div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Last Updated"]),
-        div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
-        div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election status"]),
-        div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election actions"])
-      ]),
+      div({style: Styles.TABLE.HEADER_ROW}, [tableHeaderTemplate]),
       h(DarElectionRecords, {
         isRendered: !isEmpty(filteredList),
         filteredList,
