@@ -68,7 +68,7 @@ jobs:
     - name: Construct tags
       id: construct-tags
       run: |
-        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.sha }}"
+        SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.outputs.sha }}"
         ENVIRONMENT_TAG=""
         if ${{ github.event_name == 'pull_request'}}; then
           ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ github.event.pull_request.head.ref }}"
@@ -80,13 +80,13 @@ jobs:
     - name: Build Image
       run: |
         docker build \
-        -t ${{ steps.construct-tags.sha-tag }} \
-        -t ${{ steps.construct-tags.environment-tag }} \
+        -t ${{ steps.construct-tags.outputs.sha-tag }} \
+        -t ${{ steps.construct-tags.outputs.environment-tag }} \
         .
     - name: Push Image to GCR
       run: |
-        docker push ${{ steps.construct-tags.sha-tag }}
-        docker push ${{ steps.construct-tags.environment-tag }}
+        docker push ${{ steps.construct-tags.outputs.sha-tag }}
+        docker push ${{ steps.construct-tags.outputs.environment-tag }}
     - name: Dispatch to terra-helmfile
       if: github.event_name == 'push'
       uses: broadinstitute/repository-dispatch@master
@@ -94,7 +94,7 @@ jobs:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: broadinstitute/terra-helmfile
         event-type: update-service
-        client-payload: '{"service": "duos", "version": "${{ steps.short-sha.sha }}", "dev_only": false}'
+        client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
         
 
         
