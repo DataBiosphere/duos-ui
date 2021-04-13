@@ -721,7 +721,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileCity', className: 'control-label' }, ['City*']),
+                      label({ id: 'lbl_profileCity', className: 'control-label' }, ['City* ']),
                       input({
                         id: 'profileCity',
                         name: 'city',
@@ -738,12 +738,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     ]),
 
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State*',
+                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State* ',
                         span({
-                          isRendered: !(this.state.profile.country == "" || this.state.profile.country == "United States of America"),
                           className: 'glyphicon glyphicon-question-sign tooltip-icon',
                           "data-tip": "State cannot be selected if a non-US Country is selected.",
-                          'data-for': 'tip_profilestate',
+                          'data-for': 'tip_profileState',
                         })
                       ]),
                       select({
@@ -815,7 +814,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     span({
                       className: 'glyphicon glyphicon-question-sign tooltip-icon',
                       'data-tip': 'This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.',
-                      'data-for': 'tip_isthePI'
+                      'data-for': 'tip_isThePI'
                     })
                   ])
                 ]),
@@ -977,17 +976,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, [
                     div({ className: 'dialog-description' },
                       ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
-                  ]
-                  ),
+                  ]),
                   h(ReactTooltip, {
-                    id: "tip_profilestate",
+                    id: "tip_profileState",
                     place: 'left',
                     effect: 'solid',
                     multiline: true,
                     className: 'tooltip-wrapper'
                   }),
                   h(ReactTooltip, {
-                    id: "tip_isthePI",
+                    id: "tip_isThePI",
                     place: 'left',
                     effect: 'solid',
                     multiline: true,
