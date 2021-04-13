@@ -7,7 +7,7 @@ import { Styles} from '../libs/theme';
 import DarTable from '../components/dar_table/DarTable';
 import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
-import { tableHeaderTemplate } from '../components/dar_table/DarTable';
+import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
 
 export default function NewAdminManageAccess(props) {
@@ -71,7 +71,7 @@ export default function NewAdminManageAccess(props) {
         setTableSize,
         isRendered: !isLoading
       }),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate})
+      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
     ])
   );
 }

@@ -713,122 +713,45 @@ a[disabled], .cell-button[disabled], [disabled] .cell-button, [disabled] button,
   box-shadow: none;
 }
 
-@-webkit-keyframes tableRowPulse {
+@keyframes shine {
   0% {
-    background-color: aliceblue;
+    background-position: -100px;
   }
-  50% {
-    background-color: white
-  }
-  100% {
-    background-color: aliceblue;
+  40%, 100% {
+    background-position: 200px;
   }
 }
 
-@-moz-keyframes tableRowPulse {
+@-webkit-keyframes shine {
   0% {
-    background-color: aliceblue;
+    background-position: -100px;
   }
-  50% {
-    background-color: white
-  }
-  100% {
-    background-color: aliceblue;
+  40%, 100% {
+    background-position: 400px;
   }
 }
 
-@-o-keyframes tableRowPulse {
+@-moz-keyframes shine {
   0% {
-    background-color: aliceblue;
+    background-position: -100px;
   }
-  50% {
-    background-color: white
-  }
-  100% {
-    background-color: aliceblue;
+  40%, 100% {
+    background-position: 200px;
   }
 }
 
-@keyframes tableRowPulse {
+@-o-keyframes shine {
   0% {
-    background-color: aliceblue;
+    background-position: -100px;
   }
-  50% {
-    background-color: white
-  }
-  100% {
-    background-color: aliceblue;
+  40%, 100% {
+    background-position: 200px;
   }
 }
 
-@-webkit-keyframes tableHeaderFooterPulse {
-  0% {
-    background-color: rgb(205, 216, 220);
-  }
-
-  50% {
-    background-color: rgb(243, 246, 247);
-  }
-
-  100% {
-    background-color: rgb(205, 216, 220);
-  }
-}
-
-@-moz-keyframes tableHeaderFooterPulse {
-  0% {
-    background-color: rgb(205, 216, 220);
-  }
-
-  50% {
-    background-color: rgb(243, 246, 247);
-  }
-
-  100% {
-    background-color: rgb(205, 216, 220);
-  }
-}
-
-@-o-keyframes tableHeaderFooterPulse {
-  0% {
-    background-color: rgb(205, 216, 220);
-  }
-
-  50% {
-    background-color: rgb(243, 246, 247);
-  }
-
-  100% {
-    background-color: rgb(205, 216, 220);
-  }
-}
-
-@keyframes tableHeaderFooterPulse {
-  0% {
-    background-color: rgb(205, 216, 220);
-  }
-
-  50% {
-    background-color: rgb(243, 246, 247);
-  }
-
-  100% {
-    background-color: rgb(205, 216, 220);
-  }
-}
-
-.table-row-loader {
-  -webkit-animation: tableRowPulse 5s infinite;
-  -moz-animation: tableRowPulse 5s infinite;
-  -o-animation: tableRowPulse 5s infinite;
-  animation: tableRowPulse 5s infinite;
-}
-
-.table-header-footer-loader {
-  -webkit-animation: tableHeaderFooterPulse 5s infinite;
-  -moz-animation: tableHeaderFooterPulse 5s infinite;
-  -o-animation: tableHeaderFooterPulse 5s infinite;
-  animation: tableHeaderFooterPulse 5s infinite;
+.text-placeholder {
+  background-image: linear-gradient(90deg, #ddd 0px, #e8e8e8 40px, #ddd 80px);
+  animation: shine 3s infinite linear;
 }
 
 /***************************************************Buttons, Radios & Checkboxes*/

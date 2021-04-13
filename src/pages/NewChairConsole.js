@@ -8,7 +8,7 @@ import DarTable from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
 import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
-import { tableHeaderTemplate } from '../components/dar_table/DarTable';
+import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 
 export default function NewChairConsole(props) {
   const [electionList, setElectionList] = useState([]);
@@ -20,6 +20,7 @@ export default function NewChairConsole(props) {
   useEffect(() => {
     const init = async() => {
       try {
+        setIsLoading(true);
         const pendingList = await DAR.getDataAccessManageV2();
         setElectionList(pendingList);
         setFilteredList(pendingList);
@@ -63,7 +64,7 @@ export default function NewChairConsole(props) {
         h(SearchBar, {handleSearchChange})
       ]),
       h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate, consoleType: 'chair', currentPage, setCurrentPage, tableSize, setTableSize}),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate})
+      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
     ])
   );
 }
