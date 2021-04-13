@@ -95,4 +95,3 @@ jobs:
         repository: broadinstitute/terra-helmfile
         event-type: update-service
         client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
-        
