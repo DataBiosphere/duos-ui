@@ -13,6 +13,14 @@ export const applyHoverEffects = (e, style) => {
   });
 };
 
+//currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
+//go through the list of datasets and get the name of the dataset whose id is in the datasetId list
+export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
+  let id = datasetId[0].toString();
+  let data = find({"value" : id})(datasets);
+  return isNil(data) ? "--" : getDatasetNames([data]);
+};
+
 export const formatDate = (dateval) => {
   if (dateval === null || dateval === undefined) {
     return '---';
