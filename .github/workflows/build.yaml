@@ -43,16 +43,12 @@ jobs:
     - name: Get Vault Secrets
       id: vault-secret-get
       run: |
-        GCR_EMAIL=$(docker run --rm --cap-add IPC_LOCK \
-          -e "VAULT_TOKEN=${{ steps.vault-token-get.outputs.vault-token }}" \
-          -e "VAULT_ADDR=${VAULT_ADDR}" \
-          vault:1.1.0 \
-          vault read -field=base64_encoded_json ${VAULT_PATH_GCR} | base64 -d | jq -r '.client_email')
         GCR_KEY=$(docker run --rm --cap-add IPC_LOCK \
           -e "VAULT_TOKEN=${{ steps.vault-token-get.outputs.vault-token }}" \
           -e "VAULT_ADDR=${VAULT_ADDR}" \
           vault:1.1.0 \
           vault read -field=base64_encoded_json ${VAULT_PATH_GCR})
+        GCR_EMAIL=$(echo $GCR_KEY | base64 -d | jq -r '.client_email')
         echo ::set-output name=gcr-email::$GCR_EMAIL
         echo ::add-mask::$GCR_EMAIL
         echo ::set-output name=gcr-key::$GCR_KEY
