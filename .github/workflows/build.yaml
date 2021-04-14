@@ -93,7 +93,7 @@ jobs:
         client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
     - name: Notify Slack
       if: always()
-      uses: broadinstitute/action-slack@v2.7.0
+      uses: broadinstitute/action-slack@v3.8.0
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
