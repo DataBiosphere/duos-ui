@@ -5,7 +5,7 @@ import {Config} from './config';
 import {forEach} from 'lodash';
 import {DAR, DataSet, Researcher} from "./ajax";
 import {Styles} from "./theme";
-import { find, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -16,8 +16,7 @@ export const applyHoverEffects = (e, style) => {
 //currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
 //go through the list of datasets and get the name of the dataset whose id is in the datasetId list
 export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
-  let id = datasetId[0].toString();
-  let data = find({"value" : id})(datasets);
+  const data = !isNil(datasetId) && !isEmpty(datasetId) ? find({"value" : first(datasetId).toString()})(datasets) : null;
   return isNil(data) ? '- -' : getDatasetNames([data]);
 };
 
@@ -321,7 +320,8 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
           newFilteredList = filter(electionData => {
             const { election, dac, votes} = electionData;
             const dar = electionData.dar ? electionData.dar.data : undefined;
-            const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode)]) : [];
+            console.log(dar);
+            const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
             const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
             const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
