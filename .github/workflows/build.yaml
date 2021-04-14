@@ -96,9 +96,10 @@ jobs:
       uses: broadinstitute/action-slack@v2.7.0
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         status: ${{ job.status }}
         channel: "#duos-notifications"
-        fields: repo,job,workflow,commit,eventName,author,took
+        fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
 
 
