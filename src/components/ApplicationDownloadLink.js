@@ -195,7 +195,7 @@ export default function ApplicationDownloadLink(props) {
   return h(PDFDownloadLink, {fileName: `${darInfo.darCode}_Application_PDF`, document}, [
     span({}, [
       i({ className: 'glyphicon glyphicon-download-alt', style: iconStyle}),
-      'Download Application'
+      'Full Application'
     ])
   ]);
-};
+}
