@@ -92,7 +92,8 @@ jobs:
         event-type: update-service
         client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
     - name: Notify Slack
-      if: always()
+      # only notify for develop branch build
+      if: github.event_name == 'push'
       uses: broadinstitute/action-slack@v3.8.0
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
