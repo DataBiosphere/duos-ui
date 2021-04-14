@@ -320,7 +320,6 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
           newFilteredList = filter(electionData => {
             const { election, dac, votes} = electionData;
             const dar = electionData.dar ? electionData.dar.data : undefined;
-            console.log(dar);
             const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
             const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
             const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
