@@ -91,3 +91,14 @@ jobs:
         repository: broadinstitute/terra-helmfile
         event-type: update-service
         client-payload: '{"service": "duos", "version": "${{ steps.short-sha.outputs.sha }}", "dev_only": false}'
+    - name: Notify Slack
+      if: always()
+      uses: broadinstitute/action-slack@v2.7.0
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      with:
+        status: ${{ job.status }}
+        channel: "#duos-notifications"
+        fields: repo,job,workflow,commit,eventName,author,took
+
+
