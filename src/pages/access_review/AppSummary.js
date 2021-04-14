@@ -70,7 +70,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
       return span({key: index, style: TEXT}, restrictionObj.description);
     });
     const StructuredLimitations = div({ style: ROOT}, [
-      div({style: HEADER}, 'Data Use Structured Limitations'),
+      div({style: HEADER}, 'Structured Data Use Terms'),
       div({style: TEXT}, [translatedRestrictionsList]),
       div({style: {marginTop: '0.8rem'}}, [
         h(DownloadLink,{
