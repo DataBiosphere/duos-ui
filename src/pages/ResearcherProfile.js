@@ -269,7 +269,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   isValidState(value) {
-    const stateSelected = (!isNil(value) || !isEmpty(value));
+    const stateSelected = (!isNil(value) && !isEmpty(value));
     const inUS = (this.state.profile.country === "United States of America" || this.state.profile.country === "");
     if (inUS && stateSelected) {
       return true;
