@@ -9,4 +9,4 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: npx audit-ci
-        run: npx audit-ci --moderate --config config/audit-ci.json
+        run: npx audit-ci --moderate --config config/audit-ci.json --report-type full

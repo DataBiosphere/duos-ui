@@ -1,3 +1,5 @@
 {
-  "allowlist": ["react-scripts"]
+  "allowlist": [
+    565
+  ]
 }
