@@ -81,7 +81,7 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId) => async (e) => {
+  openAccessReview = (referenceId) => async () => {
     const pathStart = NavigationUtils.accessReviewPath();
     this.props.history.push(`${pathStart}/${referenceId}`);
   };

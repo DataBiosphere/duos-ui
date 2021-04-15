@@ -1,6 +1,12 @@
 import { isEmpty } from 'lodash/fp';
 import { div, h, a } from 'react-hyperscript-helpers';
-import { applyTextHover, removeTextHover, getElectionDate, processElectionStatus } from '../../libs/utils';
+import {
+  applyTextHover,
+  removeTextHover,
+  getElectionDate,
+  processElectionStatus,
+  getNameOfDatasetForThisDAR
+} from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import DarTableActions from './DarTableActions';
 import { Theme } from '../../libs/theme';
@@ -50,6 +56,7 @@ export default function DarElectionRecords(props) {
         onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
       }, [dar && dar.data ? dar.data.darCode : '- -']),
       div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, dar.data.datasetIds) : '- -']),
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       electionStatusTemplate(consoleType, dar, election, recordTextStyle, votes, showVotes, history),
