@@ -8,5 +8,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: npm ci
-      - name: npm audit
-        run: npm audit --audit-level=moderate
+      - name: npx audit
+        run: npx audit-ci --moderate
