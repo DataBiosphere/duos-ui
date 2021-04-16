@@ -1,7 +1,6 @@
 import React from 'react';
 import { div, hh, span, h } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
-import { Files } from '../../libs/ajax';
 import { download } from '../../libs/utils';
 import { ApplicationSection } from './ApplicationSection';
 import { StructuredDarRp } from '../../components/StructuredDarRp';
@@ -52,14 +51,6 @@ export const AppSummary = hh(class AppSummary extends React.Component {
   async componentDidMount() {
     await this.generateRestrictions(this.props.consent.dataUse);
   }
-
-  /**
-   * downloads the data use letter for this dataset
-   */
-  downloadDUL = () => {
-    const { consentId, dulName } = this.props.consent;
-    Files.getDulFile(consentId, dulName);
-  };
 
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
