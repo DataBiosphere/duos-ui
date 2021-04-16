@@ -1,12 +1,12 @@
 on: [pull_request]
-name: npm audit
+name: npx audit-ci
 jobs:
   scan:
-    name: npm audit
+    name: npx audit-ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: npm ci
-      - name: npm audit
-        run: npm audit --audit-level=moderate
+      - name: npx audit-ci
+        run: npx audit-ci --moderate --config config/audit-ci.json --report-type full
