@@ -9,6 +9,7 @@ import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
+import { filter } from 'lodash/fp/filter';
 
 export default function NewMemberConsole(props) {
   const [electionList, setElectionList] = useState([]);
@@ -22,10 +23,14 @@ export default function NewMemberConsole(props) {
       try {
         setIsLoading(true);
         const pendingList = await DAR.getDataAccessManageV2();
-        setElectionList(pendingList);
-        setFilteredList(pendingList);
+        const openElectionList = (pendingList).filter((i) => {
+          return i.election.status === "Open";
+        });
+        setElectionList(openElectionList);
+        setFilteredList(openElectionList);
         setIsLoading(false);
       } catch (error) {
+        console.log(error);
         Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
       }
     };

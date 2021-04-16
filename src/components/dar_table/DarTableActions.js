@@ -124,7 +124,7 @@ export default function DarTableActions(props) {
           index,
           openConfirmation,
           label: 'Open',
-          isRendered: !isElectionOpen(election) && consoleType !== 'member',
+          isRendered: !isElectionOpen(election),
           disabled: !isChair && consoleType !== 'manageAccess'
         }),
         createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
