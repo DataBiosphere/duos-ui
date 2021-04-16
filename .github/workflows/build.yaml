@@ -22,7 +22,7 @@ jobs:
   tag-build-push:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code 
+    - name: Checkout code
       uses: actions/checkout@v2
     - name: Get Short Sha
       id: short-sha
@@ -39,12 +39,7 @@ jobs:
       id: construct-tags
       run: |
         SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.outputs.sha }}"
-        ENVIRONMENT_TAG=""
-        if ${{ github.event_name == 'pull_request'}}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ github.event.pull_request.head.ref }}"
-        elif ${{github.event_name == 'push' }}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
-        fi
+        ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
         echo ::set-output name=sha-tag::$SHA_TAG
         echo ::set-output name=environment-tag::$ENVIRONMENT_TAG
     - name: Build Image
