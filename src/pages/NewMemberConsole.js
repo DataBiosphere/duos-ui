@@ -9,7 +9,6 @@ import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { filter } from 'lodash/fp/filter';
 
 export default function NewMemberConsole(props) {
   const [electionList, setElectionList] = useState([]);
