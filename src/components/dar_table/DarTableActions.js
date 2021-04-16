@@ -24,6 +24,11 @@ export default function DarTableActions(props) {
       showCancelIcon: true,
       showResearcher: false
     },
+    member: {
+      showVote: true,
+      showCancelIcon: false,
+      showResearcher: false,
+    },
     manageAccess: {
       showVote: false,
       showCancelIcon: false,
@@ -111,7 +116,7 @@ export default function DarTableActions(props) {
           index,
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
-          isRendered: isElectionOpen(election),
+          isRendered: isElectionOpen(election) && consoleType !== 'member',
           disabled: !isChair && consoleType !== 'manageAccess'
         }),
         h(DarTableOpenButton, {
@@ -119,7 +124,7 @@ export default function DarTableActions(props) {
           index,
           openConfirmation,
           label: 'Open',
-          isRendered: !isElectionOpen(election),
+          isRendered: !isElectionOpen(election) && consoleType !== 'member',
           disabled: !isChair && consoleType !== 'manageAccess'
         }),
         createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
