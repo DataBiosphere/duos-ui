@@ -7,11 +7,6 @@ on:
     paths-ignore:
     - 'README.md'
     - '.github/**'
-  pull_request:
-    branches:
-    - develop
-    paths-ignore:
-    - 'README.md'
 env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
   VAULT_PATH_GCR: secret/devops/ci/gcp-sa/broad-dsp-gcr-public/gcr-publish-key
