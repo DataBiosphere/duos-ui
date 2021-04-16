@@ -30,7 +30,6 @@ export default function NewMemberConsole(props) {
         setFilteredList(openElectionList);
         setIsLoading(false);
       } catch (error) {
-        console.log(error);
         Notifications.showError({text: 'Error: Unable to retrieve data requests from server'});
       }
     };
