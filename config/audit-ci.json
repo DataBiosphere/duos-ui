@@ -1,5 +1,5 @@
 {
   "allowlist": [
-    565
+    "565|react-scripts>webpack>terser-webpack-plugin>cacache>ssri"
   ]
 }
