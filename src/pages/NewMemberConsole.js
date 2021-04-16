@@ -40,8 +40,7 @@ export default function NewMemberConsole(props) {
     return updateListsInit(filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize);
   }, [filteredList, electionList, currentPage, tableSize]);
 
-  //NOTE: may need to change criteria of search due to additional search attributes
-  //NOTE: for now I'm using the NewChairConsole variant to test the funciton implementation
+
   const handleSearchChange = darSearchHandler(electionList, setFilteredList, setCurrentPage);
 
   return (
