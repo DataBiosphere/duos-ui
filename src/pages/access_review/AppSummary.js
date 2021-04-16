@@ -47,7 +47,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
       prev.translatedRestrictions = translatedRestrictions;
       return prev;
     });
-  }
+  };
 
   async componentDidMount() {
     await this.generateRestrictions(this.props.consent.dataUse);
@@ -76,10 +76,6 @@ export const AppSummary = hh(class AppSummary extends React.Component {
         h(DownloadLink,{
           label: 'DUL machine-readable format',
           onDownload: () => download('machine-readable-DUL.json', mrDUL)
-        }),
-        h(DownloadLink,{
-          label: 'Data Use Letter',
-          onDownload: this.downloadDUL
         })
       ])
     ]);
