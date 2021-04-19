@@ -59,7 +59,7 @@
     "audit-ci": "^3.2.0",
     "cypress": "7.1.0",
     "eslint": "^7.24.0",
-    "eslint-plugin-flowtype": "5.7.0",
+    "eslint-plugin-flowtype": "5.7.1",
     "eslint-plugin-react": "7.23.2",
     "react-scripts": "4.0.3",
     "start-server-and-test": "1.12.1"
