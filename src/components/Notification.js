@@ -37,7 +37,8 @@ export const Notification = (props) => {
         icon = <InfoIcon fill={'#3c763d'} style={ iconStyle } />;
         break;
     }
-    const content = <ReactMarkdown source={notificationData.message} linkTarget={'_blank'} className={'underlined'}/>;
+    // eslint-disable-next-line react/no-children-prop
+    const content = <ReactMarkdown children={notificationData.message} linkTarget={'_blank'} className={'underlined'}/>;
     notificationDiv = div({
       style: {padding: '.5rem', paddingTop: '1.5rem'},
       className: 'row no-margin alert alert-' + notificationData.level,
