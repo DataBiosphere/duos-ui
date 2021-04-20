@@ -165,39 +165,46 @@ export const Styles = {
       justifyContent: "left",
       alignItems: "center",
       wordBreak: 'break-word',
-      margin: "0 2%"
+      margin: "0 1%"
+    },
+    DATASET_CELL: {
+      width: "18%",
+      margin: "0 1%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center"
     },
     DATA_ID_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "14%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center"
     },
     SUBMISSION_DATE_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "12%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     DAC_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "8%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     ELECTION_STATUS_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "12%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     ELECTION_ACTIONS_CELL: {
-      width: "23%",
-      margin: "0 2%",
+      width: "16%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",

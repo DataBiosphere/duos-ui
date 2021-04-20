@@ -48,7 +48,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               }
             }),
             div({ id: "header-text" }, [
-              div({ style: TITLE }, "Data Access Review"),
+              div({ style: TITLE }, "Data Access Request (DAR) Review"),
               div({ style: SMALL },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
