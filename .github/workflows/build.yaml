@@ -41,7 +41,7 @@ jobs:
         SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.outputs.sha }}"
         ENVIRONMENT_TAG=""
         if ${{ github.event_name == 'pull_request'}}; then
-          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${SHA_TAG}_pull_request"
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:pr-${SHA_TAG}"
         elif ${{github.event_name == 'push' }}; then
           ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
         fi
