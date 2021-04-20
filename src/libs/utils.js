@@ -288,7 +288,7 @@ export const calcFilteredListPosition = (index, currentPage, tableSize) => {
 
 export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
   return (updatedElection, darId, i, successText, votes = undefined) => {
-    const index = i + ((currentPage - 1) * tableSize);
+    const index = calcFilteredListPosition(i, currentPage, tableSize);
     let filteredListCopy = cloneDeep(filteredList);
     let electionListCopy = cloneDeep(electionList);
     const targetFilterRow = filteredListCopy[parseInt(index, 10)];

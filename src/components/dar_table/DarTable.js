@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
 import { Election, User, Votes } from '../../libs/ajax';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
-import { Notifications, getDatasetNames, calcFilteredListPosition } from '../../libs/utils';
+import { Notifications, getDatasetNames } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import DarModal from '../modals/DarModal';
 import PaginationBar from '../PaginationBar';
@@ -124,8 +124,7 @@ export default function DarTable(props) {
         const updatedElection = await Election.createDARElection(darId);
         const votes = await Votes.getDarVotes(darId);
         const successMsg = 'Election successfully opened';
-        const filterListIndex = calcFilteredListPosition(index, currentPage, tableSize);
-        updateLists(updatedElection, darId, filterListIndex, successMsg, votes);
+        updateLists(updatedElection, darId, index, successMsg, votes);
         setShowConfirmation(false);
       } catch(error) {
         const errorReturn = {text: 'Error: Failed to create election!'};
