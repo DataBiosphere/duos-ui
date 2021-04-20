@@ -4,7 +4,6 @@ import { Route, Switch } from 'react-router-dom';
 import AuthenticatedRoute from './components/AuthenticatedRoute';
 import { USER_ROLES } from './libs/utils';
 import AdminConsole from './pages/AdminConsole';
-import AdminManageAccess from './pages/AdminManageAccess';
 import NewAdminManageAccess from './pages/NewAdminManageAccess';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageDul from './pages/AdminManageDul';
