@@ -9,6 +9,7 @@ import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
+import { isNil } from 'lodash';
 
 export default function NewMemberConsole(props) {
   const [electionList, setElectionList] = useState([]);
@@ -23,7 +24,7 @@ export default function NewMemberConsole(props) {
         setIsLoading(true);
         const pendingList = await DAR.getDataAccessManageV2();
         const openElectionList = (pendingList).filter((i) => {
-          return i.election.status === "Open";
+          return isNil(i.election.status) ? false : i.election.status === "Open";
         });
         setElectionList(openElectionList);
         setFilteredList(openElectionList);
