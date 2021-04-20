@@ -104,6 +104,7 @@ export default function DarTableActions(props) {
     return ([
       div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar)}, [
         h(DarTableVoteButton, {
+          targetVotes,
           election,
           history,
           darReferenceId,
