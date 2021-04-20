@@ -7,6 +7,11 @@ on:
     paths-ignore:
     - 'README.md'
     - '.github/**'
+  pull_request:
+    branches:
+    - develop
+    paths-ignore:
+    - 'README.md'
 env:
   VAULT_ADDR: https://clotho.broadinstitute.org:8200
   VAULT_PATH_GCR: secret/devops/ci/gcp-sa/broad-dsp-gcr-public/gcr-publish-key
@@ -34,7 +39,12 @@ jobs:
       id: construct-tags
       run: |
         SHA_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${{ steps.short-sha.outputs.sha }}"
-        ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
+        ENVIRONMENT_TAG=""
+        if ${{ github.event_name == 'pull_request'}}; then
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:${SHA_TAG}_pull_request"
+        elif ${{github.event_name == 'push' }}; then
+          ENVIRONMENT_TAG="${REGISTRY_HOST}/${GOOGLE_PROJECT}/${SERVICE_NAME}:dev"
+        fi
         echo ::set-output name=sha-tag::$SHA_TAG
         echo ::set-output name=environment-tag::$ENVIRONMENT_TAG
     - name: Build Image
