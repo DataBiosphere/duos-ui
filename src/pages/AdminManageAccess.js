@@ -10,7 +10,7 @@ import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
 
-export default function NewAdminManageAccess(props) {
+export default function AdminManageAccess(props) {
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState(10);
