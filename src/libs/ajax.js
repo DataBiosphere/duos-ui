@@ -467,7 +467,11 @@ export const DataSet = {
   validateDatasetName: async (name) => {
     const url = `${await Config.getApiUrl()}/dataset/validate?name=${name}`;
     try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      // We expect a 404 in the case where the dataset name does not exist
+      const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      if (res.status === 404) {
+        return -1
+      }
       return await res.json();
     }
     catch (err) {
