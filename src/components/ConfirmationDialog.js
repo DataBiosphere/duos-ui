@@ -17,16 +17,17 @@ const customStyles = {
   },
 
   content: {
-    maxHeight: '171px',
+    position: 'relative',
+    maxHeight: '300px',
     top: '30%',
-    right: '32%',
-    bottom: '30%',
-    left: '32%',
-    width: '36%',
+    // right: '32%',
+    // bottom: '30%',
+    margin: '0 auto',
+    maxWidth: '50%',
     background: 'rgb(255, 255, 255)',
     overflow: 'auto',
     outline: 'none',
-    padding: '10px 20px 20px 20px',
+    padding: '20px 20px 20px 20px',
   }
 };
 

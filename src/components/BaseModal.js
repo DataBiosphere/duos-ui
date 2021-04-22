@@ -3,9 +3,38 @@ import { button, div, h, span, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import './BaseModal.css';
 import { PageSubHeading } from '../components/PageSubHeading';
-import {Styles} from '../libs/theme';
+
+const customStyles = {
+  overlay: {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    right: '0',
+    bottom: '0',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    overflowY: 'scroll',
+
+  },
+
+  content: {
+    position: 'relative',
+    top: '20%',
+    // bottom: '35%',
+    maxHeight: '60%',
+    // left: '20%',
+    margin: '0 auto',
+    maxWidth: '60%',
+    border: '1px solid rgb(204, 204, 204)',
+    background: 'rgb(255, 255, 255)',
+    overflow: 'scroll',
+    borderRadius: '4px',
+    outline: 'none',
+    padding: '10px 20px 20px 20px',
+  }
+};
 
 Modal.setAppElement('#root');
+
 export const BaseModal = hh(class BaseModal extends Component {
 
   render() {
@@ -19,7 +48,7 @@ export const BaseModal = hh(class BaseModal extends Component {
           isOpen: this.props.showModal,
           onAfterOpen: this.props.afterOpen,
           onRequestClose: this.props.onRequestClose,
-          style: Styles.MODAL.CONTENT,
+          style: customStyles,
           contentLabel: "Modal"
         }, [
           div({ className: "modal-header" }, [

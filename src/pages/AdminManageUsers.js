@@ -200,13 +200,13 @@ class AdminManageUsers extends Component {
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
                       isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
-                        div({
-                          className:
+                      div({
+                        className:
                             ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
                               : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
                                 : user.researcher === false || !user.completed ? 'disabled' : ''
-                        }, ["Review"]),
-                      ]),
+                      }, ["Review"]),
+                    ]),
 
                     a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),
