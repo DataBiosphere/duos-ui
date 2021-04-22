@@ -10,11 +10,11 @@ const listStyle = {
 };
 
 export default function TranslatedDulModal(props) {
-  const OKHandler = (e) => {
+  const OKHandler = () => {
     props.onOKRequest(MODAL_ID);
   };
 
-  const closeHandler = (e) => {
+  const closeHandler = () => {
     props.onCloseRequest(MODAL_ID);
   };
 
@@ -45,4 +45,4 @@ export default function TranslatedDulModal(props) {
       ul({style: listStyle, id: "txt_translatedRestrictions", className: "row no-margin translated-restriction"}, translatedDULList),
     ])
   );
-};
+}
