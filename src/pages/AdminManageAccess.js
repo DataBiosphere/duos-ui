@@ -9,6 +9,7 @@ import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
+import { consoleTypes } from "../components/dar_table/DarTableActions";
 
 export default function AdminManageAccess(props) {
   const [electionList, setElectionList] = useState([]);
@@ -64,7 +65,7 @@ export default function AdminManageAccess(props) {
         history: props.history,
         processElectionStatus,
         getElectionDate,
-        consoleType: 'manageAccess',
+        consoleType: consoleTypes.MANAGE_ACCESS,
         currentPage,
         setCurrentPage,
         tableSize,
