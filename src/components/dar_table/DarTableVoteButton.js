@@ -3,6 +3,7 @@ import TableTextButton from '../TableTextButton';
 import { isNil } from "lodash/fp";
 
 export default function VoteButton(props) {
+  //targetVotes are the votes for this user and this election, defined on DarTableActions line 98
   const {targetVotes, election, history, darReferenceId, disabled} = props;
   const hasVoted = targetVotes.some((vote) => {
     return !isNil(vote.vote);
