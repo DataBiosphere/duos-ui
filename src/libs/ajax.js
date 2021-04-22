@@ -467,7 +467,11 @@ export const DataSet = {
   validateDatasetName: async (name) => {
     const url = `${await Config.getApiUrl()}/dataset/validate?name=${name}`;
     try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      // We expect a 404 in the case where the dataset name does not exist
+      const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      if (res.status === 404) {
+        return -1
+      }
       return await res.json();
     }
     catch (err) {
@@ -1096,26 +1100,26 @@ export const AuthenticateNIH = {
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
-  spinnerService.hideAll();
-  if (res.status >= 400) {
-    await reportError(args[0], res.status);
-  }
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
   }
+  if (res.status >= 400) {
+    await reportError(args[0], res.status);
+  }
+  spinnerService.hideAll();
   return res.ok ? res : Promise.reject(res);
 };
 
 const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
-  if (res.status >= 500) {
-    await reportError(args[0], res.status);
-  }
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
+  }
+  if (res.status >= 500) {
+    await reportError(args[0], res.status);
   }
   spinnerService.hideAll();
   return res;
