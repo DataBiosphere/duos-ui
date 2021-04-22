@@ -5,6 +5,12 @@ import DarTableVoteButton from './DarTableVoteButton';
 import DarTableOpenButton from './DarTableOpenButton';
 import DarTableCancelButton from './DarTableCancelButton';
 
+export const consoleTypes = {
+  MEMBER: 'member',
+  MANAGE_ACCESS: 'manageAccess',
+  CHAIR: 'chair'
+};
+
 export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
   const { election, dar, votes, researcher = {}, dac = {} } = electionInfo;
@@ -23,6 +29,11 @@ export default function DarTableActions(props) {
       showVote: true,
       showCancelIcon: true,
       showResearcher: false
+    },
+    member: {
+      showVote: true,
+      showCancelIcon: false,
+      showResearcher: false,
     },
     manageAccess: {
       showVote: false,
@@ -99,6 +110,7 @@ export default function DarTableActions(props) {
     return ([
       div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar)}, [
         h(DarTableVoteButton, {
+          targetVotes,
           election,
           history,
           darReferenceId,
@@ -111,8 +123,8 @@ export default function DarTableActions(props) {
           index,
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
-          isRendered: isElectionOpen(election),
-          disabled: !isChair && consoleType !== 'manageAccess'
+          isRendered: isElectionOpen(election) && consoleType !== consoleTypes.MEMBER,
+          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS
         }),
         h(DarTableOpenButton, {
           dar,
@@ -120,7 +132,7 @@ export default function DarTableActions(props) {
           openConfirmation,
           label: 'Open',
           isRendered: !isElectionOpen(election),
-          disabled: !isChair && consoleType !== 'manageAccess'
+          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS
         }),
         createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
       ])

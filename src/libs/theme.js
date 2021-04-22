@@ -255,7 +255,7 @@ export const Styles = {
     },
     TABLE_TEXT_BUTTON: {
       display: 'flex',
-      width: '45%',
+      width: '65%',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: Theme.palette.secondary,
