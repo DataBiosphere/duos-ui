@@ -275,7 +275,7 @@ export const processElectionStatus = (election, votes, showVotes) => {
   //therefore both values must be checked for
   } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
     const finalVote = find(wasFinalVoteTrue)(votes);
-    output = finalVote ? 'Accepted' : 'Closed';
+    output = finalVote ? 'Approved' : 'Denied';
   } else {
     output = electionStatus;
   }
