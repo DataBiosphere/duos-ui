@@ -27,7 +27,7 @@ import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
 import AccessReview from './pages/access_review/AccessReview';
-import NewMemberConsole from "./pages/NewMemberConsole";
+import NewMemberConsole from './pages/NewMemberConsole';
 import NewChairConsole from './pages/NewChairConsole';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
