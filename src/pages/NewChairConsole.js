@@ -9,6 +9,7 @@ import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
 import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
+import {consoleTypes} from "../components/dar_table/DarTableActions";
 
 export default function NewChairConsole(props) {
   const [electionList, setElectionList] = useState([]);
@@ -63,7 +64,7 @@ export default function NewChairConsole(props) {
         ]),
         h(SearchBar, {handleSearchChange})
       ]),
-      h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate, consoleType: 'chair', currentPage, setCurrentPage, tableSize, setTableSize}),
+      h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate, consoleType: consoleTypes.CHAIR, currentPage, setCurrentPage, tableSize, setTableSize}),
       h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
     ])
   );

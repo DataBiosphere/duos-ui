@@ -8,7 +8,7 @@ import {
   getNameOfDatasetForThisDAR
 } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
-import DarTableActions from './DarTableActions';
+import DarTableActions, {consoleTypes} from './DarTableActions';
 import { Theme } from '../../libs/theme';
 
 ////////////////////
@@ -28,12 +28,12 @@ const goToReviewResults = (dar, history) => {
   }
 };
 const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
-  const tag = consoleType === 'manageAccess' ? a : div;
+  const tag = consoleType === consoleTypes.MANAGE_ACCESS ? a : div;
   return tag({
     style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
-      color: consoleType === 'manageAccess' ? Theme.palette.link : 'black' //color adjustment for manage console
+      color: consoleType === consoleTypes.MANAGE_ACCESS ? Theme.palette.link : 'black' //color adjustment for manage console
     }),
-    onClick: () => consoleType === 'manageAccess' && goToReviewResults(dar, history)
+    onClick: () => consoleType === consoleTypes.MANAGE_ACCESS && goToReviewResults(dar, history)
   }, [election ? processElectionStatus(election, votes, showVotes) : '- -']);
 };
 
@@ -43,7 +43,7 @@ export default function DarElectionRecords(props) {
   const visibleWindow = calcVisibleWindow(currentPage, tableSize, filteredList);
   const dataIDTextStyle = Styles.TABLE.DATA_REQUEST_TEXT;
   const recordTextStyle = Styles.TABLE.RECORD_TEXT;
-  const showVotes = (consoleType === 'chair' || (!isEmpty(extraOptions) && extraOptions.showVote)) ? true : false;
+  const showVotes = !!(consoleType === consoleTypes.CHAIR || (!isEmpty(extraOptions) && extraOptions.showVote));
 
   return visibleWindow.map((electionInfo, index) => {
     const {dar, dac, election, votes} = electionInfo;

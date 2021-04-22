@@ -5,6 +5,12 @@ import DarTableVoteButton from './DarTableVoteButton';
 import DarTableOpenButton from './DarTableOpenButton';
 import DarTableCancelButton from './DarTableCancelButton';
 
+export const consoleTypes = {
+  MEMBER: 'member',
+  MANAGE_ACCESS: 'manageAccess',
+  CHAIR: 'chair'
+};
+
 export default function DarTableActions(props) {
   const { updateLists, openConfirmation, history, electionInfo, consoleType, extraOptions, index, baseStyle } = props;
   const { election, dar, votes, researcher = {}, dac = {} } = electionInfo;
@@ -117,8 +123,8 @@ export default function DarTableActions(props) {
           index,
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
-          isRendered: isElectionOpen(election) && consoleType !== 'member',
-          disabled: !isChair && consoleType !== 'manageAccess'
+          isRendered: isElectionOpen(election) && consoleType !== consoleTypes.MEMBER,
+          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS
         }),
         h(DarTableOpenButton, {
           dar,
@@ -126,7 +132,7 @@ export default function DarTableActions(props) {
           openConfirmation,
           label: 'Open',
           isRendered: !isElectionOpen(election),
-          disabled: !isChair && consoleType !== 'manageAccess'
+          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS
         }),
         createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
       ])
