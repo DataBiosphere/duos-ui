@@ -24,7 +24,7 @@ export default function NewMemberConsole(props) {
         setIsLoading(true);
         const pendingList = await DAR.getDataAccessManageV2();
         const openElectionList = (pendingList).filter((i) => {
-          return isNil(i.election.status) ? false : i.election.status === "Open";
+          return isNil(i.election) ? false : i.election.status === "Open";
         });
         setElectionList(openElectionList);
         setFilteredList(openElectionList);
