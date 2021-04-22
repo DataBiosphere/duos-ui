@@ -3,13 +3,13 @@ import { div, h, img } from 'react-hyperscript-helpers';
 import { DAR } from '../libs/ajax';
 import SearchBar from '../components/SearchBar';
 import { Notifications, getElectionDate, processElectionStatus, darSearchHandler } from '../libs/utils';
-import { Styles} from '../libs/theme';
+import { Styles } from '../libs/theme';
 import DarTable from '../components/dar_table/DarTable';
 import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
-import { isNil } from 'lodash';
+import { isNil } from 'lodash/fp';
 
 export default function NewMemberConsole(props) {
   const [electionList, setElectionList] = useState([]);
