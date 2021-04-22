@@ -1,5 +1,4 @@
 import React from 'react';
-import * as fp from 'lodash/fp';
 import { div, a, span, button, hh } from 'react-hyperscript-helpers';
 import { Votes, Election, Match } from '../../libs/ajax';
 import { StackdriverReporter } from '../../libs/stackdriverReporter';
@@ -8,6 +7,7 @@ import { Theme } from '../../libs/theme';
 import { Navigation, Notifications } from '../../libs/utils';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
+import { cloneDeep, find, getOr, head, isNil, isEmpty, isEqual } from 'lodash/fp';
 
 const ROOT = {
   height: '100%',
@@ -60,7 +60,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       accessElectionOpen: false,
       rpElectionOpen: false
     };
-  };
+  }
 
   /**
    * gets final access vote data for the access and rp elections
@@ -68,12 +68,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   getVotesAsChair = async () => {
     const { agreementVotes, finalVotes, chairVotes, accessElection, rpElection } = this.props;
-    const chairAgreementVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(agreementVotes);
-    const chairFinalVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(finalVotes);
-    const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
-    const chairRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(chairVotes);
-    const accessElectionOpen = fp.isNil(accessElection) ? false : !fp.isEqual(accessElection.status)('Closed');
-    const rpElectionOpen = fp.isNil(rpElection) ? false : !fp.isEqual(rpElection.status)('Closed');
+    const chairAgreementVote = isNil(accessElection) ? null : find({ electionId: accessElection.electionId })(agreementVotes);
+    const chairFinalVote = isNil(accessElection) ? null : find({ electionId: accessElection.electionId })(finalVotes);
+    const chairAccessVote = isNil(accessElection) ? null : find({ electionId: accessElection.electionId })(chairVotes);
+    const chairRpVote = isNil(rpElection) ? null : find({ electionId: rpElection.electionId })(chairVotes);
+    const accessElectionOpen = isNil(accessElection) ? false : !isEqual(accessElection.status)('Closed');
+    const rpElectionOpen = isNil(rpElection) ? false : !isEqual(rpElection.status)('Closed');
     this.setState({
       alert: '',
       chairAgreementVote: chairAgreementVote,
@@ -105,11 +105,11 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   getVotesAsMember = async () => {
     const { chairVotes, memberVotes, accessElection, rpElection } = this.props;
-    const chairAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(chairVotes);
-    const memberAccessVote = fp.isNil(accessElection) ? null : fp.find({ electionId: accessElection.electionId })(memberVotes);
-    const memberRpVote = fp.isNil(rpElection) ? null : fp.find({ electionId: rpElection.electionId })(memberVotes);
-    const accessElectionOpen = fp.isNil(accessElection) ? false : !fp.isEqual(accessElection.status)('Closed');
-    const rpElectionOpen = fp.isNil(rpElection) ? false : !fp.isEqual(rpElection.status)('Closed');
+    const chairAccessVote = isNil(accessElection) ? null : find({ electionId: accessElection.electionId })(chairVotes);
+    const memberAccessVote = isNil(accessElection) ? null : find({ electionId: accessElection.electionId })(memberVotes);
+    const memberRpVote = isNil(rpElection) ? null : find({ electionId: rpElection.electionId })(memberVotes);
+    const accessElectionOpen = isNil(accessElection) ? false : !isEqual(accessElection.status)('Closed');
+    const rpElectionOpen = isNil(rpElection) ? false : !isEqual(rpElection.status)('Closed');
     this.setState({
       alert: '',
       chairAccessVote: chairAccessVote,
@@ -126,20 +126,20 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   updateMemberVote = (voteId, voteStatus, rationale) => {
     const { memberAccessVote, memberRpVote } = this.state;
-    const isAccessVote = voteId === (fp.isNil(memberAccessVote) ? null : memberAccessVote.voteId);
-    const isRpVote = voteId === (fp.isNil(memberRpVote) ? null : memberRpVote.voteId);
+    const isAccessVote = voteId === (isNil(memberAccessVote) ? null : memberAccessVote.voteId);
+    const isRpVote = voteId === (isNil(memberRpVote) ? null : memberRpVote.voteId);
     let voteClone;
 
     if (isAccessVote) {
-      voteClone = fp.cloneDeep(memberAccessVote);
+      voteClone = cloneDeep(memberAccessVote);
     } else if (isRpVote) {
-      voteClone = fp.cloneDeep(memberRpVote);
+      voteClone = cloneDeep(memberRpVote);
     }
 
     if (voteStatus !== null) {
       voteClone.vote = voteStatus;
     }
-    if (!fp.isNil(rationale)) {
+    if (!isNil(rationale)) {
       voteClone.rationale = rationale;
     } // rationale can be null!
 
@@ -155,22 +155,22 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { history } = this.props;
     const { chairAccessVote, memberAccessVote, memberRpVote } = this.state;
     if (memberRpVote) {
-      if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote) &&
-          !fp.isNil(memberRpVote) && !fp.isNil(memberRpVote.vote)) {
+      if (!isNil(memberAccessVote) && !isNil(memberAccessVote.vote) &&
+          !isNil(memberRpVote) && !isNil(memberRpVote.vote)) {
         this.submitVote(memberAccessVote);
         this.submitVote(memberRpVote);
         // Navigate back if this member doesn't have chairperson votes to complete
-        if (fp.isNil(chairAccessVote)) {
+        if (isNil(chairAccessVote)) {
           Navigation.back(Storage.getCurrentUser(), history);
         }
       } else {
         this.setState({ alert: 'incomplete' });
       }
     } else {
-      if (!fp.isNil(memberAccessVote) && !fp.isNil(memberAccessVote.vote)) {
+      if (!isNil(memberAccessVote) && !isNil(memberAccessVote.vote)) {
         this.submitVote(memberAccessVote);
         // Navigate back if this member doesn't have chairperson votes to complete
-        if (fp.isNil(chairAccessVote)) {
+        if (isNil(chairAccessVote)) {
           Navigation.back(Storage.getCurrentUser(), history);
         }
       } else {
@@ -186,20 +186,20 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   updateChairVotes = (voteId, voteStatus, rationale) => {
     const { chairAccessVote, chairRpVote } = this.state;
-    const isAccessVote = voteId === (fp.isNil(chairAccessVote) ? null : chairAccessVote.voteId);
-    const isRpVote = voteId === (fp.isNil(chairRpVote) ? null : chairRpVote.voteId);
+    const isAccessVote = voteId === (isNil(chairAccessVote) ? null : chairAccessVote.voteId);
+    const isRpVote = voteId === (isNil(chairRpVote) ? null : chairRpVote.voteId);
     let voteClone;
 
     if (isAccessVote) {
-      voteClone = fp.cloneDeep(chairAccessVote);
+      voteClone = cloneDeep(chairAccessVote);
     } else if (isRpVote) {
-      voteClone = fp.cloneDeep(chairRpVote);
+      voteClone = cloneDeep(chairRpVote);
     }
 
     if (voteStatus !== null) {
       voteClone.vote = voteStatus;
     }
-    if (!fp.isNil(rationale)) {
+    if (!isNil(rationale)) {
       voteClone.rationale = rationale;
     }
 
@@ -219,8 +219,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { chairFinalVote, chairAccessVote, chairRpVote } = this.state;
     // If an RP vote exists, we need to submit both votes to complete the election.
     // If not, only the access vote is required.
-    if (!fp.isNil(chairRpVote)) {
-      if (!fp.isNil(chairAccessVote.vote) && !fp.isNil(chairRpVote.vote)) {
+    if (!isNil(chairRpVote)) {
+      if (!isNil(chairAccessVote.vote) && !isNil(chairRpVote.vote)) {
         await this.submitVote(chairAccessVote);
         await this.submitVote(chairRpVote);
 
@@ -235,7 +235,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
         this.setState({ alert: 'incomplete' });
       }
     } else {
-      if (!fp.isNil(chairAccessVote) && !fp.isNil(chairAccessVote.vote)) {
+      if (!isNil(chairAccessVote) && !isNil(chairAccessVote.vote)) {
         await this.submitVote(chairAccessVote);
         chairFinalVote.vote = chairAccessVote.vote;
         chairFinalVote.rationale = chairAccessVote.rationale;
@@ -256,8 +256,8 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
    */
   submitAgreementVote = async () => {
     const { chairAgreementVote, chairAccessVote, matchData } = this.state;
-    if (!fp.isNil(fp.getOr(matchData, 'match', null))) {
-      if (!fp.isNil(chairAgreementVote)) {
+    if (!isNil(getOr(matchData, 'match', null))) {
+      if (!isNil(chairAgreementVote)) {
         chairAgreementVote.rationale = chairAccessVote.rationale;
         chairAgreementVote.vote = chairAccessVote.vote && matchData.match;
         await this.submitVote(chairAgreementVote);
@@ -288,7 +288,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
 
   // closes the election for this DAR
   closeElection = async (election, vote, rationale) => {
-    const electionClone = fp.cloneDeep(election);
+    const electionClone = cloneDeep(election);
     electionClone.status = 'Closed';
     electionClone.finalVote = vote;
     electionClone.finalAccessVote = vote;
@@ -323,17 +323,20 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { voteAsChair, selectChair, chairVotes, libraryCards } = this.props;
     const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData, accessElectionOpen, rpElectionOpen } = this.state;
+    const hasLibraryCard = !isNil(head(libraryCards));
 
     // If we have an open election, theme the button based on the alert status.
     // If we do not, set it to disabled state.
-    const voteButtonStyle = (accessElectionOpen || rpElectionOpen) ?
-      (alert === 'success') ? { backgroundColor: Theme.palette.success } : {} :
-      { backgroundColor: Theme.palette.disabled, cursor: 'not-allowed'};
+    const voteButtonStyle = (disabled) =>
+      ((accessElectionOpen || rpElectionOpen) && !disabled) ?
+        (alert === 'success') ? { backgroundColor: Theme.palette.success }
+          : {}
+        : { backgroundColor: Theme.palette.disabled, cursor: 'not-allowed'};
 
     // If we have an open election, we can submit votes as either a chair or member.
     // If we do not, we cannot submit any votes.
     const voteButtonAction = (accessElectionOpen || rpElectionOpen) ?
-      (!fp.isEmpty(chairVotes) && voteAsChair) ? this.submitChairVote : this.submitMemberVote :
+      (!isEmpty(chairVotes) && voteAsChair) ? this.submitChairVote : this.submitMemberVote :
       () => {};
 
     return div({ style: ROOT },
@@ -347,12 +350,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
           [span({ style: { opacity: '70%' } }, 'Vote As Member')]),
           a({
             id: 'vote-as-chair',
-            isRendered: !fp.isEmpty(chairVotes),
+            isRendered: !isEmpty(chairVotes),
             style: voteAsChair ? TAB_SELECTED : TAB_UNSELECTED,
             onClick: () => selectChair(true),
           },
           [span({
-            isRendered: !fp.isEmpty(chairVotes),
+            isRendered: !isEmpty(chairVotes),
             style: { opacity: '70%' }
           }, 'Vote As Chair')])
         ]),
@@ -377,15 +380,16 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               rpVote: chairRpVote,
               accessElectionOpen: accessElectionOpen,
               rpElectionOpen: rpElectionOpen,
-              libraryCards: libraryCards
+              hasLibraryCard: hasLibraryCard
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),
               button({
                 id: 'vote',
                 className: 'button-contained',
-                style: voteButtonStyle,
+                style: voteButtonStyle(!hasLibraryCard && voteAsChair),
                 onClick: voteButtonAction,
+                disabled: !hasLibraryCard && voteAsChair
               },
               ['Vote',
                 alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })
