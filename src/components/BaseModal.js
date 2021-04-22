@@ -13,15 +13,12 @@ const customStyles = {
     bottom: '0',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     overflowY: 'scroll',
-
   },
 
   content: {
     position: 'relative',
     top: '20%',
-    // bottom: '35%',
     maxHeight: '60%',
-    // left: '20%',
     margin: '0 auto',
     maxWidth: '60%',
     border: '1px solid rgb(204, 204, 204)',

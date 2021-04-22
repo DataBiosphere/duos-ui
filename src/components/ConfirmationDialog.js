@@ -20,12 +20,10 @@ const customStyles = {
     position: 'relative',
     maxHeight: '300px',
     top: '30%',
-    // right: '32%',
-    // bottom: '30%',
     margin: '0 auto',
     maxWidth: '50%',
     background: 'rgb(255, 255, 255)',
-    overflow: 'auto',
+    overflow: 'scroll',
     outline: 'none',
     padding: '20px 20px 20px 20px',
   }
