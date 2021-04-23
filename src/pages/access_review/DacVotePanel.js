@@ -7,7 +7,7 @@ import { Theme } from '../../libs/theme';
 import { Navigation, Notifications } from '../../libs/utils';
 import { VoteAsMember } from './VoteAsMember';
 import { VoteAsChair } from './VoteAsChair';
-import { cloneDeep, find, getOr, head, isNil, isEmpty, isEqual } from 'lodash/fp';
+import { cloneDeep, find, getOr, isNil, isEmpty, isEqual } from 'lodash/fp';
 
 const ROOT = {
   height: '100%',
@@ -323,15 +323,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
   render() {
     const { voteAsChair, selectChair, chairVotes, libraryCards } = this.props;
     const { alert, chairAccessVote, chairRpVote, memberAccessVote, memberRpVote, matchData, accessElectionOpen, rpElectionOpen } = this.state;
-    const hasLibraryCard = !isNil(head(libraryCards));
 
     // If we have an open election, theme the button based on the alert status.
     // If we do not, set it to disabled state.
-    const voteButtonStyle = (disabled) =>
-      ((accessElectionOpen || rpElectionOpen) && !disabled) ?
-        (alert === 'success') ? { backgroundColor: Theme.palette.success }
-          : {}
-        : { backgroundColor: Theme.palette.disabled, cursor: 'not-allowed'};
+    const voteButtonStyle = (accessElectionOpen || rpElectionOpen) ?
+      (alert === 'success') ? { backgroundColor: Theme.palette.success } : {} :
+      { backgroundColor: Theme.palette.disabled, cursor: 'not-allowed'};
 
     // If we have an open election, we can submit votes as either a chair or member.
     // If we do not, we cannot submit any votes.
@@ -380,16 +377,15 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
               rpVote: chairRpVote,
               accessElectionOpen: accessElectionOpen,
               rpElectionOpen: rpElectionOpen,
-              hasLibraryCard: hasLibraryCard
+              libraryCards: libraryCards
             }),
             div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } }, [
               this.showAlert(alert),
               button({
                 id: 'vote',
                 className: 'button-contained',
-                style: voteButtonStyle(!hasLibraryCard && voteAsChair),
-                onClick: voteButtonAction,
-                disabled: !hasLibraryCard && voteAsChair
+                style: voteButtonStyle,
+                onClick: voteButtonAction
               },
               ['Vote',
                 alert === 'success' && span({ className: 'glyphicon glyphicon-ok', style: { marginLeft: '8px' } })

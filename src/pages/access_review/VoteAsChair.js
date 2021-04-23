@@ -2,7 +2,7 @@ import React from 'react';
 import { div, a, span, hh } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { VoteQuestion } from './VoteQuestion';
-import {isNil,  get, getOr} from 'lodash/fp';
+import {isNil, head, get, getOr} from 'lodash/fp';
 import * as moment from 'moment';
 
 const LINK = {
@@ -62,8 +62,9 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
   };
 
   render() {
-    const { vote, rpVote, onUpdate, matchData, accessElectionOpen, rpElectionOpen, hasLibraryCard } = this.props;
-    const errorMessage = "The Researcher must have a Library Card before this DAR can be approved.";
+    const { vote, rpVote, onUpdate, matchData, accessElectionOpen, rpElectionOpen, libraryCards } = this.props;
+    const hasLibraryCard = !isNil(head(libraryCards));
+    const errorMessage = "The Researcher must have a Library Card before this DAR can be approved. You can still deny the request or vote on question 2.";
     const accessVoteQuestion = isNil(vote) ?
       div({}, []) :
       VoteQuestion({
@@ -89,8 +90,7 @@ export const VoteAsChair = hh(class VoteAsChair extends React.PureComponent {
         voteId: isNil(rpVote) ? null : rpVote.voteId,
         rationale: isNil(rpVote.rationale) ? '' : rpVote.rationale,
         selectedOption: isNil(rpVote) ? null : rpVote.vote,
-        disabled: !rpElectionOpen,
-        hasLibraryCard: hasLibraryCard
+        disabled: !rpElectionOpen
       });
     return div({ id: 'chair-vote' }, [
       accessVoteQuestion,
