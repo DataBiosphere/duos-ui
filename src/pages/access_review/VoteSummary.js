@@ -113,7 +113,7 @@ export const VoteSummary = hh(
 
     memberVote = (vote) => {
       const voteString = fp.isNil(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
-      const createDateString = fp.isNil(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
+      const updateDateString = fp.isNil(vote.vote.updateDate) ? '' : moment(vote.vote.updateDate).format('MM/DD/YY');
       return div({
         key: vote.vote.voteId,
         style: {
@@ -138,7 +138,7 @@ export const VoteSummary = hh(
           ]),
           div({style: {display: 'flex', flexWrap: 'wrap'}}, [
             div({style:{padding: '0 1rem 1rem 0'}}, ['DATE: ']),
-            div({style:{fontWeight: Theme.font.weight.regular}}, [createDateString]),
+            div({style:{fontWeight: Theme.font.weight.regular}}, [updateDateString]),
           ]),
           div({style: {}}, [
             div({style: {flex: '1 0 auto', padding: '0 1rem 1rem 0'}}, ['RATIONALE: ']),
