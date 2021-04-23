@@ -7,7 +7,7 @@ import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import { isNil, get, find } from 'lodash/fp';
 
 const SECTION = {
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   margin: '1rem 0',
   color: Theme.palette.primary,
   display: 'flex',

@@ -12,7 +12,7 @@ const TITLE = {
 };
 
 const SMALL = {
-  fontSize: Theme.font.size.small,
+  fontSize: '15px',
   lineHeight: Theme.font.leading.dense,
 };
 
@@ -25,7 +25,7 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
           justifyContent: 'space-between',
           alignItems: 'center',
           display: 'flex',
-          fontFamily: 'Montserrat',
+          fontFamily: 'Arial',
           color: Theme.palette.primary,
         }
       },
