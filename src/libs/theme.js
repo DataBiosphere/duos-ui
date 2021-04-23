@@ -21,9 +21,9 @@ export const Theme = {
     size: {
       title: '28px',
       superheader: '24px',
-      header: '18px',
+      header: '1.7rem',
       subheader: '16px',
-      small: '14px'
+      small: '1.6rem'
     },
     leading: {
       regular: '22px',

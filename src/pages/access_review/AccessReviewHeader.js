@@ -12,7 +12,7 @@ const TITLE = {
 };
 
 const SMALL = {
-  fontSize: '15px',
+  fontSize: Theme.font.size.small,
   lineHeight: Theme.font.leading.dense,
 };
 
