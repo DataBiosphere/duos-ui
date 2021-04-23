@@ -113,7 +113,11 @@ export const VoteSummary = hh(
 
     memberVote = (vote) => {
       const voteString = fp.isNil(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
-      const updateDateString = fp.isNil(vote.vote.updateDate) ? '' : moment(vote.vote.updateDate).format('MM/DD/YY');
+      const updateDateString = !fp.isNil(vote.vote.updateDate) ?
+        moment(vote.vote.updateDate).format('MM/DD/YY')
+        : !fp.isNil(vote.vote.createDate) ?
+          moment(vote.vote.createDate).format('MM/DD/YY')
+          : '';
       return div({
         key: vote.vote.voteId,
         style: {
