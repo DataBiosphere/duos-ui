@@ -470,7 +470,7 @@ export const DataSet = {
       // We expect a 404 in the case where the dataset name does not exist
       const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
       if (res.status === 404) {
-        return -1
+        return -1;
       }
       return await res.json();
     }
@@ -706,7 +706,7 @@ export const Match = {
     const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
     const res = await fetchOk(url, Config.authOpts());
     try {
-      const answer = await res.json();
+      const answer = await res;
       return answer;
     } catch (error) {
       return {};
