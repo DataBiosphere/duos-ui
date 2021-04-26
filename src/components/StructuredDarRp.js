@@ -5,7 +5,7 @@ import { DataUseTranslation } from '../libs/dataUseTranslation';
 import { Theme } from '../libs/theme';
 
 const ROOT = {
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   color: Theme.palette.primary,
   whiteSpace: 'pre-line'
 };

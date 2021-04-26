@@ -12,7 +12,7 @@ const STYLE = {
   fontSize: Theme.font.size.small,
   lineHeight: Theme.font.leading.dense,
   fontWeight: Theme.font.weight.semibold,
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   backgroundColor: Theme.palette.background.secondary,
   padding: 16,
   borderRadius: '9px',

@@ -5,7 +5,7 @@ import { Theme } from '../../libs/theme';
 import { DownloadLink } from '../../components/DownloadLink';
 
 const ROOT = {
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   color: Theme.palette.primary,
   whiteSpace: 'pre-line'
 };

@@ -11,7 +11,7 @@ import { cloneDeep, find, getOr, isNil, isEmpty, isEqual } from 'lodash/fp';
 
 const ROOT = {
   height: '100%',
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   fontSize: Theme.font.size.small,
   lineHeight: Theme.font.leading.dense,
   fontWeight: Theme.font.weight.semibold,

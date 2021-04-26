@@ -10,7 +10,7 @@ import { DataUseTranslation } from '../../libs/dataUseTranslation';
 import isNil from "lodash/fp";
 
 const ROOT = {
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   color: Theme.palette.primary,
   whiteSpace: 'pre-line'
 };
