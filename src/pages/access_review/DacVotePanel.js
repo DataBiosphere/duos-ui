@@ -60,7 +60,7 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
       accessElectionOpen: false,
       rpElectionOpen: false
     };
-  };
+  }
 
   /**
    * gets final access vote data for the access and rp elections

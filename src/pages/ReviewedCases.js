@@ -46,7 +46,7 @@ class ReviewedCases extends Component {
     };
   }
 
-  sort = (sortKey, descendantOrder = false) => (event) => {
+  sort = (sortKey, descendantOrder = false) => () => {
 
     let data = this.state.electionsList.dul;
     let sortedData = data.sort(function(a, b) {
@@ -81,7 +81,7 @@ class ReviewedCases extends Component {
 
   componentDidMount() {
     this.getReviewedConsents();
-  };
+  }
 
   getReviewedConsents = async () => {
     const dul = await Election.findReviewedConsents();
@@ -193,41 +193,41 @@ class ReviewedCases extends Component {
           this.state.electionsList.dul
             .filter(this.searchTable(searchDulText))
             .slice((currentDulPage - 1) * this.state.dulLimit, currentDulPage * this.state.dulLimit).map((election, rIndex) => {
-            return h(Fragment, { key: rIndex }, [
-              div({ className: 'grid-row tableRowDul' }, [
-                div({
-                  id: election.displayId + '_consentId',
-                  name: 'consentId',
-                  className: 'col-2 cell-body text ' + (election.archived ? 'flagged' : ''),
-                  title: election.displayId
-                }, [election.displayId]),
-                div({
-                  id: election.displayId + '_consentGroup',
-                  name: 'consentGroup',
-                  className: 'col-2 cell-body text ' + (!election.consentGroupName ? 'empty' : ''),
-                  title: election.consentGroupName
-                }, [election.consentGroupName]),
-                div({ id: election.displayId + '_electionVersion', name: 'electionVersion', className: 'col-1 cell-body text' },
-                  [election.version < 10 ? '0' + election.version : election.version]),
-                div({ id: election.displayId + '_resultDateDul', name: 'resultDateDul', className: 'col-1 cell-body text' },
-                  [Utils.formatDate(election.finalVoteDate)]),
-                div({ id: election.displayId + '_finalResultDul', name: 'finalResulDul', className: 'col-1 cell-body text f-center bold' }, [
-                  span({ isRendered: election.finalVote, className: 'dul-color' }, ['YES']),
-                  span({ isRendered: !election.finalVote }, ['NO'])
+              return h(Fragment, { key: rIndex }, [
+                div({ className: 'grid-row tableRowDul' }, [
+                  div({
+                    id: election.displayId + '_consentId',
+                    name: 'consentId',
+                    className: 'col-2 cell-body text ' + (election.archived ? 'flagged' : ''),
+                    title: election.displayId
+                  }, [election.displayId]),
+                  div({
+                    id: election.displayId + '_consentGroup',
+                    name: 'consentGroup',
+                    className: 'col-2 cell-body text ' + (!election.consentGroupName ? 'empty' : ''),
+                    title: election.consentGroupName
+                  }, [election.consentGroupName]),
+                  div({ id: election.displayId + '_electionVersion', name: 'electionVersion', className: 'col-1 cell-body text' },
+                    [election.version < 10 ? '0' + election.version : election.version]),
+                  div({ id: election.displayId + '_resultDateDul', name: 'resultDateDul', className: 'col-1 cell-body text' },
+                    [Utils.formatDate(election.finalVoteDate)]),
+                  div({ id: election.displayId + '_finalResultDul', name: 'finalResulDul', className: 'col-1 cell-body text f-center bold' }, [
+                    span({ isRendered: election.finalVote, className: 'dul-color' }, ['YES']),
+                    span({ isRendered: !election.finalVote }, ['NO'])
+                  ]),
+                  div({ className: 'col-1 cell-body f-center' }, [
+                    button({
+                      id: election.displayId + '_btnRecordDul',
+                      name: 'btn_recordDul',
+                      className: 'cell-button hover-color',
+                      'ui-sref': 'dul_results_record({electionId: \'this.election.electionId \'})',
+                      onClick: () => this.openDulResultsRecord(election.electionId)
+                    }, ['Record'])
+                  ])
                 ]),
-                div({ className: 'col-1 cell-body f-center' }, [
-                  button({
-                    id: election.displayId + '_btnRecordDul',
-                    name: 'btn_recordDul',
-                    className: 'cell-button hover-color',
-                    'ui-sref': 'dul_results_record({electionId: \'this.election.electionId \'})',
-                    onClick: () => this.openDulResultsRecord(election.electionId)
-                  }, ['Record'])
-                ])
-              ]),
-              hr({ className: 'table-body-separator' })
-            ]);
-          }),
+                hr({ className: 'table-body-separator' })
+              ]);
+            }),
           PaginatorBar({
             name: 'dul',
             total: this.state.electionsList.dul.filter(this.searchTable(searchDulText)).length,
@@ -267,33 +267,33 @@ class ReviewedCases extends Component {
           this.state.electionsList.access
             .filter(this.searchTable(searchDarText))
             .slice((currentAccessPage - 1) * this.state.darLimit, currentAccessPage * this.state.darLimit).map((election, rIndex) => {
-            return h(Fragment, { key: rIndex }, [
-              div({ className: 'grid-row tableRowAccess' }, [
-                div({ id: election.displayId + '_darId', name: 'darId', className: 'col-2 cell-body text', title: 'this.election.displayId ' },
-                  [election.displayId]),
-                div({
-                  id: election.displayId + '_projectTitle', name: 'projectTitle', className: 'col-3 cell-body text',
-                  title: 'this.election.projectTitle '
-                }, [election.projectTitle]),
-                div({ id: election.displayId + '_resultDateAccess', name: 'resultDateAccess', className: 'col-1 cell-body text' },
-                  [Utils.formatDate(election.finalVoteDate)]),
-                div({ id: election.displayId + '_finalResultAccess', name: 'finalResultAccess', className: 'col-1 cell-body text f-center bold' }, [
-                  span({ isRendered: election.finalVote === true, className: 'access-color' }, ['YES']),
-                  span({ isRendered: election.finalVote === false }, ['NO'])
+              return h(Fragment, { key: rIndex }, [
+                div({ className: 'grid-row tableRowAccess' }, [
+                  div({ id: election.displayId + '_darId', name: 'darId', className: 'col-2 cell-body text', title: 'this.election.displayId ' },
+                    [election.displayId]),
+                  div({
+                    id: election.displayId + '_projectTitle', name: 'projectTitle', className: 'col-3 cell-body text',
+                    title: 'this.election.projectTitle '
+                  }, [election.projectTitle]),
+                  div({ id: election.displayId + '_resultDateAccess', name: 'resultDateAccess', className: 'col-1 cell-body text' },
+                    [Utils.formatDate(election.finalVoteDate)]),
+                  div({ id: election.displayId + '_finalResultAccess', name: 'finalResultAccess', className: 'col-1 cell-body text f-center bold' }, [
+                    span({ isRendered: election.finalVote === true, className: 'access-color' }, ['YES']),
+                    span({ isRendered: election.finalVote === false }, ['NO'])
+                  ]),
+                  div({ className: 'col-1 cell-body f-center' }, [
+                    button({
+                      id: election.displayId + '_btnRecordAccess',
+                      name: 'btn_recordAccess',
+                      className: 'cell-button hover-color',
+                      'ui-sref': 'access_results_record({electionId: \'this.election.electionId \', referenceId: \'this.election.referenceId \'})',
+                      onClick: () => this.openAccessReviewResults(election.referenceId)
+                    }, ['Record'])
+                  ])
                 ]),
-                div({ className: 'col-1 cell-body f-center' }, [
-                  button({
-                    id: election.displayId + '_btnRecordAccess',
-                    name: 'btn_recordAccess',
-                    className: 'cell-button hover-color',
-                    'ui-sref': 'access_results_record({electionId: \'this.election.electionId \', referenceId: \'this.election.referenceId \'})',
-                    onClick: () => this.openAccessReviewResults(election.referenceId)
-                  }, ['Record'])
-                ])
-              ]),
-              hr({ className: 'table-body-separator' })
-            ]);
-          }),
+                hr({ className: 'table-body-separator' })
+              ]);
+            }),
           PaginatorBar({
             name: 'access',
             total: this.state.electionsList.access.filter(this.searchTable(searchDarText)).length,

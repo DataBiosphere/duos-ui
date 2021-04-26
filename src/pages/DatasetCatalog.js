@@ -144,7 +144,7 @@ class DatasetCatalog extends Component {
     const formData = await DAR.postDarDraft(darBody);
     const referenceId = formData.referenceId;
     this.props.history.push({ pathname: 'dar_application/' + referenceId });
-  };
+  }
 
   openConnectDataset(dataset) {
     this.setState(prev => {
@@ -190,41 +190,41 @@ class DatasetCatalog extends Component {
     });
   }
 
-  openDelete = (datasetId) => (e) => {
+  openDelete = (datasetId) => () => {
     this.setState({
       showDialogDelete: true,
       datasetId: datasetId
     });
   };
 
-  openEdit = (datasetId) => (e) => {
+  openEdit = (datasetId) => () => {
     this.setState({
       showDialogEdit: true,
       datasetId: datasetId
     });
-  }
+  };
 
-  openEnable = (datasetId) => (e) => {
+  openEnable = (datasetId) => () => {
     this.setState({
       showDialogEnable: true,
       datasetId: datasetId
     });
   };
 
-  openDisable = (datasetId) => (e) => {
+  openDisable = (datasetId) => () => {
     this.setState({
       showDialogDisable: true,
       datasetId: datasetId
     });
   };
 
-  dialogHandlerDelete = (answer) => (e) => {
+  dialogHandlerDelete = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.deleteDataset(this.state.datasetId).then(resp => {
+      DataSet.deleteDataset(this.state.datasetId).then(resp => { // eslint-disable-line no-unused-vars
         this.getDatasets();
         this.setState({ showDialogDelete: false, disableOkButton: false });
-      }).catch(error => {
+      }).catch(error => { // eslint-disable-line no-unused-vars
         this.setState(prev => {
           prev.showDialogDelete = true;
           prev.alertMessage = 'Please try again later.';
@@ -237,13 +237,13 @@ class DatasetCatalog extends Component {
     }
   };
 
-  dialogHandlerEnable = (answer) => (e) => {
+  dialogHandlerEnable = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, true).then(resp => {
+      DataSet.disableDataset(this.state.datasetId, true).then(resp => { // eslint-disable-line no-unused-vars
         this.getDatasets();
         this.setState({ showDialogEnable: false, disableOkButton: false });
-      }).catch(error => {
+      }).catch(error => { // eslint-disable-line no-unused-vars
         this.setState(prev => {
           prev.showDialogEnable = true;
           prev.alertMessage = 'Please try again later.';
@@ -257,13 +257,13 @@ class DatasetCatalog extends Component {
 
   };
 
-  dialogHandlerDisable = (answer) => (e) => {
+  dialogHandlerDisable = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, false).then(resp => {
+      DataSet.disableDataset(this.state.datasetId, false).then(resp => { // eslint-disable-line no-unused-vars
         this.getDatasets();
         this.setState({ showDialogDisable: false, disableOkButton: false });
-      }).catch(error => {
+      }).catch(error => { // eslint-disable-line no-unused-vars
         this.setState(prev => {
           prev.alertMessage = 'Please try again later.';
           prev.alertTitle = 'Something went wrong';
@@ -276,7 +276,7 @@ class DatasetCatalog extends Component {
     }
   };
 
-  dialogHandlerEdit = (answer) => (e) => {
+  dialogHandlerEdit = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
       this.setState(prev => {
@@ -362,7 +362,7 @@ class DatasetCatalog extends Component {
   defaultString(str, defaultStr) {
     if (str.length === 0) { return defaultStr; }
     return str;
-  };
+  }
 
   render() {
 
@@ -530,15 +530,15 @@ class DatasetCatalog extends Component {
                           td({
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: Theme.textTableBody },
-                            [dataSet.dbGapLink !== '' ?
-                              a({
-                                id: trIndex + '_linkdbGap',
-                                name: 'link_dbGap',
-                                href: dataSet.dbGapLink,
-                                target: '_blank',
-                                className: 'enabled'
-                              }, ['Link']) : '--'
-                            ]),
+                          [dataSet.dbGapLink !== '' ?
+                            a({
+                              id: trIndex + '_linkdbGap',
+                              name: 'link_dbGap',
+                              href: dataSet.dbGapLink,
+                              target: '_blank',
+                              className: 'enabled'
+                            }, ['Link']) : '--'
+                          ]),
 
                           td({
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),

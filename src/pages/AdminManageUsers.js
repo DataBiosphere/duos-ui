@@ -60,7 +60,7 @@ class AdminManageUsers extends Component {
       return prev;
     });
 
-  }
+  };
 
   handlePageChange = page => {
     this.setState(prev => {
@@ -77,7 +77,7 @@ class AdminManageUsers extends Component {
     });
   };
 
-  addUser = (e) => {
+  addUser = () => {
     this.setState(prev => {
       prev.user = null;
       prev.showAddUserModal = true;
@@ -85,7 +85,7 @@ class AdminManageUsers extends Component {
     });
   };
 
-  editUser = (user) => (e) => {
+  editUser = (user) => () => {
     this.setState(prev => {
       prev.userEmail = user.email;
       prev.user = user;
@@ -96,8 +96,9 @@ class AdminManageUsers extends Component {
 
   openResearcherReview = (userId) => {
     this.props.history.push(`researcher_review/${userId}`);
-  }
+  };
 
+  // eslint-disable-next-line no-unused-vars
   okModal = async (name) => {
     this.setState(prev => {
       prev.showAddUserModal = false;
@@ -105,19 +106,21 @@ class AdminManageUsers extends Component {
     }, () => {
       this.getUsers();
     });
-  }
+  };
 
+  // eslint-disable-next-line no-unused-vars
   closeModal = (name) => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
-  }
+  };
 
+  // eslint-disable-next-line no-unused-vars
   afterModalOpen = (name) => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
   };
 
   handleSearchUser = (query) => {
     this.setState({ searchUserText: query });
-  }
+  };
 
   searchTable = (query) => (row) => {
     if (query && query !== undefined) {
@@ -125,7 +128,7 @@ class AdminManageUsers extends Component {
       return text.toLowerCase().includes(query.toLowerCase());
     }
     return true;
-  }
+  };
 
   render() {
 
@@ -173,7 +176,7 @@ class AdminManageUsers extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => {
+          this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => { // eslint-disable-line no-unused-vars
             return h(Fragment, { key: user.dacUserId }, [
               div({ id: user.dacUserId, className: "row no-margin tableRow" }, [
                 div({ id: user.dacUserId + "_name", name: "userName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),
@@ -200,13 +203,13 @@ class AdminManageUsers extends Component {
                       id: user.dacUserId + "_btnResearcherReview", name: "btn_researcherReview", onClick: () => this.openResearcherReview(user.dacUserId),
                       isRendered: user.researcher !== false && user.completed === true, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9"
                     }, [
-                        div({
-                          className:
-                            ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
-                              : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
-                                : user.researcher === false || !user.completed ? 'disabled' : ''
-                        }, ["Review"]),
-                      ]),
+                      div({
+                        className:
+                          ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
+                            : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
+                              : user.researcher === false || !user.completed ? 'disabled' : ''
+                      }, ["Review"]),
+                    ]),
 
                     a({ isRendered: user.researcher === "false" || !user.completed, className: "admin-manage-buttons col-lg-10 col-md-10 col-sm-10 col-xs-9" }, [
                       div({ className: "disabled" }, ["Review"]),

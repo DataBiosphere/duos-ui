@@ -26,7 +26,7 @@ export const DatasetSummaryModal = hh(class DatasetSummaryModal extends Componen
 
     this.closeHandler = this.closeHandler.bind(this);
     this.OKHandler = this.OKHandler.bind(this);
-  };
+  }
 
   componentDidMount() {
     this.getSummaryInfo();

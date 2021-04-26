@@ -45,6 +45,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
     };
   }
 
+  // eslint-disable-next-line no-unused-vars
   static getDerivedStateFromProps(nextProps, prevState) {
     return {
       alertMessage: nextProps.alertMessage,

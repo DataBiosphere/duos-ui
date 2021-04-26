@@ -53,7 +53,7 @@ class DulReview extends Component {
       prev.consentName = consent.dulName;
       return prev;
     });
-  };
+  }
 
   setEnableVoteButton() {
     this.setState(prev => {
@@ -67,30 +67,31 @@ class DulReview extends Component {
     voteToUpdate.vote = vote;
     voteToUpdate.rationale = rationale;
     this.processVote(voteToUpdate);
-  };
+  }
 
   async processVote(vote) {
     if (vote.createDate === null) {
       Votes.postVote(this.state.consent.consentId, vote).then(
-        data => {
+        data => { // eslint-disable-line no-unused-vars
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully logged!" });
         }
-      ).catch(error => {
+      ).catch(error => { // eslint-disable-line no-unused-vars
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
 
     } else {
       Votes.updateVote(this.state.consent.consentId, vote).then(
-        data => {
+        data => { // eslint-disable-line no-unused-vars
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully edited!" });
         }
-      ).catch(error => {
+      ).catch(error => { // eslint-disable-line no-unused-vars
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
     }
-  };
+  }
 
-  confirmationHandlerOK = (answer) => (e) => {
+  // eslint-disable-next-line no-unused-vars
+  confirmationHandlerOK = (answer) => () => {
     this.setState({ showConfirmationDialog: false });
     Navigation.back(this.state.currentUser, this.props.history);
   };

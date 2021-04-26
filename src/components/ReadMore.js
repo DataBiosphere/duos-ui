@@ -68,7 +68,7 @@ export const ReadMore = hh(class ReadMore extends Component {
           })], linkElementsStyle: this.state.readStyle,
       };
     return a({ onClick: () => fun(), style: linkElementsStyle}, linkElements);
-  }
+  };
 
   render() {
     const readLink = this.state.expanded ?

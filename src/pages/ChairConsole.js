@@ -98,7 +98,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     );
   }
 
-  openDULReview = (voteId, referenceId) => (e) => {
+  openDULReview = (voteId, referenceId) => () => {
     this.props.history.push(`dul_review/${voteId}/${referenceId}`);
   };
 
@@ -111,11 +111,11 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     return (!_.isEmpty(dacChairRoles)) && pendingCaseDulCollectStatus;
   };
 
-  openDulCollect = (consentId) => (e) => {
+  openDulCollect = (consentId) => () => {
     this.props.history.push(`dul_collect/${consentId}`);
   };
 
-  openAccessReview = (referenceId, alreadyVoted) => async (e) => {
+  openAccessReview = (referenceId, alreadyVoted) => async () => {
     const pathStart = NavigationUtils.accessReviewPath();
     let chairFinal = false;
     if(this.state.currentUser && alreadyVoted) {
@@ -139,7 +139,7 @@ export const ChairConsole = hh(class ChairConsole extends Component {
     return (!_.isEmpty(dacChairRoles)) && pendingCaseAccessCollectStatus;
   };
 
-  openAccessCollect = (referenceId, electionId) => (e) => {
+  openAccessCollect = (referenceId, electionId) => () => {
     this.props.history.push(`access_collect/${electionId}/${referenceId}`);
   };
 

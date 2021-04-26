@@ -12,7 +12,7 @@ export const SubmitVoteBox = hh(class SubmitVoteBox extends PureComponent {
     rationale: this.props.rationale === null ? '' : this.props.rationale,
   };
 
-  logVote = (e) => {
+  logVote = () => {
     if (this.state.voteStatus != null) {
       this.setState({
         enableVoteButton: false,

@@ -17,11 +17,11 @@ class DulCollect extends Component {
     this.back = this.back.bind(this);
     this.state = this.initialState();
     this.handlerReminder = this.handlerReminder(this);
-  };
+  }
 
   back() {
     this.props.history.goBack();
-  };
+  }
 
   async componentDidMount() {
     const consentId = this.props.match.params.consentId;
@@ -44,7 +44,7 @@ class DulCollect extends Component {
       return prev;
     });
 
-  };
+  }
 
   chunk(arr, size) {
     let newArr = [];
@@ -52,7 +52,7 @@ class DulCollect extends Component {
       newArr.push(arr.slice(i, i + size));
     }
     return newArr;
-  };
+  }
 
   initialState() {
     return {
@@ -77,21 +77,21 @@ class DulCollect extends Component {
         ['Pending', 0]
       ]
     };
-  };
+  }
 
-  handlerReminder = (e) => (voteId) => {
+  handlerReminder = () => (voteId) => {
     this.setState(prev => {
       prev.buttonDisabled = true;
       return prev;
     });
-    this.sendReminder(voteId).then(reminder => {
+    this.sendReminder(voteId).then(reminder => { // eslint-disable-line no-unused-vars
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = true;
         prev.buttonDisabled = false;
         return prev;
       });
-    }).catch(error => {
+    }).catch(error => { // eslint-disable-line no-unused-vars
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = false;
@@ -103,9 +103,10 @@ class DulCollect extends Component {
 
   async sendReminder(voteId) {
     return await Email.sendReminderEmail(voteId);
-  };
+  }
 
-  dialogHandlerReminder = (answer) => (e) => {
+  // eslint-disable-next-line no-unused-vars
+  dialogHandlerReminder = (answer) => () => {
     this.setState({ showDialogReminder: false });
   };
 
@@ -120,7 +121,7 @@ class DulCollect extends Component {
     );
   };
 
-  confirmationHandlerOK = (answer) => async (e) => {
+  confirmationHandlerOK = (answer) => async () => {
     if (answer === true) {
       let election = this.state.election;
       election.status = 'Closed';
@@ -164,7 +165,7 @@ class DulCollect extends Component {
       ];
       return prev;
     });
-  };
+  }
 
   render() {
 

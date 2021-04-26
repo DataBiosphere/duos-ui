@@ -73,12 +73,12 @@ class ResearcherConsole extends Component {
 
   };
 
-  dialogHandlerCancelDAR = (answer) => (e) => {
+  dialogHandlerCancelDAR = (answer) => () => {
     this.setState({ buttonDisabled: true });
     if (answer === true) {
-      DAR.cancelDar(this.state.dataRequestId).then(resp => {
-        this.init(this.state.currentUser);
-      }).catch(error => {
+      DAR.cancelDar(this.state.dataRequestId).then(resp => { // eslint-disable-line no-unused-vars
+        this.init();
+      }).catch(error => { // eslint-disable-line no-unused-vars
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to cancel the request. Please try again.', buttonDisabled: false });
       });
     } else {
@@ -86,12 +86,12 @@ class ResearcherConsole extends Component {
     }
   };
 
-  dialogHandlerDeletePDAR = (answer) => (e) => {
+  dialogHandlerDeletePDAR = (answer) => () => {
     this.setState({ buttonDisabled: true });
     if (answer === true) {
-      DAR.deleteDar(this.state.dataRequestId).then(resp => {
-        this.init(this.state.currentUser);
-      }).catch(error => {
+      DAR.deleteDar(this.state.dataRequestId).then(resp => { // eslint-disable-line no-unused-vars
+        this.init();
+      }).catch(error => { // eslint-disable-line no-unused-vars
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to delete the request. Please try again.', buttonDisabled: false });
       });
     } else {
@@ -102,10 +102,10 @@ class ResearcherConsole extends Component {
   componentDidMount() {
     let currentUser = Storage.getCurrentUser();
     this.setState({ currentUser: currentUser });
-    this.init(currentUser);
+    this.init();
   }
 
-  init(currentUser) {
+  init() {
 
     DAR.getDataAccessManage().then(
       dars => {
@@ -165,9 +165,9 @@ class ResearcherConsole extends Component {
                 id: "btn_createRequest",
                 className: "col-md-3 col-sm-4 col-xs-12 btn-primary btn-add access-background search-wrapper", to: "/dar_application"
               }, [
-                  div({ className: "all-icons add-access_white" }, []),
-                  span({}, ["Create Data Access Request"]),
-                ]),
+                div({ className: "all-icons add-access_white" }, []),
+                span({}, ["Create Data Access Request"]),
+              ]),
             ]),
 
             div({ style: Theme.lightTable }, [
@@ -238,7 +238,7 @@ class ResearcherConsole extends Component {
                 ]),
                 hr({ className: "table-head-separator" }),
 
-                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {
+                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {// eslint-disable-line no-unused-vars
                   return h(Fragment, { key: pdar.partialDarCode }, [
                     div({ key: pdar.partialDarCode, id: pdar.partialDarCode, className: "row no-margin tableRowPartial" }, [
                       a({
@@ -247,8 +247,8 @@ class ResearcherConsole extends Component {
                         className: "col-xs-1 cell-body delete-dar default-color",
                         onClick: this.deletePartialDar, value: pdar.dataRequestId
                       }, [
-                          span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
-                        ]),
+                        span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
+                      ]),
 
                       div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialId", name: "partialId", className: "col-xs-2" }, [pdar.partialDarCode]),
                       div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialTitle", name: "partialTitle", className: "col-xs-5" }, [pdar.projectTitle]),

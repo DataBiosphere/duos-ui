@@ -57,21 +57,21 @@ class AdminConsole extends Component {
     );
   }
 
-  addDac = (e) => {
+  addDac = () => {
     this.setState(prev => {
       prev.showAddDacModal = true;
       return prev;
     });
   };
 
-  addUser = (e) => {
+  addUser = () => {
     this.setState(prev => {
       prev.showAddUserModal = true;
       return prev;
     });
   };
 
-  async electionTimeout(e) {
+  async electionTimeout() {
     const timeOut = await ElectionTimeout.findApprovalExpirationTime();
     const isDataSetElection = await Election.isDataSetElectionOpen();
 

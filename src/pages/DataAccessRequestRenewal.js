@@ -483,10 +483,11 @@ class DataAccessRequestRenewal extends Component {
     this.saveDAR(null);
   }
 
+  // eslint-disable-next-line no-unused-vars
   saveDAR(response) {
   }
 
-  onDatasetsChange = (data, action) => {
+  onDatasetsChange = (data, action) => { // eslint-disable-line no-unused-vars
     this.setState(prev => {
       prev.formData.datasets = data;
       return prev;
