@@ -18,18 +18,14 @@ const customStyles = {
 
   content: {
     position: 'relative',
-    top: '0',
-    right: '0',
-    bottom: '0',
-    left: '0',
-    width: '600px',
-    margin: '12vh auto auto auto',
-    border: '1px solid rgb(204, 204, 204)',
+    maxHeight: '300px',
+    top: '30%',
+    margin: '0 auto',
+    maxWidth: '50%',
     background: 'rgb(255, 255, 255)',
-    overflow: 'auto',
-    borderRadius: '4px',
+    overflow: 'scroll',
     outline: 'none',
-    padding: '10px 20px 20px 20px',
+    padding: '20px 20px 20px 20px',
   }
 };
 
@@ -45,7 +41,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
     };
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     return {
       alertMessage: nextProps.alertMessage,
       alertTitle: nextProps.alertTitle
@@ -56,34 +52,30 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
     const { disableOkBtn = false, disableNoBtn = false } = this.props;
 
     return (
-
-      div({}, [
-
-        h(Modal, {
-          isOpen: this.props.showModal,
-          onAfterOpen: this.props.afterOpenModal,
-          onRequestClose: this.props.onRequestClose,
-          style: _.mergeAll([customStyles, this.props.style]),
-          contentLabel: "Modal"
-        }, [
-          div({ className: "dialog-header" }, [
-            button({ id: "btn_dialogClose", type: "button", className: "dialog-close-btn close", onClick: this.props.action.handler(false) }, [
-              span({ className: "glyphicon glyphicon-remove default-color" }),
-            ]),
-            h2({ id: "lbl_dialogTitle", className: "dialog-title " + this.props.color + "-color" }, [this.props.title]),
+      h(Modal, {
+        isOpen: this.props.showModal,
+        onAfterOpen: this.props.afterOpenModal,
+        onRequestClose: this.props.onRequestClose,
+        style: _.mergeAll([customStyles, this.props.style]),
+        contentLabel: "Modal"
+      }, [
+        div({ className: "dialog-header" }, [
+          button({ id: "btn_dialogClose", type: "button", className: "dialog-close-btn close", onClick: this.props.action.handler(false) }, [
+            span({ className: "glyphicon glyphicon-remove default-color" }),
           ]),
+          h2({ id: "lbl_dialogTitle", className: "dialog-title " + this.props.color + "-color" }, [this.props.title]),
+        ]),
 
-          div({ id: "lbl_dialogContent", className: "dialog-content" }, [
-            this.props.children,
-            div({ isRendered: this.state.alertTitle !== undefined, className: "dialog-alert" }, [
-              Alert({ id: "dialog", type: "danger", title: this.state.alertTitle, description: this.state.alertMessage })
-            ])
-          ]),
-
-          div({ className: "dialog-footer" }, [
-            button({ isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background", onClick: this.props.action.handler(false), disabled: disableNoBtn }, ["No"]),
-            button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background " + (this.props.type === "informative" ? "f-right" : ""), onClick: this.props.action.handler(true), disabled: disableOkBtn }, [this.props.action.label]),
+        div({ id: "lbl_dialogContent", className: "dialog-content" }, [
+          this.props.children,
+          div({ isRendered: this.state.alertTitle !== undefined, className: "dialog-alert" }, [
+            Alert({ id: "dialog", type: "danger", title: this.state.alertTitle, description: this.state.alertMessage })
           ])
+        ]),
+
+        div({ className: "dialog-footer row no-margin" }, [
+          button({ isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-lg-offset-3 col-md-3 col-md-offset-3 col-sm-4 col-sm-offset-2 col-xs-6 btn dismiss-background", onClick: this.props.action.handler(false), disabled: disableNoBtn }, ["No"]),
+          button({ id: "btn_action", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn " + this.props.color + "-background " + (this.props.type === "informative" ? "f-right" : ""), onClick: this.props.action.handler(true), disabled: disableOkBtn }, [this.props.action.label]),
         ])
       ])
     );
