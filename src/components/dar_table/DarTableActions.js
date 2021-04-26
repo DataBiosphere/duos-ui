@@ -106,6 +106,9 @@ export default function DarTableActions(props) {
       const targetTypes = (v.type === 'Chairperson' || v.type === 'DAC');
       return belongsToUser && targetTypes;
     })(votes);
+    const addStyle = {
+      height: '4rem'
+    };
 
     return ([
       div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar)}, [
@@ -116,6 +119,7 @@ export default function DarTableActions(props) {
           darReferenceId,
           disabled: isEmpty(targetVotes),
           isRendered: visibilityOptions.showVote && isElectionOpen(election),
+          addBaseStyle: addStyle
         }),
         h(DarTableCancelButton, {
           election,
@@ -124,7 +128,8 @@ export default function DarTableActions(props) {
           updateLists,
           isIcon: visibilityOptions.showCancelIcon,
           isRendered: isElectionOpen(election) && consoleType !== consoleTypes.MEMBER,
-          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS
+          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS,
+          addBaseStyle: addStyle
         }),
         h(DarTableOpenButton, {
           dar,
@@ -132,7 +137,8 @@ export default function DarTableActions(props) {
           openConfirmation,
           label: 'Open',
           isRendered: !isElectionOpen(election),
-          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS
+          disabled: !isChair && consoleType !== consoleTypes.MANAGE_ACCESS,
+          addBaseStyle: addStyle
         }),
         createResearcherButtons(dar, visibilityOptions.showResearcher, history, researcher)
       ])

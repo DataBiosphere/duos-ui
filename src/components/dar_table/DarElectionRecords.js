@@ -10,6 +10,7 @@ import {
 import { Styles } from '../../libs/theme';
 import DarTableActions, {consoleTypes} from './DarTableActions';
 import { Theme } from '../../libs/theme';
+import { ReadMore } from '../ReadMore';
 
 ////////////////////
 //HELPER FUNCTIONS//
@@ -55,8 +56,20 @@ export default function DarElectionRecords(props) {
         onMouseEnter: applyTextHover,
         onMouseLeave: (e) => removeTextHover(e, Styles.TABLE.DATA_REQUEST_TEXT.color)
       }, [dar && dar.data ? dar.data.darCode : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? dar.data.projectTitle : '- -']),
-      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, dar.data.datasetIds) : '- -']),
+      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [ReadMore({
+        expanded: false,
+        inline: true,
+        hideUnderLimit: true,
+        readLessText: ' Read Less',
+        content: dar && dar.data ? dar.data.projectTitle : '- -'
+      })]),
+      div({style: Object.assign({}, Styles.TABLE.TITLE_CELL, recordTextStyle)}, [ReadMore({
+        expanded: false,
+        inline: true,
+        hideUnderLimit: true,
+        readLessText: ' Read Less',
+        content: dar && dar.data ? getNameOfDatasetForThisDAR(dar.data.datasets, dar.data.datasetIds) : '- -'
+      })]),
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       electionStatusTemplate(consoleType, dar, election, recordTextStyle, votes, showVotes, history),
