@@ -6,8 +6,8 @@ import concat from 'lodash/fp/concat';
 import clone from 'lodash/fp/clone';
 import uniq from 'lodash/fp/uniq';
 import head from 'lodash/fp/head';
-import { searchOntology } from '../libs/ontologyService';
-import { Notifications } from '../libs/utils';
+import { searchOntology } from './ontologyService';
+import { Notifications } from './utils';
 
 const srpTranslations = {
   hmb: {
@@ -403,6 +403,14 @@ export const DataUseTranslation = {
     });
     restrictionStatements = await Promise.all(processingPromises);
     restrictionStatements = filter((statement) => !isNil(statement))(restrictionStatements);
+    if (!isNil(dataUse.other)) {
+      restrictionStatements = restrictionStatements.concat(
+        { code: "OTH", description: dataUse.other });
+    }
+    if (!isNil(dataUse.secondaryOther)) {
+      restrictionStatements = restrictionStatements.concat(
+        { code: "OTH2", description: dataUse.secondaryOther });
+    }
     return restrictionStatements;
   }
 };

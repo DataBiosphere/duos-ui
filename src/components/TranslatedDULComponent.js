@@ -33,7 +33,7 @@ export async function GenerateUseRestrictionStatements(dataUse) {
       key: `${restriction.code}-statement`,
     }, [restriction.description]);
   });
-};
+}
 
 //component generation for non AccessReviewV2 components
 //template structure is different between DAR and DUL due to differing grid organization in previous template, making it hard to convert
