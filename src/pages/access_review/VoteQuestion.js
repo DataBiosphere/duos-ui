@@ -17,7 +17,7 @@ const FADED = {
 
 const INPUT = {
   backgroundColor: '#ffffff',
-  fontSize: '12px',
+  fontSize: '1.35rem',
   fontWeight: Theme.font.weight.regular,
   border: 'none',
   padding: '8px',

@@ -706,7 +706,7 @@ export const Match = {
     const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
     const res = await fetchOk(url, Config.authOpts());
     try {
-      const answer = await res.json();
+      const answer = await res;
       return answer;
     } catch (error) {
       return {};

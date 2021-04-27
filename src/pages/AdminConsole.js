@@ -2,7 +2,6 @@ import { Component } from 'react';
 import { div, hr } from 'react-hyperscript-helpers';
 import { AdminConsoleBox } from '../components/AdminConsoleBox';
 import { PageHeading } from '../components/PageHeading';
-import { AddDacModal } from './manage_dac/AddDacModal';
 import { AddUserModal } from '../components/modals/AddUserModal';
 import { ElectionTimeoutModal } from '../components/modals/ElectionTimeoutModal';
 import { Election, ElectionTimeout, PendingCases } from '../libs/ajax';
@@ -18,7 +17,6 @@ class AdminConsole extends Component {
     this.state = {
       currentUser: currentUser,
       showModal: false,
-      showAddDacModal: false,
       showAddUserModal: false,
       showElectionTimeoutModal: false,
       dulUnreviewedCases: 0,
@@ -57,13 +55,6 @@ class AdminConsole extends Component {
     );
   }
 
-  addDac = () => {
-    this.setState(prev => {
-      prev.showAddDacModal = true;
-      return prev;
-    });
-  };
-
   addUser = () => {
     this.setState(prev => {
       prev.showAddUserModal = true;
@@ -90,10 +81,6 @@ class AdminConsole extends Component {
         this.setState({showAddUserModal: false});
         this.props.history.push(`admin_manage_users`);
         break;
-      case 'addDac':
-        this.setState({showAddDacModal: false});
-        this.props.history.push(`manage_dac`);
-        break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
     }
@@ -101,7 +88,6 @@ class AdminConsole extends Component {
 
   closeModal = (name) => {
     switch (name) {
-      case 'addDac': this.setState({ showAddDacModal: false }); break;
       case 'addUser': this.setState({ showAddUserModal: false }); break;
       case 'electionTimeout': this.setState({ showElectionTimeoutModal: false }); break;
       default: break;
@@ -110,7 +96,6 @@ class AdminConsole extends Component {
 
   afterModalOpen = (name) => {
     switch (name) {
-      case 'addDac': this.setState(prev => { prev.showAddDacModal = false; return prev; }); break;
       case 'addUser': this.setState(prev => { prev.showAddUserModal = false; return prev; }); break;
       case 'electionTimeout': this.setState(prev => { prev.showElectionTimeoutModal = false; return prev; }); break;
       default: break;
@@ -214,25 +199,7 @@ class AdminConsole extends Component {
                   iconSize: 'large',
                 })
               ]),
-
-              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
-                AdminConsoleBox({
-                  id: 'btn_addDAC',
-                  clickHandler: this.addDac,
-                  color: 'common',
-                  title: 'Add Data Access Committee',
-                  description: 'Create a new Data Access Committee in the system',
-                  iconName: 'add-dac',
-                  iconSize: 'large',
-                }),
-                AddDacModal({
-                  showModal: this.state.showAddDacModal,
-                  isEditMode: false,
-                  onOKRequest: this.okModal,
-                  onCloseRequest: this.closeModal,
-                  onAfterOpen: this.afterModalOpen
-                })
-              ])
+              consoleBoxPlaceholder
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [

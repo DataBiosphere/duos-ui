@@ -205,9 +205,9 @@ class AdminManageUsers extends Component {
                     }, [
                       div({
                         className:
-                          ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
-                            : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
-                              : user.researcher === false || !user.completed ? 'disabled' : ''
+                            ((user.researcher === true && user.completed === true && user.status === 'pending') || user.status === null) ? 'enabled'
+                              : user.researcher === true && user.completed === true && user.status !== 'pending' ? 'editable'
+                                : user.researcher === false || !user.completed ? 'disabled' : ''
                       }, ["Review"]),
                     ]),
 

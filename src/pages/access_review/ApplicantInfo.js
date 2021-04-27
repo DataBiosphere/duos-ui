@@ -59,7 +59,7 @@ export const ApplicantInfo = hh(
       const { content, researcherProfile } = this.props;
       const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
       return div(
-        { style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
+        { style: { fontFamily: 'Arial', color: Theme.palette.primary } }, [
           div({ style: HEADER }, 'Applicant Information'),
           div({ style: { display: 'flex', justifyContent: 'space-between' }},
             this.formatResearcherInfo(content)),

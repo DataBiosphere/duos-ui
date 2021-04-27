@@ -221,10 +221,10 @@ class DatasetCatalog extends Component {
   dialogHandlerDelete = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.deleteDataset(this.state.datasetId).then(resp => { // eslint-disable-line no-unused-vars
+      DataSet.deleteDataset(this.state.datasetId).then(() => {
         this.getDatasets();
         this.setState({ showDialogDelete: false, disableOkButton: false });
-      }).catch(error => { // eslint-disable-line no-unused-vars
+      }).catch(() => {
         this.setState(prev => {
           prev.showDialogDelete = true;
           prev.alertMessage = 'Please try again later.';
@@ -240,10 +240,10 @@ class DatasetCatalog extends Component {
   dialogHandlerEnable = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, true).then(resp => { // eslint-disable-line no-unused-vars
+      DataSet.disableDataset(this.state.datasetId, true).then(() => {
         this.getDatasets();
         this.setState({ showDialogEnable: false, disableOkButton: false });
-      }).catch(error => { // eslint-disable-line no-unused-vars
+      }).catch(() => {
         this.setState(prev => {
           prev.showDialogEnable = true;
           prev.alertMessage = 'Please try again later.';
@@ -260,10 +260,10 @@ class DatasetCatalog extends Component {
   dialogHandlerDisable = (answer) => () => {
     this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, false).then(resp => { // eslint-disable-line no-unused-vars
+      DataSet.disableDataset(this.state.datasetId, false).then(() => {
         this.getDatasets();
         this.setState({ showDialogDisable: false, disableOkButton: false });
-      }).catch(error => { // eslint-disable-line no-unused-vars
+      }).catch(() => {
         this.setState(prev => {
           prev.alertMessage = 'Please try again later.';
           prev.alertTitle = 'Something went wrong';
@@ -712,8 +712,7 @@ class DatasetCatalog extends Component {
             showModal: this.state.showDialogEdit,
             disableOkBtn: this.state.disableOkButton,
             action: { label: 'Yes', handler: this.dialogHandlerEdit }
-          }, [div({ className: 'dialog-description' }, ['Are you sure you want to edit this Dataset?']),]),
-
+          }, [div({ className: 'dialog-description' }, ['Are you sure you want to edit this Dataset?'])]),
           ConnectDatasetModal({
             isRendered: this.state.showConnectDatasetModal,
             showModal: this.state.showConnectDatasetModal,

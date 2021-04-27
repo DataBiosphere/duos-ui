@@ -13,20 +13,17 @@ const customStyles = {
     bottom: '0',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     overflowY: 'scroll',
-
   },
 
   content: {
     position: 'relative',
-    top: '0',
-    right: '0',
-    bottom: '0',
-    left: '0',
-    width: '750px',
-    margin: '12vh auto 50px auto',
+    top: '20%',
+    maxHeight: '60%',
+    margin: '0 auto',
+    maxWidth: '60%',
     border: '1px solid rgb(204, 204, 204)',
     background: 'rgb(255, 255, 255)',
-    overflow: 'hidden',
+    overflow: 'scroll',
     borderRadius: '4px',
     outline: 'none',
     padding: '10px 20px 20px 20px',
@@ -51,7 +48,6 @@ export const BaseModal = hh(class BaseModal extends Component {
           style: customStyles,
           contentLabel: "Modal"
         }, [
-
           div({ className: "modal-header" }, [
             button({ type: "button", className: "modal-close-btn close", onClick: this.props.onRequestClose }, [
               span({ className: "glyphicon glyphicon-remove default-color" }),
@@ -69,9 +65,7 @@ export const BaseModal = hh(class BaseModal extends Component {
               onClick: this.props.action.handler, disabled: disableOkBtn }, [this.props.action.label]),
             button({ isRendered: this.props.type !== "informative", id: "btn_cancel", className: "col-lg-3 col-md-3 col-sm-4 col-xs-6 btn dismiss-background", onClick: this.props.onRequestClose }, ["Cancel"]),
           ]),
-
         ])
-
       ])
     );
   }
