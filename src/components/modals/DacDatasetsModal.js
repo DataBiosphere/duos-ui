@@ -9,8 +9,7 @@ import { DataUseTranslation } from '../../libs/dataUseTranslation';
 
 export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
 
-  // eslint-disable-next-line no-unused-vars
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
       translatedDatasetRestrictions: [],

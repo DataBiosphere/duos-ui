@@ -98,8 +98,7 @@ class AdminManageUsers extends Component {
     this.props.history.push(`researcher_review/${userId}`);
   };
 
-  // eslint-disable-next-line no-unused-vars
-  okModal = async (name) => {
+  okModal = async () => {
     this.setState(prev => {
       prev.showAddUserModal = false;
       return prev;
@@ -108,13 +107,11 @@ class AdminManageUsers extends Component {
     });
   };
 
-  // eslint-disable-next-line no-unused-vars
-  closeModal = (name) => {
+  closeModal = () => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
   };
 
-  // eslint-disable-next-line no-unused-vars
-  afterModalOpen = (name) => {
+  afterModalOpen = () => {
     this.setState(prev => { prev.showAddUserModal = false; return prev; });
   };
 
@@ -176,7 +173,7 @@ class AdminManageUsers extends Component {
 
           hr({ className: "table-head-separator" }),
 
-          this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user, index) => { // eslint-disable-line no-unused-vars
+          this.state.userList.filter(this.searchTable(searchUserText)).slice((currentPage - 1) * this.state.limit, currentPage * this.state.limit).map((user) => {
             return h(Fragment, { key: user.dacUserId }, [
               div({ id: user.dacUserId, className: "row no-margin tableRow" }, [
                 div({ id: user.dacUserId + "_name", name: "userName", className: "col-lg-2 col-md-2 col-sm-2 col-xs-2 cell-body text" }, [user.displayName]),

@@ -72,26 +72,25 @@ class DulReview extends Component {
   async processVote(vote) {
     if (vote.createDate === null) {
       Votes.postVote(this.state.consent.consentId, vote).then(
-        data => { // eslint-disable-line no-unused-vars
+        () => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully logged!" });
         }
-      ).catch(error => { // eslint-disable-line no-unused-vars
+      ).catch(() => {
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
 
     } else {
       Votes.updateVote(this.state.consent.consentId, vote).then(
-        data => { // eslint-disable-line no-unused-vars
+        () => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully edited!" });
         }
-      ).catch(error => { // eslint-disable-line no-unused-vars
+      ).catch(() => {
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
     }
   }
 
-  // eslint-disable-next-line no-unused-vars
-  confirmationHandlerOK = (answer) => () => {
+  confirmationHandlerOK = () => () => {
     this.setState({ showConfirmationDialog: false });
     Navigation.back(this.state.currentUser, this.props.history);
   };

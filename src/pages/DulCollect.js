@@ -84,14 +84,14 @@ class DulCollect extends Component {
       prev.buttonDisabled = true;
       return prev;
     });
-    this.sendReminder(voteId).then(reminder => { // eslint-disable-line no-unused-vars
+    this.sendReminder(voteId).then(() => {
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = true;
         prev.buttonDisabled = false;
         return prev;
       });
-    }).catch(error => { // eslint-disable-line no-unused-vars
+    }).catch(() => {
       this.setState(prev => {
         prev.showDialogReminder = true;
         prev.isReminderSent = false;
@@ -105,8 +105,7 @@ class DulCollect extends Component {
     return await Email.sendReminderEmail(voteId);
   }
 
-  // eslint-disable-next-line no-unused-vars
-  dialogHandlerReminder = (answer) => () => {
+  dialogHandlerReminder = () => () => {
     this.setState({ showDialogReminder: false });
   };
 

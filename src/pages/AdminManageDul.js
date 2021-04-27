@@ -224,7 +224,7 @@ class AdminManageDul extends Component {
         electionPromise = Election.createElection(consentId);
       }
       electionPromise.then(
-        (value) => { // eslint-disable-line no-unused-vars
+        () => {
           this.setState({
             showDialogCreate: false,
             alertTitle: undefined,
@@ -337,7 +337,7 @@ class AdminManageDul extends Component {
 
           this.state.electionsList.dul.filter(this.searchTable(searchDulText))
             .slice((currentPage - 1) * limit, currentPage * limit)
-            .map((election, eIndex) => {  // eslint-disable-line no-unused-vars
+            .map((election) => {
               return (
                 h(Fragment, { key: election.consentId }, [
                   div({

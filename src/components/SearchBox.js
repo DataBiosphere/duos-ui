@@ -53,6 +53,6 @@ SearchBox.propTypes = {
 };
 
 SearchBox.defaultProps = {
-  searchHandler: (query) => { }, // eslint-disable-line no-unused-vars
-  pageHandler: (page) => { } // eslint-disable-line no-unused-vars
+  searchHandler: () => { },
+  pageHandler: () => { }
 };

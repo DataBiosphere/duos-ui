@@ -73,7 +73,7 @@ export default function BackgroundSignIn(props) {
                   redirect(user);
                   setLoading(false);
                 },
-                error => { // eslint-disable-line no-unused-vars
+                () => {
                   Storage.clearStorage();
                   setLoading(false);
                 });

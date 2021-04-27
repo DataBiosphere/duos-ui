@@ -59,9 +59,9 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
 
   OKHandler() {
     if (this.state.needsApprovalModified) {
-      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(response => { // eslint-disable-line no-unused-vars
+      DataSet.reviewDataSet(this.state.datasetId, this.state.needsApproval).then(() => {
         this.createOrUpdateAssociations();
-      }, (error) => { // eslint-disable-line no-unused-vars
+      }, () => {
         this.setState(prev => {
           prev.showError = true;
           return prev;
@@ -79,19 +79,19 @@ export const ConnectDatasetModal = hh(class ConnectDatasetModal extends Componen
     });
 
     if (this.state.isUpdate) {
-      DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(response => { // eslint-disable-line no-unused-vars
+      DatasetAssociation.updateDatasetAssociations(this.state.datasetId, usersId).then(() => {
         this.props.onOKRequest('ConnectDatasetModal');
       }
-      , (error) => { // eslint-disable-line no-unused-vars
+      , () => {
         this.setState(prev => {
           prev.showError = true;
           return prev;
         });
       });
     } else {
-      DatasetAssociation.createDatasetAssociations(this.state.datasetId, usersId).then(response => { // eslint-disable-line no-unused-vars
+      DatasetAssociation.createDatasetAssociations(this.state.datasetId, usersId).then(() => {
         this.props.onOKRequest('ConnectDatasetModal');
-      }, (error) => { // eslint-disable-line no-unused-vars
+      }, () => {
         this.setState(prev => {
           prev.showError = true;
           return prev;

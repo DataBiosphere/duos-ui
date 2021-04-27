@@ -214,18 +214,18 @@ class DataOwnerReview extends Component {
       (updatedVote.hasConcerns !== this.state.vote.hasConcerns)) {
       if (this.state.vote.createDate === null) {
         Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote).then(
-          resp => { // eslint-disable-line no-unused-vars
+          () => {
             this.setState({ showConfirmDialog:true, showError:false, alertMessage: 'Your vote has been successfully logged!'});
           }
-        ).catch(error => { // eslint-disable-line no-unused-vars
+        ).catch(() => {
           this.setState({showError:true});
         });
       } else {
         Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote).then(
-          resp => { // eslint-disable-line no-unused-vars
+          () => {
             this.setState({ showConfirmDialog:true, showError:false, alertMessage: 'Your vote has been successfully edited!'});
           }
-        ).catch(error => { // eslint-disable-line no-unused-vars
+        ).catch(() => {
           this.setState({showError:true});
         });
       }

@@ -76,9 +76,9 @@ class ResearcherConsole extends Component {
   dialogHandlerCancelDAR = (answer) => () => {
     this.setState({ buttonDisabled: true });
     if (answer === true) {
-      DAR.cancelDar(this.state.dataRequestId).then(resp => { // eslint-disable-line no-unused-vars
+      DAR.cancelDar(this.state.dataRequestId).then(() => {
         this.init();
-      }).catch(error => { // eslint-disable-line no-unused-vars
+      }).catch(() => {
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to cancel the request. Please try again.', buttonDisabled: false });
       });
     } else {
@@ -89,9 +89,9 @@ class ResearcherConsole extends Component {
   dialogHandlerDeletePDAR = (answer) => () => {
     this.setState({ buttonDisabled: true });
     if (answer === true) {
-      DAR.deleteDar(this.state.dataRequestId).then(resp => { // eslint-disable-line no-unused-vars
+      DAR.deleteDar(this.state.dataRequestId).then(() => {
         this.init();
-      }).catch(error => { // eslint-disable-line no-unused-vars
+      }).catch(() => {
         this.setState({ alertTitle: 'Sorry, something went wrong when trying to delete the request. Please try again.', buttonDisabled: false });
       });
     } else {
@@ -238,7 +238,7 @@ class ResearcherConsole extends Component {
                 ]),
                 hr({ className: "table-head-separator" }),
 
-                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, rIndex) => {// eslint-disable-line no-unused-vars
+                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar) => {
                   return h(Fragment, { key: pdar.partialDarCode }, [
                     div({ key: pdar.partialDarCode, id: pdar.partialDarCode, className: "row no-margin tableRowPartial" }, [
                       a({

@@ -29,7 +29,7 @@ export const ElectionTimeoutModal = hh(class ElectionTimeoutModal extends Compon
     this.OKHandler = this.OKHandler.bind(this);
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {  // eslint-disable-line no-unused-vars
+  static getDerivedStateFromProps(nextProps) {
     return {
       timeOut: nextProps.timeOut,
       isDataSetElection: nextProps.isDataSetElection.open

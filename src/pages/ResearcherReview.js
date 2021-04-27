@@ -90,16 +90,15 @@ class ResearcherReview extends Component {
     }
     let userStatus = { status: status, rationale: rationale, roleId: 5 };
     User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
-      data => { // eslint-disable-line no-unused-vars
+      () => {
         this.setState({ showConfirmationDialogOK: true });
       }
-    ).catch(error => { // eslint-disable-line no-unused-vars
+    ).catch(() => {
       this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
     });
   };
 
-  //eslint-disable-next-line no-unused-vars
-  confirmationHandlerOK = (answer) => (e) => {
+  confirmationHandlerOK = () => () => {
     this.setState({ showConfirmationDialogOK: false });
     this.props.history.goBack();
   };

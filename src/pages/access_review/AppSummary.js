@@ -32,8 +32,7 @@ const TEXT = {
 
 export const AppSummary = hh(class AppSummary extends React.Component {
 
-  // eslint-disable-next-line no-unused-vars
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
       generateRestrictions: this.generateRestrictions.bind(this),
