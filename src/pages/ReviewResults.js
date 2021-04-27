@@ -66,26 +66,26 @@ export default function ReviewResults(props) {
     setRpElectionReview(rpElectionReview);
   };
 
-    return (
-      (!isNil(darInfo)) ?
-        div({id: 'container', style: {margin: '2rem'}}, [
-          div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
-            AccessReviewHeader({})
-          ]),
-          div({id: 'body', style: SECTION}, [
-            DarApplication({
-              voteAsChair,
-              darId,
-              darInfo,
-              accessElection,
-              consent,
-              accessElectionReview,
-              rpElectionReview,
-              researcherProfile,
-              datasets
-            })
-          ])
+  return (
+    (!isNil(darInfo)) ?
+      div({id: 'container', style: {margin: '2rem'}}, [
+        div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
+          AccessReviewHeader({})
+        ]),
+        div({id: 'body', style: SECTION}, [
+          DarApplication({
+            voteAsChair,
+            darId,
+            darInfo,
+            accessElection,
+            consent,
+            accessElectionReview,
+            rpElectionReview,
+            researcherProfile,
+            datasets
+          })
         ])
-        : null
-);
+      ])
+      : null
+  );
 }

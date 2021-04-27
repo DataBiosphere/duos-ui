@@ -54,7 +54,7 @@ export default function DataSharingLanguageTool() {
     }
     await DataUseTranslation.translateDataUseRestrictions(dataUse)
       .then((resp) => { translatedDataUse = resp; });
-    translatedDataUse = translatedDataUse.forEach((sentence) => {
+    translatedDataUse.forEach((sentence) => {
       return (typeof sentence === 'object') ?
         sdsl.push(" " + sentence.description)
         : sdsl.push(" " + sentence);

@@ -483,10 +483,10 @@ class DataAccessRequestRenewal extends Component {
     this.saveDAR(null);
   }
 
-  saveDAR(response) {
+  saveDAR() {
   }
 
-  onDatasetsChange = (data, action) => {
+  onDatasetsChange = (data) => {
     this.setState(prev => {
       prev.formData.datasets = data;
       return prev;

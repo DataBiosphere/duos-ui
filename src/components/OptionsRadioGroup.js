@@ -23,17 +23,17 @@ export const OptionsRadioGroup = (props) => {
             htmlFor: "rad_" + id + "_" + ix,
             className: "radio-wrapper"
           }, [
-              input({
-                type: "radio",
-                id: "rad_" + id + "_" + ix,
-                name: name,
-                value: optionValues[ix],
-                checked: value === optionValues[ix],
-                onChange: () => { }
-              }),
-              span({ className: "radio-check" }),
-              span({ className: "radio-label" }, [optionLabels[ix]])
-            ])
+            input({
+              type: "radio",
+              id: "rad_" + id + "_" + ix,
+              name: name,
+              value: optionValues[ix],
+              checked: value === optionValues[ix],
+              onChange: () => { }
+            }),
+            span({ className: "radio-check" }),
+            span({ className: "radio-label" }, [optionLabels[ix]])
+          ])
         );
       })
     ])

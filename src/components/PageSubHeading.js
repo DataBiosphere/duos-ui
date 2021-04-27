@@ -25,7 +25,7 @@ export const PageSubHeading = hh(class PageSubHeading extends Component {
     } else {
       return MEDIUM;
     }
-  };
+  }
 
   render() {
 

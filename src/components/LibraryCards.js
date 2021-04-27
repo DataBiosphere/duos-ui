@@ -19,6 +19,6 @@ export const LibraryCards = hh(class LibraryCards extends PureComponent {
           ]);
         })
     ]);
-  };
+  }
 
 });

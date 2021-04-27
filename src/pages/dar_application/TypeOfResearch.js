@@ -37,7 +37,7 @@ export const TypeOfResearch = hh(class TypeOfResearch extends Component {
 
   optionEventHandler = (e, optionHandler) => {
     optionHandler(e);
-  }
+  };
 
   render() {
     const props = this.props;

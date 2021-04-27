@@ -32,7 +32,7 @@ const TEXT = {
 
 export const AppSummary = hh(class AppSummary extends React.Component {
 
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
       generateRestrictions: this.generateRestrictions.bind(this),

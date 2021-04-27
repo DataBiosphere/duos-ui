@@ -14,7 +14,7 @@ export default function CollaboratorList(props) {
     margin: '2px',
     border: '1px solid #d9534f',
     color: '#d9534f'
-  }
+  };
 
   const cardStyle = {
     padding: '3%',
@@ -34,7 +34,7 @@ export default function CollaboratorList(props) {
     display: 'flex',
     justifyContent: 'flex-end'
   };
-  
+
   const toggleDeleteBool = (index, updatedBool) => {
     let deleteCopy = deleteBoolArray.slice();
     deleteCopy[index] = updatedBool;
@@ -189,7 +189,7 @@ export default function CollaboratorList(props) {
                   checked: collaborator.approverStatus === option.value,
                   name: `collaborator-${collaborator.uuid}-approver-status`,
                   value: option.value,
-                  onChange: (e) => updateAttribute(index, 'approverStatus', option.value)
+                  onChange: () => updateAttribute(index, 'approverStatus', option.value)
                 }),
                 span({ className: "radio-check"}),
                 span({ className: 'radio-label '}, [option.label])
@@ -221,4 +221,4 @@ export default function CollaboratorList(props) {
       ])
     ])
   );
-};
+}
