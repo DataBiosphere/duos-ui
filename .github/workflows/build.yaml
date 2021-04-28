@@ -53,7 +53,11 @@ jobs:
         -t ${{ steps.construct-tags.outputs.sha-tag }} \
         -t ${{ steps.construct-tags.outputs.environment-tag }} \
         .
+    - name: Log Testing
+      if: ${{ github.github_actor != 'rushtong' }}
+      run: echo "${{ github.github_actor }}"
     - name: Push Image to GCR
+      if: ${{ github.github_actor != 'dependabot' }}
       run: |
         docker push ${{ steps.construct-tags.outputs.sha-tag }}
         docker push ${{ steps.construct-tags.outputs.environment-tag }}
