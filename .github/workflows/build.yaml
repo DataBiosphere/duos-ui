@@ -53,8 +53,7 @@ jobs:
         -t ${{ steps.construct-tags.outputs.sha-tag }} \
         -t ${{ steps.construct-tags.outputs.environment-tag }} \
         .
-    - name: Log Testing
-      if: github.actor != 'dependabot'
+    - name: Log Github Actor
       run: echo "${{ github.actor }}"
     - name: Push Image to GCR
       if: github.actor != 'dependabot'
