@@ -5,7 +5,6 @@ import {AppSummary} from './AppSummary';
 import {VoteSummary} from './VoteSummary';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
 import { isNil, get, find } from 'lodash/fp';
-
 const SECTION = {
   fontFamily: 'Arial',
   margin: '1rem 0',
@@ -26,7 +25,7 @@ const HEADER_BOLD = {
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
 
   render() {
-    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets } = this.props;
+    const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets, matchData } = this.props;
     const accessVotes = isNil(accessElectionReview) ? null : get( 'reviewVote')(accessElectionReview);
     const rpVotes = isNil(rpElectionReview) ? null : get( 'reviewVote')(rpElectionReview);
     const datasetName = isNil(datasets) ? "" : (find({propertyName: "Dataset Name"})(datasets[0].properties)).propertyValue;
@@ -51,6 +50,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           question: 'Should data access be granted to this application?',
           questionNumber: '1',
           votes: accessVotes,
+          matchData: matchData
         }),
         VoteSummary({
           isRendered: voteAsChair && !isNil(rpVotes),

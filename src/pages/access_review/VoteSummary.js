@@ -6,6 +6,10 @@ import { Theme } from '../../libs/theme';
 import { Chart } from 'react-google-charts';
 import * as fp from 'lodash/fp';
 import * as moment from 'moment';
+import {isNil} from "lodash/fp";
+import {getOr} from "lodash/fp";
+import {get} from "lodash/fp";
+import {span} from "react-hyperscript-helpers";
 
 const STYLE = {
   color: Theme.palette.primary,
@@ -25,6 +29,19 @@ const HEADER_STYLE = {
   textTransform: 'uppercase',
   margin: '16px 0px',
   opacity: '70%',
+};
+
+const VOTE_STYLE = {
+  borderRadius: 9,
+  backgroundColor: '#DFE8EE',
+  height: 180,
+  width: 275,
+  padding: 0,
+  margin: '.5rem',
+  overflowX: 'hidden',
+  overflowY: 'scroll',
+  display: 'flex',
+  flexDirection: 'column'
 };
 
 const QUESTION_STYLE = {
@@ -120,18 +137,7 @@ export const VoteSummary = hh(
           : '';
       return div({
         key: vote.vote.voteId,
-        style: {
-          borderRadius: 9,
-          backgroundColor: '#DFE8EE',
-          height: 180,
-          width: 275,
-          padding: 0,
-          margin: '.5rem',
-          overflowX: 'hidden',
-          overflowY: 'scroll',
-          display: 'flex',
-          flexDirection: 'column'
-        },
+        style: VOTE_STYLE
       }, [
         div({style: {flex: '1 0 auto', fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [vote.displayName]),
         div({style: {flex: '1 0 auto', margin: 0, padding: 0, borderTop: '1px solid #BABEC1', height: 0}}, []),
@@ -167,7 +173,20 @@ export const VoteSummary = hh(
       }
     };
 
+    formatMatchData = (matchData) => {
+      const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
+      const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
+      const voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
+      const createDateString = moment(get('createDate')(matchData)).format('YYYY-MM-DD');
+      const style = { marginLeft: '2rem', fontWeight: 'normal', textTransform: 'none' };
+      return div({}, [
+        div({},['DUOS Algorithm Decision:', span({style: style}, [voteString])]),
+        div({},['Date:', span({style: style}, [createDateString])]),
+      ]);
+    };
+
     render() {
+      console.log(this.props.votes);
       const data = this.voteChart(fp.map('vote')(this.props.votes));
       const options = {
         ...baseOptions, ...{
@@ -194,10 +213,13 @@ export const VoteSummary = hh(
           [
             this.voteResultsBox(data, options),
             fp.map(this.memberVote)(this.props.votes),
+          ]),
+          div({isRendered: !isNil(this.props.matchData), style: HEADER_STYLE}, ['How committee chairs voted:']),
+          div({isRendered: !isNil(this.props.matchData), style: HEADER_STYLE}, ['DUOS Algorithm Decision:']),
+          div({ isRendered: !isNil(this.props.matchData), style: {...VOTE_STYLE, height: '80px', padding: '10px' }}, [
+            this.formatMatchData(this.props.matchData)
           ])
         ]),
-      ])
-      ;
+      ]);
     }
-
   });
