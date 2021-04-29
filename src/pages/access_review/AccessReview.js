@@ -49,14 +49,22 @@ class AccessReview extends React.PureComponent {
       }
     };
 
-    const [darData, allVotes, electionData] = await Promise.all([
+    const [darData, electionData] = await Promise.all([
       getDarData(darId),
-      //Vote information
-      Votes.getDarVotes(darId),
       getElectionInformation(darId)
     ]);
+
     const {datasets, darInfo, consent, researcherProfile} = darData;
     const {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection} = electionData;
+
+    let electionIds = [];
+    if (!isNil(accessElection)) {
+      electionIds.push(accessElection.electionId);
+    }
+    if (!isNil(rpElection)) {
+      electionIds.push(rpElection.electionId);
+    }
+    const allVotes = await Votes.getElectionVotes(darId, electionIds);
 
     this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
   }
