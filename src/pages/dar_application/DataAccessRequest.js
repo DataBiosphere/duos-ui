@@ -117,7 +117,6 @@ export default function DataAccessRequest(props) {
       const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
       let updatedDULQuestions = {};
       let ontologyTally = {};
-
       if (!isNil(datasetCollection)) {
         const collectionLength = datasetCollection.length;
         datasetCollection.forEach(dataset => {
@@ -192,7 +191,7 @@ export default function DataAccessRequest(props) {
   }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
 
   const renderDULQuestions = (darCode) => {
-    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions);
+    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value !== true)(activeDULQuestions);
 
     if(!isEmpty(darCode)) {
       //for submitted dars dsAcknowledgement is not processed properly due to dataset split, therefore you need to check dsAcknowledgement directly
