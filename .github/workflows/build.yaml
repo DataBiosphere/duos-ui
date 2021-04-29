@@ -13,8 +13,6 @@ on:
     paths-ignore:
     - 'README.md'
 env:
-  VAULT_ADDR: https://clotho.broadinstitute.org:8200
-  VAULT_PATH_GCR: secret/devops/ci/gcp-sa/broad-dsp-gcr-public/gcr-publish-key
   REGISTRY_HOST: gcr.io
   GOOGLE_PROJECT: broad-dsp-gcr-public
   SERVICE_NAME: ${{ github.event.repository.name }}
