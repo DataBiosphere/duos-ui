@@ -7,6 +7,7 @@ import includes from 'lodash/fp/includes';
 import cloneDeep from 'lodash/fp/cloneDeep';
 import isEqual from 'lodash/fp/isEqual';
 import every from 'lodash/fp/every';
+import any from 'lodash/fp/some';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 import UploadLabelButton from '../../components/UploadLabelButton';
@@ -191,7 +192,7 @@ export default function DataAccessRequest(props) {
   }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
 
   const renderDULQuestions = (darCode) => {
-    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value !== true)(activeDULQuestions);
+    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && any(value => value === true)(activeDULQuestions);
 
     if(!isEmpty(darCode)) {
       //for submitted dars dsAcknowledgement is not processed properly due to dataset split, therefore you need to check dsAcknowledgement directly
