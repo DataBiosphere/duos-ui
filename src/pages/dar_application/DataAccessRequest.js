@@ -129,8 +129,8 @@ export default function DataAccessRequest(props) {
                   //process DS attributes seperately due to unique attributes
                   calculateDSTally(value, ontologyTally);
                 } else {
-                  //otherwise mark question as true
-                  updatedDULQuestions[key] = isNil(value) ? true : value;
+                  //otherwise check value. If true, update with value, otherwise defer to current status on updatedDULQuestions
+                  updatedDULQuestions[key] = value || updatedDULQuestions[key];
                 }
               }
             })(dataUse);
