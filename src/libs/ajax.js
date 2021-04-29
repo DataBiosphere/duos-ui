@@ -971,13 +971,11 @@ export const Votes = {
   /**
    * Get all votes for given election IDs. Retrieves Chair and Member Access and RP
    * votes as well as Final and Agreement election votes.
+   * @param requestId
    * @param electionIds
    * @returns {Promise<List<Vote>>}
    */
   getElectionVotes: async (requestId, electionIds) => {
-    //this does not currently work because the API path includes the requestId
-    //and this method does not have that, so we need to make some backend changes
-    //for compatibility, but I'm not sure what exactly those changes are as of now
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote`;
     const res = await fetchOk(url, Config.authOpts(), electionIds);
     return res.json();
