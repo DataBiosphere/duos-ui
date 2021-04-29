@@ -130,7 +130,7 @@ export default function DataAccessRequest(props) {
                   calculateDSTally(value, ontologyTally);
                 } else {
                   //otherwise mark question as true
-                  updatedDULQuestions[key] = true;
+                  updatedDULQuestions[key] = isNil(value) ? true : value;
                 }
               }
             })(dataUse);
