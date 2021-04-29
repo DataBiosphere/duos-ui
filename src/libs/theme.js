@@ -128,9 +128,9 @@ export const Styles = {
     },
     HEADER_ROW: {
       fontFamily: targetFont,
-      fontSize: Theme.font.size.small,
+      fontSize: Theme.font.size.subheader,
       color: "#00243C",
-      fontWeight: Theme.font.weight.medium,
+      fontWeight: Theme.font.weight.semibold,
       backgroundColor: "#f3f6f7",
       display: "flex",
       justifyContent: "left",
@@ -258,6 +258,8 @@ export const Styles = {
     TABLE_TEXT_BUTTON: {
       display: 'flex',
       width: '65%',
+      minWidth: '98px',
+      maxWidth: '115px',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: Theme.palette.secondary,

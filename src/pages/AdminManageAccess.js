@@ -54,7 +54,7 @@ export default function AdminManageAccess(props) {
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
             div({style: Styles.TITLE}, ["Manage Data Access Request"]),
-            div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
+            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, ["Select and manage Data Access Requests for DAC review"])
           ]),
         ]),
         h(SearchBar, {handleSearchChange, currentPage})
