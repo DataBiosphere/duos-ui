@@ -4,12 +4,8 @@ import { Email } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 import { Theme } from '../../libs/theme';
 import { Chart } from 'react-google-charts';
-import * as fp from 'lodash/fp';
 import * as moment from 'moment';
-import {isNil} from "lodash/fp";
-import {getOr} from "lodash/fp";
-import {get} from "lodash/fp";
-import {span} from "react-hyperscript-helpers";
+import {isNil, filter, map} from "lodash/fp";
 
 const STYLE = {
   color: Theme.palette.primary,
@@ -117,9 +113,9 @@ export const VoteSummary = hh(
     };
 
     voteChart = (votes) => {
-      const positiveVotes = fp.filter(['vote', true])(votes).length;
-      const negativeVotes = fp.filter(['vote', false])(votes).length;
-      const pendingVotes = fp.filter(['vote', null])(votes).length;
+      const positiveVotes = filter(['vote', true])(votes).length;
+      const negativeVotes = filter(['vote', false])(votes).length;
+      const pendingVotes = filter(['vote', null])(votes).length;
       return [
         ['Results', 'Votes'],
         ['Yes', positiveVotes],
@@ -129,10 +125,10 @@ export const VoteSummary = hh(
     };
 
     memberVote = (vote) => {
-      const voteString = fp.isNil(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
-      const updateDateString = !fp.isNil(vote.vote.updateDate) ?
+      const voteString = isNil(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
+      const updateDateString = isNil(vote.vote.updateDate) ?
         moment(vote.vote.updateDate).format('MM/DD/YY')
-        : !fp.isNil(vote.vote.createDate) ?
+        : !isNil(vote.vote.createDate) ?
           moment(vote.vote.createDate).format('MM/DD/YY')
           : '';
       return div({
@@ -173,21 +169,11 @@ export const VoteSummary = hh(
       }
     };
 
-    formatMatchData = (matchData) => {
-      const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
-      const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
-      const voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
-      const createDateString = moment(get('createDate')(matchData)).format('YYYY-MM-DD');
-      const style = { marginLeft: '2rem', fontWeight: 'normal', textTransform: 'none' };
-      return div({}, [
-        div({},['DUOS Algorithm Decision:', span({style: style}, [voteString])]),
-        div({},['Date:', span({style: style}, [createDateString])]),
-      ]);
-    };
-
     render() {
-      console.log(this.props.votes);
-      const data = this.voteChart(fp.map('vote')(this.props.votes));
+      const memberVotes = filter((v) => v.vote.type === "DAC")(this.props.votes);
+      const chairVotes = filter((v) => v.vote.type === "FINAL")(this.props.votes);
+      const memberData = this.voteChart(map('vote')(memberVotes));
+      const chairData = this.voteChart(map('vote')(chairVotes));
       const options = {
         ...baseOptions, ...{
           slices: {
@@ -203,22 +189,26 @@ export const VoteSummary = hh(
           div({style: HEADER_STYLE},
             ['Question ', this.props.questionNumber, ':']),
           div({style: QUESTION_STYLE}, [this.props.question]),
+          div({isRendered: this.props.isAdmin, style: HEADER_STYLE}, ['How committee chairs voted:']),
+          div({isRendered: this.props.isAdmin,
+            style: {
+              display: 'flex',
+              flexWrap: 'wrap',
+            }
+          },[
+            this.voteResultsBox(chairData, options),
+            map(this.memberVote)(chairVotes),
+          ]),
           div({style: HEADER_STYLE}, ['How committee members voted:']),
           div({
             style: {
               display: 'flex',
               flexWrap: 'wrap',
-            },
-          },
-          [
-            this.voteResultsBox(data, options),
-            fp.map(this.memberVote)(this.props.votes),
+            }
+          },[
+            this.voteResultsBox(memberData, options),
+            map(this.memberVote)(memberVotes),
           ]),
-          div({isRendered: !isNil(this.props.matchData), style: HEADER_STYLE}, ['How committee chairs voted:']),
-          div({isRendered: !isNil(this.props.matchData), style: HEADER_STYLE}, ['DUOS Algorithm Decision:']),
-          div({ isRendered: !isNil(this.props.matchData), style: {...VOTE_STYLE, height: '80px', padding: '10px' }}, [
-            this.formatMatchData(this.props.matchData)
-          ])
         ]),
       ]);
     }

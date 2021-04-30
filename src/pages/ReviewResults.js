@@ -65,9 +65,7 @@ export default function ReviewResults(props) {
     try {
       matchData = await Match.findMatch(consent.consentId, accessElection.referenceId);
       setMatchData(matchData);
-      console.log(matchData);
     } catch (e) {
-      console.log(e);
       Notifications.showError({ text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}` });
     }
   };

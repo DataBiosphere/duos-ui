@@ -4,7 +4,8 @@ import {Theme} from '../../libs/theme';
 import {AppSummary} from './AppSummary';
 import {VoteSummary} from './VoteSummary';
 import ApplicationDownloadLink from '../../components/ApplicationDownloadLink';
-import { isNil, get, find } from 'lodash/fp';
+import { isEmpty, isNil, get, getOr, filter, find } from 'lodash/fp';
+
 const SECTION = {
   fontFamily: 'Arial',
   margin: '1rem 0',
@@ -22,12 +23,57 @@ const HEADER_BOLD = {
   fontWeight: Theme.font.weight.semibold,
 };
 
+const INFO_STYLE = {
+  ...HEADER_BOLD,
+  margin: '1rem 0',
+  color: Theme.palette.primary
+};
+
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
 
   render() {
+
+    let voteString;
+
+    const formatMatchData = (matchData) => {
+      const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
+      const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
+      voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
+      const style = { fontWeight: Theme.font.weight.semibold };
+      return div({}, [
+        div({},['DUOS Algorithm Decision: ', span({style: style}, [voteString])]),
+      ]);
+    };
+
+    //The final vote saved on the rpElection is marked as true if the access request is approved, and it is marked as false
+    //if the access request is denied, even if there are no votes, so we must calculate this value based on the votes
+    const determineRpResult = (rpVotes) => {
+      const chairVotes = filter((v) => !isNil(v.vote.vote) && v.vote.type === 'FINAL')(rpVotes);
+      if (!isEmpty(chairVotes)) {
+        const posVotes = filter((v) => v.vote.vote === true)(chairVotes).length;
+        const negVotes = filter((v) => v.vote.vote === false)(chairVotes).length;
+        return posVotes > negVotes ? "Yes" : "No";
+      } else {
+        const memberVotes = filter((v) => !isNil(v.vote.vote) && v.vote.type === 'DAC')(rpVotes);
+        const posVotes = filter((v) => v.vote.vote === true)(memberVotes).length;
+        const negVotes = filter((v) => v.vote.vote === false)(memberVotes).length;
+        if (posVotes === 0 && negVotes === 0) {
+          return "No decision";
+        } else {
+          return posVotes > negVotes ? "Yes" : "No";
+        }
+      }
+    };
+
     const { voteAsChair, darInfo, accessElection, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets, matchData } = this.props;
-    const accessVotes = isNil(accessElectionReview) ? null : get( 'reviewVote')(accessElectionReview);
+    const isAdmin = !isNil(matchData);
+    const formattedMatch = formatMatchData(matchData);
+    const accessVotes = isNil(accessElectionReview) ? null : get('reviewVote')(accessElectionReview);
+    const finalDecision = isNil(accessElectionReview) || isNil(accessElectionReview.election.finalVote) ? 'No decision'
+      : accessElectionReview.election.finalVote ? 'Yes' : 'No';
+    const agreement = finalDecision === voteString ? 'Yes' : 'No';
     const rpVotes = isNil(rpElectionReview) ? null : get( 'reviewVote')(rpElectionReview);
+    const rpDecision = isNil(rpElectionReview) || isNil(rpElectionReview.election.finalVote) ? 'No decision': determineRpResult(rpVotes);
     const datasetName = isNil(datasets) ? "" : (find({propertyName: "Dataset Name"})(datasets[0].properties)).propertyValue;
     //only render the page if the data has been populated to avoid errors downstream
     return !isNil(datasets) && !isNil(researcherProfile) ?
@@ -45,18 +91,32 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           span({style: HEADER_BOLD}, ["Dataset: "]),
           span({style: {...HEADER, paddingLeft: "5px"}}, [datasetName])
         ]),
+        div({ isRendered: isAdmin, style: INFO_STYLE }, [
+          "DAC Final DAR Decision: " + finalDecision
+        ]),
+        div({ isRendered: isAdmin, style: INFO_STYLE }, [
+          formattedMatch
+        ]),
+        div({ isRendered: isAdmin, style: INFO_STYLE }, [
+          "DAC vs. DUOS Algorithm Agreement: " + agreement
+        ]),
+        div({ isRendered: isAdmin, style: INFO_STYLE }, [
+          "Research Purpose Accurate: " + rpDecision
+        ]),
+
         VoteSummary({
           isRendered: voteAsChair && !isNil(accessVotes),
           question: 'Should data access be granted to this application?',
           questionNumber: '1',
           votes: accessVotes,
-          matchData: matchData
+          isAdmin: isAdmin
         }),
         VoteSummary({
           isRendered: voteAsChair && !isNil(rpVotes),
           question: 'Was the research purpose accurately converted to a structured format?',
           questionNumber: '2',
           votes: rpVotes,
+          isAdmin: isAdmin
         }),
         AppSummary({darInfo, accessElection, consent, researcherProfile})
       ])
