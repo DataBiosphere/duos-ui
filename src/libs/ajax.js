@@ -1097,6 +1097,37 @@ export const AuthenticateNIH = {
 
 };
 
+export const Institution = {
+  list: async () => {
+    const url = `${await Config.getApiUrl()}/institutions`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  getById: async (id) => {
+    const url = `${await Config.getApiUrl()}/institutions/${id}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  postInstitution: async (institution) => {
+    const url = `${await Config.getApiUrl()}/institutions`;
+    const res = await axios.post(url, institution, Config.authOpts());
+    return res.data;
+  },
+
+  putInstitution: async (id, institution) => {
+    const url = `${await Config.getApiUrl()}/institutions/${id}`;
+    const res = await axios.put(url, institution, Config.authOpts());
+    return res.data;
+  },
+
+  deleteInstitution: async (id) => {
+    const url = `${await Config.getApiUrl()}/institutions/${id}`;
+    return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+  }
+};
+
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
