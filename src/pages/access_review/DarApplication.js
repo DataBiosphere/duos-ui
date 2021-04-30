@@ -49,7 +49,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
     //the final vote saved on the rpElection is marked as true if the access request is approved, and it is marked as false
     //if the access request is denied, so we must calculate this value based on the votes for it to be accurate
     const determineRpResult = (rpVotes) => {
-      const chairVotes = filter((v) => !isNil(v.vote.vote) && v.vote.type === 'FINAL')(rpVotes);
+      const chairVotes = filter((v) => !isNil(v.vote.vote) && v.vote.type === 'Chairperson')(rpVotes);
       if (!isEmpty(chairVotes)) {
         const posVotes = filter((v) => v.vote.vote === true)(chairVotes).length;
         const negVotes = filter((v) => v.vote.vote === false)(chairVotes).length;
