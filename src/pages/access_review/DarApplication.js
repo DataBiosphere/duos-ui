@@ -45,8 +45,9 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
       ]);
     };
 
-    //The final vote saved on the rpElection is marked as true if the access request is approved, and it is marked as false
-    //if the access request is denied, even if there are no votes, so we must calculate this value based on the votes
+    //Unlike the final vote on the access election, the final vote saved on the rpElection is not a reflection of its votes
+    //the final vote saved on the rpElection is marked as true if the access request is approved, and it is marked as false
+    //if the access request is denied, so we must calculate this value based on the votes for it to be accurate
     const determineRpResult = (rpVotes) => {
       const chairVotes = filter((v) => !isNil(v.vote.vote) && v.vote.type === 'FINAL')(rpVotes);
       if (!isEmpty(chairVotes)) {
