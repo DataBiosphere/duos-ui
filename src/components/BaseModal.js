@@ -12,7 +12,7 @@ const customStyles = {
     right: '0',
     bottom: '0',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    overflowY: 'scroll',
+    overflowY: 'auto',
   },
 
   content: {
@@ -23,7 +23,7 @@ const customStyles = {
     maxWidth: '60%',
     border: '1px solid rgb(204, 204, 204)',
     background: 'rgb(255, 255, 255)',
-    overflow: 'scroll',
+    overflow: 'auto',
     borderRadius: '4px',
     outline: 'none',
     padding: '10px 20px 20px 20px',
