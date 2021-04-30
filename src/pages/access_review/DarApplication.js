@@ -69,11 +69,11 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
     const isAdmin = !isNil(matchData);
     const formattedMatch = formatMatchData(matchData);
     const accessVotes = isNil(accessElectionReview) ? null : get('reviewVote')(accessElectionReview);
-    const finalDecision = isNil(accessElectionReview) || isNil(accessElectionReview.election.finalVote) ? 'No decision'
+    const finalDecision = isNil(accessElectionReview) || isNil(accessElectionReview.election)  || isNil(accessElectionReview.election.finalVote) ? 'No decision'
       : accessElectionReview.election.finalVote ? 'Yes' : 'No';
     const agreement = finalDecision === voteString ? 'Yes' : 'No';
     const rpVotes = isNil(rpElectionReview) ? null : get( 'reviewVote')(rpElectionReview);
-    const rpDecision = isNil(rpElectionReview) || isNil(rpElectionReview.election.finalVote) ? 'No decision': determineRpResult(rpVotes);
+    const rpDecision = isNil(rpElectionReview) || isNil(rpElectionReview.election) || isNil(rpElectionReview.election.finalVote) ? 'No decision': determineRpResult(rpVotes);
     const datasetName = isNil(datasets) ? "" : (find({propertyName: "Dataset Name"})(datasets[0].properties)).propertyValue;
     //only render the page if the data has been populated to avoid errors downstream
     return !isNil(datasets) && !isNil(researcherProfile) ?
