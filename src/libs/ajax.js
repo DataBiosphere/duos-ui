@@ -535,8 +535,8 @@ export const Election = {
     return await res.json();
   },
 
-  findDataAccessElectionReview: async (electionId, isFinalAccess) => {
-    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}?isFinalAccess=${isFinalAccess}`;
+  findDataAccessElectionReview: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },

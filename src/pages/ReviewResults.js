@@ -48,8 +48,8 @@ export default function ReviewResults(props) {
       //so there is no vote information to display
     }
     try {
-      accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId, true);
-      rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId, false);
+      accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId);
+      rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId);
     } catch (error) {
       Notifications.showError({text: 'Error initializing Election Data'});
       return Promise.reject(error);
