@@ -171,7 +171,7 @@ export const VoteSummary = hh(
 
     render() {
       const memberVotes = filter((v) => v.vote.type === "DAC")(this.props.votes);
-      const chairVotes = filter((v) => v.vote.type === "FINAL")(this.props.votes);
+      const chairVotes = filter((v) => v.vote.type === "Chairperson")(this.props.votes);
       const memberData = this.voteChart(map('vote')(memberVotes));
       const chairData = this.voteChart(map('vote')(chairVotes));
       const options = {
