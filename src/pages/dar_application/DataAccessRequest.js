@@ -7,6 +7,7 @@ import includes from 'lodash/fp/includes';
 import cloneDeep from 'lodash/fp/cloneDeep';
 import isEqual from 'lodash/fp/isEqual';
 import every from 'lodash/fp/every';
+import any from 'lodash/fp/some';
 import { DAR } from '../../libs/ajax';
 import AsyncSelect from 'react-select/async';
 import UploadLabelButton from '../../components/UploadLabelButton';
@@ -117,7 +118,6 @@ export default function DataAccessRequest(props) {
       const targetDULKeys = ['ethicsApprovalRequired', 'collaboratorRequired', 'publicationResults', 'diseaseRestrictions', 'geneticStudiesOnly'];
       let updatedDULQuestions = {};
       let ontologyTally = {};
-
       if (!isNil(datasetCollection)) {
         const collectionLength = datasetCollection.length;
         datasetCollection.forEach(dataset => {
@@ -129,8 +129,8 @@ export default function DataAccessRequest(props) {
                   //process DS attributes seperately due to unique attributes
                   calculateDSTally(value, ontologyTally);
                 } else {
-                  //otherwise mark question as true
-                  updatedDULQuestions[key] = true;
+                  //otherwise check value. If true, update with value, otherwise defer to current status on updatedDULQuestions
+                  updatedDULQuestions[key] = value || updatedDULQuestions[key];
                 }
               }
             })(dataUse);
@@ -192,7 +192,7 @@ export default function DataAccessRequest(props) {
   }, [datasets, initializeDatasets, activeDULQuestions, formFieldChange, darCode]);
 
   const renderDULQuestions = (darCode) => {
-    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && !every(value => value === false)(activeDULQuestions);
+    let renderBool = !(isNil(activeDULQuestions) && isEmpty(activeDULQuestions)) && any(value => value === true)(activeDULQuestions);
 
     if(!isEmpty(darCode)) {
       //for submitted dars dsAcknowledgement is not processed properly due to dataset split, therefore you need to check dsAcknowledgement directly
