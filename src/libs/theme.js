@@ -21,8 +21,8 @@ export const Theme = {
     size: {
       title: '28px',
       superheader: '24px',
-      header: '1.7rem',
-      subheader: '16px',
+      header: '1.8rem',
+      subheader: '1.65rem',
       small: '1.5rem',
     },
     leading: {
@@ -128,7 +128,7 @@ export const Styles = {
     },
     HEADER_ROW: {
       fontFamily: targetFont,
-      fontSize: Theme.font.size.subheader,
+      fontSize: '1.6rem',
       color: "#00243C",
       fontWeight: Theme.font.weight.semibold,
       backgroundColor: "#f3f6f7",
