@@ -2,6 +2,7 @@ import { Page, Document, StyleSheet, View, /*PDFViewer*/ PDFDownloadLink, Text} 
 import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import isEmpty from 'lodash/fp/isEmpty';
+import { Theme } from '../libs/theme';
 
 const styles = StyleSheet.create({
   page: {
@@ -193,7 +194,7 @@ export default function ApplicationDownloadLink(props) {
   ]);
 
   return h(PDFDownloadLink, {fileName: `${darInfo.darCode}_Application_PDF`, document}, [
-    span({}, [
+    span({style: { fontSize: Theme.font.size.subheader}}, [
       i({ className: 'glyphicon glyphicon-download-alt', style: iconStyle}),
       'Full Application'
     ])

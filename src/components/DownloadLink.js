@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { div, a, i } from 'react-hyperscript-helpers';
+import { div, a, i, span } from 'react-hyperscript-helpers';
 import { Theme } from '../libs/theme';
 
 const ICON = {
@@ -16,7 +16,7 @@ export const DownloadLink = props => {
     },
     [
       i({ className: 'glyphicon glyphicon-download-alt', style: ICON }),
-      label,
+      span({style: { fontSize: Theme.font.size.small }}, label)
     ])
   ]);
 };

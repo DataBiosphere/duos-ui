@@ -16,6 +16,11 @@ const SMALL = {
   lineHeight: Theme.font.leading.dense,
 };
 
+const SUBHEADER = {
+  fontSize: Theme.font.size.subheader,
+  lineHeight: Theme.font.leading.dense
+}
+
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
   render() {
@@ -49,10 +54,10 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
             }),
             div({ id: "header-text" }, [
               div({ style: TITLE }, "Data Access Request (DAR) Review"),
-              div({ style: SMALL },
+              div({ style: SUBHEADER },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
-              div({ isRendered: !isNil(this.props.message), style: SMALL }, this.props.message )
+              div({ isRendered: !isNil(this.props.message), style: SUBHEADER }, this.props.message )
             ])
           ]
         )

@@ -3,13 +3,13 @@ import { div, h, img } from 'react-hyperscript-helpers';
 import { DAR } from '../libs/ajax';
 import SearchBar from '../components/SearchBar';
 import { Notifications, getElectionDate, processElectionStatus, darSearchHandler } from '../libs/utils';
-import { Styles} from '../libs/theme';
+import { Styles } from '../libs/theme';
 import DarTable from '../components/dar_table/DarTable';
 import DarTableSkeletonLoader from '../components/TableSkeletonLoader';
 import lockIcon from '../images/lock-icon.png';
 import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
-import {consoleTypes} from "../components/dar_table/DarTableActions";
+import { consoleTypes } from "../components/dar_table/DarTableActions";
 
 export default function NewChairConsole(props) {
   const [electionList, setElectionList] = useState([]);
@@ -59,7 +59,7 @@ export default function NewChairConsole(props) {
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
             div({style: Styles.TITLE}, ["DAC Chair Console"]),
-            div({style: Styles.SMALL}, ["Select and manage Data Access Requests for DAC review"])
+            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, ["Select and manage Data Access Requests for DAC review"])
           ]),
         ]),
         h(SearchBar, {handleSearchChange})

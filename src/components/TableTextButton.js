@@ -24,7 +24,7 @@ export default function TableTextButton(props) {
     dataTip
   } = props;
   const baseStyle = props.style || Styles.TABLE.TABLE_TEXT_BUTTON;
-  const style = setStyle(disabled, baseStyle);
+  const style = setStyle(disabled, baseStyle, 'backgroundColor');
   const divAttributes = setDivAttributes(disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave);
 
   return (
