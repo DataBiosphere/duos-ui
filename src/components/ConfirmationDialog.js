@@ -23,7 +23,7 @@ const customStyles = {
     margin: '0 auto',
     maxWidth: '50%',
     background: 'rgb(255, 255, 255)',
-    overflow: 'scroll',
+    overflow: 'auto',
     outline: 'none',
     padding: '20px 20px 20px 20px',
   }
