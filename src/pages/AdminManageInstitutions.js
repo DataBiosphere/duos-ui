@@ -3,7 +3,7 @@ import { div, h, img, a, span } from 'react-hyperscript-helpers';
 import { Institution } from '../libs/ajax';
 import { Styles} from '../libs/theme';
 import { Notifications } from '../libs/utils';
-import manageUsersIcon from "../images/icon_manage_users.png";
+import manageInstitutionsIcon from "../images/icon_manage_dac.png";
 import SearchBar from '../components/SearchBar';
 import InstitutionTable from '../components/institution_table/InstitutionTable';
 import AddInstitutionModal from '../components/modals/AddInstitutionModal';
@@ -87,7 +87,7 @@ export default function AdminManageInstitutions(props) {
           div({style: Styles.ICON_CONTAINER}, [
             img({
               id: 'lock-icon',
-              src: manageUsersIcon,
+              src: manageInstitutionsIcon,
               style: Styles.HEADER_IMG
             })
           ]),

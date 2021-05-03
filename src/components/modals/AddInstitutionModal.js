@@ -3,8 +3,8 @@ import {div, form, label, input } from 'react-hyperscript-helpers';
 import { Alert } from '../Alert';
 import { Institution } from '../../libs/ajax';
 import { BaseModal } from '../BaseModal';
-import addUserIcon from '../../images/icon_add_user.png';
-import editUserIcon from '../../images/icon_edit_user.png';
+import addInstitutionIcon from '../../images/icon_add_dac.png';
+import editInstitutionIcon from '../../images/icon_edit_dac.png';
 import { Notifications } from '../../libs/utils';
 
 const AddInstitutionModal = (props) => {
@@ -102,7 +102,7 @@ const AddInstitutionModal = (props) => {
     showModal: showModal,
     disableOkBtn: !validForm,
     onRequestClose: closeHandler,
-    imgSrc: mode === 'Add' ? addUserIcon : editUserIcon,
+    imgSrc: mode === 'Add' ? addInstitutionIcon : editInstitutionIcon,
     color: 'common',
     title: mode === 'Add' ? 'Add Institution' : 'Edit Institution',
     description: mode === 'Add' ? 'Add a new Institution in the system' : 'Edit an Institution in the system',
