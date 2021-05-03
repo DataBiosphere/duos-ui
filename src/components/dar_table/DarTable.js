@@ -1,7 +1,7 @@
-import { isEmpty, isNil, assign, head, map } from 'lodash/fp';
+import { isEmpty, isNil, assign } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
 import { div, h } from 'react-hyperscript-helpers';
-import { Election, User, Votes } from '../../libs/ajax';
+import { Election, User } from '../../libs/ajax';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
 import { Notifications, getDatasetNames } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
@@ -121,11 +121,11 @@ export default function DarTable(props) {
   const createElection = async (darId, index) => {
     if (!isNil(darId)) {
       try{
-        const updatedElections = await Election.createDARElection(darId);
-        const electionIds = map(election => election.electionId)(updatedElections);
-        const votes = await Votes.getElectionVotes(darId, electionIds);
+        //updatedElection is the new access election
+        const updatedElection = await Election.createDARElection(darId);
+        const accessVotes = await Election.getElectionVotes(updatedElection.electionId);
         const successMsg = 'Election successfully opened';
-        updateLists(head(updatedElections), darId, index, successMsg, votes);
+        updateLists(updatedElection, darId, index, successMsg, accessVotes);
         setShowConfirmation(false);
       } catch(error) {
         const errorReturn = {text: 'Error: Failed to create election!'};

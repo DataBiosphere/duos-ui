@@ -504,6 +504,12 @@ export const DatasetAssociation = {
 
 export const Election = {
 
+  getElectionVotes: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/election/${electionId}/votes`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
   findElectionById: async (electionId) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -965,19 +971,6 @@ export const Votes = {
   getDarFinalAccessVote: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/final`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  /**
-   * Get all votes for given election IDs. Retrieves Chair and Member Access and RP
-   * votes as well as Final and Agreement election votes.
-   * @param requestId
-   * @param electionIds
-   * @returns {Promise<List<Vote>>}
-   */
-  getElectionVotes: async (requestId, electionIds) => {
-    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote`;
-    const res = await fetchOk(url, Config.authOpts(), electionIds);
     return res.json();
   },
 
