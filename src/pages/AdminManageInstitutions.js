@@ -75,9 +75,11 @@ export default function AdminManageInstitutions(props) {
     setShowAddInstitutionModal(false);
   };
 
-  const modalSave = () => {
-    setShowAddInstitutionModal(false);
-    loadInstitutions();
+  const modalSave = (result) => {
+    if (result) {
+      setShowAddInstitutionModal(false);
+      loadInstitutions();
+    }
   };
 
   return (

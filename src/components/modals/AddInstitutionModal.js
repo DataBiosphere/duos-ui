@@ -81,14 +81,22 @@ const AddInstitutionModal = (props) => {
         const newInstitution = {
           name: institutionName
         };
-        result = await Institution.postInstitution(newInstitution);
+        try {
+          result = await Institution.postInstitution(newInstitution);
+        } catch (e) {
+          Notifications.showError({ text: "Unable to save institution by that name" });
+        }
         break;
       }
       case 'Edit': {
         const editInstitution = {
           name: institutionName
         };
-        result = await Institution.putInstitution(institution.id, editInstitution);
+        try {
+          result = await Institution.putInstitution(institution.id, editInstitution);
+        } catch (e) {
+          Notifications.showError({ text: "Unable to save institution by that name" });
+        }
         break;
       }
     }
