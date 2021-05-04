@@ -135,7 +135,17 @@ class AdminConsole extends Component {
                   unreviewedCases: dulUnreviewedCases
                 }),
               ]),
-              consoleBoxPlaceholder
+              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                AdminConsoleBox({
+                  id: 'btn_manageInstitutions',
+                  url: '/admin_manage_institutions',
+                  color: 'common',
+                  title: 'Manage Institutions',
+                  description: 'Add and manage Institutions',
+                  iconName: 'manage-user',
+                  iconSize: 'default',
+                }),
+              ])
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [

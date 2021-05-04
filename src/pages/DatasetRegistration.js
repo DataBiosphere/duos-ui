@@ -1095,7 +1095,7 @@ class DatasetRegistration extends Component {
                               defaultChecked: generalUse,
                               onClick: this.setGeneralUse,
                               label: 'General Research Use: ',
-                              description: 'use is permitted for any research purpose',
+                              description: 'Use is permitted for any research purpose',
                               disabled: isUpdateDataset,
                             }),
 
@@ -1106,7 +1106,7 @@ class DatasetRegistration extends Component {
                               defaultChecked: hmb,
                               onClick: this.setHmb,
                               label: 'Health/Medical/Biomedical Use: ',
-                              description: 'use is permitted for any health, medical, or biomedical purpose',
+                              description: 'Use is permitted for any health, medical, or biomedical purpose',
                               disabled: isUpdateDataset,
                             }),
 
@@ -1117,7 +1117,7 @@ class DatasetRegistration extends Component {
                               defaultChecked: diseases,
                               onClick: this.setDiseases,
                               label: 'Disease-related studies: ',
-                              description: 'use is permitted for research on the specified disease',
+                              description: 'Use is permitted for research on the specified disease',
                               disabled: isUpdateDataset,
                             }),
                             div({
@@ -1147,15 +1147,15 @@ class DatasetRegistration extends Component {
                               defaultChecked: other,
                               onClick: this.setOther,
                               label: 'Other Use:',
-                              description: 'permitted research use is defined as follows: ',
+                              description: 'Permitted research use is defined as follows: ',
                               disabled: isUpdateDataset,
                             }),
 
                             textarea({
                               style: {margin: '1rem 0'},
                               className: 'form-control',
-                              defaultValue: primaryOtherText,
-                              onBlur: (e) => this.setOtherText(e, 'primary'),
+                              value: primaryOtherText,
+                              onChange: (e) => this.setOtherText(e, 'primary'),
                               name: 'primaryOtherText',
                               id: 'primaryOtherText',
                               maxLength: '512',

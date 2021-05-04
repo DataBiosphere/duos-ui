@@ -1,10 +1,10 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {Config} from './config';
-import {forEach} from 'lodash';
-import {DAR, DataSet, Researcher} from "./ajax";
-import {Styles} from "./theme";
+import { Config } from './config';
+import { forEach } from 'lodash';
+import { DAR, DataSet, Researcher } from "./ajax";
+import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
@@ -349,9 +349,9 @@ export const searchOntologies = (query, callback) => {
     });
 };
 
-export const setStyle = (disabled, baseStyle) => {
-  const opacity = disabled ? 0.5 : 1;
-  return {opacity, ...baseStyle};
+export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
+  let appliedStyle = disabled ? {[targetColorAttribute] : Theme.palette.disabled} : {};
+  return Object.assign(baseStyle, appliedStyle);
 };
 
 export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave) => {

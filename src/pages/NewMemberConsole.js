@@ -57,7 +57,7 @@ export default function NewMemberConsole(props) {
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
             div({style: Styles.TITLE}, ["DAC Member Console"]),
-            div({style: Styles.SMALL}, ["Should data access be granted to this applicant?"])
+            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, ["Select and manage Data Access Requests for DAC review"])
           ]),
         ]),
         h(SearchBar, {handleSearchChange, currentPage})

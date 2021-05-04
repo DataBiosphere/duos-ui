@@ -42,6 +42,7 @@ import { SummaryVotes } from './pages/SummaryVotes';
 import HomeResearcherInfo from "./pages/HomeResearcherInfo";
 import BackgroundSignIn from './pages/BackgroundSignIn';
 import DataSharingLanguageTool from "./pages/DataSharingLanguageTool";
+import AdminManageInstitutions from './pages/AdminManageInstitutions';
 
 
 const Routes = (props) => (
@@ -69,6 +70,7 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/manage_dac" component={ManageDac} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
+    <AuthenticatedRoute path="/admin_manage_institutions" component={AdminManageInstitutions} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/summary_votes" component={SummaryVotes} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
