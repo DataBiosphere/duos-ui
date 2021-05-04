@@ -7,6 +7,6 @@ export default function CloseIconComponent(props) {
     className: 'modal-close-btn close',
     onClick: closeFn
   }, [
-    span({ className: ' glyphicon glyphicon-remove default-color'})
+    span({ className: 'glyphicon glyphicon-remove default-color'})
   ]);
 }
