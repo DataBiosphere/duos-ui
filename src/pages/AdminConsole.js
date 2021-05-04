@@ -146,7 +146,6 @@ class AdminConsole extends Component {
                   iconSize: 'default',
                 }),
               ])
-              //consoleBoxPlaceholder
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [
