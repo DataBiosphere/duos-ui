@@ -535,16 +535,16 @@ export const Election = {
     return await res.json();
   },
 
-  findDataAccessElectionReview: async (electionId, isFinalAccess) => {
-    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}?isFinalAccess=${isFinalAccess}`;
+  findDataAccessElectionReview: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
 
   // RP Election Information. Can be null for manual review DARs.
   // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
-  findRPElectionReview: async (electionId, isFinalAccess) => {
-    const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
+  findRPElectionReview: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     if (res.status === 204) {
       return {};
