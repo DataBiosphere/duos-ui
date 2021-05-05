@@ -3,7 +3,7 @@ import { div } from 'react-hyperscript-helpers';
 import { DarApplication } from './DarApplication';
 import { AccessReviewHeader } from './AccessReviewHeader';
 import { DacVotePanel } from './DacVotePanel';
-import { Election, Votes} from '../../libs/ajax';
+import { Election } from '../../libs/ajax';
 import { getDarData, Notifications } from '../../libs/utils';
 import { Storage } from '../../libs/storage';
 import { isNil, filter } from 'lodash/fp';
@@ -49,14 +49,22 @@ class AccessReview extends React.PureComponent {
       }
     };
 
-    const [darData, allVotes, electionData] = await Promise.all([
+    const [darData, electionData] = await Promise.all([
       getDarData(darId),
-      //Vote information
-      Votes.getDarVotes(darId),
       getElectionInformation(darId)
     ]);
+
     const {datasets, darInfo, consent, researcherProfile} = darData;
     const {accessVote, accessElectionReview, accessElection, rpElectionReview, rpElection} = electionData;
+
+    let allVotes = [];
+    if (!isNil(accessElection)) {
+      allVotes = await Election.getElectionVotes(accessElection.electionId);
+    }
+    if (!isNil(rpElection)) {
+      const rpVotes = await Election.getElectionVotes(rpElection.electionId);
+      allVotes = allVotes.concat(rpVotes);
+    }
 
     this.setState({ allVotes, darId, accessVote, accessElection, rpElection, darInfo, consent, accessElectionReview, rpElectionReview, researcherProfile, datasets });
   }
