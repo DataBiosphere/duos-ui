@@ -23,12 +23,6 @@ const HEADER_BOLD = {
   fontWeight: Theme.font.weight.semibold,
 };
 
-const INFO_STYLE = {
-  ...HEADER_BOLD,
-  margin: '1rem 0',
-  color: Theme.palette.primary
-};
-
 export const DarApplication = hh(class DarApplication extends React.PureComponent {
 
   render() {
@@ -39,9 +33,9 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
       const failure = JSON.stringify(getOr('false')('failed')(matchData)).toLowerCase() === 'true';
       const vote = JSON.stringify(getOr('false')('match')(matchData)).toLowerCase() === 'true';
       voteString = failure ? 'Unable to determine a system match' : vote ? 'Yes' : 'No';
-      const style = { fontWeight: Theme.font.weight.semibold };
-      return div({}, [
-        div({},['DUOS Algorithm Decision: ', span({style: style}, [voteString])]),
+      return div({style: SECTION}, [
+        div({style: HEADER_BOLD},['DUOS Algorithm Decision: ']),
+        div({style: {...HEADER, paddingLeft: "5px"}}, [voteString])
       ]);
     };
 
@@ -92,19 +86,21 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           span({style: HEADER_BOLD}, ["Dataset: "]),
           span({style: {...HEADER, paddingLeft: "5px"}}, [datasetName])
         ]),
-        div({ isRendered: isAdmin, style: INFO_STYLE }, [
-          "DAC Final DAR Decision: " + finalDecision
+        div({style: SECTION, isRendered: isAdmin }, [
+          span({ style: HEADER_BOLD }, ["DAC Final DAR Decision: "]),
+          span({ style: {...HEADER, paddingLeft: "5px"}}, [finalDecision])
         ]),
-        div({ isRendered: isAdmin, style: INFO_STYLE }, [
+        div({ isRendered: isAdmin }, [
           formattedMatch
         ]),
-        div({ isRendered: isAdmin, style: INFO_STYLE }, [
-          "DAC vs. DUOS Algorithm Agreement: " + agreement
+        div({style: SECTION, isRendered: isAdmin }, [
+          span({ style: HEADER_BOLD }, ["DAC vs. DUOS Algorithm Agreement: "]),
+          span({ style: {...HEADER, paddingLeft: "5px"}}, [agreement])
         ]),
-        div({ isRendered: isAdmin, style: INFO_STYLE }, [
-          "Research Purpose Accurate: " + rpDecision
+        div({style: SECTION, isRendered: isAdmin }, [
+          span({ style: HEADER_BOLD }, ["Research Purpose Accurate: "]),
+          span({ style: {...HEADER, paddingLeft: "5px"}}, [rpDecision])
         ]),
-
         VoteSummary({
           isRendered: voteAsChair && !isNil(accessVotes),
           question: 'Should data access be granted to this application?',
