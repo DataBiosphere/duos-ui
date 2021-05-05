@@ -1,10 +1,10 @@
 import _ from 'lodash/fp';
 import { Component } from 'react';
-import { button, div, h, h2, span, hh } from 'react-hyperscript-helpers';
+import { button, div, h, h2, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
 import { Alert } from '../components/Alert';
+import CloseIconComponent from '../components/CloseIconComponent';
 import './ConfirmationDialog.css';
-
 
 const customStyles = {
   overlay: {
@@ -60,9 +60,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
         contentLabel: "Modal"
       }, [
         div({ className: "dialog-header" }, [
-          button({ id: "btn_dialogClose", type: "button", className: "dialog-close-btn close", onClick: this.props.action.handler(false) }, [
-            span({ className: "glyphicon glyphicon-remove default-color" }),
-          ]),
+          h(CloseIconComponent, {closeFn: this.props.action.handler(false)}),
           h2({ id: "lbl_dialogTitle", className: "dialog-title " + this.props.color + "-color" }, [this.props.title]),
         ]),
 
