@@ -86,7 +86,7 @@ export default function InstitutionTable(props) {
             ]),
             div({
               style: Object.assign({}, Styles.TABLE.DATA_ID_CELL)
-            }, [inst.createUser.displayName]),
+            }, [inst.createUser ? inst.createUser.displayName : '']),
             div({
               style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL)
             }, [inst.createDate]),
