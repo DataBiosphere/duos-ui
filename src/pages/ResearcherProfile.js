@@ -6,13 +6,14 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Researcher, User } from '../libs/ajax';
+import { Researcher, User, Institution } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 import ReactTooltip from "react-tooltip";
+import { SearchSelect } from '../components/SearchSelect';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -43,6 +44,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       additionalEmail: '',
+      institutionId: null,
       roles: [],
       profile: {
         checkNotifications: false,
@@ -56,7 +58,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         division: '',
         eRACommonsID: '',
         havePI: null,
-        institution: '',
         isThePI: null,
         linkedIn: '',
         orcid: '',
@@ -73,7 +74,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       invalidFields: {
         profileName: false,
         academicEmail: false,
-        institution: false,
         department: false,
         address1: false,
         city: false,
@@ -83,10 +83,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         havePI: false,
         isThePI: false,
         piName: false,
-        piEmail: false
+        piEmail: false,
+        institution: false
       },
       showValidationMessages: false,
-      validateFields: false
+      validateFields: false,
+      institutionList: []
     };
   }
 
@@ -94,6 +96,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let rp = {};
     let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
     const user = await User.getByEmail(currentUser.email);
+    const institutionList = await Institution.list();
     if (profile.profileName === undefined) {
       profile.profileName = user.displayName;
     }
@@ -118,6 +121,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         prev.profile.checkNotifications = get(profile, 'checkNotifications', 'false') === 'true';
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
+      prev.institutionId = user.institutionId;
+      prev.institutionList = institutionList;
       return prev;
     }, () => {
       if (this.state.profile.completed !== undefined && this.state.profile.completed !== '') {
@@ -183,7 +188,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.institution)) {
+    if (!this.isValidNumber(this.state.institutionId)) {
       institution = true;
       showValidationMessages = true;
     }
@@ -263,6 +268,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   isValid(value) {
     let isValid = false;
     if (value !== '' && value !== null && value !== undefined) {
+      isValid = true;
+    }
+    return isValid;
+  }
+
+  isValidNumber(value) {
+    let isValid = false;
+    if (value !== 0 && value !== null && value !== undefined) {
       isValid = true;
     }
     return isValid;
@@ -404,6 +417,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     currentUserUpdate.displayName = this.state.profile.profileName;
     currentUserUpdate.additionalEmail = this.state.additionalEmail;
     currentUserUpdate.roles = this.state.roles;
+    currentUserUpdate.institutionId = this.state.institutionId;
     const payload = { updatedUser: currentUserUpdate };
     let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
@@ -623,16 +637,39 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '20px' } }, [
-                  label({ id: 'lbl_profileInstitution', className: 'control-label' }, ['Institution Name*']),
-                  input({
-                    id: 'profileInstitution',
+                  label({ id: 'lbl_profileInstitution', className: 'control-label' }, [
+                    'Institution Name* ',
+                    span({
+                      className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                      "data-tip": "If your preferred institution cannot be found, please submit a ticket to have it added.",
+                      'data-for': 'tip_profileState',
+                    })
+                  ]),
+                  h(SearchSelect, {
+                    id: 'Institution',
                     name: 'institution',
-                    type: 'text',
+                    onSelection: (selection) => {
+                      this.setState(prev => {
+                        prev.institutionId = selection;
+                        return prev;
+                      }, () => {
+                        if (this.state.validateFields) {
+                          this.researcherFieldsValidation();
+                        }
+                      });
+                    },
+                    options: this.state.institutionList.map(institution => {
+                      return {
+                        key: institution.id,
+                        displayText: institution.name
+                      };
+                    }),
+                    placeholder: 'Please Select an Institution',
+                    searchPlaceholder: 'Search for Institution...',
+                    value: this.state.institutionId,
                     className: (this.state.invalidFields.institution && showValidationMessages) ?
                       'form-control required-field-error' :
                       'form-control',
-                    onChange: this.handleChange,
-                    value: this.state.profile.institution,
                     required: true
                   }),
                   span({
