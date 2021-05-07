@@ -2,5 +2,6 @@
   "allowlist": [
     "565|react-scripts>webpack>terser-webpack-plugin>cacache>ssri",
     "1677|react-scripts"
-  ]
+  ],
+  "registry": "https://registry.npmjs.org"
 }
