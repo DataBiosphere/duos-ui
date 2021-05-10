@@ -21,6 +21,11 @@ axios.interceptors.response.use(function (response) {
     Storage.clearStorage();
     window.location.href = '/home';
   }
+
+  if (error.response.status >= 500) {
+    reportError(error.response.config.url, error.response.status);
+  }
+
   return Promise.reject(error);
 });
 
