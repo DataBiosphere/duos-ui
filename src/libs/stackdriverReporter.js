@@ -2,7 +2,7 @@ import { Storage } from './storage';
 import StackdriverErrorReporter from 'stackdriver-errors-js';
 import { Config } from './config';
 import * as ld from 'lodash';
-import isNil from "lodash/fp";
+import { isNil } from "lodash/fp";
 
 const errorHandler = new StackdriverErrorReporter();
 
@@ -33,7 +33,7 @@ export const StackdriverReporter = {
 
   start: async () => {
     const config = await StackdriverReporter.generateErrorConfig();
-    if (!isNil(config) && !isNil(config.errorApiKey)) {
+    if (!isNil(config) && !isNil(config.key)) {
       errorHandler.start(config);
     }
   },
