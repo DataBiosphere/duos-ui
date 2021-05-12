@@ -9,7 +9,7 @@ import { DataUseTranslation } from '../../libs/dataUseTranslation';
 
 export const DacDatasetsModal = hh(class DacDatasetsModal extends Component {
 
-  constructor(props) {
+  constructor() {
     super();
     this.state = {
       translatedDatasetRestrictions: [],

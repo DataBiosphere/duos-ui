@@ -42,7 +42,7 @@ export default function BackgroundSignIn(props) {
       return user;
     };
 
-    const setIsLogged = (user) => {
+    const setIsLogged = () => {
       Storage.setUserIsLogged(true);
     };
 
@@ -73,7 +73,7 @@ export default function BackgroundSignIn(props) {
                   redirect(user);
                   setLoading(false);
                 },
-                error => {
+                () => {
                   Storage.clearStorage();
                   setLoading(false);
                 });

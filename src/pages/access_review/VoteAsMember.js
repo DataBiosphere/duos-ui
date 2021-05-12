@@ -7,7 +7,7 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
 
   componentDidMount() {
     this.props.getVotes();
-  };
+  }
 
   render() {
     const { onUpdate, vote, rpVote, accessElectionOpen, rpElectionOpen } = this.props;

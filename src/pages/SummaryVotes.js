@@ -141,9 +141,9 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             onClick: () => this.getFile("TranslateDUL"),
             isRendered: this.isAuthedToDownload()
           }, [
-              span({}, ["Download stats"]),
-              span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
-            ]),
+            span({}, ["Download stats"]),
+            span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
+          ]),
         ]),
 
         div({ className: "row fsi-row-lg-level fsi-row-md-level" }, [
@@ -181,9 +181,9 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
             onClick: () => this.getFile("DataAccess"),
             isRendered: this.isAuthedToDownload()
           }, [
-              span({}, ["Download stats"]),
-              span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
-            ]),
+            span({}, ["Download stats"]),
+            span({ className: "glyphicon glyphicon-download caret-margin", "aria-hidden": "true" }),
+          ]),
         ]),
 
         h3({ className: "stats-box-title access-color" }, ["1. Should data access be granted to this applicant ?"]),

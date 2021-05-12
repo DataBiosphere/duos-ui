@@ -40,7 +40,7 @@ const BasicListItem = (props) => {
       alignItems: 'center',
       id: `menu-link-${label}`,
       style: Styles.NAVBAR.DRAWER_LINK,
-      onClick: (e) => goToLink(targetLink),
+      onClick: () => goToLink(targetLink),
       onMouseEnter
     }, [label])
   );
@@ -60,7 +60,7 @@ const DropdownComponent = (props) => {
     return keys.map((label) => {
       const linkData = links[label];
       return h(MenuItem, {
-        onClick: (e) => goToLink(linkData.link),
+        onClick: () => goToLink(linkData.link),
         alignItems: 'center',
         id: `menu-link-${label}`,
         isRendered: linkData.isRendered,
@@ -70,7 +70,7 @@ const DropdownComponent = (props) => {
     });
   };
 
-  const handleClose = (e) => {
+  const handleClose = () => {
     setAnchorEl(null);
   };
 
@@ -125,7 +125,7 @@ class DuosHeader extends Component {
       notificationData: [],
       openDrawer: false
     };
-  };
+  }
 
   async componentDidMount() {
     let dacChairPath = await NavigationUtils.dacChairConsolePath();
@@ -186,7 +186,7 @@ class DuosHeader extends Component {
   goToLink = (link) => {
     this.props.history.push(link);
     this.toggleDrawer(false);
-  }
+  };
 
   render() {
     const { classes } = this.props;
@@ -395,9 +395,9 @@ class DuosHeader extends Component {
             img({
               style: duosLogoImage, src: DuosLogo,
               alt: 'DUOS Logo',
-              onClick: (e) => this.goToLink('/home')
+              onClick: () => this.goToLink('/home')
             }),
-            h(IconButton, {size: 'small', onClick: (e) => this.toggleDrawer(true)}, [
+            h(IconButton, {size: 'small', onClick: () => this.toggleDrawer(true)}, [
               h(MenuIcon, {
                 id: 'navbar-menu-icon',
                 style: {color: 'white', fontSize: '6rem', flex: 1},
@@ -413,7 +413,7 @@ class DuosHeader extends Component {
               style: {
                 // I have to give this a ridiculous z-index value to keep the google sign in widget or register link from showing up on top
               },
-              onClose: (e) => this.toggleDrawer(false)
+              onClose: () => this.toggleDrawer(false)
             }, [
               h(List, {}, [
                 //NOTE: create user component to show logged in status (as well as dropdown options)

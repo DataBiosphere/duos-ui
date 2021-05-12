@@ -313,7 +313,7 @@ export const SupportRequestModal = hh(
                     ['Attachment']),
                   h(Dropzone, {
                     onDrop: acceptedFiles => this.attachmentChangeHandler(acceptedFiles)
-                  }, [({isDragActive, openUploader, getRootProps, getInputProps}) => (
+                  }, [({isDragActive, openUploader, getRootProps, getInputProps}) => ( // eslint-disable-line no-unused-vars
                     section({
                       style: {
                         backgroundColor: this.state.attachment.length !== 0 ?

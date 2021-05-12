@@ -340,9 +340,8 @@ export const DAR = {
   },
 
   //endpoint to be deprecated
-  getDataAccessManage: async userId => {
-    userId = userId === undefined ? '' : userId;
-    const url = `${await Config.getApiUrl()}/dar/manage/?userId=${userId}`;
+  getDataAccessManage: async() => {
+    const url = `${await Config.getApiUrl()}/dar/manage`;
     const res = await fetchOk(url, Config.authOpts());
     let dars = await res.json();
     dars.map(dar => {
@@ -468,7 +467,11 @@ export const DataSet = {
   validateDatasetName: async (name) => {
     const url = `${await Config.getApiUrl()}/dataset/validate?name=${name}`;
     try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      // We expect a 404 in the case where the dataset name does not exist
+      const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), {method: 'GET'}]));
+      if (res.status === 404) {
+        return -1;
+      }
       return await res.json();
     }
     catch (err) {
@@ -501,6 +504,12 @@ export const DatasetAssociation = {
 
 export const Election = {
 
+  getElectionVotes: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/election/${electionId}/votes`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
   findElectionById: async (electionId) => {
     const url = `${await Config.getApiUrl()}/election/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -515,7 +524,7 @@ export const Election = {
   findElectionByDarId: async (requestId) => {
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/election`;
     const res = await fetchOk(url, Config.authOpts());
-    return res.json();
+    return await res.json();
   },
 
   downloadDatasetVotesForDARElection: async (requestId) => {
@@ -532,16 +541,16 @@ export const Election = {
     return await res.json();
   },
 
-  findDataAccessElectionReview: async (electionId, isFinalAccess) => {
-    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}?isFinalAccess=${isFinalAccess}`;
+  findDataAccessElectionReview: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/electionReview/access/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
 
   // RP Election Information. Can be null for manual review DARs.
   // N.B. We get the rpElectionReview from the Access election id, not the rp election id. This is a legacy behavior.
-  findRPElectionReview: async (electionId, isFinalAccess) => {
-    const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}?isFinalAccess=${isFinalAccess}`;
+  findRPElectionReview: async (electionId) => {
+    const url = `${await Config.getApiUrl()}/electionReview/rp/${electionId}`;
     const res = await fetchOk(url, Config.authOpts());
     if (res.status === 204) {
       return {};
@@ -702,19 +711,14 @@ export const Match = {
   findMatch: async (consentId, purposeId) => {
     const url = `${await Config.getApiUrl()}/match/${consentId}/${purposeId}`;
     const res = await fetchOk(url, Config.authOpts());
-    try {
-      const answer = await res.json();
-      return answer;
-    } catch (error) {
-      return {};
-    }
+    return res.json();
   }
 };
 
 export const PendingCases = {
 
-  findDataRequestPendingCasesByUser: async (userId) => {
-    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending/${userId}`;
+  findDataRequestPendingCases: async () => {
+    const url = `${await Config.getApiUrl()}/dataRequest/cases/pending`;
     const res = await fetchOk(url, Config.authOpts());
     const dars = await res.json();
     let resp = {
@@ -970,18 +974,6 @@ export const Votes = {
     return res.json();
   },
 
-  /**
-   * Get all votes for a DAR election. Retrieves Chair and Member Access and RP
-   * votes as well as Final and Agreement election votes.
-   * @param requestId
-   * @returns {Promise<List<Vote>>}
-   */
-  getDarVotes: async (requestId) => {
-    const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
   postDarVote: async (requestId, vote) => {
     const postObject = {};
     postObject.vote = vote.vote;
@@ -1094,29 +1086,60 @@ export const AuthenticateNIH = {
 
 };
 
+export const Institution = {
+  list: async () => {
+    const url = `${await Config.getApiUrl()}/institutions`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  getById: async (id) => {
+    const url = `${await Config.getApiUrl()}/institutions/${id}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  },
+
+  postInstitution: async (institution) => {
+    const url = `${await Config.getApiUrl()}/institutions`;
+    const res = await axios.post(url, institution, Config.authOpts());
+    return res.data;
+  },
+
+  putInstitution: async (id, institution) => {
+    const url = `${await Config.getApiUrl()}/institutions/${id}`;
+    const res = await axios.put(url, institution, Config.authOpts());
+    return res.data;
+  },
+
+  deleteInstitution: async (id) => {
+    const url = `${await Config.getApiUrl()}/institutions/${id}`;
+    return await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
+  }
+};
+
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
-  spinnerService.hideAll();
-  if (res.status >= 400) {
-    await reportError(args[0], res.status);
-  }
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
   }
+  if (res.status >= 400) {
+    await reportError(args[0], res.status);
+  }
+  spinnerService.hideAll();
   return res.ok ? res : Promise.reject(res);
 };
 
 const fetchAny = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
-  if (res.status >= 500) {
-    await reportError(args[0], res.status);
-  }
   if (!res.ok && res.status === 401) {
     Storage.clearStorage();
     window.location.href = '/home';
+  }
+  if (res.status >= 500) {
+    await reportError(args[0], res.status);
   }
   spinnerService.hideAll();
   return res;

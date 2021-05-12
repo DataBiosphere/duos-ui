@@ -4,15 +4,15 @@ import { Email } from '../../libs/ajax';
 import { Notifications } from '../../libs/utils';
 import { Theme } from '../../libs/theme';
 import { Chart } from 'react-google-charts';
-import * as fp from 'lodash/fp';
 import * as moment from 'moment';
+import {isNil, filter, map} from "lodash/fp";
 
 const STYLE = {
   color: Theme.palette.primary,
   fontSize: Theme.font.size.small,
   lineHeight: Theme.font.leading.dense,
   fontWeight: Theme.font.weight.semibold,
-  fontFamily: 'Montserrat',
+  fontFamily: 'Arial',
   backgroundColor: Theme.palette.background.secondary,
   padding: 16,
   borderRadius: '9px',
@@ -25,6 +25,19 @@ const HEADER_STYLE = {
   textTransform: 'uppercase',
   margin: '16px 0px',
   opacity: '70%',
+};
+
+const VOTE_STYLE = {
+  borderRadius: 9,
+  backgroundColor: '#DFE8EE',
+  height: 180,
+  width: 275,
+  padding: 0,
+  margin: '.5rem',
+  overflowX: 'hidden',
+  overflowY: 'scroll',
+  display: 'flex',
+  flexDirection: 'column'
 };
 
 const QUESTION_STYLE = {
@@ -100,9 +113,9 @@ export const VoteSummary = hh(
     };
 
     voteChart = (votes) => {
-      const positiveVotes = fp.filter(['vote', true])(votes).length;
-      const negativeVotes = fp.filter(['vote', false])(votes).length;
-      const pendingVotes = fp.filter(['vote', null])(votes).length;
+      const positiveVotes = filter(['vote', true])(votes).length;
+      const negativeVotes = filter(['vote', false])(votes).length;
+      const pendingVotes = filter(['vote', null])(votes).length;
       return [
         ['Results', 'Votes'],
         ['Yes', positiveVotes],
@@ -112,22 +125,15 @@ export const VoteSummary = hh(
     };
 
     memberVote = (vote) => {
-      const voteString = fp.isNil(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
-      const createDateString = fp.isNil(vote.vote.createDate) ? '' : moment(vote.vote.createDate).format('MM/DD/YY');
+      const voteString = isNil(vote.vote.vote) ? 'Pending' : vote.vote.vote ? 'Yes' : 'No';
+      const updateDateString = isNil(vote.vote.updateDate) ?
+        moment(vote.vote.updateDate).format('MM/DD/YY')
+        : !isNil(vote.vote.createDate) ?
+          moment(vote.vote.createDate).format('MM/DD/YY')
+          : '';
       return div({
         key: vote.vote.voteId,
-        style: {
-          borderRadius: 9,
-          backgroundColor: '#DFE8EE',
-          height: 180,
-          width: 275,
-          padding: 0,
-          margin: '.5rem',
-          overflowX: 'hidden',
-          overflowY: 'scroll',
-          display: 'flex',
-          flexDirection: 'column'
-        },
+        style: VOTE_STYLE
       }, [
         div({style: {flex: '1 0 auto', fontSize: Theme.font.size.small, fontWeight: Theme.font.weight.semibold, padding: '1rem'}}, [vote.displayName]),
         div({style: {flex: '1 0 auto', margin: 0, padding: 0, borderTop: '1px solid #BABEC1', height: 0}}, []),
@@ -138,7 +144,7 @@ export const VoteSummary = hh(
           ]),
           div({style: {display: 'flex', flexWrap: 'wrap'}}, [
             div({style:{padding: '0 1rem 1rem 0'}}, ['DATE: ']),
-            div({style:{fontWeight: Theme.font.weight.regular}}, [createDateString]),
+            div({style:{fontWeight: Theme.font.weight.regular}}, [updateDateString]),
           ]),
           div({style: {}}, [
             div({style: {flex: '1 0 auto', padding: '0 1rem 1rem 0'}}, ['RATIONALE: ']),
@@ -164,7 +170,10 @@ export const VoteSummary = hh(
     };
 
     render() {
-      const data = this.voteChart(fp.map('vote')(this.props.votes));
+      const memberVotes = filter((v) => v.vote.type === "DAC")(this.props.votes);
+      const chairVotes = filter((v) => v.vote.type === "Chairperson")(this.props.votes);
+      const memberData = this.voteChart(map('vote')(memberVotes));
+      const chairData = this.voteChart(map('vote')(chairVotes));
       const options = {
         ...baseOptions, ...{
           slices: {
@@ -180,20 +189,27 @@ export const VoteSummary = hh(
           div({style: HEADER_STYLE},
             ['Question ', this.props.questionNumber, ':']),
           div({style: QUESTION_STYLE}, [this.props.question]),
+          div({isRendered: this.props.isAdmin, style: HEADER_STYLE}, ['How committee chairs voted:']),
+          div({isRendered: this.props.isAdmin,
+            style: {
+              display: 'flex',
+              flexWrap: 'wrap',
+            }
+          },[
+            this.voteResultsBox(chairData, options),
+            map(this.memberVote)(chairVotes),
+          ]),
           div({style: HEADER_STYLE}, ['How committee members voted:']),
           div({
             style: {
               display: 'flex',
               flexWrap: 'wrap',
-            },
-          },
-          [
-            this.voteResultsBox(data, options),
-            fp.map(this.memberVote)(this.props.votes),
-          ])
+            }
+          },[
+            this.voteResultsBox(memberData, options),
+            map(this.memberVote)(memberVotes),
+          ]),
         ]),
-      ])
-      ;
+      ]);
     }
-
   });

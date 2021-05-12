@@ -10,7 +10,7 @@ const TEXT = {
 export const ApplicationSection = hh(class ApplicationSection extends React.PureComponent {
   render() {
     const { header, content, headerColor } = this.props;
-    return div({ style: { fontFamily: 'Montserrat', color: Theme.palette.primary } }, [
+    return div({ style: { fontFamily: 'Arial', color: Theme.palette.primary } }, [
       div({
         style: {
           marginBottom: '5px',

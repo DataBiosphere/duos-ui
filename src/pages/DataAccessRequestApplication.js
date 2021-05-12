@@ -477,7 +477,7 @@ class DataAccessRequestApplication extends Component {
   verifyStep2() {
     //defined attribute keys for dynamic DUL based questions
     const dulInvalidCheck = () => {
-      const activeQuestions = this.state.formData.activeDULQuestions;
+      const activeQuestions = fp.pickBy((isActive) => isActive)(this.state.formData.activeDULQuestions);
       let result = false;
       //mapping of ontology keys to dar established keys
       const dulQuestionMap = {
@@ -491,11 +491,12 @@ class DataAccessRequestApplication extends Component {
       if (!isNil(activeQuestions) && !isEmpty(activeQuestions)) {
         const formData = this.state.formData;
         const uncappedAny = fp.any.convert({cap: false});
+        //uncappedAny will look for the first instance in which the dataset is false (or nil/empty) for early termination
         result = uncappedAny((value, question) => {
           const formDataKey = dulQuestionMap[question];
           const input = formData[formDataKey];
           //for the document keys, check to see if a file has recently uploaded to the front-end or has been saved previously
-          if (formDataKey === 'irbDocument' || formDataKey === 'collaborationLetter') {
+          if ((formDataKey === 'irbDocument' || formDataKey === 'collaborationLetter')) {
             //keys follow the syntax of 'uploaded{irbDocument|collaborationLetter} (for newly uploaded files)
             const newlyUploadedFileKey = `uploaded${formDataKey[0].toUpperCase()}${formDataKey.slice(1)}`;
             //keys follow the syntax of "{irbDocument | collaborationLetter}Location" (for previously saved files)
@@ -504,13 +505,14 @@ class DataAccessRequestApplication extends Component {
             const newlyUploadedFile = this.state.step2[newlyUploadedFileKey];
             //use established key to assign the saved file location to a variable
             const currentFileLocation = this.state.formData[currentFileLocationKey];
-            //empty check on both to ensure that a file does exists for the DAR application
+            //confirm question status and perform empty check for files to determine rejection
             return isEmpty(currentFileLocation) && (isFileEmpty(newlyUploadedFile));
-            //if question is a checkbox acnkowledgement and the question is active, check to see if box was left unchecked
-          } else if((formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement') && value) {
+            //if question is a checkbox acknowledgement and the question is active, check to see if box was left unchecked using translated key
+          } else if((formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement')) {
             return !this.state.formData[formDataKey];
+          //else check input directly
           } else {
-            return isNil(input);
+            return !input;
           }
         })(activeQuestions);
       }

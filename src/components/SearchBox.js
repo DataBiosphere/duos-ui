@@ -17,7 +17,7 @@ export class SearchBox extends Component {
     this.props.pageHandler(1);
   };
 
-  reset = (e) => {
+  reset = () => {
     this.myRef.current.value = '';
     this.props.searchHandler('');
   };
@@ -53,6 +53,6 @@ SearchBox.propTypes = {
 };
 
 SearchBox.defaultProps = {
-  searchHandler: (query) => { },
-  pageHandler: (page) => { }
+  searchHandler: () => { },
+  pageHandler: () => { }
 };

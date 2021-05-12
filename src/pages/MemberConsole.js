@@ -66,7 +66,7 @@ class MemberConsole extends Component {
     let currentUser = Storage.getCurrentUser();
 
     const duls = await PendingCases.findConsentPendingCasesByUser(currentUser.dacUserId);
-    const dars = await PendingCases.findDataRequestPendingCasesByUser(currentUser.dacUserId);
+    const dars = await PendingCases.findDataRequestPendingCases();
 
     this.setState(prev => {
       prev.currentUser = currentUser;
@@ -81,7 +81,7 @@ class MemberConsole extends Component {
 
   }
 
-  openAccessReview = (referenceId) => async (e) => {
+  openAccessReview = (referenceId) => async () => {
     const pathStart = NavigationUtils.accessReviewPath();
     this.props.history.push(`${pathStart}/${referenceId}`);
   };

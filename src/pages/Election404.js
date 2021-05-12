@@ -13,7 +13,7 @@ class Election404 extends Component {
     };
   }
 
-  goToConsole = (e) => {
+  goToConsole = () => {
     this.props.history.goBack();
   };
 

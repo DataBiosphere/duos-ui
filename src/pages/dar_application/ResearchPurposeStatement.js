@@ -95,7 +95,7 @@ export default function ResearchPurposeStatement(props) {
                     return (
                       label({
                         key: 'gender' + ix,
-                        onClick: (e) => genderClickHandler(genderValues[ix]),
+                        onClick: () => genderClickHandler(genderValues[ix]),
                         id: 'lbl_gender_' + ix,
                         htmlFor: 'rad_gender_' + ix,
                         className: 'radio-wrapper'

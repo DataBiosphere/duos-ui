@@ -1,52 +1,37 @@
-import _, { isNil, isEmpty } from 'lodash';
+import {omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
 import { Component } from 'react';
-import {button, div, form, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
+import {button, div, form, h, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Researcher, User } from '../libs/ajax';
+import { Researcher, User, Institution } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import * as ld from 'lodash';
 import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
-
-const USA = option({ value: "United States of America"}, ["United States of America"]);
-const empty = option({ value: ""}, [""]);
-const countryNames = getNames().map((name) => option({value: name}, [name]));
-const index = countryNames.indexOf(USA);
-countryNames.splice(index, 1);
-countryNames.splice(0, 0, USA);
-countryNames.splice(0, 0, empty);
-const UsaStates = require('usa-states').UsaStates;
-const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
-stateNames.splice(0, 0, empty);
-const currentUser = Storage.getCurrentUser();
+import ReactTooltip from "react-tooltip";
+import { SearchSelect } from '../components/SearchSelect';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   constructor(props) {
     super(props);
     this.state = this.initialState();
-
-    this.getResearcherProfile = this.getResearcherProfile.bind(this);
-    this.clearNotRelatedPIFields = this.clearNotRelatedPIFields.bind(this);
-    this.clearCommonsFields = this.clearCommonsFields.bind(this);
-    this.clearNoHasPIFields = this.clearNoHasPIFields.bind(this);
-    this.saveProfile = this.saveProfile.bind(this);
-    this.submit = this.submit.bind(this);
-    this.saveUser = this.saveUser.bind(this);
   }
 
   async componentDidMount() {
-    await this.getResearcherProfile();
+    const currentUser = Storage.getCurrentUser();
+    await this.getResearcherProfile(currentUser);
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
+      prev.profile.academicEmail = currentUser.email;
+      prev.currentUser = currentUser;
+      prev.isResearcher = currentUser.isResearcher;
       return prev;
     });
   }
@@ -54,12 +39,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   initialState() {
     return {
       loading: true,
-      isResearcher: currentUser.isResearcher,
       hasLibraryCard: false,
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
       additionalEmail: '',
+      institutionId: null,
       roles: [],
       profile: {
         checkNotifications: false,
@@ -68,12 +53,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         address2: '',
         city: '',
         completed: undefined,
-        country: undefined,
+        country: '',
         department: '',
         division: '',
         eRACommonsID: '',
         havePI: null,
-        institution: '',
         isThePI: null,
         linkedIn: '',
         orcid: '',
@@ -90,7 +74,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       invalidFields: {
         profileName: false,
         academicEmail: false,
-        institution: false,
         department: false,
         address1: false,
         city: false,
@@ -100,17 +83,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         havePI: false,
         isThePI: false,
         piName: false,
-        piEmail: false
+        piEmail: false,
+        institution: false
       },
       showValidationMessages: false,
-      validateFields: false
+      validateFields: false,
+      institutionList: []
     };
   }
 
-  async getResearcherProfile() {
+  getResearcherProfile = async (currentUser) => {
     let rp = {};
-    let profile = await Researcher.getResearcherProfile(currentUser().dacUserId);
+    let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
     const user = await User.getByEmail(currentUser.email);
+    const institutionList = await Institution.list();
     if (profile.profileName === undefined) {
       profile.profileName = user.displayName;
     }
@@ -123,22 +109,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
-      if (_.isEmpty(currentUser.roles)) {
+      if (isEmpty(currentUser.roles)) {
         prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
       } else {
         prev.roles = currentUser.roles;
       }
       prev.researcherProfile = profile;
-      let key;
-      for (key in profile) {
-        if (key === 'checkNotifications') {
-          prev.profile[key] = profile[key] === 'true';
-        } else {
-          prev.profile[key] = profile[key];
-        }
-
+      prev.profile = profile;
+      // This ensures that we have a boolean for `checkNotifications`
+      if (!isNil(get(profile, 'checkNotifications', null))) {
+        prev.profile.checkNotifications = get(profile, 'checkNotifications', 'false') === 'true';
       }
       prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
+      prev.institutionId = user.institutionId;
+      prev.institutionList = institutionList;
       return prev;
     }, () => {
       if (this.state.profile.completed !== undefined && this.state.profile.completed !== '') {
@@ -148,7 +132,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         });
       }
     });
-  }
+  };
 
   handleChange = (event) => {
     let field = event.target.name;
@@ -162,6 +146,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.researcherFieldsValidation();
       }
     });
+    //clear out state field if the user selects
+    //another country or clears out the country field
+    if (field === "country") {
+      if (value !== "United States of America") {
+        this.setState(prev => {
+          prev.profile.state = "";
+          return prev;
+        }, () => {
+          if (this.state.validateFields) {
+            this.researcherFieldsValidation();
+          }
+        });
+      }
+    }
   };
 
   researcherFieldsValidation() {
@@ -190,7 +188,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.institution)) {
+    if (!this.isValidNumber(this.state.institutionId)) {
       institution = true;
       showValidationMessages = true;
     }
@@ -275,16 +273,24 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return isValid;
   }
 
+  isValidNumber(value) {
+    let isValid = false;
+    if (value !== 0 && value !== null && value !== undefined) {
+      isValid = true;
+    }
+    return isValid;
+  }
+
   isValidState(value) {
-    const stateSelected = (!isNil(value) || !isEmpty(value)) && (value !== "N/A");
-    const inUS = (this.state.profile.country === "United States of America");
+    const stateSelected = (!isNil(value) && !isEmpty(value));
+    const inUS = (this.state.profile.country === "United States of America" || this.state.profile.country === "");
     if (inUS && stateSelected) {
       return true;
     }
     return !inUS;
   }
 
-  submit(event) {
+  submit = (event) => {
     this.setState({ validateFields: true });
     event.preventDefault();
     let errorsShowed = false;
@@ -304,7 +310,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         return prev;
       });
     }
-  }
+  };
 
   handleRadioChange = (e, field, value) => {
 
@@ -327,7 +333,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  clearNotRelatedPIFields() {
+  clearNotRelatedPIFields = () => {
     this.clearCommonsFields();
     this.setState(prev => {
       prev.profile.havePI = '';
@@ -335,69 +341,61 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }, () => {
       this.clearPIData();
     });
+  };
 
-  }
-
-  clearNoHasPIFields() {
+  clearNoHasPIFields = () => {
     this.clearPIData();
     this.clearCommonsFields();
-  }
+  };
 
-  clearCommonsFields() {
+  clearCommonsFields = () => {
     this.setState(prev => {
       prev.profile.eRACommonsID = '';
       prev.profile.pubmedID = '';
       prev.profile.scientificURL = '';
       return prev;
     });
-  }
+  };
 
-  clearPIData() {
+  clearPIData = () => {
     this.setState(prev => {
       prev.profile.piName = '';
       prev.profile.piEmail = '';
       return prev;
     });
-  }
-
-  saveProfile(event) {
-    event.preventDefault();
-    this.setState({ showDialogSave: true });
-  }
-
-  cleanObject = (obj) => {
-    for (let key in obj) {
-      if (obj[key] === '') {
-        delete obj[key];
-      }
-    }
-    return obj;
   };
 
-  saveProperties(profile) {
-    Researcher.createProperties(profile).then(()=> {
-      this.saveUser().then(() => {
-        this.setState({ showDialogSubmit: false });
-        this.props.history.push({ pathname: 'dataset_catalog' });
-      });
-    });
-  }
+  saveProfile = (event) => {
+    event.preventDefault();
+    this.setState({ showDialogSave: true });
+  };
 
-  dialogHandlerSubmit = (answer) => () => {
+  cleanObject = (obj) => {
+    // Removes any zero length properties from a copy of the object
+    return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
+  };
+
+  saveProperties = async (profile) => {
+    await Researcher.createProperties(profile);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
+  };
+
+  dialogHandlerSubmit = (answer) => async () => {
     if (answer === true) {
       if (this.state.isResearcher) {
         let profile = this.state.profile;
         profile = this.cleanObject(profile);
         profile.completed = true;
         if (this.state.profile.completed === undefined) {
-          this.saveProperties(profile);
+          await this.saveProperties(profile);
         } else {
-          this.updateResearcher(profile);
+          await this.updateResearcher(profile);
         }
       } else {
-        this.saveUser().then(resp => {
-          this.setState({ isResearcher: resp.isResearcher, showDialogSubmit: false });
-        });
+        const savedUser = await this.saveUser();
+        this.setState({ isResearcher: savedUser.isResearcher, showDialogSubmit: false });
       }
 
     } else {
@@ -405,27 +403,26 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
   };
 
-  updateResearcher(profile) {
+  updateResearcher = async (profile) => {
     const profileClone = this.cloneProfile(profile);
-    Researcher.updateProperties(currentUser.dacUserId, true, profileClone).then(()=> {
-      this.saveUser().then(() => {
-        this.setState({ showDialogSubmit: false });
-        this.props.history.push({ pathname: 'dataset_catalog' });
-      });
-    });
-  }
+    await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
+  };
 
-  async saveUser() {
+  saveUser = async () => {
     const currentUserUpdate = Storage.getCurrentUser();
     delete currentUserUpdate.email;
     currentUserUpdate.displayName = this.state.profile.profileName;
     currentUserUpdate.additionalEmail = this.state.additionalEmail;
     currentUserUpdate.roles = this.state.roles;
+    currentUserUpdate.institutionId = this.state.institutionId;
     const payload = { updatedUser: currentUserUpdate };
     let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
     updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
     return updatedUser;
-  }
+  };
 
   handleCheckboxChange = (e) => {
     const value = e.target.checked;
@@ -443,12 +440,12 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     });
   };
 
-  dialogHandlerSave = (answer) => () => {
+  dialogHandlerSave = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profile;
       profile.completed = false;
       const profileClone = this.cloneProfile(profile);
-      Researcher.updateProperties(currentUser.dacUserId, false, profileClone);
+      await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
 
@@ -458,13 +455,34 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   // When posting a user's researcher properties, library cards and entries are
   // not valid properties for update.
   cloneProfile = (profile) => {
-    return _.omit(_.cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
+  };
+
+  generateCountryNames = () => {
+    const USA = option({ value: "United States of America"}, ["United States of America"]);
+    const empty = option({ value: ""}, [""]);
+    const countryNames = getNames().map((name) => option({value: name}, [name]));
+    const index = countryNames.indexOf(USA);
+    countryNames.splice(index, 1);
+    countryNames.splice(0, 0, USA);
+    countryNames.splice(0, 0, empty);
+    return countryNames;
+  };
+
+  generateStateNames = () => {
+    const empty = option({ value: ""}, [""]);
+    const UsaStates = require('usa-states').UsaStates;
+    const stateNames = (new UsaStates().arrayOf("names")).map((name) => option({value: name}, [name]));
+    stateNames.splice(0, 0, empty);
+    return stateNames;
   };
 
   render() {
+    const countryNames = this.generateCountryNames();
+    const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
-    const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
+    const libraryCards = get(researcherProfile, 'libraryCards', []);
 
     return (
 
@@ -513,7 +531,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: 'profileAcademicEmail',
                     name: 'academicEmail',
                     type: 'email',
-                    defaultValue: currentUser.email,
                     value: this.state.profile.academicEmail,
                     className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ?
                       'form-control required-field-error' :
@@ -567,14 +584,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     eRACommons({
                       className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
-                      onNihStatusUpdate: (nihValid) => {},
+                      onNihStatusUpdate: () => {},
                       location: this.props.location
                     }),
                     div({ className: '' }, [
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
                       LibraryCards({
                         style: { display: 'flex', flexFlow: 'row wrap' },
-                        isRendered: !ld.isNil(researcherProfile),
+                        isRendered: !isNil(researcherProfile),
                         libraryCards: libraryCards
                       })
                     ])
@@ -620,16 +637,39 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '20px' } }, [
-                  label({ id: 'lbl_profileInstitution', className: 'control-label' }, ['Institution Name*']),
-                  input({
-                    id: 'profileInstitution',
+                  label({ id: 'lbl_profileInstitution', className: 'control-label' }, [
+                    'Institution Name* ',
+                    span({
+                      className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                      "data-tip": "If your preferred institution cannot be found, please submit a ticket to have it added.",
+                      'data-for': 'tip_profileState',
+                    })
+                  ]),
+                  h(SearchSelect, {
+                    id: 'Institution',
                     name: 'institution',
-                    type: 'text',
+                    onSelection: (selection) => {
+                      this.setState(prev => {
+                        prev.institutionId = selection;
+                        return prev;
+                      }, () => {
+                        if (this.state.validateFields) {
+                          this.researcherFieldsValidation();
+                        }
+                      });
+                    },
+                    options: this.state.institutionList.map(institution => {
+                      return {
+                        key: institution.id,
+                        displayText: institution.name
+                      };
+                    }),
+                    placeholder: 'Please Select an Institution',
+                    searchPlaceholder: 'Search for Institution...',
+                    value: this.state.institutionId,
                     className: (this.state.invalidFields.institution && showValidationMessages) ?
                       'form-control required-field-error' :
                       'form-control',
-                    onChange: this.handleChange,
-                    value: this.state.profile.institution,
                     required: true
                   }),
                   span({
@@ -732,7 +772,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     ]),
 
                     div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
-                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State*']),
+                      label({ id: 'lbl_profileState', className: 'control-label'}, ['State* ',
+                        span({
+                          className: 'glyphicon glyphicon-question-sign tooltip-icon',
+                          "data-tip": "State cannot be selected if a non-US Country is selected.",
+                          'data-for': 'tip_profileState',
+                        })
+                      ]),
                       select({
                         id: 'profileState',
                         name: 'state',
@@ -740,7 +786,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         value: this.state.profile.state,
                         className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true,
-                        disabled: (this.state.profile.country !== "United States of America")
+                        disabled: (this.state.profile.country !== "" && this.state.profile.country !== "United States of America")
                       }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
@@ -802,7 +848,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     span({
                       className: 'glyphicon glyphicon-question-sign tooltip-icon',
                       'data-tip': 'This information is required in order to classify users as bonafide researchers as part of the process of Data Access approvals.',
-                      'data-for': 'tip_isthePI'
+                      'data-for': 'tip_isThePI'
                     })
                   ])
                 ]),
@@ -941,7 +987,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
                 div({ className: 'col-lg-8 col-md-6 col-sm-6 col-xs-6' }, [
                   button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
-                    span({ isRendered: ((!completed || completed === undefined)) && this.state.isResearcher }, ['Submit']),
+                    span({ isRendered: (!completed || false) && this.state.isResearcher }, ['Submit']),
                     span({ isRendered: (completed === true || !this.state.isResearcher) }, ['Update'])
                   ]),
                   ConfirmationDialog({
@@ -964,8 +1010,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, [
                     div({ className: 'dialog-description' },
                       ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
-                  ]
-                  ),
+                  ]),
+                  h(ReactTooltip, {
+                    id: "tip_profileState",
+                    place: 'left',
+                    effect: 'solid',
+                    multiline: true,
+                    className: 'tooltip-wrapper'
+                  }),
+                  h(ReactTooltip, {
+                    id: "tip_isThePI",
+                    place: 'left',
+                    effect: 'solid',
+                    multiline: true,
+                    className: 'tooltip-wrapper'
+                  })
                 ])
               ])
             ])

@@ -56,7 +56,7 @@ class DulResultRecords extends Component {
 
     if (electionReview.consent) {
       dataUse = electionReview.consent.dataUse;
-    };
+    }
 
     this.setState({
       electionReview: electionReview,

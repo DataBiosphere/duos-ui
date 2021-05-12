@@ -62,9 +62,9 @@ class DataOwnerConsole extends Component {
     this.setState({ showModal: false });
   }
 
-  editReview = (e) => {
+  editReview = () => {
     // const data = e.target.getAttribute('data');
-  }
+  };
 
   voteReview = (pendingCase) => {
     this.props.history.push(`${'data_owner_review'}/${pendingCase.voteId}/${pendingCase.referenceId}/${pendingCase.dataSetId}`);

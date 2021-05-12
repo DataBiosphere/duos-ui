@@ -21,9 +21,9 @@ export const Theme = {
     size: {
       title: '28px',
       superheader: '24px',
-      header: '18px',
-      subheader: '16px',
-      small: '14px'
+      header: '1.8rem',
+      subheader: '1.65rem',
+      small: '1.5rem',
     },
     leading: {
       regular: '22px',
@@ -62,10 +62,12 @@ export const Theme = {
   },
 };
 
+const targetFont  = 'Arial';
+
 export const Styles = {
   NAVBAR: {
     DRAWER_LINK: {
-      fontFamily: 'Montserrat',
+      fontFamily: targetFont,
       fontWeight: 400,
       fontSize: '1.6rem'
     }
@@ -75,23 +77,23 @@ export const Styles = {
     margin: "0 auto"
   },
   TITLE: {
-    fontFamily: "Montserrat",
+    fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,
     fontSize: Theme.font.size.title,
   },
   SMALL: {
-    fontFamily: 'Montserrat',
+    fontFamily: targetFont,
     fontWeight: Theme.font.weight.regular,
     fontSize: Theme.font.size.small
   },
   MEDIUM: {
-    fontFamily: 'Montserrat',
+    fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,
     fontSize: '18px',
     margin: '15px 0'
   },
   MEDIUM_DESCRIPTION: {
-    fontFamily: 'Montserrat',
+    fontFamily: targetFont,
     fontWeight: Theme.font.weight.regular,
     fontSize: '15px',
   },
@@ -125,10 +127,10 @@ export const Styles = {
       borderRadius: '10px'
     },
     HEADER_ROW: {
-      fontFamily: "Montserrat",
-      fontSize: "14px",
+      fontFamily: targetFont,
+      fontSize: '1.6rem',
       color: "#00243C",
-      fontWeight: Theme.font.weight.medium,
+      fontWeight: Theme.font.weight.semibold,
       backgroundColor: "#f3f6f7",
       display: "flex",
       justifyContent: "left",
@@ -137,12 +139,12 @@ export const Styles = {
       borderTopRightRadius: 'inherit'
     },
     RECORD_ROW: {
-      fontFamily: 'Montserrat',
+      fontFamily: targetFont,
       fontWeight: Theme.font.weight.regular,
-      fontSize: "14px",
+      fontSize: Theme.font.size.small,
       display: "flex",
       justifyContent: "left",
-      height: "48px",
+      padding: "0.8rem 0"
     },
     RECORD_TEXT: {
       color: "#00243C"
@@ -165,39 +167,46 @@ export const Styles = {
       justifyContent: "left",
       alignItems: "center",
       wordBreak: 'break-word',
-      margin: "0 2%"
+      margin: "0 1%"
     },
-    DATA_ID_CELL: {
-      width: "10%",
-      margin: "0 2%",
+    DATASET_CELL: {
+      width: "18%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
-      alignItems: "center",
+      alignItems: "center"
+    },
+    DATA_ID_CELL: {
+      width: "14%",
+      margin: "0 1%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center"
     },
     SUBMISSION_DATE_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "12%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     DAC_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "8%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     ELECTION_STATUS_CELL: {
-      width: "10%",
-      margin: "0 2%",
+      width: "12%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     ELECTION_ACTIONS_CELL: {
-      width: "23%",
-      margin: "0 2%",
+      width: "16%",
+      margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
@@ -205,7 +214,7 @@ export const Styles = {
     FOOTER: {
       backgroundColor: "#f3f6f7",
       fontSize: '14px',
-      fontFamily: "Montserrat",
+      fontFamily: targetFont,
       display: 'flex',
       padding: '0 1%',
       justifyContent: 'flex-end',
@@ -238,7 +247,7 @@ export const Styles = {
     PAGINATION_INPUT: {
       textAlign: 'center',
       width: '20%',
-      fontFamily: 'Montserrat'
+      fontFamily: targetFont
     },
     PAGINATION_TABLE_SIZE_SECTION: {
       display: 'flex',
@@ -248,7 +257,9 @@ export const Styles = {
     },
     TABLE_TEXT_BUTTON: {
       display: 'flex',
-      width: '45%',
+      width: '65%',
+      minWidth: '98px',
+      maxWidth: '115px',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: Theme.palette.secondary,
@@ -283,18 +294,18 @@ export const Styles = {
       bottom: "20%",
       left: "20%",
       right: "20%",
-      fontFamily: 'Montserrat',
+      fontFamily: targetFont,
       padding: "2%"
     },
     CONFIRMATION: {
       height: "250px",
       inset: "20%",
-      fontFamily: 'Montserrat',
+      fontFamily: targetFont,
       padding: "2%"
     },
     DAR_SUBHEADER: {
       display: 'flex',
-      fontFamily: 'Montserrat',
+      fontFamily: targetFont,
       fontSize: '16px',
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',
@@ -302,7 +313,7 @@ export const Styles = {
     },
     TITLE_HEADER: {
       display: 'flex',
-      fontFamily: 'Montserrat',
+      fontFamily: targetFont,
       fontSize: Theme.font.size.title,
       fontWeight: Theme.font.weight.semibold,
       justifyContent: 'left',

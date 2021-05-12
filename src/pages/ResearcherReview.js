@@ -79,7 +79,7 @@ class ResearcherReview extends Component {
       prev.voteId = this.props.match.params.dacUserId;
       return prev;
     });
-  };
+  }
 
   submitVote = (voteStatus, rationale) => {
     let status = "pending";
@@ -90,15 +90,15 @@ class ResearcherReview extends Component {
     }
     let userStatus = { status: status, rationale: rationale, roleId: 5 };
     User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
-      data => {
+      () => {
         this.setState({ showConfirmationDialogOK: true });
       }
-    ).catch(error => {
+    ).catch(() => {
       this.setState({ showConfirmationDialogOK: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
     });
   };
 
-  confirmationHandlerOK = (answer) => (e) => {
+  confirmationHandlerOK = () => () => {
     this.setState({ showConfirmationDialogOK: false });
     this.props.history.goBack();
   };

@@ -133,14 +133,14 @@ class DataOwnerReview extends Component {
     this.setState({ showDatasetSummaryModal: false });
   }
 
-  openApplication = (e) => {
+  openApplication = () => {
     this.setState(prev => {
       prev.showApplicationSummaryModal = true;
       return prev;
     });
   };
 
-  openDataset = (e) => {
+  openDataset = () => {
     this.setState(prev => {
       prev.showDatasetSummaryModal = true;
       return prev;
@@ -174,7 +174,7 @@ class DataOwnerReview extends Component {
       return prev;
     });
   }
-  dialogHandlerCreate = () => (e) => {
+  dialogHandlerCreate = () => () => {
     this.setState(prev => {
       prev.showConfirmDialog = false;
       return prev;
@@ -214,23 +214,23 @@ class DataOwnerReview extends Component {
       (updatedVote.hasConcerns !== this.state.vote.hasConcerns)) {
       if (this.state.vote.createDate === null) {
         Votes.postDarVote(this.state.pendingCase.referenceId, updatedVote).then(
-          resp => {
+          () => {
             this.setState({ showConfirmDialog:true, showError:false, alertMessage: 'Your vote has been successfully logged!'});
           }
-        ).catch(error => {
+        ).catch(() => {
           this.setState({showError:true});
         });
       } else {
         Votes.updateDarVote(this.state.pendingCase.referenceId, updatedVote).then(
-          resp => {
+          () => {
             this.setState({ showConfirmDialog:true, showError:false, alertMessage: 'Your vote has been successfully edited!'});
           }
-        ).catch(error => {
+        ).catch(() => {
           this.setState({showError:true});
         });
       }
     }
-  };
+  }
 
   fixValue = (value) => {
     let newValue = undefined;

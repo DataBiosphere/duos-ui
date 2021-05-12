@@ -1,17 +1,23 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {Config} from './config';
-import {isNil} from 'lodash/fp';
-import {forEach} from 'lodash';
-import {DAR, DataSet, Researcher} from "./ajax";
-import {Styles} from "./theme";
-import {find, map} from "lodash/fp";
+import { Config } from './config';
+import { forEach } from 'lodash';
+import { DAR, DataSet, Researcher } from "./ajax";
+import {Theme, Styles } from "./theme";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
     e.target.style[key] = value;
   });
+};
+
+//currently, dars contain a list of datasets (any length) and a list of length 1 of a datasetId
+//go through the list of datasets and get the name of the dataset whose id is in the datasetId list
+export const getNameOfDatasetForThisDAR = (datasets, datasetId) => {
+  const data = !isNil(datasetId) && !isEmpty(datasetId) ? find({"value" : first(datasetId).toString()})(datasets) : null;
+  return isNil(data) ? '- -' : getDatasetNames([data]);
 };
 
 export const formatDate = (dateval) => {
@@ -224,6 +230,109 @@ export const PromiseSerial = funcs =>
       func().then(Array.prototype.concat.bind(result))),
   Promise.resolve([]));
 
+//////////////////////////////////
+//DAR CONSOLES UTILITY FUNCTIONS//
+/////////////////////////////////
+export const getElectionDate = (election) => {
+  let formattedString = '- -';
+  if(election) {
+    //NOTE: some elections have a createDate attribute but not a lastUpdate attributes
+    const targetDate = election.lastUpdate || election.createDate;
+    formattedString = formatDate(targetDate);
+  }
+  return formattedString;
+};
+
+export const wasVoteSubmitted =(vote) => {
+  //NOTE: as mentioned elsewhere, legacy code has resulted in multiple sources for timestamps
+  //current code will always provide lastUpdate
+  const targetDate = vote.lastUpdate || vote.createDate || vote.updateDate || vote.lastUpdateDate;
+  return !isNil(targetDate);
+};
+
+export const wasFinalVoteTrue = (voteData) => {
+  const {type, vote} = voteData;
+  //vote status capitalizes final, election status does not
+  return type === 'FINAL' && vote === true;
+};
+
+export const processElectionStatus = (election, votes, showVotes) => {
+  let output;
+  const electionStatus = election.status;
+
+  if(!isEmpty(votes) && isNil(electionStatus)) {
+    output = '- -';
+  } else if(electionStatus === 'Open') {
+    //Null check since react doesn't necessarily perform prop updates immediately
+    if(!isEmpty(votes) && !isNil(election)) {
+      const dacVotes = filter((vote) => vote.type === 'DAC' && vote.electionId === election.electionId)(votes);
+      const completedVotes = (filter(wasVoteSubmitted)(dacVotes)).length;
+      const outputSuffix = `(${completedVotes} / ${dacVotes.length} votes)`;
+      output = `Open${showVotes ? outputSuffix : ''}`;
+    }
+  //some elections have electionStatus === Final, others have electionStatus === Closed
+  //both are, in this step of the process, technically referring to a closed election
+  //therefore both values must be checked for
+  } else if (electionStatus === 'Final' || electionStatus === 'Closed') {
+    const finalVote = find(wasFinalVoteTrue)(votes);
+    output = finalVote ? 'Approved' : 'Denied';
+  } else {
+    output = electionStatus;
+  }
+  return output;
+};
+
+export const calcFilteredListPosition = (index, currentPage, tableSize) => {
+  return index + ((currentPage - 1) * tableSize);
+};
+
+export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
+  return (updatedElection, darId, i, successText, votes = undefined) => {
+    const index = calcFilteredListPosition(i, currentPage, tableSize);
+    let filteredListCopy = cloneDeep(filteredList);
+    let electionListCopy = cloneDeep(electionList);
+    const targetFilterRow = filteredListCopy[parseInt(index, 10)];
+    const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
+    targetFilterRow.election = updatedElection;
+    targetElectionRow.election = cloneDeep(updatedElection);
+    if(!isNil(votes)) {
+      targetFilterRow.votes = votes;
+      targetElectionRow.votes = cloneDeep(votes);
+    }
+    setFilteredList(filteredListCopy);
+    setElectionList(electionListCopy);
+    Notifications.showSuccess({text: successText});
+  };
+};
+
+//Helper function, search bar handler for DAC Chair console and AdminManageAccess
+//NOTE: May need to write a separate version for AdminManageAccess, need to explore more
+export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
+  return (searchTerms) => {
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    if(isEmpty(searchTermValues)) {
+      setFilteredList(electionList);
+    } else {
+      let newFilteredList = cloneDeep(electionList);
+      searchTermValues.forEach((splitTerm) => {
+        const term = splitTerm.trim();
+        if(!isEmpty(term)) {
+          newFilteredList = filter(electionData => {
+            const { election, dac, votes} = electionData;
+            const dar = electionData.dar ? electionData.dar.data : undefined;
+            const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
+            const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
+            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
+            return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
+          }, newFilteredList);
+        }
+      });
+      setFilteredList(newFilteredList);
+    }
+    setCurrentPage(1);
+  };
+};
+
 export const searchOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
@@ -238,4 +347,22 @@ export const searchOntologies = (query, callback) => {
       });
       callback(options);
     });
+};
+
+export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
+  let appliedStyle = disabled ? {[targetColorAttribute] : Theme.palette.disabled} : {};
+  return Object.assign(baseStyle, appliedStyle);
+};
+
+export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave) => {
+  let attributes;
+  if(!disabled) {
+    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip};
+  } else {
+    attributes = {style, disabled, "data-tip": dataTip};
+  }
+  if(!isEmpty(dataTip)) {
+    attributes["data-tip"] = dataTip;
+  }
+  return attributes;
 };

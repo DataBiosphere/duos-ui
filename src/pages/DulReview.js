@@ -53,7 +53,7 @@ class DulReview extends Component {
       prev.consentName = consent.dulName;
       return prev;
     });
-  };
+  }
 
   setEnableVoteButton() {
     this.setState(prev => {
@@ -67,30 +67,30 @@ class DulReview extends Component {
     voteToUpdate.vote = vote;
     voteToUpdate.rationale = rationale;
     this.processVote(voteToUpdate);
-  };
+  }
 
   async processVote(vote) {
     if (vote.createDate === null) {
       Votes.postVote(this.state.consent.consentId, vote).then(
-        data => {
+        () => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully logged!" });
         }
-      ).catch(error => {
+      ).catch(() => {
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
 
     } else {
       Votes.updateVote(this.state.consent.consentId, vote).then(
-        data => {
+        () => {
           this.setState({ showConfirmationDialog: true, alertMessage: "Your vote has been successfully edited!" });
         }
-      ).catch(error => {
+      ).catch(() => {
         this.setState({ showConfirmationDialog: true, alertMessage: "Sorry, something went wrong when trying to submit the vote. Please try again." });
       });
     }
-  };
+  }
 
-  confirmationHandlerOK = (answer) => (e) => {
+  confirmationHandlerOK = () => () => {
     this.setState({ showConfirmationDialog: false });
     Navigation.back(this.state.currentUser, this.props.history);
   };

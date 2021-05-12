@@ -81,7 +81,6 @@ export const SignIn = hh(class SignIn extends Component {
 
   forbidden = (response) => {
     Storage.clearStorage();
-    console.log(JSON.stringify(response));
     if (response.error === 'popup_closed_by_user') {
       this.setState(prev => {
         prev.error = {
