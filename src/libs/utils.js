@@ -261,7 +261,7 @@ export const processElectionStatus = (election, votes, showVotes) => {
   const electionStatus = election.status;
 
   if(!isEmpty(votes) && isNil(electionStatus)) {
-    output = '- -';
+    output = 'Unreviewed';
   } else if(electionStatus === 'Open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {

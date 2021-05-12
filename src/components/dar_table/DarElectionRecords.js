@@ -35,7 +35,7 @@ const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, vot
       color: consoleType === consoleTypes.MANAGE_ACCESS ? Theme.palette.link : 'black' //color adjustment for manage console
     }),
     onClick: () => consoleType === consoleTypes.MANAGE_ACCESS && goToReviewResults(dar, history)
-  }, [election ? processElectionStatus(election, votes, showVotes) : '- -']);
+  }, [election ? processElectionStatus(election, votes, showVotes) : 'Unreviewed']);
 };
 
 export default function DarElectionRecords(props) {
