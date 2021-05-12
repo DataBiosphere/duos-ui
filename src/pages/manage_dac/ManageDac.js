@@ -9,12 +9,13 @@ import {PaginatorBar} from '../../components/PaginatorBar';
 import {SearchBox} from '../../components/SearchBox';
 import {DAC} from '../../libs/ajax';
 import {Storage} from '../../libs/storage';
-import {contains, filter, reverse, sortBy, map, isEmpty} from 'lodash/fp';
+import {contains, filter, reverse, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
 import ConfirmationModal from "../../components/modals/ConfirmationModal";
 import TableIconButton from "../../components/TableIconButton";
 import {Delete} from "@material-ui/icons";
 import {Notifications} from "../../libs/utils";
+import {Styles} from "../../libs/theme";
 
 const limit = 10;
 const CHAIR = "Chairperson";
@@ -120,15 +121,11 @@ class ManageDac extends Component {
   };
 
   deleteDac = async (selectedDac) => {
-    await DAC.datasets(selectedDac.dacId).then((response) => {
-      isEmpty(response) ?
-        this.setState(prev => {
-          prev.showConfirmationModal = true;
-          prev.isEditMode = false;
-          prev.selectedDac = selectedDac;
-          return prev;
-        })
-        : Notifications.showError({text: "All datasets assigned to this DAC must be reassigned before this can be deleted."});
+    this.setState(prev => {
+      prev.showConfirmationModal = true;
+      prev.isEditMode = false;
+      prev.selectedDac = selectedDac;
+      return prev;
     });
   };
 
@@ -348,8 +345,12 @@ class ManageDac extends Component {
                       onClick: () => this.editDac(dac)
                     }, ['Edit']),
                     h(TableIconButton, {
-                      style: {paddingTop: '.5rem', color: '#00609f'},
+                      key: `delete-dac-icon`,
+                      dataTip: !isNil(dac.datasets) && !isEmpty(dac.datasets) ? 'All datasets assigned to this DAC must be reassigned before this can be deleted.' : 'Delete DAC',
+                      style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
+                      hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER),
                       isRendered: userRole === ADMIN,
+                      disabled: !isNil(dac.datasets) && !isEmpty(dac.datasets),
                       onClick: () => this.deleteDac(dac),
                       icon: Delete
                     })

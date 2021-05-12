@@ -28,7 +28,7 @@ export default function DarTableCancelButton(props) {
   const attributes = {
     key: `cancel-button-${election.referenceId}`,
     disabled,
-    dataTip: disabled ? 'You do not have permision to cancel this election' : 'Cancel Election',
+    dataTip: disabled ? 'You do not have permission to cancel this election' : 'Cancel Election',
     onClick: () => cancelElectionHandler(election, darReferenceId, updateLists, index),
     style: Object.assign({}, baseStyle, addBaseStyle),
     hoverStyle: Object.assign({}, baseHoverStyle, addHoverStyle)
