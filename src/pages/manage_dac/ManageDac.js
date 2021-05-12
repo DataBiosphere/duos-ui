@@ -348,12 +348,12 @@ class ManageDac extends Component {
                     h(TableIconButton, {
                       key: `delete-dac-icon`,
                       dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
-                      style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
-                      hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER),
                       isRendered: userRole === ADMIN,
                       disabled: disabled,
                       onClick: () => this.deleteDac(dac),
-                      icon: Delete
+                      icon: Delete,
+                      style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
+                      hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
                     })
                   ])
                 ]),
@@ -400,6 +400,12 @@ class ManageDac extends Component {
             message: "Are you sure you want to delete this Data Access Committee?",
             header: this.state.selectedDac.name,
             onConfirm: this.handleDeleteDac,
+          }),
+          h(ReactTooltip, {
+            place: 'left',
+            effect: 'solid',
+            multiline: true,
+            className: 'tooltip-wrapper'
           })
         ])
       ])
