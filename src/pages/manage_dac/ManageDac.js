@@ -298,6 +298,7 @@ class ManageDac extends Component {
           this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map(dac => {
+              const disabled = !isNil(dac.datasets) && !isEmpty(dac.datasets);
               return (h(Fragment, {key: dac.dacId}, [
                 div({
                   id: dac.dacId,
@@ -346,11 +347,11 @@ class ManageDac extends Component {
                     }, ['Edit']),
                     h(TableIconButton, {
                       key: `delete-dac-icon`,
-                      dataTip: !isNil(dac.datasets) && !isEmpty(dac.datasets) ? 'All datasets assigned to this DAC must be reassigned before this can be deleted.' : 'Delete DAC',
+                      dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
                       style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
                       hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER),
                       isRendered: userRole === ADMIN,
-                      disabled: !isNil(dac.datasets) && !isEmpty(dac.datasets),
+                      disabled: disabled,
                       onClick: () => this.deleteDac(dac),
                       icon: Delete
                     })
