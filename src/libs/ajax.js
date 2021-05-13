@@ -668,9 +668,14 @@ export const Files = {
 };
 
 export const Summary = {
-  getFile: async (URI, nameFile) => {
+  getFile: async (fileName) => {
+    const URI = `/consent/cases/summary/file?fileType=${fileName}`;
     const url = `${await Config.getApiUrl()}${URI}`;
-    return await getFile(url, nameFile);
+    if (fileName === 'TranslateDUL') {
+      return await getFile(url, 'DUL_summary.tsv');
+    } else {
+      return await getFile(url, 'DAR_summary.tsv');
+    }
   }
 };
 

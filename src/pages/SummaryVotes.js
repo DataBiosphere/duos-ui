@@ -138,7 +138,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           button({
             id: "btn_downloadStatsDul",
             className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper btn-primary dul-background",
-            onClick: () => this.getFile("TranslateDUL"),
+            onClick: () => Summary.getFile("TranslateDUL"),
             isRendered: this.isAuthedToDownload()
           }, [
             span({}, ["Download stats"]),
@@ -178,7 +178,7 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
           button({
             id: "btn_downloadStatsAccess",
             className: "col-lg-2 col-md-3 col-sm-4 col-xs-12 search-wrapper btn-primary access-background",
-            onClick: () => this.getFile("DataAccess"),
+            onClick: () => Summary.getFile("DataAccess"),
             isRendered: this.isAuthedToDownload()
           }, [
             span({}, ["Download stats"]),
@@ -262,15 +262,6 @@ export const SummaryVotes = hh(class SummaryVotes extends Component {
         ])
       ])
     );
-  }
-
-  getFile(fileName) {
-    const URI = `/consent/cases/summary/file?fileType=${fileName}`;
-    if (fileName === 'TranslateDUL') {
-      Summary.getFile(URI, 'DUL_summary.tsv');
-    } else {
-      Summary.getFile(URI, 'DAR_summary.tsv');
-    }
   }
 
   getDarReport(fileType, fileName) {
