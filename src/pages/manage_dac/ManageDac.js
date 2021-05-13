@@ -134,17 +134,21 @@ class ManageDac extends Component {
   };
 
   handleDeleteDac = async () => {
-    await DAC.delete(this.state.selectedDac.dacId).then(() => {
+    let status;
+    await DAC.delete(this.state.selectedDac.dacId).then((resp) => {
+      status = resp.status;
+    });
+    if (status === 200) {
+      Notifications.showSuccess({text: "DAC successfully deleted."});
       this.setState(prev => {
         prev.showConfirmationModal = false;
         prev.currentPage = 1;
         return prev;
       });
-      Notifications.showSuccess({text: "DAC successfully deleted."});
-    }).catch(() => {
+      await this.fetchDacList();
+    } else {
       Notifications.showError({text: "DAC could not be deleted."});
-    });
-    await this.fetchDacList();
+    }
   };
 
   addDac = () => {

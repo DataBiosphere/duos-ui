@@ -120,7 +120,9 @@ export const DAC = {
   delete: async (dacId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    console.log(res);
+    console.log(res.body.getReader().read());
+    return res;
   },
 
   get: async (dacId) => {
