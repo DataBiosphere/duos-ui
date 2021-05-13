@@ -8,5 +8,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: install dependencies
         run: npm ci
-      - name: npx audit-ci
-        run: npx audit-ci --moderate --config config/audit-ci.json --report-type full
+      - name: npm audit
+        run: npm audit --production
