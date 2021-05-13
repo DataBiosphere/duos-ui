@@ -13,6 +13,7 @@ const SECTION = {
 
 export default function ReviewResults(props) {
   const darId = props.match.params.referenceId;
+  const status = props.match.params.referenceId;
   const [datasets, setDatasets] = useState();
   const [darInfo, setDarInfo] = useState();
   const [consent, setConsent] = useState();
@@ -41,11 +42,14 @@ export default function ReviewResults(props) {
     let accessElectionReview;
     let rpElectionReview;
 
-    try {
-      accessElection = await Election.findElectionByDarId(darId);
-    } catch (error) {
-      //access election is null, this is expected for a dar with an unreviewed election status
-      //so there is no vote information to display
+    //dars with unreviewed status will not have an election
+    if (isNil(status)) {
+      try {
+        accessElection = await Election.findElectionByDarId(darId);
+      } catch (error) {
+        //access election is null, this is expected for a dar with an unreviewed election status
+        //so there is no vote information to display
+      }
     }
     try {
       accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId);

@@ -23,9 +23,13 @@ const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
   }
 };
 
-const goToReviewResults = (dar, history) => {
+const goToReviewResults = (dar, history, status) => {
   if(dar && dar.referenceId) {
-    history.push(`review_results/${dar.referenceId}`);
+    if (status === 'Unreviewed') {
+      history.push(`review_results/${dar.referenceId}/${status}`);
+    } else {
+      history.push(`review_results/${dar.referenceId}`);
+    }
   }
 };
 const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
@@ -37,7 +41,7 @@ const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, vot
     style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
       color: includeLink ? Theme.palette.link : 'black' //color adjustment for manage console
     }),
-    onClick: () => includeLink && goToReviewResults(dar, history)
+    onClick: () => includeLink && goToReviewResults(dar, history, status)
   }, [status]);
 };
 
