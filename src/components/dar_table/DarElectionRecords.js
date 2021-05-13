@@ -29,13 +29,16 @@ const goToReviewResults = (dar, history) => {
   }
 };
 const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
-  const tag = consoleType === consoleTypes.MANAGE_ACCESS ? a : div;
+  const linkedStatuses = ['Unreviewed', 'Approved', 'Denied', 'Canceled'];
+  const status = election ? processElectionStatus(election, votes, showVotes) : 'Unreviewed';
+  const includeLink = (consoleType === consoleTypes.MANAGE_ACCESS || linkedStatuses.includes(status));
+  const tag = includeLink ? a : div;
   return tag({
     style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
-      color: consoleType === consoleTypes.MANAGE_ACCESS ? Theme.palette.link : 'black' //color adjustment for manage console
+      color: includeLink ? Theme.palette.link : 'black' //color adjustment for manage console
     }),
-    onClick: () => consoleType === consoleTypes.MANAGE_ACCESS && goToReviewResults(dar, history)
-  }, [election ? processElectionStatus(election, votes, showVotes) : 'Unreviewed']);
+    onClick: () => includeLink && goToReviewResults(dar, history)
+  }, [status]);
 };
 
 export default function DarElectionRecords(props) {
