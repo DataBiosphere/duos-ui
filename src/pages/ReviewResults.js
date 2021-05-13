@@ -62,11 +62,13 @@ export default function ReviewResults(props) {
     //get the duos matching algorithm decision
     let matchData;
 
-    try {
-      matchData = await Match.findMatch(consent.consentId, accessElection.referenceId);
-      setMatchData(matchData);
-    } catch (e) {
-      Notifications.showError({ text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}` });
+    if (!isNil(accessElection)) {
+      try {
+        matchData = await Match.findMatch(consent.consentId, accessElection.referenceId);
+        setMatchData(matchData);
+      } catch (e) {
+        Notifications.showError({text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}`});
+      }
     }
   };
 
