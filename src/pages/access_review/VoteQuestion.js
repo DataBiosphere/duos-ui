@@ -48,14 +48,15 @@ export const VoteQuestion = hh(class VoteQuestion extends React.PureComponent {
   };
 
   render() {
-    const { label, question, id, rationale, selectedOption, disabled, hasLibraryCard } = this.props;
+    const { label, question, id, rationale, selectedOption, disabled, optional, hasLibraryCard } = this.props;
     const disabledProp = disabled ? { disabled: true } : {};
 
     return div({ style: { marginBottom: '24px' } },
       [
         div({ style: FADED }, label),
         div({ style: HEADER }, question),
-        div({ style: FADED }, 'Your vote*'),
+        div({ style: FADED, isRendered: isNil(optional) }, 'Your vote*'),
+        div({ style: FADED, isRendered: !isNil(optional) }, 'Your vote'),
         fieldset([
           input({
             ...disabledProp,
