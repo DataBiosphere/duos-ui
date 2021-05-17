@@ -125,7 +125,8 @@ export const DAC = {
   delete: async (dacId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    //we do not call .json() on res because the response has no body
+    return res;
   },
 
   get: async (dacId) => {

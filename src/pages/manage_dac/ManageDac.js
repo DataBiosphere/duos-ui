@@ -9,8 +9,13 @@ import {PaginatorBar} from '../../components/PaginatorBar';
 import {SearchBox} from '../../components/SearchBox';
 import {DAC} from '../../libs/ajax';
 import {Storage} from '../../libs/storage';
-import {contains, filter, reverse, sortBy, map} from 'lodash/fp';
+import {contains, filter, reverse, sortBy, map, isNil, isEmpty} from 'lodash/fp';
 import manageDACIcon from '../../images/icon_manage_dac.png';
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import TableIconButton from "../../components/TableIconButton";
+import {Delete} from "@material-ui/icons";
+import {Notifications} from "../../libs/utils";
+import {Styles} from "../../libs/theme";
 
 const limit = 10;
 const CHAIR = "Chairperson";
@@ -27,6 +32,7 @@ class ManageDac extends Component {
       showDacModal: false,
       showDatasetsModal: false,
       showMembersModal: false,
+      showConfirmationModal: false,
       value: '',
       limit: limit,
       dacs: [],
@@ -112,6 +118,37 @@ class ManageDac extends Component {
       prev.selectedDac = selectedDac;
       return prev;
     });
+  };
+
+  deleteDac = async (selectedDac) => {
+    this.setState(prev => {
+      prev.showConfirmationModal = true;
+      prev.isEditMode = false;
+      prev.selectedDac = selectedDac;
+      return prev;
+    });
+  };
+
+  closeConfirmation = () => {
+    this.setState({ showConfirmationModal: false });
+  };
+
+  handleDeleteDac = async () => {
+    let status;
+    await DAC.delete(this.state.selectedDac.dacId).then((resp) => {
+      status = resp.status;
+    });
+    if (status === 200) {
+      Notifications.showSuccess({text: "DAC successfully deleted."});
+      this.setState(prev => {
+        prev.showConfirmationModal = false;
+        prev.currentPage = 1;
+        return prev;
+      });
+      await this.fetchDacList();
+    } else {
+      Notifications.showError({text: "DAC could not be deleted."});
+    }
   };
 
   addDac = () => {
@@ -265,6 +302,7 @@ class ManageDac extends Component {
           this.state.dacs.filter(this.searchTable(searchDacText))
             .slice((currentPage - 1) * limit, currentPage * this.state.limit)
             .map(dac => {
+              const disabled = !isNil(dac.datasets) && !isEmpty(dac.datasets);
               return (h(Fragment, {key: dac.dacId}, [
                 div({
                   id: dac.dacId,
@@ -294,7 +332,8 @@ class ManageDac extends Component {
                     }, ['View'])
                   ]),
                   div({
-                    className: 'col-2 cell-body f-center'
+                    className: 'col-2 cell-body f-center',
+                    style: {display: 'flex'}
                   }, [
                     button({
                       id: dac.dacId + '_btnViewDAC',
@@ -309,7 +348,17 @@ class ManageDac extends Component {
                       className: 'cell-button hover-color',
                       style: actionButtonStyle,
                       onClick: () => this.editDac(dac)
-                    }, ['Edit'])
+                    }, ['Edit']),
+                    h(TableIconButton, {
+                      key: `delete-dac-icon`,
+                      dataTip: disabled ? 'All datasets assigned to this DAC must be reassigned before this can be deleted' : 'Delete DAC',
+                      isRendered: userRole === ADMIN,
+                      disabled: disabled,
+                      onClick: () => this.deleteDac(dac),
+                      icon: Delete,
+                      style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
+                      hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
+                    })
                   ])
                 ]),
                 hr({className: 'table-body-separator'})
@@ -347,6 +396,20 @@ class ManageDac extends Component {
             onCloseRequest: this.closeAddDacModal,
             dac: this.state.selectedDac,
             userRole: userRole
+          }),
+          h(ConfirmationModal, {
+            showConfirmation: this.state.showConfirmationModal,
+            closeConfirmation: this.closeConfirmation,
+            title: "Delete DAC?",
+            message: "Are you sure you want to delete this Data Access Committee?",
+            header: this.state.selectedDac.name,
+            onConfirm: this.handleDeleteDac,
+          }),
+          h(ReactTooltip, {
+            place: 'left',
+            effect: 'solid',
+            multiline: true,
+            className: 'tooltip-wrapper'
           })
         ])
       ])
