@@ -13,7 +13,7 @@ const SECTION = {
 
 export default function ReviewResults(props) {
   const darId = props.match.params.referenceId;
-  const status = props.match.params.referenceId;
+  const status = props.match.params.status;
   const [datasets, setDatasets] = useState();
   const [darInfo, setDarInfo] = useState();
   const [consent, setConsent] = useState();
@@ -43,7 +43,7 @@ export default function ReviewResults(props) {
     let rpElectionReview;
 
     //dars with unreviewed status will not have an election
-    if (isNil(status)) {
+    if (status !== 'Unreviewed') {
       try {
         accessElection = await Election.findElectionByDarId(darId);
       } catch (error) {
