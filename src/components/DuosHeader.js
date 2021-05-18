@@ -9,9 +9,8 @@ import {Link, withRouter} from 'react-router-dom';
 import {Storage} from '../libs/storage';
 import {SupportRequestModal} from './modals/SupportRequestModal';
 import './DuosHeader.css';
-import {NavigationUtils} from '../libs/utils';
 import { NotificationService } from '../libs/notificationService';
-import { Notification } from '../components/Notification';
+import { Notification } from './Notification';
 import { Styles } from '../libs/theme';
 import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
@@ -128,8 +127,7 @@ class DuosHeader extends Component {
   }
 
   async componentDidMount() {
-    let dacChairPath = await NavigationUtils.dacChairConsolePath();
-    this.setState({dacChairPath: dacChairPath});
+    this.setState({dacChairPath: '/new_chair_console'});
     const notificationData =  await NotificationService.getActiveBanners();
     this.setState(prev => {
       prev.notificationData = notificationData;
