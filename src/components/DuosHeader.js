@@ -127,7 +127,7 @@ class DuosHeader extends Component {
   }
 
   async componentDidMount() {
-    this.setState({dacChairPath: '/new_chair_console'});
+    this.setState({dacChairPath: '/chair_console'});
     const notificationData =  await NotificationService.getActiveBanners();
     this.setState(prev => {
       prev.notificationData = notificationData;

@@ -96,7 +96,7 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const page = user.isChairPerson ? '/new_chair_console'
+    const page = user.isChairPerson ? '/chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/dataset_catalog'
@@ -106,7 +106,7 @@ export const Navigation = {
     history.push(page);
   },
   console: async (user, history) => {
-    const page = user.isChairPerson ? '/new_chair_console'
+    const page = user.isChairPerson ? '/chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/researcher_console'
