@@ -24,7 +24,6 @@ data:
       "powerBiUrl": "",
       "gaId": "",
       "features": {
-        "newDarUi": true,
-        "newChairConsole": false
+        "newDarUi": true
       }
     }
