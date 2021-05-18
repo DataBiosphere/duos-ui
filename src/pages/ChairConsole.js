@@ -11,7 +11,7 @@ import { updateLists as updateListsInit } from '../libs/utils';
 import { tableHeaderTemplate, tableRowLoadingTemplate } from '../components/dar_table/DarTable';
 import { consoleTypes } from "../components/dar_table/DarTableActions";
 
-export default function NewChairConsole(props) {
+export default function ChairConsole(props) {
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState(10);
