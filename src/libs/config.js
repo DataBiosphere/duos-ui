@@ -27,11 +27,6 @@ export const Config = {
 
   getTag: async () => (await getConfig()).tag,
 
-  getFeatureFlag: async (featureName) => {
-    const feature = _.get(await getConfig(), 'features', {});
-    return _.get(feature, featureName, false);
-  },
-
   getProject: async () => {
     const env = await Config.getEnv();
     switch (env) {
