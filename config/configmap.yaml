@@ -23,7 +23,5 @@ data:
       "nihUrl": "",
       "powerBiUrl": "",
       "gaId": "",
-      "features": {
-        "newDarUi": true
-      }
+      "features": {}
     }
