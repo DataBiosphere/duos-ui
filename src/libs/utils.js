@@ -1,7 +1,6 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { Config } from './config';
 import { forEach } from 'lodash';
 import { DAR, DataSet, Researcher } from "./ajax";
 import {Theme, Styles } from "./theme";
@@ -97,7 +96,7 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const page = user.isChairPerson ? await NavigationUtils.dacChairConsolePath()
+    const page = user.isChairPerson ? '/new_chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/dataset_catalog'
@@ -107,7 +106,7 @@ export const Navigation = {
     history.push(page);
   },
   console: async (user, history) => {
-    const page = user.isChairPerson ? await NavigationUtils.dacChairConsolePath()
+    const page = user.isChairPerson ? '/new_chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/researcher_console'
@@ -181,10 +180,6 @@ export const Notifications = {
 export const NavigationUtils = {
   accessReviewPath: () => {
     return "access_review";
-  },
-  dacChairConsolePath: async () => {
-    const newChairConsoleEnabled = await Config.getFeatureFlag('newChairConsole');
-    return newChairConsoleEnabled ? "/new_chair_console" : "/chair_console";
   }
 };
 
