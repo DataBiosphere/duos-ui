@@ -306,7 +306,7 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
 };
 
 //Helper function, search bar handler for DAC Chair console and AdminManageAccess
-//NOTE: May need to write a separate version for AdminManageAccess, need to explore more
+//NOTE: need to replace this in favor of genericized function. Remove only if certain that it is not used elsewhere
 export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
   return (searchTerms) => {
     const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
@@ -325,6 +325,51 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
             const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
+        }
+      });
+      setFilteredList(newFilteredList);
+    }
+    setCurrentPage(1);
+  };
+};
+
+const getSearchFilterFunctions = () => {
+  return {
+    dar: (term, targetList) => filter(electionData => {
+      const { election, dac, votes} = electionData;
+      const dar = electionData.dar ? electionData.dar.data : undefined;
+      const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
+      const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
+      const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
+      return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
+    }, targetList),
+    libraryCard: (term, targetList) => filter(libraryCard => {
+      const { userName, userEmail, institutionName, createDate, updateDate, eraCommonsId} = libraryCard;
+      return includes(
+        term, toLower(userName),
+        term, toLower(userEmail),
+        term, toLower(institutionName),
+        term, createDate,
+        term, updateDate,
+        term, toLower(eraCommonsId)
+      );
+    }, targetList)
+  };
+};
+
+export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelName) => {
+  const filterFnMap = getSearchFilterFunctions();
+  return (searchTerms) => {
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    if(isEmpty(searchTermValues)) {
+      setFilteredList(list);
+    } else {
+      let newFilteredList = cloneDeep(list);
+      searchTermValues.forEach((splitTerm) => {
+        const term = splitTerm.trim();
+        if(!isEmpty(term)) {
+          const filterFn = filterFnMap[modelName];
+          newFilteredList = filterFn(term, newFilteredList);
         }
       });
       setFilteredList(newFilteredList);
