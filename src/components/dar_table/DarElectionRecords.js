@@ -34,7 +34,7 @@ const goToReviewResults = (dar, history, status) => {
 };
 const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
   const linkedStatuses = ['Unreviewed', 'Approved', 'Denied', 'Canceled'];
-  const status = election ? processElectionStatus(election, votes, showVotes) : 'Unreviewed';
+  const status = processElectionStatus(election, votes, showVotes);
   const includeLink = (consoleType === consoleTypes.MANAGE_ACCESS || linkedStatuses.includes(status));
   const tag = includeLink ? a : div;
   return tag({

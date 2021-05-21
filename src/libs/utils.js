@@ -258,9 +258,8 @@ export const wasFinalVoteTrue = (voteData) => {
 
 export const processElectionStatus = (election, votes, showVotes) => {
   let output;
-  const electionStatus = election.status;
-
-  if(!isEmpty(votes) && isNil(electionStatus)) {
+  const electionStatus = election ? election.status : null;
+  if (isNil(electionStatus)) {
     output = 'Unreviewed';
   } else if(electionStatus === 'Open') {
     //Null check since react doesn't necessarily perform prop updates immediately
@@ -322,7 +321,7 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
             const dar = electionData.dar ? electionData.dar.data : undefined;
             const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
             const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
-            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
+            const targetElectionAttrs = JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]);
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
         }
