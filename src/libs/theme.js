@@ -7,6 +7,7 @@ export const Theme = {
     error: '#DB3214',
     success: '#00928A',
     disabled: '#cccccc',
+    white: '#ffffff',
     background: {
       secondary: 'rgba(0, 96, 159, 0.1)',
       highlighted: 'rgba(193,107,12, 0.1)',
@@ -270,8 +271,49 @@ export const Styles = {
       minHeight: '3rem',
       margin: '2% 10% 2% 0'
     },
+    TABLE_TEXT_BUTTON_SUCCESS: {
+      display: 'flex',
+      width: '65%',
+      minWidth: '98px',
+      maxWidth: '115px',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Theme.palette.success,
+      color: Theme.palette.white,
+      height: '60%',
+      borderRadius: '.3rem',
+      cursor: 'default',
+      minHeight: '3rem',
+      margin: '2% 10% 2% 0'
+    },
+    TABLE_TEXT_BUTTON_OUTLINED: {
+      display: 'flex',
+      width: '65%',
+      minWidth: '98px',
+      maxWidth: '115px',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Theme.palette.white,
+      color: Theme.palette.secondary,
+      height: '60%',
+      borderRadius: '.3rem',
+      cursor: 'default',
+      minHeight: '3rem',
+      margin: '2% 10% 2% 0',
+      border: '1px solid',
+      borderColor: Theme.palette.secondary
+    },
     TABLE_BUTTON_TEXT_HOVER: {
       backgroundColor: '#2FA4E7',
+      cursor: 'pointer'
+    },
+    TABLE_BUTTON_TEXT_HOVER_OUTLINED: {
+      cursor: 'pointer',
+      borderColor: '#2FA4E7',
+      color: '#2FA4E7'
+    },
+    TABLE_BUTTON_TEXT_HOVER_SUCCESS: {
+      backgroundColor: '#00D8CC',
       cursor: 'pointer'
     },
     TABLE_BUTTON_ICON_HOVER: {
