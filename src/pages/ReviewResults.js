@@ -80,7 +80,7 @@ export default function ReviewResults(props) {
     (!isNil(darInfo)) ?
       div({id: 'container', style: {margin: '2rem'}}, [
         div({id: 'header', style: {...SECTION, padding: '1rem 0'}}, [
-          AccessReviewHeader({})
+          AccessReviewHeader({history: props.history})
         ]),
         div({id: 'body', style: SECTION}, [
           DarApplication({
