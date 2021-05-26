@@ -87,7 +87,7 @@ class AccessReview extends React.PureComponent {
           {
             id: 'header', style: SECTION
           },
-          [AccessReviewHeader({ match, message: dacChairMessage })]
+          [AccessReviewHeader({ match, message: dacChairMessage, history })]
         ),
         div({ id: 'body', style: { display: 'flex' } }, [
           div(
