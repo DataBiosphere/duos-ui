@@ -1008,19 +1008,10 @@ export const Votes = {
   },
 
   updateFinalAccessDarVote: async (requestId, vote) => {
-    var postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    if (vote.type === 'FINAL') {
-      postObject.type = 'FINAL';
-    }
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}/final`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
     return await res.json();
-
   }
-
 };
 
 export const AuthenticateNIH = {
