@@ -87,6 +87,12 @@ export const Styles = {
     fontWeight: Theme.font.weight.regular,
     fontSize: Theme.font.size.small
   },
+  SMALL_BOLD: {
+    fontFamily: targetFont,
+    fontWeight: Theme.font.weight.semibold,
+    fontSize: Theme.font.size.small,
+    padding: '1rem'
+  },
   MEDIUM: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,
