@@ -7,6 +7,8 @@ export const Config = {
 
   getApiUrl: async () => (await getConfig()).apiUrl,
 
+  getMetricApiUrl: async () => (await getConfig()).metricApiUrl,
+
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
   getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
