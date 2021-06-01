@@ -1,76 +1,19 @@
-import {useState} from "react";
-import {useEffect} from "react";
+import {useState, useEffect} from "react";
 import {Metrics} from "../libs/ajax";
 import {Notifications} from "../libs/utils";
-import {div} from "react-hyperscript-helpers";
-import {Styles} from "../libs/theme";
-import {h} from "react-hyperscript-helpers";
-import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
-import {tableHeaderTemplate} from "../components/dar_table/DarTable";
-import {tableRowLoadingTemplate} from "../components/dar_table/DarTable";
-import {filter, isNil} from "lodash/fp";
-import get from "lodash/get";
-import find from "lodash/find";
-import {Theme} from "../libs/theme";
+import {div, a} from "react-hyperscript-helpers";
+import {Styles, Theme} from "../libs/theme";
+import {filter} from "lodash/fp";
+import {get, find} from "lodash";
 import {ReadMore} from "../components/ReadMore";
-
-const ROW = {display: 'flex', fontSize: '18px'};
-
-const LABEL = {fontWeight: '500', marginRight: '5px'};
-
-const SECTION_HEADER = {marginTop: '15px', fontSize: '22px', fontWeight: '500'};
+import {formatDate} from "../libs/utils";
 
 const LINE = div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []);
-
-const JUMBO = {fontSize: '60px', paddingTop: '25px', textAlign: 'center' };
-
-const DESCRIPTION_BOX = {
-  borderRadius: 9,
-  backgroundColor: '#DFE8EE',
-  height: 200,
-  width: 600,
-  padding: 0,
-  margin: '.5rem 1rem .5rem 0',
-  overflowX: 'hidden',
-  overflowY: 'scroll',
-  display: 'flex',
-  flexDirection: 'column'
-};
-
-const BOX = {
-  alignContent: 'center',
-  borderRadius: 9,
-  backgroundColor: '#DFE8EE',
-  height: 200,
-  width: 220,
-  padding: 0,
-  margin: '.5rem 1rem .5rem 0',
-  overflowX: 'hidden',
-  overflowY: 'scroll',
-  display: 'flex',
-  flexDirection: 'column'
-};
-
-const READ_MORE = {
-  alignContent: 'center',
-  borderRadius: 9,
-  backgroundColor: '#DFE8EE',
-  height: 160,
-  width: 900,
-  padding: 0,
-  margin: '.5rem 1rem .5rem 0',
-  overflowX: 'hidden',
-  overflowY: 'scroll',
-  display: 'flex',
-  flexDirection: 'column'
-};
-
 
 export default function DatasetStatistics(props) {
   const datasetId = props.match.params.datasetId;
   const [dataset, setDataset] = useState();
   const [dars, setDars] = useState();
-  const [elections, setElections] = useState();
   const [darsApproved, setDarsApproved] = useState();
   const [darsDenied, setDarsDenied] = useState();
   const [isLoading, setIsLoading] = useState(true);
@@ -85,9 +28,8 @@ export default function DatasetStatistics(props) {
       const metrics = await Metrics.getDatasetStats(datasetId);
       setDataset(metrics.dataset);
       setDars(metrics.dars);
-      setElections(metrics.elections);
-      const approved = filter((election) => election.finalAccessVote === true)(elections);
-      const denied = filter((election) => election.finalAccessVote === false)(elections);
+      const approved = filter((election) => election.finalAccessVote === true)(metrics.elections);
+      const denied = filter((election) => election.finalAccessVote === false)(metrics.elections);
       setDarsApproved(approved.length);
       setDarsDenied(denied.length);
       setIsLoading(false);
@@ -97,27 +39,27 @@ export default function DatasetStatistics(props) {
     }
   };
 
-  if (!isNil(elections)) {
+  if (!isLoading) {
     return (
       div({style: {...Styles.PAGE, color: Theme.palette.primary}}, [
         div({style: {justifyContent: "space-between"}}, [
-          div({isRendered: !isLoading, style: {marginTop: '25px'}}, [
+          div({style: {marginTop: '25px'}}, [
             div({style: Styles.TITLE}, ["Dataset Statistics"]),
-            div({style: ROW}, [
-              div({style: LABEL}, ["Dataset ID: "]),
+            div({style: Styles.MEDIUM_ROW}, [
+              div({style: {fontWeight: '500', marginRight: '5px'}}, ["Dataset ID: "]),
               div([dataset.alias])
             ]),
-            div({style: ROW}, [
-              div({style: LABEL}, ["Dataset Name: "]),
+            div({style: Styles.MEDIUM_ROW}, [
+              div({style: {fontWeight: '500', marginRight: '5px'}}, ["Dataset Name: "]),
               div([get(find(dataset.properties, p => {
                 return p.propertyName === 'Dataset Name';
               }), 'propertyValue', '')])
             ])
           ]),
-          div({style: SECTION_HEADER}, ["Dataset Information"]),
+          div({style: Styles.SUB_HEADER}, ["Dataset Information"]),
           div({style: {display: 'flex'}}, [
-            div({style: DESCRIPTION_BOX}, [
-              div({style: Styles.SMALL_BOLD}, ["Dataset Description:"]),
+            div({style: Styles.DESCRIPTION_BOX}, [
+              div({style: {...Styles.MINOR_HEADER, paddingLeft:'10px'}}, ["Dataset Description:"]),
               LINE,
               div({style: {fontSize: Theme.font.size.small, padding: '1rem'}}, [
                 get(find(dataset.properties, p => {
@@ -149,65 +91,67 @@ export default function DatasetStatistics(props) {
               ])
             ])
           ]),
-          div({style: SECTION_HEADER}, ["Summary of Research Findings to Date"]),
+          div({style: Styles.SUB_HEADER}, ["Summary of Research Findings to Date"]),
           div({style: {display: 'flex'}}, [
-            div({style: BOX}, [
-              div({style: {...Styles.SMALL_BOLD, textAlign: 'center'}}, ["Data Access Requests"]),
+            div({style: Styles.SQUARE_BOX}, [
+              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ["Data Access Requests"]),
               LINE,
-              div({style: JUMBO}, [dars.length])
+              div({style: Styles.JUMBO}, [dars.length])
             ]),
-            div({style: DESCRIPTION_BOX}, [
-              div({style: Styles.SMALL_BOLD}, ["DAR Project Titles:"]),
+            div({style: Styles.DESCRIPTION_BOX}, [
+              div({style: {...Styles.MINOR_HEADER, paddingLeft:'10px'}}, ["DAR Project Titles:"]),
               LINE,
               div({style: {fontSize: Theme.font.size.small, padding: '1rem'}}, [
-                dars.map((dar) => div({style: Styles.RECORD_ROW}, [dar.data.projectTitle]))
+                dars.map((dar) => a({style: {display: 'block'}, href: `#${dar.darCode}`}, [dar.projectTitle]))
               ])
             ]),
-            div({style: BOX}, [
-              div({style: {...Styles.SMALL_BOLD, textAlign: 'center'}}, ["DARs Approved"]),
+            div({style: Styles.SQUARE_BOX}, [
+              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ["DARs Approved"]),
               LINE,
-              div({style: JUMBO}, [darsApproved])
+              div({style: Styles.JUMBO}, [darsApproved])
             ]),
-            div({style: BOX}, [
-              div({style: {...Styles.SMALL_BOLD, textAlign: 'center'}}, ["DARs Denied"]),
+            div({style: Styles.SQUARE_BOX}, [
+              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ["DARs Denied"]),
               LINE,
-              div({style: JUMBO}, [darsDenied])
+              div({style: Styles.JUMBO}, [darsDenied])
             ]),
           ]),
-          div({style: SECTION_HEADER}, ["Data Access Requests - Research Statements"]),
+          div({style: Styles.SUB_HEADER}, ["Data Access Requests - Research Statements"]),
           dars.map((dar) =>
-            div({style: READ_MORE}, [
+            div({style: Styles.READ_MORE, id: `${dar.darCode}` }, [
               ReadMore({
                 props: props,
-                readLessText: "Hide",
+                readLessText: "Show less",
                 readMoreText: "Show More",
-                readStyle: { fontWeight: 500, margin: '0 20px'},
+                readStyle: { fontWeight: 500, margin: '20px', height: 0},
                 content: [
                   div({style: {display: 'flex'}}, [
-                    div({style: {...Styles.MEDIUM, margin: '15px 25px 5px 15px'}}, [dar.data.darCode]),
-                    div({style: {...Styles.MEDIUM, margin: '15px 25px 5px 15px'}}, [dar.data.projectTitle])
+                    div({style: {...Styles.MEDIUM, width: "12%", margin: '15px'}}, [dar.darCode]),
+                    div({style: {...Styles.MEDIUM, margin: '15px'}}, [dar.projectTitle])
                   ]),
                   LINE
                 ],
                 moreContent: [
-                  div({style: {display: 'flex'}}, [
+                  div({style: {display: 'flex', backgroundColor: "white"}}, [
                     div({style: {display: 'flex'}}, [
                       div({style: Styles.SMALL_BOLD}, ["Principal Investigator: "]),
-                      div({style: Styles.SMALL_BOLD}, [dar.data.investigator]),
+                      div({style: Styles.SMALL_BOLD}, [dar.investigator]),
                     ]),
                     div({style: {display: 'flex'}}, [
                       div({style: Styles.SMALL_BOLD}, ["Last Updated: "]),
-                      div({style: Styles.SMALL_BOLD}, [dar.updateDate]),
+                      div({style: Styles.SMALL_BOLD}, [formatDate(dar.updateDate)]),
                     ]),
                   ]),
-                  div({style: Styles.SMALL_BOLD}, ["NonTechnical Summary:"]),
-                  div({style: {fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem'}}, [dar.data.nonTechRus])
+                  div({style: {backgroundColor: "white"}}, [
+                    div({style: Styles.SMALL_BOLD}, ["NonTechnical Summary:"]),
+                    div({style: {fontSize: Theme.font.size.small, padding: '0 1rem 1rem 1rem'}}, [dar.nonTechRus])
+                  ]),
+                  LINE
                 ]
               })
             ])
           )
-        ]),
-        h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
+        ])
       ])
     );
   } else {
