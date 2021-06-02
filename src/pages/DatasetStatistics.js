@@ -3,7 +3,7 @@ import {Metrics} from "../libs/ajax";
 import {Notifications} from "../libs/utils";
 import {div, a} from "react-hyperscript-helpers";
 import {Styles, Theme} from "../libs/theme";
-import {filter} from "lodash/fp";
+import {filter, map} from "lodash/fp";
 import {get, find} from "lodash";
 import {ReadMore} from "../components/ReadMore";
 import {formatDate} from "../libs/utils";
@@ -30,8 +30,8 @@ export default function DatasetStatistics(props) {
       setDars(metrics.dars);
       const approved = filter((election) => election.finalAccessVote === true)(metrics.elections);
       const denied = filter((election) => election.finalAccessVote === false)(metrics.elections);
-      setDarsApproved(approved.length);
-      setDarsDenied(denied.length);
+      setDarsApproved(map((election) => election.referenceId)(approved));
+      setDarsDenied(map((election) => election.referenceId)(denied));
       setIsLoading(false);
     } catch(error) {
       Notifications.showError({text: 'Error: Unable to retrieve dataset statistics from server'});
@@ -108,12 +108,12 @@ export default function DatasetStatistics(props) {
             div({style: Styles.SQUARE_BOX}, [
               div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ["DARs Approved"]),
               LINE,
-              div({style: Styles.JUMBO}, [darsApproved])
+              div({style: Styles.JUMBO}, [darsApproved.length])
             ]),
             div({style: Styles.SQUARE_BOX}, [
               div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ["DARs Denied"]),
               LINE,
-              div({style: Styles.JUMBO}, [darsDenied])
+              div({style: Styles.JUMBO}, [darsDenied.length])
             ]),
           ]),
           div({style: Styles.SUB_HEADER}, ["Data Access Requests - Research Statements"]),
@@ -133,14 +133,25 @@ export default function DatasetStatistics(props) {
                 ],
                 moreContent: [
                   div({style: {display: 'flex', backgroundColor: "white"}}, [
-                    div({style: {display: 'flex'}}, [
+                    div({style: {display: 'flex', paddingRight: '2rem'}}, [
                       div({style: Styles.SMALL_BOLD}, ["Principal Investigator: "]),
                       div({style: Styles.SMALL_BOLD}, [dar.investigator]),
                     ]),
-                    div({style: {display: 'flex'}}, [
+                    div({style: {display: 'flex', paddingRight: '2rem'}}, [
                       div({style: Styles.SMALL_BOLD}, ["Last Updated: "]),
                       div({style: Styles.SMALL_BOLD}, [formatDate(dar.updateDate)]),
                     ]),
+                    (darsApproved.includes(dar.referenceId)) ?
+                      div({style: {display: 'flex'}}, [
+                        div({style: Styles.SMALL_BOLD}, ["Status: "]),
+                        div({style: Styles.SMALL_BOLD}, ["APPROVED"]),
+                      ])
+                      : (darsDenied.includes(dar.referenceId)) ?
+                        div({style: {display: 'flex'}}, [
+                          div({style: Styles.SMALL_BOLD}, ["Status: "]),
+                          div({style: Styles.SMALL_BOLD}, ["DENIED"]),
+                        ])
+                        : div()
                   ]),
                   div({style: {backgroundColor: "white"}}, [
                     div({style: Styles.SMALL_BOLD}, ["NonTechnical Summary:"]),
