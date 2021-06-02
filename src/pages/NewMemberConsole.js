@@ -16,6 +16,7 @@ export default function NewMemberConsole(props) {
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState(10);
+  const [descendantOrder, setDescendantOrder] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -65,6 +66,9 @@ export default function NewMemberConsole(props) {
       h(DarTable, {
         getUpdateLists,
         filteredList,
+        setFilteredList,
+        descendantOrder,
+        setDescendantOrder,
         history: props.history,
         processElectionStatus,
         getElectionDate,

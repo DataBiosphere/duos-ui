@@ -62,6 +62,22 @@ class ResearcherConsole extends Component {
     });
   };
 
+  sortDars = Utils.getColumnSort(() => { return this.state ? this.state.dars: []; }, (sortedData, descendantOrder) => {
+    this.setState(prev => {
+      prev.dars = sortedData;
+      prev.darDescOrder = !descendantOrder;
+      return prev;
+    });
+  });
+
+  sortPartials = Utils.getColumnSort(() => { return this.state ? this.state.partialDars: []; }, (sortedData, descendantOrder) => {
+    this.setState(prev => {
+      prev.partialDars = sortedData;
+      prev.partialDescOrder = !descendantOrder;
+      return prev;
+    });
+  });
+
   cancelDar = (e) => {
     const dataRequestId = e.target.getAttribute('value');
     this.setState({ showDialogCancelDAR: true, dataRequestId: dataRequestId, alertTitle: undefined });
@@ -172,10 +188,34 @@ class ResearcherConsole extends Component {
 
             div({ style: Theme.lightTable }, [
               div({ className: "row no-margin" }, [
-                div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Data Request ID"]),
-                div({ style: Theme.textTableHead, className: "col-xs-4 access-color" }, ["Project Title"]),
-                div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Date"]),
-                div({ style: Theme.textTableHead, className: "col-xs-2 f-center access-color" }, ["Status"]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortDars({
+                  sortKey: 'frontEndId',
+                  descendantOrder: this.state.darDescOrder
+                }) }, [
+                  "Data Request ID",
+                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                ]),
+                div({ style: Theme.textTableHead, className: "col-xs-4 cell-sort access-color", onClick: this.sortDars({
+                  sortKey: 'projectTitle',
+                  descendantOrder: this.state.darDescOrder
+                }) }, [
+                  "Project Title",
+                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                ]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortDars({
+                  sortKey: 'createDate',
+                  descendantOrder: this.state.darDescOrder
+                }) }, [
+                  "Date",
+                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                ]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color", onClick: this.sortDars({
+                  sortKey: 'electionStatus',
+                  descendantOrder: this.state.darDescOrder
+                }) }, [
+                  "Status",
+                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                ]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Cancel"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Review"]),
               ]),
@@ -231,15 +271,33 @@ class ResearcherConsole extends Component {
               }),
               div({ style: Theme.lightTable }, [
                 div({ className: "row no-margin" }, [
-                  div({ style: Theme.textTableHead, className: "col-xs-2 col-xs-offset-1 access-color" }, ["Temporary ID"]),
-                  div({ style: Theme.textTableHead, className: "col-xs-5 access-color" }, ["Project Title"]),
-                  div({ style: Theme.textTableHead, className: "col-xs-2 access-color" }, ["Date"]),
+                  div({ style: Theme.textTableHead, className: "col-xs-2 col-xs-offset-1 cell-sort access-color", onClick: this.sortPartials({
+                    sortKey: 'partialDarCode',
+                    descendantOrder: this.state.partialDescOrder
+                  }) }, [
+                    "Temporary ID",
+                    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                  ]),
+                  div({ style: Theme.textTableHead, className: "col-xs-5 cell-sort access-color", onClick: this.sortPartials({
+                    sortKey: 'projectTitle',
+                    descendantOrder: this.state.partialDescOrder
+                  }) }, [
+                    "Project Title",
+                    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                  ]),
+                  div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortPartials({
+                    sortKey: 'createDate',
+                    descendantOrder: this.state.partialDescOrder
+                  }) }, [
+                    "Date",
+                    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+                  ]),
                   div({ style: Theme.textTableHead, className: "col-xs-2 f-center access-color" }, ["Resume"]),
                 ]),
                 hr({ className: "table-head-separator" }),
 
-                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar) => {
-                  return h(Fragment, { key: pdar.partialDarCode }, [
+                this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, idx) => {
+                  return h(Fragment, { key: pdar.partialDarCode + '_' + idx }, [
                     div({ key: pdar.partialDarCode, id: pdar.partialDarCode, className: "row no-margin tableRowPartial" }, [
                       a({
                         id: pdar.partialDarCode + "_btnDelete",
