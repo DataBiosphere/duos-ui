@@ -17,7 +17,7 @@ COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm install --silent
 RUN npm run build --silent
 
-FROM nginxinc/nginx-unprivileged:1.19.10-alpine
+FROM nginxinc/nginx-unprivileged:1.21.0-alpine
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
