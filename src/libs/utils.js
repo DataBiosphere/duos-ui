@@ -5,6 +5,7 @@ import { forEach } from 'lodash';
 import { DAR, DataSet, Researcher } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
+import _ from 'lodash';
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -359,4 +360,38 @@ export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter
     attributes["data-tip"] = dataTip;
   }
   return attributes;
+};
+
+export const getColumnSort = (getList, callback) => {
+  return ({ sortKey, getValue, descendantOrder = false } = {}) => () => {
+    let data = getList();
+    let sortedData = data.sort(function (a, b) {
+      if (isNil(a) || isNil(b)) {
+        return 0;
+      }
+
+      const aVal = getValue ? getValue(a) : _.get(a, sortKey);
+      const bVal = getValue ? getValue(b) : _.get(b, sortKey);
+      if (isNil(aVal) || isNil(bVal)) {
+        return 0;
+      }
+
+      const varA = (typeof aVal === 'string') ?
+        aVal.toLowerCase() : aVal;
+
+      const varB = (typeof bVal === 'string') ?
+        bVal.toLowerCase() : bVal;
+
+      let comparison = 0;
+
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+      return (descendantOrder) ? (comparison * -1) : comparison;
+    });
+
+    callback(sortedData, descendantOrder);
+  };
 };

@@ -15,6 +15,7 @@ export default function ChairConsole(props) {
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState(10);
+  const [descendantOrder, setDescendantOrder] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,7 +65,7 @@ export default function ChairConsole(props) {
         ]),
         h(SearchBar, {handleSearchChange})
       ]),
-      h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, history: props.history, processElectionStatus, getElectionDate, consoleType: consoleTypes.CHAIR, currentPage, setCurrentPage, tableSize, setTableSize}),
+      h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, setFilteredList, descendantOrder, setDescendantOrder, history: props.history, processElectionStatus, getElectionDate, consoleType: consoleTypes.CHAIR, currentPage, setCurrentPage, tableSize, setTableSize}),
       h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
     ])
   );
