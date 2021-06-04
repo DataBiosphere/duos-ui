@@ -15,6 +15,11 @@ import { Storage } from '../libs/storage';
 import { Theme } from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
 
+const tableBody = {
+  ...Theme.textTableBody,
+  padding: '8px 5px 8px 5px'
+};
+
 class DatasetCatalog extends Component {
 
   currentUser = {};
@@ -508,28 +513,31 @@ class DatasetCatalog extends Component {
                           td({
                             id: dataSet.alias + '_dataset', name: 'alias',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [dataSet.alias]),
 
                           td({
                             id: trIndex + '_datasetName', name: 'datasetName',
-                            className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            className: 'cell-size ' + (!dataSet.active ? !!'dataset-disabled' : ''),
+                            style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Dataset Name'; }), 'propertyValue', '')
+                            a({
+                              href: `/dataset_statistics/${dataSet.dataSetId}`,
+                              className: 'enabled'
+                            }, [
+                              get(find(dataSet.properties, p => { return p.propertyName === 'Dataset Name'; }), 'propertyValue', '')])
                           ]),
-
                           td({
                             id: trIndex + '_dac', name: 'dac',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
                           ]),
 
                           td({
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody },
+                            style: tableBody },
                           [dataSet.dbGapLink !== '' ?
                             a({
                               id: trIndex + '_linkdbGap',
@@ -542,7 +550,7 @@ class DatasetCatalog extends Component {
 
                           td({
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             a({
                               id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
@@ -554,7 +562,7 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_dataType', name: 'dataType',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Data Type'; }), 'propertyValue', '')
                           ]),
@@ -562,14 +570,14 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_phenotype', name: 'phenotype',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Phenotype/Indication'; }), 'propertyValue', '')
                           ]),
 
                           td({
                             id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Principal Investigator(PI)'; }), 'propertyValue', '')
                           ]),
@@ -577,7 +585,7 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_participants', name: 'participants',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === '# of participants'; }), 'propertyValue', '')
                           ]),
@@ -585,7 +593,7 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_description', name: 'description',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Description'; }), 'propertyValue', '')
                           ]),
@@ -593,7 +601,7 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_species', name: 'species',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Species'; }), 'propertyValue', '')
                           ]),
@@ -601,7 +609,7 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_depositor', name: 'depositor',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             get(find(dataSet.properties, p => { return p.propertyName === 'Data Depositor'; }), 'propertyValue', '')
                           ]),
@@ -609,19 +617,19 @@ class DatasetCatalog extends Component {
                           td({
                             id: trIndex + '_consentId', name: 'consentId',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [dataSet.consentId]),
 
                           td({
                             id: trIndex + '_scid', name: 'sc-id', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
-                            style: Theme.textTableBody
+                            style: tableBody
                           }, [
                             this.defaultString(
                               get(find(dataSet.properties, p => { return p.propertyName === 'Sample Collection ID'; }), 'propertyValue', ''),
                               '---')
                           ]),
 
-                          td({ className: 'cell-size', style: Theme.textTableBody }, [
+                          td({ className: 'cell-size', style: tableBody }, [
                             a({
                               id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => this.downloadList(dataSet),
                               className: 'enabled'

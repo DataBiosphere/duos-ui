@@ -680,6 +680,15 @@ export const Summary = {
   }
 };
 
+export const Metrics = {
+
+  getDatasetStats: async (datasetId) => {
+    const url = `${await Config.getMetricApiUrl()}/metrics/dataset/${datasetId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return await res.json();
+  }
+};
+
 export const Support = {
 
   createTicket: (name, type, email, subject, description, attachmentToken, url) => {
