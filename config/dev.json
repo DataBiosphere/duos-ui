@@ -4,7 +4,7 @@
   "tag": "dev",
   "hash": "dev",
   "apiUrl": "https://consent.dsde-dev.broadinstitute.org/api",
-  "metricApiUrl": "https://local.broadinstitute.org:27443",
+  "metricApiUrl": "https://consent.dsde-dev.broadinstitute.org",
   "ontologyApiUrl": "https://consent-ontology.dsde-dev.broadinstitute.org/",
   "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",
   "errorApiKey": "1234567890abcdefghijklmnop",
