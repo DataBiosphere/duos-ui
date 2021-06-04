@@ -1,8 +1,11 @@
 import React from 'react';
-import { div, img, hh } from 'react-hyperscript-helpers';
+import { div, img, h, hh, a, span } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import lockIcon from '../../images/lock-icon.png';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { isNil } from 'lodash/fp';
+import {Navigation} from "../../libs/utils";
+import {Storage} from "../../libs/storage";
 
 const TITLE = {
   fontWeight: Theme.font.weight.semibold,
@@ -11,24 +14,20 @@ const TITLE = {
   marginBottom: '5px',
 };
 
-const SMALL = {
-  fontSize: Theme.font.size.small,
-  lineHeight: Theme.font.leading.dense,
-};
-
 const SUBHEADER = {
   fontSize: Theme.font.size.subheader,
   lineHeight: Theme.font.leading.dense
-}
+};
 
 export const AccessReviewHeader = hh(class AccessReviewHeader extends React.PureComponent {
 
   render() {
+    const message = this.props.message;
+
     return div(
       {
         style: {
           justifyContent: 'space-between',
-          alignItems: 'center',
           display: 'flex',
           fontFamily: 'Arial',
           color: Theme.palette.primary,
@@ -57,11 +56,16 @@ export const AccessReviewHeader = hh(class AccessReviewHeader extends React.Pure
               div({ style: SUBHEADER },
                 "Review the Application Summary and Data Use Limitations to determine if the researcher should be granted access to the data."
               ),
-              div({ isRendered: !isNil(this.props.message), style: SUBHEADER }, this.props.message )
+              div({ isRendered: !isNil(message), style: SUBHEADER }, message )
             ])
           ]
-        )
-      ]
-    );
+        ),
+        div({ style: {marginRight: '10px', anchor: 'right' }}, [
+          a({onClick: () => {Navigation.back(Storage.getCurrentUser(), this.props.history);}, style: {fontSize: '22px'}}, [
+            h(ArrowBackIcon, {style: {marginRight: '8px', marginBottom: '-4px', fontSize: '22px'}}),
+            span('Return to Console')
+          ])
+        ])
+      ]);
   }
 });

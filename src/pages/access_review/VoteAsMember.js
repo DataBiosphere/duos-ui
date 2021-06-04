@@ -32,7 +32,8 @@ export const VoteAsMember = hh(class VoteAsMember extends React.PureComponent {
         voteId: fp.isNil(rpVote) ? null : rpVote.voteId,
         rationale: fp.isNil(rpVote) ? '' : rpVote.rationale,
         selectedOption: fp.isNil(rpVote) ? null : rpVote.vote,
-        disabled: !rpElectionOpen
+        disabled: !rpElectionOpen,
+        optional: true
       }),
     ]);
   }

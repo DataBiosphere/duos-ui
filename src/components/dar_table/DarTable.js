@@ -1,6 +1,6 @@
 import { isEmpty, isNil, assign } from 'lodash/fp';
 import { useState, useEffect, useCallback } from 'react';
-import { div, h } from 'react-hyperscript-helpers';
+import { div, h, span } from 'react-hyperscript-helpers';
 import { Election, User } from '../../libs/ajax';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
 import { Notifications, getDatasetNames } from '../../libs/utils';
@@ -10,17 +10,84 @@ import PaginationBar from '../PaginationBar';
 import ConfirmationModal from "../modals/ConfirmationModal";
 import DarElectionRecords from './DarElectionRecords';
 import ReactTooltip from 'react-tooltip';
+import * as Utils from '../../libs/utils';
 
 ////////////////////
 //EXPORTED PARTIAL//
 ////////////////////
+export const getTableHeaderTemplateWithSort = (sortFunc, descOrder) => {
+  return [
+    div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort', onClick: sortFunc({
+      sortKey: 'dar.data.darCode',
+      descendantOrder: descOrder
+    })}, [
+      "Data Request ID",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort', onClick: sortFunc({
+      sortKey: 'dar.data.projectTitle',
+      descendantOrder: descOrder
+    })}, [
+      "Project Title",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort', onClick: sortFunc({
+      getValue: (a) => {
+        return a.dar && a.dar.data ? Utils.getNameOfDatasetForThisDAR(a.dar.data.datasets, a.dar.data.datasetIds) : '- -';
+      },
+      descendantOrder: descOrder
+    })}, [
+      "Dataset Name",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort', onClick: sortFunc({
+      getValue: (a) => {
+        return Utils.getElectionDate(a.election);
+      },
+      descendantOrder: descOrder
+    })}, [
+      "Last Updated",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort', onClick: sortFunc({
+      sortKey: 'dac.name',
+      descendantOrder: descOrder
+    })}, [
+      "DAC",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL}, [
+      "Election Status"
+    ]),
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
+  ];
+};
+
 export const tableHeaderTemplate = [
-  div({style: Styles.TABLE.DATA_ID_CELL}, ["Data Request ID"]),
-  div({style: Styles.TABLE.TITLE_CELL}, ["Project Title"]),
-  div({style: Styles.TABLE.DATASET_CELL}, ["Dataset Name"]),
-  div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Last Updated"]),
-  div({style: Styles.TABLE.DAC_CELL}, ["DAC"]),
-  div({style: Styles.TABLE.ELECTION_STATUS_CELL}, ["Election Status"]),
+  div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
+    "Data Request ID",
+    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+  ]),
+  div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [
+    "Project Title",
+    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+  ]),
+  div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort'}, [
+    "Dataset Name",
+    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+  ]),
+  div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort'}, [
+    "Last Updated",
+    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+  ]),
+  div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort'}, [
+    "DAC",
+    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+  ]),
+  div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, [
+    "Election Status",
+    span({ className: 'glyphicon sort-icon glyphicon-sort' })
+  ]),
   div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
 ];
 const loadingMarginOverwrite = {margin: '1rem 2%'};
@@ -52,7 +119,7 @@ const calcPageCount = (tableSize, filteredList) => {
 //////////////////
 export default function DarTable(props) {
 
-  const { filteredList, history, consoleType, extraOptions, currentPage, setCurrentPage, tableSize, setTableSize } = props;
+  const { filteredList, setFilteredList, descendantOrder, setDescendantOrder, history, consoleType, extraOptions, currentPage, setCurrentPage, tableSize, setTableSize } = props;
   const [darDetails, setDarDetails] = useState({});
   const [researcher, setResearcher] = useState({});
   const [pageCount, setPageCount] = useState(calcPageCount(tableSize, filteredList));
@@ -61,6 +128,11 @@ export default function DarTable(props) {
   const [createElectionInfo, setCreateElectionInfo] = useState({});
 
   const updateLists = props.getUpdateLists();
+
+  const sortDars = Utils.getColumnSort(() => { return filteredList; }, (sortedData, descOrder) => {
+    setFilteredList(sortedData);
+    setDescendantOrder(!descOrder);
+  });
 
   useEffect(() => {
     setPageCount(calcPageCount(tableSize, filteredList));
@@ -139,10 +211,11 @@ export default function DarTable(props) {
 
   return div({className: 'dar-table-component'}, [
     div({style: Styles.TABLE.CONTAINER}, [
-      div({style: Styles.TABLE.HEADER_ROW}, [tableHeaderTemplate]),
+      div({style: Styles.TABLE.HEADER_ROW}, [getTableHeaderTemplateWithSort(sortDars, descendantOrder)]),
       h(DarElectionRecords, {
         isRendered: !isEmpty(filteredList),
         filteredList,
+        descendantOrder,
         openModal,
         currentPage,
         tableSize,

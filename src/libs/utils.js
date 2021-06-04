@@ -1,11 +1,11 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { Config } from './config';
 import { forEach } from 'lodash';
 import { DAR, DataSet, Researcher } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
+import _ from 'lodash';
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -97,7 +97,7 @@ export const setUserRoleStatuses = (user, Storage) => {
 
 export const Navigation = {
   back: async (user, history) => {
-    const page = user.isChairPerson ? await NavigationUtils.dacChairConsolePath()
+    const page = user.isChairPerson ? '/chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/dataset_catalog'
@@ -107,7 +107,7 @@ export const Navigation = {
     history.push(page);
   },
   console: async (user, history) => {
-    const page = user.isChairPerson ? await NavigationUtils.dacChairConsolePath()
+    const page = user.isChairPerson ? '/chair_console'
       : user.isMember ? '/member_console'
         : user.isAdmin ? '/admin_console'
           : user.isResearcher ? '/researcher_console'
@@ -181,10 +181,6 @@ export const Notifications = {
 export const NavigationUtils = {
   accessReviewPath: () => {
     return "access_review";
-  },
-  dacChairConsolePath: async () => {
-    const newChairConsoleEnabled = await Config.getFeatureFlag('newChairConsole');
-    return newChairConsoleEnabled ? "/new_chair_console" : "/chair_console";
   }
 };
 
@@ -258,10 +254,9 @@ export const wasFinalVoteTrue = (voteData) => {
 
 export const processElectionStatus = (election, votes, showVotes) => {
   let output;
-  const electionStatus = election.status;
-
-  if(!isEmpty(votes) && isNil(electionStatus)) {
-    output = '- -';
+  const electionStatus = election ? election.status : null;
+  if (isNil(electionStatus)) {
+    output = 'Unreviewed';
   } else if(electionStatus === 'Open') {
     //Null check since react doesn't necessarily perform prop updates immediately
     if(!isEmpty(votes) && !isNil(election)) {
@@ -322,7 +317,7 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
             const dar = electionData.dar ? electionData.dar.data : undefined;
             const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
             const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
-            const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
+            const targetElectionAttrs = JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]);
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
         }
@@ -410,4 +405,38 @@ export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter
     attributes["data-tip"] = dataTip;
   }
   return attributes;
+};
+
+export const getColumnSort = (getList, callback) => {
+  return ({ sortKey, getValue, descendantOrder = false } = {}) => () => {
+    let data = getList();
+    let sortedData = data.sort(function (a, b) {
+      if (isNil(a) || isNil(b)) {
+        return 0;
+      }
+
+      const aVal = getValue ? getValue(a) : _.get(a, sortKey);
+      const bVal = getValue ? getValue(b) : _.get(b, sortKey);
+      if (isNil(aVal) || isNil(bVal)) {
+        return 0;
+      }
+
+      const varA = (typeof aVal === 'string') ?
+        aVal.toLowerCase() : aVal;
+
+      const varB = (typeof bVal === 'string') ?
+        bVal.toLowerCase() : bVal;
+
+      let comparison = 0;
+
+      if (varA > varB) {
+        comparison = 1;
+      } else if (varA < varB) {
+        comparison = -1;
+      }
+      return (descendantOrder) ? (comparison * -1) : comparison;
+    });
+
+    callback(sortedData, descendantOrder);
+  };
 };

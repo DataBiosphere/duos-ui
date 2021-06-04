@@ -23,19 +23,26 @@ const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
   }
 };
 
-const goToReviewResults = (dar, history) => {
+const goToReviewResults = (dar, history, status) => {
   if(dar && dar.referenceId) {
-    history.push(`review_results/${dar.referenceId}`);
+    if (status === 'Unreviewed') {
+      history.push(`review_results/${dar.referenceId}/${status}`);
+    } else {
+      history.push(`review_results/${dar.referenceId}`);
+    }
   }
 };
 const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
-  const tag = consoleType === consoleTypes.MANAGE_ACCESS ? a : div;
+  const linkedStatuses = ['Unreviewed', 'Approved', 'Denied', 'Canceled'];
+  const status = processElectionStatus(election, votes, showVotes);
+  const includeLink = (consoleType === consoleTypes.MANAGE_ACCESS || linkedStatuses.includes(status));
+  const tag = includeLink ? a : div;
   return tag({
     style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
-      color: consoleType === consoleTypes.MANAGE_ACCESS ? Theme.palette.link : 'black' //color adjustment for manage console
+      color: includeLink ? Theme.palette.link : 'black' //color adjustment for manage console
     }),
-    onClick: () => consoleType === consoleTypes.MANAGE_ACCESS && goToReviewResults(dar, history)
-  }, [election ? processElectionStatus(election, votes, showVotes) : '- -']);
+    onClick: () => includeLink && goToReviewResults(dar, history, status)
+  }, [status]);
 };
 
 export default function DarElectionRecords(props) {

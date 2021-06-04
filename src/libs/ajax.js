@@ -125,7 +125,8 @@ export const DAC = {
   delete: async (dacId) => {
     const url = `${await Config.getApiUrl()}/dac/${dacId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'DELETE' }]));
-    return res.json();
+    //we do not call .json() on res because the response has no body
+    return res;
   },
 
   get: async (dacId) => {
@@ -668,9 +669,14 @@ export const Files = {
 };
 
 export const Summary = {
-  getFile: async (URI, nameFile) => {
+  getFile: async (fileName) => {
+    const URI = `/consent/cases/summary/file?fileType=${fileName}`;
     const url = `${await Config.getApiUrl()}${URI}`;
-    return await getFile(url, nameFile);
+    if (fileName === 'TranslateDUL') {
+      return await getFile(url, 'DUL_summary.tsv');
+    } else {
+      return await getFile(url, 'DAR_summary.tsv');
+    }
   }
 };
 
@@ -1002,19 +1008,10 @@ export const Votes = {
   },
 
   updateFinalAccessDarVote: async (requestId, vote) => {
-    var postObject = {};
-    postObject.vote = vote.vote;
-    postObject.dacUserId = vote.dacUserId;
-    postObject.rationale = vote.rationale;
-    if (vote.type === 'FINAL') {
-      postObject.type = 'FINAL';
-    }
     const url = `${await Config.getApiUrl()}/dataRequest/${requestId}/vote/${vote.voteId}/final`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(postObject), { method: 'POST' }]));
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(vote), { method: 'POST' }]));
     return await res.json();
-
   }
-
 };
 
 export const AuthenticateNIH = {

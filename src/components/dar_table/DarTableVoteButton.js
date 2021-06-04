@@ -9,7 +9,7 @@ export default function VoteButton(props) {
   const hasVoted = targetVotes.some((vote) => {
     return !isNil(vote.vote);
   });
-  const baseStyle = Styles.TABLE.TABLE_TEXT_BUTTON;
+  const baseStyle = hasVoted ? Styles.TABLE.TABLE_TEXT_BUTTON_OUTLINED : Styles.TABLE.TABLE_TEXT_BUTTON;
 
   return h(TableTextButton, {
     key: `vote-button-${election.referenceId}`,
@@ -18,6 +18,7 @@ export default function VoteButton(props) {
     disabled,
     dataTip: disabled ? 'You do not have permission to vote on this election' :
       hasVoted ? 'Update Vote on Election' : 'Vote on Election',
-    style: Object.assign({}, baseStyle, addBaseStyle)
+    style: Object.assign({}, baseStyle, addBaseStyle),
+    hoverStyle: hasVoted ? Styles.TABLE.TABLE_BUTTON_TEXT_HOVER_OUTLINED : undefined
   });
 }

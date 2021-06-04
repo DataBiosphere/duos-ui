@@ -15,6 +15,7 @@ export default function AdminManageAccess(props) {
   const [electionList, setElectionList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
   const [tableSize, setTableSize] = useState(10);
+  const [descendantOrder, setDescendantOrder] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,7 +39,7 @@ export default function AdminManageAccess(props) {
   }, [filteredList, electionList, currentPage, tableSize]);
 
   //NOTE: may need to change criteria of search due to additional search attributes
-  //NOTE: for now I'm using the NewChairConsole variant to test the funciton implementation
+  //NOTE: for now I'm using the ChairConsole variant to test the funciton implementation
   const handleSearchChange = darSearchHandler(electionList, setFilteredList, setCurrentPage);
 
   return (
@@ -62,6 +63,9 @@ export default function AdminManageAccess(props) {
       h(DarTable, {
         getUpdateLists,
         filteredList,
+        setFilteredList,
+        descendantOrder,
+        setDescendantOrder,
         history: props.history,
         processElectionStatus,
         getElectionDate,

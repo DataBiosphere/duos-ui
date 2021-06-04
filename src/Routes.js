@@ -8,7 +8,6 @@ import AdminManageAccess from './pages/AdminManageAccess';
 import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
-import { ChairConsole } from './pages/ChairConsole';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
 import DataAccessRequestRenewal from './pages/DataAccessRequestRenewal';
 import DataOwnerConsole from './pages/DataOwnerConsole';
@@ -27,7 +26,7 @@ import HomeSigningOfficial from './pages/HomeSigningOfficial';
 import HomeDacInfo from './pages/HomeDacInfo';
 import AccessReview from './pages/access_review/AccessReview';
 import NewMemberConsole from './pages/NewMemberConsole';
-import NewChairConsole from './pages/NewChairConsole';
+import ChairConsole from './pages/ChairConsole';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
 import ResearcherConsole from './pages/ResearcherConsole';
@@ -74,7 +73,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/summary_votes" component={SummaryVotes} props={props} rolesAllowed={[USER_ROLES.all]} />
     <AuthenticatedRoute path="/researcher_console" component={ResearcherConsole} props={props} rolesAllowed={[USER_ROLES.researcher]} />
     <AuthenticatedRoute path="/chair_console" component={ChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/new_chair_console" component={NewChairConsole} props={props} rolesAllowed={[USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/member_console" component={NewMemberConsole} props={props} rolesAllowed={[USER_ROLES.member]} />
     <AuthenticatedRoute path="/data_owner_console" component={DataOwnerConsole} props={props} rolesAllowed={[USER_ROLES.dataOwner]} />
     <AuthenticatedRoute path="/data_owner_review/:voteId/:referenceId/:dataSetId" component={DataOwnerReview} props={props}
@@ -105,8 +103,8 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.chairperson, USER_ROLES.admin]} />
     <AuthenticatedRoute path="/reviewed_cases" component={ReviewedCases} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
-    <AuthenticatedRoute path="/review_results/:referenceId" component={ReviewResults} props={props}
-      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
+    <AuthenticatedRoute path="/review_results/:referenceId/:status?" component={ReviewResults} props={props}
+      rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni, USER_ROLES.chairperson]} />
     <Route path="*" component={NotFound} />
   </Switch>
 );

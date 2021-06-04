@@ -155,10 +155,12 @@ export const DacVotePanel = hh(class DacVotePanel extends React.PureComponent {
     const { history } = this.props;
     const { chairAccessVote, memberAccessVote, memberRpVote } = this.state;
     if (memberRpVote) {
-      if (!isNil(memberAccessVote) && !isNil(memberAccessVote.vote) &&
-          !isNil(memberRpVote) && !isNil(memberRpVote.vote)) {
+      if (!isNil(memberAccessVote) && !isNil(memberAccessVote.vote)) {
         this.submitVote(memberAccessVote);
-        this.submitVote(memberRpVote);
+        //not required but if there is an rp vote submit it
+        if (!isNil(memberRpVote) && !isNil(memberRpVote.vote)) {
+          this.submitVote(memberRpVote);
+        }
         // Navigate back if this member doesn't have chairperson votes to complete
         if (isNil(chairAccessVote)) {
           Navigation.back(Storage.getCurrentUser(), history);
