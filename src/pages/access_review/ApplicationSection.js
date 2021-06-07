@@ -11,10 +11,10 @@ export const ApplicationSection = hh(class ApplicationSection extends React.Pure
 
   highlightExactMatches = (highlightedWords, content) => {
     //split words on whitespace, including the whitespace in the result as its own token
-    const allTokens = content.split(/(?=[ ])|(?<=[ ])/g);
+    const allTokens = content.split(new RegExp(/(?=[ ])|(?<=[ ])/g));
     return <span> {allTokens.map((token, i) =>
       //check if token or the token without the last character (to account for punctuation and plurals) exists in list of words to highlight
-      <span key={i} style={highlightedWords.includes(token) || highlightedWords.includes(token.substring(0, token.length - 1)) ? { backgroundColor: "yellow" } : {} }>
+      <span key={i} style={highlightedWords.includes(token.toLowerCase()) || highlightedWords.includes(token.substring(0, token.length - 1).toLowerCase()) ? { backgroundColor: "yellow" } : {} }>
         { token } </span>)
     } </span>;
   };
