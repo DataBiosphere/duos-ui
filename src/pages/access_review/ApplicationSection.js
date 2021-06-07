@@ -10,7 +10,7 @@ export const ApplicationSection = hh(class ApplicationSection extends React.Pure
 
 
   highlightExactMatches = (highlightedWords, content) => {
-    //split words on whitespace, including the whitespace in the result
+    //split words on whitespace, including the whitespace in the result as its own token
     const allTokens = content.split(/(?=[ ])|(?<=[ ])/g);
     return <span> {allTokens.map((token, i) =>
       //check if token or the token without the last character (to account for punctuation and plurals) exists in list of words to highlight
