@@ -281,12 +281,19 @@ export const calcFilteredListPosition = (index, currentPage, tableSize) => {
   return index + ((currentPage - 1) * tableSize);
 };
 
+export const calcTablePageCount = (tableSize, filteredList) => {
+  if (isEmpty(filteredList)) {
+    return 1;
+  }
+  return Math.ceil(filteredList.length / tableSize);
+};
+
 export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
   return (updatedElection, darId, i, successText, votes = undefined) => {
     const index = calcFilteredListPosition(i, currentPage, tableSize);
     let filteredListCopy = cloneDeep(filteredList);
     let electionListCopy = cloneDeep(electionList);
-    const targetFilterRow = filteredListCopy[parseInt(index, 10)];
+    const targetFilterRow = filteredListCopy[index];
     const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
     targetFilterRow.election = updatedElection;
     targetElectionRow.election = cloneDeep(updatedElection);
@@ -297,6 +304,25 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
     setFilteredList(filteredListCopy);
     setElectionList(electionListCopy);
     Notifications.showSuccess({text: successText});
+  };
+};
+
+export const updateLibraryCardListFn = (filteredCards, setFilteredCards, fullCardList, setLibraryCards, currentPage, tableSize) => {
+  return (updatedCard, cardId, i, successText) => {
+    try{
+      const index = calcFilteredListPosition(i, currentPage, tableSize);
+      let filteredCardsCopy = cloneDeep(filteredCards);
+      let fullCardListCopy = cloneDeep(fullCardList);
+      let targetFilterRow = filteredCardsCopy[index];
+      let targetFullRow = fullCardListCopy.find((element) => element.id === cardId);
+      Object.assign(targetFilterRow, updatedCard);
+      Object.assign(targetFullRow, updatedCard);
+      setFilteredCards(filteredCardsCopy);
+      setLibraryCards(fullCardListCopy);
+      Notifications.showSuccess({text: successText});
+    } catch(error) {
+      Notification.showError("Error updating library card");
+    }
   };
 };
 
