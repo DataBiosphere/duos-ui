@@ -1,4 +1,5 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { div, hh, span } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import {highlightExactMatches} from "../../libs/utils";
@@ -21,7 +22,7 @@ export const ApplicationSection = hh(class ApplicationSection extends React.Pure
           color: headerColor,
         }
       }, header),
-      span({dangerouslySetInnerHTML: {__html: highlightExactMatches(highlightedWords, content)}})
+      span({dangerouslySetInnerHTML: {__html: DOMPurify.sanitize(highlightExactMatches(highlightedWords, content))}})
     ]);
   }
 });
