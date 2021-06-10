@@ -58,7 +58,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
     const mrDAR = !isNil(accessElection) ? JSON.stringify(accessElection.useRestriction, null, 2) : null;
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {
-      return span({key: index, style: TEXT}, restrictionObj.description);
+      return div({key: index}, restrictionObj.description);
     });
     const StructuredLimitations = div({ style: ROOT}, [
       div({style: HEADER}, 'Structured Data Use Terms'),
