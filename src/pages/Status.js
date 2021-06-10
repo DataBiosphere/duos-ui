@@ -27,7 +27,7 @@ export const Status = hh(class Status extends Component {
   };
 
   async componentDidMount() {
-    const consentStatusUrl = `${ await Config.getApiUrl() }`.replace('api', 'status');
+    const consentStatusUrl = `${ await Config.getApiUrl() }/status`;
     const ontologyStatusUrl = `${ await Config.getOntologyApiUrl() }/status`;
     const fireCloudStatusUrl = `${ await Config.getFireCloudUrl() }/status`;
     fetch(consentStatusUrl, { method: 'GET' })
