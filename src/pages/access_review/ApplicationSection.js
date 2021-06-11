@@ -1,13 +1,15 @@
 import React from 'react';
-import { div, hh } from 'react-hyperscript-helpers';
+import DOMPurify from 'dompurify';
+import { div, hh, span } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
+import {highlightExactMatches} from "../../libs/utils";
 
-const TEXT = {
-  fontSize: Theme.font.size.small,
-  lineHeight: Theme.font.leading.regular,
-};
+const highlightedWords = ["race", "ethnic", "ethnicity", "transethnic", "gender", "sex", "illegal", "illicit", "stigma",
+  "behavior", "drug", "alcohol", "addict", "religion", "religious", "intellect", "intelligence", "economic", "poor",
+  "poverty", "marginalized", "impoverished", "SES", "socioeconomic"];
 
 export const ApplicationSection = hh(class ApplicationSection extends React.PureComponent {
+
   render() {
     const { header, content, headerColor } = this.props;
     return div({ style: { fontFamily: 'Arial', color: Theme.palette.primary } }, [
@@ -20,7 +22,7 @@ export const ApplicationSection = hh(class ApplicationSection extends React.Pure
           color: headerColor,
         }
       }, header),
-      div({ style: TEXT }, content)
+      span({dangerouslySetInnerHTML: {__html: DOMPurify.sanitize(highlightExactMatches(highlightedWords, content))}})
     ]);
   }
 });
