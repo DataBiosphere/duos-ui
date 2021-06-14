@@ -1,26 +1,24 @@
-import { concat } from 'lodash/fp';
+import { isNil } from 'lodash/fp';
 import { div, h } from 'react-hyperscript-helpers';
 import { Styles } from '../libs/theme';
 
 //Component that renders skeleton loader on loading
 const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
-  const rowTemplateArray = (columnHeaders) => {
-    const rowsSkeleton = [];
+  const rowTemplateArray = (columnRow, columnHeaders) => {
+    const rowsSkeleton = [columnRow];
     let i = 0;
     while(i < tableSize) {
-      let row = columnHeaders.map((columnData) => {
-        const style = Object.assign({margin: '1rem 2%'}, baseStyle, columnData.cellStyle);
+      let row = columnHeaders.map(({cellStyle}) => {
+        const style = Object.assign({height: '3rem'}, baseStyle, cellStyle);
         return div({style, className: 'text-placeholder'});
       });
-      rowsSkeleton.push(row);
+      rowsSkeleton.push(div({style: baseStyle}, row));
+      i++;
     }
     return rowsSkeleton;
   };
 
-  return div(
-    {style: Styles.TABLE.CONTAINER},
-    concat(columnRow, rowTemplateArray(columnHeaders))
-  );
+  return rowTemplateArray(columnRow, columnHeaders);
 };
 
 //Simple cell text display
@@ -48,34 +46,32 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 
 //Row component that renders out rows for each element in the provided data collection
 const DataRows = ({rowData, baseStyle}) => {
-  return div({style: baseStyle}, rowData.map(({data, isSimple, isComponent}) => {
-    let output;
-    const { text, component, style, onClick } = data;
-    if(isComponent) {
-      output = component;
-    } else if (isSimple) {
-      output = h(SimpleTextCell({text, style}));
-    } else {
-      output = h(OnClickTextCell({text, style, onClick}));
-    }
-    return output;
+  return div({style: baseStyle,}, rowData.map((row, index) => {
+    return row.map(({data, style, onClick, isComponent}) => {
+      let output;
+      //if component is passed in, render the component
+      if (isComponent) {
+        output = data;
+      //if there is no onClick function, render as simple cell
+      } else if (isNil(onClick)) {
+        output = h(SimpleTextCell, { text: data, style, key: `filtered-list-${index}-${data}` });
+      } else {
+        //otherwise render as on click cell
+        output = h(OnClickTextCell, { text: data, style, onClick: () => onClick(index), key: `filtered-list-${index}-${data}` });
+      }
+      return output;
+    });
   }));
-};
-
-//component that renders the data populated rows on a table
-const TableContents = ({baseStyle, columnRow, rowData}) => {
-  const data = h(DataRows, {rowData, baseStyle});
-  return [columnRow, data];
 };
 
 export default function SimpleTable(props) {
   //rowData is an array of arrays, outer array represents the row, inner array represents the array of rendered cells (should be components)
   //columnHeaders is an array of objects, [{label, style}], where style is used to set up dimentions of the cell (but can be used for more)
   const {
-    columnHeaders,
+    columnHeaders = [],
     //array of objects, {data, isSimple, isComponent}
     //rowData -> {text, component, style, onClick}
-    rowData,
+    rowData = [],
     isLoading,
     styles, //styles -> baseStyle, columnStyle, recordStyle
     tableSize
@@ -83,10 +79,8 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle} = styles;
   const columnRow = h(ColumnRow, {columnHeaders, baseStyle, columnStyle});
-  const tableTemplate = div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [
-    h(TableContents, {baseStyle, columnRow, rowData})
-  ]);
-  const output = isLoading ? tableTemplate : h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize});
+  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle})];
+  const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
 
   return div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [output]);
 }

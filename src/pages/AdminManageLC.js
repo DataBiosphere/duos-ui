@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { div, h, img, span } from 'react-hyperscript-helpers';
-import { pick } from 'lodash/fp';
+import {isEmpty } from 'lodash/fp';
 // import { LibraryCard } from '../libs/ajax'; //NOTE: re-enable this once ajax updates have been merged and function has been moved
 import SearchBar from '../components/SearchBar';
 import { Notifications, tableSearchHandler, updateLibraryCardListFn, calcTablePageCount} from '../libs/utils';
@@ -14,6 +14,7 @@ import PaginationBar from '../components/PaginationBar';
 //NOTE: below two imports are temporary, move these when ajax updates have been merged in
 import axios from 'axios';
 import {Config} from '../libs/config';
+import moment from 'moment';
 
 //NOTE: temp const for Styles
 //Add to Theme when finalized
@@ -21,12 +22,58 @@ const styles = {
   baseStyle: {
     fontFamily: 'Arial',
     fontSize: '14px',
-    fontWeight: 400
+    fontWeight: 400,
+    display: 'flex',
+    margin: '1rem 2%'
   },
   columnStyle: {
     fontWeight: 600,
     fontSize: '16px'
+  },
+  cellWidths: {
+    id: '20%',
+    researcher: '20%',
+    institution: '20%',
+    eraCommonsId: '20%',
+    createDate: '20%'
   }
+};
+
+const idCell = (id) => {
+  return {
+    data: id,
+    style: {width: styles.cellWidths.id},
+  };
+};
+
+//NOTE: should define cell widths in seperate const outside of column metadata
+const userNameCell = (userName, onClick) => {
+  return {
+    data: userName,
+    style: {width: styles.cellWidths.researcher},
+    onClick
+  };
+};
+
+const institutionCell = (institutionName) => {
+  return {
+    data: institutionName,
+    style: {width: styles.cellWidths.institution}
+  };
+};
+
+const eraCommonsCell = (eraCommonsId) => {
+  return {
+    data: eraCommonsId,
+    style: {width: styles.cellWidths.eraCommonsId}
+  };
+};
+
+const createDateCell = (createDate) => {
+  return {
+    data: moment(createDate).format('YYYY-MM-DD'),
+    style: {width: styles.cellWidths.createDate}
+  };
 };
 
 //NOTE: below is here temporarily
@@ -52,35 +99,14 @@ const glyphiconSortIcon = ({ isHeader, sortFunc, descOrder }) =>
       }),
   });
 
-// NOTE: use this function as a reference for setting up sorting buttons on column
-// const tableHeaderTemplate = ({ allowSort }) => {
-//   return [
-//     div({ style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort' }, [
-//       'Library Card ID',
-//       glyphiconSortIcon(allowSort),
-//     ]),
-//     div({ style: Styles.TABLE.TITLE_CELL, className: 'cell-sort' }, [
-//       'Researcher',
-//       glyphiconSortIcon(allowSort),
-//     ]),
-//     div({ style: Styles.TABLE.TITLE_CELL, className: 'cell-sort' }, [
-//       'Institution',
-//       glyphiconSortIcon(allowSort),
-//     ]),
-//     div({ style: Styles.TABLE.TITLE_CELL, className: 'cell-sort' }, [
-//       'era Commons ID',
-//       glyphiconSortIcon(allowSort),
-//     ]),
-//     div({ style: Styles.TABLE.TITLE_CELL, className: 'cell-sort' }, [
-//       'Signing Official',
-//       glyphiconSortIcon(allowSort),
-//     ]),
-//     div({ style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort' }, [
-//       'Create Date',
-//       glyphiconSortIcon(allowSort),
-//     ]),
-//   ];
-// };
+//column row metadata for simple table to process rows
+const columnHeaderFormat = {
+  id: {label: 'ID', cellStyle: {width: styles.cellWidths.id}},
+  researcher: {label: 'Researcher', cellStyle: {width: styles.cellWidths.researcher}},
+  institution: {label: 'Institution', cellStyle: {width: styles.cellWidths.institution}},
+  eraCommonsId: {label: 'era Commons ID', cellStyle: {width: styles.cellWidths.eraCommonsId}},
+  createDate: {label: 'Create Date', cellStyle: {width: styles.cellWidths.createDate}},
+};
 
 export default function AdminManageLC() {
   //NOTE: assume user details are attached to LC req
@@ -89,17 +115,31 @@ export default function AdminManageLC() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-  const [filteredCards, setFilteredCards] = useState();
-  const [showModal, setShowModal] = useState(false);
+  const [filteredCards, setFilteredCards] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [viewIndex, setViewIndex] = useState();
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+  useEffect(() => {
+    const initLibraryCards = async() => {
+      const cards = await LibraryCard.getAllLibraryCards();
+      setLibraryCards(cards);
+      setFilteredCards(cards);
+      setIsLoading(false);
+    };
+    try{
+      initLibraryCards();
+    } catch(error) {
+      Notifications.showError('Error: Failed to fetch library cards');
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const init = async() => {
-      setIsLoading(true);
       try{
-        const cards = await LibraryCard.getAllLibraryCards();
-        setLibraryCards(cards);
-        setFilteredCards(cards);
-        calcTablePageCount(tableSize, filteredCards);
+        setIsLoading(true);
+        setPageCount(calcTablePageCount(tableSize, filteredCards));
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: unable to retrieve library cards from server'});
@@ -109,27 +149,37 @@ export default function AdminManageLC() {
     init();
   }, [filteredCards, tableSize]);
 
+  const processLCData = (cards) => {
+    return cards.map((card) => {
+      return [
+        idCell(card.id),
+        userNameCell(card.userName, showModalOnClick),
+        !isEmpty(card.institution) ? institutionCell(card.institution.name) : institutionCell('- -'),
+        eraCommonsCell(card.eraCommonsId),
+        createDateCell(card.createDate)
+      ];
+    });
+  };
+
   //Use this callback function if you're updating attributes on a library card
   //NOTE: method will most likely be passed into modals that will handle the change
   const getUpdateListFn = useCallback(() => {
     return updateLibraryCardListFn(filteredCards, setFilteredCards, libraryCards, setLibraryCards, currentPage, tableSize);
   }, [filteredCards, libraryCards, currentPage, tableSize]);
 
-  //column row metadata for simple table to process rows
-  const columnHeaderData = [
-    {label: 'ID', cellStyle: {width: '20%'}},
-    {label: 'Researcher', cellStyle: {width: '20%'}},
-    {label: 'Institution', cellStyle: {width: '20%'}},
-    {label: 'era Commons ID', cellStyle: {width: '20%'}},
-    {label: 'Signing Official', cellStyle: {width: '20%'}},
-    {label: 'Create Date', cellStyle: {width: '20%'}},
-  ];
-
-  const generateRowData = (cards) => {
-    return cards.map((card) => 
-      pick(['id', 'userName', 'institution', 'eraCommonsId', 'createDate'])(card)
-    );
+  const showModalOnClick = (rowIndex) => {
+    setViewIndex(rowIndex);
+    showUpdateModal(true);
   };
+
+  //add signingOfficial when feature is implemented
+  const columnHeaderData = [
+    columnHeaderFormat.id,
+    columnHeaderFormat.researcher,
+    columnHeaderFormat.institution,
+    columnHeaderFormat.eraCommonsId,
+    columnHeaderFormat.createDate
+  ];
 
   //Search function for SearchBar component
   const handleSearchChange = tableSearchHandler(filteredCards, setFilteredCards, setCurrentPage, "libraryCard");
@@ -169,9 +219,10 @@ export default function AdminManageLC() {
     h(SimpleTable, {
       isLoading,
       //NOTE: should I limit the cards to the current window of cards or pass in the entire list?
-      rowData: generateRowData(filteredCards),
+      rowData: processLCData(filteredCards),
       columnHeaders: columnHeaderData,
       styles,
+      tableSize
       //Insert Skeleton loader here, may need to make a new one
     }),
     h(PaginationBar, {
