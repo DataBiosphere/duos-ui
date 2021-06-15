@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { div, h, img, span } from 'react-hyperscript-helpers';
-import {isEmpty } from 'lodash/fp';
+import {isEmpty, isNaN } from 'lodash/fp';
 // import { LibraryCard } from '../libs/ajax'; //NOTE: re-enable this once ajax updates have been merged and function has been moved
 import SearchBar from '../components/SearchBar';
 import { Notifications, tableSearchHandler, updateLibraryCardListFn, calcTablePageCount} from '../libs/utils';
@@ -164,12 +164,18 @@ export default function AdminManageLC() {
     }
   };
 
+  const changeTableSize = (value) => {
+    if(value > 0 && !isNaN(parseInt(value))) {
+      setTableSize(value);
+    }
+  };
+
   const paginationBar = h(PaginationBar, {
     pageCount,
     currentPage,
     tableSize,
     goToPage,
-    changeTableSize: setTableSize,
+    changeTableSize,
   });
 
   //Use this callback function if you're updating attributes on a library card
