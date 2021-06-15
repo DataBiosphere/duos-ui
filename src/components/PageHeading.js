@@ -1,5 +1,6 @@
 import {Component} from 'react';
 import {div, hh, img, h2, span} from 'react-hyperscript-helpers';
+import {isNil} from "lodash";
 
 export const PageHeading = hh(class PageHeading extends Component {
 
@@ -55,6 +56,7 @@ export const PageHeading = hh(class PageHeading extends Component {
     };
 
     const MARGINS = this.margins(this.props.iconSize);
+    const DESCRIPT_STYLE = isNil(this.props.descriptionStyle) ? DESCRIPTION : this.props.descriptionStyle;
 
     return div({id: this.props.id + "_heading", style: HEADING}, [
       img({
@@ -70,7 +72,7 @@ export const PageHeading = hh(class PageHeading extends Component {
           className: this.props.color + "-color",
           style: TITLE
         }, [this.props.title]),
-        span({id: this.props.id + "_description", style: DESCRIPTION}, [this.props.description]),
+        span({id: this.props.id + "_description", style: DESCRIPT_STYLE}, [this.props.description]),
       ]),
 
     ]);
