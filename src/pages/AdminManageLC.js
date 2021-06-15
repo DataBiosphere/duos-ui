@@ -161,6 +161,20 @@ export default function AdminManageLC() {
     });
   };
 
+  const goToPage = (value) => {
+    if(value > 1 && value <= pageCount) {
+      setCurrentPage(value);
+    }
+  };
+
+  const paginationBar = h(PaginationBar, {
+    pageCount,
+    currentPage,
+    tableSize,
+    goToPage,
+    changeTableSize: setTableSize,
+  });
+
   //Use this callback function if you're updating attributes on a library card
   //NOTE: method will most likely be passed into modals that will handle the change
   const getUpdateListFn = useCallback(() => {
@@ -182,7 +196,7 @@ export default function AdminManageLC() {
   ];
 
   //Search function for SearchBar component
-  const handleSearchChange = tableSearchHandler(filteredCards, setFilteredCards, setCurrentPage, "libraryCard");
+  const handleSearchChange = tableSearchHandler(libraryCards, setFilteredCards, setCurrentPage, "libraryCard");
 
   //NOTE: define template for th and td here, process into arrays and then pass into table template for render
   //For simple data just pass in basic data
@@ -222,16 +236,10 @@ export default function AdminManageLC() {
       rowData: processLCData(filteredCards),
       columnHeaders: columnHeaderData,
       styles,
-      tableSize
-      //Insert Skeleton loader here, may need to make a new one
-    }),
-    h(PaginationBar, {
-      pageCount,
-      currentPage,
       tableSize,
-      goToPage: setCurrentPage,
-      changeTableSize: setTableSize,
-    }),
+      paginationBar
+      //Insert Skeleton loader here, may need to make a new one
+    })
   ]);
 
 

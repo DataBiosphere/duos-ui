@@ -365,15 +365,14 @@ const getSearchFilterFunctions = () => {
       return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
     }, targetList),
     libraryCard: (term, targetList) => filter(libraryCard => {
-      const { userName, userEmail, institutionName, createDate, updateDate, eraCommonsId} = libraryCard;
-      return includes(
-        term, toLower(userName),
-        term, toLower(userEmail),
-        term, toLower(institutionName),
-        term, createDate,
-        term, updateDate,
-        term, toLower(eraCommonsId)
-      );
+      const { userName, userEmail, institution, createDate, updateDate, eraCommonsId} = libraryCard;
+      const institutionName = institution.name;
+      return includes(term, toLower(userName)) ||
+        includes(term, toLower(userEmail)) ||
+        includes(term, toLower(institutionName)) ||
+        includes(term, formatDate(createDate)) ||
+        includes(term, formatDate(updateDate)) ||
+        includes(term, toLower(eraCommonsId));
     }, targetList)
   };
 };

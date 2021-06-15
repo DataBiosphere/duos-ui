@@ -23,11 +23,13 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
 
 //Simple cell text display
 const SimpleTextCell = ({ text, style }) => {
+  text = isNil(text) ? '- -' : text;
   return div({ style }, [text]);
 };
 
 //Simple cell text that carries onClick functionality
 const OnClickTextCell= ({ text, style, onClick }) => {
+  text = isNil(text) ? '- -' : text;
   return div({ style, onClick }, [text]);
 };
 
@@ -74,7 +76,8 @@ export default function SimpleTable(props) {
     rowData = [],
     isLoading,
     styles, //styles -> baseStyle, columnStyle, recordStyle
-    tableSize
+    tableSize,
+    paginationBar
   } = props;
 
   const {baseStyle, columnStyle} = styles;
@@ -82,5 +85,5 @@ export default function SimpleTable(props) {
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
 
-  return div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [output]);
+  return div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [output, paginationBar]);
 }
