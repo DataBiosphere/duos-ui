@@ -24,12 +24,9 @@ const styles = {
     fontSize: '14px',
     fontWeight: 400,
     display: 'flex',
-    margin: '1rem 2%'
+    padding: '1rem 2%'
   },
-  columnStyle: {
-    fontWeight: 600,
-    fontSize: '16px'
-  },
+  columnStyle: Styles.TABLE.HEADER_ROW,
   cellWidths: {
     id: '20%',
     researcher: '20%',

@@ -137,7 +137,8 @@ export const Styles = {
       justifyContent: "left",
       height: "51px",
       borderTopLeftRadius: 'inherit',
-      borderTopRightRadius: 'inherit'
+      borderTopRightRadius: 'inherit',
+      alignItems: 'center'
     },
     RECORD_ROW: {
       fontFamily: targetFont,
