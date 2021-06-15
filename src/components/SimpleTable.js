@@ -47,19 +47,25 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 };
 
 //Row component that renders out rows for each element in the provided data collection
-const DataRows = ({rowData, baseStyle}) => {
+const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   return div({style: baseStyle,}, rowData.map((row, index) => {
-    return row.map(({data, style, onClick, isComponent}) => {
+    return row.map(({data, style, onClick, isComponent}, cellIndex) => {
       let output;
-      //if component is passed in, render the component
+      //columnHeaders determine width of the columns,
+      //therefore extract width from columnHeader and apply to cell style
+      const columnWidthStyle = columnHeaders[cellIndex].cellStyle;
+      const appliedStyle = Object.assign({}, style, columnWidthStyle);
+
+      //assume component is in hyperscript format
+      //wrap component in dive with columnWidth applied
       if (isComponent) {
-        output = data;
+        output = div(columnWidthStyle, [data]);
       //if there is no onClick function, render as simple cell
       } else if (isNil(onClick)) {
-        output = h(SimpleTextCell, { text: data, style, key: `filtered-list-${index}-${data}` });
+        output = h(SimpleTextCell, { text: data, style: appliedStyle, key: `filtered-list-${index}-${data}`, cellIndex });
       } else {
         //otherwise render as on click cell
-        output = h(OnClickTextCell, { text: data, style, onClick: () => onClick(index), key: `filtered-list-${index}-${data}` });
+        output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), key: `filtered-list-${index}-${data}`, cellIndex });
       }
       return output;
     });
@@ -68,7 +74,7 @@ const DataRows = ({rowData, baseStyle}) => {
 
 export default function SimpleTable(props) {
   //rowData is an array of arrays, outer array represents the row, inner array represents the array of rendered cells (should be components)
-  //columnHeaders is an array of objects, [{label, style}], where style is used to set up dimentions of the cell (but can be used for more)
+  //columnHeaders is an array of objects, [{label, cellStyle}], where style is used to set up dimentions of the cell for the columns
   const {
     columnHeaders = [],
     //array of objects, {data, isSimple, isComponent}
@@ -82,7 +88,7 @@ export default function SimpleTable(props) {
 
   const {baseStyle, columnStyle} = styles;
   const columnRow = h(ColumnRow, {columnHeaders, baseStyle, columnStyle});
-  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle})];
+  const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
 
   return div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [output, paginationBar]);
