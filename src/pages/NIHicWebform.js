@@ -10,7 +10,7 @@ import {Theme} from "../libs/theme";
 import {useState, useEffect} from "react";
 import { searchOntologies } from "../libs/utils";
 import DataProviderAgreement from "../assets/Data_Provider_Agreement.pdf";
-import {eRACommons} from "../components/eRACommons";
+import eraIcon from "../images/era-commons-logo.png";
 
 export default function NIHICWebform() {
   const [multicenter, setMulticenter] = useState();
@@ -48,6 +48,16 @@ export default function NIHICWebform() {
     fontWeight: 500,
     marginBottom: 0
   };
+
+  const logoStyle = {
+    height: 23,
+    width: 38,
+    backgroundRepeat: 'no-repeat',
+    backgroundSize: 'contain',
+    backgroundImage: `url(${eraIcon})`,
+    display: 'inline-block'
+  };
+
 
   const nihCenterList = ["National Cancer Institute (NCI)",
     "National Eye Institute (NEI)",
@@ -355,14 +365,16 @@ export default function NIHICWebform() {
                         'Authenticate with eRA Commons',
                       ]),
                     ]),
-                  eRACommons({
-                    className: 'col-sm-6 col-xs-12 rp-group',
-                    destination: null,
-                    onNihStatusUpdate: () => {},
-                    location: location
-                  })
+                  div({className: 'col-xs-12 rp-group'}, [
+                    a({
+                      className: 'btn-secondary',
+                      target: '_blank'
+                    }, [
+                      div({ style: logoStyle }),
+                      span({ style: { verticalAlign: '25%' } }, ['Authenticate your account'])
+                    ])
+                  ]),
                 ]),
-
                 div({className: 'form-group'}, [
                   div(
                     {className: 'col-xs-12 rp-group'}, [
