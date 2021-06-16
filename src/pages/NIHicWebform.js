@@ -1803,9 +1803,7 @@ export default function NIHICWebform() {
               ]),
 
 
-              //h3({ className: 'rp-form-title common-color mt-8' }, ['Signatures']),
-
-              div({ className: 'form-group' }, [
+              div({ className: 'form-group'}, [
                 div({ className: 'col-xs-12' }, [
                   label({ className: 'control-label rp-title-question common-color' }, [
                     'Dataset Registration Agreement'
