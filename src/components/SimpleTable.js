@@ -77,11 +77,10 @@ export default function SimpleTable(props) {
   //columnHeaders is an array of objects, [{label, cellStyle}], where style is used to set up dimentions of the cell for the columns
   const {
     columnHeaders = [],
-    //array of objects, {data, isSimple, isComponent}
-    //rowData -> {text, component, style, onClick}
+    //rowData -> {data, component, style, onClick}
     rowData = [],
     isLoading,
-    styles, //styles -> baseStyle, columnStyle, recordStyle
+    styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
     tableSize,
     paginationBar
   } = props;

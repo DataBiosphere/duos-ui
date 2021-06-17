@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { div, h, img, span } from 'react-hyperscript-helpers';
-import {isEmpty, isNaN } from 'lodash/fp';
+import {isEmpty, isNaN, cloneDeep, findIndex } from 'lodash/fp';
+import { Institution, User } from '../libs/ajax';
 // import { LibraryCard } from '../libs/ajax'; //NOTE: re-enable this once ajax updates have been merged and function has been moved
 import SearchBar from '../components/SearchBar';
 import { Notifications, tableSearchHandler, updateLibraryCardListFn, calcTablePageCount} from '../libs/utils';
@@ -15,6 +16,7 @@ import PaginationBar from '../components/PaginationBar';
 import axios from 'axios';
 import {Config} from '../libs/config';
 import moment from 'moment';
+import LibraryCardFormModal from '../components/modals/LibraryCardFormModal';
 
 //NOTE: temp const for Styles
 //Add to Theme when finalized
@@ -36,6 +38,7 @@ const styles = {
   }
 };
 
+//following cell functions format the data for processing within simple table
 const idCell = (id) => {
   return {
     data: id,
@@ -43,7 +46,6 @@ const idCell = (id) => {
   };
 };
 
-//NOTE: should define cell widths in seperate const outside of column metadata
 const userNameCell = (userName, onClick) => {
   return {
     data: userName,
@@ -75,13 +77,13 @@ const createDateCell = (createDate) => {
 
 //NOTE: below is here temporarily
 //When ajax updates are merged in move the function there
-
+//Need to merge in develop as well
 const LibraryCard = {
-  getAllLibraryCards: async() => {
+  getAllLibraryCards: async () => {
     const url = `${await Config.getApiUrl()}/libraryCards`;
     const res = await axios.get(url, Config.authOpts());
     return res.data;
-  }
+  },
 };
 
 //NOTE: need to add this to columns once table component renders/processes correctly
@@ -113,21 +115,32 @@ export default function AdminManageLC() {
   const [pageCount, setPageCount] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredCards, setFilteredCards] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [viewIndex, setViewIndex] = useState();
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [institutions, setInstitutions] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [currentCard, setCurrentCard] = useState();
 
   useEffect(() => {
-    const initLibraryCards = async() => {
-      const cards = await LibraryCard.getAllLibraryCards();
+    const initData = async() => {
+      const dataPromiseArray = await Promise.all([
+        LibraryCard.getAllLibraryCards,
+        Institution.list(),
+        User.list()
+      ]);
+      const cards = dataPromiseArray[0];
+      const institutions = dataPromiseArray[1];
+      const users = dataPromiseArray[2];
       setLibraryCards(cards);
       setFilteredCards(cards);
+      setInstitutions(institutions);
+      setUsers(users);
       setIsLoading(false);
     };
     try{
-      initLibraryCards();
+      initData();
     } catch(error) {
-      Notifications.showError('Error: Failed to fetch library cards');
+      Notifications.showError('Error: Failed to initialize component');
       setIsLoading(false);
     }
   }, []);
@@ -139,7 +152,7 @@ export default function AdminManageLC() {
         setPageCount(calcTablePageCount(tableSize, filteredCards));
         setIsLoading(false);
       } catch(error) {
-        Notifications.showError({text: 'Error: unable to retrieve library cards from server'});
+        Notifications.showError({text: 'Error updating Library Card table'});
         setIsLoading(false);
       }
     };
@@ -178,15 +191,30 @@ export default function AdminManageLC() {
     changeTableSize,
   });
 
-  //Use this callback function if you're updating attributes on a library card
-  //NOTE: method will most likely be passed into modals that will handle the change
-  const getUpdateListFn = useCallback(() => {
-    return updateLibraryCardListFn(filteredCards, setFilteredCards, libraryCards, setLibraryCards, currentPage, tableSize);
-  }, [filteredCards, libraryCards, currentPage, tableSize]);
+  //NOTE: update function to be sent to modal
+  //modal will only get the target card to change
+  //card will have id which can be used to find the target call in each list
+  //therefore function should only send the filteredList, originalList, set for the two, and the payload
+  const updateListFn = (filteredCards, setFilteredCards, libraryCards, setLibraryCards, payload) => {
+    try{
+      const id = payload.id;
+      let filteredCopy = cloneDeep(filteredCards);
+      let libraryCopy = cloneDeep(libraryCards);
+      let filteredIndex = findIndex((card) => card.id === id);
+      let originalIndex = findIndex((card) => card.id === id);
+      filteredCopy[filteredIndex] = payload;
+      libraryCopy[originalIndex] = payload;
+      setFilteredCards(filteredCopy);
+      setLibraryCards(libraryCopy);
+      Notifications.showSuccess(`${payload.userName}'s library cardd successfully updated`);
+    } catch(error) {
+      Notification.error('Error: Failed to update library card');
+    }
+  };
 
-  const showModalOnClick = (rowIndex) => {
-    setViewIndex(rowIndex);
-    showUpdateModal(true);
+  const showModalOnClick = (card) => {
+    setCurrentCard(card);
+    setShowModal(true);
   };
 
   //add signingOfficial when feature is implemented
@@ -242,6 +270,12 @@ export default function AdminManageLC() {
       tableSize,
       paginationBar
       //Insert Skeleton loader here, may need to make a new one
+    }),
+    h(LibraryCardFormModal, {
+      isRendered: showModal,
+      updateFn: updateLibraryCardListFn,
+      closeModal: () => setShowModal(false),
+
     })
   ]);
 
