@@ -1535,7 +1535,10 @@ export default function NIHICWebform() {
                       id: 'submission_3months',
                       label: 'within 3 months of last data generated or last clinical visit',
                       defaultChecked: submissionThreeMonths,
-                      onClick: () => setSubmissionThreeMonths(true)
+                      onClick: () => {
+                        setSubmissionThreeMonths(true);
+                        setSubmissionBatches(false);
+                      }
                     }),
 
                     RadioButton({
@@ -1545,7 +1548,10 @@ export default function NIHICWebform() {
                       id: 'submission_batches',
                       label: 'by batches over Study Timeline (e.g. based on clinical trial enrollment benchmarks)',
                       defaultChecked: submissionBatches,
-                      onClick: () => setSubmissionBatches(true)
+                      onClick: () => {
+                        setSubmissionBatches(true);
+                        setSubmissionThreeMonths(false);
+                      }
                     }),
                   ]),
                 ]),
