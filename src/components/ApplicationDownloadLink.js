@@ -1,8 +1,11 @@
 import { Page, Document, StyleSheet, View, /*PDFViewer*/ PDFDownloadLink, Text} from '@react-pdf/renderer';
 import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
-import isEmpty from 'lodash/fp/isEmpty';
+import {find, isEmpty} from 'lodash/fp';
 import { Theme } from '../libs/theme';
+import { isNil }from "lodash";
+import {Institution} from "../libs/ajax";
+import {useEffect, useState} from "react";
 
 const styles = StyleSheet.create({
   page: {
@@ -117,18 +120,30 @@ const ApprovalSection = (props => {
 });
 
 export default function ApplicationDownloadLink(props) {
+  const [institution, setInstitution] = useState("- -");
   const {darInfo, researcherProfile} = props;
   const {cloudUse, localUse, anvilUse, cloudProvider, cloudProviderType, cloudProviderDescription} = darInfo;
   const datasets = props.datasets.map((dataset) => {
-    const namePropertyObj = dataset.properties.find((property) =>  property.propertyName === "Dataset Name");
+    const namePropertyObj = dataset.properties.find((property) => property.propertyName === "Dataset Name");
     //using {description: value} so it can be listed via LabelListComponent
     return {description: namePropertyObj.propertyValue};
   });
   const translatedSRPs = DataUseTranslation.translateDarInfo(darInfo);
 
+  useEffect(() => {
+    const getInstitution = async () => {
+      if (!isNil(researcherProfile) && !isNil(researcherProfile.institutionId)) {
+        const institute = await Institution.getById(researcherProfile.institutionId);
+        setInstitution(institute.name);
+      }
+    };
+    getInstitution();
+  });
+
+
   const getCollaborators = (darInfo, key) => {
     const collaborators = darInfo[key];
-    if(!isEmpty(collaborators)) {
+    if (!isEmpty(collaborators)) {
       return collaborators.map((collaborator) => {
         return collaborator.name;
       }).join(', ');
@@ -140,7 +155,20 @@ export default function ApplicationDownloadLink(props) {
   const internalCollaborators = getCollaborators(darInfo, 'internalCollaborators');
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
-
+  const nihUsernameProp = find({propertyKey: 'nihUsername'})(researcherProfile.researcherProperties);
+  const linkedInProp = find({propertyKey: 'linkedIn'})(researcherProfile.researcherProperties);
+  const orcidProp = find({propertyKey: 'orcid'})(researcherProfile.researcherProperties);
+  const isThePiProp = find({propertyKey: 'isThePI'})(researcherProfile.researcherProperties);
+  const piNameProp = find({propertyKey: 'piName'})(researcherProfile.researcherProperties);
+  const departmentProp = find({propertyKey: 'department'})(researcherProfile.researcherProperties);
+  const cityProp = find({propertyKey: 'city'})(researcherProfile.researcherProperties);
+  const stateProp = find({propertyKey: 'state'})(researcherProfile.researcherProperties);
+  const location = () => {
+    const city = isNil(cityProp) ? "" : nihUsernameProp.propertyValue;
+    const state = isNil(stateProp) ? "" : nihUsernameProp.propertyValue;
+    return city.concat(", ").concat(state);
+  };
+  const emailProp = find({propertyKey: 'academicEmail'})(researcherProfile.researcherProperties);
   // Use PDFViewer during development to see changes to the document immediately
   // return h(PDFViewer, {width: 1800, height: 800}, [
 
@@ -150,34 +178,78 @@ export default function ApplicationDownloadLink(props) {
         h(Text, {style: styles.header}, [`${darInfo.darCode} Application`]),
         h(Text, {style: styles.subHeader}, ["Applicant Information"]),
         h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: "NIH eRA Commons ID", text: researcherProfile.nihUsername, style:{marginRight: 30}}),
-          h(SmallLabelTextComponent, {label: "LinkedIn Profile", text: researcherProfile.linkedIn})
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: "ORC ID", text: researcherProfile.orcid, style:{marginRight: 30}}),
-          h(SmallLabelTextComponent, {label: "ResearcherGate ID", text: researcherProfile.orcid}),
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: "Researcher", text: researcherProfile.profileName, style:{marginRight: 30}}),
-          h(SmallLabelTextComponent, {label: "Principal Investigator", text: `${researcherProfile.isThePI ? researcherProfile.profileName : researcherProfile.piName}`})
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: "Institution", text: researcherProfile.institution, style:{marginRight: 30}}),
-          h(SmallLabelTextComponent, {label: "Department", text: researcherProfile.department})
-        ]),
-        h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: "Location", text: `${researcherProfile.city}, ${researcherProfile.state}\n${researcherProfile.country}`,
-            style:{marginRight: 30}
+          h(SmallLabelTextComponent, {
+            label: "NIH eRA Commons ID",
+            text: `${isNil(nihUsernameProp) ? "" : nihUsernameProp.propertyValue}`,
+            style: {marginRight: 30}
           }),
-          h(SmallLabelTextComponent, {label: "Researcher Email", text: researcherProfile.academicEmail}),
+          h(SmallLabelTextComponent, {
+            label: "LinkedIn Profile",
+            text: `${isNil(linkedInProp) ? "" : linkedInProp.propertyValue}`
+          })
         ]),
         h(View, {style: styles.flexboxContainer}, [
-          h(SmallLabelTextComponent, {label: "Signing Official", text: darInfo.signingOfficial, style:{marginRight: 30}}),
+          h(SmallLabelTextComponent, {
+            label: "ORC ID",
+            text: `${isNil(orcidProp) ? "" : orcidProp.propertyValue}`,
+            style: {marginRight: 30}
+          }),
+          h(SmallLabelTextComponent, {
+            label: "ResearcherGate ID",
+            text: `${isNil(orcidProp) ? "" : orcidProp.propertyValue}`
+          }),
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {
+            label: "Researcher",
+            text: researcherProfile.displayName,
+            style: {marginRight: 30}
+          }),
+          h(SmallLabelTextComponent, {
+            label: "Principal Investigator", text: `${isNil(isThePiProp) ? "" : isThePiProp.propertyValue ?
+              researcherProfile.displayName : isNil(piNameProp) ? "" : piNameProp.propertyValue}`
+          })
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {label: "Institution", text: `${institution}`, style: {marginRight: 30}}),
+          h(SmallLabelTextComponent, {
+            label: "Department",
+            text: `${isNil(departmentProp) ? "" : departmentProp.propertyValue}`
+          })
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {
+            label: "Location", text: `${location()}`,
+            style: {marginRight: 30}
+          }),
+          h(SmallLabelTextComponent, {
+            label: "Researcher Email",
+            text: `${isNil(emailProp) ? "" : emailProp.propertyValue}`
+          }),
+        ]),
+        h(View, {style: styles.flexboxContainer}, [
+          h(SmallLabelTextComponent, {
+            label: "Signing Official",
+            text: darInfo.signingOfficial,
+            style: {marginRight: 30}
+          }),
           h(SmallLabelTextComponent, {label: "IT Director", text: darInfo.itDirector})
         ]),
-        h(SmallLabelTextComponent, {label: 'Lab Staff Collaborators', text: labCollaborators, style: {marginBottom: 20}}),
-        h(SmallLabelTextComponent, {label: 'Internal Collaborators', text: internalCollaborators, style: {marginBottom: 20}}),
-        h(SmallLabelTextComponent, {label: 'External Collaborators', text: externalCollaborators, style: {marginBottom: 20}}),
+        h(SmallLabelTextComponent, {
+          label: 'Lab Staff Collaborators',
+          text: labCollaborators,
+          style: {marginBottom: 20}
+        }),
+        h(SmallLabelTextComponent, {
+          label: 'Internal Collaborators',
+          text: internalCollaborators,
+          style: {marginBottom: 20}
+        }),
+        h(SmallLabelTextComponent, {
+          label: 'External Collaborators',
+          text: externalCollaborators,
+          style: {marginBottom: 20}
+        }),
         h(CloudUseSection, {cloudUse, localUse, anvilUse, cloudProvider, cloudProviderType, cloudProviderDescription})
       ]),
       h(View, {}, [
@@ -194,8 +266,8 @@ export default function ApplicationDownloadLink(props) {
   ]);
 
   return h(PDFDownloadLink, {fileName: `${darInfo.darCode}_Application_PDF`, document}, [
-    span({style: { fontSize: Theme.font.size.subheader}}, [
-      i({ className: 'glyphicon glyphicon-download-alt', style: iconStyle}),
+    span({style: {fontSize: Theme.font.size.subheader}}, [
+      i({className: 'glyphicon glyphicon-download-alt', style: iconStyle}),
       'Full Application'
     ])
   ]);
