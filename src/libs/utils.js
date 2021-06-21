@@ -2,10 +2,11 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
-import { DAR, DataSet, Researcher } from "./ajax";
+import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
 import _ from 'lodash';
+import {User} from "./ajax";
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -200,7 +201,7 @@ export const getDarData = async (darId) => {
 
   try {
     darInfo = await DAR.getPartialDarRequest(darId);
-    const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
+    const researcherPromise = await User.getById(darInfo.userId);
     const datasetsPromise = darInfo.datasetIds.map((id) => {
       return DataSet.getDataSetsByDatasetId(id);
     });
