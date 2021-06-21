@@ -1,35 +1,57 @@
-import { h, div, input } from 'react-hyperscript-helpers';
+import { useState, useEffect } from 'react';
+import { cloneDeep, isObject, includes, isNil, isEmpty } from 'lodash/fp';
+import { h, div } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
-import { isEmpty, isNil } from 'lodash';
 import { SearchSelect } from '../SearchSelect';
+import Creatable from 'react-select/creatable';
 
 const FormFieldRow = (props) => {
-  //NOTE: don't need index, cards have unique ids associated with them
-  const { libraryCard, updateFn, dropdownOptions, key, label } = props;
+  const { card, dropdownOptions, label, updateInstitution, updateUser, modalType } = props;
+  const [filteredDropdown, setFilteredDropdown] = useState(dropdownOptions);
+  //NOTE: need to make own Select component for input
+  //allows user to select from dropdown or put in their own name
 
   let template;
   const placeholder = `Search for ${label}...`;
-  //updateFn -> needs to take key, value and update model on the parent
-  //Parent can search for the element on filtered and original and update models accordingly
 
-  if(!isNil(dropdownOptions) && !isEmpty(dropdownOptions)) {
+  const userListFilter = (searchTerm) => {
+    let filteredCopy;
+    if(isEmpty(searchTerm)) {
+      filteredCopy = dropdownOptions;
+    } else {
+      const copiedDropdown = cloneDeep(filteredDropdown);
+      filteredCopy = copiedDropdown.filter(user => {
+        const userNameFilter = !isEmpty(user.displayName) ? includes(user.displayName)(searchTerm) : false;
+        const emailFilter = !isEmpty(user.email) ? includes(user.email)(searchTerm) : false;
+        return userNameFilter || emailFilter;
+      });
+    }
+    setFilteredDropdown(filteredCopy);
+  };
+
+  if(!isNil(updateInstitution)) {
+    //first template for institution selection
     template = h(SearchSelect, {
-      id: label,
+      id: `${label}-form-field`,
       name: label,
-      onSelection: updateFn,
+      onSelection: (selection) => updateInstitution(selection),
       options: dropdownOptions,
       placeholder,
-      value: libraryCard.institution.id
+      value: card.institutionId
     });
   } else {
-    template = input({
-      type: 'text',
-      value: libraryCard[key],
-      onChange: updateFn,
-      placeholder
-    });
+    if(modalType === 'add') {
+      h(Creatable, {
+        isClearable: true,
+        onChange: updateUser,
+        onInputChange: userListFilter,
+        options: dropdownOptions
+      });
+    } else {
+      div({}, [card.displayName]);
+    }
   }
 
   return div({display: 'flex'}, [template]);
@@ -38,7 +60,32 @@ const FormFieldRow = (props) => {
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
   //fetch for all institutions needs to happen on component init
-  const { updateFn, closeModal, showModal, libraryCard, title, dropdownOptions, onSubmitFn} = props;
+  const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType} = props;
+
+  const [card, setCard] = useState(props.card);
+
+  useEffect(() => {
+    setCard(props.card);
+  }, [props.card]);
+
+  const updateInstitution = (value) => {
+    debugger; // eslint-disable-line
+    const updatedCard = cloneDeep(card);
+    updatedCard.institutionId = value;
+    setCard(updatedCard);
+  };
+
+  const updateUser = (value) => {
+    let userEmail, userId;
+    if(isObject(value)) {
+      userId = value.userId;
+      userEmail = value.userEmail;
+    } else {
+      userEmail = value;
+    }
+    const updatedCard = Object.assign({}, {userEmail, userId}, card);
+    setCard(updatedCard);
+  };
 
   return h(Modal, {
     isOpen: showModal,
@@ -53,9 +100,23 @@ export default function LibraryCardFormModal(props) {
   }, [
     div({style: Styles.MODAL.CONTENT}, [
       h(CloseIconComponent, {closeFn: closeModal}),
-      div({style: Styles.MODAL.TITLE_HEADER}, [title]),
+      div({style: Styles.MODAL.TITLE_HEADER}, [modalType == 'add' ? 'Add Library Card' : 'Update Library Card']),
       div({style: { borderBottom: "1px solid #1FB50"}}, []),
-      h(FormFieldRow, {libraryCard, updateFn, dropdownOptions, key: 'institutionId', label: 'Institution' })
+      h(FormFieldRow, {
+        card,
+        modalType,
+        updateUser,
+        dropdownOptions: users,
+        label: 'Users'
+      }),
+      h(FormFieldRow, {
+        card,
+        modalType,
+        updateInstitution,
+        dropdownOptions: institutions,
+        label: 'Institution'
+      }),
+      div({onClick: modalType === 'add' ? () => createOnClick(card) : () => updateOnClick(card)})
     ])
   ]);
 }

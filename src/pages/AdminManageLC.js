@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { div, h, img, span } from 'react-hyperscript-helpers';
-import {isEmpty, isNaN, cloneDeep, findIndex } from 'lodash/fp';
+import {isEmpty, isNaN, cloneDeep, findIndex, isEqual } from 'lodash/fp';
 import { Institution, User } from '../libs/ajax';
 // import { LibraryCard } from '../libs/ajax'; //NOTE: re-enable this once ajax updates have been merged and function has been moved
 import SearchBar from '../components/SearchBar';
-import { Notifications, tableSearchHandler, updateLibraryCardListFn, calcTablePageCount} from '../libs/utils';
+import { Notifications, tableSearchHandler, calcTablePageCount} from '../libs/utils';
 import { Styles } from '../libs/theme';
 import lockIcon from '../images/lock-icon.png';
 // import { Style } from '@material-ui/icons';
@@ -84,6 +84,11 @@ const LibraryCard = {
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
+  createLibraryCard: async (card) => {
+    const url = `${await Config.getApiUrl()}/libraryCards`;
+    const res = await axios.post(url, Config.authOpts, {card});
+    return res.data;
+  }
 };
 
 //NOTE: need to add this to columns once table component renders/processes correctly
@@ -115,21 +120,26 @@ export default function AdminManageLC() {
   const [pageCount, setPageCount] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredCards, setFilteredCards] = useState([]);
-  const [viewIndex, setViewIndex] = useState();
   const [showModal, setShowModal] = useState(false);
   const [institutions, setInstitutions] = useState([]);
   const [users, setUsers] = useState([]);
   const [currentCard, setCurrentCard] = useState();
+  const [modalType, setModalType] = useState();
 
   useEffect(() => {
     const initData = async() => {
       const dataPromiseArray = await Promise.all([
-        LibraryCard.getAllLibraryCards,
+        LibraryCard.getAllLibraryCards(),
         Institution.list(),
         User.list()
       ]);
       const cards = dataPromiseArray[0];
-      const institutions = dataPromiseArray[1];
+      const institutions = dataPromiseArray[1].map((institution) => {
+        return {
+          key: institution.id,
+          displayText: institution.name
+        };
+      });
       const users = dataPromiseArray[2];
       setLibraryCards(cards);
       setFilteredCards(cards);
@@ -163,7 +173,7 @@ export default function AdminManageLC() {
     return cards.map((card) => {
       return [
         idCell(card.id),
-        userNameCell(card.userName, showModalOnClick),
+        userNameCell(card.userName, () => showModalOnClick(card, "update")),
         !isEmpty(card.institution) ? institutionCell(card.institution.name) : institutionCell('- -'),
         eraCommonsCell(card.eraCommonsId),
         createDateCell(card.createDate)
@@ -191,11 +201,8 @@ export default function AdminManageLC() {
     changeTableSize,
   });
 
-  //NOTE: update function to be sent to modal
-  //modal will only get the target card to change
-  //card will have id which can be used to find the target call in each list
-  //therefore function should only send the filteredList, originalList, set for the two, and the payload
-  const updateListFn = (filteredCards, setFilteredCards, libraryCards, setLibraryCards, payload) => {
+  //update function when element in array is updated via modal
+  const updateListFn = (payload) => {
     try{
       const id = payload.id;
       let filteredCopy = cloneDeep(filteredCards);
@@ -206,14 +213,42 @@ export default function AdminManageLC() {
       libraryCopy[originalIndex] = payload;
       setFilteredCards(filteredCopy);
       setLibraryCards(libraryCopy);
-      Notifications.showSuccess(`${payload.userName}'s library cardd successfully updated`);
+      setShowModal(false);
+      Notifications.showSuccess(`${payload.userName}'s library card successfully updated`);
     } catch(error) {
-      Notification.error('Error: Failed to update library card');
+      setShowModal(false);
+      Notifications.showError('Error: Failed to update library card');
     }
   };
 
-  const showModalOnClick = (card) => {
-    setCurrentCard(card);
+  const addLibraryCard = async (card) => {
+    try {
+      //check if card combination already exits, show error if it does
+      const alreadyExists = findIndex(
+        element => isEqual(element.institutionId)(card.institutionId)
+        && (element.userId === card.userId) || isEqual(element.userEmail)(card.userEmail));
+      const newCard = await LibraryCard.createLibraryCard(card);
+      if(alreadyExists > -1) {
+        Notifications.showError("Library Card already exists");
+      //otherwise execute library card update with payload, get the updated card, and
+      //add(with sort afterwards) library card to libraryCards (reference list)
+      } else {
+        const updatedList = cloneDeep(libraryCards);
+        updatedList.push(newCard);
+        updatedList.sort((a, b) => a - b);
+        setLibraryCards(updatedList);
+        setShowModal(false);
+      }
+    } catch (error) {
+      setShowModal(false);
+      Notifications.showError('Error: Failed to create new library card');
+    }
+  };
+
+  //onClick function to show target card via modal
+  const showModalOnClick = (card, type) => {
+    setCurrentCard(cloneDeep(card));
+    setModalType(type);
     setShowModal(true);
   };
 
@@ -229,11 +264,7 @@ export default function AdminManageLC() {
   //Search function for SearchBar component
   const handleSearchChange = tableSearchHandler(libraryCards, setFilteredCards, setCurrentPage, "libraryCard");
 
-  //NOTE: define template for th and td here, process into arrays and then pass into table template for render
-  //For simple data just pass in basic data
-  //For pre-computed components pass component
-  //Define base style for column data and column header for reference
-
+  //template for render
   return div({ style: Styles.PAGE }, [
     div({ style: { display: 'flex', justifyContent: 'space-between' } }, [
       div(
@@ -272,12 +303,14 @@ export default function AdminManageLC() {
       //Insert Skeleton loader here, may need to make a new one
     }),
     h(LibraryCardFormModal, {
-      isRendered: showModal,
-      updateFn: updateLibraryCardListFn,
+      showModal,
+      updateOnClick: updateListFn,
+      createOnClick: addLibraryCard,
       closeModal: () => setShowModal(false),
-
+      institutions,
+      users,
+      card: currentCard,
+      type: modalType
     })
   ]);
-
-
 }

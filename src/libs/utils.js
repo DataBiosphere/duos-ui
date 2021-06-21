@@ -307,25 +307,6 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
   };
 };
 
-export const updateLibraryCardListFn = (filteredCards, setFilteredCards, fullCardList, setLibraryCards, currentPage, tableSize) => {
-  return (updatedCard, cardId, i, successText) => {
-    try{
-      const index = calcFilteredListPosition(i, currentPage, tableSize);
-      let filteredCardsCopy = cloneDeep(filteredCards);
-      let fullCardListCopy = cloneDeep(fullCardList);
-      let targetFilterRow = filteredCardsCopy[index];
-      let targetFullRow = fullCardListCopy.find((element) => element.id === cardId);
-      Object.assign(targetFilterRow, updatedCard);
-      Object.assign(targetFullRow, updatedCard);
-      setFilteredCards(filteredCardsCopy);
-      setLibraryCards(fullCardListCopy);
-      Notifications.showSuccess({text: successText});
-    } catch(error) {
-      Notification.showError("Error updating library card");
-    }
-  };
-};
-
 //Helper function, search bar handler for DAC Chair console and AdminManageAccess
 //NOTE: need to replace this in favor of genericized function. Remove only if certain that it is not used elsewhere
 export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {

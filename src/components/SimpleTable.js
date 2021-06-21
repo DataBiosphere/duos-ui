@@ -8,11 +8,11 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
     const rowsSkeleton = [columnRow];
     let i = 0;
     while(i < tableSize) {
-      let row = columnHeaders.map(({cellStyle}) => {
+      let row = columnHeaders.map(({cellStyle}, index) => {
         const style = Object.assign({height: '3rem', padding: 0, margin: '1rem 1%'}, baseStyle, cellStyle);
-        return div({style, className: 'text-placeholder'});
+        return div({style, className: 'text-placeholder', key: `placeholder-row-${i}-cell-${index}`});
       });
-      rowsSkeleton.push(div({style: baseStyle}, row));
+      rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}`}, row));
       i++;
     }
     return rowsSkeleton;
@@ -28,7 +28,7 @@ const SimpleTextCell = ({ text, style }) => {
 };
 
 //Simple cell text that carries onClick functionality
-const OnClickTextCell= ({ text, style, onClick }) => {
+const OnClickTextCell = ({ text, style, onClick }) => {
   text = isNil(text) ? '- -' : text;
   return div({ style, onClick }, [text]);
 };
