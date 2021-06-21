@@ -9,7 +9,7 @@ import { eRACommons } from '../components/eRACommons';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { DAR, Researcher } from '../libs/ajax';
+import { DAR, Researcher, Institution, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
@@ -18,6 +18,7 @@ import { LibraryCardAgreement } from '../components/LibraryCardAgreement';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addAccessIcon from '../images/icon_add_access.png';
 import './DataAccessRequestApplication.css';
+import {isNil} from "lodash";
 
 
 const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
@@ -137,13 +138,14 @@ class DataAccessRequestRenewal extends Component {
     }
     let currentUserId = Storage.getCurrentUser().dacUserId;
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
+    let researcher = isNil(formData.userId) ? null : await User.getById(formData.userId);
     formData.darCode = formData.darCode === undefined ? null : formData.darCode;
     formData.partialDarCode = formData.partialDarCode === undefined ? null : formData.partialDarCode;
-
-    formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
+    //bc the name in user properties is not accurate
+    formData.researcher = isNil(researcher) ? "" : researcher.displayName;
 
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
-      formData.investigator = rpProperties.profileName;
+      formData.investigator = formData.researcher;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
       formData.investigator = '--';
     } else {
@@ -154,7 +156,8 @@ class DataAccessRequestRenewal extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
+      //bc the institution in user properties is not accurate
+      formData.institution = isNil(researcher)  || isNil(researcher.institutionId)? "" : (await Institution.getById(researcher.institutionId)).name;
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';
       formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
