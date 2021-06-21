@@ -1,5 +1,5 @@
 import React from 'react';
-import { div, hh, span, h } from 'react-hyperscript-helpers';
+import { div, hh, h } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import { download } from '../../libs/utils';
 import { ApplicationSection } from './ApplicationSection';
@@ -7,7 +7,9 @@ import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
-import isNil from "lodash/fp";
+import {isNil} from "lodash";
+import {find} from "lodash/fp";
+import {Institution} from "../../libs/ajax";
 
 const ROOT = {
   fontFamily: 'Arial',
@@ -36,9 +38,19 @@ export const AppSummary = hh(class AppSummary extends React.Component {
     super();
     this.state = {
       generateRestrictions: this.generateRestrictions.bind(this),
-      translatedRestrictions: []
+      translatedRestrictions: [],
+      institution: ""
     };
   }
+
+  getInstitutionFromProfile = async () => {
+    const institute = await Institution.getById(this.props.researcherProfile.institutionId);
+    this.setState(prev => {
+      prev.institution = institute.name;
+      return prev;
+    });
+  };
+
 
   generateRestrictions = async(dataUse) => {
     const translatedRestrictions = await DataUseTranslation.translateDataUseRestrictions(dataUse);
@@ -50,11 +62,23 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
   async componentDidMount() {
     await this.generateRestrictions(this.props.consent.dataUse);
+    if (!isNil(this.props.researcherProfile) && !isNil(this.props.researcherProfile.institutionId)) {
+      await this.getInstitutionFromProfile();
+    }
   }
 
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
-    const { piName, profileName, institution, department, city, country } = researcherProfile;
+    const isThePiProp = find({propertyKey: 'isThePI'})(researcherProfile.researcherProperties);
+    const piNameProp = find({propertyKey: 'piName'})(researcherProfile.researcherProperties);
+    const piName = isNil(isThePiProp) ? "- -" : isThePiProp.propertyValue ?
+      researcherProfile.displayName : isNil(piNameProp) ? "xx" : piNameProp.propertyValue;
+    const departmentProp = find({propertyKey: 'department'})(researcherProfile.researcherProperties);
+    const department = isNil(departmentProp) ? "" : departmentProp.propertyValue;
+    const cityProp = find({propertyKey: 'city'})(researcherProfile.researcherProperties);
+    const city = isNil(cityProp) ? "" : cityProp.propertyValue;
+    const countryProp = find({propertyKey: 'country'})(researcherProfile.researcherProperties);
+    const country = isNil(countryProp) ? "" : countryProp.propertyValue;
     const mrDAR = !isNil(accessElection) ? JSON.stringify(accessElection.useRestriction, null, 2) : null;
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {
@@ -118,9 +142,9 @@ export const AppSummary = hh(class AppSummary extends React.Component {
           [ApplicantInfo({
             researcherProfile: researcherProfile,
             content: {
-              principalInvestigator: researcherProfile.isThePI ? profileName : (piName || '- - -'),
-              researcher: profileName,
-              institution,
+              principalInvestigator: piName,
+              researcher: researcherProfile.displayName,
+              institution: this.state.institution,
               department,
               city,
               country
