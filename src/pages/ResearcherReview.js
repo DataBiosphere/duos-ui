@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { User, Researcher } from "../libs/ajax";
+import { User, Institution} from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 
 class ResearcherReview extends Component {
@@ -16,6 +16,8 @@ class ResearcherReview extends Component {
       rationale: '',
       enableVoteButton: false,
       voteStatus: '',
+      user: {},
+      institution: {},
       formData: {
         academicEmail: '',
         address1: '',
@@ -51,19 +53,23 @@ class ResearcherReview extends Component {
 
   async findResearcherInfo() {
 
-    let researcher = await Researcher.getPropertiesByResearcherId(this.props.match.params.dacUserId);
+    const user = await User.getById(this.props.match.params.dacUserId);
+    let researcherProps = user.researcherProperties;
 
-    if (researcher.isThePI !== undefined) {
-      researcher.isThePI = JSON.parse(researcher.isThePI);
-      researcher.piValue = researcher.isThePI === true ? researcher.piValue = 'Yes' : researcher.piValue = 'No';
+    if (researcherProps.isThePI !== undefined) {
+      researcherProps.isThePI = JSON.parse(researcherProps.isThePI);
+      researcherProps.piValue = researcherProps.isThePI === true ? researcherProps.piValue = 'Yes' : researcherProps.piValue = 'No';
     }
 
-    if (researcher.havePI !== undefined) {
-      researcher.havePI = JSON.parse(researcher.havePI);
-      researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
+    if (researcherProps.havePI !== undefined) {
+      researcherProps.havePI = JSON.parse(researcherProps.havePI);
+      researcherProps.havePIValue = researcherProps.havePI === true ? 'Yes' : researcherProps.havePIValue = 'No';
     }
 
-    let user = await User.getById(this.props.match.params.dacUserId);
+    let institution;
+    if (user.institutionId !== undefined) {
+      institution = await Institution.getById(user.institutionId);
+    }
 
     let status = null;
     if (user.status === 'approved') {
@@ -73,7 +79,9 @@ class ResearcherReview extends Component {
     }
 
     this.setState(prev => {
-      prev.formData = researcher;
+      prev.user = user;
+      prev.institution = institution;
+      prev.formData = researcherProps;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
       prev.voteId = this.props.match.params.dacUserId;
@@ -105,7 +113,7 @@ class ResearcherReview extends Component {
 
   render() {
 
-    const { formData, rationale, voteStatus } = this.state;
+    const { formData, rationale, voteStatus, user, institution } = this.state;
 
     return (
       div({ className: "container " }, [
@@ -137,7 +145,7 @@ class ResearcherReview extends Component {
             div({ className: "row form-group margin-top-20" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Full Name"]),
-                div({ id: "lbl_profileName", className: "control-data", name: "profileName", readOnly: true }, [formData.profileName])
+                div({ id: "lbl_profileName", className: "control-data", name: "profileName", readOnly: true }, [user.displayName])
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Academic/Business Email Address"]),
@@ -177,7 +185,7 @@ class ResearcherReview extends Component {
             div({ className: "row margin-top-20" }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
-                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [formData.institution]),
+                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [institution.name]),
               ])
             ]),
 
