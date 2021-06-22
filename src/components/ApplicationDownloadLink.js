@@ -5,7 +5,7 @@ import {isNil, isEmpty} from 'lodash/fp';
 import { Theme } from '../libs/theme';
 import {Institution} from "../libs/ajax";
 import {useEffect, useState} from "react";
-import {findPropertyValue, UserProperties } from "../libs/utils";
+import {getPropertyValuesFromUser} from "../libs/utils";
 
 const styles = StyleSheet.create({
   page: {
@@ -155,17 +155,8 @@ export default function ApplicationDownloadLink(props) {
   const internalCollaborators = getCollaborators(darInfo, 'internalCollaborators');
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
-  const nihUsernameProp = findPropertyValue(UserProperties.NIH_USERNAME, researcherProfile);
-  const linkedInProp = findPropertyValue(UserProperties.LINKEDIN, researcherProfile);
-  const orcidProp = findPropertyValue(UserProperties.ORCID, researcherProfile);
-  const researcherGateProp = findPropertyValue(UserProperties.RESEARCHER_GATE, researcherProfile);
-  const isThePiProp = findPropertyValue(UserProperties.IS_THE_PI, researcherProfile);
-  const piNameProp = findPropertyValue(UserProperties.PI_NAME, researcherProfile);
-  const departmentProp = findPropertyValue(UserProperties.DEPARTMENT, researcherProfile);
-  const cityProp = findPropertyValue(UserProperties.CITY, researcherProfile);
-  const stateProp = findPropertyValue(UserProperties.STATE, researcherProfile);
-  const location = cityProp.concat(", ").concat(stateProp);
-  const emailProp = researcherProfile.email;
+  const researcherProps = getPropertyValuesFromUser(researcherProfile);
+  const location = (researcherProps.city).concat(", ").concat(researcherProps.state);
   // Use PDFViewer during development to see changes to the document immediately
   // return h(PDFViewer, {width: 1800, height: 800}, [
 
@@ -177,23 +168,23 @@ export default function ApplicationDownloadLink(props) {
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
             label: "NIH eRA Commons ID",
-            text: `${nihUsernameProp}`,
+            text: `${researcherProps.nihUsername}`,
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
             label: "LinkedIn Profile",
-            text: `${linkedInProp}`
+            text: `${researcherProps.linkedIn}`
           })
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
             label: "ORC ID",
-            text: `${orcidProp}`,
+            text: `${researcherProps.orcid}`,
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
             label: "ResearcherGate ID",
-            text: `${researcherGateProp}`
+            text: `${researcherProps.researcherGate}`
           }),
         ]),
         h(View, {style: styles.flexboxContainer}, [
@@ -203,15 +194,14 @@ export default function ApplicationDownloadLink(props) {
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
-            label: "Principal Investigator", text: `${isThePiProp ?
-              researcherProfile.displayName : piNameProp.propertyValue}`
+            label: "Principal Investigator", text: `${researcherProps.piName}`
           })
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {label: "Institution", text: `${institution}`, style: {marginRight: 30}}),
           h(SmallLabelTextComponent, {
             label: "Department",
-            text: `${departmentProp}`
+            text: `${researcherProps.department}`
           })
         ]),
         h(View, {style: styles.flexboxContainer}, [
@@ -221,7 +211,7 @@ export default function ApplicationDownloadLink(props) {
           }),
           h(SmallLabelTextComponent, {
             label: "Researcher Email",
-            text: `${emailProp}`
+            text: `${researcherProps.academicEmail}`
           }),
         ]),
         h(View, {style: styles.flexboxContainer}, [

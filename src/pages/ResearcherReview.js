@@ -4,8 +4,7 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Institution} from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import {findPropertyValue} from "../libs/utils";
-import {UserProperties} from "../libs/utils";
+import {getPropertyValuesFromUser} from "../libs/utils";
 
 class ResearcherReview extends Component {
 
@@ -54,30 +53,7 @@ class ResearcherReview extends Component {
   async findResearcherInfo() {
 
     const user = await User.getById(this.props.match.params.dacUserId);
-    let researcherProps = {
-      academicEmail: user.email,
-      nihUserName: findPropertyValue(UserProperties.NIH_USERNAME, user),
-      linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
-      orcid: findPropertyValue(UserProperties.ORCID, user),
-      researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
-      department: findPropertyValue(UserProperties.DEPARTMENT, user),
-      division: findPropertyValue(UserProperties.DIVISION, user),
-      address1: findPropertyValue(UserProperties.ADDRESS1, user),
-      address2: findPropertyValue(UserProperties.ADDRESS2, user),
-      zipcode: findPropertyValue(UserProperties.ZIPCODE, user),
-      city: findPropertyValue(UserProperties.CITY, user),
-      state: findPropertyValue(UserProperties.STATE, user),
-      country: findPropertyValue(UserProperties.COUNTRY, user),
-      isThePI: findPropertyValue(UserProperties.IS_THE_PI, user),
-      havePI: findPropertyValue(UserProperties.HAVE_PI, user),
-      piName: "",
-      piEmail: "",
-      pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
-      scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user)
-    };
-
-    researcherProps.piName = researcherProps.isThePI === true ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user);
-    researcherProps.piEmail = researcherProps.isThePI === true ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user);
+    let researcherProps = getPropertyValuesFromUser(user);
 
     let institution;
     if (user.institutionId !== undefined) {
