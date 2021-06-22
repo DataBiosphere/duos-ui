@@ -9,16 +9,24 @@ import _ from 'lodash';
 import {User} from "./ajax";
 
 export const UserProperties = {
-  EMAIL: "academicEmail",
   NIH_USERNAME : "nihUsername",
   LINKEDIN : "linkedIn",
   ORCID: "orcid",
   IS_THE_PI: "isThePI",
+  HAVE_PI: "havePI",
+  PI_EMAIL: "piEmail",
   PI_NAME: "piName",
   DEPARTMENT: "department",
+  DIVISION: "division",
+  ADDRESS1: "address1",
+  ADDRESS2: "address2",
+  ZIPCODE: "zipcode",
   CITY: "city",
   STATE: "state",
-  COUNTRY: "country"
+  COUNTRY: "country",
+  RESEARCHER_GATE: "researcherGate",
+  PUBMED_ID: "pubmedID",
+  SCIENTIFIC_URL: "scientificURL"
 };
 
 export const findPropertyValue = (propName, researcher) => {

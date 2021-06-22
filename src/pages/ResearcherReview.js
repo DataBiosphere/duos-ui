@@ -4,6 +4,8 @@ import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Institution} from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import {findPropertyValue} from "../libs/utils";
+import {UserProperties} from "../libs/utils";
 
 class ResearcherReview extends Component {
 
@@ -32,12 +34,10 @@ class ResearcherReview extends Component {
         orcid: '',
         researcherGate: '',
         havePI: false,
-        havePIValue: '',
         institution: '',
         isThePI: false,
         piEmail: '',
         piName: '',
-        piValue: '',
         profileName: '',
         pubmedID: '',
         scientificURL: '',
@@ -54,17 +54,30 @@ class ResearcherReview extends Component {
   async findResearcherInfo() {
 
     const user = await User.getById(this.props.match.params.dacUserId);
-    let researcherProps = user.researcherProperties;
+    let researcherProps = {
+      academicEmail: user.email,
+      nihUserName: findPropertyValue(UserProperties.NIH_USERNAME, user),
+      linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
+      orcid: findPropertyValue(UserProperties.ORCID, user),
+      researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
+      department: findPropertyValue(UserProperties.DEPARTMENT, user),
+      division: findPropertyValue(UserProperties.DIVISION, user),
+      address1: findPropertyValue(UserProperties.ADDRESS1, user),
+      address2: findPropertyValue(UserProperties.ADDRESS2, user),
+      zipcode: findPropertyValue(UserProperties.ZIPCODE, user),
+      city: findPropertyValue(UserProperties.CITY, user),
+      state: findPropertyValue(UserProperties.STATE, user),
+      country: findPropertyValue(UserProperties.COUNTRY, user),
+      isThePI: findPropertyValue(UserProperties.IS_THE_PI, user),
+      havePI: findPropertyValue(UserProperties.HAVE_PI, user),
+      piName: "",
+      piEmail: "",
+      pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
+      scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user)
+    };
 
-    if (researcherProps.isThePI !== undefined) {
-      researcherProps.isThePI = JSON.parse(researcherProps.isThePI);
-      researcherProps.piValue = researcherProps.isThePI === true ? researcherProps.piValue = 'Yes' : researcherProps.piValue = 'No';
-    }
-
-    if (researcherProps.havePI !== undefined) {
-      researcherProps.havePI = JSON.parse(researcherProps.havePI);
-      researcherProps.havePIValue = researcherProps.havePI === true ? 'Yes' : researcherProps.havePIValue = 'No';
-    }
+    researcherProps.piName = researcherProps.isThePI === true ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user);
+    researcherProps.piEmail = researcherProps.isThePI === true ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user);
 
     let institution;
     if (user.institutionId !== undefined) {
@@ -236,13 +249,13 @@ class ResearcherReview extends Component {
             div({ className: "row margin-top-20" }, [
               div({ className: "col-xs-12 " + (formData.isThePI === true ? 'col-lg-12 col-md-12 col-sm-12' : 'col-lg-6 col-md-6 col-sm-6') }, [
                 label({ className: "control-label" }, ["Is this researcher the Principal Investigator?"]),
-                div({ id: "lbl_researcherIsPI", className: "control-data" }, [formData.piValue]),
+                div({ id: "lbl_researcherIsPI", className: "control-data" }, [formData.isThePI === true ? "Yes" : "No"]),
               ]),
 
               div({ isRendered: formData.isThePI === false }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                   label({ className: "control-label" }, ["Does the researcher have a Principal Investigator?"]),
-                  div({ id: "lbl_researcherhavePI", className: "control-data", readOnly: true}, [formData.havePIValue]),
+                  div({ id: "lbl_researcherhavePI", className: "control-data", readOnly: true}, [formData.havePI === true ? "Yes" : "No"]),
                 ])
               ])
             ]),
@@ -260,7 +273,8 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.eRACommonsID]),
+                //eraCommonsID is currently being saved as nihUsername, this will change with DUOS-1095
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.nihUsername]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
