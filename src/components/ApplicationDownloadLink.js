@@ -158,13 +158,14 @@ export default function ApplicationDownloadLink(props) {
   const nihUsernameProp = findPropertyValue(UserProperties.NIH_USERNAME, researcherProfile);
   const linkedInProp = findPropertyValue(UserProperties.LINKEDIN, researcherProfile);
   const orcidProp = findPropertyValue(UserProperties.ORCID, researcherProfile);
+  const researcherGateProp = findPropertyValue(UserProperties.RESEARCHER_GATE, researcherProfile);
   const isThePiProp = findPropertyValue(UserProperties.IS_THE_PI, researcherProfile);
   const piNameProp = findPropertyValue(UserProperties.PI_NAME, researcherProfile);
   const departmentProp = findPropertyValue(UserProperties.DEPARTMENT, researcherProfile);
   const cityProp = findPropertyValue(UserProperties.CITY, researcherProfile);
   const stateProp = findPropertyValue(UserProperties.STATE, researcherProfile);
   const location = cityProp.concat(", ").concat(stateProp);
-  const emailProp = findPropertyValue(UserProperties.EMAIL, researcherProfile);
+  const emailProp = researcherProfile.email;
   // Use PDFViewer during development to see changes to the document immediately
   // return h(PDFViewer, {width: 1800, height: 800}, [
 
@@ -192,7 +193,7 @@ export default function ApplicationDownloadLink(props) {
           }),
           h(SmallLabelTextComponent, {
             label: "ResearcherGate ID",
-            text: `${orcidProp}`
+            text: `${researcherGateProp}`
           }),
         ]),
         h(View, {style: styles.flexboxContainer}, [
