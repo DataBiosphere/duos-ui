@@ -7,9 +7,10 @@ import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
-import {isNil} from "lodash";
-import {find} from "lodash/fp";
+import {isNil} from "lodash/fp";
 import {Institution} from "../../libs/ajax";
+import {findPropertyValue} from "../../libs/utils";
+import {UserProperties} from "../../libs/utils";
 
 const ROOT = {
   fontFamily: 'Arial',
@@ -69,16 +70,13 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
   render() {
     const { darInfo, accessElection, consent, researcherProfile } = this.props;
-    const isThePiProp = find({propertyKey: 'isThePI'})(researcherProfile.researcherProperties);
-    const piNameProp = find({propertyKey: 'piName'})(researcherProfile.researcherProperties);
-    const piName = isNil(isThePiProp) ? "- -" : isThePiProp.propertyValue ?
-      researcherProfile.displayName : isNil(piNameProp) ? "xx" : piNameProp.propertyValue;
-    const departmentProp = find({propertyKey: 'department'})(researcherProfile.researcherProperties);
-    const department = isNil(departmentProp) ? "" : departmentProp.propertyValue;
-    const cityProp = find({propertyKey: 'city'})(researcherProfile.researcherProperties);
-    const city = isNil(cityProp) ? "" : cityProp.propertyValue;
-    const countryProp = find({propertyKey: 'country'})(researcherProfile.researcherProperties);
-    const country = isNil(countryProp) ? "" : countryProp.propertyValue;
+    const isThePi = findPropertyValue(UserProperties.IS_THE_PI, researcherProfile);
+    const piName = isThePi === true ?
+      researcherProfile.displayName
+      : findPropertyValue(UserProperties.PI_NAME, researcherProfile);
+    const department = findPropertyValue(UserProperties.DEPARTMENT, researcherProfile);
+    const city = findPropertyValue(UserProperties.CITY, researcherProfile);
+    const country = findPropertyValue(UserProperties.COUNTRY, researcherProfile);
     const mrDAR = !isNil(accessElection) ? JSON.stringify(accessElection.useRestriction, null, 2) : null;
     const mrDUL = JSON.stringify(consent.useRestriction, null, 2);
     const translatedRestrictionsList = this.state.translatedRestrictions.map((restrictionObj, index) => {

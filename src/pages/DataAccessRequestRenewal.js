@@ -18,7 +18,7 @@ import { LibraryCardAgreement } from '../components/LibraryCardAgreement';
 import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addAccessIcon from '../images/icon_add_access.png';
 import './DataAccessRequestApplication.css';
-import {isNil} from "lodash";
+import {isNil} from "lodash/fp";
 
 
 const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';

@@ -1,11 +1,11 @@
 import { Page, Document, StyleSheet, View, /*PDFViewer*/ PDFDownloadLink, Text} from '@react-pdf/renderer';
 import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
-import {find, isEmpty} from 'lodash/fp';
+import {isNil, isEmpty} from 'lodash/fp';
 import { Theme } from '../libs/theme';
-import { isNil }from "lodash";
 import {Institution} from "../libs/ajax";
 import {useEffect, useState} from "react";
+import {findPropertyValue, UserProperties } from "../libs/utils";
 
 const styles = StyleSheet.create({
   page: {
@@ -155,20 +155,16 @@ export default function ApplicationDownloadLink(props) {
   const internalCollaborators = getCollaborators(darInfo, 'internalCollaborators');
   const externalCollaborators = getCollaborators(darInfo, 'externalCollaborators');
   const labCollaborators = getCollaborators(darInfo, 'labCollaborators');
-  const nihUsernameProp = find({propertyKey: 'nihUsername'})(researcherProfile.researcherProperties);
-  const linkedInProp = find({propertyKey: 'linkedIn'})(researcherProfile.researcherProperties);
-  const orcidProp = find({propertyKey: 'orcid'})(researcherProfile.researcherProperties);
-  const isThePiProp = find({propertyKey: 'isThePI'})(researcherProfile.researcherProperties);
-  const piNameProp = find({propertyKey: 'piName'})(researcherProfile.researcherProperties);
-  const departmentProp = find({propertyKey: 'department'})(researcherProfile.researcherProperties);
-  const cityProp = find({propertyKey: 'city'})(researcherProfile.researcherProperties);
-  const stateProp = find({propertyKey: 'state'})(researcherProfile.researcherProperties);
-  const location = () => {
-    const city = isNil(cityProp) ? "" : nihUsernameProp.propertyValue;
-    const state = isNil(stateProp) ? "" : nihUsernameProp.propertyValue;
-    return city.concat(", ").concat(state);
-  };
-  const emailProp = find({propertyKey: 'academicEmail'})(researcherProfile.researcherProperties);
+  const nihUsernameProp = findPropertyValue(UserProperties.NIH_USERNAME, researcherProfile);
+  const linkedInProp = findPropertyValue(UserProperties.LINKEDIN, researcherProfile);
+  const orcidProp = findPropertyValue(UserProperties.ORCID, researcherProfile);
+  const isThePiProp = findPropertyValue(UserProperties.IS_THE_PI, researcherProfile);
+  const piNameProp = findPropertyValue(UserProperties.PI_NAME, researcherProfile);
+  const departmentProp = findPropertyValue(UserProperties.DEPARTMENT, researcherProfile);
+  const cityProp = findPropertyValue(UserProperties.CITY, researcherProfile);
+  const stateProp = findPropertyValue(UserProperties.STATE, researcherProfile);
+  const location = cityProp.concat(", ").concat(stateProp);
+  const emailProp = findPropertyValue(UserProperties.EMAIL, researcherProfile);
   // Use PDFViewer during development to see changes to the document immediately
   // return h(PDFViewer, {width: 1800, height: 800}, [
 
@@ -180,23 +176,23 @@ export default function ApplicationDownloadLink(props) {
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
             label: "NIH eRA Commons ID",
-            text: `${isNil(nihUsernameProp) ? "" : nihUsernameProp.propertyValue}`,
+            text: `${nihUsernameProp}`,
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
             label: "LinkedIn Profile",
-            text: `${isNil(linkedInProp) ? "" : linkedInProp.propertyValue}`
+            text: `${linkedInProp}`
           })
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
             label: "ORC ID",
-            text: `${isNil(orcidProp) ? "" : orcidProp.propertyValue}`,
+            text: `${orcidProp}`,
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
             label: "ResearcherGate ID",
-            text: `${isNil(orcidProp) ? "" : orcidProp.propertyValue}`
+            text: `${orcidProp}`
           }),
         ]),
         h(View, {style: styles.flexboxContainer}, [
@@ -206,25 +202,25 @@ export default function ApplicationDownloadLink(props) {
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
-            label: "Principal Investigator", text: `${isNil(isThePiProp) ? "" : isThePiProp.propertyValue ?
-              researcherProfile.displayName : isNil(piNameProp) ? "" : piNameProp.propertyValue}`
+            label: "Principal Investigator", text: `${isThePiProp ?
+              researcherProfile.displayName : piNameProp.propertyValue}`
           })
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {label: "Institution", text: `${institution}`, style: {marginRight: 30}}),
           h(SmallLabelTextComponent, {
             label: "Department",
-            text: `${isNil(departmentProp) ? "" : departmentProp.propertyValue}`
+            text: `${departmentProp}`
           })
         ]),
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
-            label: "Location", text: `${location()}`,
+            label: "Location", text: `${location}`,
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
             label: "Researcher Email",
-            text: `${isNil(emailProp) ? "" : emailProp.propertyValue}`
+            text: `${emailProp}`
           }),
         ]),
         h(View, {style: styles.flexboxContainer}, [
