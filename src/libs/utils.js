@@ -8,6 +8,26 @@ import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes 
 import _ from 'lodash';
 import {User} from "./ajax";
 
+export const UserProperties = {
+  EMAIL: "academicEmail",
+  NIH_USERNAME : "nihUsername",
+  LINKEDIN : "linkedIn",
+  ORCID: "orcid",
+  IS_THE_PI: "isThePI",
+  PI_NAME: "piName",
+  DEPARTMENT: "department",
+  CITY: "city",
+  STATE: "state",
+  COUNTRY: "country"
+};
+
+export const findPropertyValue = (propName, researcher) => {
+  const prop = isNil(researcher.researcherProperties) ?
+    null
+    : find({ propertyKey: propName })(researcher.researcherProperties);
+  return isNil(prop) ? "" : prop.propertyValue;
+};
+
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
     e.target.style[key] = value;
