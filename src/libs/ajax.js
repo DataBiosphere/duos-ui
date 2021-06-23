@@ -214,7 +214,7 @@ export const DAR = {
     darInfo.researcherId = rawDar.userId;
     darInfo.darCode = rawDar.darCode;
     darInfo.projectTitle = rawDar.projectTitle;
-    darInfo.institution = rawDar.institutionName;
+    darInfo.institution = isNil(researcher.institutionId) ? "" : (await Institution.getById(researcher.institutionId)).name;
     darInfo.department = rawDar.department;
     darInfo.city = rawDar.city;
     darInfo.country = rawDar.country;
@@ -240,6 +240,7 @@ export const DAR = {
     darInfo.datasetIds = rawDar.datasetIds;
     darInfo.pi = rawDar.investigator;
     darInfo.havePI = rawDar.havePI || rawDar.isThePI;
+    //name from researcher bc name in props and on dar are not accurately populated
     darInfo.profileName = researcher.displayName;
     // dataUse from Models.dar has properties denoting what research the data will be used for.
     // Get these properties directly from the DAR.

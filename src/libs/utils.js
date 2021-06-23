@@ -2,10 +2,65 @@ import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
-import { DAR, DataSet, Researcher } from "./ajax";
+import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
 import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
 import _ from 'lodash';
+import {User} from "./ajax";
+
+export const UserProperties = {
+  NIH_USERNAME : "nihUsername",
+  LINKEDIN : "linkedIn",
+  ORCID: "orcid",
+  IS_THE_PI: "isThePI",
+  HAVE_PI: "havePI",
+  PI_EMAIL: "piEmail",
+  PI_NAME: "piName",
+  DEPARTMENT: "department",
+  DIVISION: "division",
+  ADDRESS1: "address1",
+  ADDRESS2: "address2",
+  ZIPCODE: "zipcode",
+  CITY: "city",
+  STATE: "state",
+  COUNTRY: "country",
+  RESEARCHER_GATE: "researcherGate",
+  PUBMED_ID: "pubmedID",
+  SCIENTIFIC_URL: "scientificURL"
+};
+
+export const findPropertyValue = (propName, researcher) => {
+  const prop = isNil(researcher.researcherProperties) ?
+    null
+    : find({ propertyKey: propName })(researcher.researcherProperties);
+  return isNil(prop) ? "" : prop.propertyValue;
+};
+
+export const getPropertyValuesFromUser = (user) => {
+  let researcherProps = {
+    academicEmail: user.email,
+    nihUsername: findPropertyValue(UserProperties.NIH_USERNAME, user),
+    linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
+    orcid: findPropertyValue(UserProperties.ORCID, user),
+    researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
+    department: findPropertyValue(UserProperties.DEPARTMENT, user),
+    division: findPropertyValue(UserProperties.DIVISION, user),
+    address1: findPropertyValue(UserProperties.ADDRESS1, user),
+    address2: findPropertyValue(UserProperties.ADDRESS2, user),
+    zipcode: findPropertyValue(UserProperties.ZIPCODE, user),
+    city: findPropertyValue(UserProperties.CITY, user),
+    state: findPropertyValue(UserProperties.STATE, user),
+    country: findPropertyValue(UserProperties.COUNTRY, user),
+    isThePI: findPropertyValue(UserProperties.IS_THE_PI, user),
+    havePI: findPropertyValue(UserProperties.HAVE_PI, user),
+    piName: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user),
+    piEmail: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user),
+    pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
+    scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user)
+  };
+
+  return researcherProps;
+};
 
 export const applyHoverEffects = (e, style) => {
   forEach(style, (value, key) => {
@@ -200,7 +255,7 @@ export const getDarData = async (darId) => {
 
   try {
     darInfo = await DAR.getPartialDarRequest(darId);
-    const researcherPromise = await Researcher.getResearcherProfile(darInfo.userId);
+    const researcherPromise = await User.getById(darInfo.userId);
     const datasetsPromise = darInfo.datasetIds.map((id) => {
       return DataSet.getDataSetsByDatasetId(id);
     });

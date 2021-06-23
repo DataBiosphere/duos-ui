@@ -9,7 +9,7 @@ import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, Researcher, DataSet } from '../libs/ajax';
+import { DAR, Researcher, DataSet, User, Institution } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
@@ -187,6 +187,11 @@ class DataAccessRequestApplication extends Component {
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
+    const researcher = await User.getMe();
+    this.setState(prev => {
+      prev.researcher = researcher;
+      return prev;
+    });
     if (!fp.isNil(dataRequestId)) {
       // Handle the case where we have an existing DAR id
       // Same endpoint works for any dataRequestId, not just partials.
@@ -201,9 +206,9 @@ class DataAccessRequestApplication extends Component {
     let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
     formData.darCode = fp.isNil(formData.darCode) ? null : formData.darCode;
     formData.partialDarCode = fp.isNil(formData.partialDarCode) ? null : formData.partialDarCode;
-    formData.researcher = rpProperties.profileName != null ? rpProperties.profileName : '';
+    formData.researcher = isNil(researcher) ? "" : researcher.displayName;
     if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
-      formData.investigator = rpProperties.profileName;
+      formData.investigator = formData.researcher;
     } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
       formData.investigator = '';
     } else {
@@ -213,7 +218,7 @@ class DataAccessRequestApplication extends Component {
     formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
     formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
     formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-    formData.institution = rpProperties.institution != null ? rpProperties.institution : '';
+    formData.institution = isNil(researcher)  || isNil(researcher.institutionId)? "" : (await Institution.getById(researcher.institutionId)).name;
     formData.department = rpProperties.department != null ? rpProperties.department : '';
     formData.division = rpProperties.division != null ? rpProperties.division : '';
     formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';

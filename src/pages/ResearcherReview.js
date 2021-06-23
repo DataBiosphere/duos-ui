@@ -2,8 +2,9 @@ import { Component } from 'react';
 import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { User, Researcher } from "../libs/ajax";
+import { User, Institution} from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
+import {getPropertyValuesFromUser} from "../libs/utils";
 
 class ResearcherReview extends Component {
 
@@ -16,6 +17,8 @@ class ResearcherReview extends Component {
       rationale: '',
       enableVoteButton: false,
       voteStatus: '',
+      user: {},
+      institution: {},
       formData: {
         academicEmail: '',
         address1: '',
@@ -30,12 +33,10 @@ class ResearcherReview extends Component {
         orcid: '',
         researcherGate: '',
         havePI: false,
-        havePIValue: '',
         institution: '',
         isThePI: false,
         piEmail: '',
         piName: '',
-        piValue: '',
         profileName: '',
         pubmedID: '',
         scientificURL: '',
@@ -51,19 +52,13 @@ class ResearcherReview extends Component {
 
   async findResearcherInfo() {
 
-    let researcher = await Researcher.getPropertiesByResearcherId(this.props.match.params.dacUserId);
+    const user = await User.getById(this.props.match.params.dacUserId);
+    let researcherProps = getPropertyValuesFromUser(user);
 
-    if (researcher.isThePI !== undefined) {
-      researcher.isThePI = JSON.parse(researcher.isThePI);
-      researcher.piValue = researcher.isThePI === true ? researcher.piValue = 'Yes' : researcher.piValue = 'No';
+    let institution;
+    if (user.institutionId !== undefined) {
+      institution = await Institution.getById(user.institutionId);
     }
-
-    if (researcher.havePI !== undefined) {
-      researcher.havePI = JSON.parse(researcher.havePI);
-      researcher.havePIValue = researcher.havePI === true ? 'Yes' : researcher.havePIValue = 'No';
-    }
-
-    let user = await User.getById(this.props.match.params.dacUserId);
 
     let status = null;
     if (user.status === 'approved') {
@@ -73,7 +68,9 @@ class ResearcherReview extends Component {
     }
 
     this.setState(prev => {
-      prev.formData = researcher;
+      prev.user = user;
+      prev.institution = institution;
+      prev.formData = researcherProps;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
       prev.voteId = this.props.match.params.dacUserId;
@@ -105,7 +102,7 @@ class ResearcherReview extends Component {
 
   render() {
 
-    const { formData, rationale, voteStatus } = this.state;
+    const { formData, rationale, voteStatus, user, institution } = this.state;
 
     return (
       div({ className: "container " }, [
@@ -137,7 +134,7 @@ class ResearcherReview extends Component {
             div({ className: "row form-group margin-top-20" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Full Name"]),
-                div({ id: "lbl_profileName", className: "control-data", name: "profileName", readOnly: true }, [formData.profileName])
+                div({ id: "lbl_profileName", className: "control-data", name: "profileName", readOnly: true }, [user.displayName])
               ]),
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["Academic/Business Email Address"]),
@@ -177,7 +174,7 @@ class ResearcherReview extends Component {
             div({ className: "row margin-top-20" }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
-                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [formData.institution]),
+                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [institution.name]),
               ])
             ]),
 
@@ -228,13 +225,13 @@ class ResearcherReview extends Component {
             div({ className: "row margin-top-20" }, [
               div({ className: "col-xs-12 " + (formData.isThePI === true ? 'col-lg-12 col-md-12 col-sm-12' : 'col-lg-6 col-md-6 col-sm-6') }, [
                 label({ className: "control-label" }, ["Is this researcher the Principal Investigator?"]),
-                div({ id: "lbl_researcherIsPI", className: "control-data" }, [formData.piValue]),
+                div({ id: "lbl_researcherIsPI", className: "control-data" }, [formData.isThePI === true ? "Yes" : "No"]),
               ]),
 
               div({ isRendered: formData.isThePI === false }, [
                 div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                   label({ className: "control-label" }, ["Does the researcher have a Principal Investigator?"]),
-                  div({ id: "lbl_researcherhavePI", className: "control-data", readOnly: true}, [formData.havePIValue]),
+                  div({ id: "lbl_researcherhavePI", className: "control-data", readOnly: true}, [formData.havePI === true ? "Yes" : "No"]),
                 ])
               ])
             ]),
@@ -252,7 +249,8 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.eRACommonsID]),
+                //eraCommonsID is currently being saved as nihUsername, this will change with DUOS-1095
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.nihUsername]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
