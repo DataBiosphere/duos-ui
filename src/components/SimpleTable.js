@@ -38,38 +38,39 @@ const OnClickTextCell = ({ text, style, onClick }) => {
 //NOTE: use this as the template for the Skeleton Loader
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
-  return div({style: rowStyle}, columnHeaders.map((header) => {
+  return div({style: rowStyle, key: `column-row-container`}, columnHeaders.map((header) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
-    return div({style: cellStyle}, [label]);
+    return div({style: cellStyle, key: `column-row-${label}`}, [label]);
   }));
 };
 
 //Row component that renders out rows for each element in the provided data collection
 const DataRows = ({rowData, baseStyle, columnHeaders}) => {
-  return div({style: baseStyle,}, rowData.map((row, index) => {
-    return row.map(({data, style, onClick, isComponent}, cellIndex) => {
-      let output;
-      //columnHeaders determine width of the columns,
-      //therefore extract width from columnHeader and apply to cell style
-      const columnWidthStyle = columnHeaders[cellIndex].cellStyle;
-      const appliedStyle = Object.assign({}, style, columnWidthStyle);
-
-      //assume component is in hyperscript format
-      //wrap component in dive with columnWidth applied
-      if (isComponent) {
-        output = div(columnWidthStyle, [data]);
-      //if there is no onClick function, render as simple cell
-      } else if (isNil(onClick)) {
-        output = h(SimpleTextCell, { text: data, style: appliedStyle, key: `filtered-list-${index}-${data}`, cellIndex });
-      } else {
-        //otherwise render as on click cell
-        output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), key: `filtered-list-${index}-${data}`, cellIndex });
-      }
-      return output;
-    });
-  }));
+  return rowData.map((row, index) => {
+    const id = rowData[index][0].id;
+    return div({style: baseStyle, key: `row-data-${id}`},
+      row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
+        let output;
+        //columnHeaders determine width of the columns,
+        //therefore extract width from columnHeader and apply to cell style
+        const columnWidthStyle = columnHeaders[cellIndex].cellStyle;
+        const appliedStyle = Object.assign({}, style, columnWidthStyle);
+        //assume component is in hyperscript format
+        //wrap component in dive with columnWidth applied
+        if (isComponent) {
+          output = div(columnWidthStyle, [data]);
+        //if there is no onClick function, render as simple cell
+        } else if (isNil(onClick)) {
+          output = h(SimpleTextCell, { text: data, style: appliedStyle, key: `filtered-list-${id}-${label}`, cellIndex });
+        } else {
+          //otherwise render as on click cell
+          output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), key: `filtered-list-${id}-${label}`, cellIndex });
+        }
+        return output;
+      }));
+  });
 };
 
 export default function SimpleTable(props) {

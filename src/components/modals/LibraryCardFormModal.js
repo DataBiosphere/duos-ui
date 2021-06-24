@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cloneDeep, isObject, includes, isNil, isEmpty } from 'lodash/fp';
-import { h, div } from 'react-hyperscript-helpers';
+import { h, div, label } from 'react-hyperscript-helpers';
 import { Styles } from '../../libs/theme';
 import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
@@ -8,13 +8,12 @@ import { SearchSelect } from '../SearchSelect';
 import Creatable from 'react-select/creatable';
 
 const FormFieldRow = (props) => {
-  const { card, dropdownOptions, label, updateInstitution, updateUser, modalType } = props;
+  const { card, dropdownOptions, updateInstitution, updateUser, modalType } = props;
   const [filteredDropdown, setFilteredDropdown] = useState(dropdownOptions);
   //NOTE: need to make own Select component for input
   //allows user to select from dropdown or put in their own name
 
   let template;
-  const placeholder = `Search for ${label}...`;
 
   const userListFilter = (searchTerm) => {
     let filteredCopy;
@@ -33,22 +32,31 @@ const FormFieldRow = (props) => {
 
   if(!isNil(updateInstitution)) {
     //first template for institution selection
-    template = h(SearchSelect, {
-      id: `${label}-form-field`,
-      name: label,
-      onSelection: (selection) => updateInstitution(selection),
-      options: dropdownOptions,
-      placeholder,
-      value: card.institutionId
-    });
+    template = div({style: {marginBottom: "2%"}}, [
+      label({}, ['Institution']),
+      h(SearchSelect, {
+        id: `${label}-form-field`,
+        name: label,
+        onSelection: (selection) => updateInstitution(selection),
+        options: dropdownOptions,
+        placeholder: 'Search for institution...',
+        value: card.institutionId
+      })
+    ]);
   } else {
     if(modalType === 'add') {
-      h(Creatable, {
-        isClearable: true,
-        onChange: updateUser,
-        onInputChange: userListFilter,
-        options: dropdownOptions
-      });
+      template = div({style: {marginBottom: '2%'}}, [
+        label({}, ['Users']),
+        h(Creatable, {
+          isClearable: true,
+          onChange: updateUser,
+          onInputChange: userListFilter,
+          getNewOptionData: (input) => { return {email: input}; },
+          options: dropdownOptions,
+          placeholder: 'Select or type a new user email',
+          getOptionLabel: (option) => `${option.displayName || 'New User'} (${option.email || "No email provided"})` || option.email
+        })
+      ]);
     } else {
       div({}, [card.displayName]);
     }
@@ -69,7 +77,6 @@ export default function LibraryCardFormModal(props) {
   }, [props.card]);
 
   const updateInstitution = (value) => {
-    debugger; // eslint-disable-line
     const updatedCard = cloneDeep(card);
     updatedCard.institutionId = value;
     setCard(updatedCard);
@@ -79,7 +86,7 @@ export default function LibraryCardFormModal(props) {
     let userEmail, userId;
     if(isObject(value)) {
       userId = value.userId;
-      userEmail = value.userEmail;
+      userEmail = value.email;
     } else {
       userEmail = value;
     }
@@ -87,36 +94,75 @@ export default function LibraryCardFormModal(props) {
     setCard(updatedCard);
   };
 
-  return h(Modal, {
-    isOpen: showModal,
-    onRequestClose: closeModal,
-    shouldCloseOnOverlayClick: true,
-    style: {
-      content: { ...Styles.MODAL.CONTENT },
-      overlay: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)'
-      }
-    }
-  }, [
-    div({style: Styles.MODAL.CONTENT}, [
-      h(CloseIconComponent, {closeFn: closeModal}),
-      div({style: Styles.MODAL.TITLE_HEADER}, [modalType == 'add' ? 'Add Library Card' : 'Update Library Card']),
-      div({style: { borderBottom: "1px solid #1FB50"}}, []),
-      h(FormFieldRow, {
-        card,
-        modalType,
-        updateUser,
-        dropdownOptions: users,
-        label: 'Users'
-      }),
-      h(FormFieldRow, {
-        card,
-        modalType,
-        updateInstitution,
-        dropdownOptions: institutions,
-        label: 'Institution'
-      }),
-      div({onClick: modalType === 'add' ? () => createOnClick(card) : () => updateOnClick(card)})
-    ])
-  ]);
+  return h(
+    Modal,
+    {
+      isOpen: showModal,
+      onRequestClose: closeModal,
+      shouldCloseOnOverlayClick: true,
+      style: {
+        content: { ...Styles.MODAL.CONTENT },
+        overlay: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      },
+    },
+    [
+      div({ style: Styles.MODAL.CONTENT }, [
+        h(CloseIconComponent, { closeFn: closeModal }),
+        div({ style: Styles.MODAL.TITLE_HEADER }, [
+          modalType == 'add' ? 'Add Library Card' : 'Update Library Card',
+        ]),
+        div({ style: { borderBottom: '1px solid #1FB50' } }, []),
+        h(FormFieldRow, {
+          card,
+          modalType,
+          updateUser,
+          dropdownOptions: users,
+        }),
+        h(FormFieldRow, {
+          card,
+          modalType,
+          updateInstitution,
+          dropdownOptions: institutions,
+        }),
+        div(
+          {
+            style: {
+              display: 'flex',
+              marginLeft: '85%',
+              justifyContent: 'space-between',
+            },
+          },
+          [
+            div(
+              {
+                onClick:
+                  modalType === 'add'
+                    ? () => createOnClick(card)
+                    : () => updateOnClick(card),
+                style: {
+                  flex: 1,
+                  display: 'inline-block',
+                  margin: '5%',
+                },
+              },
+              [modalType === 'add' ? 'Add' : 'Update']
+            ),
+            div(
+              {
+                onClick: closeModal,
+                style: {
+                  flex: 1,
+                  display: 'inline-block',
+                  margin: '5%',
+                },
+              },
+              ['Cancel']
+            ),
+          ]
+        ),
+      ]),
+    ]
+  );
 }

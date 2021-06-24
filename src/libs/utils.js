@@ -288,6 +288,14 @@ export const calcTablePageCount = (tableSize, filteredList) => {
   return Math.ceil(filteredList.length / tableSize);
 };
 
+export const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
+  if (!isEmpty(filteredList)) {
+    const startIndex = (currentPage - 1) * tableSize;
+    const endIndex = currentPage * tableSize;
+    return filteredList.slice(startIndex, endIndex);
+  }
+};
+
 export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
   return (updatedElection, darId, i, successText, votes = undefined) => {
     const index = calcFilteredListPosition(i, currentPage, tableSize);

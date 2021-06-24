@@ -5,7 +5,8 @@ import {
   removeTextHover,
   getElectionDate,
   processElectionStatus,
-  getNameOfDatasetForThisDAR
+  getNameOfDatasetForThisDAR,
+  calcVisibleWindow
 } from '../../libs/utils';
 import { Styles } from '../../libs/theme';
 import DarTableActions, {consoleTypes} from './DarTableActions';
@@ -15,14 +16,6 @@ import { ReadMore } from '../ReadMore';
 ////////////////////
 //HELPER FUNCTIONS//
 ////////////////////
-const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
-  if(!isEmpty(filteredList)) {
-    const startIndex = (currentPage - 1) * tableSize;
-    const endIndex = (currentPage * tableSize);
-    return filteredList.slice(startIndex, endIndex);
-  }
-};
-
 const goToReviewResults = (dar, history, status) => {
   if(dar && dar.referenceId) {
     if (status === 'Unreviewed') {
