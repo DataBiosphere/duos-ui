@@ -7,8 +7,8 @@ import PaginationBar from '../PaginationBar';
 import AddInstitutionModal from '../modals/AddInstitutionModal';
 
 export const tableHeaderTemplate = [
-  div({style: Styles.TABLE.DATA_ID_CELL}, ["ID"]),
-  div({style: Styles.TABLE.TITLE_CELL}, ["Institution"]),
+  div({style: Styles.TABLE.ID_CELL}, ["ID"]),
+  div({style: Styles.TABLE.INSTITUTION_CELL}, ["Institution"]),
   div({style: Styles.TABLE.DATA_ID_CELL}, ["Create User"]),
   div({style: Styles.TABLE.SUBMISSION_DATE_CELL}, ["Create Date"]),
   div({style: Styles.TABLE.DATA_ID_CELL}, ["Update User"]),
@@ -18,8 +18,8 @@ export const tableHeaderTemplate = [
 const loadingMarginOverwrite = {margin: '1rem 2%'};
 
 export const tableRowLoadingTemplate = [
-  div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.TITLE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+  div({style: assign(Styles.TABLE.INSTITUTION_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
@@ -75,13 +75,16 @@ export default function InstitutionTable(props) {
           const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
           return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${inst.id}-${index}`}, [
             div({
-              style: Object.assign({}, Styles.TABLE.DATA_ID_CELL),
+              style: Object.assign({}, Styles.TABLE.ID_CELL),
             }, [inst.id]),
             div({
-              style: Object.assign({}, Styles.TABLE.TITLE_CELL)
+              style: Object.assign({}, Styles.TABLE.INSTITUTION_CELL)
             }, [
-              a({
-                onClick: () => { openUpdateModal(inst.id); }
+              a({ style: {
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis"},
+              onClick: () => { openUpdateModal(inst.id); }
               }, [inst.name])
             ]),
             div({
