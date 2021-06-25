@@ -48,7 +48,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   return rowData.map((row, index) => {
     const id = rowData[index][0].id;
-    return div({style: baseStyle, key: `row-data-${id}`},
+    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,

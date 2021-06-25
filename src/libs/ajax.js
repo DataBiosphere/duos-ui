@@ -1137,7 +1137,12 @@ export const LibraryCard = {
   },
   createLibraryCard: async (card) => {
     const url = `${await Config.getApiUrl()}/api/libraryCards`;
-    const res = await axios.delete(url, card, Config.authOpts());
+    const res = await axios.post(url, card, Config.authOpts());
+    return res.data;
+  },
+  updateLibraryCard: async (card) => {
+    const url = `${await Config.getApiUrl()}/api/libraryCards/${card.id}`;
+    const res = await axios.put(url, card, Config.authOpts());
     return res.data;
   },
   deleteLibraryCard: async (id) => {

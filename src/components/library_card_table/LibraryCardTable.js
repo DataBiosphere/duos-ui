@@ -1,8 +1,9 @@
 import moment from 'moment';
 import { useState, useEffect, useRef } from 'react';
 import { div, h, img } from 'react-hyperscript-helpers';
+import ReactTooltip from 'react-tooltip';
 import { Notifications, tableSearchHandler, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from '../../libs/utils';
-import {isEmpty, isNaN, cloneDeep, findIndex, isEqual, find, isNil } from 'lodash/fp';
+import {isEmpty, isNaN, cloneDeep, findIndex, isEqual, find, isNil, omit } from 'lodash/fp';
 import { Styles } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SearchBar from '../SearchBar';
@@ -11,6 +12,8 @@ import lockIcon from '../../images/lock-icon.png';
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
 import { LibraryCard } from '../../libs/ajax';
 import ConfirmationModal from '../modals/ConfirmationModal';
+import {Delete, Update} from "@material-ui/icons";
+import TableIconButton from '../TableIconButton';
 
 const styles = {
   baseStyle: {
@@ -20,6 +23,7 @@ const styles = {
     display: 'flex',
     padding: '1rem 2%',
     justifyContent: 'space-between',
+    alignItems: 'center'
   },
   columnStyle: Object.assign({}, Styles.TABLE.HEADER_ROW, {
     justifyContent: 'space-between',
@@ -27,10 +31,10 @@ const styles = {
   cellWidths: {
     researcher: '15%',
     email: '20%',
-    institution: '20%',
+    institution: '27%',
     eraCommonsId: '15%',
     createDate: '12%',
-    actions: "12%"
+    actions: "5%"
   },
 };
 
@@ -82,13 +86,16 @@ const createDateCell = (createDate, id) => {
 };
 
 //Update function name and return if requirements change
-const createDeleteCell = (card, setTargetDelete, setShowConfirmation) => {
+const createActionsCell = (card, setCurrentCard, setShowConfirmation, setShowModal, setModalType) => {
+  const deleteButton = h(DeleteRecordButton, {card, setShowConfirmation, setCurrentCard});
+  const updateButton = h(UpdateRecordButton, {card, setShowModal, setCurrentCard, setModalType});
   return {
     id: card.id,
     style: { width: styles.cellWidths.buttons },
     label: 'action-buttons',
+    key: `action-cell-${card.id}`,
     isComponent: true,
-    data: h(DeleteRecordCell, {card, setShowConfirmation, setTargetDelete})
+    data: div({style: {display: 'flex', justifyContent: 'left'}}, [updateButton, deleteButton])
   };
 };
 
@@ -104,9 +111,9 @@ const columnHeaderFormat = {
   actions: {label: 'Actions', cellStyle: {width: styles.cellWidths.actions}}
 };
 
-const deleteOnClick = (targetDelete, libraryCards, setLibraryCards, setShowConfirmation) => {
+const deleteOnClick = (currentCard, libraryCards, setLibraryCards, setShowConfirmation) => {
   try {
-    const id = targetDelete.id;
+    const id = currentCard.id;
     LibraryCard.deleteLibraryCard(id);
     const libraryCardsCopy = cloneDeep(libraryCards);
     const targetIndex = findIndex((card) =>  card.id === id)(libraryCardsCopy);
@@ -118,12 +125,43 @@ const deleteOnClick = (targetDelete, libraryCards, setLibraryCards, setShowConfi
   }
 };
 
-const DeleteRecordCell = (props) => {
-  const { card, setShowConfirmation, setTargetDelete} = props;
-  return div({onClick: () => {
-    setTargetDelete(card);
+const DeleteRecordButton = (props) => {
+  const { card, setShowConfirmation, setCurrentCard } = props;
+  const onClick = () => {
+    setCurrentCard(card);
     setShowConfirmation(true);
-  }}, ["Delete"]);
+  }
+  return h(TableIconButton, {
+    key: `show-delete-modal-${card.id}`,
+    dataTip: 'Delete Library Card',
+    isRendered: true,
+    onClick,
+    icon: Delete,
+    style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
+    hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
+  });
+};
+
+//onClick function to show target card via modal
+const showModalOnClick = (card, type, setModalType, setShowModal, setCurrentCard) => {
+  setCurrentCard(cloneDeep(card));
+  setModalType(type);
+  setShowModal(true);
+};
+
+const UpdateRecordButton = (props) => {
+  const { card, setShowModal, setCurrentCard, setModalType} = props;
+  const onClick = () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard);
+
+  return h(TableIconButton, {
+    key: `show-update-form-${card.id}`,
+    dataTip: 'Update Library Card',
+    isRendered: true,
+    onClick,
+    icon: Update,
+    style: Object.assign({}, Styles.TABLE.TABLE_ICON_BUTTON),
+    hoverStyle: Object.assign({}, Styles.TABLE.TABLE_BUTTON_ICON_HOVER)
+  });
 };
 
 export default function LibraryCardTable(props) {
@@ -138,9 +176,8 @@ export default function LibraryCardTable(props) {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [institutions, setInstitutions] = useState(props.institutions || []);
   const [users, setUsers] = useState(props.users || []);
-  const [currentCard, setCurrentCard] = useState();
+  const [currentCard, setCurrentCard] = useState({});
   const [modalType, setModalType] = useState();
-  const [targetDelete, setTargetDelete] = useState({});
   const searchRef = useRef('');
 
   //add signingOfficial when feature is implemented
@@ -166,6 +203,7 @@ export default function LibraryCardTable(props) {
           filteredCards
         );
         setVisibleCards(visibleList);
+        ReactTooltip.rebuild();
       } catch (error) {
         Notifications.showError({ text: 'Error updating Library Card table' });
       }
@@ -200,7 +238,7 @@ export default function LibraryCardTable(props) {
       return [
         userNameCell(
           card.userName,
-          () => showModalOnClick(card, 'update'),
+          () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard),
           card.id
         ),
         emailCell(card.userEmail, card.id),
@@ -209,7 +247,7 @@ export default function LibraryCardTable(props) {
           : institutionCell('- -', card.id),
         eraCommonsCell(card.eraCommonsId, card.id),
         createDateCell(card.createDate, card.id),
-        createDeleteCell(card, setTargetDelete, setShowConfirmation)
+        createActionsCell(card, setCurrentCard, setShowConfirmation, setShowModal, setModalType)
       ];
     });
   };
@@ -235,24 +273,26 @@ export default function LibraryCardTable(props) {
   });
 
   //update function when element in array is updated via modal
-  const updateListFn = (payload) => {
+  const updateListFn = async (payload) => {
     try {
       const id = payload.id;
+      const parsedPayload = omit(['createDate', 'updateDate', 'institution'])(payload);
+      const updatedCard = await LibraryCard.updateLibraryCard(parsedPayload);
       const institution = find(
         (institution) => institution.id === payload.institutionId
       )(institutions);
-      payload.institution = institution;
+      updatedCard.institution = institution;
       let filteredCopy = cloneDeep(filteredCards);
       let libraryCopy = cloneDeep(libraryCards);
       let filteredIndex = findIndex((card) => card.id === id)(filteredCards);
       let originalIndex = findIndex((card) => card.id === id)(libraryCopy);
-      filteredCopy[filteredIndex] = payload;
-      libraryCopy[originalIndex] = payload;
+      filteredCopy[filteredIndex] = updatedCard;
+      libraryCopy[originalIndex] = updatedCard;
       setFilteredCards(filteredCopy);
       setLibraryCards(libraryCopy);
       setShowModal(false);
       Notifications.showSuccess({
-        text: `${payload.userName}'s library card successfully updated`,
+        text: `${updatedCard.userName || updatedCard.userEmail}'s library card successfully updated`,
       });
     } catch (error) {
       setShowModal(false);
@@ -295,13 +335,6 @@ export default function LibraryCardTable(props) {
         text: 'Error: Failed to create new library card',
       });
     }
-  };
-
-  //onClick function to show target card via modal
-  const showModalOnClick = (card, type) => {
-    setCurrentCard(cloneDeep(card));
-    setModalType(type);
-    setShowModal(true);
   };
 
   //Search function for SearchBar component
@@ -351,7 +384,7 @@ export default function LibraryCardTable(props) {
     div({ style: { marginLeft: '90%' } }, [
       div(
         {
-          onClick: () => showModalOnClick({}, 'add'),
+          onClick: () => showModalOnClick({}, 'add', setModalType, setShowModal, setCurrentCard),
         },
         ['Add Library Card']
       ),
@@ -371,8 +404,14 @@ export default function LibraryCardTable(props) {
       closeConfirmation: () => setShowConfirmation(false),
       title: 'Delete Library Card?',
       message: 'Are you sure you want to delete this library card?',
-      header: `${targetDelete.userName || targetDelete.userEmail} - ${!isNil(targetDelete.institution) ? targetDelete.institution.name : ''}`,
-      onConfirm: () => deleteOnClick(targetDelete, libraryCards, setLibraryCards, setShowConfirmation)
+      header: `${currentCard.userName || currentCard.userEmail} - ${!isNil(currentCard.institution) ? currentCard.institution.name : ''}`,
+      onConfirm: () => deleteOnClick(currentCard, libraryCards, setLibraryCards, setShowConfirmation)
+    }),
+    h(ReactTooltip, {
+      place: 'left',
+      effect: 'solid',
+      multiline: true,
+      className: 'tooltip-wrapper'
     })
   ]);
 }
