@@ -1119,6 +1119,19 @@ export const Institution = {
   }
 };
 
+export const LibraryCard = {
+  getAllLibraryCards: async () => {
+    const url = `${await Config.getApiUrl()}/libraryCards`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  createLibraryCard: async (card) => {
+    const url = `${await Config.getApiUrl()}/libraryCards`;
+    const res = await axios.post(url, card, Config.authOpts());
+    return res.data;
+  }
+};
+
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);

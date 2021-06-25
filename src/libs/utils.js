@@ -343,7 +343,7 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
   };
 };
 
-const getSearchFilterFunctions = () => {
+export const getSearchFilterFunctions = () => {
   return {
     dar: (term, targetList) => filter(electionData => {
       const { election, dac, votes} = electionData;
@@ -354,12 +354,13 @@ const getSearchFilterFunctions = () => {
       return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
     }, targetList),
     libraryCard: (term, targetList) => filter(libraryCard => {
-      const { userName, institution, createDate, updateDate, eraCommonsId} = libraryCard;
+      const { userName, institution, createDate, updateDate, eraCommonsId, userEmail} = libraryCard;
       const institutionName = institution.name;
       return includes(term, toLower(userName)) ||
         includes(term, toLower(institutionName)) ||
         includes(term, formatDate(createDate)) ||
         includes(term, formatDate(updateDate)) ||
+        includes(term, toLower(userEmail)) ||
         includes(term, toLower(eraCommonsId));
     }, targetList)
   };

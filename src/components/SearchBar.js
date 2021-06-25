@@ -24,8 +24,8 @@ export default function SearchBar(props) {
       //Styling seems to only work when defined here, variable reference doesn't work
       //Odds are there's a competing style, need to figure out where it's coming from
       style,
-      onChange:() => handleSearchChange(searchTerms),
-      ref: searchTerms
+      onChange:() => handleSearchChange(props.searchRef || searchTerms),
+      ref: props.searchRef || searchTerms
     })
   ]);
 }
