@@ -9,7 +9,7 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
     let i = 0;
     while(i < tableSize) {
       let row = columnHeaders.map(({cellStyle}, index) => {
-        const style = Object.assign({height: '0.5rem', padding: '1rem 2%'}, baseStyle, cellStyle);
+        const style = Object.assign({height: '0.5rem'}, baseStyle, cellStyle);
         return div({style, className: 'text-placeholder', key: `placeholder-row-${i}-cell-${index}`});
       });
       rowsSkeleton.push(div({style: baseStyle, key: `placeholder-row-${i}`}, row));
