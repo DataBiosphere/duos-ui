@@ -275,6 +275,7 @@ export const DAR = {
     return await res;
   },
 
+  //v2 get draft dars
   getDraftDarRequestList: async () => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/draft/manage`;
     const res = await fetchOk(url, Config.authOpts());
