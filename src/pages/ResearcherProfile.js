@@ -647,7 +647,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ]),
                   h(SearchSelect, {
                     id: 'Institution',
-                    name: 'institution',
+                    label: 'institution',
                     onSelection: (selection) => {
                       this.setState(prev => {
                         prev.institutionId = selection;

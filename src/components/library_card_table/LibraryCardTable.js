@@ -4,7 +4,7 @@ import { div, h, img } from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
 import { Notifications, tableSearchHandler, calcTablePageCount, calcVisibleWindow, getSearchFilterFunctions} from '../../libs/utils';
 import {isEmpty, isNaN, cloneDeep, findIndex, isEqual, find, isNil, omit } from 'lodash/fp';
-import { Styles } from '../../libs/theme';
+import { Styles, Theme } from '../../libs/theme';
 import PaginationBar from '../PaginationBar';
 import SearchBar from '../SearchBar';
 import SimpleTable from '../SimpleTable';
@@ -14,6 +14,7 @@ import { LibraryCard } from '../../libs/ajax';
 import ConfirmationModal from '../modals/ConfirmationModal';
 import {Delete, Update} from "@material-ui/icons";
 import TableIconButton from '../TableIconButton';
+import SimpleButton from '../SimpleButton';
 
 const styles = {
   baseStyle: {
@@ -382,12 +383,11 @@ export default function LibraryCardTable(props) {
       paginationBar,
     }),
     div({ style: { marginLeft: '90%' } }, [
-      div(
-        {
-          onClick: () => showModalOnClick({}, 'add', setModalType, setShowModal, setCurrentCard),
-        },
-        ['Add Library Card']
-      ),
+      h(SimpleButton, {
+        onClick: () => showModalOnClick({}, 'add', setModalType, setShowModal, setCurrentCard),
+        baseColor: Theme.palette.secondary,
+        label: 'Add Library Card'
+      })
     ]),
     h(LibraryCardFormModal, {
       showModal,

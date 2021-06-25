@@ -6,6 +6,8 @@ import CloseIconComponent from '../CloseIconComponent';
 import Modal from 'react-modal';
 import { SearchSelect } from '../SearchSelect';
 import Creatable from 'react-select/creatable';
+import SimpleButton from '../SimpleButton';
+import { Theme } from '../../libs/theme';
 
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType } = props;
@@ -36,7 +38,7 @@ const FormFieldRow = (props) => {
       label({}, ['Institution']),
       h(SearchSelect, {
         id: `${label}-form-field`,
-        name: label,
+        name: label || '',
         onSelection: (selection) => updateInstitution(selection),
         options: dropdownOptions,
         placeholder: 'Search for institution...',
@@ -83,15 +85,26 @@ export default function LibraryCardFormModal(props) {
   };
 
   const updateUser = (value) => {
+    debugger; // eslint-disable-line
     let userEmail, userId;
-    if(isObject(value)) {
-      userId = value.userId;
+    if (isObject(value)) {
+      userId = value.dacUserId;
       userEmail = value.email;
     } else {
       userEmail = value;
     }
-    const updatedCard = Object.assign({}, {userEmail, userId}, card);
+    const updatedCard = Object.assign(card, { userEmail, userId });
     setCard(updatedCard);
+  };
+
+  const isConfirmDisabled = (modalType, card) => {
+    let result;
+    if(modalType === 'add') {
+      result = isNil(card.userEmail) || isNil(card.institutionId);
+    } else {
+      result = isNil(card.institutionId);
+    }
+    return result;
   };
 
   return h(
@@ -135,31 +148,30 @@ export default function LibraryCardFormModal(props) {
             },
           },
           [
-            div(
-              {
-                onClick:
-                  modalType === 'add'
-                    ? () => createOnClick(card)
-                    : () => updateOnClick(card),
-                style: {
-                  flex: 1,
-                  display: 'inline-block',
-                  margin: '5%',
-                },
+            h(SimpleButton, {
+              onClick:
+                modalType === 'add'
+                  ? () => createOnClick(card)
+                  : () => updateOnClick(card),
+              additionalStyle: {
+                flex: 1,
+                display: 'inline-block',
+                margin: '5%',
               },
-              [modalType === 'add' ? 'Add' : 'Update']
-            ),
-            div(
-              {
-                onClick: closeModal,
-                style: {
-                  flex: 1,
-                  display: 'inline-block',
-                  margin: '5%',
-                },
+              baseColor: Theme.palette.secondary,
+              disabled: isConfirmDisabled(modalType, card),
+              label: modalType === 'add' ? 'Add' : 'Update',
+            }),
+            h(SimpleButton, {
+              onClick: closeModal,
+              additionalStyle: {
+                flex: 1,
+                display: 'inline-block',
+                margin: '5%',
               },
-              ['Cancel']
-            ),
+              baseColor: Theme.palette.secondary,
+              label: 'Cancel'
+            })
           ]
         ),
       ]),
