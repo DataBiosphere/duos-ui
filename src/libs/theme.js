@@ -266,6 +266,21 @@ export const Styles = {
       justifyContent: "left",
       alignItems: "center",
     },
+    ID_CELL: {
+      width: "5%",
+      margin: "0 1%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
+    INSTITUTION_CELL: {
+      maxWidth: "35%",
+      minWidth: "35%",
+      margin: "0 1%",
+      display: "flex",
+      justifyContent: "left",
+      alignItems: "center",
+    },
     FOOTER: {
       backgroundColor: "#f3f6f7",
       fontSize: '14px',
