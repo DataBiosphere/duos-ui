@@ -43,7 +43,7 @@ import BackgroundSignIn from './pages/BackgroundSignIn';
 import DataSharingLanguageTool from "./pages/DataSharingLanguageTool";
 import AdminManageInstitutions from './pages/AdminManageInstitutions';
 import AdminManageLC from './pages/AdminManageLC';
-
+import DatasetStatistics from "./pages/DatasetStatistics";
 
 const Routes = (props) => (
   <Switch>
@@ -107,6 +107,8 @@ const Routes = (props) => (
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni]} />
     <AuthenticatedRoute path="/review_results/:referenceId/:status?" component={ReviewResults} props={props}
       rolesAllowed={[USER_ROLES.admin, USER_ROLES.alumni, USER_ROLES.chairperson]} />
+    <AuthenticatedRoute path="/dataset_statistics/:datasetId" component={DatasetStatistics} props={props}
+      rolesAllowed={[USER_ROLES.all]} />
     <Route path="*" component={NotFound} />
   </Switch>
 );

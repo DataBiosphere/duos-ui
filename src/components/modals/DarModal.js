@@ -4,6 +4,8 @@ import {Styles} from '../../libs/theme';
 import Modal from 'react-modal';
 import {find, isEmpty, isNil} from 'lodash/fp';
 import CloseIconComponent from '../CloseIconComponent';
+import {Institution} from "../../libs/ajax";
+import {useEffect, useState} from "react";
 
 const ModalDetailRow = (props) => {
   return (
@@ -32,10 +34,6 @@ const returnPIName = (researcher) => {
   return returnName || researcher.displayName;
 };
 
-const returnInstitution = (researcher) => {
-  const institutionProp = find({propertyKey: "institution"})(researcher.researcherProperties);
-  return isNil(institutionProp) ? '- -' : institutionProp.propertyValue;
-};
 
 const processResearchTypes = (researchTypes) => {
   let researchStatements = '';
@@ -61,6 +59,22 @@ const requiresManualReview = (darDetails) => {
 const DarModal = (props) => {
   //NOTE: Modal should be simple (raw information should be passed in as props) in order to ensure plug and play use
   const {showModal, closeModal, darDetails, datasets, researcher} = props;
+  const [institution, setInstitution] = useState();
+
+  useEffect(() => {
+
+    const returnInstitution = async (researcher) => {
+      const institutionId = researcher.institutionId;
+      if (isNil(institutionId)) {
+        setInstitution('- -');
+      } else {
+        const institute = await Institution.getById(institutionId);
+        setInstitution(institute.name);
+      }
+    };
+    returnInstitution(researcher);
+  }, [researcher]);
+
   return h(Modal, {
     isOpen: showModal,
     onRequestClose: closeModal,
@@ -90,7 +104,7 @@ const DarModal = (props) => {
       }),
       h(ModalDetailRow, {
         label: 'Institution',
-        detail: returnInstitution(researcher)
+        detail: institution
       }),
       h(ModalDetailRow, {
         label: 'Dataset(s)',

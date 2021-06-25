@@ -87,16 +87,70 @@ export const Styles = {
     fontWeight: Theme.font.weight.regular,
     fontSize: Theme.font.size.small
   },
+  SMALL_BOLD: {
+    fontFamily: targetFont,
+    fontWeight: Theme.font.weight.semibold,
+    fontSize: Theme.font.size.small,
+    padding: '1rem'
+  },
   MEDIUM: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.semibold,
     fontSize: '18px',
     margin: '15px 0'
   },
+  MEDIUM_ROW: {
+    display: 'flex',
+    fontSize: '18px'
+  },
   MEDIUM_DESCRIPTION: {
     fontFamily: targetFont,
     fontWeight: Theme.font.weight.regular,
     fontSize: '15px',
+  },
+  SUB_HEADER: {
+    marginTop: '20px',
+    fontSize: '22px',
+    fontWeight: '500'
+  },
+  MINOR_HEADER:{
+    fontWeight: Theme.font.weight.semibold,
+    fontSize: Theme.font.size.small,
+    backgroundColor: Theme.palette.background.secondary,
+    padding: '1rem'
+  },
+  JUMBO: {
+    fontSize: '60px',
+    paddingTop: '30px',
+    textAlign: 'center'
+  },
+  DESCRIPTION_BOX: {
+    borderRadius: 9,
+    height: 200,
+    width: 550,
+    border: '1px solid #BABEC1',
+    margin: '.5rem 1rem .5rem 0',
+    overflowX: 'hidden',
+    overflowY: 'scroll'
+  },
+  SQUARE_BOX: {
+    alignContent: 'center',
+    borderRadius: 9,
+    height: 200,
+    width: 220,
+    border: '1px solid #BABEC1',
+    margin: '.5rem 1rem .5rem 0',
+    overflowX: 'hidden',
+    overflowY: 'scroll'
+  },
+  READ_MORE: {
+    border: '1px solid #BABEC1',
+    alignContent: 'center',
+    borderRadius: 9,
+    backgroundColor: Theme.palette.background.secondary,
+    margin: '1rem 1rem 1rem 0',
+    overflowX: 'hidden',
+    overflowY: 'scroll',
   },
   HEADER_IMG: {
     width: '60px',

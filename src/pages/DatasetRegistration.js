@@ -39,7 +39,7 @@ class DatasetRegistration extends Component {
         ethics: false,
         geographic: false,
         moratorium: false,
-        forProfit: false,
+        nonProfit: false,
         hmb: false,
         npoa: false,
         diseases: false,
@@ -190,7 +190,7 @@ class DatasetRegistration extends Component {
     let ethics = dataUse.ethicsApprovalRequired;
     let geographic = dataUse.geographicalRestrictions;
     let moratorium = dataUse.publicationMoratorium;
-    let forProfit = dataUse.commercialUse;
+    let nonProfit = fp.isNil(dataUse.commercialUse) ? false : !dataUse.commercialUse;
     let hmb = dataUse.hmbResearch;
     let npoa = dataUse.populationOriginsAncestry;
     let diseases = dataUse.diseaseRestrictions;
@@ -208,7 +208,7 @@ class DatasetRegistration extends Component {
       prev.formData.ethics = ethics;
       prev.formData.geographic = geographic;
       prev.formData.moratorium = moratorium;
-      prev.formData.forProfit = forProfit;
+      prev.formData.nonProfit = nonProfit;
       prev.formData.hmb = hmb;
       prev.formData.npoa = npoa;
       prev.formData.diseases = diseases;
@@ -647,8 +647,8 @@ class DatasetRegistration extends Component {
     if (data.npoa) {
       result.populationOriginsAncestry = data.npoa;
     }
-    if (data.forProfit) {
-      result.commercialUse = data.forProfit;
+    if (data.nonProfit) {
+      result.commercialUse = !data.nonProfit;
     }
     if (data.hmb) {
       result.hmbResearch = data.hmb;
@@ -702,7 +702,7 @@ class DatasetRegistration extends Component {
       secondaryOther = false,
       secondaryOtherText = '',
       genetic = false,
-      forProfit = false,
+      nonProfit = false,
       publication = false,
       collaboration = false,
       ethics = false,
@@ -1367,17 +1367,17 @@ class DatasetRegistration extends Component {
                           [
                             div({className: 'checkbox'}, [
                               input({
-                                checked: forProfit,
+                                checked: nonProfit,
                                 onChange: this.handleCheckboxChange,
-                                id: 'checkForProfit',
+                                id: 'checkNonProfit',
                                 type: 'checkbox',
                                 className: 'checkbox-inline rp-checkbox',
-                                name: 'forProfit',
+                                name: 'nonProfit',
                                 disabled: isUpdateDataset
                               }),
                               label({
                                 className: 'regular-checkbox rp-choice-questions',
-                                htmlFor: 'checkForProfit',
+                                htmlFor: 'checkNonProfit',
                               }, [
                                 span({ className: 'access-color'},
                                   ['Non-Profit Use Only (NPU)']),

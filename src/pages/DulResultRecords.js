@@ -64,7 +64,7 @@ class DulResultRecords extends Component {
       election: electionReview.election,
       dataUse,
       dul: electionReview.election.dataUseLetter,
-      downloadUrl: await Config.getApiUrl() + 'consent/' + electionReview.consent.consentId + '/dul',
+      downloadUrl: await Config.getApiUrl() + '/api/consent/' + electionReview.consent.consentId + '/dul',
       dulName: electionReview.election.dulName,
       finalRationale: electionReview.election.finalRationale,
       status: electionReview.election.status,

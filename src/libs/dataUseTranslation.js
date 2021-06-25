@@ -1,11 +1,4 @@
-import isNil from 'lodash/fp/isNil';
-import isEmpty from 'lodash/fp/isEmpty';
-import filter from 'lodash/fp/filter';
-import join from 'lodash/fp/join';
-import concat from 'lodash/fp/concat';
-import clone from 'lodash/fp/clone';
-import uniq from 'lodash/fp/uniq';
-import head from 'lodash/fp/head';
+import {isNil, isEmpty, filter, join, concat, clone, uniq, head} from 'lodash/fp';
 import { searchOntology } from './ontologyService';
 import { Notifications } from './utils';
 
@@ -120,7 +113,7 @@ const srpTranslations = {
 const consentTranslations = {
   generalUse: {
     code: 'GRU',
-    description: 'Use is permitted for any use'
+    description: 'Use is permitted for any research purpose'
   },
   hmbResearch: {
     code: 'HMB',
@@ -369,7 +362,13 @@ export const DataUseTranslation = {
 
     const processRestrictionStatements = async(key, dataUse) => {
       let resp;
-      const value = dataUse[key];
+      let value = dataUse[key];
+      /*
+        Due to language used with Data Use Limitations, the description for 'commercialUse' describes non-profit status
+        whereas the actual value represent for-profit status. As such, commercialUse value must be inverted when processing statement
+        in order to accurately reflect description
+      */
+      if(key === 'commercialUse' && !isNil(value)) { value = !value; }
       if (!isNil(value) && value) {
         if (key === 'diseaseRestrictions') {
           let resolvedLabels = [];
