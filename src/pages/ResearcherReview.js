@@ -85,8 +85,11 @@ class ResearcherReview extends Component {
     } else if (voteStatus === "false") {
       status = "rejected";
     }
-    let userStatus = { status: status, rationale: rationale, roleId: 5 };
-    User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
+    let updatedUser = this.state.user;
+    updatedUser.status = status;
+    updatedUser.rationale = rationale;
+    const payload = { updatedUser: updatedUser };
+    User.update(payload, this.props.match.params.dacUserId).then(
       () => {
         this.setState({ showConfirmationDialogOK: true });
       }
@@ -103,7 +106,6 @@ class ResearcherReview extends Component {
   render() {
 
     const { formData, rationale, voteStatus, user, institution } = this.state;
-
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
