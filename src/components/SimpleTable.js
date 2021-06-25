@@ -34,8 +34,6 @@ const OnClickTextCell = ({ text, style, onClick }) => {
 };
 
 //Column component that renders the column row based on column headers
-//NOTE: Should incorporate sorting functionality since the utils is built out
-//NOTE: use this as the template for the Skeleton Loader
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
   return div({style: rowStyle, key: `column-row-container`}, columnHeaders.map((header) => {
@@ -78,12 +76,11 @@ export default function SimpleTable(props) {
   //columnHeaders is an array of objects, [{label, cellStyle}], where style is used to set up dimentions of the cell for the columns
   const {
     columnHeaders = [],
-    //rowData -> {data, component, style, onClick}
-    rowData = [],
+    rowData = [], //rowData -> {data, component, style, onClick}
     isLoading,
     styles, //styles -> baseStyle, columnStyle needed to determine sizing and color assignments
     tableSize,
-    paginationBar
+    paginationBar,
   } = props;
 
   const {baseStyle, columnStyle} = styles;

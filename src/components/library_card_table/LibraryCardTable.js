@@ -11,8 +11,6 @@ import lockIcon from '../../images/lock-icon.png';
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
 import { LibraryCard } from '../../libs/ajax';
 
-//NOTE: temp const for Styles
-//Add to Theme when finalized
 const styles = {
   baseStyle: {
     fontFamily: 'Arial',
