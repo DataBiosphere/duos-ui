@@ -10,6 +10,7 @@ import SimpleTable from '../SimpleTable';
 import lockIcon from '../../images/lock-icon.png';
 import LibraryCardFormModal from '../modals/LibraryCardFormModal';
 import { LibraryCard } from '../../libs/ajax';
+import ConfirmationModal from '../modals/ConfirmationModal';
 
 const styles = {
   baseStyle: {
@@ -29,6 +30,7 @@ const styles = {
     institution: '20%',
     eraCommonsId: '15%',
     createDate: '12%',
+    actions: "12%"
   },
 };
 
@@ -79,6 +81,17 @@ const createDateCell = (createDate, id) => {
   };
 };
 
+//Update function name and return if requirements change
+const createDeleteCell = (card, setTargetDelete, setShowConfirmation) => {
+  return {
+    id: card.id,
+    style: { width: styles.cellWidths.buttons },
+    label: 'action-buttons',
+    isComponent: true,
+    data: h(DeleteRecordCell, {card, setShowConfirmation, setTargetDelete})
+  };
+};
+
 const lcFilterFunction = getSearchFilterFunctions().libraryCard;
 
 //column row metadata for SimpleTable
@@ -88,6 +101,29 @@ const columnHeaderFormat = {
   institution: {label: 'Institution', cellStyle: {width: styles.cellWidths.institution}},
   eraCommonsId: {label: 'era Commons ID', cellStyle: {width: styles.cellWidths.eraCommonsId}},
   createDate: {label: 'Create Date', cellStyle: {width: styles.cellWidths.createDate}},
+  actions: {label: 'Actions', cellStyle: {width: styles.cellWidths.actions}}
+};
+
+const deleteOnClick = (targetDelete, libraryCards, setLibraryCards, setShowConfirmation) => {
+  try {
+    const id = targetDelete.id;
+    LibraryCard.deleteLibraryCard(id);
+    const libraryCardsCopy = cloneDeep(libraryCards);
+    const targetIndex = findIndex((card) =>  card.id === id)(libraryCardsCopy);
+    libraryCardsCopy.splice(targetIndex, 1);
+    setLibraryCards(libraryCardsCopy);
+    setShowConfirmation(false);
+  } catch(error) {
+    Notifications.showError("Error: Failed to delete library card");
+  }
+};
+
+const DeleteRecordCell = (props) => {
+  const { card, setShowConfirmation, setTargetDelete} = props;
+  return div({onClick: () => {
+    setTargetDelete(card);
+    setShowConfirmation(true);
+  }}, ["Delete"]);
 };
 
 export default function LibraryCardTable(props) {
@@ -99,11 +135,23 @@ export default function LibraryCardTable(props) {
   const [filteredCards, setFilteredCards] = useState([]);
   const [visibleCards, setVisibleCards] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [institutions, setInstitutions] = useState(props.institutions || []);
   const [users, setUsers] = useState(props.users || []);
   const [currentCard, setCurrentCard] = useState();
   const [modalType, setModalType] = useState();
+  const [targetDelete, setTargetDelete] = useState({});
   const searchRef = useRef('');
+
+  //add signingOfficial when feature is implemented
+  const columnHeaderData = [
+    columnHeaderFormat.researcher,
+    columnHeaderFormat.email,
+    columnHeaderFormat.institution,
+    columnHeaderFormat.eraCommonsId,
+    columnHeaderFormat.createDate,
+    columnHeaderFormat.actions
+  ];
 
   useEffect(() => {
     const init = async () => {
@@ -161,6 +209,7 @@ export default function LibraryCardTable(props) {
           : institutionCell('- -', card.id),
         eraCommonsCell(card.eraCommonsId, card.id),
         createDateCell(card.createDate, card.id),
+        createDeleteCell(card, setTargetDelete, setShowConfirmation)
       ];
     });
   };
@@ -255,15 +304,6 @@ export default function LibraryCardTable(props) {
     setShowModal(true);
   };
 
-  //add signingOfficial when feature is implemented
-  const columnHeaderData = [
-    columnHeaderFormat.researcher,
-    columnHeaderFormat.email,
-    columnHeaderFormat.institution,
-    columnHeaderFormat.eraCommonsId,
-    columnHeaderFormat.createDate,
-  ];
-
   //Search function for SearchBar component
   const handleSearchChange = tableSearchHandler(
     libraryCards,
@@ -326,5 +366,13 @@ export default function LibraryCardTable(props) {
       card: currentCard,
       modalType,
     }),
+    h(ConfirmationModal, {
+      showConfirmation,
+      closeConfirmation: () => setShowConfirmation(false),
+      title: 'Delete Library Card?',
+      message: 'Are you sure you want to delete this library card?',
+      header: `${targetDelete.userName || targetDelete.userEmail} - ${!isNil(targetDelete.institution) ? targetDelete.institution.name : ''}`,
+      onConfirm: () => deleteOnClick(targetDelete, libraryCards, setLibraryCards, setShowConfirmation)
+    })
   ]);
 }

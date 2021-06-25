@@ -403,7 +403,7 @@ class ManageDac extends Component {
             title: "Delete DAC?",
             message: "Are you sure you want to delete this Data Access Committee?",
             header: this.state.selectedDac.name,
-            onConfirm: this.handleDeleteDac,
+            onConfirm: () => this.handleDeleteDac(),
           }),
           h(ReactTooltip, {
             place: 'left',
