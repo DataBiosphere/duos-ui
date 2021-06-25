@@ -85,7 +85,6 @@ export default function LibraryCardFormModal(props) {
   };
 
   const updateUser = (value) => {
-    debugger; // eslint-disable-line
     let userEmail, userId;
     if (isObject(value)) {
       userId = value.dacUserId;
@@ -93,7 +92,7 @@ export default function LibraryCardFormModal(props) {
     } else {
       userEmail = value;
     }
-    const updatedCard = Object.assign(card, { userEmail, userId });
+    const updatedCard = Object.assign({}, card, { userEmail, userId });
     setCard(updatedCard);
   };
 

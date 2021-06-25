@@ -49,12 +49,11 @@ const emailCell = (email, id) => {
   };
 };
 
-const userNameCell = (userName, onClick, id) => {
+const userNameCell = (userName, id) => {
   return {
     data: userName || '- -',
     style: { width: styles.cellWidths.researcher },
     id,
-    onClick,
     label: 'username',
   };
 };
@@ -131,7 +130,7 @@ const DeleteRecordButton = (props) => {
   const onClick = () => {
     setCurrentCard(card);
     setShowConfirmation(true);
-  }
+  };
   return h(TableIconButton, {
     key: `show-delete-modal-${card.id}`,
     dataTip: 'Delete Library Card',
@@ -237,11 +236,7 @@ export default function LibraryCardTable(props) {
   const processLCData = (cards = []) => {
     return cards.map((card) => {
       return [
-        userNameCell(
-          card.userName,
-          () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard),
-          card.id
-        ),
+        userNameCell(card.userName, card.id),
         emailCell(card.userEmail, card.id),
         !isEmpty(card.institution)
           ? institutionCell(card.institution.name, card.id)
