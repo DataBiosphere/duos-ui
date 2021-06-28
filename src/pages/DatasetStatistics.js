@@ -134,10 +134,6 @@ export default function DatasetStatistics(props) {
                 moreContent: [
                   div({style: {display: 'flex', backgroundColor: "white"}}, [
                     div({style: {display: 'flex', paddingRight: '2rem'}}, [
-                      div({style: Styles.SMALL_BOLD}, ["Principal Investigator: "]),
-                      div({style: Styles.SMALL_BOLD}, [dar.investigator]),
-                    ]),
-                    div({style: {display: 'flex', paddingRight: '2rem'}}, [
                       div({style: Styles.SMALL_BOLD}, ["Last Updated: "]),
                       div({style: Styles.SMALL_BOLD}, [formatDate(dar.updateDate)]),
                     ]),
