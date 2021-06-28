@@ -231,9 +231,9 @@ export default function LibraryCardTable(props) {
     setInstitutions(props.institutions);
     setUsers(props.users);
     if(
-      !isEmpty(props.libraryCards)
-      && !isEmpty(props.users)
-      && !isEmpty(props.institutions)
+      !isNil(props.libraryCards)
+      && !isNil(props.users)
+      && !isNil(props.institutions)
     ) {
       setIsLoading(false);
     }
