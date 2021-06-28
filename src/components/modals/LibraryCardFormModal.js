@@ -9,14 +9,13 @@ import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
 import { Theme } from '../../libs/theme';
 
+//modal component, used to render row on modal
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType } = props;
   const [filteredDropdown, setFilteredDropdown] = useState(dropdownOptions);
-  //NOTE: need to make own Select component for input
-  //allows user to select from dropdown or put in their own name
-
   let template;
 
+  //filter function for users dropdown
   const userListFilter = (searchTerm) => {
     let filteredCopy;
     if(isEmpty(searchTerm)) {
@@ -46,6 +45,7 @@ const FormFieldRow = (props) => {
       })
     ]);
   } else {
+    //template here is for new card creation
     if(modalType === 'add') {
       template = div({style: {marginBottom: '2%'}}, [
         label({}, ['Users']),
@@ -74,16 +74,19 @@ export default function LibraryCardFormModal(props) {
 
   const [card, setCard] = useState(props.card);
 
+  //initialization hook, sets card as state variables
   useEffect(() => {
     setCard(props.card);
   }, [props.card]);
 
+  //onClick function, updates associated instituion on dropdown select
   const updateInstitution = (value) => {
     const updatedCard = cloneDeep(card);
     updatedCard.institutionId = value;
     setCard(updatedCard);
   };
 
+  //onChange function, used to change associated user on Creatable dropdown selection
   const updateUser = (value) => {
     let userEmail, userId;
     if (isObject(value)) {
@@ -96,6 +99,7 @@ export default function LibraryCardFormModal(props) {
     setCard(updatedCard);
   };
 
+  //boolean function, used to determine if submit button should be disabled
   const isConfirmDisabled = (modalType, card) => {
     let result;
     if(modalType === 'add') {

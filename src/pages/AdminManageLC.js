@@ -10,6 +10,7 @@ export default function AdminManageLC() {
   const [institutions, setInstitutions] = useState();
   const [users, setUsers] = useState();
 
+  //init hook to get users, institutions, and cards to be passed down as props
   useEffect(() => {
     const initData = async() => {
       const dataPromiseArray = await Promise.all([
@@ -37,5 +38,6 @@ export default function AdminManageLC() {
     }
   }, []);
 
+  //props are expecting array format
   return h(LibraryCardTable, {users, institutions, libraryCards});
 }

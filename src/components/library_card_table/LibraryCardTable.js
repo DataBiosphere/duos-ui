@@ -16,6 +16,7 @@ import {Delete, Update} from "@material-ui/icons";
 import TableIconButton from '../TableIconButton';
 import SimpleButton from '../SimpleButton';
 
+//Styles specific to the LibraryCard table
 const styles = {
   baseStyle: {
     fontFamily: 'Arial',
@@ -99,6 +100,7 @@ const createActionsCell = (card, setCurrentCard, setShowConfirmation, setShowMod
   };
 };
 
+//sub-component of filter function used in search bar, needed for useEffect hooks to re-filter cards on size changes
 const lcFilterFunction = getSearchFilterFunctions().libraryCard;
 
 //column row metadata for SimpleTable
@@ -111,6 +113,7 @@ const columnHeaderFormat = {
   actions: {label: 'Actions', cellStyle: {width: styles.cellWidths.actions}}
 };
 
+//delete function used within actions component
 const deleteOnClick = (currentCard, libraryCards, setLibraryCards, setShowConfirmation) => {
   try {
     const id = currentCard.id;
@@ -125,6 +128,7 @@ const deleteOnClick = (currentCard, libraryCards, setLibraryCards, setShowConfir
   }
 };
 
+//delete button component contained as child component of actions cell
 const DeleteRecordButton = (props) => {
   const { card, setShowConfirmation, setCurrentCard } = props;
   const onClick = () => {
@@ -149,6 +153,7 @@ const showModalOnClick = (card, type, setModalType, setShowModal, setCurrentCard
   setShowModal(true);
 };
 
+//update button stored as child component of actions cell
 const UpdateRecordButton = (props) => {
   const { card, setShowModal, setCurrentCard, setModalType} = props;
   const onClick = () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard);
@@ -190,6 +195,7 @@ export default function LibraryCardTable(props) {
     columnHeaderFormat.actions
   ];
 
+  //hook to recalculate visible table records when listed dependencies update
   useEffect(() => {
     const init = async () => {
       try {
@@ -211,6 +217,7 @@ export default function LibraryCardTable(props) {
     init();
   }, [filteredCards, tableSize, currentPage, pageCount]);
 
+  //hook to execute on initialization and card creation/deletion, applies filter on updated collection list
   useEffect(() => {
     const searchTerms = searchRef.current.value;
     let filteredList = !isEmpty(libraryCards) ? libraryCards : props.libraryCards;
@@ -220,6 +227,7 @@ export default function LibraryCardTable(props) {
     setFilteredCards(filteredList);
   }, [props.libraryCards, libraryCards]);
 
+  //hook that executes on prop load (initialization hook)
   useEffect(() => {
     setLibraryCards(props.libraryCards);
     setInstitutions(props.institutions);
@@ -233,6 +241,7 @@ export default function LibraryCardTable(props) {
     }
   }, [props.libraryCards, props.institutions, props.users]);
 
+  //formats institution data to be used by SearchSelect component within modal
   const processLCData = (cards = []) => {
     return cards.map((card) => {
       return [
@@ -248,18 +257,21 @@ export default function LibraryCardTable(props) {
     });
   };
 
+  //onClick function for page change (either by prev/next or manual input)
   const goToPage = (value) => {
     if (value >= 1 && value <= pageCount) {
       setCurrentPage(value);
     }
   };
 
+  //table size change hook
   const changeTableSize = (value) => {
     if (value > 0 && !isNaN(parseInt(value))) {
       setTableSize(value);
     }
   };
 
+  //pre-computed PaginationBar component passed into SimpleTable as a prop
   const paginationBar = h(PaginationBar, {
     pageCount,
     currentPage,
@@ -296,6 +308,7 @@ export default function LibraryCardTable(props) {
     }
   };
 
+  //onClick function, used to create new card on modal based on form data
   const addLibraryCard = async (card) => {
     try {
       //check if card combination already exits, show error if it does

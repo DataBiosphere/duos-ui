@@ -71,8 +71,11 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   });
 };
 
+//Simple table component, can be used alone, can be built on top of (like with LibraryCardTable)
+//component handles simple rendering of table, however logic behind pagination and row format has to be computed as the parent
 export default function SimpleTable(props) {
-  //rowData is an array of arrays, outer array represents the row, inner array represents the array of rendered cells (should be components)
+  //rowData -> array of arrays, outer array represents the collection of rows, inner array represents the collection of cells within a particular row
+  //ex -> [[{cellData1Row1}], [{cellData1Row2}]], where inner objects contain relevant data for render (text, style, component (if provided))
   //columnHeaders is an array of objects, [{label, cellStyle}], where style is used to set up dimentions of the cell for the columns
   const {
     columnHeaders = [],
