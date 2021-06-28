@@ -218,7 +218,7 @@ export default function LibraryCardTable(props) {
   //hook to execute on initialization and card creation/deletion, applies filter on updated collection list
   useEffect(() => {
     const searchTerms = searchRef.current.value;
-    let filteredList = !isEmpty(libraryCards) ? libraryCards : props.libraryCards;
+    let filteredList = libraryCards;
     if (!isEmpty(searchTerms)) {
       filteredList = lcFilterFunction(searchRef, libraryCards);
     }
