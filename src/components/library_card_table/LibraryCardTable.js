@@ -94,9 +94,8 @@ const createActionsCell = (card, setCurrentCard, setShowConfirmation, setShowMod
     id: card.id,
     style: { width: styles.cellWidths.buttons },
     label: 'action-buttons',
-    key: `action-cell-${card.id}`,
     isComponent: true,
-    data: div({style: {display: 'flex', justifyContent: 'left'}}, [updateButton, deleteButton])
+    data: div({style: {display: 'flex', justifyContent: 'left'}, key: `action-cell-${card.id}`}, [updateButton, deleteButton])
   };
 };
 
@@ -136,7 +135,7 @@ const DeleteRecordButton = (props) => {
     setShowConfirmation(true);
   };
   return h(TableIconButton, {
-    key: `show-delete-modal-${card.id}`,
+    keyProp: `show-delete-modal-${card.id}`,
     dataTip: 'Delete Library Card',
     isRendered: true,
     onClick,
@@ -159,7 +158,7 @@ const UpdateRecordButton = (props) => {
   const onClick = () => showModalOnClick(card, 'update', setModalType, setShowModal, setCurrentCard);
 
   return h(TableIconButton, {
-    key: `show-update-form-${card.id}`,
+    keyProp: `show-update-form-${card.id}`,
     dataTip: 'Update Library Card',
     isRendered: true,
     onClick,
@@ -209,7 +208,6 @@ export default function LibraryCardTable(props) {
           filteredCards
         );
         setVisibleCards(visibleList);
-        ReactTooltip.rebuild();
       } catch (error) {
         Notifications.showError({ text: 'Error updating Library Card table' });
       }
