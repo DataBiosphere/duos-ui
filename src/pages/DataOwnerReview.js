@@ -74,9 +74,8 @@ class DataOwnerReview extends Component {
 
   async getDarInfo() {
     const dar = await DAR.describeDar(this.props.match.params.referenceId);
-    const darRus = dar.rus;
     this.setState(prev => {
-      prev.darFields.rus = darRus.rus;
+      prev.darFields.rus = dar.rus;
       prev.pendingCase.voteId = this.props.match.params.voteId;
       prev.pendingCase.referenceId = this.props.match.params.referenceId;
       prev.pendingCase.dataSetId = this.props.match.params.dataSetId;
