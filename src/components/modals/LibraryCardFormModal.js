@@ -88,14 +88,16 @@ export default function LibraryCardFormModal(props) {
 
   //onChange function, used to change associated user on Creatable dropdown selection
   const updateUser = (value) => {
-    let userEmail, userId;
+    let userEmail, userId, userName, eraCommonsId;
     if (isObject(value)) {
       userId = value.dacUserId;
       userEmail = value.email;
+      userName = value.displayName;
+      eraCommonsId = value.eraCommonsId;
     } else {
       userEmail = value;
     }
-    const updatedCard = Object.assign({}, card, { userEmail, userId });
+    const updatedCard = Object.assign({}, card, { userEmail, userId, userName, eraCommonsId });
     setCard(updatedCard);
   };
 
