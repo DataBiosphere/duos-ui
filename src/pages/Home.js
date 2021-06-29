@@ -183,7 +183,10 @@ class Home extends Component {
               p({style: description}, [
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
-                a({href: 'home_dac_info', style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}}, ['LEARN MORE'])
+                a({
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide', 
+                  target: '_blank', style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}}, 
+                ['LEARN MORE'])
               ])
             ]),
             div({ className: 'col-lg-4 col-md-4 '}, [
@@ -191,7 +194,11 @@ class Home extends Component {
               p({ style: description }, [
                 'Click here to learn learn more about DUOS\' innovative Library Card \ninitiative and how to issue a Library Card to your researchers.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
-                a({ href: 'home_signing_official', style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}, ['LEARN MORE'])
+                a({
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
+                  target: '_blank',
+                  style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }},
+                ['LEARN MORE'])
               ])
             ]),
             div({ className: 'col-lg-4 col-md-4' }, [
@@ -199,7 +206,11 @@ class Home extends Component {
               p({ style: description }, [
                 'Click here to learn more about how DUOS helps researchers and for details on making a data access request.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
-                a({ href: 'home_researcher_info', style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }}, ['LEARN MORE'])
+                a({
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402551-Researcher-User-Guide',
+                  target: 'blank',
+                  style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }},
+                ['LEARN MORE'])
               ])
             ])
           ]),
@@ -211,7 +222,8 @@ class Home extends Component {
                   props: this.props,
                   readStyle: readMoreStyle,
                   content: [
-                    p({ style: paragraph, key: 'p-0' }, [
+                    p({
+                      style: paragraph, key: 'p-0' }, [
                       'Increasingly, a major challenge to data sharing is navigating the complex web of restrictions on secondary data use. Human subjects datasets often have complex and/or ambiguous restrictions on future use deduced from the original consent form, which must be respected when utilizing data. Previously, such data use restrictions were uniquely drafted across institutions, creating vast inconsistencies and requiring the investment of significant human effort to determine if researchers should be permitted to use the data. With support from DUOS team members, the Global Alliance for Genomics and Health (GA4GH) published a solution for this ambiguous and inconsistent data sharing language in the form of their ',
                       a({
                         href: 'https://www.ga4gh.org/genomic-data-toolkit/regulatory-ethics-toolkit/#:~:text=Machine%20Readable%20Consent%20Guidance&text=Machine%20readable%20consent%20language%20is,to%20for%20their%20research%20purposes',
