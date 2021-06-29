@@ -73,7 +73,6 @@ const BasicListItem = (props) => {
   Note: user profile was split in this manner to show how that would work out
 */
 const DropdownComponent = (props) => {
-  debugger; // eslint-disable-line
   const {dropdownLinks, label, goToLink, isRendered, onMouseEnter, classes} = props;
   const [anchorEl, setAnchorEl] = useState(null);
   const linkLabels = Object.keys(dropdownLinks);
