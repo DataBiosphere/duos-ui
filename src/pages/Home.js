@@ -184,8 +184,8 @@ class Home extends Component {
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
-                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide', 
-                  target: '_blank', style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}}, 
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide',
+                  target: '_blank', style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}},
                 ['LEARN MORE'])
               ])
             ]),

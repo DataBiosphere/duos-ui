@@ -483,7 +483,7 @@ class DuosHeader extends Component {
                     id: 'link_help',
                     className: 'navbar-duos-link',
                     href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
-                    target: '_blank'
+                    target: '_blank',
                   },
                   [
                     div({
@@ -613,13 +613,15 @@ class DuosHeader extends Component {
                   h(BasicListItem, {
                     isRendered: !isLogged,
                     applyPointer,
-                    targetLink: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                    targetLink:
+                      'https://broad-duos.zendesk.com/hc/en-us/articles/360060400311-About-DUOS',
                     label: 'About',
                     isHref: true,
                   }),
                   h(BasicListItem, {
                     applyPointer,
-                    targetLink: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                    targetLink:
+                      'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
                     isHref: true,
                     label: 'FAQs',
                   }),
