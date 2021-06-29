@@ -211,7 +211,7 @@ class Home extends Component {
                 a({
                   href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402551-Researcher-User-Guide',
                   id: 'zendesk-researcher-link',
-                  target: 'blank',
+                  target: '_blank',
                   style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }},
                 ['LEARN MORE'])
               ])
