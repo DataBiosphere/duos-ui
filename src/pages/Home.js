@@ -184,6 +184,7 @@ class Home extends Component {
                 'Click here to learn how DUOS is helping DACs \nefficiently manage data access and use compliance.']),
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
+                  id: 'zendesk-dac-link',
                   href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060401131-Data-Access-Committee-User-Guide',
                   target: '_blank', style: {color: '#1F3B50', fontSize: '16px', fontWeight: 500}},
                 ['LEARN MORE'])
@@ -197,6 +198,7 @@ class Home extends Component {
                 a({
                   href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
                   target: '_blank',
+                  id: 'zendesk-so-link',
                   style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }},
                 ['LEARN MORE'])
               ])
@@ -208,6 +210,7 @@ class Home extends Component {
               div({className: 'row', style: {display: 'flex', justifyContent: 'center'}}, [
                 a({
                   href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402551-Researcher-User-Guide',
+                  id: 'zendesk-researcher-link',
                   target: 'blank',
                   style: { color: '#1F3B50', fontSize: '16px', fontWeight: 500 }},
                 ['LEARN MORE'])
