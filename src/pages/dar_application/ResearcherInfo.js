@@ -50,7 +50,7 @@ export default function ResearcherInfo(props) {
 
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
-  const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || null);
+  const [signingOfficial, setSigningOfficial] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
