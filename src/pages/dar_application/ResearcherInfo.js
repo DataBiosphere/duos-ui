@@ -48,6 +48,12 @@ export default function ResearcherInfo(props) {
     marginTop: '5rem'
   };
 
+  const soDropDownStyle = {
+    control: styles => ({ ...styles,
+      backgroundColor: !isNil(darCode) ? '#efefef' : 'white',
+      borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
+  };
+
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
@@ -318,10 +324,13 @@ export default function ResearcherInfo(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               <Creatable
                 key={"selectSO"}
+                required={true}
+                disabled={!isNil(darCode)}
                 placeholder="Select from the list or type your SO's full name if it is not present"
                 onChange={(e) => formFieldChange({name: 'signingOfficial', value: e.value})}
                 onCreateOption={(e) => updateSOList(e)}
                 options={allSigningOfficials}
+                styles={soDropDownStyle}
                 value={isNil(signingOfficial) || isEmpty(signingOfficial) ? null : {value: signingOfficial, label: signingOfficial}}
               />,
               span({
