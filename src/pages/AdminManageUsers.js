@@ -29,7 +29,7 @@ class AdminManageUsers extends Component {
   }
 
   async getUsers() {
-    const users = await User.list();
+    const users = await User.list("Admin");
     let userList = users.map(user => {
       user.researcher = false;
       user.roles.forEach(role => {
