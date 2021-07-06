@@ -18,6 +18,7 @@ import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
+import {map} from "lodash/fp";
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -33,6 +34,7 @@ class DataAccessRequestApplication extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
+      allSigningOfficials: [],
       formData: {
         datasets: [],
         darCode: null,
@@ -184,12 +186,22 @@ class DataAccessRequestApplication extends Component {
     return datasets;
   }
 
+  async getSOs()  {
+    const allSOs = await User.getSOsForCurrentUser();
+    const allSOsOptions = map((user) =>  {
+      return {value: user.displayName, label: user.displayName};
+    })(allSOs);
+    return allSOsOptions;
+  }
+
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
     const researcher = await User.getMe();
+    const signingOfficials = await this.getSOs();
     this.setState(prev => {
       prev.researcher = researcher;
+      prev.allSigningOfficials = signingOfficials;
       return prev;
     });
     if (!fp.isNil(dataRequestId)) {
@@ -1040,6 +1052,7 @@ class DataAccessRequestApplication extends Component {
                 researcherGate: researcherGate,
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,
+                allSigningOfficials: this.state.allSigningOfficials,
                 signingOfficial,
                 itDirector,
                 anvilUse,

@@ -61,27 +61,15 @@ export default function ResearcherInfo(props) {
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [allSigningOfficials, setAllSigningOfficials] = useState([]);
-  const [calledOnce, setCalledOnce] = useState(false);
+  const [allSigningOfficials, setAllSigningOfficials] = useState(props.allSigningOfficials || []);
 
   useEffect(() => {
-    const getSOs = async ()  => {
-      const allSOs = await User.getSOsForCurrentUser();
-      const allSOsOptions = map((user) =>  {
-        return {value: user.displayName, label: user.displayName};
-      })(allSOs);
-      setAllSigningOfficials(allSOsOptions);
-    };
-    if (!calledOnce) {
-      getSOs();
-    }
     setSigningOfficial(props.signingOfficial);
     setCheckCollaborator(props.checkCollaborator);
     setITDirector(props.itDirector);
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-    setCalledOnce(true);
   }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
 
   const updateSOList = (e) => {
