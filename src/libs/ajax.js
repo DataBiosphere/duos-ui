@@ -954,7 +954,7 @@ export const User = {
   },
 
   getSOsForCurrentUser: async () => {
-    const url = `${await Config.getApiUrl()}/api/user/SigningOfficials`;
+    const url = `${await Config.getApiUrl()}/api/user/signing-officials`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
     return res.json();
   }
