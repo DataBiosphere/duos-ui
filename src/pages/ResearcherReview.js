@@ -103,6 +103,7 @@ class ResearcherReview extends Component {
   render() {
 
     const { formData, rationale, voteStatus, user, institution } = this.state;
+
     return (
       div({ className: "container " }, [
         div({ className: "col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12" }, [
