@@ -85,11 +85,8 @@ class ResearcherReview extends Component {
     } else if (voteStatus === "false") {
       status = "rejected";
     }
-    let updatedUser = this.state.user;
-    updatedUser.status = status;
-    updatedUser.rationale = rationale;
-    const payload = { updatedUser: updatedUser };
-    User.update(payload, this.props.match.params.dacUserId).then(
+    let userStatus = { status: status, rationale: rationale, roleId: 5 };
+    User.registerStatus(userStatus, this.props.match.params.dacUserId).then(
       () => {
         this.setState({ showConfirmationDialogOK: true });
       }

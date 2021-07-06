@@ -907,6 +907,12 @@ export const User = {
     const url = `${await Config.getApiUrl()}/api/user`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'POST' }]));
     return res.json();
+  },
+
+  registerStatus: async (userRoleStatus, userId) => {
+    const url = `${await Config.getApiUrl()}/api/dacuser/status/${userId}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
+    return res.json();
   }
 
 };
