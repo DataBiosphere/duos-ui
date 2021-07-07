@@ -911,8 +911,8 @@ export const User = {
     return res.data;
   },
 
-  list: async () => {
-    const url = `${await Config.getApiUrl()}/api/dacuser`;
+  list: async roleName => {
+    const url = `${await Config.getApiUrl()}/api/user/role/${roleName}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
