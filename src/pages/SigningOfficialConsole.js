@@ -71,7 +71,7 @@ export default function SigningOfficialConsole(props) {
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
-        //setIsLoading(false);
+        setIsLoading(false);
       }
     };
     init();
