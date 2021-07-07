@@ -52,7 +52,8 @@ export const ApplicantInfo = hh(
                 borderRadius: 3,
                 textAlign: 'center',
                 paddingLeft: 3,
-                paddingRight: 3
+                paddingRight: 3,
+                maxWidth: 150
               },
             },
             [institution.name]),
