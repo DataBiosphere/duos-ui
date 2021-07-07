@@ -8,6 +8,7 @@ import { PaginatorBar } from '../components/PaginatorBar';
 import { SearchBox } from '../components/SearchBox';
 import { User } from '../libs/ajax';
 import manageUsersIcon from "../images/icon_manage_users.png";
+import {USER_ROLES} from "../libs/utils";
 
 class AdminManageUsers extends Component {
 
@@ -29,7 +30,7 @@ class AdminManageUsers extends Component {
   }
 
   async getUsers() {
-    const users = await User.list("Admin");
+    const users = await User.list(USER_ROLES.admin);
     let userList = users.map(user => {
       user.researcher = false;
       user.roles.forEach(role => {
