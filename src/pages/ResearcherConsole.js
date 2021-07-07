@@ -135,7 +135,7 @@ class ResearcherConsole extends Component {
       }
     );
 
-    DAR.getPartialDarRequestList().then(
+    DAR.getDraftDarRequestList().then(
       pdars => {
         this.setState({
           partialDars: pdars,
@@ -297,28 +297,29 @@ class ResearcherConsole extends Component {
                 hr({ className: "table-head-separator" }),
 
                 this.state.partialDars.slice((currentPartialDarPage - 1) * partialDarLimit, currentPartialDarPage * partialDarLimit).map((pdar, idx) => {
-                  return h(Fragment, { key: pdar.partialDarCode + '_' + idx }, [
-                    div({ key: pdar.partialDarCode, id: pdar.partialDarCode, className: "row no-margin tableRowPartial" }, [
+                  return h(Fragment, { key: pdar.dar.data.partialDarCode + '_' + idx }, [
+                    div({ key: pdar.dar.data.partialDarCode, id: pdar.dar.data.partialDarCode, className: "row no-margin tableRowPartial" }, [
                       a({
-                        id: pdar.partialDarCode + "_btnDelete",
+                        id: pdar.dar.data.partialDarCode + "_btnDelete",
                         name: "btn_delete",
                         className: "col-xs-1 cell-body delete-dar default-color",
-                        onClick: this.deletePartialDar, value: pdar.dataRequestId
+                        onClick: this.deletePartialDar,
+                        value: pdar.dar.referenceId
                       }, [
-                        span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dataRequestId }),
+                        span({ className: "cm-icon-button glyphicon glyphicon-trash caret-margin", "aria-hidden": "true", value: pdar.dar.referenceId }),
                       ]),
 
-                      div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialId", name: "partialId", className: "col-xs-2" }, [pdar.partialDarCode]),
-                      div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialTitle", name: "partialTitle", className: "col-xs-5" }, [pdar.projectTitle]),
-                      div({ style: Theme.textTableBody, id: pdar.partialDarCode + "_partialDate", name: "partialDate", className: "col-xs-2" }, [Utils.formatDate(pdar.createDate)]),
+                      div({ style: Theme.textTableBody, id: pdar.dar.data.partialDarCode + "_partialId", name: "partialId", className: "col-xs-2" }, [pdar.dar.data.partialDarCode]),
+                      div({ style: Theme.textTableBody, id: pdar.dar.data.partialDarCode + "_partialTitle", name: "partialTitle", className: "col-xs-5" }, [pdar.dar.data.projectTitle]),
+                      div({ style: Theme.textTableBody, id: pdar.dar.data.partialDarCode + "_partialDate", name: "partialDate", className: "col-xs-2" }, [Utils.formatDate(pdar.dar.createDate)]),
                       div({className: "col-xs-2 cell-body f-center" }, [
                         button({
-                          id: pdar.partialDarCode + '_btnResume',
+                          id: pdar.dar.data.partialDarCode + '_btnResume',
                           name: 'btn_resume',
                           className: 'cell-button hover-color',
                         }, [
                           h(Link, {
-                            to: 'dar_application/' + pdar.dataRequestId,
+                            to: 'dar_application/' + pdar.dar.data.referenceId,
                           }, ['Resume'])],
                         ),
                       ]),
