@@ -61,7 +61,7 @@ export default function ResearcherInfo(props) {
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [allSigningOfficials, setAllSigningOfficials] = useState(props.allSigningOfficials || []);
+  const [allSigningOfficials, setAllSigningOfficials] = useState(props.allSigningOfficials);
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
@@ -70,14 +70,15 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+    setAllSigningOfficials(props.allSigningOfficials);
+  }, [props.signingOfficial, props.allSigningOfficials, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
 
   const updateSOList = (e) => {
     const newOption = {value: e, label: e};
     allSigningOfficials.push(newOption);
     setAllSigningOfficials(allSigningOfficials);
     setSigningOfficial(e);
-    formFieldChange("signingOfficial", e);
+    formFieldChange({ name: "signingOfficial", value: e });
   };
 
   const cloudRadioGroup = div({

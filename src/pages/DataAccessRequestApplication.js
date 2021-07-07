@@ -34,7 +34,6 @@ class DataAccessRequestApplication extends Component {
       showDialogSubmit: false,
       showDialogSave: false,
       step: 1,
-      allSigningOfficials: [],
       formData: {
         datasets: [],
         darCode: null,
