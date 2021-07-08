@@ -913,6 +913,12 @@ export const User = {
     const url = `${await Config.getApiUrl()}/api/dacuser/status/${userId}`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(userRoleStatus), { method: 'PUT' }]));
     return res.json();
+  },
+
+  getSOsForCurrentUser: async () => {
+    const url = `${await Config.getApiUrl()}/api/user/signing-officials`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
+    return res.json();
   }
 
 };
