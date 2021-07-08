@@ -318,6 +318,7 @@ export default function ResearcherInfo(props) {
                 disabled={!isNil(darCode)}
                 placeholder="Select from the list or type your SO's full name if it is not present"
                 onChange={(e) =>  {
+                  //if this was a user created option there is no ID to save
                   formFieldChange({name: 'signingOfficial', value: e.label});
                   (e.value === e.label) ? setSoUserId(null) : setSoUserId(e.value);
                 }}
@@ -325,6 +326,7 @@ export default function ResearcherInfo(props) {
                 options={allSigningOfficials}
                 styles={soDropDownStyle}
                 value={isNil(signingOfficial) || isEmpty(signingOfficial) ?
+                  //if this was a user created option there is no ID so use the name for both value and label
                   null : {value: isNil(soUserId) ? signingOfficial : soUserId, label: signingOfficial}}
               />,
               span({
