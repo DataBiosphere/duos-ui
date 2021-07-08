@@ -154,6 +154,7 @@ export const setUserRoleStatuses = (user, Storage) => {
   user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
   user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
   user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+  user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
   Storage.setCurrentUser(user);
   return user;
 };
