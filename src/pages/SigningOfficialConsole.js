@@ -2,7 +2,7 @@ import {useState} from "react";
 import {useEffect} from "react";
 import {Notifications} from "../libs/utils";
 import {div, a, h} from "react-hyperscript-helpers";
-import {Theme, Styles} from "../libs/theme";
+import {Styles} from "../libs/theme";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
 import {tableHeaderTemplate} from "../components/dar_table/DarTable";
 import {tableRowLoadingTemplate} from "../components/dar_table/DarTable";
@@ -16,16 +16,16 @@ import {userSearchHandler} from "../libs/utils";
 import {assign} from "lodash/fp";
 import {span} from "react-hyperscript-helpers";
 
-export default function SigningOfficialConsole(props) {
+export default function SigningOfficialConsole() {
   const [signingOfficial, setSiginingOfficial] = useState();
-  //to be used for the manage dar component
-  const [darList, setDarList] = useState();
-  const [filteredDarList, setFilteredDarList] = useState();
-  const [currentDarPage, setCurrentDarPage] = useState();
-  //to be used for manage researcher component
-  const [userList, setUserList] = useState();
-  const [filteredUserList, setFilteredUserList] = useState();
-  const [currentUserPage, setCurrentUserPage] = useState();
+  //states to be added and used for the manage dar component
+  const [darList,] = useState();
+  const [setFilteredDarList] = useState();
+  const [setCurrentDarPage] = useState();
+  //states to be added and used for manage researcher component
+  const [userList,] = useState();
+  const [setFilteredUserList] = useState();
+  const [setCurrentUserPage] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   //could benefit in moving this to utils or a shared component so it can be used for the adminManageUsers page
@@ -99,11 +99,10 @@ export default function SigningOfficialConsole(props) {
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
       div({style: {display: 'flex',justifyContent: "space-between"}}, [
         div({ style: Styles.LEFT_HEADER_SECTION}, [
-          div({style: Styles.ICON_CONTAINER}, [
+          div({style: {... Styles.ICON_CONTAINER, textAlign: "center"}}, [
             img({
               id: 'user-icon',
-              src: userIcon,
-              style: Styles.HEADER_IMG
+              src: userIcon
             })
           ]),
           div({style: Styles.HEADER_CONTAINER}, [
