@@ -4,7 +4,7 @@ import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import {isNil} from 'lodash/fp';
+import {isNil, find} from 'lodash/fp';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty } from 'lodash';
 import Creatable from 'react-select/creatable';
@@ -56,7 +56,6 @@ export default function ResearcherInfo(props) {
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
-  const [soUserId, setSoUserId] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
@@ -78,8 +77,15 @@ export default function ResearcherInfo(props) {
     allSigningOfficials.push(newOption);
     setAllSigningOfficials(allSigningOfficials);
     setSigningOfficial(e);
-    setSoUserId(null);
     formFieldChange({ name: "signingOfficial", value: e });
+  };
+
+  const getSOValue = () => {
+    if (isNil(signingOfficial)) {
+      return null;
+    } else {
+      return find((option) => option.value === signingOfficial)(allSigningOfficials);
+    }
   };
 
   const cloudRadioGroup = div({
@@ -317,17 +323,14 @@ export default function ResearcherInfo(props) {
                 required={true}
                 disabled={!isNil(darCode)}
                 placeholder="Select from the list or type your SO's full name if it is not present"
-                onChange={(e) =>  {
-                  //if this was a user created option there is no ID to save
-                  formFieldChange({name: 'signingOfficial', value: e.label});
-                  (e.value === e.label) ? setSoUserId(null) : setSoUserId(e.value);
+                onChange={(e) => {
+                  formFieldChange({name: 'signingOfficial', value: e.value});
+                  setSigningOfficial(e.value);
                 }}
                 onCreateOption={(e) => updateSOList(e)}
                 options={allSigningOfficials}
                 styles={soDropDownStyle}
-                value={isNil(signingOfficial) || isEmpty(signingOfficial) ?
-                  //if this was a user created option there is no ID so use the name for both value and label
-                  null : {value: isNil(soUserId) ? signingOfficial : soUserId, label: signingOfficial}}
+                value={getSOValue()}
               />,
               span({
                 isRendered: showValidationMessages && isEmpty(signingOfficial),
