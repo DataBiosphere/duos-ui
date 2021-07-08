@@ -316,7 +316,7 @@ export default function ResearcherInfo(props) {
                 required={true}
                 disabled={!isNil(darCode)}
                 placeholder="Select from the list or type your SO's full name if it is not present"
-                onChange={(e) => formFieldChange({name: 'signingOfficial', value: e.value})}
+                onChange={(e) => formFieldChange({name: 'signingOfficial', value: e.label})}
                 onCreateOption={(e) => updateSOList(e)}
                 options={allSigningOfficials}
                 styles={soDropDownStyle}

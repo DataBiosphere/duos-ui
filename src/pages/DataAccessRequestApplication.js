@@ -188,7 +188,7 @@ class DataAccessRequestApplication extends Component {
   async getSOs()  {
     const allSOs = await User.getSOsForCurrentUser();
     const allSOsOptions = map((user) =>  {
-      return {value: user.displayName, label: user.displayName};
+      return {value: user.userId, label: user.displayName};
     })(allSOs);
     return allSOsOptions;
   }
