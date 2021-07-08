@@ -32,9 +32,12 @@ export const ApplicantInfo = hh(
         ]);
       });
     };
-    formatLibraryCard = cards => {
+    formatLibraryCard = (cards, institution) => {
       return ld.map(cards, (card) => {
-        return div({ style: { margin: 3 } }, [
+        if (card.institutionId !== institution.id) {
+          return div({});
+        }
+        return div({ style: { margin: 3, textAlign: 'center' } }, [
           img({
             id: 'card_' + card,
             src: cardImg,
@@ -48,15 +51,18 @@ export const ApplicantInfo = hh(
                 backgroundColor: '#00928A',
                 borderRadius: 3,
                 textAlign: 'center',
+                paddingLeft: 3,
+                paddingRight: 3,
+                maxWidth: 150
               },
             },
-            [card]),
+            [institution.name]),
         ]);
       });
     };
 
     render() {
-      const { content, researcherProfile } = this.props;
+      const { content, researcherProfile, institution } = this.props;
       const libraryCards = ld.get(researcherProfile, 'libraryCards', []);
       return div(
         { style: { fontFamily: 'Arial', color: Theme.palette.primary } }, [
@@ -67,7 +73,7 @@ export const ApplicantInfo = hh(
             [
               div({ style: {...HEADER, margin: '20px 0'} }, 'Library Cards'),
               div({ style: { display: 'flex', flexFlow: 'row wrap' } },
-                this.formatLibraryCard(libraryCards)),
+                this.formatLibraryCard(libraryCards, institution)),
             ]),
         ]);
     }

@@ -175,13 +175,6 @@ export const DAC = {
 
 export const DAR = {
 
-  describeDarWithConsent: async (darId) => {
-    const darInfo = await DAR.describeDar(darId);
-    const consent = await DAR.getDarConsent(darId);
-    darInfo.translatedDataUse = await DAR.translateDataUse(consent.dataUse);
-    return { darInfo, consent };
-  },
-
   //v2 get for DARs
   describeDar: async (darId) => {
     const apiUrl = await Config.getApiUrl();
@@ -254,12 +247,6 @@ export const DAR = {
     return darInfo;
   },
 
-  translateDataUse: async dataUse => {
-    const url = `${await Config.getOntologyApiUrl()}translate/summary`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(dataUse), { method: 'POST' }]));
-    return await res.json();
-  },
-
   //v2 get for DARs
   getPartialDarRequest: async darId => {
     const url = `${await Config.getApiUrl()}/api/dar/v2/${darId}`;
@@ -288,23 +275,15 @@ export const DAR = {
     return await res;
   },
 
-  getPartialDarRequestList: async () => {
-    const url = `${await Config.getApiUrl()}/api/dar/partials/manage`;
+  //v2 get draft dars
+  getDraftDarRequestList: async () => {
+    const url = `${await Config.getApiUrl()}/api/dar/v2/draft/manage`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
 
   getDarConsent: async id => {
     const url = `${await Config.getApiUrl()}/api/dar/find/${id}/consent`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
-  getDarFields: async (id, fields) => {
-    let url = `${await Config.getApiUrl()}/api/dar/find/${id}`;
-    if (fields !== null) {
-      url = url + `?fields=${fields}`;
-    }
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
@@ -346,7 +325,7 @@ export const DAR = {
     return res.data;
   },
 
-  //endpoint to be deprecated
+  //endpoint to be deprecated once V2 endpoint is updated to account for reasearchers
   getDataAccessManage: async() => {
     const url = `${await Config.getApiUrl()}/api/dar/manage`;
     const res = await fetchOk(url, Config.authOpts());
@@ -517,11 +496,6 @@ export const Election = {
     return res.json();
   },
 
-  findElectionById: async (electionId) => {
-    const url = `${await Config.getApiUrl()}/api/election/${electionId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
   findElectionByVoteId: async (voteId) => {
     const url = `${await Config.getApiUrl()}/api/election/vote/${voteId}`;
     const res = await fetchOk(url, Config.authOpts());
@@ -615,18 +589,6 @@ export const Election = {
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
-
-  findElectionReviewById: async (electionId, referenceId) => {
-    if (electionId !== undefined) {
-      const url = `${await Config.getApiUrl()}/api/electionReview/${electionId}`;
-      const res = await fetchOk(url, Config.authOpts());
-      return await res.json();
-    } else {
-      const url = `${await Config.getApiUrl()}/api/electionReview/last/${referenceId}`;
-      const res = await fetchOk(url, Config.authOpts());
-      return await res.json();
-    }
-  }
 
 };
 
@@ -911,8 +873,8 @@ export const User = {
     return res.data;
   },
 
-  list: async () => {
-    const url = `${await Config.getApiUrl()}/api/dacuser`;
+  list: async roleName => {
+    const url = `${await Config.getApiUrl()}/api/user/role/${roleName}`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },
@@ -991,12 +953,6 @@ export const Votes = {
 
   getDarVote: async (requestId, voteId) => {
     const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/vote/${voteId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return res.json();
-  },
-
-  getDarFinalAccessVote: async (requestId) => {
-    const url = `${await Config.getApiUrl()}/api/dataRequest/${requestId}/vote/final`;
     const res = await fetchOk(url, Config.authOpts());
     return res.json();
   },

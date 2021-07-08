@@ -5,11 +5,11 @@
   "dependencies": {
     "@material-ui/core": "4.11.4",
     "@material-ui/icons": "4.11.2",
-    "@react-pdf/renderer": "^2.0.15",
+    "@react-pdf/renderer": "^2.0.16",
     "axios": "^0.21.1",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
-    "dompurify": "2.2.9",
+    "dompurify": "2.3.0",
     "jquery": "3.6.0",
     "js-file-download": "0.4.12",
     "lodash": "4.17.21",
@@ -56,12 +56,12 @@
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
-    "cypress": "7.6.0",
-    "eslint": "^7.29.0",
-    "eslint-plugin-flowtype": "5.7.2",
+    "cypress": "7.7.0",
+    "eslint": "^7.30.0",
+    "eslint-plugin-flowtype": "5.8.0",
     "eslint-plugin-react": "7.24.0",
     "react-scripts": "4.0.3",
-    "start-server-and-test": "1.12.5"
+    "start-server-and-test": "1.12.6"
   },
   "browserslist": [
     ">0.2%",
