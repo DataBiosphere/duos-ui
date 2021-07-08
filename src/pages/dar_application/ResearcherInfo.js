@@ -4,10 +4,9 @@ import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import {isNil, map} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty } from 'lodash';
-import {User} from "../../libs/ajax";
 import Creatable from 'react-select/creatable';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
@@ -57,6 +56,7 @@ export default function ResearcherInfo(props) {
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
+  const [soUserId, setSoUserId] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
@@ -78,6 +78,7 @@ export default function ResearcherInfo(props) {
     allSigningOfficials.push(newOption);
     setAllSigningOfficials(allSigningOfficials);
     setSigningOfficial(e);
+    setSoUserId(null);
     formFieldChange({ name: "signingOfficial", value: e });
   };
 
@@ -316,11 +317,15 @@ export default function ResearcherInfo(props) {
                 required={true}
                 disabled={!isNil(darCode)}
                 placeholder="Select from the list or type your SO's full name if it is not present"
-                onChange={(e) => formFieldChange({name: 'signingOfficial', value: e.label})}
+                onChange={(e) =>  {
+                  formFieldChange({name: 'signingOfficial', value: e.label});
+                  (e.value === e.label) ? setSoUserId(null) : setSoUserId(e.value);
+                }}
                 onCreateOption={(e) => updateSOList(e)}
                 options={allSigningOfficials}
                 styles={soDropDownStyle}
-                value={isNil(signingOfficial) || isEmpty(signingOfficial) ? null : {value: signingOfficial, label: signingOfficial}}
+                value={isNil(signingOfficial) || isEmpty(signingOfficial) ?
+                  null : {value: isNil(soUserId) ? signingOfficial : soUserId, label: signingOfficial}}
               />,
               span({
                 isRendered: showValidationMessages && isEmpty(signingOfficial),
