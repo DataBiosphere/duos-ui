@@ -9,7 +9,6 @@ import _ from 'lodash';
 import {User} from "./ajax";
 
 export const UserProperties = {
-  NIH_USERNAME : "nihUsername",
   LINKEDIN : "linkedIn",
   ORCID: "orcid",
   IS_THE_PI: "isThePI",
@@ -39,7 +38,7 @@ export const findPropertyValue = (propName, researcher) => {
 export const getPropertyValuesFromUser = (user) => {
   let researcherProps = {
     academicEmail: user.email,
-    nihUsername: findPropertyValue(UserProperties.NIH_USERNAME, user),
+    eraCommonsId: user.eraCommonsId,
     linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
     orcid: findPropertyValue(UserProperties.ORCID, user),
     researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),

@@ -29,7 +29,7 @@ class ResearcherReview extends Component {
         department: '',
         division: '',
         eRACommonsID: '',
-        nihUsername: '',
+        eraCommonsId: '',
         linkedIn: '',
         orcid: '',
         researcherGate: '',
@@ -152,7 +152,7 @@ class ResearcherReview extends Component {
             div({ className: "row no-margin" }, [
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
                 label({ className: "control-label" }, ["NIH User Name"]),
-                div({ id: "lbl_profileNihUsername", className: "control-data", name: "profileNihUsername",  readOnly: true}, [formData.nihUsername]),
+                div({ id: "lbl_profileeraCommonsId", className: "control-data", name: "profileeraCommonsId",  readOnly: true}, [formData.eraCommonsId]),
               ]),
 
               div({ className: "col-lg-6 col-md-6 col-sm-6 col-xs-12" }, [
@@ -250,8 +250,7 @@ class ResearcherReview extends Component {
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["eRA Commons ID"]),
-                //eraCommonsID is currently being saved as nihUsername, this will change with DUOS-1095
-                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.nihUsername]),
+                div({ id: "lbl_profileEraCommons", className: "control-data", name: "profileEraCommons", readOnly: true}, [formData.eraCommonsId]),
               ]),
 
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [

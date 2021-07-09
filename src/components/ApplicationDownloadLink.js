@@ -168,7 +168,7 @@ export default function ApplicationDownloadLink(props) {
         h(View, {style: styles.flexboxContainer}, [
           h(SmallLabelTextComponent, {
             label: "NIH eRA Commons ID",
-            text: `${researcherProps.nihUsername}`,
+            text: `${researcherProps.eraCommonsId}`,
             style: {marginRight: 30}
           }),
           h(SmallLabelTextComponent, {
