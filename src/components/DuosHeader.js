@@ -569,9 +569,9 @@ class DuosHeader extends Component {
                     label: 'Admin Console',
                   }),
                   h(BasicListItem, {
-                    isRendered: isSigningOfficial, 
-                    applyPointer, 
-                    targetLink: '/signing_official_console', 
+                    isRendered: isSigningOfficial,
+                    applyPointer,
+                    targetLink: '/signing_official_console',
                     label: 'Signing Official Console',
                   }),
                   h(DropdownComponent, {
