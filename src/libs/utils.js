@@ -345,12 +345,27 @@ export const calcFilteredListPosition = (index, currentPage, tableSize) => {
   return index + ((currentPage - 1) * tableSize);
 };
 
+export const calcTablePageCount = (tableSize, filteredList) => {
+  if (isEmpty(filteredList)) {
+    return 1;
+  }
+  return Math.ceil(filteredList.length / tableSize);
+};
+
+export const calcVisibleWindow = (currentPage, tableSize, filteredList) => {
+  if (!isEmpty(filteredList)) {
+    const startIndex = (currentPage - 1) * tableSize;
+    const endIndex = currentPage * tableSize;
+    return filteredList.slice(startIndex, endIndex);
+  }
+};
+
 export const updateLists = (filteredList, setFilteredList, electionList, setElectionList, currentPage, tableSize) => {
   return (updatedElection, darId, i, successText, votes = undefined) => {
     const index = calcFilteredListPosition(i, currentPage, tableSize);
     let filteredListCopy = cloneDeep(filteredList);
     let electionListCopy = cloneDeep(electionList);
-    const targetFilterRow = filteredListCopy[parseInt(index, 10)];
+    const targetFilterRow = filteredListCopy[index];
     const targetElectionRow = electionListCopy.find((element) => element.dar.referenceId === darId);
     targetFilterRow.election = updatedElection;
     targetElectionRow.election = cloneDeep(updatedElection);
@@ -365,7 +380,7 @@ export const updateLists = (filteredList, setFilteredList, electionList, setElec
 };
 
 //Helper function, search bar handler for DAC Chair console and AdminManageAccess
-//NOTE: May need to write a separate version for AdminManageAccess, need to explore more
+//NOTE: need to replace this in favor of the generic function. Will remove once substitutions in code is completed
 export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) => {
   return (searchTerms) => {
     const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
@@ -384,6 +399,50 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
             const targetElectionAttrs = JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]);
             return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
           }, newFilteredList);
+        }
+      });
+      setFilteredList(newFilteredList);
+    }
+    setCurrentPage(1);
+  };
+};
+
+export const getSearchFilterFunctions = () => {
+  return {
+    dar: (term, targetList) => filter(electionData => {
+      const { election, dac, votes} = electionData;
+      const dar = electionData.dar ? electionData.dar.data : undefined;
+      const targetDarAttrs = !isNil(dar) ? JSON.stringify([toLower(dar.projectTitle), toLower(dar.darCode), toLower(getNameOfDatasetForThisDAR(dar.datasets, dar.datasetIds))]) : [];
+      const targetDacAttrs = !isNil(dac) ? JSON.stringify([toLower(dac.name)]) : [];
+      const targetElectionAttrs = !isNil(election) ? JSON.stringify([toLower(processElectionStatus(election, votes)), getElectionDate(election)]) : [];
+      return includes(term, targetDarAttrs) || includes(term, targetDacAttrs) || includes(term, targetElectionAttrs);
+    }, targetList),
+    libraryCard: (term, targetList) => filter(libraryCard => {
+      const { userName, institution, createDate, updateDate, eraCommonsId, userEmail} = libraryCard;
+      const institutionName = institution.name;
+      return includes(term, toLower(userName)) ||
+        includes(term, toLower(institutionName)) ||
+        includes(term, formatDate(createDate)) ||
+        includes(term, formatDate(updateDate)) ||
+        includes(term, toLower(userEmail)) ||
+        includes(term, toLower(eraCommonsId));
+    }, targetList)
+  };
+};
+
+export const tableSearchHandler = (list, setFilteredList, setCurrentPage, modelName) => {
+  const filterFnMap = getSearchFilterFunctions();
+  return (searchTerms) => {
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    if(isEmpty(searchTermValues)) {
+      setFilteredList(list);
+    } else {
+      let newFilteredList = cloneDeep(list);
+      searchTermValues.forEach((splitTerm) => {
+        const term = splitTerm.trim();
+        if(!isEmpty(term)) {
+          const filterFn = filterFnMap[modelName];
+          newFilteredList = filterFn(term, newFilteredList);
         }
       });
       setFilteredList(newFilteredList);
@@ -415,7 +474,6 @@ export const userSearchHandler = (userList, setFilteredList, setCurrentPage) => 
   };
 };
 
-
 export const searchOntologies = (query, callback) => {
   let options = [];
   DAR.getAutoCompleteOT(query).then(
@@ -437,12 +495,12 @@ export const setStyle = (disabled, baseStyle, targetColorAttribute) => {
   return Object.assign(baseStyle, appliedStyle);
 };
 
-export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave) => {
+export const setDivAttributes = (disabled, onClick, style, dataTip, onMouseEnter, onMouseLeave, key) => {
   let attributes;
   if(!disabled) {
-    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip};
+    attributes = {onClick, onMouseEnter, onMouseLeave, style, "data-tip": dataTip, key};
   } else {
-    attributes = {style, disabled, "data-tip": dataTip};
+    attributes = {style, disabled, "data-tip": dataTip, key};
   }
   if(!isEmpty(dataTip)) {
     attributes["data-tip"] = dataTip;

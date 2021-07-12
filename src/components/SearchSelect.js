@@ -3,7 +3,7 @@ import {div, input, span, a, ul, li } from 'react-hyperscript-helpers';
 import './SearchSelect.css';
 
 export const SearchSelect = (props) => {
-  const { onSelection, placeholder, options, searchPlaceholder, id, name } = props;
+  const { onSelection, placeholder, options, searchPlaceholder, id, label } = props;
   const [currentDisplay, setCurrentDisplay] = useState(placeholder || '');
   const [currentSelection, setCurrentSelection] = useState(props.value);
   const [fullList, setFullList] = useState(props.options);
@@ -42,7 +42,7 @@ export const SearchSelect = (props) => {
   };
 
   return (
-    div({ className: 'dropdown select-dropdown', id, name }, [
+    div({ className: 'dropdown select-dropdown', id, name: label }, [
       a({
         className: 'btn select-btn btn-secondary dropdown-toggle',
         role: "button",

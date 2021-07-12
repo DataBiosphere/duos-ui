@@ -234,9 +234,7 @@ export default function DarTable(props) {
       title: "Open Election?",
       message: "Are you sure you want the DAC to vote on this data access request?",
       header: createElectionInfo.name,
-      onConfirm: createElection,
-      id: createElectionInfo.id,
-      index: createElectionInfo.index
+      onConfirm: () => createElection(createElectionInfo.id, createElectionInfo.index)
     }),
     //You only need one instance of ReactTooltip rendered for all tooltips (if they follow the same styling)
     //Only create multiple instances if there is enough of a difference in appearance to warrant it

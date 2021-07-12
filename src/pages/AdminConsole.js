@@ -194,7 +194,17 @@ class AdminConsole extends Component {
                   unreviewedCases: darUnreviewedCases
                 }),
               ]),
-              consoleBoxPlaceholder,
+              div({ className: "col-lg-6 col-md-6 col-sm-12 col-xs-12 admin-box" }, [
+                AdminConsoleBox({
+                  id: 'btn_manageDAR',
+                  url: '/admin_manage_lc',
+                  color: 'access',
+                  title: 'Manage Library Cards',
+                  description: 'Select and manage Library Cards',
+                  iconName: 'manage-access',
+                  iconSize: 'default'
+                }),
+              ])
             ]),
 
             div({ className: "row fsi-row-lg-level fsi-row-md-level no-margin" }, [

@@ -1091,6 +1091,28 @@ export const Institution = {
   }
 };
 
+export const LibraryCard = {
+  getAllLibraryCards: async () => {
+    const url = `${await Config.getApiUrl()}/api/libraryCards`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
+  },
+  createLibraryCard: async (card) => {
+    const url = `${await Config.getApiUrl()}/api/libraryCards`;
+    const res = await axios.post(url, card, Config.authOpts());
+    return res.data;
+  },
+  updateLibraryCard: async (card) => {
+    const url = `${await Config.getApiUrl()}/api/libraryCards/${card.id}`;
+    const res = await axios.put(url, card, Config.authOpts());
+    return res.data;
+  },
+  deleteLibraryCard: async (id) => {
+    const url = `${await Config.getApiUrl()}/api/libraryCards/${id}`;
+    return await axios.delete(url, Config.authOpts());
+  }
+};
+
 const fetchOk = async (...args) => {
   spinnerService.showAll();
   const res = await fetch(...args);
