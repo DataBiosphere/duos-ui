@@ -1,5 +1,5 @@
 # base image
-FROM node:14.17.1 AS builder
+FROM node:14.17.3 AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
 # set working directory
@@ -17,7 +17,7 @@ COPY config/base_config.json /usr/src/app/public/config.json
 RUN npm install --silent
 RUN npm run build --silent
 
-FROM nginxinc/nginx-unprivileged:1.21.0-alpine
+FROM nginxinc/nginx-unprivileged:1.21.1-alpine
 RUN rm -rf /etc/nginx/conf.d
 COPY conf /etc/nginx
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html

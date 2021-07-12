@@ -216,6 +216,7 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
+    let isSigningOfficial = false;
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
 
@@ -226,6 +227,7 @@ class DuosHeader extends Component {
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
+      isSigningOfficial = currentUser.isSigningOfficial;
     }
 
     const dropdownLinks = {
@@ -346,7 +348,9 @@ class DuosHeader extends Component {
                   'Admin Console',
                 ]),
               ]),
-
+              li({ isRendered: isSigningOfficial }, [
+                h(Link, { id: 'link_so_console', to: '/signing_official_console' }, ['Signing Official Console'])
+              ]),
               li({ className: 'dropdown', isRendered: isChairPerson }, [
                 a(
                   {
@@ -563,6 +567,12 @@ class DuosHeader extends Component {
                     applyPointer,
                     targetLink: '/admin_console',
                     label: 'Admin Console',
+                  }),
+                  h(BasicListItem, {
+                    isRendered: isSigningOfficial, 
+                    applyPointer, 
+                    targetLink: '/signing_official_console', 
+                    label: 'Signing Official Console',
                   }),
                   h(DropdownComponent, {
                     isRendered: isChairPerson,

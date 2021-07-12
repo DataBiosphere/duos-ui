@@ -5,6 +5,7 @@ import { SubmitVoteBox } from '../components/SubmitVoteBox';
 import { User, Institution} from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import {getPropertyValuesFromUser} from "../libs/utils";
+import {isNil} from "lodash/fp";
 
 class ResearcherReview extends Component {
 
@@ -174,7 +175,7 @@ class ResearcherReview extends Component {
             div({ className: "row margin-top-20" }, [
               div({ className: "col-lg-12 col-md-12 col-sm-12 col-xs-12" }, [
                 label({ className: "control-label" }, ["Institution Name"]),
-                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [institution.name]),
+                div({ id: "lbl_profileInstitution", className: "control-data", name: "profileInstitution", readOnly: true}, [isNil(institution) ? '' : institution.name]),
               ])
             ]),
 

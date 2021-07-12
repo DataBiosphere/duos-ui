@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes } from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq } from "lodash/fp";
 import _ from 'lodash';
 import {User} from "./ajax";
 
@@ -109,6 +109,7 @@ export const USER_ROLES = {
   researcher: 'Researcher',
   alumni: 'Alumni',
   dataOwner: 'DataOwner',
+  signingOfficial: 'SigningOfficial',
   all: 'All'
 };
 
@@ -153,6 +154,7 @@ export const setUserRoleStatuses = (user, Storage) => {
   user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
   user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
   user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
+  user.isSigningOfficial = currentUserRoles.indexOf(USER_ROLES.signingOfficial) > -1;
   Storage.setCurrentUser(user);
   return user;
 };
@@ -389,6 +391,30 @@ export const darSearchHandler = (electionList, setFilteredList, setCurrentPage) 
     setCurrentPage(1);
   };
 };
+
+export const userSearchHandler = (userList, setFilteredList, setCurrentPage) => {
+  return (searchTerms) => {
+    const searchTermValues = toLower(searchTerms.current.value).split(/\s|,/);
+    if(isEmpty(searchTermValues)) {
+      setFilteredList(userList);
+    } else {
+      let newFilteredList = cloneDeep(userList);
+      searchTermValues.forEach((splitTerm) => {
+        const term = splitTerm.trim();
+        if(!isEmpty(term)) {
+          newFilteredList = filter(user => {
+            const roles = sortedUniq(map(role => role.name)(user.roles));
+            const targetUserAttrs = !isNil(user) ? JSON.stringify([toLower(user.displayName), toLower(user.email), toLower(roles)]) : [];
+            return includes(term, targetUserAttrs);
+          }, newFilteredList);
+        }
+      });
+      setFilteredList(newFilteredList);
+    }
+    setCurrentPage(1);
+  };
+};
+
 
 export const searchOntologies = (query, callback) => {
   let options = [];

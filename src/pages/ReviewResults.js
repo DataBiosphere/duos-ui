@@ -25,56 +25,54 @@ export default function ReviewResults(props) {
   const [matchData, setMatchData] = useState();
 
   useEffect(() => {
-    setData(darId);
+    const setData = async (darId, status) => {
+      //get information associated with the access request
+      const {datasets, darInfo, consent, researcherProfile} = await getDarData(darId);
+      setDarInfo(darInfo);
+      setConsent(consent);
+      setDatasets(datasets);
+      setResearcherProfile(researcherProfile);
 
-  }, [darId]);
+      //get information about access election and research purpose election
+      let accessElection;
+      let accessElectionReview;
+      let rpElectionReview;
 
-  const setData = async (darId) => {
-    //get information associated with the access request
-    const {datasets, darInfo, consent, researcherProfile} = await getDarData(darId);
-    setDarInfo(darInfo);
-    setConsent(consent);
-    setDatasets(datasets);
-    setResearcherProfile(researcherProfile);
-
-    //get information about access election and research purpose election
-    let accessElection;
-    let accessElectionReview;
-    let rpElectionReview;
-
-    //dars with unreviewed status will not have an election
-    if (status !== 'Unreviewed') {
+      //dars with unreviewed status will not have an election
+      if (status !== 'Unreviewed') {
+        try {
+          accessElection = await Election.findElectionByDarId(darId);
+        } catch (error) {
+          //access election is null, this is expected for a dar with an unreviewed election status
+          //so there is no vote information to display
+        }
+      }
       try {
-        accessElection = await Election.findElectionByDarId(darId);
+        accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId);
+        rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId);
       } catch (error) {
-        //access election is null, this is expected for a dar with an unreviewed election status
-        //so there is no vote information to display
+        Notifications.showError({text: 'Error initializing Election Data'});
+        return Promise.reject(error);
       }
-    }
-    try {
-      accessElectionReview = isNil(accessElection) ? null : await Election.findDataAccessElectionReview(accessElection.electionId);
-      rpElectionReview = isNil(accessElection) ? null : await Election.findRPElectionReview(accessElection.electionId);
-    } catch (error) {
-      Notifications.showError({text: 'Error initializing Election Data'});
-      return Promise.reject(error);
-    }
 
-    setAccessElection(accessElection);
-    setAccessElectionReview(accessElectionReview);
-    setRpElectionReview(rpElectionReview);
+      setAccessElection(accessElection);
+      setAccessElectionReview(accessElectionReview);
+      setRpElectionReview(rpElectionReview);
 
-    //get the duos matching algorithm decision
-    let matchData;
+      //get the duos matching algorithm decision
+      let matchData;
 
-    if (!isNil(accessElection)) {
-      try {
-        matchData = await Match.findMatch(consent.consentId, accessElection.referenceId);
-        setMatchData(matchData);
-      } catch (e) {
-        Notifications.showError({text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}`});
+      if (!isNil(accessElection)) {
+        try {
+          matchData = await Match.findMatch(consent.consentId, accessElection.referenceId);
+          setMatchData(matchData);
+        } catch (e) {
+          Notifications.showError({text: `Something went wrong trying to get match algorithm results. Error code: ${e.status}`});
+        }
       }
-    }
-  };
+    };
+    setData(darId);
+  }, [darId, status]);
 
   return (
     (!isNil(darInfo)) ?

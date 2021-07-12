@@ -6,7 +6,7 @@ import { Alert } from './Alert';
 import { User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
-import { Navigation, setUserRoleStatuses, USER_ROLES } from '../libs/utils';
+import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
 export const SignIn = hh(class SignIn extends Component {
 
@@ -105,18 +105,6 @@ export const SignIn = hh(class SignIn extends Component {
   redirect = (user) => {
     Navigation.back(user, this.props.history);
     this.props.onSignIn();
-  };
-
-  setUserRoleStatuses = (user) => {
-    const currentUserRoles = user.roles.map(roles => roles.name);
-    user.isChairPerson = currentUserRoles.indexOf(USER_ROLES.chairperson) > -1;
-    user.isMember = currentUserRoles.indexOf(USER_ROLES.member) > -1;
-    user.isAdmin = currentUserRoles.indexOf(USER_ROLES.admin) > -1;
-    user.isResearcher = currentUserRoles.indexOf(USER_ROLES.researcher) > -1;
-    user.isDataOwner = currentUserRoles.indexOf(USER_ROLES.dataOwner) > -1;
-    user.isAlumni = currentUserRoles.indexOf(USER_ROLES.alumni) > -1;
-    Storage.setCurrentUser(user);
-    return user;
   };
 
   renderSpinnerIfDisabled = (disabled) => {

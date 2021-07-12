@@ -1,11 +1,13 @@
 import { useState, useEffect} from 'react';
+import React from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import isNil from 'lodash/fp/isNil';
+import {isNil, find} from 'lodash/fp';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty } from 'lodash';
+import Creatable from 'react-select/creatable';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
 const profileUnsubmitted = span(["Please submit ", profileLink, " to be able to create a Data Access Request"]);
@@ -45,13 +47,20 @@ export default function ResearcherInfo(props) {
     marginTop: '5rem'
   };
 
+  const soDropDownStyle = {
+    control: styles => ({ ...styles,
+      backgroundColor: !isNil(darCode) ? '#efefef' : 'white',
+      borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
+  };
+
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
-  const [signingOfficial, setSigningOfficial] = useState(props.signingOfficial || '');
+  const [signingOfficial, setSigningOfficial] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
+  const [allSigningOfficials, setAllSigningOfficials] = useState(props.allSigningOfficials);
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
@@ -60,7 +69,24 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+    setAllSigningOfficials(props.allSigningOfficials);
+  }, [props.signingOfficial, props.allSigningOfficials, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+
+  const updateSOList = (e) => {
+    const newOption = {value: e, label: e};
+    allSigningOfficials.push(newOption);
+    setAllSigningOfficials(allSigningOfficials);
+    setSigningOfficial(e);
+    formFieldChange({ name: "signingOfficial", value: e });
+  };
+
+  const getSOValue = () => {
+    if (isNil(signingOfficial)) {
+      return null;
+    } else {
+      return find((option) => option.value === signingOfficial)(allSigningOfficials);
+    }
+  };
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -292,14 +318,20 @@ export default function ResearcherInfo(props) {
               ])
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              input({
-                type: 'text',
-                defaultValue: signingOfficial,
-                name: 'signingOfficial',
-                required: true,
-                className: isEmpty(signingOfficial) && showValidationMessages ? 'form-control required-field-error' : 'form-control',
-                onBlur: (e) => formFieldChange({name: 'signingOfficial', value: e.target.value})
-              }),
+              <Creatable
+                key={"selectSO"}
+                required={true}
+                disabled={!isNil(darCode)}
+                placeholder="Select from the list or type your SO's full name if it is not present"
+                onChange={(e) => {
+                  formFieldChange({name: 'signingOfficial', value: e.value});
+                  setSigningOfficial(e.value);
+                }}
+                onCreateOption={(e) => updateSOList(e)}
+                options={allSigningOfficials}
+                styles={soDropDownStyle}
+                value={getSOValue()}
+              />,
               span({
                 isRendered: showValidationMessages && isEmpty(signingOfficial),
                 className: 'cancel-color required-field-error-span'

@@ -40,14 +40,14 @@ export const AppSummary = hh(class AppSummary extends React.Component {
     this.state = {
       generateRestrictions: this.generateRestrictions.bind(this),
       translatedRestrictions: [],
-      institution: ""
+      institution: {},
     };
   }
 
   getInstitutionFromProfile = async () => {
-    const institute = await Institution.getById(this.props.researcherProfile.institutionId);
+    const institution = await Institution.getById(this.props.researcherProfile.institutionId);
     this.setState(prev => {
-      prev.institution = institute.name;
+      prev.institution = institution;
       return prev;
     });
   };
@@ -139,10 +139,10 @@ export const AppSummary = hh(class AppSummary extends React.Component {
           },
           [ApplicantInfo({
             researcherProfile: researcherProfile,
+            institution: this.state.institution,
             content: {
               principalInvestigator: piName,
               researcher: researcherProfile.displayName,
-              institution: this.state.institution,
               department,
               city,
               country
