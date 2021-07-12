@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { h } from 'react-hyperscript-helpers';
 import { Institution, User } from '../libs/ajax';
 import { LibraryCard } from '../libs/ajax';
-import { Notifications } from '../libs/utils';
+import { Notifications, USER_ROLES } from '../libs/utils';
 import LibraryCardTable from '../components/library_card_table/LibraryCardTable';
 
 export default function AdminManageLC() {
@@ -16,7 +16,7 @@ export default function AdminManageLC() {
       const dataPromiseArray = await Promise.all([
         LibraryCard.getAllLibraryCards(),
         Institution.list(),
-        User.list()
+        User.list(USER_ROLES.admin)
       ]);
       const cards = dataPromiseArray[0];
       const institutions = dataPromiseArray[1].map((institution) => {

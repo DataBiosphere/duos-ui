@@ -194,6 +194,7 @@ class DuosHeader extends Component {
     let isAdmin = false;
     let isResearcher = false;
     let isDataOwner = false;
+    let isSigningOfficial = false;
     let isLogged = Storage.userIsLogged();
     let currentUser = {};
 
@@ -204,6 +205,7 @@ class DuosHeader extends Component {
       isAdmin = currentUser.isAdmin;
       isResearcher = currentUser.isResearcher;
       isDataOwner = currentUser.isDataOwner;
+      isSigningOfficial = currentUser.isSigningOfficial;
     }
 
     const dropdownLinks = {
@@ -308,6 +310,10 @@ class DuosHeader extends Component {
                 ]),
                 li({ isRendered: isAdmin }, [
                   h(Link, { id: 'link_adminConsole', to: '/admin_console' }, ['Admin Console'])
+                ]),
+
+                li({ isRendered: isSigningOfficial }, [
+                  h(Link, { id: 'link_so_console', to: '/signing_official_console' }, ['Signing Official Console'])
                 ]),
 
                 li({ className: 'dropdown', isRendered: isChairPerson }, [
@@ -417,6 +423,7 @@ class DuosHeader extends Component {
                 //NOTE: create user component to show logged in status (as well as dropdown options)
                 h(BasicListItem, {isRendered: isLogged, applyPointer, targetLink: '/profile', label: 'Your Profile', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isAdmin, applyPointer, targetLink: '/admin_console', label: 'Admin Console', goToLink: this.goToLink}),
+                h(BasicListItem, {isRendered: isSigningOfficial, applyPointer, targetLink: '/signing_official_console', label: 'Signing Official Console', goToLink: this.goToLink}),
                 h(DropdownComponent, {isRendered: isChairPerson, label: 'DAC Chair Console', goToLink: this.goToLink, onMouseEnter: applyPointer, dropdownLinks: dropdownLinks.chair, classes}),
                 h(BasicListItem, {isRendered: isMember, applyPointer, targetLink: '/member_console', label: 'DAC Member Console', goToLink: this.goToLink}),
                 h(BasicListItem, {isRendered: isResearcher, applyPointer, targetLink: '/researcher_console', label: 'Researcher Console', goToLink: this.goToLink}),

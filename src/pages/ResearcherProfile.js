@@ -14,6 +14,7 @@ import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 import ReactTooltip from "react-tooltip";
 import { SearchSelect } from '../components/SearchSelect';
+import { filter } from 'lodash/fp';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -39,7 +40,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   initialState() {
     return {
       loading: true,
-      hasLibraryCard: false,
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
@@ -483,6 +483,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let completed = this.state.profile.completed;
     const { researcherProfile, showValidationMessages } = this.state;
     const libraryCards = get(researcherProfile, 'libraryCards', []);
+    const lcInstitutions = filter((institution) => libraryCards.includes(institution.id))(this.state.institutionList);
 
     return (
 
@@ -592,7 +593,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       LibraryCards({
                         style: { display: 'flex', flexFlow: 'row wrap' },
                         isRendered: !isNil(researcherProfile),
-                        libraryCards: libraryCards
+                        libraryCards: lcInstitutions
                       })
                     ])
                   ])
