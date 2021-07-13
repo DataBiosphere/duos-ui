@@ -753,7 +753,7 @@ export const PendingCases = {
   },
 
   findDataOwnerUnReviewed: async (dataOwnerId) => {
-    const url = `${await Config.getApiUrl()}api/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
+    const url = `${await Config.getApiUrl()}/api/dataRequest/cases/pending/dataOwner/${dataOwnerId}`;
     const res = await fetchOk(url, Config.authOpts());
     return await res.json();
   },
