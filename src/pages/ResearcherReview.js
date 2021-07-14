@@ -6,6 +6,7 @@ import { User, Institution} from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";
+import { isEmpty } from 'lodash';
 
 class ResearcherReview extends Component {
 
@@ -56,11 +57,6 @@ class ResearcherReview extends Component {
     const user = await User.getById(this.props.match.params.dacUserId);
     let researcherProps = getPropertyValuesFromUser(user);
 
-    let institution;
-    if (user.institutionId !== undefined) {
-      institution = await Institution.getById(user.institutionId);
-    }
-
     let status = null;
     if (user.status === 'approved') {
       status = true;
@@ -70,7 +66,9 @@ class ResearcherReview extends Component {
 
     this.setState(prev => {
       prev.user = user;
-      prev.institution = institution;
+      if(!isEmpty(user.institution)) {
+        prev.institution = user.institution;
+      }
       prev.formData = researcherProps;
       prev.rationale = user.rationale;
       prev.voteStatus = status;
