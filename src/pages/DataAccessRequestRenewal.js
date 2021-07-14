@@ -156,7 +156,7 @@ class DataAccessRequestRenewal extends Component {
       formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
       formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
       formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
-      //bc the institution in user properties is not accurate
+      //NOTE: need to make new PR to add institution to User.me || User.getUserByEmail queries
       formData.institution = isNil(researcher)  || isNil(researcher.institutionId)? "" : (await Institution.getById(researcher.institutionId)).name;
       formData.department = rpProperties.department != null ? rpProperties.department : '';
       formData.division = rpProperties.division != null ? rpProperties.division : '';

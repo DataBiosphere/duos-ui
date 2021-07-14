@@ -3,7 +3,6 @@ import {h, span, i} from 'react-hyperscript-helpers';
 import {DataUseTranslation} from '../libs/dataUseTranslation';
 import {isNil, isEmpty} from 'lodash/fp';
 import { Theme } from '../libs/theme';
-import {Institution} from "../libs/ajax";
 import {useEffect, useState} from "react";
 import {getPropertyValuesFromUser} from "../libs/utils";
 
@@ -131,14 +130,10 @@ export default function ApplicationDownloadLink(props) {
   const translatedSRPs = DataUseTranslation.translateDarInfo(darInfo);
 
   useEffect(() => {
-    const getInstitution = async () => {
-      if (!isNil(researcherProfile) && !isNil(researcherProfile.institutionId)) {
-        const institute = await Institution.getById(researcherProfile.institutionId);
-        setInstitution(institute.name);
-      }
-    };
-    getInstitution();
-  });
+    if (!isNil(researcherProfile) && !isNil(researcherProfile.institution)) {
+      setInstitution(researcherProfile.institution.name);
+    }
+  }, [researcherProfile]);
 
 
   const getCollaborators = (darInfo, key) => {

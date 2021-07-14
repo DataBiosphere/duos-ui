@@ -4,7 +4,6 @@ import {Styles} from '../../libs/theme';
 import Modal from 'react-modal';
 import {find, isEmpty, isNil} from 'lodash/fp';
 import CloseIconComponent from '../CloseIconComponent';
-import {Institution} from "../../libs/ajax";
 import {useEffect, useState} from "react";
 
 const ModalDetailRow = (props) => {
@@ -64,12 +63,10 @@ const DarModal = (props) => {
   useEffect(() => {
 
     const returnInstitution = async (researcher) => {
-      const institutionId = researcher.institutionId;
-      if (isNil(institutionId)) {
+      if (isEmpty(researcher.institution)) {
         setInstitution('- -');
       } else {
-        const institute = await Institution.getById(institutionId);
-        setInstitution(institute.name);
+        setInstitution(researcher.institution.name);
       }
     };
     returnInstitution(researcher);

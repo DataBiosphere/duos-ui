@@ -7,8 +7,7 @@ import { StructuredDarRp } from '../../components/StructuredDarRp';
 import { ApplicantInfo } from './ApplicantInfo';
 import { DownloadLink } from '../../components/DownloadLink';
 import { DataUseTranslation } from '../../libs/dataUseTranslation';
-import {isNil} from "lodash/fp";
-import {Institution} from "../../libs/ajax";
+import {isNil, isEmpty} from "lodash/fp";
 import {findPropertyValue} from "../../libs/utils";
 import {UserProperties} from "../../libs/utils";
 
@@ -44,12 +43,13 @@ export const AppSummary = hh(class AppSummary extends React.Component {
     };
   }
 
-  getInstitutionFromProfile = async () => {
-    const institution = await Institution.getById(this.props.researcherProfile.institutionId);
-    this.setState(prev => {
-      prev.institution = institution;
-      return prev;
-    });
+  getInstitutionFromProfile = (profile) => {
+    if(!isEmpty(profile)) {
+      this.setState((prev) => {
+        prev.institution = profile.institution || {};
+        return prev;
+      });
+    }
   };
 
 
@@ -63,9 +63,7 @@ export const AppSummary = hh(class AppSummary extends React.Component {
 
   async componentDidMount() {
     await this.generateRestrictions(this.props.consent.dataUse);
-    if (!isNil(this.props.researcherProfile) && !isNil(this.props.researcherProfile.institutionId)) {
-      await this.getInstitutionFromProfile();
-    }
+    this.getInstitutionFromProfile(this.props.researcherProfile);
   }
 
   render() {
