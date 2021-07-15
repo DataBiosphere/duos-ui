@@ -1,10 +1,9 @@
 import { useState, useEffect} from 'react';
-import React from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import {isNil, find} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty } from 'lodash';
 import Creatable from 'react-select/creatable';
@@ -53,6 +52,13 @@ export default function ResearcherInfo(props) {
       borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
   };
 
+  const formatSOString = (name, email) => {
+    if(isEmpty(name)) { return '';}
+    const nameString = `${name}`;
+    const emailString = !isNil(email) ? ` (${email})` : '';
+    return nameString + emailString;
+  };
+
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
@@ -71,22 +77,6 @@ export default function ResearcherInfo(props) {
     setLocalUse(props.localUse);
     setAllSigningOfficials(props.allSigningOfficials);
   }, [props.signingOfficial, props.allSigningOfficials, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
-
-  const updateSOList = (e) => {
-    const newOption = {value: e, label: e};
-    allSigningOfficials.push(newOption);
-    setAllSigningOfficials(allSigningOfficials);
-    setSigningOfficial(e);
-    formFieldChange({ name: "signingOfficial", value: e });
-  };
-
-  const getSOValue = () => {
-    if (isNil(signingOfficial)) {
-      return null;
-    } else {
-      return find((option) => option.value === signingOfficial)(allSigningOfficials);
-    }
-  };
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -318,22 +308,32 @@ export default function ResearcherInfo(props) {
               ])
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              <Creatable
-                key={"selectSO"}
-                required={true}
-                disabled={!isNil(darCode)}
-                placeholder="Select from the list or type your SO's full name if it is not present"
-                onChange={(e) => {
-                  formFieldChange({name: 'signingOfficial', value: e.value});
-                  setSigningOfficial(e.value);
-                }}
-                onCreateOption={(e) => updateSOList(e)}
-                options={allSigningOfficials}
-                styles={soDropDownStyle}
-                value={getSOValue()}
-              />,
+              h(Creatable, {
+                key: "selectSO",
+                isClearable: true,
+                required: true,
+                isDisabled: !isNil(darCode),
+                placeholder: "Select from the list or type your SO's full name if it is not present",
+                onChange: (option) => {
+                  const value = isNil(option) ? '' : formatSOString(option.displayName, option.email);
+                  formFieldChange({name: 'signingOfficial', value});
+                },
+                options: allSigningOfficials,
+                styles: soDropDownStyle,
+                getOptionLabel: (option) => formatSOString(option.displayName, option.email),
+                getNewOptionData: (inputValue) => {
+                  return { displayName: inputValue };
+                },
+                getOptionValue: (option) => {
+                  if(isNil(option) || isEmpty(option.displayName)) {
+                    return undefined;
+                  }
+                  return option;
+                },
+                value: props.signingOfficial
+              }),
               span({
-                isRendered: showValidationMessages && isEmpty(signingOfficial),
+                isRendered: showValidationMessages && (isNil(signingOfficial) || isEmpty(signingOfficial.displayName)),
                 className: 'cancel-color required-field-error-span'
               }, ['Required field'])
             ])

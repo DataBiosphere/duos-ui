@@ -197,7 +197,7 @@ class DataAccessRequestApplication extends Component {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
     const researcher = await User.getMe();
-    const signingOfficials = await this.getSOs();
+    const signingOfficials = await User.getSOsForCurrentUser();
     this.setState(prev => {
       prev.researcher = researcher;
       prev.allSigningOfficials = signingOfficials;
@@ -1052,7 +1052,7 @@ class DataAccessRequestApplication extends Component {
                 showValidationMessages: showValidationMessages,
                 nextPage: this.nextPage,
                 allSigningOfficials: this.state.allSigningOfficials,
-                signingOfficial,
+                signingOfficial: {displayName: signingOfficial},
                 itDirector,
                 anvilUse,
                 cloudUse,
