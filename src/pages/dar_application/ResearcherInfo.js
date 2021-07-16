@@ -14,6 +14,7 @@ const profileSubmitted = span(["Please make sure ", profileLink, " is updated as
 
 export default function ResearcherInfo(props) {
   const {
+    allSigningOfficials,
     completed,
     darCode,
     cloudProviderDescription,
@@ -66,7 +67,6 @@ export default function ResearcherInfo(props) {
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [allSigningOfficials, setAllSigningOfficials] = useState(props.allSigningOfficials);
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
@@ -75,8 +75,7 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-    setAllSigningOfficials(props.allSigningOfficials);
-  }, [props.signingOfficial, props.allSigningOfficials, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -310,23 +309,22 @@ export default function ResearcherInfo(props) {
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
               h(Creatable, {
                 key: "selectSO",
-                isClearable: true,
+                isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
                 required: true,
                 isDisabled: !isNil(darCode),
-                placeholder: "Select from the list or type your SO's full name if it is not present",
-                onChange: (option) => {
+                placeholder: "Select from the list or type your SO's full name if it is not present. Clear selection with the Backspace key or the 'X' at the end of this input box",
+                onChange: (option) => { //this is react-async's onChange function, not React's. (Function definition is different, expects option rather than event)
                   const value = isNil(option) ? '' : formatSOString(option.displayName, option.email);
                   formFieldChange({name: 'signingOfficial', value});
                 },
-                options: allSigningOfficials,
-                styles: soDropDownStyle,
-                getOptionLabel: (option) => formatSOString(option.displayName, option.email),
-                getNewOptionData: (inputValue) => {
+                options: allSigningOfficials, //dropdown options
+                getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
+                getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
                   return { displayName: inputValue };
                 },
-                getOptionValue: (option) => {
+                getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
                   if(isNil(option) || isEmpty(option.displayName)) {
-                    return undefined;
+                    return null;
                   }
                   return option;
                 },
