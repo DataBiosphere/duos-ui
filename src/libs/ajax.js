@@ -893,8 +893,10 @@ export const User = {
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/dacuser/${userId}`;
+    // We don't need to update the user's create date:
+    const filteredUser = fp.omit(['createDate'])(user);
     try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
+      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredUser), { method: 'PUT' }]));
       if (res.ok) {
         return res.json();
       }
