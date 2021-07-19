@@ -229,7 +229,7 @@ class ResearcherConsole extends Component {
                       span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false }, ["Denied"]),
                       span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true }, ["Approved"]),
                     ]),
-                    div({ className: "col-xs-1 cell-body f-center", disabled: darInfo.electionStatus !== 'un-reviewed'}, [
+                    div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
                         id: darInfo.dar.data.darCode + "_btnCancel", name: "btn_cancel", isRendered: isNil(darInfo.election), className: "cell-button cancel-color",
                         onClick: this.cancelDar, value: darInfo.dar.referenceId
