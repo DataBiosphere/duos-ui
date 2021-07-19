@@ -1,10 +1,9 @@
 import { useState, useEffect} from 'react';
-import React from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import {isNil, find} from 'lodash/fp';
+import {isNil} from 'lodash/fp';
 import CollaboratorList from './CollaboratorList';
 import { isEmpty } from 'lodash';
 import Creatable from 'react-select/creatable';
@@ -15,6 +14,7 @@ const profileSubmitted = span(["Please make sure ", profileLink, " is updated as
 
 export default function ResearcherInfo(props) {
   const {
+    allSigningOfficials,
     completed,
     darCode,
     cloudProviderDescription,
@@ -53,6 +53,13 @@ export default function ResearcherInfo(props) {
       borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
   };
 
+  const formatSOString = (name, email) => {
+    if(isEmpty(name)) { return '';}
+    const nameString = `${name}`;
+    const emailString = !isNil(email) ? ` (${email})` : '';
+    return nameString + emailString;
+  };
+
   //initial state variable assignment
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
@@ -60,7 +67,6 @@ export default function ResearcherInfo(props) {
   const [anvilUse, setAnvilUse] = useState(props.anvilUse || '');
   const [cloudUse, setCloudUse] = useState(props.cloudUse || '');
   const [localUse, setLocalUse] = useState(props.localUse || '');
-  const [allSigningOfficials, setAllSigningOfficials] = useState(props.allSigningOfficials);
 
   useEffect(() => {
     setSigningOfficial(props.signingOfficial);
@@ -69,24 +75,7 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-    setAllSigningOfficials(props.allSigningOfficials);
-  }, [props.signingOfficial, props.allSigningOfficials, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
-
-  const updateSOList = (e) => {
-    const newOption = {value: e, label: e};
-    allSigningOfficials.push(newOption);
-    setAllSigningOfficials(allSigningOfficials);
-    setSigningOfficial(e);
-    formFieldChange({ name: "signingOfficial", value: e });
-  };
-
-  const getSOValue = () => {
-    if (isNil(signingOfficial)) {
-      return null;
-    } else {
-      return find((option) => option.value === signingOfficial)(allSigningOfficials);
-    }
-  };
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -318,22 +307,31 @@ export default function ResearcherInfo(props) {
               ])
             ]),
             div({className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group'}, [
-              <Creatable
-                key={"selectSO"}
-                required={true}
-                disabled={!isNil(darCode)}
-                placeholder="Select from the list or type your SO's full name if it is not present"
-                onChange={(e) => {
-                  formFieldChange({name: 'signingOfficial', value: e.value});
-                  setSigningOfficial(e.value);
-                }}
-                onCreateOption={(e) => updateSOList(e)}
-                options={allSigningOfficials}
-                styles={soDropDownStyle}
-                value={getSOValue()}
-              />,
+              h(Creatable, {
+                key: "selectSO",
+                isClearable: true, //ensures that selections can be cleared from dropdown, adds an 'x' within input box
+                required: true,
+                isDisabled: !isNil(darCode),
+                placeholder: "Select from the list or type your SO's full name if it is not present. Clear selection with the Backspace key or the 'X' at the end of this input box",
+                onChange: (option) => { //this is react-async's onChange function, not React's. (Function definition is different, expects option rather than event)
+                  const value = isNil(option) ? '' : formatSOString(option.displayName, option.email);
+                  formFieldChange({name: 'signingOfficial', value});
+                },
+                options: allSigningOfficials, //dropdown options
+                getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
+                getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
+                  return { displayName: inputValue };
+                },
+                getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
+                  if(isNil(option) || isEmpty(option.displayName)) {
+                    return null;
+                  }
+                  return option;
+                },
+                value: props.signingOfficial
+              }),
               span({
-                isRendered: showValidationMessages && isEmpty(signingOfficial),
+                isRendered: showValidationMessages && (isNil(signingOfficial) || isEmpty(signingOfficial.displayName)),
                 className: 'cancel-color required-field-error-span'
               }, ['Required field'])
             ])
