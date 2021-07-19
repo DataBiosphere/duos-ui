@@ -217,17 +217,26 @@ class ResearcherConsole extends Component {
               hr({ className: "table-head-separator" }),
 
               this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(darInfo => {
+                const opened = !isNil(darInfo.election);
+                //if the dar was canceled by an admin or chair the canceled status will be on the election
+                //if the researcher canceled the dar the canceled status will be on the dar data
+                const canceled = 
+                !isNil(darInfo.dar.data.status) ? 
+                  darInfo.dar.data.status === 'Canceled'
+                  : opened ?
+                    darInfo.election.status === 'Canceled'
+                    : false;
                 return h(Fragment, { key: darInfo.dar.darCode }, [
                   div({ key: darInfo.dar.data.darCode, id: darInfo.dar.data.darCode, className: "row no-margin tableRow" }, [
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_darId", name: "darId", className: "col-xs-2" }, [darInfo.dar.data.darCode]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_projectTitle", name: "projectTitle", className: "col-xs-4" }, [darInfo.dar.data.projectTitle]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_createDate", name: "createDate", className: "col-xs-2" }, [Utils.formatDate(darInfo.dar.createDate)]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_electionStatus", name: "electionStatus", className: "col-xs-2 bold f-center" }, [
-                      span({ isRendered: isNil(darInfo.election) }, ["Submitted"]),
-                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Open' || darInfo.electionStatus === 'Final' || darInfo.electionStatus === 'PendingApproval' }, ["In review"]),
-                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Canceled' }, ["Canceled"]),
-                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false }, ["Denied"]),
-                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true }, ["Approved"]),
+                      span({ isRendered: !opened && !canceled}, ["Submitted"]),
+                      span({ isRendered: opened && !canceled ? darInfo.election.status === 'Open' || darInfo.election.status === 'Final' || darInfo.election.status === 'PendingApproval' : false}, ["In review"]),
+                      span({ isRendered: canceled }, ["Canceled"]),
+                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false : false}, ["Denied"]),
+                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true : false}, ["Approved"]),
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
