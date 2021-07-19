@@ -210,13 +210,7 @@ class ResearcherConsole extends Component {
                   "Date",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
-                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color", onClick: this.sortDars({
-                  sortKey: 'electionStatus',
-                  descendantOrder: this.state.darDescOrder
-                }) }, [
-                  "Status",
-                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                ]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color"}, [ "Status" ]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Cancel"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Review"]),
               ]),
@@ -230,17 +224,17 @@ class ResearcherConsole extends Component {
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_createDate", name: "createDate", className: "col-xs-2" }, [Utils.formatDate(darInfo.dar.createDate)]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_electionStatus", name: "electionStatus", className: "col-xs-2 bold f-center" }, [
                       span({ isRendered: isNil(darInfo.election) }, ["Submitted"]),
-                      span({ isRendered: darInfo.election.status === 'Open' || darInfo.electionStatus === 'Final' || darInfo.electionStatus === 'PendingApproval' }, ["In review"]),
-                      span({ isRendered: darInfo.election.status === 'Canceled' }, ["Canceled"]),
-                      span({ isRendered: darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false }, ["Denied"]),
-                      span({ isRendered: darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true }, ["Approved"]),
+                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Open' || darInfo.electionStatus === 'Final' || darInfo.electionStatus === 'PendingApproval' }, ["In review"]),
+                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Canceled' }, ["Canceled"]),
+                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false }, ["Denied"]),
+                      span({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true }, ["Approved"]),
                     ]),
                     div({ className: "col-xs-1 cell-body f-center", disabled: darInfo.electionStatus !== 'un-reviewed'}, [
                       button({
-                        id: darInfo.dar.data.darCode + "_btnCancel", name: "btn_cancel", isRendered: !darInfo.isCanceled, className: "cell-button cancel-color",
+                        id: darInfo.dar.data.darCode + "_btnCancel", name: "btn_cancel", isRendered: isNil(darInfo.election), className: "cell-button cancel-color",
                         onClick: this.cancelDar, value: darInfo.dar.referenceId
                       }, ["Cancel"]),
-                      button({ isRendered: darInfo.isCanceled, className: "disabled" }, ["Canceled"]),
+                      button({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Canceled' , className: "disabled" }, ["Canceled"]),
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
