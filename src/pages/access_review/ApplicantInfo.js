@@ -3,6 +3,7 @@ import * as ld from 'lodash';
 import { div, hh, img } from 'react-hyperscript-helpers';
 import { Theme } from '../../libs/theme';
 import cardImg from '../../images/card.png';
+import { isEmpty } from 'lodash';
 
 const HEADER = {
   margin: '10px 0px',
@@ -32,11 +33,12 @@ export const ApplicantInfo = hh(
         ]);
       });
     };
-    formatLibraryCard = (cards, institution) => {
+    formatLibraryCard = (cards) => {
       return ld.map(cards, (card) => {
-        if (card.institutionId !== institution.id) {
+        if (isEmpty(card) || isEmpty(card.institution)) {
           return div({});
         }
+        const { institution } = card;
         return div({ style: { margin: 3, textAlign: 'center' } }, [
           img({
             id: 'card_' + card,
