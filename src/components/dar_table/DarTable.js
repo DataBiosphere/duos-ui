@@ -64,7 +64,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
   ];
 };
 
-export const tableHeaderTemplate = [
+export const soTableHeaderTemplate = [
   div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
     "Data Request ID",
     span({ className: 'glyphicon sort-icon glyphicon-sort' })
@@ -88,20 +88,25 @@ export const tableHeaderTemplate = [
   div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, [
     "Election Status",
     span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
+  ])
 ];
+
+export const tableHeaderTemplate = soTableHeaderTemplate.concat(
+  div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"]));
+
 const loadingMarginOverwrite = {margin: '1rem 2%'};
 
-export const tableRowLoadingTemplate = [
+export const soTableRowLoadingTemplate = [
   div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.TITLE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.DATASET_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
   div({style: assign(Styles.TABLE.DAC_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.ELECTION_STATUS_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.ELECTION_ACTIONS_CELL, loadingMarginOverwrite), className: 'text-placeholder'})
+  div({style: assign(Styles.TABLE.ELECTION_STATUS_CELL, loadingMarginOverwrite), className: 'text-placeholder'})
 ];
+
+export const tableRowLoadingTemplate = soTableRowLoadingTemplate.concat(
+  div({style: assign(Styles.TABLE.ELECTION_ACTIONS_CELL, loadingMarginOverwrite), className: 'text-placeholder'}));
 
 
 ////////////////////

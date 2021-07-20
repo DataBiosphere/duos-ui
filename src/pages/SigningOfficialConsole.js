@@ -4,8 +4,8 @@ import {Notifications} from "../libs/utils";
 import {div, a, h} from "react-hyperscript-helpers";
 import {Styles} from "../libs/theme";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
-import {tableHeaderTemplate} from "../components/dar_table/DarTable";
-import {tableRowLoadingTemplate} from "../components/dar_table/DarTable";
+import {soTableHeaderTemplate} from "../components/dar_table/DarTable";
+import {soTableRowLoadingTemplate} from "../components/dar_table/DarTable";
 import {User} from "../libs/ajax";
 import {img} from "react-hyperscript-helpers";
 import lockIcon from "../images/lock-icon.png";
@@ -174,7 +174,12 @@ export default function SigningOfficialConsole(props) {
         setTableSize: setDarPageSize,
         isRendered: !isLoading
       }),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
+      h(DarTableSkeletonLoader, {
+        isRendered: isLoading,
+        tableHeaderTemplate: soTableHeaderTemplate,
+        tableRowLoadingTemplate: soTableRowLoadingTemplate,
+        consoleType: consoleTypes.SIGNING_OFFICIAL
+      })
     ])
   );
 }
