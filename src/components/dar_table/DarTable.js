@@ -11,11 +11,12 @@ import ConfirmationModal from "../modals/ConfirmationModal";
 import DarElectionRecords from './DarElectionRecords';
 import ReactTooltip from 'react-tooltip';
 import * as Utils from '../../libs/utils';
+import {consoleTypes} from "./DarTableActions";
 
 ////////////////////
 //EXPORTED PARTIAL//
 ////////////////////
-export const getTableHeaderTemplateWithSort = (sortFunc, descOrder) => {
+export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType) => {
   return [
     div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.darCode',
@@ -59,7 +60,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder) => {
     div({style: Styles.TABLE.ELECTION_STATUS_CELL}, [
       "Election Status"
     ]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
   ];
 };
 
@@ -211,7 +212,7 @@ export default function DarTable(props) {
 
   return div({className: 'dar-table-component'}, [
     div({style: Styles.TABLE.CONTAINER}, [
-      div({style: Styles.TABLE.HEADER_ROW}, [getTableHeaderTemplateWithSort(sortDars, descendantOrder)]),
+      div({style: Styles.TABLE.HEADER_ROW}, [getTableHeaderTemplateWithSort(sortDars, descendantOrder, consoleType)]),
       h(DarElectionRecords, {
         isRendered: !isEmpty(filteredList),
         filteredList,

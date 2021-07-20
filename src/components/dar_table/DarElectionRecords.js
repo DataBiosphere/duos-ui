@@ -28,7 +28,9 @@ const goToReviewResults = (dar, history, status) => {
 const electionStatusTemplate = (consoleType, dar, election, recordTextStyle, votes, showVotes, history) =>{
   const linkedStatuses = ['Unreviewed', 'Approved', 'Denied', 'Canceled'];
   const status = processElectionStatus(election, votes, showVotes);
-  const includeLink = (consoleType === consoleTypes.MANAGE_ACCESS || linkedStatuses.includes(status));
+  const includeLink = (consoleType === consoleTypes.MANAGE_ACCESS ||
+    consoleType === consoleTypes.SIGNING_OFFICIAL ||
+    linkedStatuses.includes(status));
   const tag = includeLink ? a : div;
   return tag({
     style: Object.assign({}, Styles.TABLE.ELECTION_STATUS_CELL, recordTextStyle, {
@@ -73,16 +75,18 @@ export default function DarElectionRecords(props) {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       electionStatusTemplate(consoleType, dar, election, recordTextStyle, votes, showVotes, history),
-      h(DarTableActions, {
-        baseStyle: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle),
-        updateLists,
-        openConfirmation,
-        history,
-        electionInfo,
-        index,
-        consoleType,
-        extraOptions
-      })
+      div({isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, [
+        h(DarTableActions, {
+          baseStyle: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle),
+          updateLists,
+          openConfirmation,
+          history,
+          electionInfo,
+          index,
+          consoleType,
+          extraOptions
+        })
+      ])
     ]);
   });
 }

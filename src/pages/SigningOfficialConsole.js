@@ -138,7 +138,7 @@ export default function SigningOfficialConsole(props) {
         }, ["Add Researcher(s)"]),
       ]),
       //researcher table goes here
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate: userTableHeaderTemplate, tableRowLoadingTemplate: userTableRowLoadingTemplate}),
+      h(DarTableSkeletonLoader, {isRendered: isLoading, consoleType: consoleTypes.SIGNING_OFFICIAL, tableHeaderTemplate: userTableHeaderTemplate, tableRowLoadingTemplate: userTableRowLoadingTemplate}),
 
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
@@ -167,7 +167,7 @@ export default function SigningOfficialConsole(props) {
         history: props.history,
         processElectionStatus,
         getElectionDate,
-        consoleType: consoleTypes.MANAGE_ACCESS,
+        consoleType: consoleTypes.SIGNING_OFFICIAL,
         currentPage: currentDarPage,
         setCurrentPage: setCurrentDarPage,
         tableSize: darPageSize,
