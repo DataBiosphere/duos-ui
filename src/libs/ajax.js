@@ -1,7 +1,7 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {find, getOr} from 'lodash/fp';
-import {cloneDeep, unset, isNil} from 'lodash';
+import {find, getOr, cloneDeep, unset, flow} from 'lodash/fp';
+import {isNil} from 'lodash';
 import {Config} from './config';
 import {Models} from './models';
 import {spinnerService} from './spinner-service';
@@ -893,11 +893,13 @@ export const User = {
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/dacuser/${userId}`;
-    // We don't need to update the user's create date, or the user's institution's create/update dates
-    let filteredUser = cloneDeep(user);
-    unset(filteredUser,'updatedUser.createDate');
-    unset(filteredUser,'updatedUser.institution.createDate');
-    unset(filteredUser,'updatedUser.institution.updateDate');
+    // We don't need to update the user's create date, or the user's full institution object
+    let filteredUser = flow(
+      cloneDeep,
+      unset('updatedUser.createDate'),
+      unset('updatedUser.institution')
+    )(user);
+    console.log(JSON.stringify(filteredUser, null, 2));
     try {
       const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredUser), { method: 'PUT' }]));
       if (res.ok) {
