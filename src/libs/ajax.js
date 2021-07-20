@@ -1,6 +1,6 @@
 import fileDownload from 'js-file-download';
 import * as fp from 'lodash/fp';
-import {find, getOr} from 'lodash/fp';
+import {find, getOr, cloneDeep, unset, flow} from 'lodash/fp';
 import {isNil} from 'lodash';
 import {Config} from './config';
 import {Models} from './models';
@@ -893,8 +893,15 @@ export const User = {
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/dacuser/${userId}`;
+    // We should not be updating the user's create date, associated institution, or library cards
+    let filteredUser = flow(
+      cloneDeep,
+      unset('updatedUser.createDate'),
+      unset('updatedUser.institution'),
+      unset('updatedUser.libraryCards')
+    )(user);
     try {
-      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(user), { method: 'PUT' }]));
+      const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredUser), { method: 'PUT' }]));
       if (res.ok) {
         return res.json();
       }
