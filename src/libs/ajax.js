@@ -899,7 +899,6 @@ export const User = {
       unset('updatedUser.createDate'),
       unset('updatedUser.institution')
     )(user);
-    console.log(JSON.stringify(filteredUser, null, 2));
     try {
       const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredUser), { method: 'PUT' }]));
       if (res.ok) {
