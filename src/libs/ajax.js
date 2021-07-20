@@ -893,11 +893,12 @@ export const User = {
 
   update: async (user, userId) => {
     const url = `${await Config.getApiUrl()}/api/dacuser/${userId}`;
-    // We don't need to update the user's create date, or the user's full institution object
+    // We should not be updating the user's create date, associated institution, or library cards
     let filteredUser = flow(
       cloneDeep,
       unset('updatedUser.createDate'),
-      unset('updatedUser.institution')
+      unset('updatedUser.institution'),
+      unset('updatedUser.libraryCards')
     )(user);
     try {
       const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(filteredUser), { method: 'PUT' }]));
