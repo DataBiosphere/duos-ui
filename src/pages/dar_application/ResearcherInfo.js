@@ -313,9 +313,15 @@ export default function ResearcherInfo(props) {
                 required: true,
                 isDisabled: !isNil(darCode),
                 placeholder: "Select from the list or type your SO's full name if it is not present. Clear selection with the Backspace key or the 'X' at the end of this input box",
-                onChange: (option) => { //this is react-async's onChange function, not React's. (Function definition is different, expects option rather than event)
+                onChange: (option) => {
                   const value = isNil(option) ? '' : formatSOString(option.displayName, option.email);
                   formFieldChange({name: 'signingOfficial', value});
+                },
+                onInputChange: (input, {action}) => {
+                  if(action !== 'input-blur' && action !== 'menu-close') {
+                    const value = isNil(input) ? '' : formatSOString(input, null);
+                    formFieldChange({name: 'signingOfficial', value});
+                  }
                 },
                 options: allSigningOfficials, //dropdown options
                 getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
