@@ -115,9 +115,8 @@ export default function DarTableActions(props) {
     const addStyle = {
       height: '4rem'
     };
-
     return ([
-      div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar)}, [
+      div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar) &&  consoleType !== consoleTypes.SIGNING_OFFICIAL }, [
         h(DarTableVoteButton, {
           targetVotes,
           election,

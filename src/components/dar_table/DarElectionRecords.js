@@ -75,18 +75,16 @@ export default function DarElectionRecords(props) {
       div({style: Object.assign({}, Styles.TABLE.SUBMISSION_DATE_CELL, recordTextStyle)}, [getElectionDate(election)]),
       div({style: Object.assign({}, Styles.TABLE.DAC_CELL, recordTextStyle)}, [dac ? dac.name : '- -']),
       electionStatusTemplate(consoleType, dar, election, recordTextStyle, votes, showVotes, history),
-      div({isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, [
-        h(DarTableActions, {
-          baseStyle: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle),
-          updateLists,
-          openConfirmation,
-          history,
-          electionInfo,
-          index,
-          consoleType,
-          extraOptions
-        })
-      ])
+      h(DarTableActions, {
+        baseStyle: Object.assign({}, Styles.TABLE.ELECTION_ACTIONS_CELL, recordTextStyle),
+        updateLists,
+        openConfirmation,
+        history,
+        electionInfo,
+        index,
+        consoleType,
+        extraOptions
+      })
     ]);
   });
 }
