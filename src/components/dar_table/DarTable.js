@@ -18,21 +18,21 @@ import {consoleTypes} from "./DarTableActions";
 ////////////////////
 export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType) => {
   return [
-    div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DATA_ID_CELL, key: "data_id_cell", className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.darCode',
       descendantOrder: descOrder
     })}, [
       "Data Request ID",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.TITLE_CELL, key: "project_title_cell", className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.projectTitle',
       descendantOrder: descOrder
     })}, [
       "Project Title",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DATASET_CELL, key: "dataset_name_cell", className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
         return a.dar && a.dar.data ? Utils.getNameOfDatasetForThisDAR(a.dar.data.datasets, a.dar.data.datasetIds) : '- -';
       },
@@ -41,7 +41,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
       "Dataset Name",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, key: "submission_date_cell", className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
         return Utils.getElectionDate(a.election);
       },
@@ -50,17 +50,17 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType)
       "Last Updated",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DAC_CELL, key: "dac_name_cell", className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dac.name',
       descendantOrder: descOrder
     })}, [
       "DAC",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.ELECTION_STATUS_CELL}, [
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL, key: "election_status_cell" }, [
       "Election Status"
     ]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: "election_actions_cell", isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
   ];
 };
 
