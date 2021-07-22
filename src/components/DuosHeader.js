@@ -430,6 +430,7 @@ class DuosHeader extends Component {
                   ]),
                 ]),
               ]),
+
               li({ className: 'dropdown', isRendered: hasTwoOrMoreRoles() }, [
                 a(
                   {
