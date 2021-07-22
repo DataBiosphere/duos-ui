@@ -325,29 +325,12 @@ export const DAR = {
     return res.data;
   },
 
-  //endpoint to be deprecated once V2 endpoint is updated to account for reasearchers
-  getDataAccessManage: async() => {
-    const url = `${await Config.getApiUrl()}/api/dar/manage`;
-    const res = await fetchOk(url, Config.authOpts());
-    let dars = await res.json();
-    dars.map(dar => {
-      if (!fp.isNil(dar.ownerUser) && !fp.isNil(dar.ownerUser.roles)) {
-        dar.ownerUser.roles.map(role => {
-          if (role.name === 'Researcher') {
-            dar.status = dar.ownerUser.status;
-            return dar;
-          }
-          return dar;
-        });
-      }
-      return dar;
-    });
-    return dars;
-  },
-
   //new manage endpoint, should be renamed once v1 variant is removed from use
-  getDataAccessManageV2: async() => {
-    const url = `${await Config.getApiUrl()}/api/dar/manage/v2`;
+  getDataAccessManageV2: async(roleName) => {
+    let url = `${await Config.getApiUrl()}/api/dar/manage/v2`;
+    if (!isNil(roleName)) {
+      url = `${await Config.getApiUrl()}/api/dar/manage/v2/?roleName=${roleName}`;
+    }
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },

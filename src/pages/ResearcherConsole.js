@@ -10,6 +10,8 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
 import { Theme } from '../libs/theme';
 import accessIcon from "../images/icon_access.png";
+import { isNil } from 'lodash/fp';
+import {USER_ROLES} from "../libs/utils";
 
 class ResearcherConsole extends Component {
 
@@ -123,7 +125,7 @@ class ResearcherConsole extends Component {
 
   init() {
 
-    DAR.getDataAccessManage().then(
+    DAR.getDataAccessManageV2(USER_ROLES.researcher).then(
       dars => {
         this.setState({
           dars: dars,
@@ -189,63 +191,66 @@ class ResearcherConsole extends Component {
             div({ style: Theme.lightTable }, [
               div({ className: "row no-margin" }, [
                 div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortDars({
-                  sortKey: 'frontEndId',
+                  sortKey: 'dar.data.darCode',
                   descendantOrder: this.state.darDescOrder
                 }) }, [
                   "Data Request ID",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
                 div({ style: Theme.textTableHead, className: "col-xs-4 cell-sort access-color", onClick: this.sortDars({
-                  sortKey: 'projectTitle',
+                  sortKey: 'dar.data.projectTitle',
                   descendantOrder: this.state.darDescOrder
                 }) }, [
                   "Project Title",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
                 div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort access-color", onClick: this.sortDars({
-                  sortKey: 'createDate',
+                  sortKey: 'dar.createDate',
                   descendantOrder: this.state.darDescOrder
                 }) }, [
                   "Date",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
-                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color", onClick: this.sortDars({
-                  sortKey: 'electionStatus',
-                  descendantOrder: this.state.darDescOrder
-                }) }, [
-                  "Status",
-                  span({ className: 'glyphicon sort-icon glyphicon-sort' })
-                ]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color"}, ["Status"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Cancel"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Review"]),
               ]),
               hr({ className: "table-head-separator" }),
 
-              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(dar => {
-                return h(Fragment, { key: dar.frontEndId }, [
-                  div({ key: dar.frontEndId, id: dar.frontEndId, className: "row no-margin tableRow" }, [
-                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_darId", name: "darId", className: "col-xs-2" }, [dar.frontEndId]),
-                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_projectTitle", name: "projectTitle", className: "col-xs-4" }, [dar.projectTitle]),
-                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_createDate", name: "createDate", className: "col-xs-2" }, [Utils.formatDate(dar.createDate)]),
-                    div({ style: Theme.textTableBody, id: dar.frontEndId + "_electionStatus", name: "electionStatus", className: "col-xs-2 bold f-center" }, [
-                      span({ isRendered: dar.electionStatus === 'un-reviewed' }, ["Submitted"]),
-                      span({ isRendered: dar.electionStatus === 'Open' || dar.electionStatus === 'Final' || dar.electionStatus === 'PendingApproval' }, ["In review"]),
-                      span({ isRendered: dar.electionStatus === 'Canceled' }, ["Canceled"]),
-                      span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === false }, ["Denied"]),
-                      span({ isRendered: dar.electionStatus === 'Closed' && dar.electionVote === true }, ["Approved"]),
-                    ]),
-                    div({ className: "col-xs-1 cell-body f-center", disabled: dar.electionStatus !== 'un-reviewed'}, [
-                      button({
-                        id: dar.frontEndId + "_btnCancel", name: "btn_cancel", isRendered: !dar.isCanceled, className: "cell-button cancel-color",
-                        onClick: this.cancelDar, value: dar.dataRequestId
-                      }, ["Cancel"]),
-                      button({ isRendered: dar.isCanceled, className: "disabled" }, ["Canceled"]),
+              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((darInfo, idx) => {
+                const opened = !isNil(darInfo.election);
+                //if the dar was canceled by an admin or chair the canceled status will be on the election
+                //if the researcher canceled the dar the canceled status will be on the dar data
+                const canceled =
+                !isNil(darInfo.dar.data.status) ?
+                  darInfo.dar.data.status === 'Canceled'
+                  : opened ?
+                    darInfo.election.status === 'Canceled'
+                    : false;
+                return h(Fragment, { key: darInfo.dar.darCode + '_' + idx}, [
+                  div({ key: darInfo.dar.data.darCode, id: darInfo.dar.data.darCode, className: "row no-margin tableRow" }, [
+                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_darId", name: "darId", className: "col-xs-2" }, [darInfo.dar.data.darCode]),
+                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_projectTitle", name: "projectTitle", className: "col-xs-4" }, [darInfo.dar.data.projectTitle]),
+                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_createDate", name: "createDate", className: "col-xs-2" }, [Utils.formatDate(darInfo.dar.createDate)]),
+                    div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_electionStatus", name: "electionStatus", className: "col-xs-2 bold f-center" }, [
+                      span({ isRendered: !opened && !canceled}, ["Submitted"]),
+                      span({ isRendered: opened && !canceled ? darInfo.election.status === 'Open' || darInfo.election.status === 'Final' || darInfo.election.status === 'PendingApproval' : false}, ["In review"]),
+                      span({ isRendered: canceled }, ["Canceled"]),
+                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === false : false}, ["Denied"]),
+                      span({ isRendered: opened ? darInfo.election.status === 'Closed' && darInfo.election.finalAccessVote === true : false}, ["Approved"]),
                     ]),
                     div({ className: "col-xs-1 cell-body f-center" }, [
                       button({
-                        id: dar.frontEndId + "_btnReview", name: "btn_review", className: "cell-button hover-color"
+                        id: darInfo.dar.data.darCode + "_btnCancel", name: "btn_cancel", isRendered: isNil(darInfo.election), className: "cell-button cancel-color",
+                        onClick: this.cancelDar, value: darInfo.dar.referenceId
+                      }, ["Cancel"]),
+                      button({ isRendered: isNil(darInfo.election) ? false : darInfo.election.status === 'Canceled' , className: "disabled" }, ["Canceled"]),
+                    ]),
+                    div({ className: "col-xs-1 cell-body f-center" }, [
+                      button({
+                        id: darInfo.dar.data.darCode + "_btnReview", name: "btn_review", className: "cell-button hover-color"
                       }, [h(Link, {
-                        to: 'dar_application/' + dar.dataRequestId,
+                        to: 'dar_application/' + darInfo.dar.referenceId,
                       }, ['Review'])]),
                     ])
                   ]),
