@@ -330,7 +330,7 @@ export const DAR = {
     let url = `${await Config.getApiUrl()}/api/dar/manage/v2`;
     if (!isNil(roleName)) {
       url = `${await Config.getApiUrl()}/api/dar/manage/v2/?roleName=${roleName}`;
-    } 
+    }
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },

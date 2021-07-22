@@ -10,7 +10,7 @@ import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Link } from 'react-router-dom';
 import { Theme } from '../libs/theme';
 import accessIcon from "../images/icon_access.png";
-import { isNil } from 'lodash/fp'
+import { isNil } from 'lodash/fp';
 import {USER_ROLES} from "../libs/utils";
 
 class ResearcherConsole extends Component {
@@ -211,23 +211,23 @@ class ResearcherConsole extends Component {
                   "Date",
                   span({ className: 'glyphicon sort-icon glyphicon-sort' })
                 ]),
-                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color"}, [ "Status" ]),
+                div({ style: Theme.textTableHead, className: "col-xs-2 cell-sort f-center access-color"}, ["Status"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Cancel"]),
                 div({ style: Theme.textTableHead, className: "col-xs-1 f-center access-color" }, ["Review"]),
               ]),
               hr({ className: "table-head-separator" }),
 
-              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map(darInfo => {
+              this.state.dars.slice((currentDarPage - 1) * darLimit, currentDarPage * darLimit).map((darInfo, idx) => {
                 const opened = !isNil(darInfo.election);
                 //if the dar was canceled by an admin or chair the canceled status will be on the election
                 //if the researcher canceled the dar the canceled status will be on the dar data
-                const canceled = 
-                !isNil(darInfo.dar.data.status) ? 
+                const canceled =
+                !isNil(darInfo.dar.data.status) ?
                   darInfo.dar.data.status === 'Canceled'
                   : opened ?
                     darInfo.election.status === 'Canceled'
                     : false;
-                return h(Fragment, { key: darInfo.dar.darCode }, [
+                return h(Fragment, { key: darInfo.dar.darCode + '_' + idx}, [
                   div({ key: darInfo.dar.data.darCode, id: darInfo.dar.data.darCode, className: "row no-margin tableRow" }, [
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_darId", name: "darId", className: "col-xs-2" }, [darInfo.dar.data.darCode]),
                     div({ style: Theme.textTableBody, id: darInfo.dar.data.darCode + "_projectTitle", name: "projectTitle", className: "col-xs-4" }, [darInfo.dar.data.projectTitle]),
