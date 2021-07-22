@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { Theme } from '../libs/theme';
 import accessIcon from "../images/icon_access.png";
 import { isNil } from 'lodash/fp'
+import {USER_ROLES} from "../libs/utils";
 
 class ResearcherConsole extends Component {
 
@@ -124,7 +125,7 @@ class ResearcherConsole extends Component {
 
   init() {
 
-    DAR.getDataAccessManageV2("Researcher").then(
+    DAR.getDataAccessManageV2(USER_ROLES.researcher).then(
       dars => {
         this.setState({
           dars: dars,
