@@ -4,8 +4,8 @@ import {Notifications} from "../libs/utils";
 import {div, a, h} from "react-hyperscript-helpers";
 import {Styles} from "../libs/theme";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
-import {soTableHeaderTemplate} from "../components/dar_table/DarTable";
-import {soTableRowLoadingTemplate} from "../components/dar_table/DarTable";
+import {tableHeaderTemplate} from "../components/dar_table/DarTable";
+import {tableRowLoadingTemplate} from "../components/dar_table/DarTable";
 import {User} from "../libs/ajax";
 import {img} from "react-hyperscript-helpers";
 import lockIcon from "../images/lock-icon.png";
@@ -138,7 +138,7 @@ export default function SigningOfficialConsole(props) {
         }, ["Add Researcher(s)"]),
       ]),
       //researcher table goes here
-      h(DarTableSkeletonLoader, {isRendered: isLoading, consoleType: consoleTypes.SIGNING_OFFICIAL, tableHeaderTemplate: userTableHeaderTemplate, tableRowLoadingTemplate: userTableRowLoadingTemplate}),
+      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate: userTableHeaderTemplate, tableRowLoadingTemplate: userTableRowLoadingTemplate}),
 
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
@@ -176,9 +176,8 @@ export default function SigningOfficialConsole(props) {
       }),
       h(DarTableSkeletonLoader, {
         isRendered: isLoading,
-        tableHeaderTemplate: soTableHeaderTemplate,
-        tableRowLoadingTemplate: soTableRowLoadingTemplate,
-        consoleType: consoleTypes.SIGNING_OFFICIAL
+        tableHeaderTemplate: tableHeaderTemplate(consoleTypes.SIGNING_OFFICIAL),
+        tableRowLoadingTemplate: tableRowLoadingTemplate(consoleTypes.SIGNING_OFFICIAL)
       })
     ])
   );

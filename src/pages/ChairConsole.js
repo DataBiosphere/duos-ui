@@ -66,7 +66,11 @@ export default function ChairConsole(props) {
         h(SearchBar, {handleSearchChange})
       ]),
       h(DarTable, {isRendered: !isLoading, getUpdateLists, filteredList, setFilteredList, descendantOrder, setDescendantOrder, history: props.history, processElectionStatus, getElectionDate, consoleType: consoleTypes.CHAIR, currentPage, setCurrentPage, tableSize, setTableSize}),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
+      h(DarTableSkeletonLoader, {
+        isRendered: isLoading,
+        tableHeaderTemplate: tableHeaderTemplate(consoleTypes.CHAIR),
+        tableRowLoadingTemplate: tableRowLoadingTemplate(consoleTypes.CHAIR)
+      })
     ])
   );
 }

@@ -79,7 +79,11 @@ export default function NewMemberConsole(props) {
         setTableSize,
         isRendered: !isLoading
       }),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
+      h(DarTableSkeletonLoader, {
+        isRendered: isLoading,
+        tableHeaderTemplate: tableHeaderTemplate(consoleTypes.MEMBER),
+        tableRowLoadingTemplate: tableRowLoadingTemplate(consoleTypes.MEMBER)
+      })
     ])
   );
 }
