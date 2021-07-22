@@ -11,27 +11,28 @@ import ConfirmationModal from "../modals/ConfirmationModal";
 import DarElectionRecords from './DarElectionRecords';
 import ReactTooltip from 'react-tooltip';
 import * as Utils from '../../libs/utils';
+import {consoleTypes} from "./DarTableActions";
 
 ////////////////////
 //EXPORTED PARTIAL//
 ////////////////////
-export const getTableHeaderTemplateWithSort = (sortFunc, descOrder) => {
+export const getTableHeaderTemplateWithSort = (sortFunc, descOrder, consoleType) => {
   return [
-    div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DATA_ID_CELL, key: "data_id_cell", className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.darCode',
       descendantOrder: descOrder
     })}, [
       "Data Request ID",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.TITLE_CELL, key: "project_title_cell", className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dar.data.projectTitle',
       descendantOrder: descOrder
     })}, [
       "Project Title",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DATASET_CELL, key: "dataset_name_cell", className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
         return a.dar && a.dar.data ? Utils.getNameOfDatasetForThisDAR(a.dar.data.datasets, a.dar.data.datasetIds) : '- -';
       },
@@ -40,7 +41,7 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder) => {
       "Dataset Name",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, key: "submission_date_cell", className: 'cell-sort', onClick: sortFunc({
       getValue: (a) => {
         return Utils.getElectionDate(a.election);
       },
@@ -49,58 +50,61 @@ export const getTableHeaderTemplateWithSort = (sortFunc, descOrder) => {
       "Last Updated",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort', onClick: sortFunc({
+    div({style: Styles.TABLE.DAC_CELL, key: "dac_name_cell", className: 'cell-sort', onClick: sortFunc({
       sortKey: 'dac.name',
       descendantOrder: descOrder
     })}, [
       "DAC",
       span({ className: 'glyphicon sort-icon glyphicon-sort' })
     ]),
-    div({style: Styles.TABLE.ELECTION_STATUS_CELL}, [
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL, key: "election_status_cell" }, [
       "Election Status"
     ]),
-    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL, key: "election_actions_cell", isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
   ];
 };
 
-export const tableHeaderTemplate = [
-  div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
-    "Data Request ID",
-    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [
-    "Project Title",
-    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort'}, [
-    "Dataset Name",
-    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort'}, [
-    "Last Updated",
-    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort'}, [
-    "DAC",
-    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, [
-    "Election Status",
-    span({ className: 'glyphicon sort-icon glyphicon-sort' })
-  ]),
-  div({style: Styles.TABLE.ELECTION_ACTIONS_CELL}, ["Election Actions"])
-];
+export const tableHeaderTemplate = (consoleType) =>  {
+  return [
+    div({style: Styles.TABLE.DATA_ID_CELL, className: 'cell-sort'}, [
+      "Data Request ID",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.TITLE_CELL, className: 'cell-sort'}, [
+      "Project Title",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.DATASET_CELL, className: 'cell-sort'}, [
+      "Dataset Name",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.SUBMISSION_DATE_CELL, className: 'cell-sort'}, [
+      "Last Updated",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.DAC_CELL, className: 'cell-sort'}, [
+      "DAC",
+      span({ className: 'glyphicon sort-icon glyphicon-sort' })
+    ]),
+    div({style: Styles.TABLE.ELECTION_STATUS_CELL, className: 'cell-sort'}, ["Election Status"]),
+    div({style: Styles.TABLE.ELECTION_ACTIONS_CELL,
+      isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL}, ["Election Actions"])
+  ];
+};
+
 const loadingMarginOverwrite = {margin: '1rem 2%'};
 
-export const tableRowLoadingTemplate = [
-  div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.TITLE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.DATASET_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.DAC_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.ELECTION_STATUS_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
-  div({style: assign(Styles.TABLE.ELECTION_ACTIONS_CELL, loadingMarginOverwrite), className: 'text-placeholder'})
-];
+export const tableRowLoadingTemplate = (consoleType) => {
+  return [
+    div({style: assign(Styles.TABLE.DATA_ID_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+    div({style: assign(Styles.TABLE.TITLE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+    div({style: assign(Styles.TABLE.DATASET_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+    div({style: assign(Styles.TABLE.SUBMISSION_DATE_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+    div({style: assign(Styles.TABLE.DAC_CELL, loadingMarginOverwrite), className: 'text-placeholder'}),
+    div({style: assign(Styles.TABLE.ELECTION_STATUS_CELL, loadingMarginOverwrite),
+      isRendered: consoleType !== consoleTypes.SIGNING_OFFICIAL, className: 'text-placeholder'})
+  ];
+};
 
 
 ////////////////////
@@ -211,7 +215,7 @@ export default function DarTable(props) {
 
   return div({className: 'dar-table-component'}, [
     div({style: Styles.TABLE.CONTAINER}, [
-      div({style: Styles.TABLE.HEADER_ROW}, [getTableHeaderTemplateWithSort(sortDars, descendantOrder)]),
+      div({style: Styles.TABLE.HEADER_ROW}, [getTableHeaderTemplateWithSort(sortDars, descendantOrder, consoleType)]),
       h(DarElectionRecords, {
         isRendered: !isEmpty(filteredList),
         filteredList,

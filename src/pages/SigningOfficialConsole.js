@@ -15,13 +15,22 @@ import {darSearchHandler} from "../libs/utils";
 import {userSearchHandler} from "../libs/utils";
 import {assign} from "lodash/fp";
 import {span} from "react-hyperscript-helpers";
+import DarTable from "../components/dar_table/DarTable";
+import {processElectionStatus} from "../libs/utils";
+import {getElectionDate} from "../libs/utils";
+import {consoleTypes} from "../components/dar_table/DarTableActions";
+import {DAR} from "../libs/ajax";
+import {useCallback} from "react";
+import {updateLists as updateListsInit} from "../libs/utils";
 
-export default function SigningOfficialConsole() {
+export default function SigningOfficialConsole(props) {
   const [signingOfficial, setSiginingOfficial] = useState();
   //states to be added and used for the manage dar component
-  const [darList,] = useState();
-  const [setFilteredDarList] = useState();
-  const [setCurrentDarPage] = useState();
+  const [darList, setDarList] = useState();
+  const [filteredDarList, setFilteredDarList] = useState();
+  const [currentDarPage, setCurrentDarPage] = useState(1);
+  const [darPageSize, setDarPageSize] = useState(10);
+  const [descendantOrderDars, setDescendantOrderDars] = useState(false);
   //states to be added and used for manage researcher component
   const [userList,] = useState();
   const [setFilteredUserList] = useState();
@@ -68,6 +77,9 @@ export default function SigningOfficialConsole() {
         setIsLoading(true);
         const soUser = await User.getMe();
         setSiginingOfficial(soUser.displayName);
+        const darList = await DAR.getDataAccessManageV2();
+        setDarList(darList);
+        setFilteredDarList(darList);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
@@ -76,6 +88,11 @@ export default function SigningOfficialConsole() {
     };
     init();
   }, []);
+
+  const getUpdateDarLists = useCallback(() => {
+    return updateListsInit(filteredDarList, setFilteredDarList, darList, setDarList, currentDarPage, darPageSize);
+  }, [filteredDarList, darList, currentDarPage, darPageSize]);
+
 
   const handleSearchChangeDars = darSearchHandler(darList, setFilteredDarList, setCurrentDarPage);
   const handleSearchChangeUsers = userSearchHandler(userList, setFilteredUserList, setCurrentUserPage);
@@ -141,8 +158,27 @@ export default function SigningOfficialConsole() {
         ]),
         h(SearchBar, {handleSearchChange: handleSearchChangeDars}),
       ]),
-      //dar table goes here
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
+      h(DarTable, {
+        getUpdateLists: getUpdateDarLists,
+        filteredList: filteredDarList,
+        setFilteredList: setFilteredDarList,
+        descendentOrder: descendantOrderDars,
+        setDescendantOrder: setDescendantOrderDars,
+        history: props.history,
+        processElectionStatus,
+        getElectionDate,
+        consoleType: consoleTypes.SIGNING_OFFICIAL,
+        currentPage: currentDarPage,
+        setCurrentPage: setCurrentDarPage,
+        tableSize: darPageSize,
+        setTableSize: setDarPageSize,
+        isRendered: !isLoading
+      }),
+      h(DarTableSkeletonLoader, {
+        isRendered: isLoading,
+        tableHeaderTemplate: tableHeaderTemplate(consoleTypes.SIGNING_OFFICIAL),
+        tableRowLoadingTemplate: tableRowLoadingTemplate(consoleTypes.SIGNING_OFFICIAL)
+      })
     ])
   );
 }
