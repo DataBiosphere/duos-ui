@@ -337,7 +337,7 @@ class DuosHeader extends Component {
       h(Link, { id: 'link_so_console', to: '/signing_official_console' }, ['Signing Official Console'])
     ]);
 
-    const chairpersonLink = (inDropDown)  => li({ className: 'dropdown', isRendered: inDropDown ? isChairPerson : isChairPerson && !hasTwoOrMoreRoles()}, [
+    const chairpersonDropDown = li({ className: 'dropdown', isRendered: isChairPerson && !hasTwoOrMoreRoles()}, [
       a(
         {
           role: 'button',
@@ -367,6 +367,24 @@ class DuosHeader extends Component {
         ]),
       ]),
     ]);
+
+    const chairSubHeader =
+      li({ isRendered: isChairPerson, style: {marginTop: '10px', marginBottom: '5px'} }, [
+        span({style: { color: '#00609f', fontSize: '12px', padding: '10px 15px'}}, ['DAC Chair Console'])
+      ]);
+
+    const chairManageDACsLink =
+      li({ isRendered: isChairPerson, style: {marginLeft: '10px', paddingBottom: '0 !important'} }, [
+        h(Link, { id: 'link_manageDac', to: '/manage_dac' }, [
+          'Manage DACs',
+        ]),
+      ]);
+    const chairManageDARsLink =
+      li({ isRendered: isChairPerson, style: {marginLeft: '10px'} }, [
+        h( Link, { id: 'link_chairConsole', to: this.state.dacChairPath },
+          ['Manage DARs']
+        ),
+      ]);
 
     const memberLink = (inDropDown) =>
       li({ isRendered: inDropDown ? isMember : isMember && !hasTwoOrMoreRoles() }, [
@@ -448,7 +466,9 @@ class DuosHeader extends Component {
                 ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
                   adminLink(true),
                   signingOfficialLink(true),
-                  chairpersonLink(true),
+                  chairSubHeader,
+                  chairManageDARsLink,
+                  chairManageDACsLink,
                   memberLink(true),
                   researcherLink(true),
                   dataOwnerLink(true)
@@ -457,7 +477,7 @@ class DuosHeader extends Component {
 
               adminLink(false),
               signingOfficialLink(false),
-              chairpersonLink(false),
+              chairpersonDropDown,
               memberLink(false),
               researcherLink(false),
               dataOwnerLink(false),
