@@ -15,7 +15,7 @@ import { Styles } from '../libs/theme';
 import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
-import { isNil } from 'lodash';
+import { isNil, map, uniq } from 'lodash/fp';
 
 const styles = {
   drawerPaper: {
@@ -231,26 +231,8 @@ class DuosHeader extends Component {
     }
 
     const hasTwoOrMoreRoles = () => {
-      let roles = 0;
-      if (isAdmin) {
-        roles += 1;
-      }
-      if (isResearcher) {
-        roles += 1;
-      }
-      if (isMember) {
-        roles += 1;
-      }
-      if (isChairPerson) {
-        roles += 1;
-      }
-      if (isDataOwner) {
-        roles += 1;
-      }
-      if (isSigningOfficial) {
-        roles += 1;
-      }
-      return roles >= 2;
+      const roleNames = uniq(map("name")(currentUser.roles));
+      return roleNames.length >= 2;
     };
 
     const dropdownLinks = {
@@ -370,7 +352,7 @@ class DuosHeader extends Component {
 
     const chairSubHeader =
       li({ isRendered: isChairPerson, style: {marginTop: '10px', marginBottom: '5px'} }, [
-        span({style: { color: '#00609f', fontSize: '12px', fontWeight: '500', padding: '10px 15px'}}, ['DAC Chair Console'])
+        span({style: { fontSize: '12px', fontWeight: '600', padding: '10px 15px'}}, ['DAC Chair Console'])
       ]);
 
     const chairManageDACsLink =
