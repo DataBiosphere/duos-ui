@@ -107,7 +107,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           questionNumber: '1',
           votes: accessVotes,
           isAdmin: isAdmin,
-          finalDecision
+          accessElection
         }),
         VoteSummary({
           isRendered: voteAsChair && !isNil(rpVotes),
@@ -115,7 +115,7 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           questionNumber: '2',
           votes: rpVotes,
           isAdmin: isAdmin,
-          finalDecision
+          accessElection
         }),
         AppSummary({darInfo, accessElection, consent, researcherProfile})
       ])

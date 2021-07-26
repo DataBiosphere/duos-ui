@@ -156,7 +156,7 @@ export const VoteSummary = hh(
           textAlign: 'right',
           flexShrink: '0',
           fontWeight: Theme.font.weight.regular},
-        isRendered: this.props.finalDecision === "No decision"
+        isRendered: isNil(this.props.accessElection) ? false : this.props.accessElection.status === "Open"
         }, [a({onClick: () => this.sendReminder(vote)}, ['Send Reminder'])])
       ]);
     };
