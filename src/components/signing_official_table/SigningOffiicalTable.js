@@ -1,12 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { h, div, button } from "react-hyperscript-helpers";
 import { cloneDeep, findIndex } from "lodash/fp";
 import { Notifications, USER_ROLES } from "../../libs/utils";
 import { User, LibraryCard } from "../../libs/ajax";
 import { Storage } from "../../libs/storage";
+import { button } from "noty";
+
+const deactivateLibraryCard = (props) => {
+  const {deactivateLibraryCard} = props;
+  return button({
+    style: {}, //figure this out},
+    onClick: () => deactivateLibraryCard()
+  }, ['Deactivate']);
+}
+
+const LibraryCardCell = (props) => {
+  const {issueNewLibraryCard, deleteLibraryCard, card} = props;
+  return { 
+    
+  }
+
+};
 
 export default function SigningOfficialTable(props) {
   const [researchers, setResearchers] = useState([]);
-  const [signingOffiical, setSigningOfficial] = useState({});
+  const [signingOfficial, setSigningOfficial] = useState({});
 
   //NOTE: for now mock out ajax calls so I can develop the console.
   //The back-end code needs to be updated in a separate PR
@@ -26,11 +44,11 @@ export default function SigningOfficialTable(props) {
     init();
   }, []);
 
-  const issueNewLibraryCard = async (targetResearcher, researcherList) => {
+  const issueNewLibraryCard = useCallback(async (targetResearcher) => {
     const { eraCommonsId, dacUserId, displayName, email } = targetResearcher;
-    const { institutionId } = signingOffiical;
+    const { institutionId } = signingOfficial;
     try {
-      const listCopy = cloneDeep(researcherList);
+      const listCopy = cloneDeep(researchers);
       const newLibraryCard = LibraryCard.createLibraryCard({
         institutionId,
         eraCommonsId,
@@ -39,7 +57,7 @@ export default function SigningOfficialTable(props) {
         userName: displayName
       });
 
-      const targetIndex = findIndex((researcher) => targetResearcher.dacUserId === researcher.dacUserId)(researcherList);
+      const targetIndex = findIndex((researcher) => targetResearcher.dacUserId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX, SO should not be able to see LCs from other institutions
       listCopy[targetIndex].libraryCards = [newLibraryCard];
       setResearchers(listCopy);
@@ -47,20 +65,18 @@ export default function SigningOfficialTable(props) {
     } catch(error) {
       Notifications.showError({text: `Error issuing library card to ${displayName}`});
     }
-  };
+  }, [signingOfficial, researchers]);
 
-  const deleteLibraryCard = async (id, displayName, dacUserId, researcherList) => {
-    const listCopy = cloneDeep(researcherList);
+  const deactivateLibraryCard = useCallback(async (id, displayName, dacUserId) => {
+    const listCopy = cloneDeep(researchers);
     try {
       await LibraryCard.deleteLibraryCard(id);
-      const targetIndex = findIndex((researcher) => dacUserId === researcher.dacUserId)(researcherList);
+      const targetIndex = findIndex((researcher) => dacUserId === researcher.dacUserId)(researchers);
       listCopy[targetIndex].libraryCards = [];
       setResearchers(listCopy);
       Notifications.showSuccess({text: `Removed library card issued to ${displayName}`});
     } catch(error) {
       Notifications.showError({text: `Error deleting library card issued to ${displayName}`});
     }
-  };
-
-  
+  }, [researchers]);
 }
