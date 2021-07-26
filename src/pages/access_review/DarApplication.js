@@ -106,14 +106,16 @@ export const DarApplication = hh(class DarApplication extends React.PureComponen
           question: 'Should data access be granted to this application?',
           questionNumber: '1',
           votes: accessVotes,
-          isAdmin: isAdmin
+          isAdmin: isAdmin,
+          finalDecision
         }),
         VoteSummary({
           isRendered: voteAsChair && !isNil(rpVotes),
           question: 'Was the research purpose accurately converted to a structured format?',
           questionNumber: '2',
           votes: rpVotes,
-          isAdmin: isAdmin
+          isAdmin: isAdmin,
+          finalDecision
         }),
         AppSummary({darInfo, accessElection, consent, researcherProfile})
       ])
