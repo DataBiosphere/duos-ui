@@ -430,10 +430,16 @@ export const getSearchFilterFunctions = () => {
     signingOfficialResearchers: (term, targetList) => filter(researcher => {
       const { userName, createDate, updateDate, eraCommonsId, userEmail, roles } = researcher;
       const baseAttributes = [userName, createDate, updateDate, eraCommonsId, userEmail];
-      const reduceCallback = (memo, current) => memo || includes(toLower(current), term);
 
-      const includesRoles = reduce(reduceCallback)(roles);
-      const includesBaseAttributes = reduce(reduceCallback)(baseAttributes);
+      const includesRoles = reduce((memo, current) => {
+        const roleName = current.name;
+        return memo || includes(toLower(roleName), term);
+      })(roles);
+
+      const includesBaseAttributes = reduce((memo, current) =>
+        memo || includes(toLower(current), term)
+      )(baseAttributes);
+
       return includesRoles || includesBaseAttributes;
     })(targetList)
   };
