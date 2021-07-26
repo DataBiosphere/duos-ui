@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq } from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, reduce } from "lodash/fp";
 import _ from 'lodash';
 import {User} from "./ajax";
 
@@ -426,7 +426,16 @@ export const getSearchFilterFunctions = () => {
         includes(term, formatDate(updateDate)) ||
         includes(term, toLower(userEmail)) ||
         includes(term, toLower(eraCommonsId));
-    }, targetList)
+    }, targetList),
+    signingOfficialResearchers: (term, targetList) => filter(researcher => {
+      const { userName, createDate, updateDate, eraCommonsId, userEmail, roles } = researcher;
+      const baseAttributes = [userName, createDate, updateDate, eraCommonsId, userEmail];
+      const reduceCallback = (memo, current) => memo || includes(toLower(current), term);
+
+      const includesRoles = reduce(reduceCallback)(roles);
+      const includesBaseAttributes = reduce(reduceCallback)(baseAttributes);
+      return includesRoles || includesBaseAttributes;
+    })(targetList)
   };
 };
 
