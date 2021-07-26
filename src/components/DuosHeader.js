@@ -370,7 +370,7 @@ class DuosHeader extends Component {
 
     const chairSubHeader =
       li({ isRendered: isChairPerson, style: {marginTop: '10px', marginBottom: '5px'} }, [
-        span({style: { color: '#00609f', fontSize: '12px', padding: '10px 15px'}}, ['DAC Chair Console'])
+        span({style: { color: '#00609f', fontSize: '12px', fontWeight: '500', padding: '10px 15px'}}, ['DAC Chair Console'])
       ]);
 
     const chairManageDACsLink =
