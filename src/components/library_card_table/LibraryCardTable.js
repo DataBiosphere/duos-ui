@@ -195,6 +195,7 @@ export default function LibraryCardTable(props) {
   ];
 
   //hook to recalculate visible table records when listed dependencies update
+  //NOTE: function moved to util, update implementation here
   useEffect(() => {
     const init = async () => {
       try {

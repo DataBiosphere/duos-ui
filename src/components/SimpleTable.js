@@ -26,19 +26,19 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
 //Simple cell text display
 const SimpleTextCell = ({ text, style }) => {
   text = isNil(text) ? '- -' : text;
-  return div({ style }, [text]);
+  return div({ style, role: 'cell' }, [text]);
 };
 
 //Simple cell text that carries onClick functionality
 const OnClickTextCell = ({ text, style, onClick }) => {
   text = isNil(text) ? '- -' : text;
-  return div({ style, onClick }, [text]);
+  return div({ style, onClick, role: 'cell' }, [text]);
 };
 
 //Column component that renders the column row based on column headers
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
-  return div({style: rowStyle, key: `column-row-container`}, columnHeaders.map((header) => {
+  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
@@ -50,7 +50,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   const rows = rowData.map((row, index) => {
     const id = rowData[index][0].id;
-    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`},
+    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`, role: 'row'},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
@@ -99,5 +99,5 @@ export default function SimpleTable(props) {
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
 
-  return div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [output, paginationBar]);
+  return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, paginationBar]);
 }

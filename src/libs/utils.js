@@ -556,3 +556,42 @@ export const getColumnSort = (getList, callback) => {
     callback(sortedData, descendantOrder);
   };
 };
+
+//Functions that are commonly used between tables//
+export const recalculateVisibleTable = async (tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList ) => {
+  try {
+    setPageCount(calcTablePageCount(tableSize, filteredList));
+    if (currentPage > pageCount) {
+      setCurrentPage(pageCount);
+    }
+    const visibleList = calcVisibleWindow(
+      currentPage,
+      tableSize,
+      filteredList
+    );
+    setVisibleList(visibleList);
+  } catch (error) {
+    Notifications.showError({ text: 'Error updating Library Card table' });
+  }
+};
+
+export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFilteredList) => {
+  let filteredList = originalList;
+  if(!isEmpty(searchTerms)) {
+    filteredList = filterFn(searchTerms, originalList);
+  }
+  setFilteredList(filteredList);
+};
+
+const goToPage = (value, setCurrentPage, pageCount) => {
+  if(value >= 1 && value <= pageCount) {
+    setCurrentPage(value);
+  }
+};
+
+const changeTableSize = (value, setTableSize) => {
+  if (value > 0 && !isNaN(parseInt(value))) {
+    setTableSize(value);
+  }
+};
+
