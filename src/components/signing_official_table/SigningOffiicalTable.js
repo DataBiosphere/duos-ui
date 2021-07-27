@@ -1,8 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles } from "../../libs/theme";
-import { h, div, button } from "react-hyperscript-helpers";
+import { h, div, button, img } from "react-hyperscript-helpers";
+import lockIcon from '../../images/lock-icon.png';
 import { cloneDeep, findIndex, concat } from "lodash/fp";
+import SimpleTable from "../SimpleTable";
 import PaginationBar from "../PaginationBar";
+import SearchBar from "../SearchBar";
 import {
   Notifications,
   USER_ROLES,
@@ -147,6 +150,7 @@ export default function SigningOfficialTable(props) {
   const [newCard, setNewCard] = useState({});
   const [showModal, setShowModal] = useState(false);
   const searchRef = useRef('');
+  const [isLoading, setIsLoading] = useState(true);
 
   //NOTE: for now mock out ajax calls so I can develop the console.
   //The back-end code needs to be updated in a separate PR
@@ -159,10 +163,12 @@ export default function SigningOfficialTable(props) {
   }, [props.researchers, researchers]);
 
   useEffect(() => {
+    setIsLoading(true);
     recalculateVisibleTable(
       tableSize, pageCount, filteredResearchers, currentPage,
       setPageCount, setCurrentPage, setVisibleResearchers
     );
+    setIsLoading(false);
   }, [tableSize, pageCount, filteredResearchers, currentPage]);
 
   const paginationBar = h(PaginationBar, {
@@ -245,4 +251,34 @@ export default function SigningOfficialTable(props) {
       Notifications.showError({text: `Error deleting library card issued to ${displayName}`});
     }
   }, [researchers]);
+
+  return (
+    h(Fragment, {}, [
+      div({style: {display: 'flex', justifyContent: 'space-between'}}, [
+        div(
+          {className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION},
+          [
+            div({style: Styles.ICON_CONTAINER}, [
+              img({
+                id: 'lock-icon',
+                src: lockIcon,
+                style: Styles.HEADER_IMG
+              }),
+            ]),
+            div({ style: Styles.HEADER_CONTAINER}, [
+              div({ style: Styles.TITLE}, ['Manage Researchers']),
+              div(
+                {style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})},
+                ["Manage your institution's researchers"]
+              )
+            ])
+          ]
+        ),
+        h(SearchBar, {handleSearchChange, searchRef}),
+      ]),
+      h(SimpleTable, {
+
+      })
+    ])
+  );
 }
