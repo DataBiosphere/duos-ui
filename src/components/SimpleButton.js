@@ -1,4 +1,4 @@
-import { div } from 'react-hyperscript-helpers';
+import { button } from 'react-hyperscript-helpers';
 import { useState, useEffect } from 'react';
 
 export default function SimpleButton(props) {
@@ -43,5 +43,5 @@ export default function SimpleButton(props) {
     return baseAttributes;
   };
 
-  return div(getDivAttributes(disabled), [label]);
+  return button(getDivAttributes(disabled), [label]);
 }

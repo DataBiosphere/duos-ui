@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
-import { Styles } from "../../libs/theme";
+import { Styles, Theme } from "../../libs/theme";
 import { h, div, button, img } from "react-hyperscript-helpers";
 import lockIcon from '../../images/lock-icon.png';
 import { cloneDeep, findIndex, concat } from "lodash/fp";
 import SimpleTable from "../SimpleTable";
+import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
 import SearchBar from "../SearchBar";
 import {
@@ -16,6 +17,8 @@ import {
   goToPage,
   changeTableSize
 } from "../../libs/utils";
+import LibraryCardFormModal from "../modals/LibraryCardFormModal";
+import ConfirmationModal from "../modals/ConfirmationModal";
 import { User, LibraryCard } from "../../libs/ajax";
 import { isEmpty, isNil } from "lodash";
 
@@ -51,12 +54,21 @@ const columnHeaderFormat = {
   activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
 };
 
+
+//NOTE: confirmation modal needs to have a card (or the data needed to generate a card) ready
+//For deletion it's a matter of pulling the card
+//For issuing a new card, it's a matter of creating a new card on the modal
+const showConfirmationModal = (setShowConfirmation, card, setSelectedCard) => {
+  setSelectedCard(card);
+  setShowConfirmation(true);
+};
+
 const DeactivateLibraryCardButton = (props) => {
-  const {deactivateLibraryCard, id} = props;
+  const {setShowConfirmation, card, setSelectedCard} = props;
   return button({
     role: 'button',
     style: {}, //figure this out},
-    onClick: () => deactivateLibraryCard(id)
+    onClick: () => showConfirmationModal(setShowConfirmation, card, setSelectedCard)
   }, ['Deactivate']);
 };
 
@@ -64,26 +76,28 @@ const IssueLibraryCardButton = (props) => {
   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
   //institution id should be determined from the logged in SO account on the back-end
-  const {issueLibraryCard, targetResearcher} = props;
+  const {setShowConfirmation, card, setSelectedCard} = props;
   return button({
     role: 'button',
     style: {},
-    onClick: () => issueLibraryCard(targetResearcher)
+    onClick: () => showConfirmationModal(setShowConfirmation, card, setSelectedCard)
   }, ['Issue']);
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
 const LibraryCardCell = (props) => {
-  const {issueLibraryCard, deactivateLibraryCard, targetResearcher, card} = props;
-  const {id, userId} = card;
+  const {setShowConfirmation, card, setSelectedCard} = props;
+  const {userId} = card;
 
   const button = !isNil(card) ? DeactivateLibraryCardButton({
-    deactivateLibraryCard,
-    id
+    setShowConfirmation,
+    card,
+    setSelectedCard
   }) : IssueLibraryCardButton({
-    issueLibraryCard,
-    targetResearcher
+    showConfirmationModal,
+    setSelectedCard,
+    card: isEmpty(card) ? {} : card
   });
 
   return {
@@ -148,7 +162,9 @@ export default function SigningOfficialTable(props) {
   const [visibleResearchers, setVisibleResearchers] = useState([]);
   const [signingOfficial, setSigningOfficial] = useState({});
   const [newCard, setNewCard] = useState({});
+  const [selectedCard, setSelectedCard] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const searchRef = useRef('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -186,16 +202,23 @@ export default function SigningOfficialTable(props) {
         emailCell(email, id),
         displayNameCell(displayName, id),
         h(LibraryCardCell, {
-          issueLibraryCard,
-          deactivateLibraryCard,
-          targetResearcher: researcher,
-          card: isEmpty(libraryCards) ? {} : libraryCards[0]
+          setShowConfirmation,
+          card: isEmpty(libraryCards) ? {} : libraryCards[0],
+          setSelectedCard
         }),
         roleCell(roles, id),
         activeDarCountCell(count, id)
       ];
     });
   };
+
+  const columnHeaderData = [
+    columnHeaderFormat.name,
+    columnHeaderFormat.email,
+    columnHeaderFormat.libraryCard,
+    columnHeaderFormat.role,
+    columnHeaderFormat.activeDARs
+  ];
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = tableSearchHandler(
@@ -209,21 +232,22 @@ export default function SigningOfficialTable(props) {
     setShowModal(true);
   };
 
-  const issueLibraryCard = useCallback(async (targetResearcher) => {
-    const { dacUserId } = targetResearcher;
-    let { email, displayName } = targetResearcher;
+  //rewrite this, modal is sending back the card, work with that instead
+  const issueLibraryCard = useCallback(async (card) => {
+    const { userId } = card;
+    let { email, displayName } = card;
     let messageName;
     try {
       const listCopy = cloneDeep(researchers);
       //NOTE: institution_id and userName can be supplied by the back-end
       const newLibraryCard = await LibraryCard.createLibraryCard({
         userEmail: email,
-        userId: dacUserId
+        userId
       });
       displayName = newLibraryCard.displayName;
       email = newLibraryCard.email;
 
-      const targetIndex = findIndex((researcher) => targetResearcher.dacUserId === researcher.dacUserId)(listCopy);
+      const targetIndex = findIndex((researcher) => card.userId === researcher.userId)(listCopy);
       //library cards array should only have one card MAX, SO should not be able to see LCs from other institutions
       if(targetIndex === -1) { //if card is not found, push new card to end of list
         listCopy.push({email, libraryCards: [newLibraryCard]});
@@ -239,7 +263,7 @@ export default function SigningOfficialTable(props) {
     }
   }, [researchers]);
 
-  const deactivateLibraryCard = useCallback(async (id, displayName, dacUserId) => {
+  const deactivateLibraryCard = useCallback(async ({id, displayName, email, dacUserId}) => {
     const listCopy = cloneDeep(researchers);
     try {
       await LibraryCard.deleteLibraryCard(id);
@@ -277,7 +301,34 @@ export default function SigningOfficialTable(props) {
         h(SearchBar, {handleSearchChange, searchRef}),
       ]),
       h(SimpleTable, {
-
+        isLoading,
+        rowData: processResearcherRowData(visibleResearchers),
+        columnHeaders: columnHeaderData,
+        styles,
+        tableSize,
+        paginationBar
+      }),
+      div({ style: {marginLeft: '90%'}}, [
+        h(SimpleButton, {
+          onClick: () => showModalOnClick(),
+          baseColor: Theme.palette.secondary,
+          label: 'Add New Researcher'
+        })
+      ]),
+      //NOTE: need to update LibraryCardFormModal
+      //SO cannot pick an institution outside of their own, need to lock the selection in place
+      h(LibraryCardFormModal, {
+        showModal,
+        createOnClick: issueLibraryCard,
+        closeModal: () => setShowModal(false)
+      }),
+      h(ConfirmationModal, {
+        showConfirmation,
+        closeConfirmation: () => setShowConfirmation(false),
+        title: 'Deactivate Library Card?',
+        message: 'Are you sure you want to deactivate this library card?',
+        header: `${selectedCard.userName || selectedCard.userEmail} - ${!isNil(selectedCard.institution) ? selectedCard.institution.name : ''}`,
+        onConfirm: () => deactivateLibraryCard(selectedCard)
       })
     ])
   );
