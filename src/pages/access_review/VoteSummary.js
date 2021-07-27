@@ -155,7 +155,8 @@ export const VoteSummary = hh(
           padding: '1rem',
           textAlign: 'right',
           flexShrink: '0',
-          fontWeight: Theme.font.weight.regular}
+          fontWeight: Theme.font.weight.regular},
+        isRendered: isNil(this.props.accessElection) ? false : this.props.accessElection.status === "Open"
         }, [a({onClick: () => this.sendReminder(vote)}, ['Send Reminder'])])
       ]);
     };
