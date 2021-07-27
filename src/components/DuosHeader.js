@@ -15,7 +15,7 @@ import { Styles } from '../libs/theme';
 import DuosLogo from '../images/duos-network-logo.svg';
 import contactUsHover from '../images/navbar_icon_contact_us_hover.svg';
 import contactUsStandard from '../images/navbar_icon_contact_us.svg';
-import { isNil } from 'lodash';
+import { isNil, map, uniq } from 'lodash/fp';
 
 const styles = {
   drawerPaper: {
@@ -230,6 +230,11 @@ class DuosHeader extends Component {
       isSigningOfficial = currentUser.isSigningOfficial;
     }
 
+    const hasTwoOrMoreRoles = () => {
+      const roleNames = uniq(map("name")(currentUser.roles));
+      return roleNames.length >= 2;
+    };
+
     const dropdownLinks = {
       statistics: {
         'Votes Statistics': {
@@ -304,6 +309,88 @@ class DuosHeader extends Component {
       url: this.props.location.pathname
     });
 
+    const adminLink = (inDropDown) => li({ isRendered: inDropDown ? isAdmin : isAdmin && !hasTwoOrMoreRoles()}, [
+      h(Link, { id: 'link_adminConsole', to: '/admin_console' }, [
+        'Admin Console',
+      ]),
+    ]);
+
+    const signingOfficialLink = (inDropDown)  => li({ isRendered:  inDropDown ? isSigningOfficial : isSigningOfficial && !hasTwoOrMoreRoles()}, [
+      h(Link, { id: 'link_so_console', to: '/signing_official_console' }, ['Signing Official Console'])
+    ]);
+
+    const chairpersonDropDown = li({ className: 'dropdown', isRendered: isChairPerson && !hasTwoOrMoreRoles()}, [
+      a(
+        {
+          role: 'button',
+          className: 'dropdown-toggle',
+          'data-toggle': 'dropdown',
+        },
+        [
+          div({}, [
+            'DAC Chair Console',
+            span({ className: 'caret caret-margin' }, []),
+          ]),
+        ]
+      ),
+      ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
+        li({}, [
+          h(
+            Link,
+            { id: 'link_chairConsole', to: this.state.dacChairPath },
+            ['Manage DARs']
+          ),
+        ]),
+        hr({ style: hrStyle }),
+        li({}, [
+          h(Link, { id: 'link_manageDac', to: '/manage_dac' }, [
+            'Manage DACs',
+          ]),
+        ]),
+      ]),
+    ]);
+
+    const chairSubHeader =
+      li({ isRendered: isChairPerson, style: {marginTop: '10px', marginBottom: '5px'} }, [
+        span({style: { fontSize: '12px', fontWeight: '600', padding: '10px 15px'}}, ['DAC Chair Console'])
+      ]);
+
+    const chairManageDACsLink =
+      li({ isRendered: isChairPerson, style: {marginLeft: '10px', paddingBottom: '0 !important'} }, [
+        h(Link, { id: 'link_manageDac', to: '/manage_dac' }, [
+          'Manage DACs',
+        ]),
+      ]);
+    const chairManageDARsLink =
+      li({ isRendered: isChairPerson, style: {marginLeft: '10px'} }, [
+        h( Link, { id: 'link_chairConsole', to: this.state.dacChairPath },
+          ['Manage DARs']
+        ),
+      ]);
+
+    const memberLink = (inDropDown) =>
+      li({ isRendered: inDropDown ? isMember : isMember && !hasTwoOrMoreRoles() }, [
+        h(Link, { id: 'link_memberConsole', to: '/member_console' }, [
+          'DAC Member Console',
+        ]),
+      ]);
+
+    const researcherLink = (inDropDown) => li({ isRendered: inDropDown ? isResearcher : isResearcher && !hasTwoOrMoreRoles() }, [
+      h(
+        Link,
+        { id: 'link_researcherConsole', to: '/researcher_console' },
+        ['Researcher Console']
+      ),
+    ]);
+
+    const dataOwnerLink = (inDropDown) => li({ isRendered: inDropDown ? isDataOwner :  isDataOwner && !hasTwoOrMoreRoles() }, [
+      h(
+        Link,
+        { id: 'link_dataOwnerConsole', to: '/data_owner_console' },
+        ['Data Owner Console']
+      ),
+    ]);
+
     return nav({ className: 'navbar-duos', role: 'navigation' }, [
       h(Hidden, { mdDown: true }, [
         this.makeNotifications(),
@@ -343,15 +430,8 @@ class DuosHeader extends Component {
                   ]),
                 ]),
               ]),
-              li({ isRendered: isAdmin }, [
-                h(Link, { id: 'link_adminConsole', to: '/admin_console' }, [
-                  'Admin Console',
-                ]),
-              ]),
-              li({ isRendered: isSigningOfficial }, [
-                h(Link, { id: 'link_so_console', to: '/signing_official_console' }, ['Signing Official Console'])
-              ]),
-              li({ className: 'dropdown', isRendered: isChairPerson }, [
+
+              li({ className: 'dropdown', isRendered: hasTwoOrMoreRoles() }, [
                 a(
                   {
                     role: 'button',
@@ -360,49 +440,29 @@ class DuosHeader extends Component {
                   },
                   [
                     div({}, [
-                      'DAC Chair Console',
+                      'Your Consoles',
                       span({ className: 'caret caret-margin' }, []),
                     ]),
                   ]
                 ),
                 ul({ className: 'dropdown-menu user-dropdown', role: 'menu' }, [
-                  li({}, [
-                    h(
-                      Link,
-                      { id: 'link_chairConsole', to: this.state.dacChairPath },
-                      ['Manage DARs']
-                    ),
-                  ]),
-                  hr({ style: hrStyle }),
-                  li({}, [
-                    h(Link, { id: 'link_manageDac', to: '/manage_dac' }, [
-                      'Manage DACs',
-                    ]),
-                  ]),
+                  adminLink(true),
+                  signingOfficialLink(true),
+                  chairSubHeader,
+                  chairManageDARsLink,
+                  chairManageDACsLink,
+                  memberLink(true),
+                  researcherLink(true),
+                  dataOwnerLink(true)
                 ]),
               ]),
 
-              li({ isRendered: isMember }, [
-                h(Link, { id: 'link_memberConsole', to: '/member_console' }, [
-                  'DAC Member Console',
-                ]),
-              ]),
-
-              li({ isRendered: isResearcher }, [
-                h(
-                  Link,
-                  { id: 'link_researcherConsole', to: '/researcher_console' },
-                  ['Researcher Console']
-                ),
-              ]),
-
-              li({ isRendered: isDataOwner }, [
-                h(
-                  Link,
-                  { id: 'link_dataOwnerConsole', to: '/data_owner_console' },
-                  ['Data Owner Console']
-                ),
-              ]),
+              adminLink(false),
+              signingOfficialLink(false),
+              chairpersonDropDown,
+              memberLink(false),
+              researcherLink(false),
+              dataOwnerLink(false),
 
               li({ isRendered: isResearcher }, [
                 h(
