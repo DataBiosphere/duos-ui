@@ -53,7 +53,7 @@ const Routes = (props) => (
     <Route exact path="/backgroundsignin" render={
       (routeProps) =>
         props.env
-          ? props.env !== 'prod'
+          ? (props.env !== 'prod' && props.env !== 'staging')
             ? <BackgroundSignIn {...routeProps} />
             : <NotFound />
           : <div />
