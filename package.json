@@ -61,7 +61,7 @@
     "eslint-plugin-flowtype": "5.8.1",
     "eslint-plugin-react": "7.24.0",
     "react-scripts": "4.0.3",
-    "start-server-and-test": "1.13.0"
+    "start-server-and-test": "1.13.1"
   },
   "browserslist": [
     ">0.2%",
