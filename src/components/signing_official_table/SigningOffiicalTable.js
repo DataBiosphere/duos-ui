@@ -9,7 +9,7 @@ import PaginationBar from "../PaginationBar";
 import SearchBar from "../SearchBar";
 import {
   Notifications,
-  // USER_ROLES,
+  USER_ROLES,
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
@@ -99,15 +99,19 @@ const IssueLibraryCardButton = (props) => {
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
 const LibraryCardCell = (props) => {
-  const {setShowConfirmation, card, setSelectedCard, researcher = {}} = props;
+  const {setShowConfirmation, card, setSelectedCard, researcher, setConfirmationModalMsg, setConfirmationTitle = {}} = props;
   const {userId} = card;
 
   const button = !isNil(card) ? DeactivateLibraryCardButton({
     setShowConfirmation,
     card,
-    setSelectedCard
+    setSelectedCard,
+    setConfirmationModalMsg,
+    setConfirmationTitle
   }) : IssueLibraryCardButton({
     showConfirmationModal,
+    setConfirmationModalMsg,
+    setConfirmationTitle,
     setSelectedCard,
     card: {
       userId: researcher.dacUserId,
@@ -186,6 +190,17 @@ export default function SigningOfficialTable(props) {
 
   //init hook, need to make ajax calls here
   useEffect(() => {
+    const init = async() => {
+      try{
+        setIsLoading(true);
+        const researchers = await User.list(USER_ROLES.signingOfficial);
+        setResearchers(researchers);
+        setIsLoading(false);
+      } catch(error) {
+        Notifications.showError({text: 'Failed to initialize researcher table'});
+      }
+    };
+    init();
   }, []);
 
   useEffect(() => {
@@ -222,7 +237,9 @@ export default function SigningOfficialTable(props) {
           setShowConfirmation,
           card: !isEmpty(libraryCards) ? libraryCards[0] : null,
           researcher,
-          setSelectedCard
+          setSelectedCard,
+          setConfirmationModalMsg,
+          setConfirmationTitle
         }),
         roleCell(roles, id),
         // activeDarCountCell(count, id)
@@ -265,8 +282,8 @@ export default function SigningOfficialTable(props) {
       displayName = newLibraryCard.displayName;
       email = newLibraryCard.email;
 
-      const targetIndex = findIndex((researcher) => card.userId === researcher.userId)(listCopy);
-      //library cards array should only have one card MAX, SO should not be able to see LCs from other institutions
+      const targetIndex = findIndex((researcher) => card.userId === researcher.dacUserId)(listCopy);
+      //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new card to end of list
         listCopy.push({email, libraryCards: [newLibraryCard]});
         messageName = email;
