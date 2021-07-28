@@ -458,7 +458,13 @@ class DuosHeader extends Component {
                   ['Dataset Catalog']
                 ),
               ]),
-              li({}, [h(Link, { id: 'link_help', to: '/FAQs' }, ['FAQs'])]),
+              li({}, [
+                a({
+                  id: 'link_help',
+                  href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360059957092-Frequently-Asked-Questions-FAQs-',
+                  target: '_blank'
+                }, ['FAQs']),
+              ]),
               contactUsButton,
               supportrequestModal,
             ]),
