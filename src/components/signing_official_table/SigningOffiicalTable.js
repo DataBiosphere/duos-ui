@@ -9,13 +9,13 @@ import PaginationBar from "../PaginationBar";
 import SearchBar from "../SearchBar";
 import {
   Notifications,
-  USER_ROLES,
+  // USER_ROLES,
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
   searchOnFilteredList,
-  goToPage,
-  changeTableSize
+  goToPageCallback,
+  changeTableSizeCallback
 } from "../../libs/utils";
 import LibraryCardFormModal from "../modals/LibraryCardFormModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
@@ -41,7 +41,7 @@ const styles = {
     name: '20%',
     libraryCard: '25%',
     role: '20%',
-    activeDARs: '10%'
+    // activeDARs: '10%'
   },
 };
 
@@ -51,24 +51,29 @@ const columnHeaderFormat = {
   name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
   libraryCard: {label: 'Library Card', cellStyle: {width: styles.cellWidths.libraryCard}},
   role: {label: 'Role', cellStyle: {width: styles.cellWidths.libraryCard}},
-  activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
+  // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
 };
 
-
-//NOTE: confirmation modal needs to have a card (or the data needed to generate a card) ready
-//For deletion it's a matter of pulling the card
-//For issuing a new card, it's a matter of creating a new card on the modal
-const showConfirmationModal = (setShowConfirmation, card, setSelectedCard) => {
+const showConfirmationModal = (setShowConfirmation, card, setSelectedCard, setConfirmationModalMsg, message, setConfirmationTitle, title) => {
   setSelectedCard(card);
   setShowConfirmation(true);
+  setConfirmationModalMsg(message);
+  setConfirmationTitle(title);
 };
 
 const DeactivateLibraryCardButton = (props) => {
-  const {setShowConfirmation, card, setSelectedCard} = props;
+  const {setShowConfirmation, card = {}, setSelectedCard, setConfirmationModalMsg, setConfirmationTitle} = props;
+  const message = 'Are you sure you want to deactivate this library card?';
+  const title = 'Deactivate Library Card';
   return button({
+    key: `deactivate-card-${card.id}`,
     role: 'button',
     style: {}, //figure this out},
-    onClick: () => showConfirmationModal(setShowConfirmation, card, setSelectedCard)
+    onClick: () => showConfirmationModal(
+      setShowConfirmation,
+      card, setSelectedCard,
+      setConfirmationModalMsg, message,
+      setConfirmationTitle, title)
   }, ['Deactivate']);
 };
 
@@ -76,18 +81,25 @@ const IssueLibraryCardButton = (props) => {
   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
   //institution id should be determined from the logged in SO account on the back-end
-  const {setShowConfirmation, card, setSelectedCard} = props;
+  const {setShowConfirmation, card, setSelectedCard, setConfirmationModalMsg, setConfirmationTitle} = props;
+  const message = 'Are you sure you want to issue this library card?';
+  const title = 'Issue Library Card';
   return button({
     role: 'button',
     style: {},
-    onClick: () => showConfirmationModal(setShowConfirmation, card, setSelectedCard)
+    onClick: () => showConfirmationModal(
+      setShowConfirmation,
+      card, setSelectedCard,
+      setConfirmationModalMsg, message,
+      setConfirmationTitle, title
+    )
   }, ['Issue']);
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
 const LibraryCardCell = (props) => {
-  const {setShowConfirmation, card, setSelectedCard} = props;
+  const {setShowConfirmation, card, setSelectedCard, researcher = {}} = props;
   const {userId} = card;
 
   const button = !isNil(card) ? DeactivateLibraryCardButton({
@@ -97,13 +109,16 @@ const LibraryCardCell = (props) => {
   }) : IssueLibraryCardButton({
     showConfirmationModal,
     setSelectedCard,
-    card: isEmpty(card) ? {} : card
+    card: {
+      userId: researcher.dacUserId,
+      userEmail: researcher.email
+    }
   });
 
   return {
     isComponent: true,
     id: userId,
-    style: {},//figure it out,
+    style: {}, //need to figure out a base style
     label: 'lc-button',
     data: div({
       style: {
@@ -144,14 +159,14 @@ const displayNameCell = (displayName, id) => {
   };
 };
 
-const activeDarCountCell = (count, id) => {
-  return {
-    data: count || 0,
-    id,
-    style: {},
-    label: 'active-dar-count'
-  };
-};
+// const activeDarCountCell = (count, id) => {
+//   return {
+//     data: count || 0,
+//     id,
+//     style: {},
+//     label: 'active-dar-count'
+//   };
+// };
 
 export default function SigningOfficialTable(props) {
   const [researchers, setResearchers] = useState([]);
@@ -160,16 +175,18 @@ export default function SigningOfficialTable(props) {
   const [pageCount, setPageCount] = useState(1);
   const [filteredResearchers, setFilteredResearchers] = useState([]);
   const [visibleResearchers, setVisibleResearchers] = useState([]);
-  const [signingOfficial, setSigningOfficial] = useState({});
-  const [newCard, setNewCard] = useState({});
+  // const [signingOfficial, setSigningOfficial] = useState({});
   const [selectedCard, setSelectedCard] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const searchRef = useRef('');
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
+  const [confirmationTitle, setConfirmationTitle] = useState('');
 
-  //NOTE: for now mock out ajax calls so I can develop the console.
-  //The back-end code needs to be updated in a separate PR
+  //init hook, need to make ajax calls here
+  useEffect(() => {
+  }, []);
 
   useEffect(() => {
     searchOnFilteredList(
@@ -191,8 +208,8 @@ export default function SigningOfficialTable(props) {
     pageCount,
     currentPage,
     tableSize,
-    goToPage,
-    changeTableSize
+    goToPage: goToPageCallback(setCurrentPage, currentPage),
+    changeTableSize: changeTableSizeCallback(setTableSize)
   });
 
   const processResearcherRowData = (researchers = []) => {
@@ -203,11 +220,12 @@ export default function SigningOfficialTable(props) {
         displayNameCell(displayName, id),
         h(LibraryCardCell, {
           setShowConfirmation,
-          card: isEmpty(libraryCards) ? {} : libraryCards[0],
+          card: !isEmpty(libraryCards) ? libraryCards[0] : null,
+          researcher,
           setSelectedCard
         }),
         roleCell(roles, id),
-        activeDarCountCell(count, id)
+        // activeDarCountCell(count, id)
       ];
     });
   };
@@ -217,7 +235,7 @@ export default function SigningOfficialTable(props) {
     columnHeaderFormat.email,
     columnHeaderFormat.libraryCard,
     columnHeaderFormat.role,
-    columnHeaderFormat.activeDARs
+    // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
   ];
 
   //Search function for SearchBar component, function defined in utils
@@ -232,7 +250,7 @@ export default function SigningOfficialTable(props) {
     setShowModal(true);
   };
 
-  //rewrite this, modal is sending back the card, work with that instead
+  //NOTE: make sure callback methods works as expected
   const issueLibraryCard = useCallback(async (card) => {
     const { userId } = card;
     let { email, displayName } = card;
@@ -263,16 +281,18 @@ export default function SigningOfficialTable(props) {
     }
   }, [researchers]);
 
+  //NOTE: other callback method, make sure it works as expected
   const deactivateLibraryCard = useCallback(async ({id, displayName, email, dacUserId}) => {
     const listCopy = cloneDeep(researchers);
+    const messageName = displayName || email;
     try {
       await LibraryCard.deleteLibraryCard(id);
       const targetIndex = findIndex((researcher) => dacUserId === researcher.dacUserId)(researchers);
       listCopy[targetIndex].libraryCards = [];
       setResearchers(listCopy);
-      Notifications.showSuccess({text: `Removed library card issued to ${displayName}`});
+      Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
     } catch(error) {
-      Notifications.showError({text: `Error deleting library card issued to ${displayName}`});
+      Notifications.showError({text: `Error deleting library card issued to ${messageName}`});
     }
   }, [researchers]);
 
@@ -315,18 +335,19 @@ export default function SigningOfficialTable(props) {
           label: 'Add New Researcher'
         })
       ]),
-      //NOTE: need to update LibraryCardFormModal
-      //SO cannot pick an institution outside of their own, need to lock the selection in place
       h(LibraryCardFormModal, {
         showModal,
         createOnClick: issueLibraryCard,
-        closeModal: () => setShowModal(false)
+        closeModal: () => setShowModal(false),
+        card: selectedCard,
+        institutions: [], //pass in empty array to force modal to hide institution dropdown
+        modalType: 'add'
       }),
       h(ConfirmationModal, {
         showConfirmation,
         closeConfirmation: () => setShowConfirmation(false),
-        title: 'Deactivate Library Card?',
-        message: 'Are you sure you want to deactivate this library card?',
+        title: confirmationTitle,
+        message: confirmationModalMsg,
         header: `${selectedCard.userName || selectedCard.userEmail} - ${!isNil(selectedCard.institution) ? selectedCard.institution.name : ''}`,
         onConfirm: () => deactivateLibraryCard(selectedCard)
       })

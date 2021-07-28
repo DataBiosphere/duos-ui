@@ -12,6 +12,10 @@ import { Theme } from '../../libs/theme';
 //modal component, used to render row on modal
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType } = props;
+  // signing officials shouldn't be able to pick and choose from solutions
+  // front-end can hide the input by limiting dropdown options to less than two choices
+  // (as a way to impose conditional rendering without adding more prop variables)
+  // however back-end still needs to filter out institutionId
   const [filteredDropdown, setFilteredDropdown] = useState(dropdownOptions);
   let template;
 
@@ -132,13 +136,16 @@ export default function LibraryCardFormModal(props) {
           modalType == 'add' ? 'Add Library Card' : 'Update Library Card',
         ]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
+        //users dropdown
         h(FormFieldRow, {
           card,
           modalType,
           updateUser,
           dropdownOptions: users,
         }),
+        //institution dropdown
         h(FormFieldRow, {
+          isRendered: institutions.length > 1,
           card,
           modalType,
           updateInstitution,

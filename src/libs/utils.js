@@ -583,15 +583,19 @@ export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFil
   setFilteredList(filteredList);
 };
 
-const goToPage = (value, setCurrentPage, pageCount) => {
-  if(value >= 1 && value <= pageCount) {
-    setCurrentPage(value);
-  }
+export const goToPageCallback = (setCurrentPage, pageCount) => {
+  return (value) => {
+    if(value >= 1 && value <= pageCount) {
+      setCurrentPage(value);
+    }
+  };
 };
 
-const changeTableSize = (value, setTableSize) => {
-  if (value > 0 && !isNaN(parseInt(value))) {
-    setTableSize(value);
-  }
+export const changeTableSize = (setTableSize) => {
+  return (value) => {
+    if (value > 0 && !isNaN(parseInt(value))) {
+      setTableSize(value);
+    }
+  };
 };
 
