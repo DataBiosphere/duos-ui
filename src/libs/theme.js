@@ -268,15 +268,15 @@ export const Styles = {
       alignItems: "center",
     },
     ID_CELL: {
-      width: "5%",
+      width: "2%",
       margin: "0 1%",
       display: "flex",
       justifyContent: "left",
       alignItems: "center",
     },
     INSTITUTION_CELL: {
-      maxWidth: "35%",
-      minWidth: "35%",
+      maxWidth: "25%",
+      minWidth: "25%",
       margin: "0 1%",
       display: "flex",
       justifyContent: "left",
