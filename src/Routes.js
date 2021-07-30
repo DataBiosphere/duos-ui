@@ -19,7 +19,6 @@ import DulPreview from './pages/DulPreview';
 import DulResultRecords from './pages/DulResultRecords';
 import DulReview from './pages/DulReview';
 import Election404 from './pages/Election404';
-import FAQs from './pages/FAQs';
 import Home from './pages/Home';
 import HomeAbout from './pages/HomeAbout';
 import HomeSigningOfficial from './pages/HomeSigningOfficial';
@@ -58,7 +57,6 @@ const Routes = (props) => (
             : <NotFound />
           : <div />
     } />
-    <Route path="/FAQs" component={FAQs} />
     <Route path="/home_about" component={HomeAbout} />
     <Route path="/home_signing_official" component={HomeSigningOfficial} />
     <Route path="/home_dac_info" component={HomeDacInfo} />
