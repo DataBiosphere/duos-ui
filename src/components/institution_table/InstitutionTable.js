@@ -77,9 +77,9 @@ export default function InstitutionTable(props) {
           let signingOfficials = '';
           isNil(inst.signingOfficials) ? signingOfficials = '' : inst.signingOfficials.forEach((user, i) => {
             signingOfficials = signingOfficials.concat(user.displayName, ' (', user.email, ')');
-            //if there are multiple SOs in the list and this is not the last one, add line break
+            //if there are multiple SOs in the list and this is not the last one, add comma
             if (inst.signingOfficials.length > 1 && i < (inst.signingOfficials.length - 1)) {
-              signingOfficials = signingOfficials.concat('\n');
+              signingOfficials = signingOfficials.concat(', ');
             }
           });
           const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
