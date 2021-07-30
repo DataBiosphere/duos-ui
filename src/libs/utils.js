@@ -558,7 +558,9 @@ export const getColumnSort = (getList, callback) => {
 };
 
 //Functions that are commonly used between tables//
-export const recalculateVisibleTable = async (tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList ) => {
+export const recalculateVisibleTable = async ({
+  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList
+}) => {
   try {
     setPageCount(calcTablePageCount(tableSize, filteredList));
     if (currentPage > pageCount) {

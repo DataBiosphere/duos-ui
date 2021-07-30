@@ -50,27 +50,15 @@ const columnHeaderFormat = {
   // activeDARs: {label: 'Active DARs', cellStyle: {width: styles.cellWidths.activeDARs}}
 };
 
-const showConfirmationModal = (setShowConfirmation, card, setSelectedCard, setConfirmationModalMsg, message, setConfirmationTitle, title) => {
-  setSelectedCard(card);
-  setShowConfirmation(true);
-  setConfirmationModalMsg(message);
-  setConfirmationTitle(title);
-  //need to set confirmationType so that the correct onClick function is used
-};
-
 const DeactivateLibraryCardButton = (props) => {
-  const {setShowConfirmation, card = {}, setSelectedCard, setConfirmationModalMsg, setConfirmationTitle} = props;
+  const {card = {}, showConfirmationModal, deleteFn} = props;
   const message = 'Are you sure you want to deactivate this library card?';
   const title = 'Deactivate Library Card';
   return button({
     key: `deactivate-card-${card.id}`,
     role: 'button',
     style: {}, //figure this out},
-    onClick: () => showConfirmationModal(
-      setShowConfirmation,
-      card, setSelectedCard,
-      setConfirmationModalMsg, message,
-      setConfirmationTitle, title)
+    onClick: () => showConfirmationModal({card, message, title, deleteFn})
   }, ['Deactivate']);
 };
 
@@ -78,51 +66,41 @@ const IssueLibraryCardButton = (props) => {
   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
   //institution id should be determined from the logged in SO account on the back-end
-  const {setShowConfirmation, card, setSelectedCard, setConfirmationModalMsg, setConfirmationTitle} = props;
+  const {card, showConfirmationModal, issueFn} = props;
   const message = 'Are you sure you want to issue this library card?';
   const title = 'Issue Library Card';
   return button({
     role: 'button',
     style: {},
-    onClick: () => showConfirmationModal(
-      setShowConfirmation,
-      card, setSelectedCard,
-      setConfirmationModalMsg, message,
-      setConfirmationTitle, title
-    )
+    onClick: () => showConfirmationModal({card, message, title, issueFn})
   }, ['Issue']);
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const LibraryCardCell = (
-  setShowConfirmation,
-  setSelectedCard,
+const LibraryCardCell = ({
   researcher,
-  setConfirmationModalMsg,
-  setConfirmationTitle = {}
-) => {
+  showConfirmationModal,
+  deleteFn,
+  issueFn
+}) => {
   const id = researcher.dacUserId || researcher.email;
   const card = !isEmpty(researcher.libraryCards)
     ? researcher.libraryCards[0]
     : null;
   const button = !isNil(card)
     ? DeactivateLibraryCardButton({
-      setShowConfirmation,
       card,
-      setSelectedCard,
-      setConfirmationModalMsg,
-      setConfirmationTitle,
+      showConfirmationModal,
+      deleteFn
     })
     : IssueLibraryCardButton({
-      setShowConfirmation,
-      setConfirmationModalMsg,
-      setConfirmationTitle,
-      setSelectedCard,
       card: {
         userId: researcher.dacUserId,
         userEmail: researcher.email,
       },
+      showConfirmationModal,
+      issueFn
     });
 
   return {
@@ -181,8 +159,8 @@ const displayNameCell = (displayName, id) => {
 //   };
 // };
 
-export default function SigningOfficialTable() {
-  const [researchers, setResearchers] = useState([]);
+export default function SigningOfficialTable(props) {
+  const [researchers, setResearchers] = useState(props.researchers || []);
   const [tableSize, setTableSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
@@ -196,13 +174,21 @@ export default function SigningOfficialTable() {
   const [isLoading, setIsLoading] = useState(true);
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
+  const [confirmationClickFn, setConfirmationClickFn] = useState();
+
+  const showConfirmationModal = ({card, message, title, method}) => {
+    setSelectedCard(card);
+    setShowConfirmation(true);
+    setConfirmationModalMsg(message);
+    setConfirmationTitle(title);
+    setConfirmationClickFn(method);
+  };
 
   //init hook, need to make ajax calls here
   useEffect(() => {
     const init = async() => {
       try{
         setIsLoading(true);
-        const researchers = await User.list(USER_ROLES.signingOfficial);
         setResearchers(researchers);
         setIsLoading(false);
       } catch(error) {
@@ -210,7 +196,7 @@ export default function SigningOfficialTable() {
       }
     };
     init();
-  }, []);
+  }, [researchers]);
 
   useEffect(() => {
     searchOnFilteredList(
@@ -221,10 +207,14 @@ export default function SigningOfficialTable() {
 
   useEffect(() => {
     setIsLoading(true);
-    recalculateVisibleTable(
-      tableSize, pageCount, filteredResearchers, currentPage,
-      setPageCount, setCurrentPage, setVisibleResearchers
-    );
+    recalculateVisibleTable({
+      tableSize, pageCount,
+      filteredList: filteredResearchers,
+      currentPage,
+      setPageCount,
+      setCurrentPage,
+      setVisibleList: setVisibleResearchers
+    });
     setIsLoading(false);
   }, [tableSize, pageCount, filteredResearchers, currentPage]);
 
@@ -250,18 +240,17 @@ export default function SigningOfficialTable() {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {email, displayName, count = 0, roles, libraryCards} = researcher;
+      const {email, displayName, count = 0, roles} = researcher;
       const id = researcher.dacUserId;
       return [
         displayNameCell(displayName, id),
         emailCell(email, id),
-        LibraryCardCell(
-          setShowConfirmation,
-          setSelectedCard,
+        LibraryCardCell({
           researcher,
-          setConfirmationModalMsg,
-          setConfirmationTitle
-        ),
+          showConfirmationModal,
+          issueFn: issueLibraryCard,
+          deleteFn: deactivateLibraryCard
+        }),
         roleCell(roles, id),
         // activeDarCountCell(count, id)
       ];
@@ -365,7 +354,7 @@ export default function SigningOfficialTable() {
         title: confirmationTitle,
         message: confirmationModalMsg,
         header: `${selectedCard.userName || selectedCard.userEmail} - ${!isNil(selectedCard.institution) ? selectedCard.institution.name : ''}`,
-        onConfirm: () => deactivateLibraryCard(selectedCard)
+        onConfirm: () => confirmationClickFn(selectedCard)
       })
     ])
   );
