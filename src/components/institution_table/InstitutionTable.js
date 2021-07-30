@@ -91,6 +91,7 @@ export default function InstitutionTable(props) {
               style: Object.assign({}, Styles.TABLE.INSTITUTION_CELL)
             }, [
               a({ style: {
+                overflow: "hidden",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis"},
               onClick: () => { openUpdateModal(inst.id); }
