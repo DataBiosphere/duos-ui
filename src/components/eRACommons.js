@@ -3,7 +3,7 @@ import { find, getOr } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
-import { AuthenticateNIH, User } from '../libs/ajax';
+import { AuthenticateNIH } from '../libs/ajax';
 import { Config } from '../libs/config';
 import eraIcon from "../images/era-commons-logo.png";
 
@@ -36,10 +36,8 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   authenticateAsNIHFCUser = async (searchArg) => {
     let isFcUser = await this.verifyUser();
     if (!isFcUser) {
-      await User.getMe().then(
-        (response) => isFcUser = this.registerUserToFC(response),
-        () => this.setState({ nihError: true })
-      );
+      isFcUser = this.registerUserToFC(this.props.currentUser);
+      this.setState({ nihError: true });
     }
     if (isFcUser) {
       const parsedToken = qs.parse(searchArg);
@@ -56,21 +54,19 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    User.getMe().then((response) => {
-      const props = response.researcherProperties;
-      const authProp = find({'propertyKey':'eraAuthorized'})(props);
-      const expProp = find({'propertyKey':'eraExpiration'})(props);
-      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
-      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
-      const nihValid = isAuthorized && expirationCount > 0;
-      const eraCommonsId = response.eraCommonsId;
-      this.props.onNihStatusUpdate(nihValid);
-      this.setState(prev => {
-        prev.isAuthorized = isAuthorized;
-        prev.expirationCount = expirationCount;
-        prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
-        return prev;
-      });
+    const props = this.props.currentUser.researcherProperties;
+    const authProp = find({'propertyKey':'eraAuthorized'})(props);
+    const expProp = find({'propertyKey':'eraExpiration'})(props);
+    const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+    const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
+    const nihValid = isAuthorized && expirationCount > 0;
+    const eraCommonsId = this.props.currentUser.eraCommonsId;
+    this.props.onNihStatusUpdate(nihValid);
+    this.setState(prev => {
+      prev.isAuthorized = isAuthorized;
+      prev.expirationCount = expirationCount;
+      prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
+      return prev;
     });
   };
 

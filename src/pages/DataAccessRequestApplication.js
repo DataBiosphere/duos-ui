@@ -9,7 +9,7 @@ import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, Researcher, DataSet, User, Institution } from '../libs/ajax';
+import { DAR, DataSet, User, Institution } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
@@ -18,7 +18,6 @@ import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
-import {map} from "lodash/fp";
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -185,14 +184,6 @@ class DataAccessRequestApplication extends Component {
     return datasets;
   }
 
-  async getSOs()  {
-    const allSOs = await User.getSOsForCurrentUser();
-    const allSOsOptions = map((user) =>  {
-      return {value: user.userId, label: user.displayName};
-    })(allSOs);
-    return allSOsOptions;
-  }
-
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
@@ -213,8 +204,7 @@ class DataAccessRequestApplication extends Component {
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
       Storage.removeData('dar_application');
     }
-    let currentUserId = Storage.getCurrentUser().dacUserId;
-    let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
+    let rpProperties = researcher.researcherProperties;
     formData.darCode = fp.isNil(formData.darCode) ? null : formData.darCode;
     formData.partialDarCode = fp.isNil(formData.partialDarCode) ? null : formData.partialDarCode;
     formData.researcher = isNil(researcher) ? "" : researcher.displayName;
@@ -245,7 +235,7 @@ class DataAccessRequestApplication extends Component {
     formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
     formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
     formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
-    formData.userId = Storage.getCurrentUser().dacUserId;
+    formData.userId = researcher.dacUserId;
 
     let completed = false;
     if (!fp.isNil(formData.darCode)) {
@@ -1064,7 +1054,8 @@ class DataAccessRequestApplication extends Component {
                 isCloudProviderInvalid: this.state.isCloudProviderInvalid,
                 isSigningOfficialInvalid: this.state.isSigningOfficialInvalid,
                 isITDirectorInvalid: this.state.isITDirectorInvalid,
-                isAnvilUseInvalid: this.state.isAnvilUseInvalid
+                isAnvilUseInvalid: this.state.isAnvilUseInvalid,
+                currentUser: this.state.researcher
               }))
             ]),
 

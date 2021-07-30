@@ -9,7 +9,7 @@ import { eRACommons } from '../components/eRACommons';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { DAR, Researcher, Institution, User } from '../libs/ajax';
+import { DAR, Institution, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
@@ -136,8 +136,11 @@ class DataAccessRequestRenewal extends Component {
         formData.datasets = this.processDataSet(this.props.location.props.formData.datasetIds);
       }
     }
-    let currentUserId = Storage.getCurrentUser().dacUserId;
-    let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
+    //I think some of the logic is messed up here because the rpProperties are that of the currentUser
+    //while the researcher is most likely a different user (bc this is an admin only page) so we are
+    //getting the researcher's name with the currentUser's other info
+    let currentUser = await User.getMe();
+    let rpProperties = currentUser.researcherProperties;
     let researcher = isNil(formData.userId) ? null : await User.getById(formData.userId);
     formData.darCode = formData.darCode === undefined ? null : formData.darCode;
     formData.partialDarCode = formData.partialDarCode === undefined ? null : formData.partialDarCode;
@@ -175,7 +178,7 @@ class DataAccessRequestRenewal extends Component {
       formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
     }
 
-    formData.userId = Storage.getCurrentUser().dacUserId;
+    formData.userId = currentUser.dacUserId;
 
     if (formData.darCode !== null || formData.partialDarCode !== null) {
       formData.datasets = this.processDataSet(formData.datasetIds);
@@ -187,6 +190,7 @@ class DataAccessRequestRenewal extends Component {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
+      prev.currentUser = currentUser;
       prev.completed = completed;
       prev.formData = formData;
       return prev;
@@ -216,14 +220,6 @@ class DataAccessRequestRenewal extends Component {
         label: item.concatenation
       };
     });
-  }
-
-  handleOpenModal() {
-    this.setState({ showModal: true });
-  }
-
-  handleCloseModal() {
-    this.setState({ showModal: false });
   }
 
   handleChange = (e) => {
@@ -777,7 +773,8 @@ class DataAccessRequestRenewal extends Component {
                         destination: 'dar_application',
                         onNihStatusUpdate: this.onNihStatusUpdate,
                         location: this.props.location,
-                        validationError: showValidationMessages
+                        validationError: showValidationMessages,
+                        currentUser: this.state.currentUser
                       }),
                       div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
                         label({ className: 'control-label' }, ['LinkedIn Profile']),

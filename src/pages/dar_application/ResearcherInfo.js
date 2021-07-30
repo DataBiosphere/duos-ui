@@ -40,17 +40,12 @@ export default function ResearcherInfo(props) {
     cloudProvider,
     isCloudUseInvalid,
     isCloudProviderInvalid,
-    isAnvilUseInvalid
+    isAnvilUseInvalid,
+    currentUser
   } = props;
 
   const navButtonContainerStyle = {
     marginTop: '5rem'
-  };
-
-  const soDropDownStyle = {
-    control: styles => ({ ...styles,
-      backgroundColor: !isNil(darCode) ? '#efefef' : 'white',
-      borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
   };
 
   const formatSOString = (name, email) => {
@@ -181,7 +176,8 @@ export default function ResearcherInfo(props) {
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
-              validationError: showValidationMessages
+              validationError: showValidationMessages,
+              currentUser: currentUser
             }),
             div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
               label({ className: 'control-label' }, ['LinkedIn Profile']),
@@ -327,12 +323,6 @@ export default function ResearcherInfo(props) {
                 getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
                 getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
                   return { displayName: inputValue };
-                },
-                getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
-                  if(isNil(option) || isEmpty(option.displayName)) {
-                    return null;
-                  }
-                  return option;
                 },
                 value: props.signingOfficial
               }),
