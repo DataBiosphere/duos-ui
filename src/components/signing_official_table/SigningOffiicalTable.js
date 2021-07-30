@@ -1,12 +1,10 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles, Theme } from "../../libs/theme";
-import { h, div, button, img } from "react-hyperscript-helpers";
-import lockIcon from '../../images/lock-icon.png';
+import { h, div, button } from "react-hyperscript-helpers";
 import { cloneDeep, findIndex, concat } from "lodash/fp";
 import SimpleTable from "../SimpleTable";
 import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
-import SearchBar from "../SearchBar";
 import {
   Notifications,
   USER_ROLES,
@@ -57,6 +55,7 @@ const showConfirmationModal = (setShowConfirmation, card, setSelectedCard, setCo
   setShowConfirmation(true);
   setConfirmationModalMsg(message);
   setConfirmationTitle(title);
+  //need to set confirmationType so that the correct onClick function is used
 };
 
 const DeactivateLibraryCardButton = (props) => {
@@ -96,39 +95,51 @@ const IssueLibraryCardButton = (props) => {
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
-const LibraryCardCell = (props) => {
-  const {setShowConfirmation, card, setSelectedCard, researcher, setConfirmationModalMsg, setConfirmationTitle = {}} = props;
+const LibraryCardCell = (
+  setShowConfirmation,
+  setSelectedCard,
+  researcher,
+  setConfirmationModalMsg,
+  setConfirmationTitle = {}
+) => {
   const id = researcher.dacUserId || researcher.email;
-
-  const button = !isNil(card) ? DeactivateLibraryCardButton({
-    setShowConfirmation,
-    card,
-    setSelectedCard,
-    setConfirmationModalMsg,
-    setConfirmationTitle
-  }) : IssueLibraryCardButton({
-    showConfirmationModal,
-    setConfirmationModalMsg,
-    setConfirmationTitle,
-    setSelectedCard,
-    card: {
-      userId: researcher.dacUserId,
-      userEmail: researcher.email
-    }
-  });
+  const card = !isEmpty(researcher.libraryCards)
+    ? researcher.libraryCards[0]
+    : null;
+  const button = !isNil(card)
+    ? DeactivateLibraryCardButton({
+      setShowConfirmation,
+      card,
+      setSelectedCard,
+      setConfirmationModalMsg,
+      setConfirmationTitle,
+    })
+    : IssueLibraryCardButton({
+      setShowConfirmation,
+      setConfirmationModalMsg,
+      setConfirmationTitle,
+      setSelectedCard,
+      card: {
+        userId: researcher.dacUserId,
+        userEmail: researcher.email,
+      },
+    });
 
   return {
     isComponent: true,
     id,
     style: {}, //need to figure out a base style
     label: 'lc-button',
-    data: div({
-      style: {
-        display: 'flex',
-        justifyContent: 'left'
+    data: div(
+      {
+        style: {
+          display: 'flex',
+          justifyContent: 'left',
+        },
+        key: `lc-action-cell-${id}`,
       },
-      key: `lc-action-cell-${id}`
-    }, [button])
+      [button]
+    ),
   };
 };
 
@@ -242,16 +253,15 @@ export default function SigningOfficialTable() {
       const {email, displayName, count = 0, roles, libraryCards} = researcher;
       const id = researcher.dacUserId;
       return [
-        emailCell(email, id),
         displayNameCell(displayName, id),
-        h(LibraryCardCell, {
+        emailCell(email, id),
+        LibraryCardCell(
           setShowConfirmation,
-          card: !isEmpty(libraryCards) ? libraryCards[0] : null,
-          researcher,
           setSelectedCard,
+          researcher,
           setConfirmationModalMsg,
           setConfirmationTitle
-        }),
+        ),
         roleCell(roles, id),
         // activeDarCountCell(count, id)
       ];
