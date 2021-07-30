@@ -3,6 +3,7 @@ import {useEffect} from "react";
 import {Notifications} from "../libs/utils";
 import {div, a, h} from "react-hyperscript-helpers";
 import {Styles} from "../libs/theme";
+import SigningOfficialTable from "../components/signing_official_table/SigningOffiicalTable";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
 import {tableHeaderTemplate} from "../components/dar_table/DarTable";
 import {tableRowLoadingTemplate} from "../components/dar_table/DarTable";
@@ -31,36 +32,6 @@ export default function SigningOfficialConsole() {
   //could benefit in moving this to utils or a shared component so it can be used for the adminManageUsers page
   const widerColumnStyle = assign(Styles.TABLE.DATASET_CELL, {margin: '1rem 2%'});
   const regWidthColumnStyle = assign(Styles.TABLE.SUBMISSION_DATE_CELL, {margin: '1rem 2%'});
-  const userTableHeaderTemplate = [
-    div({style: widerColumnStyle, className: 'cell-sort'}, [
-      "Name",
-      span({ className: 'glyphicon sort-icon glyphicon-sort' })
-    ]),
-    div({style: widerColumnStyle, className: 'cell-sort'}, [
-      "Email",
-      span({ className: 'glyphicon sort-icon glyphicon-sort' })
-    ]),
-    div({style: widerColumnStyle, className: 'cell-sort'}, [
-      "Library Card",
-      span({ className: 'glyphicon sort-icon glyphicon-sort' })
-    ]),
-    div({style: regWidthColumnStyle, className: 'cell-sort'}, [
-      "Role",
-      span({ className: 'glyphicon sort-icon glyphicon-sort' })
-    ]),
-    div({style: regWidthColumnStyle, className: 'cell-sort'}, [
-      "Active DARs",
-      span({ className: 'glyphicon sort-icon glyphicon-sort' })
-    ])
-  ];
-
-  const userTableRowLoadingTemplate = [
-    div({style: widerColumnStyle, className: 'text-placeholder'}),
-    div({style: widerColumnStyle, className: 'text-placeholder'}),
-    div({style: widerColumnStyle, className: 'text-placeholder'}),
-    div({style: regWidthColumnStyle, className: 'text-placeholder'}),
-    div({style: regWidthColumnStyle, className: 'text-placeholder'})
-  ];
 
   useEffect(() => {
     const init = async() => {
@@ -121,8 +92,7 @@ export default function SigningOfficialConsole() {
         }, ["Add Researcher(s)"]),
       ]),
       //researcher table goes here
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate: userTableHeaderTemplate, tableRowLoadingTemplate: userTableRowLoadingTemplate}),
-
+      h(SigningOfficialTable, {}, []),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [

@@ -13,9 +13,7 @@ import {
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
-  searchOnFilteredList,
-  goToPageCallback,
-  changeTableSizeCallback
+  searchOnFilteredList
 } from "../../libs/utils";
 import LibraryCardFormModal from "../modals/LibraryCardFormModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
@@ -100,7 +98,7 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 
 const LibraryCardCell = (props) => {
   const {setShowConfirmation, card, setSelectedCard, researcher, setConfirmationModalMsg, setConfirmationTitle = {}} = props;
-  const {userId} = card;
+  const id = researcher.dacUserId || researcher.email;
 
   const button = !isNil(card) ? DeactivateLibraryCardButton({
     setShowConfirmation,
@@ -121,7 +119,7 @@ const LibraryCardCell = (props) => {
 
   return {
     isComponent: true,
-    id: userId,
+    id,
     style: {}, //need to figure out a base style
     label: 'lc-button',
     data: div({
@@ -129,7 +127,7 @@ const LibraryCardCell = (props) => {
         display: 'flex',
         justifyContent: 'left'
       },
-      key: `lc-action-cell-${userId}`
+      key: `lc-action-cell-${id}`
     }, [button])
   };
 };
@@ -172,7 +170,7 @@ const displayNameCell = (displayName, id) => {
 //   };
 // };
 
-export default function SigningOfficialTable(props) {
+export default function SigningOfficialTable() {
   const [researchers, setResearchers] = useState([]);
   const [tableSize, setTableSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -208,7 +206,7 @@ export default function SigningOfficialTable(props) {
       searchRef.current.value, researchers,
       researcherFilterFunction, setFilteredResearchers
     );
-  }, [props.researchers, researchers]);
+  }, [researchers]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -219,17 +217,30 @@ export default function SigningOfficialTable(props) {
     setIsLoading(false);
   }, [tableSize, pageCount, filteredResearchers, currentPage]);
 
+  const goToPage = useCallback((value) => {
+    if (value >= 1 && value <= pageCount) {
+      setCurrentPage(value);
+    }
+  }, [pageCount]);
+
+  const changeTableSize = useCallback((value) => {
+    if (value > 0 && !isNaN(parseInt(value))) {
+      setTableSize(value);
+    }
+  }, []);
+
   const paginationBar = h(PaginationBar, {
     pageCount,
     currentPage,
     tableSize,
-    goToPage: goToPageCallback(setCurrentPage, currentPage),
-    changeTableSize: changeTableSizeCallback(setTableSize)
+    goToPage,
+    changeTableSize
   });
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {id, email, displayName, count = 0, roles, libraryCards} = researcher;
+      const {email, displayName, count = 0, roles, libraryCards} = researcher;
+      const id = researcher.dacUserId;
       return [
         emailCell(email, id),
         displayNameCell(displayName, id),
@@ -315,28 +326,6 @@ export default function SigningOfficialTable(props) {
 
   return (
     h(Fragment, {}, [
-      div({style: {display: 'flex', justifyContent: 'space-between'}}, [
-        div(
-          {className: 'left-header-section', style: Styles.LEFT_HEADER_SECTION},
-          [
-            div({style: Styles.ICON_CONTAINER}, [
-              img({
-                id: 'lock-icon',
-                src: lockIcon,
-                style: Styles.HEADER_IMG
-              }),
-            ]),
-            div({ style: Styles.HEADER_CONTAINER}, [
-              div({ style: Styles.TITLE}, ['Manage Researchers']),
-              div(
-                {style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})},
-                ["Manage your institution's researchers"]
-              )
-            ])
-          ]
-        ),
-        h(SearchBar, {handleSearchChange, searchRef}),
-      ]),
       h(SimpleTable, {
         isLoading,
         rowData: processResearcherRowData(visibleResearchers),
