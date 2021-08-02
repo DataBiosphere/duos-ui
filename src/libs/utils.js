@@ -1,12 +1,12 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import { forEach } from 'lodash';
-import { DAR, DataSet } from "./ajax";
-import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq } from "lodash/fp";
+import {forEach} from 'lodash';
 import _ from 'lodash';
+import {DAR, DataSet} from "./ajax";
 import {User} from "./ajax";
+import {Styles, Theme} from "./theme";
+import {cloneDeep, filter, find, first, includes, isEmpty, isNil, map, sortedUniq, toLower} from "lodash/fp";
 
 export const UserProperties = {
   LINKEDIN : "linkedIn",
@@ -25,7 +25,8 @@ export const UserProperties = {
   COUNTRY: "country",
   RESEARCHER_GATE: "researcherGate",
   PUBMED_ID: "pubmedID",
-  SCIENTIFIC_URL: "scientificURL"
+  SCIENTIFIC_URL: "scientificURL",
+  COMPLETED: "completed"
 };
 
 export const findPropertyValue = (propName, researcher) => {
@@ -36,7 +37,7 @@ export const findPropertyValue = (propName, researcher) => {
 };
 
 export const getPropertyValuesFromUser = (user) => {
-  let researcherProps = {
+  return {
     academicEmail: user.email,
     eraCommonsId: user.eraCommonsId,
     linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
@@ -55,10 +56,9 @@ export const getPropertyValuesFromUser = (user) => {
     piName: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user),
     piEmail: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user),
     pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
-    scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user)
+    scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user),
+    completed: findPropertyValue(UserProperties.COMPLETED, user)
   };
-
-  return researcherProps;
 };
 
 export const applyHoverEffects = (e, style) => {
