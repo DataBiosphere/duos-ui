@@ -14,11 +14,11 @@ import userIcon from "../images/icon_manage_users.png";
 import SearchBar from "../components/SearchBar";
 import {darSearchHandler} from "../libs/utils";
 import {userSearchHandler} from "../libs/utils";
-import {assign} from "lodash/fp";
-import {span} from "react-hyperscript-helpers";
+import { USER_ROLES } from "../libs/utils";
 
 export default function SigningOfficialConsole() {
-  const [signingOfficial, setSiginingOfficial] = useState();
+  const [signingOfficial, setSiginingOfficial] = useState({});
+  const [researchers, setResearchers] = useState([]);
   //states to be added and used for the manage dar component
   const [darList,] = useState();
   const [setFilteredDarList] = useState();
@@ -29,16 +29,14 @@ export default function SigningOfficialConsole() {
   const [setCurrentUserPage] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
-  //could benefit in moving this to utils or a shared component so it can be used for the adminManageUsers page
-  const widerColumnStyle = assign(Styles.TABLE.DATASET_CELL, {margin: '1rem 2%'});
-  const regWidthColumnStyle = assign(Styles.TABLE.SUBMISSION_DATE_CELL, {margin: '1rem 2%'});
-
   useEffect(() => {
     const init = async() => {
       try {
         setIsLoading(true);
         const soUser = await User.getMe();
-        setSiginingOfficial(soUser.displayName);
+        const researcherList = await User.list(USER_ROLES.signingOfficial);
+        setResearchers(researcherList);
+        setSiginingOfficial(soUser);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Error: Unable to retrieve current user from server'});
@@ -55,7 +53,7 @@ export default function SigningOfficialConsole() {
     div({style: Styles.PAGE}, [
       div({ isRendered: !isLoading, style: {display: "flex"}}, [
         div({style: {...Styles.HEADER_CONTAINER, paddingTop: "3rem", paddingBottom: "2rem"}}, [
-          div({style: Styles.TITLE}, ["Welcome " +signingOfficial+ "!"]),
+          div({style: Styles.TITLE}, ["Welcome " +signingOfficial.displayName+ "!"]),
           div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '18px'})}, [
             "Your researchers and their submitted Data Access requests are below. ",
             a({
@@ -92,7 +90,7 @@ export default function SigningOfficialConsole() {
         }, ["Add Researcher(s)"]),
       ]),
       //researcher table goes here
-      h(SigningOfficialTable, {}, []),
+      h(SigningOfficialTable, {researchers, signingOfficial}, []),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [

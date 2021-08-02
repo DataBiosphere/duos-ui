@@ -7,7 +7,6 @@ import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
 import {
   Notifications,
-  USER_ROLES,
   tableSearchHandler,
   recalculateVisibleTable,
   getSearchFilterFunctions,
@@ -15,7 +14,7 @@ import {
 } from "../../libs/utils";
 import LibraryCardFormModal from "../modals/LibraryCardFormModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
-import { User, LibraryCard } from "../../libs/ajax";
+import { LibraryCard } from "../../libs/ajax";
 import { isEmpty, isNil } from "lodash";
 
 //Styles specific to this table
@@ -82,7 +81,8 @@ const LibraryCardCell = ({
   researcher,
   showConfirmationModal,
   deleteFn,
-  issueFn
+  issueFn,
+  institutionId
 }) => {
   const id = researcher.dacUserId || researcher.email;
   const card = !isEmpty(researcher.libraryCards)
@@ -98,6 +98,7 @@ const LibraryCardCell = ({
       card: {
         userId: researcher.dacUserId,
         userEmail: researcher.email,
+        institutionId: institutionId
       },
       showConfirmationModal,
       issueFn
@@ -176,6 +177,8 @@ export default function SigningOfficialTable(props) {
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmationClickFn, setConfirmationClickFn] = useState();
 
+  const { signingOfficial } = props;
+
   const showConfirmationModal = ({card, message, title, method}) => {
     setSelectedCard(card);
     setShowConfirmation(true);
@@ -189,14 +192,14 @@ export default function SigningOfficialTable(props) {
     const init = async() => {
       try{
         setIsLoading(true);
-        setResearchers(researchers);
+        setResearchers(props.researchers);
         setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
     };
     init();
-  }, [researchers]);
+  }, [props.researchers]);
 
   useEffect(() => {
     searchOnFilteredList(
@@ -249,7 +252,8 @@ export default function SigningOfficialTable(props) {
           researcher,
           showConfirmationModal,
           issueFn: issueLibraryCard,
-          deleteFn: deactivateLibraryCard
+          deleteFn: deactivateLibraryCard,
+          institutionId: signingOfficial.institutionId
         }),
         roleCell(roles, id),
         // activeDarCountCell(count, id)
@@ -274,29 +278,30 @@ export default function SigningOfficialTable(props) {
   );
 
   const showModalOnClick = () => {
+    setSelectedCard({institutionId: signingOfficial.institutionId});
     setShowModal(true);
   };
 
   //NOTE: make sure callback methods works as expected
   const issueLibraryCard = useCallback(async (card) => {
     const { userId } = card;
-    let { email, displayName } = card;
+    let { userEmail, displayName } = card;
     let messageName;
     try {
       const listCopy = cloneDeep(researchers);
       //NOTE: institution_id and userName can be supplied by the back-end
       const newLibraryCard = await LibraryCard.createLibraryCard({
-        userEmail: email,
+        userEmail,
         userId
       });
       displayName = newLibraryCard.displayName;
-      email = newLibraryCard.email;
+      userEmail = newLibraryCard.userEmail;
 
       const targetIndex = findIndex((researcher) => card.userId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new card to end of list
-        listCopy.push({email, libraryCards: [newLibraryCard]});
-        messageName = email;
+      if(targetIndex === -1) { //if card is not found, push new user to end of list
+        listCopy.push({userEmail, libraryCards: [newLibraryCard], roles: []});
+        messageName = userEmail;
       } else {
         listCopy[targetIndex].libraryCards = [newLibraryCard];
         messageName = displayName;
@@ -323,39 +328,40 @@ export default function SigningOfficialTable(props) {
     }
   }, [researchers]);
 
-  return (
-    h(Fragment, {}, [
-      h(SimpleTable, {
-        isLoading,
-        rowData: processResearcherRowData(visibleResearchers),
-        columnHeaders: columnHeaderData,
-        styles,
-        tableSize,
-        paginationBar
+  return h(Fragment, {}, [
+    h(SimpleTable, {
+      isLoading,
+      rowData: processResearcherRowData(visibleResearchers),
+      columnHeaders: columnHeaderData,
+      styles,
+      tableSize,
+      paginationBar,
+    }),
+    div({ style: { marginLeft: '90%' } }, [
+      h(SimpleButton, {
+        onClick: () => showModalOnClick(),
+        baseColor: Theme.palette.secondary,
+        label: 'Add New Researcher',
       }),
-      div({ style: {marginLeft: '90%'}}, [
-        h(SimpleButton, {
-          onClick: () => showModalOnClick(),
-          baseColor: Theme.palette.secondary,
-          label: 'Add New Researcher'
-        })
-      ]),
-      h(LibraryCardFormModal, {
-        showModal,
-        createOnClick: issueLibraryCard,
-        closeModal: () => setShowModal(false),
-        card: selectedCard,
-        institutions: [], //pass in empty array to force modal to hide institution dropdown
-        modalType: 'add'
-      }),
-      h(ConfirmationModal, {
-        showConfirmation,
-        closeConfirmation: () => setShowConfirmation(false),
-        title: confirmationTitle,
-        message: confirmationModalMsg,
-        header: `${selectedCard.userName || selectedCard.userEmail} - ${!isNil(selectedCard.institution) ? selectedCard.institution.name : ''}`,
-        onConfirm: () => confirmationClickFn(selectedCard)
-      })
-    ])
-  );
+    ]),
+    h(LibraryCardFormModal, {
+      showModal,
+      createOnClick: issueLibraryCard,
+      closeModal: () => setShowModal(false),
+      card: selectedCard,
+      users: props.researchers,
+      institutions: [], //pass in empty array to force modal to hide institution dropdown
+      modalType: 'add',
+    }),
+    h(ConfirmationModal, {
+      showConfirmation,
+      closeConfirmation: () => setShowConfirmation(false),
+      title: confirmationTitle,
+      message: confirmationModalMsg,
+      header: `${selectedCard.userName || selectedCard.userEmail} - ${
+        !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
+      }`,
+      onConfirm: () => confirmationClickFn(selectedCard),
+    }),
+  ]);
 }

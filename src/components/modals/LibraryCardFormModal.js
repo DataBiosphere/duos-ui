@@ -16,7 +16,13 @@ const FormFieldRow = (props) => {
   // front-end can hide the input by limiting dropdown options to less than two choices
   // (as a way to impose conditional rendering without adding more prop variables)
   // however back-end still needs to filter out institutionId
-  const [filteredDropdown, setFilteredDropdown] = useState(dropdownOptions);
+
+  //NOTE: check if this works as expected
+  const cardlessOptions = dropdownOptions.filter(({libraryCards}) => {
+    const savedCard = libraryCards.find(({institutionId}) => institutionId === card.institutionId);
+    return isNil(savedCard);
+  });
+  const [filteredDropdown, setFilteredDropdown] = useState(cardlessOptions);
   let template;
 
   //filter function for users dropdown
@@ -82,6 +88,7 @@ export default function LibraryCardFormModal(props) {
   useEffect(() => {
     setCard(props.card);
   }, [props.card]);
+
 
   //onClick function, updates associated instituion on dropdown select
   const updateInstitution = (value) => {
