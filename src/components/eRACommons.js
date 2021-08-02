@@ -54,13 +54,13 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    const props = this.props.currentUser.researcherProperties;
-    const authProp = find({'propertyKey':'eraAuthorized'})(props);
-    const expProp = find({'propertyKey':'eraExpiration'})(props);
+    const currentUser = isNil(this.props.currentUser)? {} : (this.props.currentUser);
+    const authProp = find({'propertyKey':'eraAuthorized'})(currentUser.researcherProperties);
+    const expProp = find({'propertyKey':'eraExpiration'})(currentUser.researcherProperties);
     const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
     const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
     const nihValid = isAuthorized && expirationCount > 0;
-    const eraCommonsId = this.props.currentUser.eraCommonsId;
+    const eraCommonsId = currentUser.eraCommonsId;
     this.props.onNihStatusUpdate(nihValid);
     this.setState(prev => {
       prev.isAuthorized = isAuthorized;
