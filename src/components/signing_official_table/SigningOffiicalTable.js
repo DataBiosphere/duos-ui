@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles, Theme } from "../../libs/theme";
 import { h, div, button } from "react-hyperscript-helpers";
-import { cloneDeep, findIndex, concat } from "lodash/fp";
+import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from "lodash/fp";
 import SimpleTable from "../SimpleTable";
 import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
@@ -15,7 +15,6 @@ import {
 import LibraryCardFormModal from "../modals/LibraryCardFormModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
 import { LibraryCard } from "../../libs/ajax";
-import { isEmpty, isNil } from "lodash";
 
 //Styles specific to this table
 const styles = {
@@ -123,8 +122,14 @@ const LibraryCardCell = ({
 };
 
 const roleCell = (roles, id) => {
-  const roleNames = roles.map(role => role.name);
-  const roleString = concat(roleNames);
+
+  const roleString = flow(
+    map(role => role.name),
+    sortBy((name) => name),
+    sortedUniq,
+    join(', ')
+  )(roles);
+
   return {
     data: roleString || '- -',
     id,
