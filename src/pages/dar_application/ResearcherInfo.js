@@ -56,6 +56,7 @@ export default function ResearcherInfo(props) {
   };
 
   //initial state variable assignment
+  const [isLoading, setIsLoading] = useState(true);
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
@@ -70,7 +71,10 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
+    if (!isNil(currentUser)) {
+      setIsLoading(false);
+    }
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.currentUser]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -170,7 +174,7 @@ export default function ResearcherInfo(props) {
             isRendered: (showValidationMessages && !nihValid && !checkCollaborator), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
           }, ['NIH eRA Authentication is required']),
 
-          div({ className: 'row no-margin' }, [
+          div({ className: 'row no-margin', isRendered: !isLoading }, [
             eRACommons({
               className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
               destination: eRACommonsDestination,

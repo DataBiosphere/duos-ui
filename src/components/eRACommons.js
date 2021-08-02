@@ -54,7 +54,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    const currentUser = isNil(this.props.currentUser)? {} : (this.props.currentUser);
+    const currentUser = isNil(this.props.currentUser) ? {} : (this.props.currentUser);
     const authProp = find({'propertyKey':'eraAuthorized'})(currentUser.researcherProperties);
     const expProp = find({'propertyKey':'eraExpiration'})(currentUser.researcherProperties);
     const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
