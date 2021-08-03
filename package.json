@@ -5,7 +5,7 @@
   "dependencies": {
     "@material-ui/core": "4.12.3",
     "@material-ui/icons": "4.11.2",
-    "@react-pdf/renderer": "^2.0.17",
+    "@react-pdf/renderer": "^2.0.18",
     "axios": "^0.21.1",
     "bootstrap": "3.4.1",
     "country-list": "2.2.0",
@@ -52,12 +52,12 @@
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.14.7",
+    "@babel/eslint-parser": "^7.14.9",
     "@babel/eslint-plugin": "^7.14.5",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
-    "cypress": "8.0.0",
-    "eslint": "^7.31.0",
+    "cypress": "8.1.0",
+    "eslint": "^7.32.0",
     "eslint-plugin-flowtype": "5.8.2",
     "eslint-plugin-react": "7.24.0",
     "react-scripts": "4.0.3",
