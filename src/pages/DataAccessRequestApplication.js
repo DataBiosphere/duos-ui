@@ -526,7 +526,7 @@ class DataAccessRequestApplication extends Component {
             //if question is a checkbox acknowledgement and the question is active, check to see if box was left unchecked using translated key
           } else if((formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement')) {
             return !this.state.formData[formDataKey];
-            //else check input directly
+          //else check input directly
           } else {
             return !input;
           }
