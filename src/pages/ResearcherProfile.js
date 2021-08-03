@@ -1,4 +1,4 @@
-import {omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
+import {cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
 import { Component } from 'react';
 import {button, div, form, h, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -10,11 +10,12 @@ import { Researcher, User, Institution } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
+import { USER_ROLES } from '../libs/utils';
 import {getNames} from "country-list";
 import ReactTooltip from "react-tooltip";
 import { SearchSelect } from '../components/SearchSelect';
 import { filter } from 'lodash/fp';
+import {getPropertyValuesFromUser} from "../libs/utils";
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -24,15 +25,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
-    const currentUser = Storage.getCurrentUser();
+    const currentUser = await User.getMe();
     await this.getResearcherProfile(currentUser);
     this.props.history.push('profile');
+    const institutionList = await Institution.list();
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
-      prev.profile.academicEmail = currentUser.email;
-      prev.currentUser = currentUser;
-      prev.isResearcher = currentUser.isResearcher;
+      prev.currentUser = cloneDeep(currentUser);
+      if (isNil(currentUser.additionalEmail)) {
+        prev.currentUser.additionalEmail = '';
+      }
+      if (isNil(currentUser.displayName)) {
+        prev.currentUser.displayName = '';
+      }
+      prev.institutionList = institutionList;
       return prev;
     });
   }
@@ -43,33 +50,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       fieldStatus: {},
       showDialogSubmit: false,
       showDialogSave: false,
-      additionalEmail: '',
-      institutionId: null,
-      roles: [],
-      profile: {
-        checkNotifications: false,
-        academicEmail: '',
-        address1: '',
-        address2: '',
-        city: '',
-        completed: undefined,
-        country: '',
-        department: '',
-        division: '',
-        eRACommonsID: '',
-        havePI: null,
-        isThePI: null,
-        linkedIn: '',
-        orcid: '',
-        piEmail: '',
-        piName: '',
-        profileName: '',
-        pubmedID: '',
-        researcherGate: '',
-        scientificURL: '',
-        state: undefined,
-        zipcode: ''
-      },
+      currentUser: {},
+      profileProperties: {},
+      profileName: '',
       showRequired: false,
       invalidFields: {
         profileName: false,
@@ -93,44 +76,25 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   getResearcherProfile = async (currentUser) => {
-    let rp = {};
-    let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
-    const user = await User.getByEmail(currentUser.email);
-    const institutionList = await Institution.list();
-    if (profile.profileName === undefined) {
-      profile.profileName = user.displayName;
-    }
-
     if (Storage.getData('researcher') !== null) {
       Storage.removeData('researcher');
-    } else {
-      rp = profile;
-      rp.profileName = profile.profileName === undefined ? currentUser.displayName : profile.profileName;
     }
 
     this.setState(prev => {
+      //if there are no roles, add researcher role
       if (isEmpty(currentUser.roles)) {
-        prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
-      } else {
-        prev.roles = currentUser.roles;
+        prev.currentUser.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
       }
-      prev.researcherProfile = profile;
-      prev.profile = profile;
+
+      let profileProperties = getPropertyValuesFromUser(currentUser);
+      prev.profileProperties = profileProperties;
+
       // This ensures that we have a boolean for `checkNotifications`
-      if (!isNil(get(profile, 'checkNotifications', null))) {
-        prev.profile.checkNotifications = get(profile, 'checkNotifications', 'false') === 'true';
+      if (profileProperties.checkNotifications === '') {
+        prev.profileProperties.checkNotifications = false;
       }
-      prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
-      prev.institutionId = user.institutionId;
-      prev.institutionList = institutionList;
       return prev;
-    }, () => {
-      if (this.state.profile.completed !== undefined && this.state.profile.completed !== '') {
-        this.setState(prev => {
-          prev.profile.completed = JSON.parse(this.state.profile.completed);
-          return prev;
-        });
-      }
+
     });
   };
 
@@ -139,7 +103,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     let value = event.target.value;
 
     this.setState(prev => {
-      prev.profile[field] = value;
+      prev.profileProperties[field] = value;
       return prev;
     }, () => {
       if (this.state.validateFields) {
@@ -151,7 +115,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     if (field === "country") {
       if (value !== "United States of America") {
         this.setState(prev => {
-          prev.profile.state = "";
+          prev.profileProperties.state = "";
           return prev;
         }, () => {
           if (this.state.validateFields) {
@@ -160,6 +124,52 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         });
       }
     }
+  };
+
+  handleChangeDisplayName = (e) => {
+    const value = e.target.value;
+    this.setState(prev => {
+      prev.currentUser.displayName = value;
+      return prev;
+    });
+  };
+
+  handleAdditionalEmailChange = (e) => {
+    const value = e.target.value;
+    this.setState(prev => {
+      prev.currentUser.additionalEmail = value;
+      return prev;
+    });
+  };
+
+  handleCheckboxChange = (e) => {
+    const value = e.target.checked;
+    this.setState(prev => {
+      prev.profileProperties.checkNotifications = value;
+      return prev;
+    });
+  };
+
+
+  handleRadioChange = (e, field, value) => {
+
+    this.setState(prev => {
+      prev.profileProperties[field] = value;
+      return prev;
+    },
+    () => {
+      if (field === 'isThePI') {
+        this.clearNotRelatedPIFields();
+      }
+      if (field === 'havePI' && (value === true || value === 'true')) {
+        this.clearCommonsFields();
+      } else if (field === 'havePI' && (value === false || value === 'false')) {
+        this.clearNoHasPIFields();
+      }
+      if (this.state.validateFields) {
+        this.researcherFieldsValidation();
+      }
+    });
   };
 
   researcherFieldsValidation() {
@@ -178,68 +188,68 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       piName = false,
       showValidationMessages = false;
 
-    if (!this.isValid(this.state.profile.profileName)) {
+    if (!this.isValid(this.state.currentUser.displayName)) {
       profileName = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.academicEmail) || this.state.profile.academicEmail.indexOf('@') === -1) {
+    if (!this.isValid(this.state.profileProperties.academicEmail) || this.state.profileProperties.academicEmail.indexOf('@') === -1) {
       academicEmail = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValidNumber(this.state.institutionId)) {
+    if (!this.isValidNumber(this.state.currentUser.institutionId)) {
       institution = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.department)) {
+    if (!this.isValid(this.state.profileProperties.department)) {
       department = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.address1)) {
+    if (!this.isValid(this.state.profileProperties.address1)) {
       address1 = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.city)) {
+    if (!this.isValid(this.state.profileProperties.city)) {
       city = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValidState(this.state.profile.state)) {
+    if (!this.isValidState(this.state.profileProperties.state)) {
       state = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.country)) {
+    if (!this.isValid(this.state.profileProperties.country)) {
       country = true;
       showValidationMessages = true;
     }
 
-    if (!this.isValid(this.state.profile.zipcode)) {
+    if (!this.isValid(this.state.profileProperties.zipcode)) {
       zipcode = true;
       showValidationMessages = true;
     }
 
-    if (this.state.profile.isThePI === null) {
+    if (this.state.profileProperties.isThePI === '') {
       isThePI = true;
       showValidationMessages = true;
     }
 
-    if (this.state.profile.isThePI === 'false' && this.state.profile.havePI === 'true') {
-      if (!this.isValid(this.state.profile.piEmail) || this.state.profile.piEmail.indexOf('@') === -1) {
+    if (this.state.profileProperties.isThePI === 'false' && this.state.profileProperties.havePI === 'true') {
+      if (!this.isValid(this.state.profileProperties.piEmail) || this.state.profileProperties.piEmail.indexOf('@') === -1) {
         piEmail = true;
         showValidationMessages = true;
       }
-      if (!this.isValid(this.state.profile.piName)) {
+      if (!this.isValid(this.state.profileProperties.piName)) {
         piName = true;
         showValidationMessages = true;
       }
     }
 
-    if (this.state.profile.isThePI === 'false' && this.state.profile.havePI === '') {
+    if (this.state.profileProperties.isThePI === 'false' && this.state.profileProperties.havePI === '') {
       havePI = true;
       showValidationMessages = true;
     }
@@ -260,6 +270,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.invalidFields.piEmail = piEmail;
       prev.invalidFields.havePI = havePI;
       prev.showValidationMessages = showValidationMessages;
+      //if all required fields have been completed and are valid, update the profile completion status to be true
+      //so they can 'submit' their profile and will be allowed to submit dars.
+      //if the required fields are not valid, mark the completion status as false so that the user can 'save' their
+      //profile and continue working on it later but cannot submit dars until it is completed
+      prev.profileProperties.completed = !showValidationMessages;
       return prev;
     });
     return showValidationMessages;
@@ -283,60 +298,17 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   isValidState(value) {
     const stateSelected = (!isNil(value) && !isEmpty(value));
-    const inUS = (this.state.profile.country === "United States of America" || this.state.profile.country === "");
+    const inUS = (this.state.profileProperties.country === "United States of America" || this.state.profileProperties.country === "");
     if (inUS && stateSelected) {
       return true;
     }
     return !inUS;
   }
 
-  submit = (event) => {
-    this.setState({ validateFields: true });
-    event.preventDefault();
-    let errorsShowed = false;
-    if (this.state.isResearcher) {
-      errorsShowed = this.researcherFieldsValidation();
-    } else if (this.state.profile.profileName === '' || (this.state.additionalEmail !== '' && this.state.additionalEmail.indexOf('@') === -1)) {
-      this.setState(prev => {
-        prev.showValidationMessages = true;
-        return true;
-      });
-      errorsShowed = true;
-    }
-    if (errorsShowed === false) {
-      this.setState(prev => {
-        prev.showDialogSubmit = true;
-        prev.showValidationMessages = false;
-        return prev;
-      });
-    }
-  };
-
-  handleRadioChange = (e, field, value) => {
-
-    this.setState(prev => {
-      prev.profile[field] = value;
-      return prev;
-    },
-    () => {
-      if (field === 'isThePI') {
-        this.clearNotRelatedPIFields();
-      }
-      if (field === 'havePI' && (value === true || value === 'true')) {
-        this.clearCommonsFields();
-      } else if (field === 'havePI' && (value === false || value === 'false')) {
-        this.clearNoHasPIFields();
-      }
-      if (this.state.validateFields) {
-        this.researcherFieldsValidation();
-      }
-    });
-  };
-
   clearNotRelatedPIFields = () => {
     this.clearCommonsFields();
     this.setState(prev => {
-      prev.profile.havePI = '';
+      prev.profileProperties.havePI = '';
       return prev;
     }, () => {
       this.clearPIData();
@@ -350,24 +322,19 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   clearCommonsFields = () => {
     this.setState(prev => {
-      prev.profile.eRACommonsID = '';
-      prev.profile.pubmedID = '';
-      prev.profile.scientificURL = '';
+      prev.profileProperties.eRACommonsID = '';
+      prev.profileProperties.pubmedID = '';
+      prev.profileProperties.scientificURL = '';
       return prev;
     });
   };
 
   clearPIData = () => {
     this.setState(prev => {
-      prev.profile.piName = '';
-      prev.profile.piEmail = '';
+      prev.profileProperties.piName = '';
+      prev.profileProperties.piEmail = '';
       return prev;
     });
-  };
-
-  saveProfile = (event) => {
-    event.preventDefault();
-    this.setState({ showDialogSave: true });
   };
 
   cleanObject = (obj) => {
@@ -375,99 +342,48 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
   };
 
-  saveProperties = async (profile) => {
-    await Researcher.createProperties(profile);
-    await this.saveUser();
-    this.setState({ showDialogSubmit: false });
-    this.props.history.push({ pathname: 'dataset_catalog' });
+  saveProfile = (event) => {
+    event.preventDefault();
+    this.setState({ showDialogSave: true });
   };
 
-  dialogHandlerSubmit = (answer) => async () => {
-    if (answer === true) {
-      if (this.state.isResearcher) {
-        let profile = this.state.profile;
-        profile = this.cleanObject(profile);
-        profile.completed = true;
-        if (this.state.profile.completed === undefined) {
-          await this.saveProperties(profile);
-        } else {
-          await this.updateResearcher(profile);
-        }
-      } else {
-        const savedUser = await this.saveUser();
-        this.setState({ isResearcher: savedUser.isResearcher, showDialogSubmit: false });
-      }
-
-    } else {
-      this.setState({ showDialogSubmit: false });
+  submit = (event) => {
+    this.setState({ validateFields: true });
+    event.preventDefault();
+    let errorsShowed = this.researcherFieldsValidation();
+    if (errorsShowed === false) {
+      this.setState(prev => {
+        prev.showDialogSubmit = true;
+        prev.showValidationMessages = false;
+        return prev;
+      });
     }
   };
 
-  updateResearcher = async (profile) => {
-    const profileClone = this.cloneProfile(profile);
-    await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone);
-    await this.saveUser();
-    this.setState({ showDialogSubmit: false });
-    this.props.history.push({ pathname: 'dataset_catalog' });
-  };
-
-  saveUser = async () => {
-    const currentUserUpdate = Storage.getCurrentUser();
-    delete currentUserUpdate.email;
-    currentUserUpdate.displayName = this.state.profile.profileName;
-    currentUserUpdate.additionalEmail = this.state.additionalEmail;
-    currentUserUpdate.roles = this.state.roles;
-    currentUserUpdate.institutionId = this.state.institutionId;
-    const payload = { updatedUser: currentUserUpdate };
-    let updatedUser = await User.update(payload, currentUserUpdate.dacUserId);
-    updatedUser = Object.assign({}, updatedUser, setUserRoleStatuses(updatedUser, Storage));
-    return updatedUser;
-  };
-
-  handleCheckboxChange = (e) => {
-    const value = e.target.checked;
-    this.setState(prev => {
-      prev.profile.checkNotifications = value;
-      return prev;
-    });
-  };
-
-  handleAdditionalEmailChange = (e) => {
-    const value = e.target.value;
-    this.setState(prev => {
-      prev.additionalEmail = value;
-      return prev;
-    });
-  };
-
-  dialogHandlerSave = (answer) => async () => {
+  dialogHandlerUpdateUser = (answer) => async () => {
     if (answer === true) {
-      let profile = this.state.profile;
-      profile.completed = false;
-      const profileClone = this.cloneProfile(profile);
-      await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
+      let profile = this.state.profileProperties;
+      //profile = this.cleanObject(profile);
+      //updates fields saved in user properties
+      await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profile);
+      //updates fields saved on the user
+      const payload = { updatedUser: this.state.currentUser };
+      await User.update(payload, this.state.currentUser.dacUserId);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
-
-    this.setState({ showDialogSave: false });
+    this.setState({ showDialogSubmit: false });
   };
 
-  // When posting a user's researcher properties, library cards and entries are
-  // not valid properties for update.
-  cloneProfile = (profile) => {
-    return omit(cloneDeep(profile), ['libraryCards', 'libraryCardEntries']);
-  };
-
-  generateCountryNames = () => {
-    const USA = option({ value: "United States of America"}, ["United States of America"]);
-    const empty = option({ value: ""}, [""]);
-    const countryNames = getNames().map((name) => option({value: name}, [name]));
-    const index = countryNames.indexOf(USA);
-    countryNames.splice(index, 1);
-    countryNames.splice(0, 0, USA);
-    countryNames.splice(0, 0, empty);
-    return countryNames;
-  };
+    generateCountryNames = () => {
+      const USA = option({ value: "United States of America"}, ["United States of America"]);
+      const empty = option({ value: ""}, [""]);
+      const countryNames = getNames().map((name) => option({value: name}, [name]));
+      const index = countryNames.indexOf(USA);
+      countryNames.splice(index, 1);
+      countryNames.splice(0, 0, USA);
+      countryNames.splice(0, 0, empty);
+      return countryNames;
+    };
 
   generateStateNames = () => {
     const empty = option({ value: ""}, [""]);
@@ -480,29 +396,29 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   render() {
     const countryNames = this.generateCountryNames();
     const stateNames = this.generateStateNames();
-    let completed = this.state.profile.completed;
-    const { researcherProfile, showValidationMessages } = this.state;
-    const libraryCards = get(researcherProfile, 'libraryCards', []);
+    const { currentUser, profileProperties, showValidationMessages } = this.state;
+    const isResearcher = isNil(currentUser.roles) ? false : currentUser.roles.some((role) => role.roleId === 5);
+    const libraryCards = get(currentUser, 'libraryCards', []);
     const lcInstitutions = filter((institution) => libraryCards.includes(institution.id))(this.state.institutionList);
 
     return (
 
       div({ className: 'container' }, [
         div({ className: 'row no-margin' }, [
-          div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
+          div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12' }, [
             Notification({notificationData: this.state.notificationData}),
             PageHeading({
               id: 'researcherProfile',
               color: 'common',
               title: 'Your Profile',
-              description: this.state.isResearcher ? 'Please complete the following information to be able to request access to dataset(s)' : ''
+              description: isResearcher ? 'Please complete the following information to be able to request access to dataset(s)' : ''
             }),
             hr({ className: 'section-separator' })
           ]),
-          div({ className: 'col-lg-10 col-lg-offset-1 col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding' }, [
+          div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding' }, [
             form({ name: 'researcherForm' }, [
               div({ className: 'form-group' }, [
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                div({ className: 'col-xs-12' }, [
                   label({
                     id: 'lbl_profileName', className: 'control-label'
                   }, ['Full Name*']),
@@ -510,11 +426,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: 'profileName',
                     name: 'profileName',
                     type: 'text',
-                    onChange: this.handleChange,
+                    onChange: (e) => this.handleChangeDisplayName(e),
                     className: (this.state.invalidFields.profileName && showValidationMessages) ?
                       'form-control required-field-error' :
                       'form-control',
-                    value: this.state.profile.profileName,
+                    value: currentUser.displayName,
                     required: true
                   }),
                   span({
@@ -523,7 +439,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ['Full Name is required'])
                 ]),
 
-                div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                div({ className: 'col-xs-12' }, [
                   label({
                     id: 'lbl_profileAcademicEmail',
                     className: 'control-label'
@@ -532,7 +448,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: 'profileAcademicEmail',
                     name: 'academicEmail',
                     type: 'email',
-                    value: this.state.profile.academicEmail,
+                    value: profileProperties.academicEmail,
                     className: ((this.state.invalidFields.academicEmail) && showValidationMessages) ?
                       'form-control required-field-error' :
                       'form-control',
@@ -540,20 +456,20 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   })
                 ]),
 
-                div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group checkbox' }, [
+                div({ className: 'col-xs-12 rp-group checkbox' }, [
                   input({
                     type: 'checkbox',
                     id: 'chk_sendNotificationsAcademicEmail',
                     name: 'checkNotifications',
                     className: 'checkbox-inline rp-checkbox',
-                    checked: this.state.profile.checkNotifications,
+                    checked: profileProperties.checkNotifications,
                     onChange: this.handleCheckboxChange
                   }),
                   label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_sendNotificationsAcademicEmail' },
                     ['Send Notifications to my Academic/Business Email Address'])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 ' + (!this.state.isResearcher ? 'rp-last-group' : '') }, [
+                div({ className: 'col-xs-12' }, [
                   label({
                     id: 'lbl_notificationsEmail', className: 'control-label'
                   }, ['Enter an additional email to receive DUOS notifications ', span({ className: 'italic display-inline' }, ['(optional)'])]),
@@ -563,36 +479,38 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     type: 'text',
                     onChange: this.handleAdditionalEmailChange,
                     className: 'form-control',
-                    value: this.state.additionalEmail
+                    value: currentUser.additionalEmail
                   }),
                   span({
                     className: 'cancel-color required-field-error-span',
-                    isRendered: (this.state.additionalEmail.indexOf('@') === -1) && showValidationMessages
-                  }, ['Email Address is empty or has invalid format'])
+                    //email is allowed to be empty but if it is not empty, it must have the correct format
+                    isRendered: showValidationMessages && currentUser.additionalEmail.length !== 0 && (currentUser.additionalEmail.indexOf('@') === -1)
+                  }, ['Email Address has invalid format'])
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: 'form-group' }, [
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '20px' } }, [
+              div({ className: 'form-group' }, [
+                div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
                   label({ className: 'control-label rp-title-question default-color' }, [
                     'Researcher Identification*',
                     span({}, ['Please authenticate your eRA Commons account to submit Data Access Requests. Other profiles are optional:'])
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                     eRACommons({
                       className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
                       onNihStatusUpdate: () => {},
-                      location: this.props.location
+                      location: this.props.location,
+                      currentUser: currentUser
                     }),
                     div({ className: '' }, [
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
                       LibraryCards({
                         style: { display: 'flex', flexFlow: 'row wrap' },
-                        isRendered: !isNil(researcherProfile),
+                        isRendered: !isNil(currentUser),
                         libraryCards: lcInstitutions
                       })
                     ])
@@ -609,7 +527,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         type: 'text',
                         className: 'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.linkedIn
+                        value: profileProperties.linkedIn
                       })
                     ]),
                     div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
@@ -620,7 +538,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         type: 'text',
                         className: 'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.orcid
+                        value: profileProperties.orcid
                       })
                     ]),
                     div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
@@ -631,7 +549,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         type: 'text',
                         className: 'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.researcherGate
+                        value: profileProperties.researcherGate
                       })
                     ])
                   ])
@@ -651,7 +569,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     label: 'institution',
                     onSelection: (selection) => {
                       this.setState(prev => {
-                        prev.institutionId = selection;
+                        prev.currentUser.institutionId = selection;
                         return prev;
                       }, () => {
                         if (this.state.validateFields) {
@@ -667,7 +585,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     }),
                     placeholder: 'Please Select an Institution',
                     searchPlaceholder: 'Search for Institution...',
-                    value: this.state.institutionId,
+                    value: currentUser.institutionId,
                     className: (this.state.invalidFields.institution && showValidationMessages) ?
                       'form-control required-field-error' :
                       'form-control',
@@ -679,9 +597,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   }, ['Institution Name is required'])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                    div({ className: 'col-xs-6' }, [
                       label({ id: 'lbl_profileDepartment', className: 'control-label' }, ['Department*']),
                       input({
                         id: 'profileDepartment',
@@ -691,7 +609,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                           'form-control required-field-error' :
                           'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.department,
+                        value: profileProperties.department,
                         required: true
                       }),
                       span({
@@ -699,7 +617,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         isRendered: this.state.invalidFields.department && showValidationMessages
                       }, ['Department is required'])
                     ]),
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                    div({ className: 'col-xs-6' }, [
                       label({
                         id: 'lbl_profileDivision',
                         className: 'control-label'
@@ -710,33 +628,33 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         type: 'text',
                         className: 'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.division
+                        value: profileProperties.division
                       })
                     ])
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                    div({ className: 'col-xs-6' }, [
                       label({ id: 'lbl_profileAddress1', className: 'control-label' }, ['Street Address 1*']),
                       input({
                         id: 'profileAddress1',
                         name: 'address1',
                         type: 'text',
-                        className: ((this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages) ?
+                        className: ((profileProperties.address1 === '' || this.state.invalidFields.address1) && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.address1,
+                        value: profileProperties.address1,
                         required: true
                       }),
                       span({
                         className: 'cancel-color required-field-error-span',
-                        isRendered: (this.state.profile.address1 === '' || this.state.invalidFields.address1) && showValidationMessages
+                        isRendered: (profileProperties.address1 === '' || this.state.invalidFields.address1) && showValidationMessages
                       }, ['Street Address is required'])
                     ]),
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                    div({ className: 'col-xs-6' }, [
                       label({
                         id: 'lbl_profileAddress2',
                         className: 'control-label'
@@ -747,15 +665,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         type: 'text',
                         className: 'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.address2
+                        value: profileProperties.address2
                       })
                     ])
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                    div({ className: 'col-xs-6' }, [
                       label({ id: 'lbl_profileCity', className: 'control-label' }, ['City*']),
                       input({
                         id: 'profileCity',
@@ -763,7 +681,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         type: 'text',
                         className: (this.state.invalidFields.city && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.city,
+                        value: profileProperties.city,
                         required: true
                       }),
                       span({
@@ -772,7 +690,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }, ['City is required'])
                     ]),
 
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6' }, [
+                    div({ className: 'col-xs-6' }, [
                       label({ id: 'lbl_profileState', className: 'control-label'}, ['State* ',
                         span({
                           className: 'glyphicon glyphicon-question-sign tooltip-icon',
@@ -784,10 +702,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         id: 'profileState',
                         name: 'state',
                         onChange: this.handleChange,
-                        value: this.state.profile.state,
+                        value: profileProperties.state,
                         className: (this.state.invalidFields.state && showValidationMessages) ? 'form-control required-field-error' : 'form-control',
                         required: true,
-                        disabled: (this.state.profile.country !== "" && this.state.profile.country !== "United States of America")
+                        disabled: (profileProperties.country !== "" && profileProperties.country !== "United States of America")
                       }, stateNames ),
                       span({
                         className: 'cancel-color required-field-error-span',
@@ -797,9 +715,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
+                    div({ className: 'col-xs-6 rp-group' }, [
                       label({ id: 'lbl_profileZip', className: 'control-label' }, ['Zip/Postal Code*']),
                       input({
                         id: 'profileZip',
@@ -809,7 +727,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                           'form-control required-field-error' :
                           'form-control',
                         onChange: this.handleChange,
-                        value: this.state.profile.zipcode,
+                        value: profileProperties.zipcode,
                         required: true
                       }),
                       span({
@@ -818,13 +736,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       }, ['Zip/Postal Code is required'])
                     ]),
 
-                    div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-6 rp-group' }, [
+                    div({ className: 'col-xs-6 rp-group' }, [
                       label({ id: 'lbl_profileCountry', className: 'control-label' }, ['Country*']),
                       select({
                         id: 'profileCountry',
                         name: 'country',
                         onChange: this.handleChange,
-                        value: this.state.profile.country,
+                        value: profileProperties.country,
                         className: (this.state.invalidFields.country && showValidationMessages) ?
                           'form-control required-field-error' :
                           'form-control',
@@ -839,8 +757,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: 'form-group' }, [
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '15px' } }, [
+              div({ className: 'form-group' }, [
+                div({ className: 'col-xs-12', style: { 'marginTop': '15px' } }, [
                   label({
                     id: 'lbl_isThePI',
                     className: 'control-label '
@@ -854,9 +772,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                div({ className: 'col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
-                    value: this.state.profile.isThePI,
+                    value: profileProperties.isThePI,
                     onChange: this.handleRadioChange,
                     id: 'rad_isThePI',
                     name: 'isThePI',
@@ -866,21 +784,21 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 span({
                   className: 'cancel-color required-field-error-span',
                   style: { 'marginLeft': '15px' },
-                  isRendered: (this.state.profile.isThePI === null || this.state.invalidFields.isThePI) && showValidationMessages
+                  isRendered: this.state.invalidFields.isThePI && showValidationMessages
                 }, ['Required field'])
               ]),
 
-              div({ isRendered: this.state.profile.isThePI === 'false' && this.state.isResearcher, className: 'form-group' }, [
+              div({ isRendered: profileProperties.isThePI === 'false', className: 'form-group' }, [
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                div({ className: 'col-xs-12' }, [
                   label({
                     className: 'control-label '
                   }, ['Do you have a Principal Investigator?*'])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
+                div({ className: 'col-xs-12 rp-group' }, [
                   YesNoRadioGroup({
-                    value: this.state.profile.havePI,
+                    value: profileProperties.havePI,
                     onChange: this.handleRadioChange,
                     id: 'rad_havePI',
                     name: 'havePI',
@@ -893,8 +811,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   isRendered: (this.state.invalidFields.havePI === 'true' || this.state.invalidFields.havePI) && showValidationMessages
                 }, ['Required field']),
 
-                div({ isRendered: this.state.profile.havePI === true || this.state.profile.havePI === 'true', className: 'form-group' }, [
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                div({ isRendered: profileProperties.havePI === true || profileProperties.havePI === 'true', className: 'form-group' }, [
+                  div({ className: 'col-xs-12' }, [
                     label({ id: 'lbl_profilePIName', className: 'control-label' }, ['Principal Investigator Name*']),
                     input({
                       id: 'profilePIName',
@@ -902,16 +820,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       type: 'text',
                       className: 'form-control ',
                       onChange: this.handleChange,
-                      value: this.state.profile.piName,
-                      required: this.state.profile.havePI === true
+                      value: profileProperties.piName,
+                      required: profileProperties.havePI === true
                     }),
                     span({
                       className: 'cancel-color required-field-error-span',
-                      isRendered: (this.state.profile.piName === '' || this.state.invalidFields.piName) && showValidationMessages
+                      isRendered: this.state.invalidFields.piName && showValidationMessages
                     }, ['Principal Investigator is required'])
                   ]),
 
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                  div({ className: 'col-xs-12' }, [
                     label({
                       id: 'lbl_profilePIEmail',
                       className: 'control-label'
@@ -922,16 +840,16 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       type: 'email',
                       className: 'form-control ',
                       onChange: this.handleChange,
-                      value: this.state.profile.piEmail,
-                      required: this.state.profile.havePI === true
+                      value: profileProperties.piEmail,
+                      required: profileProperties.havePI === true
                     }),
                     span({
                       className: 'cancel-color required-field-error-span',
-                      isRendered: (this.state.invalidFields.piEmail && this.state.profile.piEmail.indexOf('@') === -1) && showValidationMessages
+                      isRendered: (this.state.invalidFields.piEmail && profileProperties.piEmail.indexOf('@') === -1) && showValidationMessages
                     }, ['Email Address is empty or has invalid format'])
                   ]),
 
-                  div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+                  div({ className: 'col-xs-12' }, [
                     label({
                       id: 'lbl_profileEraCommons',
                       className: 'control-label'
@@ -942,14 +860,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       type: 'text',
                       className: 'form-control',
                       onChange: this.handleChange,
-                      value: this.state.profile.eRACommonsID
+                      value: profileProperties.eraCommonsId
                     })
                   ])
                 ])
               ]),
 
-              div({ isRendered: this.state.isResearcher, className: 'form-group' }, [
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12' }, [
+              div({ className: 'form-group' }, [
+                div({ className: 'col-xs-12' }, [
                   label({
                     id: 'lbl_profilePubmedID',
                     className: 'control-label'
@@ -960,11 +878,11 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     type: 'text',
                     className: 'form-control',
                     onChange: this.handleChange,
-                    value: this.state.profile.pubmedID
+                    value: profileProperties.pubmedID
                   })
                 ]),
 
-                div({ isRendered: this.state.isResearcher, className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-last-group' }, [
+                div({ className: 'col-xs-12 rp-last-group' }, [
                   label({
                     id: 'lbl_profileScientificURL',
                     className: 'control-label'
@@ -976,30 +894,29 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     maxLength: '512',
                     rows: '3',
                     onChange: this.handleChange,
-                    value: this.state.profile.scientificURL
+                    value: profileProperties.scientificURL
                   })
                 ])
               ]),
 
               div({ className: 'row margin-top-20' }, [
-                div({ className: 'col-lg-4 col-md-6 col-sm-6 col-xs-6' }, [
+                div({ className: 'col-lg-4 col-xs-6' }, [
                   div({ className: 'italic default-color' }, ['*Required field'])
                 ]),
 
-                div({ className: 'col-lg-8 col-md-6 col-sm-6 col-xs-6' }, [
+                div({ className: 'col-lg-8 col-xs-6' }, [
                   button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
-                    span({ isRendered: (!completed || false) && this.state.isResearcher }, ['Submit']),
-                    span({ isRendered: (completed === true || !this.state.isResearcher) }, ['Update'])
+                    span({ isRendered: profileProperties.completed }, ['Submit'])
                   ]),
                   ConfirmationDialog({
                     title: 'Submit Profile',
                     color: 'common',
                     showModal: this.state.showDialogSubmit,
-                    action: { label: 'Yes', handler: this.dialogHandlerSubmit }
+                    action: { label: 'Yes', handler: this.dialogHandlerUpdateUser }
                   }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit your Profile information?'])]),
 
                   button({
-                    id: 'btn_continueLater', isRendered: !completed && this.state.isResearcher, onClick: this.saveProfile,
+                    id: 'btn_continueLater', isRendered: !profileProperties.completed, onClick: this.saveProfile,
                     className: 'f-right btn-secondary common-color'
                   }, ['Continue later']),
 
@@ -1007,7 +924,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     title: 'Continue later',
                     color: 'common',
                     showModal: this.state.showDialogSave,
-                    action: { label: 'Yes', handler: this.dialogHandlerSave }
+                    action: { label: 'Yes', handler: this.dialogHandlerUpdateUser }
                   }, [
                     div({ className: 'dialog-description' },
                       ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
