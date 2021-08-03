@@ -800,6 +800,7 @@ export const PendingCases = {
 
 export const Researcher = {
 
+  //unused
   getPropertiesByResearcherId: async (userId) => {
     const url = `${await Config.getApiUrl()}/api/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
