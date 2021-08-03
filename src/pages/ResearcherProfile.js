@@ -377,7 +377,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       await User.update(payload, this.state.currentUser.dacUserId);
       this.props.history.push({ pathname: 'dataset_catalog' });
     }
-    this.setState({ showDialogSubmit: false });
+    this.setState({ showDialogSubmit: false, showDialogSave: false });
   };
 
     generateCountryNames = () => {
@@ -421,7 +421,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
             }),
             hr({ className: 'section-separator' })
           ]),
-          div({ className: 'col-md-10 col-md-offset-1 col-sm-12 col-xs-12 no-padding' }, [
+          div({ className: 'col-md-10 col-md-offset-1 col-xs-12 no-padding' }, [
             form({ name: 'researcherForm' }, [
               div({ className: 'form-group' }, [
                 div({ className: 'col-xs-12' }, [
@@ -506,7 +506,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
                     eRACommons({
-                      className: 'col-lg-4 col-md-4 col-sm-6 col-xs-12',
+                      className: 'col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
                       onNihStatusUpdate: () => {},
                       location: this.props.location,
@@ -523,9 +523,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding' }, [
+                div({ className: 'col-xs-12 no-padding' }, [
                   div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
-                    div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
+                    div({ className: 'col-sm-4 col-xs-12' }, [
                       label({ id: 'lbl_profileLinkedIn', className: 'control-label' }, ['LinkedIn Profile']),
                       input({
                         id: 'profileLinkedIn',
@@ -536,7 +536,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         value: profileProperties.linkedIn
                       })
                     ]),
-                    div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
+                    div({ className: 'col-sm-4 col-xs-12' }, [
                       label({ id: 'lbl_profileOrcid', className: 'control-label' }, ['ORCID iD']),
                       input({
                         id: 'profileOrcid',
@@ -547,7 +547,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         value: profileProperties.orcid
                       })
                     ]),
-                    div({ className: 'col-lg-4 col-md-4 col-sm-4 col-xs-12' }, [
+                    div({ className: 'col-sm-4 col-xs-12' }, [
                       label({ id: 'lbl_profileResearcherGate', className: 'control-label' }, ['ResearchGate ID']),
                       input({
                         id: 'profileResearcherGate',
@@ -561,7 +561,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                   ])
                 ]),
 
-                div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12', style: { 'marginTop': '20px' } }, [
+                div({ className: 'col-xs-12', style: { 'marginTop': '20px' } }, [
                   label({ id: 'lbl_profileInstitution', className: 'control-label' }, [
                     'Institution Name* ',
                     span({
