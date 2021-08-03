@@ -1,4 +1,4 @@
-import {cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
+import {cloneDeep, isEmpty, isNil, get} from 'lodash';
 import { Component } from 'react';
 import {button, div, form, h, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -338,8 +338,15 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   };
 
   cleanObject = (obj) => {
-    // Removes any zero length properties from a copy of the object
-    return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
+    // Removes any empty properties from a copy of the object
+    const propNames = Object.getOwnPropertyNames(obj);
+    for (let i = 0; i < propNames.length; i++) {
+      const propName = propNames[i];
+      if (obj[propName] === null || obj[propName] === undefined || obj[propName].toString().length === 0) {
+        delete obj[propName];
+      }
+    }
+    return obj;
   };
 
   saveProfile = (event) => {
@@ -363,7 +370,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   dialogHandlerUpdateUser = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profileProperties;
-      //profile = this.cleanObject(profile);
+      profile = this.cleanObject(profile);
       //updates fields saved in user properties
       await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profile);
       //updates fields saved on the user
