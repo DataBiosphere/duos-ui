@@ -49,14 +49,14 @@ const columnHeaderFormat = {
 };
 
 const DeactivateLibraryCardButton = (props) => {
-  const {card = {}, showConfirmationModal, deleteFn} = props;
+  const {card = {}, showConfirmationModal} = props;
   const message = 'Are you sure you want to deactivate this library card?';
   const title = 'Deactivate Library Card';
   return button({
     key: `deactivate-card-${card.id}`,
     role: 'button',
     style: {}, //figure this out},
-    onClick: () => showConfirmationModal({card, message, title, deleteFn})
+    onClick: () => showConfirmationModal({card, message, title, confirmType: 'delete'})
   }, ['Deactivate']);
 };
 
@@ -64,13 +64,13 @@ const IssueLibraryCardButton = (props) => {
   //SO should be able to add library cards to users that are not yet in the system, so userEmail needs to be a possible value to send back
   //username can be confirmed on back-end -> if userId exists pull data from db, otherwise only save email
   //institution id should be determined from the logged in SO account on the back-end
-  const {card, showConfirmationModal, issueFn} = props;
+  const {card, showConfirmationModal} = props;
   const message = 'Are you sure you want to issue this library card?';
   const title = 'Issue Library Card';
   return button({
     role: 'button',
     style: {},
-    onClick: () => showConfirmationModal({card, message, title, issueFn})
+    onClick: () => showConfirmationModal({card, message, title, confirmType: 'issue'})
   }, ['Issue']);
 };
 
@@ -79,8 +79,6 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 const LibraryCardCell = ({
   researcher,
   showConfirmationModal,
-  deleteFn,
-  issueFn,
   institutionId
 }) => {
   const id = researcher.dacUserId || researcher.email;
@@ -91,7 +89,6 @@ const LibraryCardCell = ({
     ? DeactivateLibraryCardButton({
       card,
       showConfirmationModal,
-      deleteFn
     })
     : IssueLibraryCardButton({
       card: {
@@ -99,8 +96,7 @@ const LibraryCardCell = ({
         userEmail: researcher.email,
         institutionId: institutionId
       },
-      showConfirmationModal,
-      issueFn
+      showConfirmationModal
     });
 
   return {
@@ -124,7 +120,7 @@ const LibraryCardCell = ({
 const roleCell = (roles, id) => {
 
   const roleString = flow(
-    map(role => role.name),
+    map((role) => role.name),
     sortBy((name) => name),
     sortedUniq,
     join(', ')
@@ -180,16 +176,16 @@ export default function SigningOfficialTable(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
-  const [confirmationClickFn, setConfirmationClickFn] = useState();
+  const [confirmType, setConfirmType] = useState('delete');
 
   const { signingOfficial } = props;
 
-  const showConfirmationModal = ({card, message, title, method}) => {
+  const showConfirmationModal = ({card, message, title, confirmType}) => {
     setSelectedCard(card);
     setShowConfirmation(true);
     setConfirmationModalMsg(message);
     setConfirmationTitle(title);
-    setConfirmationClickFn(method);
+    setConfirmType(confirmType);
   };
 
   //init hook, need to make ajax calls here
@@ -288,50 +284,52 @@ export default function SigningOfficialTable(props) {
   };
 
   //NOTE: make sure callback methods works as expected
-  const issueLibraryCard = useCallback(async (card) => {
-    const { userId } = card;
-    let { userEmail, displayName } = card;
+  const issueLibraryCard = async (selectedCard, researchers) => {
+    const { userId } = selectedCard;
+    let { userEmail, userName } = selectedCard;
     let messageName;
     try {
       const listCopy = cloneDeep(researchers);
       //NOTE: institution_id and userName can be supplied by the back-end
       const newLibraryCard = await LibraryCard.createLibraryCard({
         userEmail,
-        userId
+        userId,
       });
-      displayName = newLibraryCard.displayName;
+      userName = newLibraryCard.userName;
       userEmail = newLibraryCard.userEmail;
-
-      const targetIndex = findIndex((researcher) => card.userId === researcher.dacUserId)(listCopy);
+      const targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to end of list
         listCopy.push({userEmail, libraryCards: [newLibraryCard], roles: []});
         messageName = userEmail;
       } else {
         listCopy[targetIndex].libraryCards = [newLibraryCard];
-        messageName = displayName;
+        messageName = userName;
       }
       setResearchers(listCopy);
+      setShowConfirmation(false);
       Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
     } catch(error) {
       Notifications.showError({text: `Error issuing library card to ${messageName}`});
     }
-  }, [researchers]);
+  };
 
   //NOTE: other callback method, make sure it works as expected
-  const deactivateLibraryCard = useCallback(async ({id, displayName, email, dacUserId}) => {
+  const deactivateLibraryCard = async (selectedCard, researchers) => {
+    const {id, userName, userEmail, userId} = selectedCard;
     const listCopy = cloneDeep(researchers);
-    const messageName = displayName || email;
+    const messageName = userName || userEmail;
     try {
       await LibraryCard.deleteLibraryCard(id);
-      const targetIndex = findIndex((researcher) => dacUserId === researcher.dacUserId)(researchers);
+      const targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(researchers);
       listCopy[targetIndex].libraryCards = [];
       setResearchers(listCopy);
+      setShowConfirmation(false);
       Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
     } catch(error) {
       Notifications.showError({text: `Error deleting library card issued to ${messageName}`});
     }
-  }, [researchers]);
+  };
 
   return h(Fragment, {}, [
     h(SimpleTable, {
@@ -366,7 +364,7 @@ export default function SigningOfficialTable(props) {
       header: `${selectedCard.userName || selectedCard.userEmail} - ${
         !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
       }`,
-      onConfirm: () => confirmationClickFn(selectedCard),
+      onConfirm: () => confirmType == 'delete' ? deactivateLibraryCard(selectedCard, researchers) : issueLibraryCard(selectedCard, researchers)
     }),
   ]);
 }
