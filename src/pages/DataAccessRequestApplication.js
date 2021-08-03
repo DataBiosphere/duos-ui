@@ -9,7 +9,7 @@ import { TypeOfResearch } from './dar_application/TypeOfResearch';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
-import { DAR, DataSet, User } from '../libs/ajax';
+import { DAR, Researcher, DataSet, User, Institution } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { Navigation } from "../libs/utils";
@@ -18,7 +18,7 @@ import { isEmpty, isNil, assign } from 'lodash';
 import { isFileEmpty } from '../libs/utils';
 import './DataAccessRequestApplication.css';
 import headingIcon from '../images/icon_add_access.png';
-import {getPropertyValuesFromUser} from "../libs/utils";
+import {map} from "lodash/fp";
 
 class DataAccessRequestApplication extends Component {
   constructor(props) {
@@ -185,6 +185,14 @@ class DataAccessRequestApplication extends Component {
     return datasets;
   }
 
+  async getSOs()  {
+    const allSOs = await User.getSOsForCurrentUser();
+    const allSOsOptions = map((user) =>  {
+      return {value: user.userId, label: user.displayName};
+    })(allSOs);
+    return allSOsOptions;
+  }
+
   async init() {
     const { dataRequestId } = this.props.match.params;
     let formData = {};
@@ -205,35 +213,44 @@ class DataAccessRequestApplication extends Component {
       formData = Storage.getData('dar_application') === null ? this.state.formData : Storage.getData('dar_application');
       Storage.removeData('dar_application');
     }
-    let rpProperties = getPropertyValuesFromUser(researcher);
+    let currentUserId = Storage.getCurrentUser().dacUserId;
+    let rpProperties = await Researcher.getPropertiesByResearcherId(currentUserId);
+    formData.darCode = fp.isNil(formData.darCode) ? null : formData.darCode;
+    formData.partialDarCode = fp.isNil(formData.partialDarCode) ? null : formData.partialDarCode;
     formData.researcher = isNil(researcher) ? "" : researcher.displayName;
-    formData.investigator = rpProperties.piName;
+    if (rpProperties.piName === undefined && rpProperties.isThePI === 'true') {
+      formData.investigator = formData.researcher;
+    } else if (rpProperties.piName === undefined && rpProperties.isThePI === 'false') {
+      formData.investigator = '';
+    } else {
+      formData.investigator = rpProperties.piName;
+    }
 
-    formData.linkedIn = rpProperties.linkedIn;
-    formData.researcherGate = rpProperties.researcherGate;
-    formData.orcid = rpProperties.orcid;
-    formData.institution = isNil(researcher)  || isNil(researcher.institution)? "" : researcher.institution.name;
-    formData.department = rpProperties.department;
-    formData.division = rpProperties.division;
-    formData.address1 = rpProperties.address1;
-    formData.address2 = rpProperties.address2;
-    formData.city = rpProperties.city;
-    formData.zipCode = rpProperties.zipCode;
-    formData.country = rpProperties.country;
-    formData.state = rpProperties.state;
-    formData.piName = rpProperties.piName;
-    formData.academicEmail = rpProperties.academicEmail;
-    formData.piEmail = rpProperties.piEmail;
-    formData.isThePi = rpProperties.isThePI;
-    formData.havePi = rpProperties.havePI;
-    formData.pubmedId = rpProperties.pubmedID;
-    formData.scientificUrl = rpProperties.scientificURL;
-    formData.userId = researcher.dacUserId;
+    formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
+    formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
+    formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+    formData.institution = isNil(researcher)  || isNil(researcher.institutionId)? "" : (await Institution.getById(researcher.institutionId)).name;
+    formData.department = rpProperties.department != null ? rpProperties.department : '';
+    formData.division = rpProperties.division != null ? rpProperties.division : '';
+    formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
+    formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
+    formData.city = rpProperties.city != null ? rpProperties.city : '';
+    formData.zipCode = rpProperties.zipCode != null ? rpProperties.zipCode : '';
+    formData.country = rpProperties.country != null ? rpProperties.country : '';
+    formData.state = rpProperties.state != null ? rpProperties.state : '';
+    formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
+    formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
+    formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
+    formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
+    formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
+    formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
+    formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
+    formData.userId = Storage.getCurrentUser().dacUserId;
 
     let completed = false;
     if (!fp.isNil(formData.darCode)) {
       completed = '';
-    } else if (rpProperties.completed !== '') {
+    } else if (rpProperties.completed !== undefined) {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
@@ -509,7 +526,7 @@ class DataAccessRequestApplication extends Component {
             //if question is a checkbox acknowledgement and the question is active, check to see if box was left unchecked using translated key
           } else if((formDataKey === 'dsAcknowledgement' || formDataKey === 'gsoAcknowledgement' || formDataKey === 'pubAcknowledgement')) {
             return !this.state.formData[formDataKey];
-          //else check input directly
+            //else check input directly
           } else {
             return !input;
           }
