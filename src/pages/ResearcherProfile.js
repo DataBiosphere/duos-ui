@@ -340,8 +340,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   cleanObject = (obj) => {
     // Removes any empty properties from a copy of the object
     const propNames = Object.getOwnPropertyNames(obj);
-    for (let i = 0; i < propNames.length; i++) {
-      const propName = propNames[i];
+    for (let propName in propNames) {
       if (obj[propName] === null || obj[propName] === undefined || obj[propName].toString().length === 0) {
         delete obj[propName];
       }
