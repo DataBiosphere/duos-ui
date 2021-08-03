@@ -74,14 +74,13 @@ export default function InstitutionTable(props) {
       div({style: Styles.TABLE.CONTAINER}, [
         div({style: Styles.TABLE.HEADER_ROW}, [tableHeaderTemplate]),
         filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
-          let signingOfficials = '';
-          isNil(inst.signingOfficials) ? signingOfficials = '' : inst.signingOfficials.forEach((user, i) => {
-            signingOfficials = signingOfficials.concat(user.displayName, ' (', user.email, ')');
-            //if there are multiple SOs in the list and this is not the last one, add comma
-            if (inst.signingOfficials.length > 1 && i < (inst.signingOfficials.length - 1)) {
-              signingOfficials = signingOfficials.concat(', ');
-            }
-          });
+          let signingOfficialsList = [];
+          if (!isNil(inst.signingOfficials)) {
+            inst.signingOfficials.forEach((user, i) => {
+              signingOfficialsList.push(user.displayName.concat(' (', user.email, ')'));
+            });
+          }
+          const signingOfficialsText = signingOfficialsList.join(', ');
           const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
           return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${inst.id}-${index}`}, [
             div({
@@ -99,7 +98,7 @@ export default function InstitutionTable(props) {
             ]),
             div({
               style: Object.assign({}, Styles.TABLE.INSTITUTION_CELL)
-            }, [span(signingOfficials)]),
+            }, [span(signingOfficialsText)]),
             div({
               style: Object.assign({}, Styles.TABLE.DATA_ID_CELL)
             }, [inst.createUser ? inst.createUser.displayName : '']),
