@@ -71,7 +71,7 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-    if (!isNil(currentUser)) {
+    if (!isNil(props.currentUser)) {
       setIsLoading(false);
     }
   }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.currentUser]);

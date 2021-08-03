@@ -9,7 +9,7 @@ import { eRACommons } from '../components/eRACommons';
 import { Notification } from '../components/Notification';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { DAR, Institution, User } from '../libs/ajax';
+import { DAR, User } from '../libs/ajax';
 import { NotificationService } from '../libs/notificationService';
 import { Storage } from '../libs/storage';
 import { TypeOfResearch } from './dar_application/TypeOfResearch';
@@ -19,6 +19,7 @@ import DataProviderAgreement from '../assets/Data_Provider_Agreement.pdf';
 import addAccessIcon from '../images/icon_add_access.png';
 import './DataAccessRequestApplication.css';
 import {isNil} from "lodash/fp";
+import {getPropertyValuesFromUser} from "../libs/utils";
 
 
 const noOptionMessage = 'Start typing a Dataset Name, Sample Collection ID, or PI';
@@ -138,9 +139,10 @@ class DataAccessRequestRenewal extends Component {
     }
     //I think some of the logic is messed up here because the rpProperties are that of the currentUser
     //while the researcher is most likely a different user (bc this is an admin only page) so we are
-    //getting the researcher's name with the currentUser's other info
+    //getting the researcher's name with the currentUser's other info, I am not changing the logic now.
+    //only updating API calls but will file ticket if reviewers agree
     let currentUser = await User.getMe();
-    let rpProperties = currentUser.researcherProperties;
+    let rpProperties = getPropertyValuesFromUser(currentUser);
     let researcher = isNil(formData.userId) ? null : await User.getById(formData.userId);
     formData.darCode = formData.darCode === undefined ? null : formData.darCode;
     formData.partialDarCode = formData.partialDarCode === undefined ? null : formData.partialDarCode;
@@ -156,26 +158,26 @@ class DataAccessRequestRenewal extends Component {
     }
 
     if (formData.darCode === null) {
-      formData.linkedIn = rpProperties.linkedIn !== undefined ? rpProperties.linkedIn : '';
-      formData.researcherGate = rpProperties.researcherGate !== undefined ? rpProperties.researcherGate : '';
-      formData.orcid = rpProperties.orcid !== undefined ? rpProperties.orcid : '';
+      formData.linkedIn = rpProperties.linkedIn;
+      formData.researcherGate = rpProperties.researcherGate;
+      formData.orcid = rpProperties.orcid;
       //NOTE: need to make new PR to add institution to User.me || User.getUserByEmail queries
-      formData.institution = isNil(researcher)  || isNil(researcher.institutionId)? "" : (await Institution.getById(researcher.institutionId)).name;
-      formData.department = rpProperties.department != null ? rpProperties.department : '';
-      formData.division = rpProperties.division != null ? rpProperties.division : '';
-      formData.address1 = rpProperties.address1 != null ? rpProperties.address1 : '';
-      formData.address2 = rpProperties.address2 != null ? rpProperties.address2 : '';
-      formData.city = rpProperties.city != null ? rpProperties.city : '';
-      formData.zipCode = rpProperties.zipCode != null ? rpProperties.zipCode : '';
-      formData.country = rpProperties.country != null ? rpProperties.country : '';
-      formData.state = rpProperties.state != null ? rpProperties.state : '';
-      formData.piName = rpProperties.piName !== null ? rpProperties.piName : '';
-      formData.academicEmail = rpProperties.academicEmail != null ? rpProperties.academicEmail : '';
-      formData.piEmail = rpProperties.piEmail != null ? rpProperties.piEmail : '';
-      formData.isThePi = rpProperties.isThePI !== undefined ? rpProperties.isThePI : '';
-      formData.havePi = rpProperties.havePI !== undefined ? rpProperties.havePI : '';
-      formData.pubmedId = rpProperties.pubmedID !== undefined ? rpProperties.pubmedID : '';
-      formData.scientificUrl = rpProperties.scientificURL !== undefined ? rpProperties.scientificURL : '';
+      formData.institution = isNil(researcher)  || isNil(researcher.institution)? "" : researcher.institution.name;
+      formData.department = rpProperties.department;
+      formData.division = rpProperties.division;
+      formData.address1 = rpProperties.address1;
+      formData.address2 = rpProperties.address2;
+      formData.city = rpProperties.city;
+      formData.zipCode = rpProperties.zipCode;
+      formData.country = rpProperties.country;
+      formData.state = rpProperties.state;
+      formData.piName = rpProperties.piName;
+      formData.academicEmail = rpProperties.academicEmail;
+      formData.piEmail = rpProperties.piEmail;
+      formData.isThePi = rpProperties.isThePI;
+      formData.havePi = rpProperties.havePI;
+      formData.pubmedId = rpProperties.pubmedID;
+      formData.scientificUrl = rpProperties.scientificURL;
     }
 
     formData.userId = currentUser.dacUserId;
@@ -186,7 +188,7 @@ class DataAccessRequestRenewal extends Component {
     let completed = false;
     if (formData.darCode !== null) {
       completed = '';
-    } else if (rpProperties.completed !== undefined) {
+    } else if (rpProperties.completed !== '') {
       completed = JSON.parse(rpProperties.completed);
     }
     this.setState(prev => {
