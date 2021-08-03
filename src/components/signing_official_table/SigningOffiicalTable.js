@@ -52,12 +52,17 @@ const DeactivateLibraryCardButton = (props) => {
   const {card = {}, showConfirmationModal} = props;
   const message = 'Are you sure you want to deactivate this library card?';
   const title = 'Deactivate Library Card';
-  return button({
-    key: `deactivate-card-${card.id}`,
-    role: 'button',
-    style: {}, //figure this out},
+  return h(SimpleButton, {
+    keyProp: `deactivate-card-${card.id}`,
+    label: 'Deactivate',
+    baseColor: Theme.palette.error,
+    additionalStyle: {
+      width: '30%',
+      padding: '2%',
+      fontSize: '1.45rem'
+    },
     onClick: () => showConfirmationModal({card, message, title, confirmType: 'delete'})
-  }, ['Deactivate']);
+  });
 };
 
 const IssueLibraryCardButton = (props) => {
@@ -67,11 +72,17 @@ const IssueLibraryCardButton = (props) => {
   const {card, showConfirmationModal} = props;
   const message = 'Are you sure you want to issue this library card?';
   const title = 'Issue Library Card';
-  return button({
-    role: 'button',
-    style: {},
-    onClick: () => showConfirmationModal({card, message, title, confirmType: 'issue'})
-  }, ['Issue']);
+  return h(SimpleButton, {
+    keyProp: `issue-card-${card.userEmail}`,
+    label: 'Issue',
+    baseColor: Theme.palette.secondary,
+    additionalStyle: {
+      width: '30%',
+      padding: '2%',
+      fontSize: '1.45rem',
+    },
+    onClick: () => showConfirmationModal({ card, message, title, confirmType: 'issue' }),
+  });
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
