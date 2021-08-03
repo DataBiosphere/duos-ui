@@ -798,6 +798,7 @@ export const PendingCases = {
 
 };
 
+//Now these are all unused, if we don't want them we can file a ticket to deprecate the APIs
 export const Researcher = {
 
   getPropertiesByResearcherId: async (userId) => {
