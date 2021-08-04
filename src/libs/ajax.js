@@ -806,7 +806,7 @@ export const Researcher = {
     return await res.json();
   },
 
-  //unused, if we don't want this API we can file a ticket to deprecate the APIs
+  //unused, if we don't want this API I can file a ticket to deprecate the APIs
   createProperties: async (researcherProperties) => {
     const url = `${await Config.getApiUrl()}/api/researcher`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
@@ -819,7 +819,7 @@ export const Researcher = {
     return res.json();
   },
 
-  //unused, if we don't want this API we can file a ticket to deprecate the APIs
+  //unused, if we don't want this API I can file a ticket to deprecate the APIs
   getResearcherProfile: async userId => {
     const url = `${await Config.getApiUrl()}/api/researcher/${userId}`;
     const res = await fetchOk(url, Config.authOpts());
