@@ -24,15 +24,15 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
 };
 
 //Simple cell text display
-const SimpleTextCell = ({ text, style }) => {
+const SimpleTextCell = ({ text, style, keyProp }) => {
   text = isNil(text) ? '- -' : text;
-  return div({ style, role: 'cell' }, [text]);
+  return div({ style, role: 'cell', key: keyProp }, [text]);
 };
 
 //Simple cell text that carries onClick functionality
-const OnClickTextCell = ({ text, style, onClick }) => {
+const OnClickTextCell = ({ text, style, onClick, keyProp }) => {
   text = isNil(text) ? '- -' : text;
-  return div({ style, onClick, role: 'cell' }, [text]);
+  return div({ style, onClick, role: 'cell', key: keyProp }, [text]);
 };
 
 //Column component that renders the column row based on column headers
@@ -63,10 +63,10 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
           output = div({style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
         //if there is no onClick function, render as simple cell
         } else if (isNil(onClick)) {
-          output = h(SimpleTextCell, { text: data, style: appliedStyle, key: `filtered-list-${id}-${label}`, cellIndex });
+          output = h(SimpleTextCell, { text: data, style: appliedStyle, keyProp: `filtered-list-${id}-${label}`, cellIndex });
         } else {
           //otherwise render as on click cell
-          output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), key: `filtered-list-${id}-${label}`, cellIndex });
+          output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), keyProp: `filtered-list-${id}-${label}`, cellIndex });
         }
         return output;
       }));

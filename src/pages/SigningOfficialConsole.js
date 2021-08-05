@@ -66,29 +66,6 @@ export default function SigningOfficialConsole() {
         ])
       ]),
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
-      div({style: {display: 'flex',justifyContent: "space-between"}}, [
-        div({ style: Styles.LEFT_HEADER_SECTION}, [
-          div({style: {... Styles.ICON_CONTAINER, textAlign: "center"}}, [
-            img({
-              id: 'user-icon',
-              src: userIcon
-            })
-          ]),
-          div({style: Styles.HEADER_CONTAINER}, [
-            div({style: {...Styles.SUB_HEADER, marginTop: '0'}}, ["Researchers"]),
-            div({style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {fontSize: '16px'})}, [
-              "My Institution's Researchers. Issue or Remove Researcher privileges below.",
-            ])
-          ])
-        ]),
-        h(SearchBar, {handleSearchChange: handleSearchChangeUsers}),
-        a({
-          id: 'btn_addUser',
-          className: "btn-primary btn-add common-background",
-          style: {marginTop: '4.75rem'}
-          //onClick: this.addUser
-        }, ["Add Researcher(s)"]),
-      ]),
       //researcher table goes here
       h(SigningOfficialTable, {researchers, signingOfficial}, []),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [

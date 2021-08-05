@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq, reduce } from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq} from "lodash/fp";
 import _ from 'lodash';
 import {User} from "./ajax";
 
@@ -428,17 +428,18 @@ export const getSearchFilterFunctions = () => {
         includes(term, toLower(eraCommonsId));
     }, targetList),
     signingOfficialResearchers: (term, targetList) => filter(researcher => {
-      const { userName, createDate, updateDate, eraCommonsId, userEmail, roles } = researcher;
-      const baseAttributes = [userName, createDate, updateDate, eraCommonsId, userEmail];
+      const { displayName, eraCommonsId, email, roles } = researcher;
+      const baseAttributes = [displayName, eraCommonsId, email];
 
-      const includesRoles = reduce((memo, current) => {
+      const includesRoles = roles.reduce((memo, current) => {
         const roleName = current.name;
-        return memo || includes(toLower(roleName), term);
-      })(roles);
+        return memo || includes(term, toLower(roleName));
+      }, false);
 
-      const includesBaseAttributes = reduce((memo, current) =>
-        memo || includes(toLower(current), term)
-      )(baseAttributes);
+      const includesBaseAttributes = baseAttributes.reduce(
+        (memo, current) => {
+          return memo || includes(term, toLower(current));
+        }, false);
 
       return includesRoles || includesBaseAttributes;
     })(targetList)

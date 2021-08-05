@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles, Theme } from "../../libs/theme";
-import { h, div, button } from "react-hyperscript-helpers";
+import { h, div, img } from "react-hyperscript-helpers";
+import userIcon from '../../images/icon_manage_users.png';
 import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from "lodash/fp";
 import SimpleTable from "../SimpleTable";
 import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
+import SearchBar from "../SearchBar";
 import {
   Notifications,
   tableSearchHandler,
@@ -191,6 +193,14 @@ export default function SigningOfficialTable(props) {
 
   const { signingOfficial } = props;
 
+  //Search function for SearchBar component, function defined in utils
+  const handleSearchChange = tableSearchHandler(
+    researchers,
+    setFilteredResearchers,
+    setCurrentPage,
+    'signingOfficialResearchers'
+  );
+
   const showConfirmationModal = ({card, message, title, confirmType}) => {
     setSelectedCard(card);
     setShowConfirmation(true);
@@ -255,7 +265,9 @@ export default function SigningOfficialTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {email, displayName, count = 0, roles} = researcher;
+      const {displayName, count = 0, roles, libraryCards} = researcher;
+      const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
+      const email = researcher.email || libraryCard.userEmail;
       const id = researcher.dacUserId;
       return [
         displayNameCell(displayName, id),
@@ -263,8 +275,6 @@ export default function SigningOfficialTable(props) {
         LibraryCardCell({
           researcher,
           showConfirmationModal,
-          issueFn: issueLibraryCard,
-          deleteFn: deactivateLibraryCard,
           institutionId: signingOfficial.institutionId
         }),
         roleCell(roles, id),
@@ -280,14 +290,6 @@ export default function SigningOfficialTable(props) {
     columnHeaderFormat.role,
     // columnHeaderFormat.activeDARs -> add this back in when back-end supports this
   ];
-
-  //Search function for SearchBar component, function defined in utils
-  const handleSearchChange = tableSearchHandler(
-    researchers,
-    setFilteredResearchers,
-    setCurrentPage,
-    'signingOfficialResearchers'
-  );
 
   const showModalOnClick = () => {
     setSelectedCard({institutionId: signingOfficial.institutionId});
@@ -311,7 +313,7 @@ export default function SigningOfficialTable(props) {
       const targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to end of list
-        listCopy.push({userEmail, libraryCards: [newLibraryCard], roles: []});
+        listCopy.unshift({userEmail, libraryCards: [newLibraryCard], roles: []});
         messageName = userEmail;
       } else {
         listCopy[targetIndex].libraryCards = [newLibraryCard];
@@ -319,6 +321,7 @@ export default function SigningOfficialTable(props) {
       }
       setResearchers(listCopy);
       setShowConfirmation(false);
+      setShowModal(false);
       Notifications.showSuccess({text: `Issued new library card to ${messageName}`});
     } catch(error) {
       Notifications.showError({text: `Error issuing library card to ${messageName}`});
@@ -332,8 +335,15 @@ export default function SigningOfficialTable(props) {
     const messageName = userName || userEmail;
     try {
       await LibraryCard.deleteLibraryCard(id);
-      const targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(researchers);
-      listCopy[targetIndex].libraryCards = [];
+      const targetIndex = findIndex((researcher) => {
+        const card = researcher.libraryCards[0];
+        return !isNil(card) && id === card.id;
+      })(researchers);
+      if(isNil(userId)) {
+        listCopy.splice(targetIndex, 1);
+      } else {
+        listCopy[targetIndex].libraryCards = [];
+      }
       setResearchers(listCopy);
       setShowConfirmation(false);
       Notifications.showSuccess({text: `Removed library card issued to ${messageName}`});
@@ -343,6 +353,36 @@ export default function SigningOfficialTable(props) {
   };
 
   return h(Fragment, {}, [
+    div({ style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end'} }, [
+      div({ style: Styles.LEFT_HEADER_SECTION }, [
+        div({ style: { ...Styles.ICON_CONTAINER, textAlign: 'center' } }, [
+          img({
+            id: 'user-icon',
+            src: userIcon,
+          }),
+        ]),
+        div({ style: Styles.HEADER_CONTAINER }, [
+          div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, ['Researchers',]),
+          div({
+            style: Object.assign({}, Styles.MEDIUM_DESCRIPTION, {
+              fontSize: '16px',
+            }),
+          },["My Institution's Researchers. Issue or Remove Researcher privileges below.",]),
+        ]),
+      ]),
+      h(SearchBar, { handleSearchChange, searchRef }),
+      div({style: {
+      }}, [
+        h(SimpleButton, {
+          onClick: () => showModalOnClick(),
+          baseColor: Theme.palette.secondary,
+          label: 'Add New Researcher',
+          additionalStyle: {
+            width: '20rem'
+          }
+        }),
+      ])
+    ]),
     h(SimpleTable, {
       isLoading,
       rowData: processResearcherRowData(visibleResearchers),
@@ -351,16 +391,9 @@ export default function SigningOfficialTable(props) {
       tableSize,
       paginationBar,
     }),
-    div({ style: { marginLeft: '90%' } }, [
-      h(SimpleButton, {
-        onClick: () => showModalOnClick(),
-        baseColor: Theme.palette.secondary,
-        label: 'Add New Researcher',
-      }),
-    ]),
     h(LibraryCardFormModal, {
       showModal,
-      createOnClick: issueLibraryCard,
+      createOnClick: (card) => issueLibraryCard(card, researchers),
       closeModal: () => setShowModal(false),
       card: selectedCard,
       users: props.researchers,
@@ -375,7 +408,10 @@ export default function SigningOfficialTable(props) {
       header: `${selectedCard.userName || selectedCard.userEmail} - ${
         !isNil(selectedCard.institution) ? selectedCard.institution.name : ''
       }`,
-      onConfirm: () => confirmType == 'delete' ? deactivateLibraryCard(selectedCard, researchers) : issueLibraryCard(selectedCard, researchers)
+      onConfirm: () =>
+        confirmType == 'delete'
+          ? deactivateLibraryCard(selectedCard, researchers)
+          : issueLibraryCard(selectedCard, researchers)
     }),
   ]);
 }
