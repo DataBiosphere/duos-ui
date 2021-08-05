@@ -77,7 +77,7 @@ export default function InstitutionTable(props) {
           let signingOfficialsList = [];
           if (!isNil(inst.signingOfficials)) {
             inst.signingOfficials.forEach((user, i) => {
-              signingOfficialsList.push(user.displayName.concat(' (', user.email, ')'));
+              signingOfficialsList.push(`${user.displayName} (${user.email})`);
             });
           }
           const signingOfficialsText = signingOfficialsList.join(', ');
