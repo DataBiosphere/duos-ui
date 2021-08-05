@@ -265,7 +265,7 @@ export default function SigningOfficialTable(props) {
 
   const processResearcherRowData = (researchers = []) => {
     return researchers.map(researcher => {
-      const {displayName, count = 0, roles, libraryCards} = researcher;
+      const {displayName, /*count = 0,*/ roles, libraryCards} = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
       const id = researcher.dacUserId;
