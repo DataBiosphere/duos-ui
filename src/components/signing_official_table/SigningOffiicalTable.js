@@ -313,7 +313,7 @@ export default function SigningOfficialTable(props) {
       const targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to end of list
-        listCopy.unshift({userEmail, libraryCards: [newLibraryCard], roles: []});
+        listCopy.unshift({email: userEmail, libraryCards: [newLibraryCard], roles: []});
         messageName = userEmail;
       } else {
         listCopy[targetIndex].libraryCards = [newLibraryCard];
