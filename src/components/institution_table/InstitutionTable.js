@@ -76,11 +76,10 @@ export default function InstitutionTable(props) {
         filteredList.slice((currentPage - 1) * tableSize, (currentPage * tableSize)).map((inst, index) => {
           let signingOfficialsList = [];
           if (!isNil(inst.signingOfficials)) {
-            inst.signingOfficials.forEach((user, i) => {
-              signingOfficialsList.push(`${user.displayName} (${user.email})`);
+            inst.signingOfficials.forEach((user) => {
+              signingOfficialsList.push(span({style: {display: 'block'}}, `${user.displayName} (${user.email})`));
             });
           }
-          const signingOfficialsText = signingOfficialsList.join(', ');
           const borderStyle = index > 0 ? {borderTop: "1px solid rgba(109,110,112,0.2)"} : {};
           return div({style: Object.assign({}, borderStyle, Styles.TABLE.RECORD_ROW), key: `${inst.id}-${index}`}, [
             div({
@@ -97,8 +96,8 @@ export default function InstitutionTable(props) {
               }, [inst.name])
             ]),
             div({
-              style: Object.assign({}, Styles.TABLE.INSTITUTION_CELL)
-            }, [span(signingOfficialsText)]),
+              style: Object.assign({}, {...Styles.TABLE.INSTITUTION_CELL, display: 'block'})
+            }, signingOfficialsList),
             div({
               style: Object.assign({}, Styles.TABLE.DATA_ID_CELL)
             }, [inst.createUser ? inst.createUser.displayName : '']),
