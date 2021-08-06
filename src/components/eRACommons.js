@@ -37,7 +37,6 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     let isFcUser = await this.verifyUser();
     if (!isFcUser) {
       isFcUser = this.registerUserToFC(this.props.currentUser);
-      this.setState({ nihError: true });
     }
     if (isFcUser) {
       const parsedToken = qs.parse(searchArg);

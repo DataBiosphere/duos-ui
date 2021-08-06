@@ -3,8 +3,7 @@ import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
 import {forEach} from 'lodash';
 import _ from 'lodash';
-import {DAR, DataSet} from "./ajax";
-import {User} from "./ajax";
+import {DAR, DataSet, User} from "./ajax";
 import {Styles, Theme} from "./theme";
 import {cloneDeep, filter, find, first, includes, isEmpty, isNil, map, sortedUniq, toLower} from "lodash/fp";
 
