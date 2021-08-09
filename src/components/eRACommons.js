@@ -43,7 +43,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       this.verifyToken(parsedToken).then(
         (decodedNihAccount) => {
           AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
-            () => this.getUserInfo(),
+            () => this.getUpdatedUserInfo(),
             () => this.setState({ nihError: true })
           );
         },
@@ -53,7 +53,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    const currentUser = isNil(await this.props.currentUser) ? {} : (this.props.currentUser);
+    const currentUser = this.props.currentUser;
     const authProp = find({'propertyKey':'eraAuthorized'})(currentUser.researcherProperties);
     const expProp = find({'propertyKey':'eraExpiration'})(currentUser.researcherProperties);
     const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
@@ -106,12 +106,12 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   deleteNihAccount = async () => {
     AuthenticateNIH.eliminateAccount().then(
-      () => this.logUserOut(),
+      () => this.getUpdatedUserInfo(),
       () => this.setState({ nihError: true })
     );
   };
 
-  logUserOut = () => {
+  getUpdatedUserInfo = () => {
     User.getMe().then((response) => {
       const props = response.researcherProperties;
       const authProp = find({'propertyKey':'eraAuthorized'})(props);
@@ -122,22 +122,12 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       const eraCommonsId = response.eraCommonsId;
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
+        prev.currentUser = response;
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
         prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
         return prev;
       });
-    // this.props.currentUser.eraCommonsId = '';
-    // if (!isNil( this.props.currentUser.researcherProperties)) {
-    // this.props.currentUser.researcherProperties =
-    //   this.props.currentUser.researcherProperties.filter((prop) => {
-    //     return prop.propertyName !== 'eraAuthorized' || prop.propertyName !== 'eraExpiration';
-    //   });
-    // }
-    // this.setState((prev) => {
-    //   prev.isAuthorized = false;
-    //   prev.eRACommons = '';
-    //   prev.expirationCount = 0;
     });
   };
 
