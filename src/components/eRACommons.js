@@ -3,7 +3,7 @@ import { find, getOr } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
-import { AuthenticateNIH } from '../libs/ajax';
+import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import eraIcon from "../images/era-commons-logo.png";
 
@@ -53,7 +53,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = async () => {
-    const currentUser = isNil(this.props.currentUser) ? {} : (this.props.currentUser);
+    const currentUser = isNil(await this.props.currentUser) ? {} : (this.props.currentUser);
     const authProp = find({'propertyKey':'eraAuthorized'})(currentUser.researcherProperties);
     const expProp = find({'propertyKey':'eraExpiration'})(currentUser.researcherProperties);
     const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
@@ -106,9 +106,39 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   deleteNihAccount = async () => {
     AuthenticateNIH.eliminateAccount().then(
-      () => this.getUserInfo(),
+      () => this.logUserOut(),
       () => this.setState({ nihError: true })
     );
+  };
+
+  logUserOut = () => {
+    User.getMe().then((response) => {
+      const props = response.researcherProperties;
+      const authProp = find({'propertyKey':'eraAuthorized'})(props);
+      const expProp = find({'propertyKey':'eraExpiration'})(props);
+      const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
+      const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
+      const nihValid = isAuthorized && expirationCount > 0;
+      const eraCommonsId = response.eraCommonsId;
+      this.props.onNihStatusUpdate(nihValid);
+      this.setState(prev => {
+        prev.isAuthorized = isAuthorized;
+        prev.expirationCount = expirationCount;
+        prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
+        return prev;
+      });
+    // this.props.currentUser.eraCommonsId = '';
+    // if (!isNil( this.props.currentUser.researcherProperties)) {
+    // this.props.currentUser.researcherProperties =
+    //   this.props.currentUser.researcherProperties.filter((prop) => {
+    //     return prop.propertyName !== 'eraAuthorized' || prop.propertyName !== 'eraExpiration';
+    //   });
+    // }
+    // this.setState((prev) => {
+    //   prev.isAuthorized = false;
+    //   prev.eRACommons = '';
+    //   prev.expirationCount = 0;
+    });
   };
 
   render() {
@@ -171,7 +201,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         div({ isRendered: (this.state.isAuthorized) }, [
           div({
             isRendered: this.state.expirationCount >= 0,
-            className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 no-padding'
+            className: 'col-xs-12 no-padding'
           }, [
             div({
               style: {
