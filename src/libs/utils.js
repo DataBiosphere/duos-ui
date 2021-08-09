@@ -428,9 +428,9 @@ export const getSearchFilterFunctions = () => {
         includes(term, toLower(eraCommonsId));
     }, targetList),
     signingOfficialResearchers: (term, targetList) => filter(researcher => {
-      const { displayName, eraCommonsId, email, roles } = researcher;
+      const { displayName, eraCommonsId, email } = researcher;
+      const roles = researcher.roles || [];
       const baseAttributes = [displayName, eraCommonsId, email];
-
       const includesRoles = roles.reduce((memo, current) => {
         const roleName = current.name;
         return memo || includes(term, toLower(roleName));
