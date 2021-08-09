@@ -504,7 +504,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: 'col-xs-12 no-padding' }, [
-                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin' }, [
+                  div({ className: 'row fsi-row-lg-level fsi-row-md-level no-margin', isRendered: !isNil(currentUser) }, [
                     eRACommons({
                       className: 'col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
@@ -865,8 +865,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       name: 'eRACommonsID',
                       type: 'text',
                       className: 'form-control',
-                      onChange: this.handleChange,
-                      value: profileProperties.eraCommonsId
+                      //changes to eraCommons Id are handled in eraCommons component
+                      onChange: () => {},
+                      value: currentUser.eRACommonsID
                     })
                   ])
                 ])
