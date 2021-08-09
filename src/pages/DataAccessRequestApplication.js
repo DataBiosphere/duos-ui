@@ -233,8 +233,8 @@ class DataAccessRequestApplication extends Component {
     let completed = false;
     if (!fp.isNil(formData.darCode)) {
       completed = '';
-    } else if (rpProperties.completed !== '') {
-      completed = JSON.parse(rpProperties.completed);
+    } else if (isNil(rpProperties.completed) && rpProperties.completed !== '') {
+      completed = rpProperties.completed;
     }
     this.setState(prev => {
       prev.completed = completed;
@@ -1011,7 +1011,7 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
-            div({ isRendered: this.state.step === 1 }, [
+            div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [ 
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 completed: this.state.completed,
