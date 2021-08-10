@@ -191,7 +191,7 @@ export default function SigningOfficialTable(props) {
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState('delete');
 
-  const { signingOfficial } = props;
+  const { signingOfficial, unregisteredResearchers } = props;
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = tableSearchHandler(
@@ -396,7 +396,7 @@ export default function SigningOfficialTable(props) {
       createOnClick: (card) => issueLibraryCard(card, researchers),
       closeModal: () => setShowModal(false),
       card: selectedCard,
-      users: props.researchers,
+      users: unregisteredResearchers,
       institutions: [], //pass in empty array to force modal to hide institution dropdown
       modalType: 'add',
     }),

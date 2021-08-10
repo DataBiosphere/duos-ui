@@ -10,10 +10,8 @@ import {tableRowLoadingTemplate} from "../components/dar_table/DarTable";
 import {User} from "../libs/ajax";
 import {img} from "react-hyperscript-helpers";
 import lockIcon from "../images/lock-icon.png";
-import userIcon from "../images/icon_manage_users.png";
 import SearchBar from "../components/SearchBar";
 import {darSearchHandler} from "../libs/utils";
-import {userSearchHandler} from "../libs/utils";
 import { USER_ROLES } from "../libs/utils";
 
 export default function SigningOfficialConsole() {
@@ -23,10 +21,8 @@ export default function SigningOfficialConsole() {
   const [darList,] = useState();
   const [setFilteredDarList] = useState();
   const [setCurrentDarPage] = useState();
+  const [unregisteredResearchers, setUnregisteredResearchers] = useState();
   //states to be added and used for manage researcher component
-  const [userList,] = useState();
-  const [setFilteredUserList] = useState();
-  const [setCurrentUserPage] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,6 +31,8 @@ export default function SigningOfficialConsole() {
         setIsLoading(true);
         const soUser = await User.getMe();
         const researcherList = await User.list(USER_ROLES.signingOfficial);
+        const unregisteredResearchers = await User.getUnassignedUsers();
+        setUnregisteredResearchers(unregisteredResearchers);
         setResearchers(researcherList);
         setSiginingOfficial(soUser);
         setIsLoading(false);
@@ -47,7 +45,6 @@ export default function SigningOfficialConsole() {
   }, []);
 
   const handleSearchChangeDars = darSearchHandler(darList, setFilteredDarList, setCurrentDarPage);
-  const handleSearchChangeUsers = userSearchHandler(userList, setFilteredUserList, setCurrentUserPage);
 
   return (
     div({style: Styles.PAGE}, [
@@ -67,7 +64,7 @@ export default function SigningOfficialConsole() {
       ]),
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
       //researcher table goes here
-      h(SigningOfficialTable, {researchers, signingOfficial}, []),
+      h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers}, []),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [
