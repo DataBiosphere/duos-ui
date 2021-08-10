@@ -1011,7 +1011,7 @@ class DataAccessRequestApplication extends Component {
               div({ className: 'dialog-description' },
                 ['Are you sure you want to save this Data Access Request? Previous changes will be overwritten.'])
             ]),
-            div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [ 
+            div({ isRendered: this.state.step === 1 && (this.state.formData.researcher !== '') }, [
               h(ResearcherInfo, ({
                 checkCollaborator: checkCollaborator,
                 completed: this.state.completed,
