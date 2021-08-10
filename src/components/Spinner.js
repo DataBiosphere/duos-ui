@@ -7,3 +7,7 @@ export const Spinner =
   div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
     img({ src: loadingIndicator, alt: 'spinner' })
   ]);
+
+  // TODO: implement this spinner in every componentDidMount or Init method on 
+  // pages that call async methods unpon loading the page. Search for 'await'.
+  // See SignIn for example usage of this constant.
