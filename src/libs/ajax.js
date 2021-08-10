@@ -800,13 +800,6 @@ export const PendingCases = {
 
 export const Researcher = {
 
-  //unused do we want to deprecate this API
-  getPropertiesByResearcherId: async (userId) => {
-    const url = `${await Config.getApiUrl()}/api/researcher/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   createProperties: async (researcherProperties) => {
     const url = `${await Config.getApiUrl()}/api/researcher`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
