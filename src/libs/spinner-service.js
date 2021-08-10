@@ -1,3 +1,5 @@
+// TODO: Delete this class 
+// Deprecated
 export class SpinnerService {
 
   constructor() {
