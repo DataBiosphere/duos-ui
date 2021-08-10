@@ -18,7 +18,8 @@ const FormFieldRow = (props) => {
   // however back-end still needs to filter out institutionId
 
   //NOTE: check if this works as expected
-  const cardlessOptions = dropdownOptions.filter(({libraryCards}) => {
+  const cardlessOptions = dropdownOptions.filter((option) => {
+    const libraryCards = option.libraryCards || [];
     const savedCard = libraryCards.find(({institutionId}) => institutionId === card.institutionId);
     return isNil(savedCard);
   });

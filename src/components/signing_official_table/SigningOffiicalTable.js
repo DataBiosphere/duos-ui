@@ -268,7 +268,7 @@ export default function SigningOfficialTable(props) {
       const {displayName, /*count = 0,*/ roles, libraryCards} = researcher;
       const libraryCard = !isEmpty(libraryCards) ? libraryCards[0] : {};
       const email = researcher.email || libraryCard.userEmail;
-      const id = researcher.dacUserId;
+      const id = researcher.dacUserId || email;
       return [
         displayNameCell(displayName, id),
         emailCell(email, id),
