@@ -233,7 +233,7 @@ class DataAccessRequestApplication extends Component {
     let completed = false;
     if (!fp.isNil(formData.darCode)) {
       completed = '';
-    } else if (!isNil(rpProperties.completed) && rpProperties.completed !== '') {
+    } else if (rpProperties.completed !== '') {
       completed = rpProperties.completed;
     }
     this.setState(prev => {
