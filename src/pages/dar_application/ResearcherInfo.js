@@ -180,7 +180,8 @@ export default function ResearcherInfo(props) {
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
-              validationError: showValidationMessages
+              validationError: showValidationMessages,
+              currentUser: currentUser
             }),
             div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
               label({ className: 'control-label' }, ['LinkedIn Profile']),
