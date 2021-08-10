@@ -509,8 +509,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       className: 'col-md-4 col-sm-6 col-xs-12',
                       destination: 'profile',
                       onNihStatusUpdate: () => {},
-                      location: this.props.location,
-                      currentUser: currentUser
+                      location: this.props.location
                     }),
                     div({ className: '' }, [
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
