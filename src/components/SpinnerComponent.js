@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { spinnerService } from '../libs/spinner-service';
 
+// TODO: Delete this class
+// Deprecated
 export class SpinnerComponent extends React.Component {
 
   constructor(props, context) {

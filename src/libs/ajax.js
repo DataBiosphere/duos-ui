@@ -1098,6 +1098,7 @@ export const LibraryCard = {
 };
 
 const fetchOk = async (...args) => {
+  //TODO: Remove spinnerService calls
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
@@ -1112,6 +1113,7 @@ const fetchOk = async (...args) => {
 };
 
 const fetchAny = async (...args) => {
+  //TODO: Remove spinnerService calls
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
