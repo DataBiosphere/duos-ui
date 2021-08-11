@@ -1,4 +1,4 @@
-// TODO: Delete this class 
+// TODO: Delete this class
 // Deprecated
 export class SpinnerService {
 
