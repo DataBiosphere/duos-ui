@@ -30,8 +30,12 @@ export default function SigningOfficialConsole() {
       try {
         setIsLoading(true);
         const soUser = await User.getMe();
-        const researcherList = await User.list(USER_ROLES.signingOfficial);
-        const unregisteredResearchers = await User.getUnassignedUsers();
+        const soPromises = await Promise.all([
+          User.list(USER_ROLES.signingOfficial),
+          User.getUnassignedUsers()
+        ]);
+        const researcherList = soPromises[0];
+        const unregisteredResearchers = soPromises[1];
         setUnregisteredResearchers(unregisteredResearchers);
         setResearchers(researcherList);
         setSiginingOfficial(soUser);
@@ -64,7 +68,7 @@ export default function SigningOfficialConsole() {
       ]),
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
       //researcher table goes here
-      h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers}, []),
+      h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [

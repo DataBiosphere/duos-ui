@@ -186,12 +186,10 @@ export default function SigningOfficialTable(props) {
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const searchRef = useRef('');
-  const [isLoading, setIsLoading] = useState(true);
   const [confirmationModalMsg, setConfirmationModalMsg] = useState('');
   const [confirmationTitle, setConfirmationTitle] = useState('');
   const [confirmType, setConfirmType] = useState('delete');
-
-  const { signingOfficial, unregisteredResearchers } = props;
+  const { signingOfficial, unregisteredResearchers, isLoading } = props;
 
   //Search function for SearchBar component, function defined in utils
   const handleSearchChange = tableSearchHandler(
@@ -213,9 +211,7 @@ export default function SigningOfficialTable(props) {
   useEffect(() => {
     const init = async() => {
       try{
-        setIsLoading(true);
         setResearchers(props.researchers);
-        setIsLoading(false);
       } catch(error) {
         Notifications.showError({text: 'Failed to initialize researcher table'});
       }
@@ -231,7 +227,6 @@ export default function SigningOfficialTable(props) {
   }, [researchers]);
 
   useEffect(() => {
-    setIsLoading(true);
     recalculateVisibleTable({
       tableSize, pageCount,
       filteredList: filteredResearchers,
@@ -240,7 +235,6 @@ export default function SigningOfficialTable(props) {
       setCurrentPage,
       setVisibleList: setVisibleResearchers
     });
-    setIsLoading(false);
   }, [tableSize, pageCount, filteredResearchers, currentPage]);
 
   const goToPage = useCallback((value) => {
@@ -339,7 +333,7 @@ export default function SigningOfficialTable(props) {
         const card = researcher.libraryCards[0];
         return !isNil(card) && id === card.id;
       })(researchers);
-      if(isNil(userId)) {
+      if(isNil(userId) || researchers[targetIndex].institutionId !== signingOfficial.institutionId) {
         listCopy.splice(targetIndex, 1);
       } else {
         listCopy[targetIndex].libraryCards = [];
