@@ -25,7 +25,8 @@ export const UserProperties = {
   COUNTRY: "country",
   RESEARCHER_GATE: "researcherGate",
   PUBMED_ID: "pubmedID",
-  SCIENTIFIC_URL: "scientificURL"
+  SCIENTIFIC_URL: "scientificURL",
+  COMPLETED: "completed"
 };
 
 export const findPropertyValue = (propName, researcher) => {
@@ -55,7 +56,8 @@ export const getPropertyValuesFromUser = (user) => {
     piName: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user),
     piEmail: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user),
     pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
-    scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user)
+    scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user),
+    completed: findPropertyValue(UserProperties.COMPLETED, user)
   };
 
   return researcherProps;
