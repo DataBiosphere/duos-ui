@@ -1,11 +1,11 @@
 import Noty from 'noty';
 import 'noty/lib/noty.css';
 import 'noty/lib/themes/bootstrap-v3.css';
-import {forEach} from 'lodash';
+import { forEach } from 'lodash';
+import { DAR, DataSet, User } from "./ajax";
+import { Theme, Styles } from "./theme";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq } from "lodash/fp";
 import _ from 'lodash';
-import {DAR, DataSet, User} from "./ajax";
-import {Styles, Theme} from "./theme";
-import {cloneDeep, filter, find, first, includes, isEmpty, isNil, map, sortedUniq, toLower} from "lodash/fp";
 
 export const UserProperties = {
   LINKEDIN : "linkedIn",
