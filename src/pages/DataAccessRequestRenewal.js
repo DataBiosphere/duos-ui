@@ -983,10 +983,10 @@ class DataAccessRequestRenewal extends Component {
                         disabled: this.state.formData.darCode !== null,
                       }),
                       span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                      },
+                      ['Required field']),
                     ]),
 
 
@@ -1100,10 +1100,10 @@ class DataAccessRequestRenewal extends Component {
                         disabled: this.state.formData.darCode !== null,
                       }),
                       span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                      },
+                      ['Required field']),
                     ]),
 
                   div({ className: 'col-lg-12 col-md-12 col-sm-12 col-xs-12 rp-group' }, [
@@ -1189,10 +1189,10 @@ class DataAccessRequestRenewal extends Component {
 
                       }),
                       span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.datasets) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.datasets) && showValidationMessages,
+                      },
+                      ['Required field']),
                     ])
                   ]),
 
@@ -1223,10 +1223,10 @@ class DataAccessRequestRenewal extends Component {
                           disabled: this.state.formData.darCode !== null,
                         }),
                         span({
-                            className: 'cancel-color required-field-error-span',
-                            isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
-                          },
-                          ['Required field']),
+                          className: 'cancel-color required-field-error-span',
+                          isRendered: fp.isEmpty(this.state.formData.projectTitle) && showValidationMessages,
+                        },
+                        ['Required field']),
                       ]),
                   ]),
 
@@ -1416,10 +1416,10 @@ class DataAccessRequestRenewal extends Component {
                         disabled: this.state.formData.darCode !== null,
                       }),
                       span({
-                          className: 'cancel-color required-field-error-span',
-                          isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
-                        },
-                        ['Required field']),
+                        className: 'cancel-color required-field-error-span',
+                        isRendered: fp.isEmpty(this.state.formData.rus) && showValidationMessages,
+                      },
+                      ['Required field']),
                     ]),
                 ]),
 
