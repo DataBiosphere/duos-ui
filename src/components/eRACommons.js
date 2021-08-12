@@ -5,6 +5,7 @@ import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
 import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
+import { Storage } from '../libs/storage';
 import eraIcon from "../images/era-commons-logo.png";
 
 export const eRACommons = hh(class eRACommons extends React.Component {
@@ -36,7 +37,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   authenticateAsNIHFCUser = async (searchArg) => {
     let isFcUser = await this.verifyUser();
     if (!isFcUser) {
-      isFcUser = this.registerUserToFC(this.props.currentUser);
+      isFcUser = this.registerUserToFC(Storage.getCurrentUser());
     }
     if (isFcUser) {
       const parsedToken = qs.parse(searchArg);
@@ -53,7 +54,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUserInfo = () => {
-    const currentUser = this.props.currentUser;
+    const currentUser = Storage.getCurrentUser();
     const authProp = find({'propertyKey':'eraAuthorized'})(currentUser.researcherProperties);
     const expProp = find({'propertyKey':'eraExpiration'})(currentUser.researcherProperties);
     const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);

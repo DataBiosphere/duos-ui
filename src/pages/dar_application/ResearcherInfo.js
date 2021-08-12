@@ -40,8 +40,7 @@ export default function ResearcherInfo(props) {
     cloudProvider,
     isCloudUseInvalid,
     isCloudProviderInvalid,
-    isAnvilUseInvalid,
-    currentUser
+    isAnvilUseInvalid
   } = props;
 
   const navButtonContainerStyle = {
@@ -56,7 +55,6 @@ export default function ResearcherInfo(props) {
   };
 
   //initial state variable assignment
-  const [isLoading, setIsLoading] = useState(true);
   const [checkCollaborator, setCheckCollaborator] = useState(props.checkCollaborator);
   const [signingOfficial, setSigningOfficial] = useState();
   const [itDirector, setITDirector] = useState(props.itDirector || '');
@@ -71,9 +69,6 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-    if (!isNil(props.currentUser)) {
-      setIsLoading(false);
-    }
   }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.currentUser]);
 
   const cloudRadioGroup = div({
@@ -174,14 +169,13 @@ export default function ResearcherInfo(props) {
             isRendered: (showValidationMessages && !nihValid && !checkCollaborator), className: 'col-lg-12 col-md-12 col-sm-6 col-xs-12 cancel-color required-field-error-span'
           }, ['NIH eRA Authentication is required']),
 
-          div({ className: 'row no-margin', isRendered: !isLoading }, [
+          div({ className: 'row no-margin' }, [
             eRACommons({
               className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group',
               destination: eRACommonsDestination,
               onNihStatusUpdate: onNihStatusUpdate,
               location: location,
-              validationError: showValidationMessages,
-              currentUser: currentUser
+              validationError: showValidationMessages
             }),
             div({ className: 'col-lg-6 col-md-6 col-sm-6 col-xs-12 rp-group' }, [
               label({ className: 'control-label' }, ['LinkedIn Profile']),

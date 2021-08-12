@@ -1047,8 +1047,7 @@ class DataAccessRequestApplication extends Component {
                 isCloudProviderInvalid: this.state.isCloudProviderInvalid,
                 isSigningOfficialInvalid: this.state.isSigningOfficialInvalid,
                 isITDirectorInvalid: this.state.isITDirectorInvalid,
-                isAnvilUseInvalid: this.state.isAnvilUseInvalid,
-                currentUser: this.state.researcher
+                isAnvilUseInvalid: this.state.isAnvilUseInvalid
               }))
             ]),
 
