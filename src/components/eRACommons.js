@@ -3,10 +3,11 @@ import { find, getOr } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
+import eraIcon from '../images/era-commons-logo.png';
 import { AuthenticateNIH, User } from '../libs/ajax';
 import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
-import eraIcon from "../images/era-commons-logo.png";
+import { setUserRoleStatuses } from '../libs/utils';
 
 export const eRACommons = hh(class eRACommons extends React.Component {
 
@@ -113,22 +114,23 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   };
 
   getUpdatedUserInfo = async () => {
-    User.getMe().then((response) => {
-      const props = response.researcherProperties;
+    User.getMe().then((user) => {
+      const props = user.researcherProperties;
       const authProp = find({'propertyKey':'eraAuthorized'})(props);
       const expProp = find({'propertyKey':'eraExpiration'})(props);
       const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
       const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
       const nihValid = isAuthorized && expirationCount > 0;
-      const eraCommonsId = response.eraCommonsId;
+      const eraCommonsId = user.eraCommonsId;
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
-        prev.currentUser = response;
+        prev.currentUser = user;
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
         prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
         return prev;
       });
+      setUserRoleStatuses(user, Storage);
     });
   };
 
