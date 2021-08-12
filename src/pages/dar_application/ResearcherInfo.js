@@ -47,6 +47,12 @@ export default function ResearcherInfo(props) {
     marginTop: '5rem'
   };
 
+  const soDropDownStyle = {
+    control: styles => ({ ...styles,
+      backgroundColor: !isNil(darCode) ? '#efefef' : 'white',
+      borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
+  };
+
   const formatSOString = (name, email) => {
     if(isEmpty(name)) { return '';}
     const nameString = `${name}`;
@@ -69,7 +75,7 @@ export default function ResearcherInfo(props) {
     setAnvilUse(props.anvilUse);
     setCloudUse(props.cloudUse);
     setLocalUse(props.localUse);
-  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse, props.currentUser]);
+  }, [props.signingOfficial, props.checkCollaborator, props.itDirector, props.anvilUse, props.cloudUse, props.localUse]);
 
   const cloudRadioGroup = div({
     className: 'radio-inline',
@@ -321,6 +327,12 @@ export default function ResearcherInfo(props) {
                 getOptionLabel: (option) => formatSOString(option.displayName, option.email), //formats labels on dropdown
                 getNewOptionData: (inputValue) => { //formats user input into object for use within Creatable
                   return { displayName: inputValue };
+                },
+                getOptionValue: (option) => { //value formatter for options, attr used to ensure empty strings are treated as undefined
+                  if(isNil(option) || isEmpty(option.displayName)) {
+                    return null;
+                  }
+                  return option;
                 },
                 value: props.signingOfficial
               }),
