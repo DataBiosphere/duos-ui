@@ -360,22 +360,39 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
   };
 
-  dialogHandlerUpdateUser = (answer) => async () => {
+  saveProperties = async (profile) => {
+    await Researcher.createProperties(profile);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
+  };
+
+  dialogHandlerSubmit = (answer) => async () => {
     if (answer === true) {
       let profile = this.state.profile;
-      profile = this.cleanObject(this.cloneProfile(profile));
-      //updates fields saved in user properties
-      let validate = this.state.profile.completed === true;
-      await Researcher.updateProperties(this.state.currentUser.dacUserId, validate, profile);
-      //updates fields saved on the user
-      await this.saveUser();
-      this.props.history.push({ pathname: 'dataset_catalog' });
-      this.setState({ showDialogSubmit: false, showDialogSave: false });
+      profile = this.cleanObject(profile);
+      profile.completed = true;
+      if (this.state.profile.completed === undefined) {
+        await this.saveProperties(profile);
+      } else {
+        await this.updateResearcher(profile);
+      }
+
+    } else {
+      this.setState({ showDialogSubmit: false });
     }
   };
 
+  updateResearcher = async (profile) => {
+    const profileClone = this.cloneProfile(profile);
+    await Researcher.updateProperties(this.state.currentUser.dacUserId, true, profileClone);
+    await this.saveUser();
+    this.setState({ showDialogSubmit: false });
+    this.props.history.push({ pathname: 'dataset_catalog' });
+  };
+
   saveUser = async () => {
-    const currentUserUpdate = this.state.currentUser;
+    const currentUserUpdate = Storage.getCurrentUser();
     delete currentUserUpdate.email;
     currentUserUpdate.displayName = this.state.profile.profileName;
     currentUserUpdate.additionalEmail = this.state.additionalEmail;
@@ -401,6 +418,18 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.additionalEmail = value;
       return prev;
     });
+  };
+
+  dialogHandlerSave = (answer) => async () => {
+    if (answer === true) {
+      let profile = this.state.profile;
+      profile.completed = false;
+      const profileClone = this.cloneProfile(profile);
+      await Researcher.updateProperties(this.state.currentUser.dacUserId, false, profileClone);
+      this.props.history.push({ pathname: 'dataset_catalog' });
+    }
+
+    this.setState({ showDialogSave: false });
   };
 
   // When posting a user's researcher properties, library cards and entries are
@@ -945,7 +974,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     title: 'Submit Profile',
                     color: 'common',
                     showModal: this.state.showDialogSubmit,
-                    action: { label: 'Yes', handler: this.dialogHandlerUpdateUser }
+                    action: { label: 'Yes', handler: this.dialogHandlerSubmit }
                   }, [div({ className: 'dialog-description' }, ['Are you sure you want to submit your Profile information?'])]),
 
                   button({
@@ -957,7 +986,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     title: 'Continue later',
                     color: 'common',
                     showModal: this.state.showDialogSave,
-                    action: { label: 'Yes', handler: this.dialogHandlerUpdateUser }
+                    action: { label: 'Yes', handler: this.dialogHandlerSave }
                   }, [
                     div({ className: 'dialog-description' },
                       ['Are you sure you want to leave this page? Please remember that you need to submit your Profile information to be able to create a Data Access Request.'])
