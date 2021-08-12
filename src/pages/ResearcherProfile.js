@@ -15,6 +15,7 @@ import {getNames} from "country-list";
 import ReactTooltip from "react-tooltip";
 import { SearchSelect } from '../components/SearchSelect';
 import { filter } from 'lodash/fp';
+import {getPropertyValuesFromUser} from "../libs/utils";
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -93,7 +94,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   getResearcherProfile = async (currentUser) => {
-    let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
+    let profile = getPropertyValuesFromUser(currentUser);
     const institutionList = await Institution.list();
     if (profile.profileName === undefined) {
       profile.profileName = currentUser.displayName;
