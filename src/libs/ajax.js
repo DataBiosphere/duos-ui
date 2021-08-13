@@ -812,6 +812,11 @@ export const Researcher = {
     return res.json();
   },
 
+  getResearcherProfile: async userId => {
+    const url = `${await Config.getApiUrl()}/api/researcher/${userId}`;
+    const res = await fetchOk(url, Config.authOpts());
+    return res.json();
+  }
 };
 
 export const StatFiles = {

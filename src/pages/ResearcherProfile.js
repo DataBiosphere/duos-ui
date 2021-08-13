@@ -94,7 +94,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   getResearcherProfile = async (currentUser) => {
-    let profile = getPropertyValuesFromUser(currentUser);
+    let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
     const institutionList = await Institution.list();
     if (profile.profileName === undefined) {
       profile.profileName = currentUser.displayName;
@@ -968,8 +968,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                 ]),
 
                 div({ className: 'col-lg-8 col-xs-6' }, [
-                  button({ id: 'btn_submit', onClick: this.submit, className: 'f-right btn-primary common-background' }, [
-                    span({ isRendered: completed === true }, ['Submit'])
+                  button({ id: 'btn_submit', isRendered: completed === true, onClick: this.submit, className: 'f-right btn-primary common-background' }, [
+                    'Submit'
                   ]),
                   ConfirmationDialog({
                     title: 'Submit Profile',
