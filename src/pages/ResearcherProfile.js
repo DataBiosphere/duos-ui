@@ -15,7 +15,6 @@ import {getNames} from "country-list";
 import ReactTooltip from "react-tooltip";
 import { SearchSelect } from '../components/SearchSelect';
 import { filter } from 'lodash/fp';
-import {getPropertyValuesFromUser} from "../libs/utils";
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
