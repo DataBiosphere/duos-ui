@@ -350,8 +350,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   clearCommonsFields = () => {
     this.setState(prev => {
       prev.profile.eRACommonsID = '';
-      prev.profile.pubmedID = '';
-      prev.profile.scientificURL = '';
       return prev;
     });
   };
