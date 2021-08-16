@@ -24,15 +24,13 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   async componentDidMount() {
-    const currentUser = Storage.getCurrentUser();
-    await this.getResearcherProfile(currentUser);
+    await this.getResearcherProfile();
     this.props.history.push('profile');
     const notificationData = await NotificationService.getBannerObjectById('eRACommonsOutage');
     this.setState(prev => {
       prev.notificationData = notificationData;
-      prev.profile.academicEmail = currentUser.email;
-      prev.currentUser = currentUser;
-      prev.isResearcher = currentUser.isResearcher;
+      prev.currentUser = Storage.getCurrentUser();
+      prev.isResearcher = Storage.getCurrentUser().isResearcher;
       return prev;
     });
   }
@@ -92,7 +90,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     };
   }
 
-  getResearcherProfile = async (currentUser) => {
+  getResearcherProfile = async () => {
     const user = await User.getMe();
     const researcherProps = getPropertyValuesFromUser(user);
     const institutionList = await Institution.list();
@@ -102,14 +100,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     }
 
     this.setState(prev => {
-      if (isEmpty(currentUser.roles)) {
+      if (isEmpty(user.roles)) {
         prev.roles = [{ 'roleId': 5, 'name': USER_ROLES.researcher }];
       } else {
-        prev.roles = currentUser.roles;
+        prev.roles = user.roles;
       }
       // prev.profile = researcherProps;
-      prev.additionalEmail = currentUser.additionalEmail === null ? '' : currentUser.additionalEmail;
-      prev.institutionId = currentUser.institutionId;
+      prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
+      prev.institutionId = user.institutionId;
       prev.institutionList = institutionList;
       prev.profile.academicEmail = researcherProps.academicEmail;
       prev.profile.address1 = researcherProps.address1;
@@ -153,7 +151,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       return prev;
     }, () => {
       if (this.state.validateFields) {
-        this.researcherFieldsValidation();
+        this.validateUserFields();
       }
     });
     //clear out state field if the user selects
@@ -165,14 +163,14 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
           return prev;
         }, () => {
           if (this.state.validateFields) {
-            this.researcherFieldsValidation();
+            this.validateUserFields();
           }
         });
       }
     }
   };
 
-  researcherFieldsValidation() {
+  validateUserFields() {
     let profileName = false,
       academicEmail = false,
       institution = false,
@@ -303,7 +301,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   submit = (event) => {
     this.setState({ validateFields: true });
     event.preventDefault();
-    const errorsShowed = this.researcherFieldsValidation();
+    const errorsShowed = this.validateUserFields();
     if (errorsShowed === false) {
       this.setState(prev => {
         prev.showDialogSubmit = true;
@@ -329,7 +327,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
         this.clearNoHasPIFields();
       }
       if (this.state.validateFields) {
-        this.researcherFieldsValidation();
+        this.validateUserFields();
       }
     });
   };
@@ -651,7 +649,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                         return prev;
                       }, () => {
                         if (this.state.validateFields) {
-                          this.researcherFieldsValidation();
+                          this.validateUserFields();
                         }
                       });
                     },
