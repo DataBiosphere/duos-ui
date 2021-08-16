@@ -22,10 +22,10 @@ The Data Use Oversight system ensures that researchers using genomics data honor
 
 Deployments are currently run in CircleCI.
 
-1. We use node@15 On Darwin with Homebrew:
+1. We use node@16 On Darwin with Homebrew:
 
 ```
-brew install node@15
+brew install node@16
 ```
 2. Update npm:
 
