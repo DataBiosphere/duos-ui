@@ -1,4 +1,4 @@
-# base image
+# builder image
 FROM node:16.6.2-slim AS builder
 LABEL maintainer="grushton@broadinstitute.org"
 
