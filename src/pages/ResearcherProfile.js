@@ -10,7 +10,7 @@ import { Researcher, User, Institution } from '../libs/ajax';
 import { Storage } from '../libs/storage';
 import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import { USER_ROLES, setUserRoleStatuses } from '../libs/utils';
+import { USER_ROLES, getPropertyValuesFromUser, setUserRoleStatuses } from '../libs/utils';
 import {getNames} from "country-list";
 import ReactTooltip from "react-tooltip";
 import { SearchSelect } from '../components/SearchSelect';
@@ -47,10 +47,10 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       institutionId: null,
       roles: [],
       profile: {
-        checkNotifications: false,
         academicEmail: '',
         address1: '',
         address2: '',
+        checkNotifications: false,
         city: '',
         completed: undefined,
         country: '',
@@ -93,11 +93,9 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
   }
 
   getResearcherProfile = async (currentUser) => {
-    let profile = await Researcher.getResearcherProfile(currentUser.dacUserId);
+    const user = await User.getMe();
+    const researcherProps = getPropertyValuesFromUser(user);
     const institutionList = await Institution.list();
-    if (profile.profileName === undefined) {
-      profile.profileName = currentUser.displayName;
-    }
 
     if (Storage.getData('researcher') !== null) {
       Storage.removeData('researcher');
@@ -109,14 +107,32 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       } else {
         prev.roles = currentUser.roles;
       }
-      prev.profile = profile;
-      // This ensures that we have a boolean for `checkNotifications`
-      if (!isNil(get(profile, 'checkNotifications', null))) {
-        prev.profile.checkNotifications = get(profile, 'checkNotifications', 'false') === 'true';
-      }
+      // prev.profile = researcherProps;
       prev.additionalEmail = currentUser.additionalEmail === null ? '' : currentUser.additionalEmail;
       prev.institutionId = currentUser.institutionId;
       prev.institutionList = institutionList;
+      prev.profile.academicEmail = researcherProps.academicEmail;
+      prev.profile.address1 = researcherProps.address1;
+      prev.profile.address2 = researcherProps.address2;
+      prev.profile.checkNotifications = researcherProps.checkNotifications;
+      prev.profile.city = researcherProps.city;
+      prev.profile.completed = researcherProps.completed;
+      prev.profile.country = researcherProps.country;
+      prev.profile.department = researcherProps.department;
+      prev.profile.division = researcherProps.division;
+      prev.profile.eRACommonsID = researcherProps.eraCommonsId;
+      prev.profile.havePI = researcherProps.havePI;
+      prev.profile.isThePI = researcherProps.isThePI;
+      prev.profile.linkedIn = researcherProps.linkedIn;
+      prev.profile.orcid = researcherProps.orcid;
+      prev.profile.piEmail = researcherProps.piEmail;
+      prev.profile.piName = researcherProps.piName;
+      prev.profile.profileName = user.displayName;
+      prev.profile.pubmedID = researcherProps.pubmedID;
+      prev.profile.researcherGate = researcherProps.researcherGate;
+      prev.profile.scientificURL = researcherProps.scientificURL;
+      prev.profile.state = researcherProps.state;
+      prev.profile.zipcode = researcherProps.zipcode;
       return prev;
     }, () => {
       if (this.state.profile.completed !== undefined && this.state.profile.completed !== '') {

@@ -9,26 +9,28 @@ import _ from 'lodash';
 import {User} from "./ajax";
 
 export const UserProperties = {
-  LINKEDIN : "linkedIn",
-  ORCID: "orcid",
-  IS_THE_PI: "isThePI",
-  HAVE_PI: "havePI",
-  PI_EMAIL: "piEmail",
-  PI_NAME: "piName",
-  DEPARTMENT: "department",
-  DIVISION: "division",
+  ACADEMIC_EMAIL: "academicEmail",
   ADDRESS1: "address1",
   ADDRESS2: "address2",
-  ZIPCODE: "zipcode",
+  CHECK_NOTIFICATIONS: "checkNotifications",
   CITY: "city",
-  STATE: "state",
-  COUNTRY: "country",
-  RESEARCHER_GATE: "researcherGate",
-  PUBMED_ID: "pubmedID",
-  SCIENTIFIC_URL: "scientificURL",
   COMPLETED: "completed",
+  COUNTRY: "country",
+  DEPARTMENT: "department",
+  DIVISION: "division",
   ERA_AUTHORIZED: "eraAuthorized",
-  ERA_EXPIRATION: "eraExpiration"
+  ERA_EXPIRATION: "eraExpiration",
+  HAVE_PI: "havePI",
+  IS_THE_PI: "isThePI",
+  LINKEDIN : "linkedIn",
+  ORCID: "orcid",
+  PI_EMAIL: "piEmail",
+  PI_NAME: "piName",
+  PUBMED_ID: "pubmedID",
+  RESEARCHER_GATE: "researcherGate",
+  SCIENTIFIC_URL: "scientificURL",
+  STATE: "state",
+  ZIPCODE: "zipcode"
 };
 
 export const findPropertyValue = (propName, researcher) => {
@@ -40,28 +42,29 @@ export const findPropertyValue = (propName, researcher) => {
 
 export const getPropertyValuesFromUser = (user) => {
   let researcherProps = {
-    academicEmail: user.email,
-    eraCommonsId: user.eraCommonsId,
-    linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
-    orcid: findPropertyValue(UserProperties.ORCID, user),
-    researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
-    department: findPropertyValue(UserProperties.DEPARTMENT, user),
-    division: findPropertyValue(UserProperties.DIVISION, user),
+    academicEmail: findPropertyValue(UserProperties.ACADEMIC_EMAIL, user),
     address1: findPropertyValue(UserProperties.ADDRESS1, user),
     address2: findPropertyValue(UserProperties.ADDRESS2, user),
-    zipcode: findPropertyValue(UserProperties.ZIPCODE, user),
+    department: findPropertyValue(UserProperties.DEPARTMENT, user),
+    division: findPropertyValue(UserProperties.DIVISION, user),
+    checkNotifications: findPropertyValue(UserProperties.CHECK_NOTIFICATIONS, user),
     city: findPropertyValue(UserProperties.CITY, user),
-    state: findPropertyValue(UserProperties.STATE, user),
     country: findPropertyValue(UserProperties.COUNTRY, user),
-    isThePI: findPropertyValue(UserProperties.IS_THE_PI, user),
+    completed: findPropertyValue(UserProperties.COMPLETED, user),
+    eraAuthorized: findPropertyValue(UserProperties.ERA_AUTHORIZED, user),
+    eraCommonsId: user.eraCommonsId,
+    eraExpiration: findPropertyValue(UserProperties.ERA_EXPIRATION, user),
     havePI: findPropertyValue(UserProperties.HAVE_PI, user),
+    isThePI: findPropertyValue(UserProperties.IS_THE_PI, user),
+    linkedIn: findPropertyValue(UserProperties.LINKEDIN, user),
+    orcid: findPropertyValue(UserProperties.ORCID, user),
     piName: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.displayName : findPropertyValue(UserProperties.PI_NAME, user),
     piEmail: findPropertyValue(UserProperties.IS_THE_PI, user) === "true" ? user.email : findPropertyValue(UserProperties.PI_EMAIL, user),
     pubmedID: findPropertyValue(UserProperties.PUBMED_ID, user),
+    researcherGate: findPropertyValue(UserProperties.RESEARCHER_GATE, user),
     scientificURL: findPropertyValue(UserProperties.SCIENTIFIC_URL, user),
-    completed: findPropertyValue(UserProperties.COMPLETED, user),
-    eraAuthorized: findPropertyValue(UserProperties.ERA_AUTHORIZED, user),
-    eraExpiration: findPropertyValue(UserProperties.ERA_EXPIRATION, user)
+    state: findPropertyValue(UserProperties.STATE, user),
+    zipcode: findPropertyValue(UserProperties.ZIPCODE, user)
   };
 
   return researcherProps;
