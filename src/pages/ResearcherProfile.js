@@ -1,20 +1,20 @@
-import {omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
 import { Component } from 'react';
-import {button, div, form, h, hh, hr, input, label, option, select, span, textarea} from 'react-hyperscript-helpers';
+import { getNames } from "country-list";
+import { omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
+import { filter } from 'lodash/fp';
+import ReactTooltip from "react-tooltip";
+import { button, div, form, h, hh, hr, input, label, option, select, span, textarea } from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import { eRACommons } from '../components/eRACommons';
 import { PageHeading } from '../components/PageHeading';
 import { YesNoRadioGroup } from '../components/YesNoRadioGroup';
-import { Researcher, User, Institution } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-import { NotificationService } from '../libs/notificationService';
 import { Notification } from '../components/Notification';
-import { USER_ROLES, getPropertyValuesFromUser, setUserRoleStatuses } from '../libs/utils';
-import {getNames} from "country-list";
-import ReactTooltip from "react-tooltip";
 import { SearchSelect } from '../components/SearchSelect';
-import { filter } from 'lodash/fp';
+import { Researcher, User, Institution } from '../libs/ajax';
+import { NotificationService } from '../libs/notificationService';
+import { Storage } from '../libs/storage';
+import { USER_ROLES, getPropertyValuesFromUser, setUserRoleStatuses } from '../libs/utils';
 
 export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
@@ -94,10 +94,6 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const user = await User.getMe();
     const researcherProps = getPropertyValuesFromUser(user);
     const institutionList = await Institution.list();
-
-    if (Storage.getData('researcher') !== null) {
-      Storage.removeData('researcher');
-    }
 
     this.setState(prev => {
       if (isEmpty(user.roles)) {
