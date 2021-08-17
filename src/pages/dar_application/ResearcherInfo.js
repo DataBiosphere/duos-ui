@@ -1,4 +1,3 @@
-// noinspection SqlDialectInspection
 import { useState, useEffect} from 'react';
 import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
