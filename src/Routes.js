@@ -9,7 +9,6 @@ import ManageDac from './pages/manage_dac/ManageDac';
 import AdminManageDul from './pages/AdminManageDul';
 import AdminManageUsers from './pages/AdminManageUsers';
 import DataAccessRequestApplication from './pages/DataAccessRequestApplication';
-import DataAccessRequestRenewal from './pages/DataAccessRequestRenewal';
 import DataOwnerConsole from './pages/DataOwnerConsole';
 import DataOwnerReview from './pages/DataOwnerReview';
 import DatasetCatalog from './pages/DatasetCatalog';
@@ -86,7 +85,6 @@ const Routes = (props) => (
     <AuthenticatedRoute path="/signing_official_console" component={SigningOfficialConsole} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.signingOfficial]} />
     <AuthenticatedRoute path="/dataset_registration/:datasetId" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
     <AuthenticatedRoute path="/dataset_registration" component={DatasetRegistration} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.chairperson]} />
-    <AuthenticatedRoute path="/dar_renewal" component={DataAccessRequestRenewal} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_dul" component={AdminManageDul} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_lc/" component={AdminManageLC} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/dataset_catalog" component={DatasetCatalog} props={props} rolesAllowed={[USER_ROLES.admin, USER_ROLES.all]} />
