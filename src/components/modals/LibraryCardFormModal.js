@@ -11,7 +11,7 @@ import { Theme } from '../../libs/theme';
 
 //modal component, used to render row on modal
 const FormFieldRow = (props) => {
-  const { card, dropdownOptions, updateInstitution, updateUser, modalType } = props;
+  const { card, dropdownOptions, updateInstitution, updateUser, modalType, setCard } = props;
   // signing officials shouldn't be able to pick and choose from solutions
   // front-end can hide the input by limiting dropdown options to less than two choices
   // (as a way to impose conditional rendering without adding more prop variables)
@@ -24,10 +24,11 @@ const FormFieldRow = (props) => {
     return isNil(savedCard);
   });
   const [filteredDropdown, setFilteredDropdown] = useState(cardlessOptions);
+
   let template;
 
   //filter function for users dropdown
-  const userListFilter = (searchTerm) => {
+  const userListFilter = ({searchTerm, card, setCard, action}) => {
     let filteredCopy;
     if(isEmpty(searchTerm)) {
       filteredCopy = dropdownOptions;
@@ -40,6 +41,9 @@ const FormFieldRow = (props) => {
       });
     }
     setFilteredDropdown(filteredCopy);
+    if(action !== 'input-blur' && action !== `menu-close`) {
+      setCard(Object.assign({}, card, { email: searchTerm }));
+    }
   };
 
   if(!isNil(updateInstitution)) {
@@ -61,12 +65,15 @@ const FormFieldRow = (props) => {
       template = div({style: {marginBottom: '2%'}}, [
         label({}, ['Users']),
         h(Creatable, {
+          key: 'select-user',
           isClearable: true,
           onChange: updateUser,
-          onInputChange: userListFilter,
+          createOptionPosition: 'first',
+          onInputChange: (input, {action}) => userListFilter({input, card, setCard, action}),
           getNewOptionData: (input) => { return {email: input}; },
           options: dropdownOptions,
           placeholder: 'Select or type a new user email',
+          isOptionSelected: () => false, //Workaround to prevent odd react-select behavior where all dropdown options are highlighted
           getOptionLabel: (option) => `${option.displayName || 'New User'} (${option.email || "No email provided"})` || option.email
         })
       ]);
@@ -149,6 +156,7 @@ export default function LibraryCardFormModal(props) {
           card,
           modalType,
           updateUser,
+          setCard,
           dropdownOptions: users,
         }),
         //institution dropdown

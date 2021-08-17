@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles, Theme } from "../../libs/theme";
 import { h, div, img } from "react-hyperscript-helpers";
 import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from "lodash/fp";
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from "lodash/fp";
 import SimpleTable from "../SimpleTable";
 import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
@@ -292,22 +292,26 @@ export default function SigningOfficialTable(props) {
 
   //NOTE: make sure callback methods works as expected
   const issueLibraryCard = async (selectedCard, researchers) => {
-    const { userId } = selectedCard;
-    let { userEmail, userName } = selectedCard;
     let messageName;
     try {
       const listCopy = cloneDeep(researchers);
       //NOTE: institution_id and userName can be supplied by the back-end
-      const newLibraryCard = await LibraryCard.createLibraryCard({
-        userEmail,
-        userId,
-      });
-      userName = newLibraryCard.userName;
-      userEmail = newLibraryCard.userEmail;
-      const targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
+      const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
+      const {userEmail, userName, userId} = newLibraryCard;
+      let targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
       if(targetIndex === -1) { //if card is not found, push new user to end of list
-        listCopy.unshift({email: userEmail, libraryCards: [newLibraryCard], roles: []});
+        const targetUnregisteredResearcher = find((researcher) => userId === researcher.dacUserId)(props.unregisteredResearchers);
+        const attributes = {
+          email: userEmail,
+          displayName: userName,
+          libraryCards: [newLibraryCard],
+          roles: [],
+        };
+        if(!isNil(targetUnregisteredResearcher)) {
+          attributes.roles = targetUnregisteredResearcher.roles;
+        }
+        listCopy.unshift(attributes);
         messageName = userEmail;
       } else {
         listCopy[targetIndex].libraryCards = [newLibraryCard];
@@ -330,7 +334,8 @@ export default function SigningOfficialTable(props) {
     try {
       await LibraryCard.deleteLibraryCard(id);
       const targetIndex = findIndex((researcher) => {
-        const card = researcher.libraryCards[0];
+        const libraryCards = researcher.libraryCards || [];
+        const card = libraryCards[0];
         return !isNil(card) && id === card.id;
       })(researchers);
       if(isNil(userId) || researchers[targetIndex].institutionId !== signingOfficial.institutionId) {

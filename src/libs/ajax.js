@@ -325,29 +325,12 @@ export const DAR = {
     return res.data;
   },
 
-  //endpoint to be deprecated once V2 endpoint is updated to account for reasearchers
-  getDataAccessManage: async() => {
-    const url = `${await Config.getApiUrl()}/api/dar/manage`;
-    const res = await fetchOk(url, Config.authOpts());
-    let dars = await res.json();
-    dars.map(dar => {
-      if (!fp.isNil(dar.ownerUser) && !fp.isNil(dar.ownerUser.roles)) {
-        dar.ownerUser.roles.map(role => {
-          if (role.name === 'Researcher') {
-            dar.status = dar.ownerUser.status;
-            return dar;
-          }
-          return dar;
-        });
-      }
-      return dar;
-    });
-    return dars;
-  },
-
   //new manage endpoint, should be renamed once v1 variant is removed from use
-  getDataAccessManageV2: async() => {
-    const url = `${await Config.getApiUrl()}/api/dar/manage/v2`;
+  getDataAccessManageV2: async(roleName) => {
+    let url = `${await Config.getApiUrl()}/api/dar/manage/v2`;
+    if (!isNil(roleName)) {
+      url = `${await Config.getApiUrl()}/api/dar/manage/v2/?roleName=${roleName}`;
+    }
     const res = await axios.get(url, Config.authOpts());
     return res.data;
   },
@@ -817,12 +800,6 @@ export const PendingCases = {
 
 export const Researcher = {
 
-  getPropertiesByResearcherId: async (userId) => {
-    const url = `${await Config.getApiUrl()}/api/researcher/${userId}`;
-    const res = await fetchOk(url, Config.authOpts());
-    return await res.json();
-  },
-
   createProperties: async (researcherProperties) => {
     const url = `${await Config.getApiUrl()}/api/researcher`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
@@ -1126,6 +1103,7 @@ export const LibraryCard = {
 };
 
 const fetchOk = async (...args) => {
+  //TODO: Remove spinnerService calls
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {
@@ -1140,6 +1118,7 @@ const fetchOk = async (...args) => {
 };
 
 const fetchAny = async (...args) => {
+  //TODO: Remove spinnerService calls
   spinnerService.showAll();
   const res = await fetch(...args);
   if (!res.ok && res.status === 401) {

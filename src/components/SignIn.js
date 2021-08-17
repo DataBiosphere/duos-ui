@@ -8,6 +8,7 @@ import { Config } from '../libs/config';
 import { Storage } from '../libs/storage';
 import { Navigation, setUserRoleStatuses } from '../libs/utils';
 import loadingIndicator from '../images/loading-indicator.svg';
+import { Spinner } from './Spinner';
 export const SignIn = hh(class SignIn extends Component {
 
   constructor(props) {
@@ -119,9 +120,7 @@ export const SignIn = hh(class SignIn extends Component {
       disabledStyle: { 'opacity': '25%', 'cursor': 'not-allowed' }
     };
     return disabled ?
-      div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
-        img({ src: loadingIndicator, alt: 'spinner' })
-      ]) :
+      Spinner :
       h(GoogleLogin,
         _.isNil(this.props.customStyle) ? defaultStyle : {
           render: (props) => button({className: 'btn-primary', onClick: props.onClick, style: this.props.customStyle}, 'Submit a Data Access Request'),
@@ -134,9 +133,7 @@ export const SignIn = hh(class SignIn extends Component {
     let googleLoginButton;
 
     if (this.state.clientId === '') {
-      googleLoginButton = div({ style: { textAlign: 'center', height: '44px', width: '180px' } }, [
-        img({ src: loadingIndicator, alt: 'spinner' })
-      ]);
+      googleLoginButton = Spinner;
     } else {
       googleLoginButton = h(GoogleLogin, {
         scope: 'openid email profile',

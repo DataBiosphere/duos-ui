@@ -12,7 +12,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
   state = {
     isAuthorized: false,
     expirationCount: 0,
-    nihUsername: '',
+    eraCommonsId: '',
     nihError: false,
     isHovered: false
   };
@@ -63,12 +63,12 @@ export const eRACommons = hh(class eRACommons extends React.Component {
       const isAuthorized = isNil(authProp) ? false : getOr(false,'propertyValue')(authProp);
       const expirationCount = isNil(expProp) ? 0 : AuthenticateNIH.expirationCount(getOr(0,'propertyValue')(expProp));
       const nihValid = isAuthorized && expirationCount > 0;
-      const nihUsernameProp = find({'propertyKey':'nihUsername'})(props);
+      const eraCommonsId = response.eraCommonsId;
       this.props.onNihStatusUpdate(nihValid);
       this.setState(prev => {
         prev.isAuthorized = isAuthorized;
         prev.expirationCount = expirationCount;
-        prev.nihUsername = isNil(nihUsernameProp) ? '' : getOr('', 'propertyValue')(nihUsernameProp);
+        prev.eraCommonsId = isNil(eraCommonsId) ? '' : eraCommonsId;
         return prev;
       });
     });
@@ -185,7 +185,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
                 display: 'inline',
                 paddingTop: 5
               }
-            }, [this.state.nihUsername]),
+            }, [this.state.eraCommonsId]),
             button({
               style: {
                 float: 'left',

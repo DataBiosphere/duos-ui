@@ -8,7 +8,8 @@ import DarTableCancelButton from './DarTableCancelButton';
 export const consoleTypes = {
   MEMBER: 'member',
   MANAGE_ACCESS: 'manageAccess',
-  CHAIR: 'chair'
+  CHAIR: 'chair',
+  SIGNING_OFFICIAL: 'signingOfficial'
 };
 
 export default function DarTableActions(props) {
@@ -39,6 +40,11 @@ export default function DarTableActions(props) {
       showVote: false,
       showCancelIcon: false,
       showResearcher: true
+    },
+    signingOfficial: {
+      showVote: false,
+      showCancelIcon: false,
+      showResearcher: false
     }
   };
 
@@ -109,9 +115,8 @@ export default function DarTableActions(props) {
     const addStyle = {
       height: '4rem'
     };
-
     return ([
-      div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar)}, [
+      div({style: baseStyle, key: `dar-${dar.referenceId}-action-buttons`, isRendered: !isNil(dar) &&  consoleType !== consoleTypes.SIGNING_OFFICIAL }, [
         h(DarTableVoteButton, {
           targetVotes,
           election,

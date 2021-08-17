@@ -76,7 +76,11 @@ export default function AdminManageAccess(props) {
         setTableSize,
         isRendered: !isLoading
       }),
-      h(DarTableSkeletonLoader, {isRendered: isLoading, tableHeaderTemplate, tableRowLoadingTemplate})
+      h(DarTableSkeletonLoader, {
+        isRendered: isLoading,
+        tableHeaderTemplate: tableHeaderTemplate(consoleTypes.MANAGE_ACCESS),
+        tableRowLoadingTemplate: tableRowLoadingTemplate(consoleTypes.MANAGE_ACCESS)
+      })
     ])
   );
 }
