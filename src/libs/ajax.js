@@ -800,15 +800,15 @@ export const PendingCases = {
 
 export const Researcher = {
 
-  createProperties: async (researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/api/researcher`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'POST' }]));
+  createProperties: async (properties) => {
+    const url = `${await Config.getApiUrl()}/api/user/profile`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(properties), { method: 'POST' }]));
     return await res;
   },
 
-  updateProperties: async (userId, validate, researcherProperties) => {
-    const url = `${await Config.getApiUrl()}/api/researcher?validate=${validate}`;
-    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(researcherProperties), { method: 'PUT' }]));
+  updateProperties: async (userId, validate, properties) => {
+    const url = `${await Config.getApiUrl()}/api/user/profile?validate=${validate}`;
+    const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(properties), { method: 'PUT' }]));
     return res.json();
   },
 
