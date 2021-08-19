@@ -903,6 +903,11 @@ export const User = {
     const url = `${await Config.getApiUrl()}/api/user/signing-officials`;
     const res = await fetchOk(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
     return res.json();
+  },
+  getUnassignedUsers: async () => {
+    const url = `${await Config.getApiUrl()}/api/user/institution/unassigned`;
+    const res = await axios.get(url, Config.authOpts());
+    return res.data;
   }
 
 };

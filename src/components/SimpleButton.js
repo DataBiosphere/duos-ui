@@ -1,8 +1,8 @@
-import { div } from 'react-hyperscript-helpers';
+import { button } from 'react-hyperscript-helpers';
 import { useState, useEffect } from 'react';
 
 export default function SimpleButton(props) {
-  const { onClick, label, disabled, baseColor, additionalStyle } = props;
+  const { onClick, label, disabled, baseColor, additionalStyle, keyProp } = props;
 
   const updateStyle = (backgroundColor, baseColor, additionalStyle = {}, pointerBool, disabled) => {
     const baseStyle = {
@@ -18,7 +18,7 @@ export default function SimpleButton(props) {
       cursor: pointerBool ? 'pointer' : 'default'
     };
 
-    const newStyle = Object.assign({}, additionalStyle, baseStyle);
+    const newStyle = Object.assign({}, baseStyle, additionalStyle);
     if (disabled) {
       newStyle.opacity = '0.5';
     }
@@ -34,6 +34,7 @@ export default function SimpleButton(props) {
   const getDivAttributes = (disabled) => {
     const baseAttributes = {
       style,
+      key: keyProp || `${label}-button`,
       onClick: () => !disabled && onClick(),
       onMouseEnter: () =>
         !disabled && updateStyle(baseColor, 'white', additionalStyle, true, disabled),
@@ -43,5 +44,5 @@ export default function SimpleButton(props) {
     return baseAttributes;
   };
 
-  return div(getDivAttributes(disabled), [label]);
+  return button(getDivAttributes(disabled), [label]);
 }

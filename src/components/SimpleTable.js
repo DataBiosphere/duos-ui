@@ -19,26 +19,25 @@ const SkeletonLoader = ({columnRow, columnHeaders, baseStyle, tableSize}) => {
     }
     return rowsSkeleton;
   };
-
   return rowTemplateArray(columnRow, columnHeaders);
 };
 
 //Simple cell text display
-const SimpleTextCell = ({ text, style }) => {
+const SimpleTextCell = ({ text, style, keyProp }) => {
   text = isNil(text) ? '- -' : text;
-  return div({ style }, [text]);
+  return div({ style, role: 'cell', key: keyProp }, [text]);
 };
 
 //Simple cell text that carries onClick functionality
-const OnClickTextCell = ({ text, style, onClick }) => {
+const OnClickTextCell = ({ text, style, onClick, keyProp }) => {
   text = isNil(text) ? '- -' : text;
-  return div({ style, onClick }, [text]);
+  return div({ style, onClick, role: 'cell', key: keyProp }, [text]);
 };
 
 //Column component that renders the column row based on column headers
 const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
   const rowStyle = Object.assign({}, baseStyle, columnStyle);
-  return div({style: rowStyle, key: `column-row-container`}, columnHeaders.map((header) => {
+  return div({style: rowStyle, key: `column-row-container`, role:'row'}, columnHeaders.map((header) => {
     const {cellStyle, label} = header;
     //style here pertains to styling for individual cells
     //should be used to set dimensions of specific columns
@@ -50,7 +49,7 @@ const ColumnRow = ({columnHeaders, baseStyle, columnStyle}) => {
 const DataRows = ({rowData, baseStyle, columnHeaders}) => {
   const rows = rowData.map((row, index) => {
     const id = rowData[index][0].id;
-    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`},
+    return div({style: Object.assign({border: '1px solid #f3f6f7'}, baseStyle), key: `row-data-${id}`, role: 'row'},
       row.map(({data, style, onClick, isComponent, id, label}, cellIndex) => {
         let output;
         //columnHeaders determine width of the columns,
@@ -60,13 +59,13 @@ const DataRows = ({rowData, baseStyle, columnHeaders}) => {
         //assume component is in hyperscript format
         //wrap component in dive with columnWidth applied
         if (isComponent) {
-          output = div({style: columnWidthStyle, key: `${!isNil(data) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
+          output = div({style: columnWidthStyle, key: `${!isNil(data) && !isNil(data.key) ? data.key : 'component-' + index + '-' + cellIndex}-container`}, [data]);
         //if there is no onClick function, render as simple cell
         } else if (isNil(onClick)) {
-          output = h(SimpleTextCell, { text: data, style: appliedStyle, key: `filtered-list-${id}-${label}`, cellIndex });
+          output = h(SimpleTextCell, { text: data, style: appliedStyle, keyProp: `filtered-list-${id}-${label}`, cellIndex });
         } else {
           //otherwise render as on click cell
-          output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), key: `filtered-list-${id}-${label}`, cellIndex });
+          output = h(OnClickTextCell, { text: data, style: appliedStyle, onClick: () => onClick(index), keyProp: `filtered-list-${id}-${label}`, cellIndex });
         }
         return output;
       }));
@@ -98,6 +97,5 @@ export default function SimpleTable(props) {
   const columnRow = h(ColumnRow, {key: 'column-row-container', columnHeaders, baseStyle, columnStyle});
   const tableTemplate = [columnRow, h(DataRows, {rowData, baseStyle, columnHeaders})];
   const output = isLoading ? h(SkeletonLoader, {columnRow, columnHeaders, baseStyle, tableSize}) : tableTemplate;
-
-  return div({className: 'table-data', style: Styles.TABLE.CONTAINER}, [output, paginationBar]);
+  return div({className: 'table-data', style: Styles.TABLE.CONTAINER, role: 'table'}, [output, paginationBar]);
 }
