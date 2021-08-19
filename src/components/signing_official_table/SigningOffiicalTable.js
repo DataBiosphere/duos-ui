@@ -115,7 +115,6 @@ const LibraryCardCell = ({
   return {
     isComponent: true,
     id,
-    style: {}, //need to figure out a base style
     label: 'lc-button',
     data: div(
       {
@@ -181,7 +180,6 @@ export default function SigningOfficialTable(props) {
   const [pageCount, setPageCount] = useState(1);
   const [filteredResearchers, setFilteredResearchers] = useState([]);
   const [visibleResearchers, setVisibleResearchers] = useState([]);
-  // const [signingOfficial, setSigningOfficial] = useState({});
   const [selectedCard, setSelectedCard] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -290,7 +288,6 @@ export default function SigningOfficialTable(props) {
     setShowModal(true);
   };
 
-  //NOTE: make sure callback methods works as expected
   const issueLibraryCard = async (selectedCard, researchers) => {
     let messageName;
     try {
@@ -300,7 +297,7 @@ export default function SigningOfficialTable(props) {
       const {userEmail, userName, userId} = newLibraryCard;
       let targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
       //library cards array should only have one card MAX (officials should not be able to see cards from other institutions)
-      if(targetIndex === -1) { //if card is not found, push new user to end of list
+      if(targetIndex === -1) { //if card is not found, push new user to top of list
         const targetUnregisteredResearcher = find((researcher) => userId === researcher.dacUserId)(props.unregisteredResearchers);
         const attributes = {
           email: userEmail,
@@ -326,7 +323,6 @@ export default function SigningOfficialTable(props) {
     }
   };
 
-  //NOTE: other callback method, make sure it works as expected
   const deactivateLibraryCard = async (selectedCard, researchers) => {
     const {id, userName, userEmail, userId} = selectedCard;
     const listCopy = cloneDeep(researchers);

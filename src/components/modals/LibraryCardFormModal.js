@@ -9,15 +9,9 @@ import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
 import { Theme } from '../../libs/theme';
 
-//modal component, used to render row on modal
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType, setCard } = props;
-  // signing officials shouldn't be able to pick and choose from solutions
-  // front-end can hide the input by limiting dropdown options to less than two choices
-  // (as a way to impose conditional rendering without adding more prop variables)
-  // however back-end still needs to filter out institutionId
 
-  //NOTE: check if this works as expected
   const cardlessOptions = dropdownOptions.filter((option) => {
     const libraryCards = option.libraryCards || [];
     const savedCard = libraryCards.find(({institutionId}) => institutionId === card.institutionId);
@@ -87,7 +81,6 @@ const FormFieldRow = (props) => {
 
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
-  //fetch for all institutions needs to happen on component init
   const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType} = props;
 
   const [card, setCard] = useState(props.card);
