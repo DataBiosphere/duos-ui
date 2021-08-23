@@ -1,7 +1,6 @@
 import { Component } from 'react';
 import { getNames } from "country-list";
 import { omit, cloneDeep, isEmpty, isNil, get, trim, omitBy } from 'lodash';
-import { filter } from 'lodash/fp';
 import ReactTooltip from "react-tooltip";
 import { button, div, form, h, hh, hr, input, label, option, select, span, textarea } from 'react-hyperscript-helpers';
 import { LibraryCards } from '../components/LibraryCards';
@@ -469,8 +468,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
     const stateNames = this.generateStateNames();
     let completed = this.state.profile.completed;
     const { showValidationMessages } = this.state;
-    const libraryCards = get(this.state.profile, 'libraryCards', []);
-    const lcInstitutions = filter((institution) => libraryCards.includes(institution.id))(this.state.institutionList);
+    const libraryCards = get(this.state.currentUser, 'libraryCards', []);
 
     return (
 
@@ -579,8 +577,8 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                       label({ id: 'lbl_profileLibraryCard', className: 'control-label' }, ['Library Cards']),
                       LibraryCards({
                         style: { display: 'flex', flexFlow: 'row wrap' },
-                        isRendered: !isNil(this.state.profile),
-                        libraryCards: lcInstitutions
+                        isRendered: !isNil(libraryCards),
+                        libraryCards: libraryCards
                       })
                     ])
                   ])
