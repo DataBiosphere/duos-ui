@@ -101,7 +101,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       } else {
         prev.roles = user.roles;
       }
-      prev.additionalEmail = user.additionalEmail === null ? '' : user.additionalEmail;
+      prev.additionalEmail = isNil(user.additionalEmail) ? '' : user.additionalEmail;
       prev.institutionId = user.institutionId;
       prev.institutionList = institutionList;
       prev.profile.academicEmail = researcherProps.academicEmail;
