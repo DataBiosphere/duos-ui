@@ -9,14 +9,20 @@ import Creatable from 'react-select/creatable';
 import SimpleButton from '../SimpleButton';
 import { Theme } from '../../libs/theme';
 
-//modal component, used to render row on modal
 const FormFieldRow = (props) => {
   const { card, dropdownOptions, updateInstitution, updateUser, modalType, setCard } = props;
-  const [filteredDropdown, setFilteredDropdown] = useState(dropdownOptions);
+
+  const cardlessOptions = dropdownOptions.filter((option) => {
+    const libraryCards = option.libraryCards || [];
+    const savedCard = libraryCards.find(({institutionId}) => institutionId === card.institutionId);
+    return isNil(savedCard);
+  });
+  const [filteredDropdown, setFilteredDropdown] = useState(cardlessOptions);
+
   let template;
 
   //filter function for users dropdown
-  const userListFilter = (searchTerm, card, setCard, action) => {
+  const userListFilter = ({searchTerm, card, setCard, action}) => {
     let filteredCopy;
     if(isEmpty(searchTerm)) {
       filteredCopy = dropdownOptions;
@@ -57,7 +63,7 @@ const FormFieldRow = (props) => {
           isClearable: true,
           onChange: updateUser,
           createOptionPosition: 'first',
-          onInputChange: (input, {action}) => userListFilter(input, card, setCard, action),
+          onInputChange: (input, {action}) => userListFilter({input, card, setCard, action}),
           getNewOptionData: (input) => { return {email: input}; },
           options: dropdownOptions,
           placeholder: 'Select or type a new user email',
@@ -75,7 +81,6 @@ const FormFieldRow = (props) => {
 
 export default function LibraryCardFormModal(props) {
   //NOTE: dropdown options need to be passed down from parent component
-  //fetch for all institutions needs to happen on component init
   const { showModal, updateOnClick, createOnClick, closeModal, institutions, users, modalType} = props;
 
   const [card, setCard] = useState(props.card);
@@ -84,6 +89,7 @@ export default function LibraryCardFormModal(props) {
   useEffect(() => {
     setCard(props.card);
   }, [props.card]);
+
 
   //onClick function, updates associated instituion on dropdown select
   const updateInstitution = (value) => {
@@ -138,6 +144,7 @@ export default function LibraryCardFormModal(props) {
           modalType == 'add' ? 'Add Library Card' : 'Update Library Card',
         ]),
         div({ style: { borderBottom: '1px solid #1FB50' } }, []),
+        //users dropdown
         h(FormFieldRow, {
           card,
           modalType,
@@ -145,7 +152,9 @@ export default function LibraryCardFormModal(props) {
           setCard,
           dropdownOptions: users,
         }),
+        //institution dropdown
         h(FormFieldRow, {
+          isRendered: institutions.length > 1,
           card,
           modalType,
           updateInstitution,

@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { div, hr, label, form, textarea } from 'react-hyperscript-helpers';
 import { PageHeading } from '../components/PageHeading';
 import { SubmitVoteBox } from '../components/SubmitVoteBox';
-import { User, Institution} from "../libs/ajax";
+import { User } from "../libs/ajax";
 import { ConfirmationDialog } from '../components/ConfirmationDialog';
 import {getPropertyValuesFromUser} from "../libs/utils";
 import {isNil} from "lodash/fp";

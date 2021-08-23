@@ -4,7 +4,7 @@ import 'noty/lib/themes/bootstrap-v3.css';
 import { forEach } from 'lodash';
 import { DAR, DataSet } from "./ajax";
 import {Theme, Styles } from "./theme";
-import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq } from "lodash/fp";
+import { find, first, map, isEmpty, filter, cloneDeep, isNil, toLower, includes, sortedUniq} from "lodash/fp";
 import _ from 'lodash';
 import {User} from "./ajax";
 
@@ -434,7 +434,23 @@ export const getSearchFilterFunctions = () => {
         includes(term, formatDate(updateDate)) ||
         includes(term, toLower(userEmail)) ||
         includes(term, toLower(eraCommonsId));
-    }, targetList)
+    }, targetList),
+    signingOfficialResearchers: (term, targetList) => filter(researcher => {
+      const { displayName, eraCommonsId, email } = researcher;
+      const roles = researcher.roles || [];
+      const baseAttributes = [displayName, eraCommonsId, email];
+      const includesRoles = roles.reduce((memo, current) => {
+        const roleName = current.name;
+        return memo || includes(term, toLower(roleName));
+      }, false);
+
+      const includesBaseAttributes = baseAttributes.reduce(
+        (memo, current) => {
+          return memo || includes(term, toLower(current));
+        }, false);
+
+      return includesRoles || includesBaseAttributes;
+    })(targetList)
   };
 };
 
@@ -549,3 +565,32 @@ export const getColumnSort = (getList, callback) => {
     callback(sortedData, descendantOrder);
   };
 };
+
+//Functions that are commonly used between tables//
+export const recalculateVisibleTable = async ({
+  tableSize, pageCount, filteredList, currentPage, setPageCount, setCurrentPage, setVisibleList
+}) => {
+  try {
+    setPageCount(calcTablePageCount(tableSize, filteredList));
+    if (currentPage > pageCount) {
+      setCurrentPage(pageCount);
+    }
+    const visibleList = calcVisibleWindow(
+      currentPage,
+      tableSize,
+      filteredList
+    );
+    setVisibleList(visibleList);
+  } catch (error) {
+    Notifications.showError({ text: 'Error updating Library Card table' });
+  }
+};
+
+export const searchOnFilteredList = (searchTerms, originalList, filterFn, setFilteredList) => {
+  let filteredList = originalList;
+  if(!isEmpty(searchTerms)) {
+    filteredList = filterFn(searchTerms, originalList);
+  }
+  setFilteredList(filteredList);
+};
+

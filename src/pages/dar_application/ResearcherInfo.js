@@ -3,9 +3,8 @@ import { Alert } from '../../components/Alert';
 import { Link } from 'react-router-dom';
 import { a, div, fieldset, h, h3, input, label, span, textarea} from 'react-hyperscript-helpers';
 import { eRACommons } from '../../components/eRACommons';
-import {isNil} from 'lodash/fp';
 import CollaboratorList from './CollaboratorList';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNil } from 'lodash/fp';
 import Creatable from 'react-select/creatable';
 
 const profileLink = h(Link, {to:'/profile', className:'hover-color'}, ['Your Profile']);
@@ -45,12 +44,6 @@ export default function ResearcherInfo(props) {
 
   const navButtonContainerStyle = {
     marginTop: '5rem'
-  };
-
-  const soDropDownStyle = {
-    control: styles => ({ ...styles,
-      backgroundColor: !isNil(darCode) ? '#efefef' : 'white',
-      borderColor: showValidationMessages && isEmpty(signingOfficial) ? '#D13B07' : '#999999' }),
   };
 
   const formatSOString = (name, email) => {
