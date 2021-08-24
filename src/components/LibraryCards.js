@@ -15,7 +15,7 @@ export const LibraryCards = hh(class LibraryCards extends PureComponent {
         ld.map(ld.uniq(libraryCards), card => {
           return div({ key: card.id, style: { margin: 1 }, className: 'library-flag flag-enabled' }, [
             div({ className: 'library-icon' }),
-            span({ className: 'library-label' }, card.name)
+            span({ className: 'library-label' }, card.institution.name)
           ]);
         })
     ]);
