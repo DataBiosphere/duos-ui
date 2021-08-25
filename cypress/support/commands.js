@@ -33,15 +33,13 @@
 
 Cypress.Commands.add("auth", async (roleName) => {
   const {auth} = require('google-auth-library');
-
   const keys = Cypress.env('ADMIN');
-  console.log(keys);
-
   const client = auth.fromJSON(keys);
   client.scopes = ['email', 'profile'];
-  console.log(JSON.stringify(client));
-
-  const url = `https://dns.googleapis.com/dns/v1/projects/${keys.project_id}`;
+  const url = `http://localhost:3000`;
   const res = await client.request({url});
   console.log(res.data);
+  console.log(JSON.stringify(client, null, 2));
+  console.log(JSON.stringify(client.credentials, null, 2));
+  console.log(JSON.stringify(client.credentials.access_token, null, 2));
 });
