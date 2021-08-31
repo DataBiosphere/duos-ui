@@ -16,6 +16,7 @@ describe('Authentication', function() {
       cy.visit('/backgroundsignin');
       cy.get('textarea').type(credentials.access_token, {delay: 0});
       cy.get('form').submit();
+      cy.contains('Admin Console');
     });
   });
 });
