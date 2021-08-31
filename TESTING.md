@@ -28,9 +28,3 @@ CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) \
     CYPRESS_SIGNING_OFFICIAL=$(cat cypress/fixtures/duos-automation-signing-official.json) \
     npm run cypress:open
 ```
-
-See also: 
-* https://www.npmjs.com/package/google-auth-library
-* https://github.com/googleapis/google-auth-library-nodejs
-* https://docs.cypress.io/guides/testing-strategies/google-authentication
-* https://developers.google.com/identity/protocols/oauth2/scopes
