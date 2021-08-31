@@ -11,7 +11,7 @@ const roles = {
 describe('Authentication', function() {
 
   it('Background Sign-in Admin', function() {
-    cy.viewport(2000, 2000);
+    cy.viewport(1000, 1000);
     cy.auth(roles.ADMIN).then(credentials => {
       cy.visit('/backgroundsignin');
       cy.get('textarea').type(credentials.access_token, {delay: 0});
