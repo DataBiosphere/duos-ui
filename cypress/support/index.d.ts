@@ -6,6 +6,6 @@ declare namespace Cypress {
          * Custom command to auth as a specific role service account
          * @example cy.auth('admin')
          */
-        auth(value: string): Chainable<Element>
+        auth(roleName: string): Chainable<Element>
     }
 }

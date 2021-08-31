@@ -26,20 +26,15 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
-
-
 // Manually run tests with Cypress env vars:
 // CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) npm run cypress:open
 
 Cypress.Commands.add("auth", async (roleName) => {
   const {auth} = require('google-auth-library');
-  const keys = Cypress.env('ADMIN');
+  const keys = Cypress.env(roleName);
   const client = auth.fromJSON(keys);
   client.scopes = ['email', 'profile'];
   const url = `http://localhost:3000`;
-  const res = await client.request({url});
-  console.log(res.data);
-  console.log(JSON.stringify(client, null, 2));
-  console.log(JSON.stringify(client.credentials, null, 2));
-  console.log(JSON.stringify(client.credentials.access_token, null, 2));
+  await client.request({url});
+  return client.credentials;
 });
