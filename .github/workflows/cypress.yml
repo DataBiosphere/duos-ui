@@ -4,6 +4,8 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
+      - name: Log Actor
+        run: echo "${{ github.actor }}"
       - name: Checkout
         uses: actions/checkout@v2
       - name: NPM Install
@@ -14,6 +16,12 @@ jobs:
         run: CI=false npm run build --silent
       - name: Cypress run
         uses: cypress-io/github-action@v2
+        env:
+          CYPRESS_ADMIN: ${{ secrets.DUOS_AUTOMATION_ADMIN }}
+          CYPRESS_CHAIR: ${{ secrets.DUOS_AUTOMATION_CHAIR }}
+          CYPRESS_MEMBER: ${{ secrets.DUOS_AUTOMATION_MEMBER }}
+          CYPRESS_RESEARCHER: ${{ secrets.DUOS_AUTOMATION_RESEARCHER }}
+          CYPRESS_SIGNING_OFFICIAL: ${{ secrets.DUOS_AUTOMATION_SIGNING_OFFICIAL }}
         with:
           start: npm start
           wait-on: 'http://localhost:3000'
