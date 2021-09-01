@@ -593,7 +593,7 @@ class DuosHeader extends Component {
             }),
             h(
               IconButton,
-              { size: 'small', onClick: () => this.toggleDrawer(true) },
+              { id: 'collapsed-navigation-icon-button', size: 'small', onClick: () => this.toggleDrawer(true) },
               [
                 h(
                   MenuIcon,
