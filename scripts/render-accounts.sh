@@ -10,9 +10,7 @@ set -e
 ##    brew install jq
 
 # Defaults
-WORKING_DIR=$PWD
 VAULT_TOKEN=$(cat ~/.vault-token)
-
 VAULT_TOKEN=${1:-$VAULT_TOKEN}
 
 docker pull broadinstitute/dsde-toolbox:dev
