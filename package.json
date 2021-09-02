@@ -47,8 +47,8 @@
     "eject": "react-scripts eject",
     "test": "start-server-and-test start:ci http://localhost:3000  cypress:run",
     "start:ci": "BROWSER=none react-scripts start",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
+    "cypress:open": "CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) CYPRESS_CHAIR=$(cat cypress/fixtures/duos-automation-chair.json) CYPRESS_MEMBER=$(cat cypress/fixtures/duos-automation-member.json) CYPRESS_RESEARCHER=$(cat cypress/fixtures/duos-automation-researcher.json) CYPRESS_SIGNING_OFFICIAL=$(cat cypress/fixtures/duos-automation-signing-official.json) cypress open",
+    "cypress:run": "CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) CYPRESS_CHAIR=$(cat cypress/fixtures/duos-automation-chair.json) CYPRESS_MEMBER=$(cat cypress/fixtures/duos-automation-member.json) CYPRESS_RESEARCHER=$(cat cypress/fixtures/duos-automation-researcher.json) CYPRESS_SIGNING_OFFICIAL=$(cat cypress/fixtures/duos-automation-signing-official.json) cypress run",
     "cypress:verify": "cypress verify"
   },
   "devDependencies": {

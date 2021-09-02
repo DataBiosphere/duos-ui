@@ -17,14 +17,17 @@ Start a local server:
 npm start
 ```
 
-Generate configs locally (copy automation SAs to `cypress/fixtures`)
-
-Start Cypress with SA environment variables:
+Generate configs locally
 ```
-CYPRESS_ADMIN=$(cat cypress/fixtures/duos-automation-admin.json) \
-    CYPRESS_CHAIR=$(cat cypress/fixtures/duos-automation-chair.json) \
-    CYPRESS_MEMBER=$(cat cypress/fixtures/duos-automation-member.json) \
-    CYPRESS_RESEARCHER=$(cat cypress/fixtures/duos-automation-researcher.json) \
-    CYPRESS_SIGNING_OFFICIAL=$(cat cypress/fixtures/duos-automation-signing-official.json) \
+./scripts/render-accounts.sh
+```
+
+Open Cypress' interactive view:
+```
     npm run cypress:open
+```
+
+Run Cypress headless:
+```
+    npm run cypress:run
 ```
