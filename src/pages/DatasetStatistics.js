@@ -4,7 +4,7 @@ import {Notifications} from "../libs/utils";
 import {div, a} from "react-hyperscript-helpers";
 import {Styles, Theme} from "../libs/theme";
 import {filter, map} from "lodash/fp";
-import {get, find} from "lodash";
+import {difference, get, find} from "lodash";
 import {ReadMore} from "../components/ReadMore";
 import {formatDate} from "../libs/utils";
 
@@ -16,6 +16,9 @@ export default function DatasetStatistics(props) {
   const [dars, setDars] = useState();
   const [darsApproved, setDarsApproved] = useState();
   const [darsDenied, setDarsDenied] = useState();
+  const [darsOpen, setDarsOpen] = useState();
+  const [darsCanceled, setDarsCanceled] = useState();
+  const [darsUnreviewed, setDarsUnreviewed] = useState();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(()  => {
@@ -28,15 +31,43 @@ export default function DatasetStatistics(props) {
       const metrics = await Metrics.getDatasetStats(datasetId);
       setDataset(metrics.dataset);
       setDars(metrics.dars);
-      const approved = filter((election) => election.finalAccessVote === true)(metrics.elections);
-      const denied = filter((election) => election.finalAccessVote === false)(metrics.elections);
+
+      const approved = filter((election) => election.finalAccessVote === true && election.status !== "Open" && election.status !== "Canceled")(metrics.elections);
       setDarsApproved(map((election) => election.referenceId)(approved));
+
+      const denied = filter((election) => election.finalAccessVote === false && election.status !== "Open" && election.status !== "Canceled")(metrics.elections);
       setDarsDenied(map((election) => election.referenceId)(denied));
+
+      const open = filter((election) => election.status === "Open")(metrics.elections);
+      setDarsOpen(map((election) => election.referenceId)(open));
+
+      const canceled = filter((election) => election.status === "Canceled")(metrics.elections);
+      setDarsCanceled(map((election) => election.referenceId)(canceled));
+
+      const allDarReferenceIds = map((dar) => dar.referenceId)(metrics.dars);
+      const allElectionReferenceIds = map((election) => election.referenceId)(metrics.elections);
+      setDarsUnreviewed(difference(allDarReferenceIds, allElectionReferenceIds));
+
       setIsLoading(false);
     } catch(error) {
       Notifications.showError({text: 'Error: Unable to retrieve dataset statistics from server'});
       setIsLoading(false);
     }
+  };
+
+  const getDisplayStatusForDar = (referenceId) => {
+    if (darsApproved.includes(referenceId)) {
+      return "APPROVED";
+    } else if (darsDenied.includes(referenceId)) {
+      return "DENIED";
+    } else if (darsOpen.includes(referenceId)) {
+      return "OPEN";
+    } else if (darsCanceled.includes(referenceId)) {
+      return "CANCELED";
+    } else if (darsUnreviewed.includes(referenceId)) {
+      return "UNREVIEWED";
+    }
+    return "";
   };
 
   if (!isLoading) {
@@ -115,6 +146,11 @@ export default function DatasetStatistics(props) {
               LINE,
               div({style: Styles.JUMBO}, [darsDenied.length])
             ]),
+            div({style: Styles.SQUARE_BOX}, [
+              div({style: {...Styles.MINOR_HEADER, textAlign: 'center'}}, ["DARs Open, Canceled, Unreviewed"]),
+              LINE,
+              div({style: Styles.JUMBO}, [darsOpen.length + darsCanceled.length + darsUnreviewed.length])
+            ]),
           ]),
           div({style: Styles.SUB_HEADER}, ["Data Access Requests - Research Statements"]),
           dars.map((dar) =>
@@ -137,17 +173,10 @@ export default function DatasetStatistics(props) {
                       div({style: Styles.SMALL_BOLD}, ["Last Updated: "]),
                       div({style: Styles.SMALL_BOLD}, [formatDate(dar.updateDate)]),
                     ]),
-                    (darsApproved.includes(dar.referenceId)) ?
-                      div({style: {display: 'flex'}}, [
-                        div({style: Styles.SMALL_BOLD}, ["Status: "]),
-                        div({style: Styles.SMALL_BOLD}, ["APPROVED"]),
-                      ])
-                      : (darsDenied.includes(dar.referenceId)) ?
-                        div({style: {display: 'flex'}}, [
-                          div({style: Styles.SMALL_BOLD}, ["Status: "]),
-                          div({style: Styles.SMALL_BOLD}, ["DENIED"]),
-                        ])
-                        : div()
+                    div({style: {display: 'flex'}}, [
+                      div({style: Styles.SMALL_BOLD}, ["Status: "]),
+                      div({style: Styles.SMALL_BOLD}, [getDisplayStatusForDar(dar.referenceId)]),
+                    ])
                   ]),
                   div({style: {backgroundColor: "white"}}, [
                     div({style: Styles.SMALL_BOLD}, ["NonTechnical Summary:"]),
