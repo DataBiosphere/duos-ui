@@ -16,7 +16,18 @@ Start a local server:
 ```
 npm start
 ```
-Then open Cypress:
+
+Generate configs locally
 ```
-npm cypress:open
+./scripts/render-accounts.sh
+```
+
+Open Cypress' interactive view:
+```
+    npm run cypress:open
+```
+
+Run Cypress headless:
+```
+    npm run cypress:run
 ```
