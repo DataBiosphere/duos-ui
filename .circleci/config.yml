@@ -101,28 +101,6 @@ commands:
             kubectl rollout status deployment/${APPLICATION_NAME}
 
 jobs:
-  build-dev:
-    executor: cypress
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - run: cp config/base_config.json public/config.json
-      - run: npm install --silent
-      - run: npm install react-scripts --silent
-      - run:
-          name: build
-          command: CI=false npm run build
-          environment:
-            NODE_OPTIONS: --max-old-space-size=5120
-      - persist_to_workspace:
-          root: .
-          paths:
-            - .gcloudignore
-            - build
-            - config
-            - Dockerfile
   build-staging:
     executor: cypress
     steps:
@@ -146,27 +124,6 @@ jobs:
             - config
             - Dockerfile
 
-  deploy-dev:
-    executor: cloud-sdk
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - cache-{{ checksum "package.json" }}-{{ checksum "package-lock.json" }}-{{ arch }}
-      - attach_workspace:
-          at: .
-      - push-env:
-          sa_key_name: 'GCLOUD_DUOS_DEV'
-          application_name: 'duos'
-          google_project: 'broad-duos-dev'
-      - deploy-env:
-          sa_key_name: 'GCLOUD_DUOS_DEV'
-          namespace: 'duos'
-          application_name: 'duos'
-          google_project: 'broad-duos-dev'
-          google_zone: 'us-central1-a'
-          google_cluster: 'duos-ui-dev-cluster'
-          commit: ${COMMIT}
   deploy-staging:
     executor: cloud-sdk
     steps:
@@ -202,16 +159,6 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-      - build-dev:
-          filters:
-            branches:
-              only: /.*/
-      - deploy-dev:
-          requires:
-            - build-dev
-          filters:
-            branches:
-              only: develop
       - build-staging:
           filters:
             tags:
