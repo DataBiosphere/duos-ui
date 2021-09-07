@@ -169,9 +169,10 @@ export default function DarTable(props) {
 
   const openConfirmation = useCallback((dar, index) => {
     const darData = dar.data;
+    const id = dar.referenceId;
     if (!isNil(darData)) {
       setShowConfirmation(true);
-      setCreateElectionInfo({id: darData.referenceId, name: darData.darCode, index});
+      setCreateElectionInfo({id, name: darData.darCode, index});
     } else {
       Notifications.showError({text:"Cannot open this election. Please contact us for support."});
     }
