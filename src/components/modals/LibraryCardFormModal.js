@@ -154,7 +154,7 @@ export default function LibraryCardFormModal(props) {
         }),
         //institution dropdown
         h(FormFieldRow, {
-          isRendered: institutions.length > 1,
+          isRendered: !isNil(institutions) && institutions.length > 1,
           card,
           modalType,
           updateInstitution,
