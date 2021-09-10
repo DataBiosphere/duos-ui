@@ -35,7 +35,7 @@ export default function SigningOfficialConsole(props) {
         const soPromises = await Promise.all([
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers(),
-          DAR.getDataAccessManageV2()
+          DAR.getDataAccessManageV2(USER_ROLES.signingOfficial)
         ]);
         const researcherList = soPromises[0];
         const unregisteredResearchers = soPromises[1];
