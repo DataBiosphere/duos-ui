@@ -2,7 +2,7 @@ import {useState, useEffect, useCallback} from "react";
 import {Notifications} from "../libs/utils";
 import {div, a, h, img} from "react-hyperscript-helpers";
 import {Styles} from "../libs/theme";
-import SigningOfficialTable from "../components/signing_official_table/SigningOffiicalTable";
+import SigningOfficialTable from "../components/signing_official_table/SigningOfficialTable";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
 import {tableHeaderTemplate, tableRowLoadingTemplate} from "../components/dar_table/DarTable";
 import DarTable from "../components/dar_table/DarTable";
