@@ -2,7 +2,7 @@ import {useState, useEffect, useCallback} from "react";
 import {Notifications} from "../libs/utils";
 import {div, a, h, img} from "react-hyperscript-helpers";
 import {Styles} from "../libs/theme";
-import SigningOfficialTable from "../components/signing_official_table/SigningOffiicalTable";
+import SigningOfficialTable from "../components/signing_official_table/SigningOfficialTable";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
 import {tableHeaderTemplate, tableRowLoadingTemplate} from "../components/dar_table/DarTable";
 import DarTable from "../components/dar_table/DarTable";
@@ -35,7 +35,7 @@ export default function SigningOfficialConsole(props) {
         const soPromises = await Promise.all([
           User.list(USER_ROLES.signingOfficial),
           User.getUnassignedUsers(),
-          DAR.getDataAccessManageV2()
+          DAR.getDataAccessManageV2(USER_ROLES.signingOfficial)
         ]);
         const researcherList = soPromises[0];
         const unregisteredResearchers = soPromises[1];
