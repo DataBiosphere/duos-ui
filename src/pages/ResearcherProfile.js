@@ -363,7 +363,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
 
   cleanObject = (obj) => {
     // Removes any zero length properties from a copy of the object
-    return omitBy(obj, (s) => { return trim(s.toString()).length === 0; });
+    return omitBy(obj, (s) => { return isNil(s) || trim(s.toString()).length === 0; });
   };
 
   saveProperties = async (profile) => {
