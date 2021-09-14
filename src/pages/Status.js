@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { get } from 'lodash/fp';
 import React, { Component } from 'react';
 import { a, div, h2, hh, hr, li, pre, ul } from 'react-hyperscript-helpers';
 import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
@@ -17,7 +18,11 @@ export const Status = hh(class Status extends Component {
     };
   }
 
-  isHealthy = (elements) => {
+  isConsentHealthy = (elements) => {
+    return get('ok')(elements);
+  };
+
+  isOntologyHealthy = (elements) => {
     const bools = _.uniq(_.map(elements, 'healthy'));
     return bools.length === 1 && bools[0];
   };
@@ -36,8 +41,8 @@ export const Status = hh(class Status extends Component {
   render() {
     const healthyState = <CheckboxMarkedCircleOutline fill={ 'green' } style={ { marginLeft: '2rem', verticalAlign: 'middle' } }/>;
     const unhealthyState = <DiameterVariant fill={ 'red' } style={ { marginLeft: '2rem', verticalAlign: 'middle' } }/>;
-    const consentHealthy = this.isHealthy(this.state.consentStatus) ? healthyState : unhealthyState;
-    const ontologyHealthy = this.isHealthy(this.state.ontologyStatus) ? healthyState : unhealthyState;
+    const consentHealthy = this.isConsentHealthy(this.state.consentStatus) ? healthyState : unhealthyState;
+    const ontologyHealthy = this.isOntologyHealthy(this.state.ontologyStatus) ? healthyState : unhealthyState;
 
     return (
       div({ style: { margin: '2rem' } }, [
