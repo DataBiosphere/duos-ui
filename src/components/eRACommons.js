@@ -19,7 +19,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   componentDidMount = async () => {
     if (this.props.location !== undefined && this.props.location.search !== '') {
-      await this.authenticateAsNIHFCUser(this.props.location.search);
+      await this.saveNIHAuthentication(this.props.location.search);
     } else {
       await this.getUserInfo();
     }
@@ -33,7 +33,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     this.setState({ isHovered: false });
   };
 
-  authenticateAsNIHFCUser = async (searchArg) => {
+  saveNIHAuthentication = async (searchArg) => {
     const parsedToken = qs.parse(searchArg);
     this.verifyToken(parsedToken).then(
       (decodedNihAccount) => {
