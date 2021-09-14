@@ -971,17 +971,6 @@ export const Votes = {
 };
 
 export const AuthenticateNIH = {
-  fireCloudVerifyUser: async () => {
-    const url = `${await Config.getFireCloudUrl()}me`;
-    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), { method: 'GET' }]));
-    return await res.json();
-  },
-
-  fireCloudRegisterUser: async (profile) => {
-    const url = `${await Config.getFireCloudUrl()}register/profile`;
-    const res = await fetchAny(url, fp.mergeAll([Config.authOpts(), Config.jsonBody(AuthenticateNIH.parseProfile(profile)), { method: 'POST' }]));
-    return await res.json();
-  },
 
   verifyNihToken: async (token) => {
     const url = `${await Config.getProfileUrl()}/shibboleth-token`;
