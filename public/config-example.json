@@ -1,10 +1,16 @@
 {
   "env": "local|dev|staging|prod",
+  "tag": "dev",
+  "hash": "dev",
   "apiUrl": "http://localhost:8180/api",
   "ontologyApiUrl": "https://ontologyURL.org/",
   "clientId": "111111111111-11111111111111111111111111111111.apps.googleusercontent.com",
-  "firecloudUrl": "https://firecloud-orchestration.dsde-dev.broadinstitute.org/",
-  "nihUrl": "http://mock-nih.dev.test.firecloud.org/link-nih-account/index.html",
+  "errorApiKey": "example",
+  "gaId": "",
+  "gwasUrl": "",
+  "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
+  "nihUrl": "https://broad-shibboleth-prod.appspot.com/dev/login",
+  "powerBiUrl": "https://app.powerbi.com/",
   "features": {
     "featureX" : true,
     "featureY" : false
