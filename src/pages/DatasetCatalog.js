@@ -358,6 +358,21 @@ class DatasetCatalog extends Component {
     return span(get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', ''));
   };
 
+  getLinkDisplay = (dataSet, trIndex) => {
+    try {
+      const url = new URL(dataSet.dbGapLink);
+      return a({
+        id: trIndex + '_linkdbGap',
+        name: 'link_dbGap',
+        href: url,
+        target: '_blank',
+        className: 'enabled'
+      }, ['Link']);
+    } catch (e) {
+      return span({}, ["--"]);
+    }
+  };
+
   render() {
 
     const { searchDulText, currentPage, limit, dacs } = this.state;
@@ -528,14 +543,8 @@ class DatasetCatalog extends Component {
                           td({
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody },
-                          [dataSet.dbGapLink !== '' ?
-                            a({
-                              id: trIndex + '_linkdbGap',
-                              name: 'link_dbGap',
-                              href: dataSet.dbGapLink,
-                              target: '_blank',
-                              className: 'enabled'
-                            }, ['Link']) : '--'
+                          [
+                            this.getLinkDisplay(dataSet, trIndex)
                           ]),
 
                           td({
