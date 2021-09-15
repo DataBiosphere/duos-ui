@@ -351,11 +351,11 @@ class DatasetCatalog extends Component {
 
   findPropertyValue = (dataSet, propName, defaultVal) => {
     const defaultValue = isNil(defaultVal) ? '' : defaultVal;
-    return span(get(find(dataSet.properties, p => { return p.propertyName === propName; }), 'propertyValue', defaultValue));
+    return span({}, [get(find(dataSet.properties, p => { return p.propertyName === propName; }), 'propertyValue', defaultValue)]);
   };
 
   findDacName = (dacs, dataSet) => {
-    return span(get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', ''));
+    return span({}, [get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')]);
   };
 
   getLinkDisplay = (dataSet, trIndex) => {
