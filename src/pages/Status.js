@@ -1,5 +1,4 @@
-import _ from 'lodash';
-import { get } from 'lodash/fp';
+import { get, map, uniq } from 'lodash/fp';
 import React, { Component } from 'react';
 import { a, div, h2, hh, hr, li, pre, ul } from 'react-hyperscript-helpers';
 import CheckboxMarkedCircleOutline from 'react-material-icon-svg/dist/CheckboxMarkedCircleOutline';
@@ -23,7 +22,8 @@ export const Status = hh(class Status extends Component {
   };
 
   isOntologyHealthy = (elements) => {
-    const bools = _.uniq(_.map(elements, 'healthy'));
+    // find all values of "healthy" and ensure that they are all true
+    const bools = uniq(map('healthy')(elements));
     return bools.length === 1 && bools[0];
   };
 
