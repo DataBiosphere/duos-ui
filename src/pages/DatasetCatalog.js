@@ -46,24 +46,9 @@ class DatasetCatalog extends Component {
       isAdmin: null,
       isResearcher: null,
     };
-    this.getDatasets = this.getDatasets.bind(this);
-    this.handleOpenConnectDatasetModal = this.handleOpenConnectDatasetModal.bind(this);
-    this.handleCloseConnectDatasetModal = this.handleCloseConnectDatasetModal.bind(this);
-    this.handleOpenTranslatedDULModal = this.handleOpenTranslatedDULModal.bind(this);
-    this.handleCloseTranslatedDULModal = this.handleCloseTranslatedDULModal.bind(this);
-
-    this.openConnectDataset = this.openConnectDataset.bind(this);
-    this.closeConnectDatasetModal = this.closeConnectDatasetModal.bind(this);
-    this.okConnectDatasetModal = this.okConnectDatasetModal.bind(this);
-    this.closeTranslatedDULModal = this.closeTranslatedDULModal.bind(this);
-    this.okTranslatedDULModal = this.okTranslatedDULModal.bind(this);
-
-    this.download = this.download.bind(this);
-    this.exportToRequest = this.exportToRequest.bind(this);
-    this.defaultString = this.defaultString.bind(this);
   }
 
-  async getDatasets() {
+  getDatasets = async () => {
     let catalog = await DataSet.getDatasets();
     catalog.forEach((row, index) => {
       row.checked = false;
@@ -81,9 +66,9 @@ class DatasetCatalog extends Component {
       dataSetList: { catalog: catalog },
       currentPage: 1
     });
-  }
+  };
 
-  async getDacs() {
+  getDacs = async () => {
     let dacs = await DAC.list(false);
     let dacIdsAndNames = dacs.map(dac => {
       return {id: dac.dacId, name: dac.name};
@@ -91,10 +76,9 @@ class DatasetCatalog extends Component {
     this.setState( {
       dacs: dacIdsAndNames
     });
-  }
+  };
 
   componentDidMount() {
-
     this.currentUser = Storage.getCurrentUser();
     this.setState({
       isAdmin: this.currentUser.isAdmin,
@@ -106,27 +90,27 @@ class DatasetCatalog extends Component {
     });
   }
 
-  handleOpenConnectDatasetModal() {
+  handleOpenConnectDatasetModal = () => {
     this.setState({ showConnectDatasetModal: true });
-  }
+  };
 
-  handleCloseConnectDatasetModal() {
+  handleCloseConnectDatasetModal = () => {
     this.setState({ showConnectDatasetModal: false });
-  }
+  };
 
-  handleOpenTranslatedDULModal() {
+  handleOpenTranslatedDULModal = () => {
     this.setState({ showTranslatedDULModal: true });
-  }
+  };
 
-  handleCloseTranslatedDULModal() {
+  handleCloseTranslatedDULModal = () => {
     this.setState({ showTranslatedDULModal: false });
-  }
+  };
 
-  downloadList(dataset) {
+  downloadList = (dataset) => {
     Files.getApprovedUsersFile(dataset.dataSetId + '-ApprovedRequestors.tsv', dataset.dataSetId);
-  }
+  };
 
-  async exportToRequest() {
+  exportToRequest = async () => {
     let datasets = [];
     let datasetIdList = [];
     this.state.dataSetList.catalog.filter(row => row.checked)
@@ -149,29 +133,29 @@ class DatasetCatalog extends Component {
     const formData = await DAR.postDarDraft(darBody);
     const referenceId = formData.referenceId;
     this.props.history.push({ pathname: 'dar_application/' + referenceId });
-  }
+  };
 
-  openConnectDataset(dataset) {
+  openConnectDataset = (dataset) => {
     this.setState(prev => {
       prev.datasetConnect = dataset;
       prev.showConnectDatasetModal = true;
       return prev;
     });
-  }
+  };
 
-  closeConnectDatasetModal() {
+  closeConnectDatasetModal = () => {
     this.setState(prev => {
       prev.showConnectDatasetModal = false;
       return prev;
     });
-  }
+  };
 
-  okConnectDatasetModal() {
+  okConnectDatasetModal = () => {
     this.setState(prev => {
       prev.showConnectDatasetModal = false;
       return prev;
     }, () => this.getDatasets());
-  }
+  };
 
   openTranslatedDUL = (dataUse) => {
     this.setState(prev => {
@@ -181,19 +165,19 @@ class DatasetCatalog extends Component {
     });
   };
 
-  closeTranslatedDULModal() {
+  closeTranslatedDULModal = () => {
     this.setState(prev => {
       prev.showTranslatedDULModal = false;
       return prev;
     });
-  }
+  };
 
-  okTranslatedDULModal() {
+  okTranslatedDULModal = () => {
     this.setState(prev => {
       prev.showTranslatedDULModal = false;
       return prev;
     });
-  }
+  };
 
   openDelete = (datasetId) => () => {
     this.setState({
@@ -295,14 +279,14 @@ class DatasetCatalog extends Component {
     }
   };
 
-  download() {
+  download = () => {
     const listDownload = this.state.dataSetList.catalog.filter(row => row.checked);
     let dataSetsId = [];
     listDownload.forEach(dataset => {
       dataSetsId.push(dataset.dataSetId);
     });
     DataSet.downloadDataSets(dataSetsId, 'datasets.tsv');
-  }
+  };
 
   handlePageChange = page => {
     this.setState(prev => {
@@ -358,16 +342,16 @@ class DatasetCatalog extends Component {
     const disabledChecked = some(catalog, {'checked': true, 'active': false});
 
     this.setState(prev => {
-      prev.dataSetList.catalog = catalog;
+      // prev.dataSetList.catalog = catalog;
       prev.disableApplyAccessButton = disabledChecked;
       return prev;
     });
   };
 
-  defaultString(str, defaultStr) {
+  defaultString = (str) => (defaultStr) => {
     if (str.length === 0) { return defaultStr; }
     return str;
-  }
+  };
 
   render() {
 
