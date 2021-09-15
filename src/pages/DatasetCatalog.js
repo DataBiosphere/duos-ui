@@ -342,7 +342,7 @@ class DatasetCatalog extends Component {
     const disabledChecked = some(catalog, {'checked': true, 'active': false});
 
     this.setState(prev => {
-      // prev.dataSetList.catalog = catalog;
+      prev.dataSetList.catalog = catalog;
       prev.disableApplyAccessButton = disabledChecked;
       return prev;
     });
