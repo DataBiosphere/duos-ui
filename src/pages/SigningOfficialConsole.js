@@ -4,6 +4,7 @@ import {div, a, h, img} from "react-hyperscript-helpers";
 import {Styles} from "../libs/theme";
 import SigningOfficialTable from "../components/signing_official_table/SigningOfficialTable";
 import DarTableSkeletonLoader from "../components/TableSkeletonLoader";
+import SelectableText from "../components/SelectableText";
 import {tableHeaderTemplate, tableRowLoadingTemplate} from "../components/dar_table/DarTable";
 import DarTable from "../components/dar_table/DarTable";
 import lockIcon from "../images/lock-icon.png";
@@ -12,6 +13,45 @@ import {darSearchHandler, processElectionStatus, getElectionDate, updateLists as
 import {User, DAR} from "../libs/ajax";
 import {consoleTypes} from "../components/dar_table/DarTableActions";
 import { USER_ROLES } from "../libs/utils";
+import DataCustodianTable from "../components/data_custodian_table/DataCustodianTable";
+
+const defaultTabStyle = {
+  fontStyle: '1.8rem',
+  fontWeight: 400,
+  borderBottom: '0px'
+};
+
+const getSelectedTabStyle = (style) => {
+  const {color} = style;
+  return Object.assign(
+    {},
+    style,
+    { borderBottom: `3px solid ${color}`, fontWeight: 400 }
+  );
+};
+
+const tabs = {
+  custodian: 'custodian',
+  researcher: 'researchers'
+};
+
+const getCustodianTabStyle = (style) => {
+  const custodianTabStyle = {
+    color: 'red',
+    marginRight: '4rem',
+  };
+  return Object.assign({}, style, custodianTabStyle);
+};
+
+const getResearcherTabStyle = (style) => {
+  const researcherTabStyle = { color: 'blue' };
+  return Object.assign({}, style, researcherTabStyle);
+};
+
+const getOnMouseEnterStyle = (style) => {
+  const hoverStyle = { fontWeight: 600 };
+  return Object.assign({}, style, hoverStyle);
+};
 
 export default function SigningOfficialConsole(props) {
   const [signingOfficial, setSiginingOfficial] = useState({});
@@ -22,6 +62,7 @@ export default function SigningOfficialConsole(props) {
   const [filteredDarList, setFilteredDarList] = useState();
   const [currentDarPage, setCurrentDarPage] = useState(1);
   const [darPageSize, setDarPageSize] = useState(10);
+  const [selectedTag, setSelectedTag] = useState(tabs.custodian);
   const [descendantOrderDars, setDescendantOrderDars] = useState(false);
 
   //states to be added and used for manage researcher component
@@ -63,6 +104,8 @@ export default function SigningOfficialConsole(props) {
 
   return (
     div({style: Styles.PAGE}, [
+      //NOTE: need to have selective divs here
+      //NOTE: need a state variable to track state change (with associated function click)
       div({ isRendered: !isLoading, style: {display: "flex"}}, [
         div({style: {...Styles.HEADER_CONTAINER, paddingTop: "3rem", paddingBottom: "2rem"}}, [
           div({style: Styles.TITLE}, ["Welcome " +signingOfficial.displayName+ "!"]),
@@ -73,13 +116,35 @@ export default function SigningOfficialConsole(props) {
               href: 'https://broad-duos.zendesk.com/hc/en-us/articles/360060402751-Signing-Official-User-Guide',
               target: '_blank',
               id: 'so-console-info-link'},
-            ['Click Here for more information'])
+            ['Click Here for more information']),
+
           ])
         ])
       ]),
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
-      //researcher table goes here
-      h(SigningOfficialTable, {researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+      div({style: {}, class: 'signing-official-tabs'}, [
+        //NOTE: need to come up with styling for tabs and containers
+        div({style: {display: 'flex'}, class: 'tab-selection-container'}, [
+          h(SelectableText, {
+            label: 'Data Custodian',
+            color: 'red',
+            fontSize: `1.8rem`,
+            componentType: tabs.custodian,
+            setSelected: setSelectedTag,
+            selectedType: selectedTag
+          }),
+          h(SelectableText, {
+            label: 'Researchers',
+            color: 'blue',
+            fontSize: '1.8rem',
+            componentType: tabs.researcher,
+            setSelected: setSelectedTag,
+            selectedType: selectedTag
+          })
+        ]),
+        h(SigningOfficialTable, {isRendered: selectedTag === tabs.researcher, researchers, signingOfficial, unregisteredResearchers, isLoading}, []),
+        h(DataCustodianTable, {isRendered: selectedTag === tabs.custodian, researchers, signingOfficial, unregisteredResearchers, isLoading}, [])
+      ]),
       div({style: {display: 'flex', justifyContent: "space-between"}}, [
         div({className: "left-header-section", style: Styles.LEFT_HEADER_SECTION}, [
           div({style: Styles.ICON_CONTAINER}, [
