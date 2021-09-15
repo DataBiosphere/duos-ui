@@ -1,5 +1,6 @@
 import find from 'lodash/find';
 import get from 'lodash/get';
+import isNil from 'lodash/isNil';
 import some from 'lodash/some';
 import { Component, Fragment } from 'react';
 import { a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
@@ -308,7 +309,7 @@ class DatasetCatalog extends Component {
   };
 
   searchTable = (query) => (row) => {
-    if (query && query !== undefined) {
+    if (query) {
       let text = JSON.stringify(row);
       return text.toLowerCase().includes(query.toLowerCase());
     }
@@ -348,9 +349,13 @@ class DatasetCatalog extends Component {
     });
   };
 
-  defaultString = (str) => (defaultStr) => {
-    if (str.length === 0) { return defaultStr; }
-    return str;
+  findPropertyValue = (dataSet, propName, defaultVal) => {
+    const defaultValue = isNil(defaultVal) ? '' : defaultVal;
+    return span(get(find(dataSet.properties, p => { return p.propertyName === propName; }), 'propertyValue', defaultValue));
+  };
+
+  findDacName = (dacs, dataSet) => {
+    return span(get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', ''));
   };
 
   render() {
@@ -509,14 +514,15 @@ class DatasetCatalog extends Component {
                               href: `/dataset_statistics/${dataSet.dataSetId}`,
                               className: 'enabled'
                             }, [
-                              get(find(dataSet.properties, p => { return p.propertyName === 'Dataset Name'; }), 'propertyValue', '')])
+                              this.findPropertyValue(dataSet, 'Dataset Name')
+                            ])
                           ]),
                           td({
                             id: trIndex + '_dac', name: 'dac',
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')
+                            this.findDacName(dacs, dataSet)
                           ]),
 
                           td({
@@ -548,7 +554,7 @@ class DatasetCatalog extends Component {
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Data Type'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, 'Data Type')
                           ]),
 
                           td({
@@ -556,14 +562,14 @@ class DatasetCatalog extends Component {
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Phenotype/Indication'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, 'Phenotype/Indication')
                           ]),
 
                           td({
                             id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Principal Investigator(PI)'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, 'Principal Investigator(PI)')
                           ]),
 
                           td({
@@ -571,7 +577,7 @@ class DatasetCatalog extends Component {
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === '# of participants'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, '# of participants')
                           ]),
 
                           td({
@@ -579,7 +585,7 @@ class DatasetCatalog extends Component {
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Description'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, 'Description')
                           ]),
 
                           td({
@@ -587,7 +593,7 @@ class DatasetCatalog extends Component {
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Species'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, 'Species')
                           ]),
 
                           td({
@@ -595,7 +601,7 @@ class DatasetCatalog extends Component {
                             className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            get(find(dataSet.properties, p => { return p.propertyName === 'Data Depositor'; }), 'propertyValue', '')
+                            this.findPropertyValue(dataSet, 'Data Depositor')
                           ]),
 
                           td({
@@ -608,9 +614,7 @@ class DatasetCatalog extends Component {
                             id: trIndex + '_scid', name: 'sc-id', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
                             style: tableBody
                           }, [
-                            this.defaultString(
-                              get(find(dataSet.properties, p => { return p.propertyName === 'Sample Collection ID'; }), 'propertyValue', ''),
-                              '---')
+                            this.findPropertyValue(dataSet, 'Sample Collection ID', '---')
                           ]),
 
                           td({ className: 'cell-size', style: tableBody }, [
