@@ -91,22 +91,6 @@ class DatasetCatalog extends Component {
     });
   }
 
-  handleOpenConnectDatasetModal = () => {
-    this.setState({ showConnectDatasetModal: true });
-  };
-
-  handleCloseConnectDatasetModal = () => {
-    this.setState({ showConnectDatasetModal: false });
-  };
-
-  handleOpenTranslatedDULModal = () => {
-    this.setState({ showTranslatedDULModal: true });
-  };
-
-  handleCloseTranslatedDULModal = () => {
-    this.setState({ showTranslatedDULModal: false });
-  };
-
   downloadList = (dataset) => {
     Files.getApprovedUsersFile(dataset.dataSetId + '-ApprovedRequestors.tsv', dataset.dataSetId);
   };
