@@ -104,8 +104,6 @@ export default function SigningOfficialConsole(props) {
 
   return (
     div({style: Styles.PAGE}, [
-      //NOTE: need to have selective divs here
-      //NOTE: need a state variable to track state change (with associated function click)
       div({ isRendered: !isLoading, style: {display: "flex"}}, [
         div({style: {...Styles.HEADER_CONTAINER, paddingTop: "3rem", paddingBottom: "2rem"}}, [
           div({style: Styles.TITLE}, ["Welcome " +signingOfficial.displayName+ "!"]),
@@ -123,7 +121,7 @@ export default function SigningOfficialConsole(props) {
       ]),
       div({style: {borderTop: '1px solid #BABEC1', height: 0}}, []),
       div({style: {}, class: 'signing-official-tabs'}, [
-        //NOTE: need to come up with styling for tabs and containers
+        //NOTE: placeholder styling for now, can come up with more definitive designs later
         div({style: {display: 'flex'}, class: 'tab-selection-container'}, [
           h(SelectableText, {
             label: 'Data Custodian',

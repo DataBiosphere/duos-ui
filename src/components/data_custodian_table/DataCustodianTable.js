@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { Styles, Theme } from "../../libs/theme";
 import { h, div, img } from "react-hyperscript-helpers";
 import userIcon from '../../images/icon_manage_users.png';
-import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isEmpty, isNil, flow } from "lodash/fp";
+import { cloneDeep, find, findIndex, join, map, sortedUniq, sortBy, isNil, flow } from "lodash/fp";
 import SimpleTable from "../SimpleTable";
 import SimpleButton from "../SimpleButton";
 import PaginationBar from "../PaginationBar";
@@ -14,10 +14,8 @@ import {
   getSearchFilterFunctions,
   searchOnFilteredList
 } from "../../libs/utils";
-import LibraryCardFormModal from "../modals/LibraryCardFormModal";
 import ConfirmationModal from "../modals/ConfirmationModal";
-
-//NOTE: make sure the new 'custodian' model works 
+import DataCustodianFormModal from "../modals/DataCustodianFormModal";
 
 //Styles specific to this table
 const styles = {
@@ -90,8 +88,7 @@ const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResea
 
 const CustodianCell = ({
   researcher,
-  showConfirmationModal,
-  institutionId
+  showConfirmationModal
 }) => {
   const id = researcher.dacUserId || researcher.email;
   const button = researcher.isCustodian
@@ -279,28 +276,21 @@ export default function DataCustodianTable(props) {
     setShowModal(true);
   };
 
-  //NOTE: check to see if function works as expected
   const issueCustodian = async (selectedResearcher, researchers) => {
     let messageName;
-    const {dacUserId, email, displayName} = selectedResearcher;
+    const {dacUserId, displayName} = selectedResearcher;
     try {
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
         (researcher) => dacUserId === researcher.dacUserId
       )(listCopy);
       if (targetIndex === -1) {
-        const targetUnregisteredResearcher = find(
+        const targetResearcher = find(
           (researcher) => dacUserId === researcher.dacUserId
-        )(props.unregisteredResearchers);
-        if(!isNil(targetUnregisteredResearcher)) {
-          Notifications.showError({
-            text: `${targetUnregisteredResearcher.email || targetUnregisteredResearcher.displayName} is already a Data Custodian`
-          });
-        } else {
-          selectedResearcher.isCustodian = true;
-          listCopy.unshift(selectedResearcher);
-          messageName = email;
-        }
+        )(props.unregisteredResearchers) || selectedResearcher;
+        targetResearcher.isCustodian = true;
+        listCopy.unshift(targetResearcher);
+        messageName = targetResearcher.email;
       } else {
         listCopy[targetIndex].isCustodian = true;
         messageName = displayName;
@@ -386,7 +376,7 @@ export default function DataCustodianTable(props) {
           h(SimpleButton, {
             onClick: () => showModalOnClick(),
             baseColor: Theme.palette.secondary,
-            label: 'Add New Researcher',
+            label: 'Add New Data Custodian',
             additionalStyle: {
               width: '20rem',
             },
@@ -402,16 +392,13 @@ export default function DataCustodianTable(props) {
       tableSize,
       paginationBar,
     }),
-    //NOTE: need to make a new modal? Or genericize the already existing modal
-    // h(LibraryCardFormModal, {
-    //   showModal,
-    //   createOnClick: (researcher) => issueCustodian(researcher, researchers),
-    //   closeModal: () => setShowModal(false),
-    //   researcher: selectedResearcher,
-    //   users: unregisteredResearchers,
-    //   institutions: [], //pass in empty array to force modal to hide institution dropdown
-    //   modalType: 'add',
-    // }),
+    h(DataCustodianFormModal, {
+      showModal,
+      createOnClick: (researcher) => issueCustodian(researcher, researchers),
+      closeModal: () => setShowModal(false),
+      researcher: selectedResearcher,
+      users: unregisteredResearchers
+    }),
     h(ConfirmationModal, {
       showConfirmation,
       closeConfirmation: () => setShowConfirmation(false),
