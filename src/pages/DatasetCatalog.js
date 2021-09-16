@@ -1,19 +1,20 @@
 import find from 'lodash/find';
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import some from 'lodash/some';
-import { Fragment, useEffect, useState } from 'react';
-import { a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr } from 'react-hyperscript-helpers';
+import {Fragment, useEffect, useState} from 'react';
+import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
-import { ConfirmationDialog } from '../components/ConfirmationDialog';
-import { ConnectDatasetModal } from '../components/modals/ConnectDatasetModal';
+import {ConfirmationDialog} from '../components/ConfirmationDialog';
+import {ConnectDatasetModal} from '../components/modals/ConnectDatasetModal';
 import TranslatedDulModal from '../components/modals/TranslatedDulModal';
-import { PageHeading } from '../components/PageHeading';
-import { PaginatorBar } from '../components/PaginatorBar';
-import { SearchBox } from '../components/SearchBox';
-import { DAC, DAR, DataSet, Files } from '../libs/ajax';
-import { Storage } from '../libs/storage';
-import { Theme } from '../libs/theme';
+import {PageHeading} from '../components/PageHeading';
+import {PaginatorBar} from '../components/PaginatorBar';
+import {SearchBox} from '../components/SearchBox';
+import {DAC, DAR, DataSet, Files} from '../libs/ajax';
+import {Storage} from '../libs/storage';
+import {Theme} from '../libs/theme';
 import datasetIcon from '../images/icon_dataset_.png';
 
 const tableBody = {
@@ -23,25 +24,29 @@ const tableBody = {
 
 export default function DatasetCatalog(props) {
 
-  const [dataSetList, setDataSetList] = useState({
-    catalog: [],
-    showDialogDelete: false,
-    showDialogEnable: false,
-    showDialogDisable: false,
-    showDialogEdit: false
-  });
+  const [datasetList, setDatasetList] = useState([]);
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [allChecked, setAllChecked] = useState(false);
   const [dataUse, setDataUse] = useState();
   const [dacs, setDacs] = useState([]);
   const [disableOkButton, setDisableOkButton] = useState(false);
   const [disableApplyAccessButton, setDisableApplyAccessButton] = useState(true);
   const [isAdmin, setIsAdmin] = useState(null);
   const [isResearcher, setIsResearcher] = useState(null);
+  const [isChairPerson, setIsChairPerson] = useState(null);
+  const [searchDulText, setSearchDulText] = useState();
+
+  const [allChecked, setAllChecked] = useState(false);
   const [showConnectDatasetModal, setShowConnectDatasetModal] = useState(false);
   const [showTranslatedDULModal, setShowTranslatedDULModal] = useState();
-  const [searchDulText, setSearchDulText] = useState();
+  const [showDialogDisable, setShowDialogDisable] = useState(false);
+  const [showDialogDelete, setShowDialogDelete] = useState(false);
+  const [showDialogEnable, setShowDialogEnable] = useState(false);
+  const [showDialogEdit, setShowDialogEdit] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
+  const [errorTitle, setErrorTitle] = useState();
+  const [selectedDataset, setSelectedDataset] = useState();
+  const [selectedDatasetId, setSelectedDatasetId] = useState();
 
   // Initialize page data
   useEffect( () => {
@@ -49,21 +54,22 @@ export default function DatasetCatalog(props) {
       const currentUser = Storage.getCurrentUser();
       setIsAdmin(currentUser.isAdmin);
       setIsResearcher(currentUser.isResearcher);
+      setIsChairPerson(currentUser.isChairPerson);
       const catalogPromises = await Promise.all([
         getDatasets(),
         getDacs()
       ]);
       const datasets = catalogPromises[0];
       const dacs = catalogPromises[1];
-      setDataSetList(datasets);
+      setDatasetList(datasets);
       setDacs(dacs);
     };
     init();
   }, []);
 
   const getDatasets = async () => {
-    let catalog = await DataSet.getDatasets();
-    catalog.forEach((row, index) => {
+    let datasets = await DataSet.getDatasets();
+    datasets.forEach((row, index) => {
       row.checked = false;
       row.ix = index;
       row.dbGapLink =
@@ -75,15 +81,14 @@ export default function DatasetCatalog(props) {
             },
           ), 'propertyValue', '') ;
     });
-    return catalog;
+    return datasets;
   };
 
   const getDacs = async () => {
     let dacs = await DAC.list(false);
-    let dacIdsAndNames = dacs.map(dac => {
+    return dacs.map(dac => {
       return {id: dac.dacId, name: dac.name};
     });
-    return dacIdsAndNames;
   };
 
   const downloadList = (dataset) => {
@@ -93,7 +98,7 @@ export default function DatasetCatalog(props) {
   const exportToRequest = async () => {
     let datasets = [];
     let datasetIdList = [];
-    dataSetList.catalog.filter(row => row.checked)
+    datasetList.filter(row => row.checked)
       .forEach(dataset => {
         const dsNameProp = find(dataset.properties, {propertyName: 'Dataset Name'});
         const label = dsNameProp.propertyValue;
@@ -117,162 +122,127 @@ export default function DatasetCatalog(props) {
 
   const openConnectDataset = (dataset) => {
     setShowConnectDatasetModal(true);
-    // TODO: Fix
-    this.setState(prev => {
-      prev.datasetConnect = dataset;
-      // prev.showConnectDatasetModal = true;
-      return prev;
-    });
+    setSelectedDataset(dataset);
   };
 
   const closeConnectDatasetModal = () => {
     setShowConnectDatasetModal(false);
   };
 
-  const okConnectDatasetModal = () => {
+  const okConnectDatasetModal = async () => {
     setShowConnectDatasetModal(false);
-    // TODO: Fix
-    this.setState(prev => {
-      // prev.showConnectDatasetModal = false;
-      return prev;
-    }, () => this.getDatasets());
+    const datasets = await getDatasets();
+    setDatasetList(datasets);
   };
 
   const openTranslatedDUL = (dataUse) => {
     setDataUse(dataUse);
     setShowTranslatedDULModal(true);
-    // this.setState(prev => {
-    //   // prev.dataUse = dataUse;
-    //   // prev.showTranslatedDULModal = true;
-    //   return prev;
-    // });
   };
 
   const closeTranslatedDULModal = () => {
     setShowTranslatedDULModal(false);
-    // this.setState(prev => {
-    //   prev.showTranslatedDULModal = false;
-    //   return prev;
-    // });
   };
 
   const okTranslatedDULModal = () => {
-    this.setState(prev => {
-      prev.showTranslatedDULModal = false;
-      return prev;
-    });
+    setShowTranslatedDULModal(false);
   };
 
   const openDelete = (datasetId) => () => {
-    this.setState({
-      showDialogDelete: true,
-      datasetId: datasetId
-    });
+    setShowDialogDelete(true);
+    setSelectedDatasetId(datasetId);
   };
 
   const openEdit = (datasetId) => () => {
-    this.setState({
-      showDialogEdit: true,
-      datasetId: datasetId
-    });
+    setShowDialogEdit(true);
+    setSelectedDatasetId(datasetId);
   };
 
   const openEnable = (datasetId) => () => {
-    this.setState({
-      showDialogEnable: true,
-      datasetId: datasetId
-    });
+    setShowDialogEnable(true);
+    setSelectedDatasetId(datasetId);
   };
 
   const openDisable = (datasetId) => () => {
-    this.setState({
-      showDialogDisable: true,
-      datasetId: datasetId
-    });
+    setShowDialogDisable(true);
+    setSelectedDatasetId(datasetId);
   };
 
   const dialogHandlerDelete = (answer) => () => {
     setDisableOkButton(true);
-    // this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.deleteDataset(this.state.datasetId).then(() => {
+      DataSet.deleteDataset(selectedDatasetId).then(() => {
         getDatasets();
         setDisableOkButton(false);
-        this.setState({ showDialogDelete: false });
+        setShowDialogDelete(false);
       }).catch(() => {
-        this.setState(prev => {
-          prev.showDialogDelete = true;
-          prev.alertMessage = 'Please try again later.';
-          prev.alertTitle = 'Something went wrong';
-          return prev;
-        });
+        setShowDialogDelete(true);
+        setErrorMessage('Please try again later.');
+        setErrorTitle('Something went wrong');
       });
     } else {
-      this.setState({ showDialogDelete: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
+      setShowDialogDelete(false);
+      setErrorMessage(undefined);
+      setErrorTitle(undefined);
+      setDisableOkButton(false);
     }
   };
 
   const dialogHandlerEnable = (answer) => () => {
     setDisableOkButton(true);
-    // this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, true).then(() => {
+      DataSet.disableDataset(selectedDatasetId, true).then(() => {
         getDatasets();
         setDisableOkButton(false);
-        this.setState({ showDialogEnable: false });
+        setShowDialogEnable(false);
       }).catch(() => {
-        this.setState(prev => {
-          prev.showDialogEnable = true;
-          prev.alertMessage = 'Please try again later.';
-          prev.alertTitle = 'Something went wrong';
-          return prev;
-        });
+        setShowDialogEnable(true);
+        setErrorMessage('Please try again later.');
+        setErrorTitle('Something went wrong');
       });
     } else {
-      this.setState({ showDialogEnable: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
+      setShowDialogEnable(false);
+      setErrorMessage(undefined);
+      setErrorTitle(undefined);
+      setDisableOkButton(false);
     }
 
   };
 
   const dialogHandlerDisable = (answer) => () => {
     setDisableOkButton(true);
-    // this.setState({ disableOkButton: true });
     if (answer) {
-      DataSet.disableDataset(this.state.datasetId, false).then(() => {
+      DataSet.disableDataset(selectedDatasetId, false).then(() => {
         getDatasets();
         setDisableOkButton(false);
-        this.setState({ showDialogDisable: false });
+        setShowDialogDisable(false);
       }).catch(() => {
-        this.setState(prev => {
-          prev.alertMessage = 'Please try again later.';
-          prev.alertTitle = 'Something went wrong';
-          this.setState({ showDialogDisable: true });
-          return prev;
-        });
+        setShowDialogDisable(true);
+        setErrorMessage('Please try again later.');
+        setErrorTitle('Something went wrong');
       });
     } else {
-      this.setState({ showDialogDisable: false, alertMessage: undefined, alertTitle: undefined });
+      setShowDialogDisable(false);
+      setErrorMessage(undefined);
+      setErrorTitle(undefined);
     }
   };
 
   const dialogHandlerEdit = (answer) => () => {
     setDisableOkButton(true);
-    // this.setState({ disableOkButton: true });
     if (answer) {
       setDisableOkButton(false);
-      this.setState(prev => {
-        this.setState({ showDialogEdit: false });
-        return prev;
-      });
-      let datasetId = this.state.datasetId;
-      props.history.push({ pathname: `dataset_registration/${datasetId}` });
+      setShowDialogEdit(false);
+      props.history.push({ pathname: `dataset_registration/${selectedDatasetId}` });
     } else {
-      this.setState({ showDialogEdit: false, alertMessage: undefined, alertTitle: undefined, disableOkButton: false });
+      setShowDialogEdit(false);
+      setErrorMessage(undefined);
+      setErrorTitle(undefined);
     }
   };
 
   const download = () => {
-    const listDownload = dataSetList.catalog.filter(row => row.checked);
+    const listDownload = datasetList.filter(row => row.checked);
     let dataSetsId = [];
     listDownload.forEach(dataset => {
       dataSetsId.push(dataset.dataSetId);
@@ -282,25 +252,15 @@ export default function DatasetCatalog(props) {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    // this.setState(prev => {
-    //   prev.currentPage = page;
-    //   return prev;
-    // });
   };
 
   const handleSizeChange = (size) => {
     setPageSize(size);
     setCurrentPage(1);
-    // this.setState(prev => {
-    //   prev.pageSize = size;
-    //   prev.currentPage = 1;
-    //   return prev;
-    // });
   };
 
   const handleSearchDul = (query) => {
     setSearchDulText(query);
-    // this.setState({ searchDulText: query });
   };
 
   const searchTable = (query) => (row) => {
@@ -313,21 +273,16 @@ export default function DatasetCatalog(props) {
 
   const selectAll = (e) => {
     const checked = e.target.checked;
-    const catalog = dataSetList.catalog;
+    const catalog = datasetList;
     const checkedCatalog = catalog.map(row => { row.checked = checked; return row; });
     const disabledChecked = some(catalog, {'checked': true, 'active': false});
     setAllChecked(checked);
     setDisableApplyAccessButton(disabledChecked);
-    this.setState(prev => {
-      // prev.allChecked = checked;
-      prev.dataSetList.catalog = checkedCatalog;
-      // prev.disableApplyAccessButton = disabledChecked;
-      return prev;
-    });
+    setDatasetList(checkedCatalog);
   };
 
   const checkSingleRow = (index) => (e) => {
-    let catalog = dataSetList.catalog;
+    let catalog = datasetList;
     const catalogElement = catalog[index];
     catalogElement.checked = e.target.checked;
 
@@ -340,11 +295,7 @@ export default function DatasetCatalog(props) {
     const disabledChecked = some(catalog, {'checked': true, 'active': false});
 
     setDisableApplyAccessButton(disabledChecked);
-    this.setState(prev => {
-      prev.dataSetList.catalog = catalog;
-      // prev.disableApplyAccessButton = disabledChecked;
-      return prev;
-    });
+    setDatasetList(catalog);
   };
 
   const findPropertyValue = (dataSet, propName, defaultVal) => {
@@ -386,13 +337,13 @@ export default function DatasetCatalog(props) {
               description: "Search and select datasets then click 'Apply for Access' to request access"
             }),
           ]),
-          div({ className: 'right', isRendered: (this.state.isAdmin || this.state.isChairPerson) }, [
+          div({ className: 'right', isRendered: (isAdmin || isChairPerson) }, [
             div({ className: 'col-lg-7 col-md-7 col-sm-7 col-xs-7 search-wrapper' }, [
-              h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: this.handlePageChange, color: 'dataset' })
+              h(SearchBox, { id: 'datasetCatalog', searchHandler: handleSearchDul, pageHandler: handlePageChange, color: 'dataset' })
             ]),
             button({
               id: 'btn_addDataset',
-              isRendered: this.state.isAdmin,
+              isRendered: isAdmin,
               onClick: () => props.history.push({ pathname: 'dataset_registration' }),
               className: 'f-right btn-primary dataset-background search-wrapper',
               'data-tip': 'Add a new Dataset', 'data-for': 'tip_addDataset'
@@ -434,8 +385,8 @@ export default function DatasetCatalog(props) {
                 ])
               ]),
 
-              tbody({}, [
-                dataSetList.catalog.filter(searchTable(searchDulText))
+              tbody({ isRendered: !isNil(datasetList) && !isEmpty(datasetList) }, [
+                datasetList.filter(searchTable(searchDulText))
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((dataSet, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
@@ -455,7 +406,7 @@ export default function DatasetCatalog(props) {
                           ])
                         ]),
 
-                        td({ isRendered: this.state.isAdmin, style: { minWidth: '14rem' } }, [
+                        td({ isRendered: isAdmin, style: { minWidth: '14rem' } }, [
                           div({ className: 'dataset-actions' }, [
                             a({
                               id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataSet.dataSetId),
@@ -634,7 +585,7 @@ export default function DatasetCatalog(props) {
           ]),
           div({ style: { 'margin': '0 20px 15px 20px' } }, [
             PaginatorBar({
-              total: dataSetList.catalog.filter(searchTable(searchDulText)).length,
+              total: datasetList.filter(searchTable(searchDulText)).length,
               pageSize: pageSize,
               currentPage: currentPage,
               onPageChange: handlePageChange,
@@ -647,7 +598,7 @@ export default function DatasetCatalog(props) {
           button({
             id: 'btn_downloadSelection',
             download: '',
-            disabled: dataSetList.catalog.filter(row => row.checked).length === 0,
+            disabled: datasetList.filter(row => row.checked).length === 0,
             onClick: download,
             className: 'col-lg-5 col-md-5 col-sm-5 col-xs-5 btn-primary dataset-background'
           }, [
@@ -659,7 +610,7 @@ export default function DatasetCatalog(props) {
           button({
             id: 'btn_applyAccess',
             isRendered: isResearcher,
-            disabled: (dataSetList.catalog.filter(row => row.checked).length === 0) || disableApplyAccessButton,
+            disabled: (datasetList.filter(row => row.checked).length === 0) || disableApplyAccessButton,
             onClick: () => exportToRequest(),
             className: 'btn-primary dataset-background search-wrapper',
             'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
@@ -676,9 +627,9 @@ export default function DatasetCatalog(props) {
         ConfirmationDialog({
           title: 'Delete Dataset Confirmation?',
           color: 'cancel',
-          showModal: this.state.showDialogDelete,
-          alertMessage: this.state.errorMessage,
-          alertTitle: this.state.alertTitle,
+          showModal: showDialogDelete,
+          alertMessage: errorMessage,
+          alertTitle: errorTitle,
           disableOkBtn: disableOkButton,
           action: { label: 'Yes', handler: dialogHandlerDelete }
         }, [div({ className: 'dialog-description' }, ['Are you sure you want to delete this Dataset?']),]),
@@ -686,19 +637,19 @@ export default function DatasetCatalog(props) {
         ConfirmationDialog({
           title: 'Disable Dataset Confirmation?',
           color: 'dataset',
-          showModal: this.state.showDialogDisable,
-          alertMessage: this.state.errorMessage,
+          showModal: showDialogDisable,
+          alertMessage: errorMessage,
           disableOkBtn: disableOkButton,
-          alertTitle: this.state.alertTitle,
+          alertTitle: errorTitle,
           action: { label: 'Yes', handler: dialogHandlerDisable }
         }, [div({ className: 'dialog-description' }, ["If you disable a Dataset, Researchers won't be able to request access on it from now on. New Access elections related to this dataset won't be available but opened ones will continue."]),]),
 
         ConfirmationDialog({
           title: 'Enable Dataset Confirmation?',
           color: 'dataset',
-          alertMessage: this.state.errorMessage,
-          alertTitle: this.state.alertTitle,
-          showModal: this.state.showDialogEnable,
+          alertMessage: errorMessage,
+          alertTitle: errorTitle,
+          showModal: showDialogEnable,
           disableOkBtn: disableOkButton,
           action: { label: 'Yes', handler: dialogHandlerEnable }
         }, [div({ className: 'dialog-description' }, ['If you enable a Dataset, Researchers will be able to request access on it from now on.']),]),
@@ -706,9 +657,9 @@ export default function DatasetCatalog(props) {
         ConfirmationDialog({
           title: 'Edit Dataset Confirmation?',
           color: 'dataset',
-          alertMessage: this.state.errorMessage,
-          alertTitle: this.state.alertTitle,
-          showModal: this.state.showDialogEdit,
+          alertMessage: errorMessage,
+          alertTitle: errorTitle,
+          showModal: showDialogEdit,
           disableOkBtn: disableOkButton,
           action: { label: 'Yes', handler: dialogHandlerEdit }
         }, [div({ className: 'dialog-description' }, ['Are you sure you want to edit this Dataset?'])]),
@@ -717,7 +668,7 @@ export default function DatasetCatalog(props) {
           showModal: showConnectDatasetModal,
           onOKRequest: okConnectDatasetModal,
           onCloseRequest: closeConnectDatasetModal,
-          dataset: this.state.datasetConnect,
+          dataset: selectedDataset,
         }),
         h(ReactTooltip, {
           id: 'tip_delete',
