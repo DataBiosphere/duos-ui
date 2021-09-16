@@ -1,4 +1,4 @@
-import {any, find, getOr, isEmpty, isNil} from 'lodash/fp';
+import {any, contains, find, forEach, getOr, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -232,12 +232,23 @@ export default function DatasetCatalog(props) {
 
   const selectAll = (e) => {
     const checked = e.target.checked;
-    const catalog = datasetList;
-    const checkedCatalog = catalog.map(row => { row.checked = checked; return row; });
-    const disabledChecked = any({'checked': true, 'active': false})(catalog);
+    const visibleDatasets = datasetList.filter(searchTable(searchDulText)).slice((currentPage - 1) * pageSize, currentPage * pageSize);
+    const visibleIds = map('dataSetId')(visibleDatasets);
+    const selectedDatasets = forEach(row => {
+      if (checked) {
+        // The select all case, only select visible and active
+        if (contains(row.dataSetId)(visibleIds) && row.active) {
+          row.checked = checked;
+        }
+      } else {
+        // The unselect all case, ensure everything is unselected
+        row.checked = checked;
+      }
+    })(datasetList);
+
+    // Update state
     setAllChecked(checked);
-    setDisableApplyAccessButton(disabledChecked);
-    setDatasetList(checkedCatalog);
+    setDatasetList(selectedDatasets);
   };
 
   const checkSingleRow = (index) => (e) => {
@@ -351,7 +362,7 @@ export default function DatasetCatalog(props) {
               tbody({ isRendered: !isNil(datasetList) && !isEmpty(datasetList) }, [
                 datasetList.filter(searchTable(searchDulText))
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-                  .map((dataSet, trIndex) => {
+                  .map((dataset, trIndex) => {
                     return h(Fragment, { key: trIndex }, [
 
                       tr({ className: 'tableRow' }, [
@@ -362,8 +373,8 @@ export default function DatasetCatalog(props) {
                               type: 'checkbox',
                               id: trIndex + '_chkSelect',
                               name: 'chk_select',
-                              checked: dataSet.checked, className: 'checkbox-inline user-checkbox', 'add-object-id': 'true',
-                              onChange: checkSingleRow(dataSet.ix)
+                              checked: dataset.checked, className: 'checkbox-inline user-checkbox', 'add-object-id': 'true',
+                              onChange: checkSingleRow(dataset.ix)
                             }),
                             label({ className: 'regular-checkbox rp-choice-questions', htmlFor: trIndex + '_chkSelect' })
                           ])
@@ -372,17 +383,17 @@ export default function DatasetCatalog(props) {
                         td({ isRendered: currentUser.isAdmin, style: { minWidth: '14rem' } }, [
                           div({ className: 'dataset-actions' }, [
                             a({
-                              id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataSet.dataSetId),
-                              disabled: !dataSet.deletable
+                              id: trIndex + '_btnDelete', name: 'btn_delete', onClick: openDelete(dataset.dataSetId),
+                              disabled: !dataset.deletable
                             }, [
                               span({
-                                className: 'cm-icon-button glyphicon glyphicon-trash caret-margin ' + (dataSet.deletable ? 'default-color' : ''),
+                                className: 'cm-icon-button glyphicon glyphicon-trash caret-margin ' + (dataset.deletable ? 'default-color' : ''),
                                 'aria-hidden': 'true', 'data-tip': 'Delete dataset', 'data-for': 'tip_delete'
                               })
                             ]),
 
                             a({
-                              id: trIndex + '_btnEdit', name: 'btn_edit', onClick: openEdit(dataSet.dataSetId),
+                              id: trIndex + '_btnEdit', name: 'btn_edit', onClick: openEdit(dataset.dataSetId),
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-pencil caret-margin dataset-color', 'aria-hidden': 'true',
@@ -391,8 +402,8 @@ export default function DatasetCatalog(props) {
                             ]),
 
                             a({
-                              id: trIndex + '_btnDisable', name: 'btn_disable', isRendered: dataSet.active,
-                              onClick: openDisable(dataSet.dataSetId)
+                              id: trIndex + '_btnDisable', name: 'btn_disable', isRendered: dataset.active,
+                              onClick: openDisable(dataset.dataSetId)
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-ok-circle caret-margin dataset-color', 'aria-hidden': 'true',
@@ -401,8 +412,8 @@ export default function DatasetCatalog(props) {
                             ]),
 
                             a({
-                              id: trIndex + '_btnEnable', name: 'btn_enable', isRendered: !dataSet.active,
-                              onClick: openEnable(dataSet.dataSetId)
+                              id: trIndex + '_btnEnable', name: 'btn_enable', isRendered: !dataset.active,
+                              onClick: openEnable(dataset.dataSetId)
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-ban-circle caret-margin cancel-color', 'aria-hidden': 'true',
@@ -411,11 +422,11 @@ export default function DatasetCatalog(props) {
                             ]),
 
                             a({
-                              id: trIndex + '_btnConnect', name: 'btn_connect', onClick: () => openConnectDataset(dataSet)
+                              id: trIndex + '_btnConnect', name: 'btn_connect', onClick: () => openConnectDataset(dataset)
                             }, [
                               span({
                                 className: 'cm-icon-button glyphicon glyphicon-link caret-margin ' +
-                                  (dataSet.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), 'aria-hidden': 'true',
+                                  (dataset.isAssociatedToDataOwners ? 'dataset-color' : 'default-color'), 'aria-hidden': 'true',
                                 'data-tip': 'Connect with Data Owner', 'data-for': 'tip_connect'
                               })
                             ])
@@ -423,120 +434,120 @@ export default function DatasetCatalog(props) {
                         ]),
 
                         td({
-                          id: dataSet.alias + '_dataset', name: 'alias',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          id: dataset.alias + '_dataset', name: 'alias',
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
-                        }, [dataSet.alias]),
+                        }, [dataset.alias]),
 
                         td({
                           id: trIndex + '_datasetName', name: 'datasetName',
-                          className: 'cell-size ' + (!dataSet.active ? !!'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? !!'dataset-disabled' : ''),
                           style: tableBody
                         }, [
                           a({
-                            href: `/dataset_statistics/${dataSet.dataSetId}`,
+                            href: `/dataset_statistics/${dataset.dataSetId}`,
                             className: 'enabled'
                           }, [
-                            findPropertyValue(dataSet, 'Dataset Name')
+                            findPropertyValue(dataset, 'Dataset Name')
                           ])
                         ]),
                         td({
                           id: trIndex + '_dac', name: 'dac',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findDacName(dacs, dataSet)
+                          findDacName(dacs, dataset)
                         ]),
 
                         td({
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody },
                         [
-                          getLinkDisplay(dataSet, trIndex)
+                          getLinkDisplay(dataset, trIndex)
                         ]),
 
                         td({
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
                           a({
                             id: trIndex + '_linkTranslatedDul', name: 'link_translatedDul',
-                            onClick: () => openTranslatedDUL(dataSet.dataUse),
-                            className: (!dataSet.active ? 'dataset-disabled' : 'enabled')
+                            onClick: () => openTranslatedDUL(dataset.dataUse),
+                            className: (!dataset.active ? 'dataset-disabled' : 'enabled')
                           }, ['Translated Use Restriction'])
                         ]),
 
                         td({
                           id: trIndex + '_dataType', name: 'dataType',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Data Type')
+                          findPropertyValue(dataset, 'Data Type')
                         ]),
 
                         td({
                           id: trIndex + '_phenotype', name: 'phenotype',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Phenotype/Indication')
+                          findPropertyValue(dataset, 'Phenotype/Indication')
                         ]),
 
                         td({
-                          id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          id: trIndex + '_pi', name: 'pi', className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Principal Investigator(PI)')
+                          findPropertyValue(dataset, 'Principal Investigator(PI)')
                         ]),
 
                         td({
                           id: trIndex + '_participants', name: 'participants',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, '# of participants')
+                          findPropertyValue(dataset, '# of participants')
                         ]),
 
                         td({
                           id: trIndex + '_description', name: 'description',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Description')
+                          findPropertyValue(dataset, 'Description')
                         ]),
 
                         td({
                           id: trIndex + '_species', name: 'species',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Species')
+                          findPropertyValue(dataset, 'Species')
                         ]),
 
                         td({
                           id: trIndex + '_depositor', name: 'depositor',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Data Depositor')
+                          findPropertyValue(dataset, 'Data Depositor')
                         ]),
 
                         td({
                           id: trIndex + '_consentId', name: 'consentId',
-                          className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
-                        }, [dataSet.consentId]),
+                        }, [dataset.consentId]),
 
                         td({
-                          id: trIndex + '_scid', name: 'sc-id', className: 'cell-size ' + (!dataSet.active ? 'dataset-disabled' : ''),
+                          id: trIndex + '_scid', name: 'sc-id', className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
                           style: tableBody
                         }, [
-                          findPropertyValue(dataSet, 'Sample Collection ID', '---')
+                          findPropertyValue(dataset, 'Sample Collection ID', '---')
                         ]),
 
                         td({ className: 'cell-size', style: tableBody }, [
                           a({
-                            id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => downloadList(dataSet),
+                            id: trIndex + '_linkDownloadList', name: 'link_downloadList', onClick: () => downloadList(dataset),
                             className: 'enabled'
                           }, ['Download List'])
                         ])
