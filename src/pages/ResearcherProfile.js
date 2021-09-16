@@ -106,7 +106,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
       prev.profile.academicEmail = researcherProps.academicEmail;
       prev.profile.address1 = researcherProps.address1;
       prev.profile.address2 = researcherProps.address2;
-      prev.profile.checkNotifications = researcherProps.checkNotifications;
+      prev.profile.checkNotifications = (researcherProps.checkNotifications === 'true');
       prev.profile.city = researcherProps.city;
       prev.profile.completed = researcherProps.completed;
       prev.profile.country = researcherProps.country;
@@ -531,7 +531,7 @@ export const ResearcherProfile = hh(class ResearcherProfile extends Component {
                     id: 'chk_sendNotificationsAcademicEmail',
                     name: 'checkNotifications',
                     className: 'checkbox-inline rp-checkbox',
-                    checked: isNil(this.state.profile.checkNotifications) ? '' : this.state.profile.checkNotifications,
+                    checked: isNil(this.state.profile.checkNotifications) ? false : this.state.profile.checkNotifications,
                     onChange: this.handleCheckboxChange
                   }),
                   label({ className: 'regular-checkbox rp-choice-questions', htmlFor: 'chk_sendNotificationsAcademicEmail' },
