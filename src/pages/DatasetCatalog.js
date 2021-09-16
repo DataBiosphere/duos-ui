@@ -1,8 +1,4 @@
-import find from 'lodash/find';
-import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
-import some from 'lodash/some';
+import {any, find, getOr, isEmpty, isNil} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -73,13 +69,7 @@ export default function DatasetCatalog(props) {
       row.checked = false;
       row.ix = index;
       row.dbGapLink =
-        get (
-          find(
-            row.properties,
-            p => {
-              return p.propertyName === 'dbGAP';
-            },
-          ), 'propertyValue', '') ;
+        getOr('')('propertyValue')(find({propertyName: 'dbGAP'})(row.properties));
     });
     return datasets;
   };
@@ -100,7 +90,7 @@ export default function DatasetCatalog(props) {
     let datasetIdList = [];
     datasetList.filter(row => row.checked)
       .forEach(dataset => {
-        const dsNameProp = find(dataset.properties, {propertyName: 'Dataset Name'});
+        const dsNameProp = find({propertyName: 'Dataset Name'})(dataset.properties);
         const label = dsNameProp.propertyValue;
         datasets.push({
           key: dataset.dataSetId,
@@ -275,7 +265,7 @@ export default function DatasetCatalog(props) {
     const checked = e.target.checked;
     const catalog = datasetList;
     const checkedCatalog = catalog.map(row => { row.checked = checked; return row; });
-    const disabledChecked = some(catalog, {'checked': true, 'active': false});
+    const disabledChecked = any({'checked': true, 'active': false})(catalog);
     setAllChecked(checked);
     setDisableApplyAccessButton(disabledChecked);
     setDatasetList(checkedCatalog);
@@ -292,7 +282,7 @@ export default function DatasetCatalog(props) {
       ...catalog.slice(index + 1)
     ];
 
-    const disabledChecked = some(catalog, {'checked': true, 'active': false});
+    const disabledChecked = any({'checked': true, 'active': false})(catalog);
 
     setDisableApplyAccessButton(disabledChecked);
     setDatasetList(catalog);
@@ -300,11 +290,15 @@ export default function DatasetCatalog(props) {
 
   const findPropertyValue = (dataSet, propName, defaultVal) => {
     const defaultValue = isNil(defaultVal) ? '' : defaultVal;
-    return span({}, [get(find(dataSet.properties, p => { return p.propertyName === propName; }), 'propertyValue', defaultValue)]);
+    return span({}, [
+      getOr(defaultValue)('propertyValue')(find({ propertyName: propName })(dataSet.properties))
+    ]);
   };
 
   const findDacName = (dacs, dataSet) => {
-    return span({}, [get(find(dacs, dac => { return dac.id === dataSet.dacId; }), 'name', '')]);
+    return span({}, [
+      getOr('')('name')(find({ id: dataSet.dacId })(dacs))
+    ]);
   };
 
   const getLinkDisplay = (dataSet, trIndex) => {
