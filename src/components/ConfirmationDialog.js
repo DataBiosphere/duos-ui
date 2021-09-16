@@ -1,8 +1,8 @@
-import _ from 'lodash/fp';
+import { mergeAll } from 'lodash/fp';
 import { Component } from 'react';
 import { button, div, h, h2, hh } from 'react-hyperscript-helpers';
 import Modal from 'react-modal';
-import { Alert } from '../components/Alert';
+import { Alert } from './Alert';
 import CloseIconComponent from '../components/CloseIconComponent';
 import './ConfirmationDialog.css';
 
@@ -56,7 +56,7 @@ export const ConfirmationDialog = hh(class ConfirmationDialog extends Component 
         isOpen: this.props.showModal,
         onAfterOpen: this.props.afterOpenModal,
         onRequestClose: this.props.onRequestClose,
-        style: _.mergeAll([customStyles, this.props.style]),
+        style: mergeAll([customStyles, this.props.style]),
         contentLabel: "Modal"
       }, [
         div({ className: "dialog-header" }, [
