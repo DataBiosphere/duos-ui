@@ -47,15 +47,15 @@ const columnHeaderFormat = {
   email: {label: 'Email', cellStyle: {width: styles.cellWidths.email}},
   name: {label: 'Name', cellStyle: {width: styles.cellWidths.name}},
   role: {label: 'Role', cellStyle: {width: styles.cellWidths.libraryCard}},
-  institution: {label: 'Institution', cellStyle: {width: styles.cellWidths.institution}}
+  institution: {label: 'Custodian Status', cellStyle: {width: styles.cellWidths.institution}}
 };
 
 const RemoveDataCustodianButton = (props) => {
-  const { custodian = {}, showConfirmationModal } = props;
-  const message = 'Are you sure you want to remove this data custodian?';
+  const { researcher = {}, showConfirmationModal } = props;
+  const message = 'Are you sure you want to remove this Data Custodian?';
   const title = 'Remove Data Custodian';
   return h(SimpleButton, {
-    keyProp: `remove-custodian-${custodian.id}`,
+    keyProp: `remove-custodian-${researcher.id}`,
     label: 'Remove',
     baseColor: Theme.palette.error,
     additionalStyle: {
@@ -64,16 +64,16 @@ const RemoveDataCustodianButton = (props) => {
       fontSize: '1.45rem',
     },
     onClick: () =>
-      showConfirmationModal({ custodian, message, title, confirmType: 'delete' }),
+      showConfirmationModal({ researcher, message, title, confirmType: 'delete' }),
   });
 };
 
 const IssueDataCustodianButton = (props) => {
-  const { custodian, showConfirmationModal } = props;
-  const message = 'Are you sure you want to make this persone a Data Custodian?';
+  const { researcher, showConfirmationModal } = props;
+  const message = 'Are you sure you want to make this person a Data Custodian?';
   const title = 'Issue Data Custodian';
   return h(SimpleButton, {
-    keyProp: `issue-card-${custodian.userEmail}`,
+    keyProp: `issue-card-${researcher.userEmail}`,
     label: 'Issue',
     baseColor: Theme.palette.secondary,
     additionalStyle: {
@@ -82,29 +82,25 @@ const IssueDataCustodianButton = (props) => {
       fontSize: '1.45rem',
     },
     onClick: () =>
-      showConfirmationModal({ custodian, message, title, confirmType: 'issue' }),
+      showConfirmationModal({ researcher, message, title, confirmType: 'issue' }),
   });
 };
 
 const researcherFilterFunction = getSearchFilterFunctions().signingOfficialResearchers;
 
 const CustodianCell = ({
-  custodian,
+  researcher,
   showConfirmationModal,
   institutionId
 }) => {
-  const id = custodian.dacUserId || custodian.email;
-  const button = !isNil(custodian)
+  const id = researcher.dacUserId || researcher.email;
+  const button = researcher.isCustodian
     ? RemoveDataCustodianButton({
-      custodian,
+      researcher,
       showConfirmationModal,
     })
     : IssueDataCustodianButton({
-      custodian: {
-        userId: custodian.dacUserId,
-        userEmail: custodian.email,
-        institutionId: institutionId
-      },
+      researcher,
       showConfirmationModal
     });
   return {
@@ -183,12 +179,12 @@ export default function DataCustodianTable(props) {
   );
 
   const showConfirmationModal = ({
-    custodian,
+    researcher,
     message,
     title,
     confirmType,
   }) => {
-    setSelectedResearcher(custodian);
+    setSelectedResearcher(researcher);
     setShowConfirmation(true);
     setConfirmationModalMsg(message);
     setConfirmationTitle(title);
@@ -260,7 +256,7 @@ export default function DataCustodianTable(props) {
         displayNameCell(displayName, id),
         emailCell(email, id),
         CustodianCell({
-          custodian: researcher,
+          researcher,
           showConfirmationModal,
           institutionId: signingOfficial.institutionId,
         }),
@@ -286,27 +282,30 @@ export default function DataCustodianTable(props) {
   //NOTE: check to see if function works as expected
   const issueCustodian = async (selectedResearcher, researchers) => {
     let messageName;
-    const {id, email, displayName} = selectedResearcher;
+    const {dacUserId, email, displayName} = selectedResearcher;
     try {
       const listCopy = cloneDeep(researchers);
       let targetIndex = findIndex(
-        (researcher) => id === researcher.dacUserId
+        (researcher) => dacUserId === researcher.dacUserId
       )(listCopy);
       if (targetIndex === -1) {
         const targetUnregisteredResearcher = find(
-          (researcher) => id === researcher.dacUserId
+          (researcher) => dacUserId === researcher.dacUserId
         )(props.unregisteredResearchers);
         if(!isNil(targetUnregisteredResearcher)) {
           Notifications.showError({
             text: `${targetUnregisteredResearcher.email || targetUnregisteredResearcher.displayName} is already a Data Custodian`
           });
         } else {
+          selectedResearcher.isCustodian = true;
           listCopy.unshift(selectedResearcher);
           messageName = email;
         }
       } else {
+        listCopy[targetIndex].isCustodian = true;
         messageName = displayName;
       }
+
       setResearchers(listCopy);
       setShowConfirmation(false);
       setShowModal(false);
@@ -321,18 +320,21 @@ export default function DataCustodianTable(props) {
   };
 
   const removeDataCustodian = async (selectedResearcher, researchers) => {
-    const { id, displayName, email, userId } = selectedResearcher;
+    const { displayName, email, dacUserId } = selectedResearcher;
+    const searchableKey = !isNil(dacUserId) ? 'dacUserId' : 'email';
     const listCopy = cloneDeep(researchers);
     const messageName = displayName || email;
     try {
       const targetIndex = findIndex((researcher) => {
-        return !isNil(researcher) && id === researcher.id;
-      })(researchers);
+        return !isNil(researcher) && selectedResearcher[searchableKey] === researcher[searchableKey];
+      })(listCopy);
       if (
-        isNil(userId) ||
+        isNil(dacUserId) ||
         researchers[targetIndex].institutionId !== signingOfficial.institutionId
       ) {
         listCopy.splice(targetIndex, 1);
+      } else {
+        listCopy[targetIndex].isCustodian = false;
       }
       setResearchers(listCopy);
       setShowConfirmation(false);
@@ -365,7 +367,7 @@ export default function DataCustodianTable(props) {
           ]),
           div({ style: Styles.HEADER_CONTAINER }, [
             div({ style: { ...Styles.SUB_HEADER, marginTop: '0' } }, [
-              'Researchers',
+              'Data Custodians',
             ]),
             div(
               {
@@ -374,7 +376,7 @@ export default function DataCustodianTable(props) {
                 }),
               },
               [
-                "My Institution's Researchers. Issue or Remove Researcher privileges below.",
+                "Your Institution's Data Custodians. Issue or Remove Data Custodian privileges below.",
               ]
             ),
           ]),
@@ -415,7 +417,7 @@ export default function DataCustodianTable(props) {
       closeConfirmation: () => setShowConfirmation(false),
       title: confirmationTitle,
       message: confirmationModalMsg,
-      header: `${selectedResearcher.userName || selectedResearcher.userEmail} - ${
+      header: `${selectedResearcher.displayName || selectedResearcher.email} - ${
         !isNil(selectedResearcher.institution) ? selectedResearcher.institution.name : ''
       }`,
       onConfirm: () =>
