@@ -32,7 +32,7 @@ export default function SelectableText(props) {
     const hoverStyle = { fontWeight: 600, cursor: 'pointer' };
     const updatedStyle = Object.assign({}, style, hoverStyle);
     setStyle(updatedStyle);
-  };;
+  };
 
   const removeHoverEffect = () => {
     const standardStyle = { fontWeight: 400, cursor: 'default' };

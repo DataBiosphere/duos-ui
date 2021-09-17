@@ -15,42 +15,9 @@ import {consoleTypes} from "../components/dar_table/DarTableActions";
 import { USER_ROLES } from "../libs/utils";
 import DataCustodianTable from "../components/data_custodian_table/DataCustodianTable";
 
-const defaultTabStyle = {
-  fontStyle: '1.8rem',
-  fontWeight: 400,
-  borderBottom: '0px'
-};
-
-const getSelectedTabStyle = (style) => {
-  const {color} = style;
-  return Object.assign(
-    {},
-    style,
-    { borderBottom: `3px solid ${color}`, fontWeight: 400 }
-  );
-};
-
 const tabs = {
   custodian: 'custodian',
   researcher: 'researchers'
-};
-
-const getCustodianTabStyle = (style) => {
-  const custodianTabStyle = {
-    color: 'red',
-    marginRight: '4rem',
-  };
-  return Object.assign({}, style, custodianTabStyle);
-};
-
-const getResearcherTabStyle = (style) => {
-  const researcherTabStyle = { color: 'blue' };
-  return Object.assign({}, style, researcherTabStyle);
-};
-
-const getOnMouseEnterStyle = (style) => {
-  const hoverStyle = { fontWeight: 600 };
-  return Object.assign({}, style, hoverStyle);
 };
 
 export default function SigningOfficialConsole(props) {
