@@ -9,8 +9,6 @@ export const Config = {
 
   getOntologyApiUrl: async () => (await getConfig()).ontologyApiUrl,
 
-  getFireCloudUrl: async () => (await getConfig()).firecloudUrl,
-
   getProfileUrl: async () => (await getConfig()).profileUrl,
 
   getNihUrl: async () => (await getConfig()).nihUrl,

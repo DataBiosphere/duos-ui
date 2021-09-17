@@ -7,7 +7,6 @@
   "ontologyApiUrl": "https://consent-ontology.dsde-dev.broadinstitute.org/",
   "clientId": "1087760099392-u18o6sqvb8uljmdltflohmd34h6hik9b.apps.googleusercontent.com",
   "errorApiKey": "1234567890abcdefghijklmnop",
-  "firecloudUrl": "https://firecloud-orchestration.dsde-dev.broadinstitute.org/",
   "gaId": "",
   "gwasUrl": "",
   "profileUrl": "https://profile-dot-broad-shibboleth-prod.appspot.com/dev",
