@@ -292,7 +292,6 @@ export default function SigningOfficialTable(props) {
     let messageName;
     try {
       const listCopy = cloneDeep(researchers);
-      //NOTE: institution_id and userName can be supplied by the back-end
       const newLibraryCard = await LibraryCard.createLibraryCard(selectedCard);
       const {userEmail, userName, userId} = newLibraryCard;
       let targetIndex = findIndex((researcher) => userId === researcher.dacUserId)(listCopy);
