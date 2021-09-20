@@ -30,7 +30,6 @@ export default function DatasetCatalog(props) {
   const [allChecked, setAllChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [dataUse, setDataUse] = useState();
-  const [disableApplyAccessButton, setDisableApplyAccessButton] = useState(true);
   const [errorMessage, setErrorMessage] = useState();
   const [errorTitle, setErrorTitle] = useState();
   const [pageSize, setPageSize] = useState(10);
@@ -251,21 +250,16 @@ export default function DatasetCatalog(props) {
     setDatasetList(selectedDatasets);
   };
 
-  const checkSingleRow = (index) => (e) => {
-    let catalog = datasetList;
-    const catalogElement = catalog[index];
-    catalogElement.checked = e.target.checked;
-
-    catalog = [
-      ...catalog.slice(0, index),
-      ...[catalogElement],
-      ...catalog.slice(index + 1)
-    ];
-
-    const disabledChecked = any({'checked': true, 'active': false})(catalog);
-
-    setDisableApplyAccessButton(disabledChecked);
-    setDatasetList(catalog);
+  const checkSingleRow = (datasetId) => (e) => {
+    console.log(datasetId);
+    console.log(e);
+    const checked = e.target.checked;
+    const selectedDatasets = forEach(row => {
+      if (row.dataSetId === datasetId && row.active) {
+        row.checked = checked;
+      }
+    })(datasetList);
+    setDatasetList(selectedDatasets);
   };
 
   const findPropertyValue = (dataSet, propName, defaultVal) => {
@@ -294,6 +288,12 @@ export default function DatasetCatalog(props) {
     } catch (e) {
       return span({}, ["--"]);
     }
+  };
+
+  const getSingleRowChangeFunction = (dataset) => {
+    dataset.isActive ?
+      checkSingleRow(dataset.dataSetId) :
+      {};
   };
 
   return (
@@ -363,10 +363,11 @@ export default function DatasetCatalog(props) {
                 datasetList.filter(searchTable(searchDulText))
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((dataset, trIndex) => {
+                    // console.log(JSON.stringify(dataset.active));
+                    // console.log(JSON.stringify(dataset.dataSetId));
                     return h(Fragment, { key: trIndex }, [
 
                       tr({ className: 'tableRow' }, [
-
                         td({}, [
                           div({ className: 'checkbox' }, [
                             input({
@@ -374,9 +375,12 @@ export default function DatasetCatalog(props) {
                               id: trIndex + '_chkSelect',
                               name: 'chk_select',
                               checked: dataset.checked, className: 'checkbox-inline user-checkbox', 'add-object-id': 'true',
-                              onChange: checkSingleRow(dataset.ix)
+                              onChange: () => getSingleRowChangeFunction(dataset)
                             }),
-                            label({ className: 'regular-checkbox rp-choice-questions', htmlFor: trIndex + '_chkSelect' })
+                            label({
+                              className: 'regular-checkbox rp-choice-questions',
+                              style: dataset.isActive ? {} : { opacity: '50%' },
+                              htmlFor: trIndex + '_chkSelect' })
                           ])
                         ]),
 
@@ -584,7 +588,7 @@ export default function DatasetCatalog(props) {
           button({
             id: 'btn_applyAccess',
             isRendered: currentUser.isResearcher,
-            disabled: (datasetList.filter(row => row.checked).length === 0) || disableApplyAccessButton,
+            disabled: (datasetList.filter(row => row.checked).length === 0),
             onClick: () => exportToRequest(),
             className: 'btn-primary dataset-background search-wrapper',
             'data-tip': 'Request Access for selected Datasets', 'data-for': 'tip_requestAccess'
