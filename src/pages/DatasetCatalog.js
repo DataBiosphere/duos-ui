@@ -51,6 +51,7 @@ export default function DatasetCatalog(props) {
       setCurrentUser(Storage.getCurrentUser());
       await getDatasets();
       await getDacs();
+      ReactTooltip.rebuild();
     };
     init();
   }, []);
