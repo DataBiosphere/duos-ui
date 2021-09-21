@@ -1,4 +1,4 @@
-import {any, contains, find, forEach, getOr, isEmpty, isNil, map} from 'lodash/fp';
+import {contains, find, forEach, getOr, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -247,19 +247,25 @@ export default function DatasetCatalog(props) {
 
     // Update state
     setAllChecked(checked);
+    // Note that react seems to understand the arrays are different here without
+    // the need to spread it into a new array.
     setDatasetList(selectedDatasets);
   };
 
-  const checkSingleRow = (datasetId) => (e) => {
-    console.log(datasetId);
-    console.log(e);
+  const checkSingleRow = (dataset) => (e) => {
     const checked = e.target.checked;
     const selectedDatasets = forEach(row => {
-      if (row.dataSetId === datasetId && row.active) {
-        row.checked = checked;
+      if (row.dataSetId === dataset.dataSetId) {
+        if (row.active) {
+          row.checked = checked;
+        }
       }
+      row;
     })(datasetList);
-    setDatasetList(selectedDatasets);
+
+    // Update state - note that we need to make react think the arrays are
+    // different by spreading it.
+    setDatasetList([...selectedDatasets]);
   };
 
   const findPropertyValue = (dataSet, propName, defaultVal) => {
@@ -288,12 +294,6 @@ export default function DatasetCatalog(props) {
     } catch (e) {
       return span({}, ["--"]);
     }
-  };
-
-  const getSingleRowChangeFunction = (dataset) => {
-    dataset.isActive ?
-      checkSingleRow(dataset.dataSetId) :
-      {};
   };
 
   return (
@@ -375,11 +375,10 @@ export default function DatasetCatalog(props) {
                               id: trIndex + '_chkSelect',
                               name: 'chk_select',
                               checked: dataset.checked, className: 'checkbox-inline user-checkbox', 'add-object-id': 'true',
-                              onChange: () => getSingleRowChangeFunction(dataset)
+                              onChange: checkSingleRow(dataset)
                             }),
                             label({
                               className: 'regular-checkbox rp-choice-questions',
-                              style: dataset.isActive ? {} : { opacity: '50%' },
                               htmlFor: trIndex + '_chkSelect' })
                           ])
                         ]),
