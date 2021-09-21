@@ -263,9 +263,16 @@ export default function DatasetCatalog(props) {
       row;
     })(datasetList);
 
-    // Update state - note that we need to make react think the arrays are
-    // different by spreading it.
+    // Update state - note that we need to ensure react knows the arrays are
+    // different by spreading it. See https://stackoverflow.com/questions/56266575/why-is-usestate-not-triggering-re-render
     setDatasetList([...selectedDatasets]);
+  };
+
+  const inactiveCheckboxStyle = (dataset) => {
+    if (!dataset.active) {
+      return {cursor: 'default', opacity: '50%'};
+    }
+    return {};
   };
 
   const findPropertyValue = (dataSet, propName, defaultVal) => {
@@ -379,6 +386,8 @@ export default function DatasetCatalog(props) {
                             }),
                             label({
                               className: 'regular-checkbox rp-choice-questions',
+                              // Apply additional styling for inactive datasets
+                              style: inactiveCheckboxStyle(dataset),
                               htmlFor: trIndex + '_chkSelect' })
                           ])
                         ]),
