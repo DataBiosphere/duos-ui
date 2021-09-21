@@ -1,5 +1,5 @@
-import {get, isNil, isUndefined, merge } from 'lodash';
-import { find, getOr } from 'lodash/fp';
+import { get, merge } from 'lodash';
+import { find, getOr, isNil } from 'lodash/fp';
 import * as qs from 'query-string';
 import React from 'react';
 import { a, button, div, hh, label, span } from 'react-hyperscript-helpers';
@@ -19,7 +19,7 @@ export const eRACommons = hh(class eRACommons extends React.Component {
 
   componentDidMount = async () => {
     if (this.props.location !== undefined && this.props.location.search !== '') {
-      await this.authenticateAsNIHFCUser(this.props.location.search);
+      await this.saveNIHAuthentication(this.props.location.search);
     } else {
       await this.getUserInfo();
     }
@@ -33,26 +33,17 @@ export const eRACommons = hh(class eRACommons extends React.Component {
     this.setState({ isHovered: false });
   };
 
-  authenticateAsNIHFCUser = async (searchArg) => {
-    let isFcUser = await this.verifyUser();
-    if (!isFcUser) {
-      await User.getMe().then(
-        (response) => isFcUser = this.registerUserToFC(response),
-        () => this.setState({ nihError: true })
-      );
-    }
-    if (isFcUser) {
-      const parsedToken = qs.parse(searchArg);
-      this.verifyToken(parsedToken).then(
-        (decodedNihAccount) => {
-          AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
-            () => this.getUserInfo(),
-            () => this.setState({ nihError: true })
-          );
-        },
-        () => this.setState({ nihError: true })
-      );
-    }
+  saveNIHAuthentication = async (searchArg) => {
+    const parsedToken = qs.parse(searchArg);
+    this.verifyToken(parsedToken).then(
+      (decodedNihAccount) => {
+        AuthenticateNIH.saveNihUsr(decodedNihAccount).then(
+          () => this.getUserInfo(),
+          () => this.setState({ nihError: true })
+        );
+      },
+      () => this.setState({ nihError: true })
+    );
   };
 
   getUserInfo = async () => {
@@ -82,25 +73,6 @@ export const eRACommons = hh(class eRACommons extends React.Component {
         return null;
       }
     );
-  };
-
-  verifyUser = async () => {
-    const isFcUser = await AuthenticateNIH.fireCloudVerifyUser().catch(
-      () => {
-        this.setState({ nihError: true });
-        return false;
-      });
-    if (isUndefined(isFcUser)) { return false; }
-    return get(isFcUser, 'enabled.google', false);
-  };
-
-  registerUserToFC = async (properties) => {
-    return await AuthenticateNIH.fireCloudRegisterUser(properties).then(
-      () => true,
-      () => {
-        this.setState({ nihError: true });
-        return false;
-      });
   };
 
   redirectToNihLogin = async () => {

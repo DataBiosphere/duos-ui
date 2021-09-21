@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 
-const headers = ['Consent', 'Ontology', 'FireCloud'];
+const headers = ['Consent', 'Ontology'];
 
 describe('Status', function() {
 
@@ -10,7 +10,7 @@ describe('Status', function() {
     cy.url().should('include', 'status');
   });
 
-  it('All statuses should succeed', function() {
+  it('All statuses should complete', function() {
     cy.visit('');
     cy.contains('Status').click();
     headers.forEach((h) => {
