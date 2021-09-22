@@ -43,7 +43,7 @@ export default function DatasetCatalog(props) {
   const [showDatasetDelete, setShowDatasetDelete] = useState(false);
   const [showDatasetEnable, setShowDatasetEnable] = useState(false);
   const [showDatasetEdit, setShowDatasetEdit] = useState(false);
-  const [showTranslatedDULModal, setShowTranslatedDULModal] = useState();
+  const [showTranslatedDULModal, setShowTranslatedDULModal] = useState(false);
 
   // Initialize page data
   useEffect( () => {
