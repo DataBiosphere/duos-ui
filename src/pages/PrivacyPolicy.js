@@ -62,12 +62,10 @@ We follow the laws of all the countries where we operate. We follow the laws of 
 `;
 
 const content = <ReactMarkdown
-  components={{
-    a: (props) => <a target={'_blank'} {...props}/>,
-  }}>
+  components={{a: (props) => <a target={'_blank'} {...props}/>}}>
   {DOMPurify.sanitize(privacyPolicy)}
 </ReactMarkdown>;
 
 export default function PrivacyPolicy() {
-  return div({className: 'markdown-body',}, [content]);
+  return div({className: 'markdown-body'}, [content]);
 }
