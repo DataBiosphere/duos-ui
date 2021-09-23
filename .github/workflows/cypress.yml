@@ -3,23 +3,10 @@ name: cypress tests
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     steps:
       - name: Log Actor
         run: echo "${{ github.actor }}"
-
-      # For all dependabot PRs, add a sleep time from 0-9 minutes to reduce
-      # the contention on pulling repo secrets from multiple, simultaneous PRs
-      - name: Calculate Sleep if Dependabot
-        id: sleep
-        if: github.actor == 'dependabot[bot]'
-        shell: bash
-        run: echo "::set-output name=minutes::$(($GITHUB_RUN_NUMBER % 10))"
-      - name: Sleep if Dependabot
-        if: github.actor == 'dependabot[bot]'
-        uses: whatnick/wait-action@master
-        with:
-          time: '${{ steps.sleep.outputs.minutes }}m'
-
       - name: Checkout
         uses: actions/checkout@v2
       - name: NPM Install
