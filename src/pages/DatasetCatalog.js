@@ -1,4 +1,4 @@
-import {contains, find, getOr, isEmpty, isNil, map} from 'lodash/fp';
+import {find, getOr, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
