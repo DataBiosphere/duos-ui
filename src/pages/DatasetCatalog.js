@@ -368,10 +368,7 @@ export default function DatasetCatalog(props) {
                 datasetList.filter(searchTable(searchDulText))
                   .slice((currentPage - 1) * pageSize, currentPage * pageSize)
                   .map((dataset, trIndex) => {
-                    // console.log(JSON.stringify(dataset.active));
-                    // console.log(JSON.stringify(dataset.dataSetId));
                     return h(Fragment, { key: trIndex }, [
-
                       tr({ className: 'tableRow' }, [
                         td({}, [
                           div({ className: 'checkbox' }, [
