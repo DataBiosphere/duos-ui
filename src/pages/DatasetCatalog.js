@@ -232,13 +232,11 @@ export default function DatasetCatalog(props) {
   };
 
   const selectAll = (e) => {
-    const checked = e.target.checked;
-    const visibleDatasets = datasetList.filter(searchTable(searchDulText)).slice((currentPage - 1) * pageSize, currentPage * pageSize);
-    const visibleIds = map('dataSetId')(visibleDatasets);
+    const checked = isNil(e.target.checked) ? false : e.target.checked;
     const selectedDatasets = map(row => {
       if (checked) {
-        // The select all case, only select visible and active
-        if (contains(row.dataSetId)(visibleIds) && row.active) {
+        // The select all case, only select active datasets
+        if (row.active) {
           row.checked = checked;
         }
       } else {
@@ -254,7 +252,7 @@ export default function DatasetCatalog(props) {
   };
 
   const checkSingleRow = (dataset) => (e) => {
-    const checked = e.target.checked;
+    const checked = isNil(e.target.checked) ? false : e.target.checked;
     const selectedDatasets = map(row => {
       if (row.dataSetId === dataset.dataSetId) {
         if (row.active) {
