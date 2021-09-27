@@ -1,0 +1,15 @@
+
+div.markdown-body {
+  margin: 5rem;
+  max-width: 100rem;
+  font-family: Montserrat, sans-serif;
+}
+
+.markdown-body h2 {
+  color: #00609f;
+}
+
+.markdown-body ol ol {
+  list-style-type: lower-roman;
+}
+

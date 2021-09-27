@@ -27,6 +27,7 @@ import NewMemberConsole from './pages/NewMemberConsole';
 import ChairConsole from './pages/ChairConsole';
 import NotFound from './pages/NotFound';
 import NIHICWebform from './pages/NIHicWebform';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import ResearcherConsole from './pages/ResearcherConsole';
 import { ResearcherProfile } from './pages/ResearcherProfile';
 import ResearcherReview from './pages/ResearcherReview';
@@ -63,6 +64,7 @@ const Routes = (props) => (
     <Route path="/election404" component={Election404} />
     <Route path="/nih_ic_webform" component={NIHICWebform} />
     <Route path="/nih_pilot_info" component={NIHPilotInfo} />
+    <Route path="/privacy" component={PrivacyPolicy} />
     <Route path="/data_sharing_language_tool" component={DataSharingLanguageTool} />
     <AuthenticatedRoute path="/admin_console" component={AdminConsole} props={props} rolesAllowed={[USER_ROLES.admin]} />
     <AuthenticatedRoute path="/admin_manage_users" component={AdminManageUsers} props={props} rolesAllowed={[USER_ROLES.admin]} />
