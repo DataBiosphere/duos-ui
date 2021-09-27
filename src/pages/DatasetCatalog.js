@@ -572,7 +572,7 @@ export default function DatasetCatalog(props) {
           div({ style: { 'margin': '0 20px 15px 20px' } }, [
             PaginatorBar({
               total: datasetList.filter(searchTable(searchDulText)).length,
-              pageSize: pageSize,
+              limit: pageSize,
               currentPage: currentPage,
               onPageChange: handlePageChange,
               changeHandler: handleSizeChange,
