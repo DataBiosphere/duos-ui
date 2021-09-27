@@ -1,4 +1,4 @@
-import {contains, find, forEach, getOr, isEmpty, isNil, map} from 'lodash/fp';
+import {contains, find, getOr, isEmpty, isNil, map} from 'lodash/fp';
 import {Fragment, useEffect, useState} from 'react';
 import {a, button, div, form, h, input, label, span, table, tbody, td, th, thead, tr} from 'react-hyperscript-helpers';
 import ReactTooltip from 'react-tooltip';
@@ -58,12 +58,13 @@ export default function DatasetCatalog(props) {
 
   const getDatasets = async () => {
     let datasets = await DataSet.getDatasets();
-    datasets.forEach((row, index) => {
+    datasets = map((row, index) => {
       row.checked = false;
       row.ix = index;
       row.dbGapLink =
         getOr('')('propertyValue')(find({propertyName: 'dbGAP'})(row.properties));
-    });
+      return row;
+    })(datasets);
     setDatasetList(datasets);
   };
 
@@ -234,7 +235,7 @@ export default function DatasetCatalog(props) {
     const checked = e.target.checked;
     const visibleDatasets = datasetList.filter(searchTable(searchDulText)).slice((currentPage - 1) * pageSize, currentPage * pageSize);
     const visibleIds = map('dataSetId')(visibleDatasets);
-    const selectedDatasets = forEach(row => {
+    const selectedDatasets = map(row => {
       if (checked) {
         // The select all case, only select visible and active
         if (contains(row.dataSetId)(visibleIds) && row.active) {
@@ -244,29 +245,27 @@ export default function DatasetCatalog(props) {
         // The unselect all case, ensure everything is unselected
         row.checked = checked;
       }
+      return row;
     })(datasetList);
 
     // Update state
     setAllChecked(checked);
-    // Note that react seems to understand the arrays are different here without
-    // the need to spread it into a new array.
     setDatasetList(selectedDatasets);
   };
 
   const checkSingleRow = (dataset) => (e) => {
     const checked = e.target.checked;
-    const selectedDatasets = forEach(row => {
+    const selectedDatasets = map(row => {
       if (row.dataSetId === dataset.dataSetId) {
         if (row.active) {
           row.checked = checked;
         }
       }
-      row;
+      return row;
     })(datasetList);
 
-    // Update state - note that we need to ensure react knows the arrays are
-    // different by spreading it. See https://stackoverflow.com/questions/56266575/why-is-usestate-not-triggering-re-render
-    setDatasetList([...selectedDatasets]);
+    // Update state
+    setDatasetList(selectedDatasets);
   };
 
   const inactiveCheckboxStyle = (dataset) => {
@@ -382,7 +381,8 @@ export default function DatasetCatalog(props) {
                               type: 'checkbox',
                               id: trIndex + '_chkSelect',
                               name: 'chk_select',
-                              checked: dataset.checked, className: 'checkbox-inline user-checkbox', 'add-object-id': 'true',
+                              checked: dataset.checked,
+                              className: 'checkbox-inline user-checkbox',
                               onChange: checkSingleRow(dataset)
                             }),
                             label({
@@ -464,6 +464,7 @@ export default function DatasetCatalog(props) {
                             findPropertyValue(dataset, 'Dataset Name')
                           ])
                         ]),
+
                         td({
                           id: trIndex + '_dac', name: 'dac',
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
@@ -474,8 +475,8 @@ export default function DatasetCatalog(props) {
 
                         td({
                           className: 'cell-size ' + (!dataset.active ? 'dataset-disabled' : ''),
-                          style: tableBody },
-                        [
+                          style: tableBody
+                        }, [
                           getLinkDisplay(dataset, trIndex)
                         ]),
 
